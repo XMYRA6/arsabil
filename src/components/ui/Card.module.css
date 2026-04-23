@@ -1,0 +1,31 @@
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow2);
+    overflow: hidden;
+    transition: all 0.25s ease;
+    color: var(--text);
+}
+
+.card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px 10px;
+    font-weight: 800;
+    color: var(--card-title);
+    font-size: 1.1rem;
+}
+
+.cardContent {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}

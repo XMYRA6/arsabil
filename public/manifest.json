@@ -1,0 +1,49 @@
+{
+    "name": "ArsaBil — Arsa Payı ve Kat Karşılığı Fizibilite Motoru",
+    "short_name": "ArsaBil",
+    "description": "Arsa sahipleri ve müteahhitler için akıllı fizibilite analizi. Arsa payı, inşaat maliyeti ve kâr analizini bilimsel verilerle saniyeler içinde yapın.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0a0f1e",
+    "theme_color": "#1f6feb",
+    "categories": [
+        "business",
+        "finance",
+        "productivity"
+    ],
+    "lang": "tr",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-maskable-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icons/icon-maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icons/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

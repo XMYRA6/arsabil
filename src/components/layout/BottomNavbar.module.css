@@ -1,0 +1,202 @@
+/* ==========================================================================
+   BOTTOM NAVBAR — Apple iOS Tab Bar Quality
+   ========================================================================== */
+
+.bottomNav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: calc(83px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Dark mode: deep iOS frosted glass */
+    background: rgba(10, 20, 42, 0.76);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.13);
+    box-shadow:
+        0 -0.5px 0 rgba(255, 255, 255, 0.06),
+        0 -16px 48px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    backdrop-filter: saturate(200%) blur(32px);
+    -webkit-backdrop-filter: saturate(200%) blur(32px);
+    z-index: 999;
+
+    /* GPU layer — buttery smooth */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* Light theme overrides */
+:global([data-theme="sky"]) .bottomNav,
+:global([data-theme="mint"]) .bottomNav,
+:global([data-theme="sand"]) .bottomNav,
+:global([data-theme="light"]) .bottomNav {
+    background: rgba(244, 248, 255, 0.82);
+    border-top: 0.5px solid rgba(0, 0, 0, 0.10);
+    box-shadow:
+        0 -0.5px 0 rgba(0, 0, 0, 0.05),
+        0 -12px 36px rgba(0, 0, 0, 0.07),
+        inset 0 1px 0 rgba(255, 255, 255, 0.80);
+}
+
+@media (max-width: 768px) {
+    .bottomNav {
+        display: flex !important;
+        justify-content: space-around;
+        align-items: flex-start;
+        padding-top: 9px;
+    }
+}
+
+/* ---- NAV ITEMS ---- */
+
+.navItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 0.595rem;
+    font-weight: 600;
+    letter-spacing: 0.15px;
+    flex: 1;
+    min-height: 50px; /* Apple HIG 44pt minimum touch target */
+    padding: 0 4px;
+    cursor: pointer;
+    text-decoration: none;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.22s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.active {
+    color: var(--primary);
+}
+
+/* ---- ICON PILL HIGHLIGHT ---- */
+
+.iconWrap {
+    width: 48px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    position: relative;
+    background: transparent;
+    transition:
+        background 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.active .iconWrap {
+    background: rgba(var(--primary-rgb, 31, 111, 235), 0.13);
+}
+
+/* SVG icons */
+.navItem svg {
+    transition:
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+        stroke-width 0.18s ease,
+        color 0.22s ease;
+    will-change: transform;
+}
+
+.active svg {
+    stroke-width: 2.5;
+    transform: scale(1.08);
+}
+
+/* Press haptic — instant compress, spring back */
+.navItem:active .iconWrap {
+    transform: scale(0.84);
+    transition: transform 0.08s ease;
+    background: rgba(var(--primary-rgb, 31, 111, 235), 0.18);
+}
+
+.navItem:active svg {
+    transform: scale(0.84) !important;
+    transition: transform 0.08s ease;
+}
+
+/* ---- LABEL ---- */
+
+.label {
+    font-size: 0.595rem;
+    font-weight: 600;
+    letter-spacing: 0.15px;
+    line-height: 1;
+    transition: color 0.22s ease;
+}
+
+/* ---- CENTER FAB BUTTON ---- */
+
+.fabContainer {
+    position: relative;
+    top: -20px;
+    justify-content: flex-start;
+    padding-top: 0;
+    gap: 3px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.fabItem {
+    background: linear-gradient(148deg, var(--primary) 0%, var(--primary-2) 100%);
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+
+    /* Apple-quality layered shadow */
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.12),
+        0 8px 22px rgba(var(--primary-rgb, 31, 111, 235), 0.42),
+        0 0 0 3.5px var(--bg),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+
+    transition:
+        transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.22s ease;
+    will-change: transform;
+}
+
+.fabActive {
+    box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.16),
+        0 14px 30px rgba(var(--primary-rgb, 31, 111, 235), 0.55),
+        0 0 0 3.5px var(--bg),
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.10);
+    transform: scale(1.07);
+}
+
+.fabContainer:active .fabItem {
+    transform: scale(0.88) !important;
+    transition: transform 0.08s ease !important;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.10),
+        0 4px 10px rgba(var(--primary-rgb, 31, 111, 235), 0.28),
+        0 0 0 3.5px var(--bg);
+}
+
+.fabText {
+    position: absolute;
+    bottom: -20px;
+    font-size: 0.595rem;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.15px;
+    line-height: 1;
+    transition: color 0.22s ease;
+}

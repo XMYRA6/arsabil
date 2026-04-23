@@ -1,0 +1,173 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 106px);
+    overflow: hidden;
+    border-radius: 0 0 18px 18px;
+    border: 1px solid var(--border);
+    border-top: none;
+    background: var(--panel);
+}
+
+.topBar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.bodyContainer {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.listPanel {
+    flex-shrink: 0;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mapPanel {
+    flex: 1;
+    height: 100%;
+}
+
+.desktopOnlySpacer {
+    flex: 1;
+    min-width: 10px;
+}
+
+.desktopViewToggle {
+    display: block;
+}
+
+.mobileTabs {
+    display: none;
+}
+
+/* =========================================================================
+   RESPONSIVE DESIGN FOR MOBILE (< 768px)
+   ========================================================================= */
+@media (max-width: 768px) {
+
+    .desktopOnlySpacer,
+    .desktopViewToggle {
+        display: none !important;
+    }
+
+    .container {
+        height: auto;
+        min-height: calc(100vh - 70px);
+        border: none;
+        border-radius: 0;
+    }
+
+    .topBar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 8px 12px;
+        gap: 8px;
+    }
+
+    .topBar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Tab Switcher */
+    .mobileTabs {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        background: var(--panel);
+        border-bottom: 1px solid var(--border);
+        padding: 8px 16px;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .mobileTabs button {
+        flex: 1;
+        padding: 8px 0;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .mobileTabs button.activeTab {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px var(--primary-glow);
+    }
+
+    /* Container for the active tab */
+    .bodyContainer {
+        flex-direction: column;
+        height: calc(100vh - 160px);
+        /* Adjust based on topbars */
+        overflow: hidden;
+    }
+
+    /* Hide all sub-panels by default on mobile so we can toggle them */
+    .sidebarWrapper,
+    .listPanel,
+    .mapPanel {
+        display: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    .sidebarWrapper>aside {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        height: 100%;
+    }
+
+    /* Show the correct panel based on mobileTab state */
+    .bodyContainer[data-mobile-tab="filter"] .sidebarWrapper {
+        display: contents !important;
+        /* Aside inside it will take full space */
+    }
+
+    .bodyContainer[data-mobile-tab="list"] .listPanel {
+        display: flex !important;
+    }
+
+    .bodyContainer[data-mobile-tab="map"] .mapPanel {
+        display: block !important;
+        position: relative;
+    }
+}
