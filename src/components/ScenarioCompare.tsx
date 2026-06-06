@@ -34,7 +34,7 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios }) => {
     }
 
     const formatTL = (v: number) => '₺' + v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
-    const luxLabels: Record<number, string> = { 1.0: 'Standart', 1.2: 'Orta', 1.5: 'Lüks' };
+    const luxLabels: Record<number, string> = { 1.0: 'Standart', 1.2: 'Orta', 1.4: 'Lüks' };
 
     const rows: { label: string; values: string[]; highlight?: boolean }[] = [
         { label: 'Kalite', values: scenarios.map(s => luxLabels[s.luxLevel] || `x${s.luxLevel}`) },
