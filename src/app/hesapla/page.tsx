@@ -43,7 +43,7 @@ interface ScenarioItem {
   luxLevel: number;
   apartmentSize: number;
   landShareRatio: number;
-  totalApartments?: number;
+  totalApartments?: number | null;
   riskLevel: number;
   builderProfit: number;
   fdTotal: number;
@@ -51,8 +51,8 @@ interface ScenarioItem {
   mi: number;
   ma: number;
   totalCost: number;
-  fa?: number;
-  sdx?: number;
+  fa?: number | null;
+  sdx?: number | null;
 }
 
 export default function Home() {
@@ -241,24 +241,27 @@ export default function Home() {
   };
 
   const handleAddScenario = () => {
-    if (!result || savedScenarios.length >= 3) return;
-    setSavedScenarios(prev => [...prev, {
-      id: Date.now().toString(),
-      name: `Senaryo ${prev.length + 1}`,
-      luxLevel,
-      apartmentSize,
-      landShareRatio: landShareRatio / 100,
-      totalApartments: isApartmentCountEnabled ? totalApartments : undefined,
-      riskLevel: riskLevel > 0 ? 1 + riskLevel / 100 : 1,
-      builderProfit,
-      fdTotal: result.FD_total,
-      fdPerM2: result.FD_per_m2,
-      mi: result.Mi,
-      ma: result.Ma,
-      totalCost: result.M,
-      fa: result.FA ?? undefined,
-      sdx: result.Sdx ?? undefined,
-    }]);
+    if (!result) return;
+    setSavedScenarios(prev => {
+      if (prev.length >= 3) return prev;
+      return [...prev, {
+        id: Date.now().toString(),
+        name: `Senaryo ${prev.length + 1}`,
+        luxLevel,
+        apartmentSize,
+        landShareRatio: landShareRatio / 100,
+        totalApartments: isApartmentCountEnabled ? totalApartments : undefined,
+        riskLevel: riskLevel > 0 ? 1 + riskLevel / 100 : 1,
+        builderProfit,
+        fdTotal: result.FD_total,
+        fdPerM2: result.FD_per_m2,
+        mi: result.Mi,
+        ma: result.Ma,
+        totalCost: result.M,
+        fa: result.FA ?? undefined,
+        sdx: result.Sdx ?? undefined,
+      }];
+    });
   };
 
   const handleRemoveScenario = (id: string) => {
