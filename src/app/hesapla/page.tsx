@@ -20,6 +20,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'react-hot-toast';
 import { generatePdfReport } from '@/lib/pdf/report_generator';
 import { ScenarioCompare } from '@/components/ScenarioCompare';
+import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 
 const PILL_COLORS = [
   { bg: 'rgba(31,111,235,0.1)', border: 'var(--primary)', text: 'var(--primary)' },
@@ -94,6 +95,10 @@ export default function Home() {
   const [summaryPage, setSummaryPage] = useState(0); // 0: Dağılım, 1: Analiz, 2: Finans
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [savedScenarios, setSavedScenarios] = useState<ScenarioItem[]>([]);
+  const [selectedIl, setSelectedIl] = useState<string>('');
+  const [selectedIlce, setSelectedIlce] = useState<string>('');
+  const [districtPrices, setDistrictPrices] = useState<DistrictPriceEntry[]>([]);
+  const [originalUnitPrice, setOriginalUnitPrice] = useState<number | null>(null);
 
   // Arsa Alanı (Aa) toggle
   const [isAaEnabled, setIsAaEnabled] = useState<boolean>(false);
@@ -153,6 +158,13 @@ export default function Home() {
         }
       })
       .catch(console.error);
+
+    fetch('/api/district-prices')
+      .then(res => res.json())
+      .then((data: DistrictPriceEntry[]) => {
+        if (Array.isArray(data)) setDistrictPrices(data);
+      })
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -188,6 +200,16 @@ export default function Home() {
     const res = CalculatorEngineV2.calculate(input);
     setResult(res);
   }, [luxLevel, apartmentSize, totalApartments, ownerApartmentCount, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
+
+  useEffect(() => {
+    if (!selectedIlce) return;
+    const entry = districtPrices.find(
+      d => d.il === selectedIl && d.ilce === selectedIlce
+    );
+    if (!entry) return;
+    const market = Math.round(entry.avgSalesPricePerM2 * apartmentSize);
+    setManualMarketPrice(market.toLocaleString('tr-TR', { maximumFractionDigits: 0 }));
+  }, [apartmentSize, selectedIl, selectedIlce, districtPrices]);
 
   const handleSaveReport = async () => {
     if (!result) return;
@@ -272,6 +294,30 @@ export default function Home() {
 
   const handleRemoveScenario = (id: string) => {
     setSavedScenarios(prev => prev.filter(s => s.id !== id));
+  };
+
+  const handleIlChange = (il: string) => {
+    setSelectedIl(il);
+    setSelectedIlce('');
+  };
+
+  const handleIlceChange = (ilce: string) => {
+    setSelectedIlce(ilce);
+    const entry = districtPrices.find(d => d.il === selectedIl && d.ilce === ilce);
+    if (!entry) return;
+    if (originalUnitPrice === null) setOriginalUnitPrice(globalUnitPrice);
+    setGlobalUnitPrice(entry.avgUnitConstructionPrice);
+    const market = Math.round(entry.avgSalesPricePerM2 * apartmentSize);
+    setManualMarketPrice(market.toLocaleString('tr-TR', { maximumFractionDigits: 0 }));
+  };
+
+  const handleClearLocation = () => {
+    setSelectedIl('');
+    setSelectedIlce('');
+    if (originalUnitPrice !== null) {
+      setGlobalUnitPrice(originalUnitPrice);
+      setOriginalUnitPrice(null);
+    }
   };
 
   return (
@@ -686,6 +732,16 @@ export default function Home() {
               </div>
             </div>
 
+            {districtPrices.length > 0 && (
+              <LocationSelector
+                districtPrices={districtPrices}
+                selectedIl={selectedIl}
+                selectedIlce={selectedIlce}
+                onIlChange={handleIlChange}
+                onIlceChange={handleIlceChange}
+                onClear={handleClearLocation}
+              />
+            )}
             <div className={styles.actionBottomRow}>
               <Button variant="outline" onClick={handlePdfDownload} disabled={!result}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px', verticalAlign: 'middle' }}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
