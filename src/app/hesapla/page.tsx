@@ -21,6 +21,12 @@ import { toast } from 'react-hot-toast';
 import { generatePdfReport } from '@/lib/pdf/report_generator';
 import { ScenarioCompare } from '@/components/ScenarioCompare';
 
+const PILL_COLORS = [
+  { bg: 'rgba(31,111,235,0.1)', border: 'var(--primary)', text: 'var(--primary)' },
+  { bg: 'rgba(47,191,113,0.1)', border: 'var(--green)', text: 'var(--green)' },
+  { bg: 'rgba(251,146,60,0.1)', border: '#fb923c', text: '#fb923c' },
+] as const;
+
 interface ProfitLevel {
   id: string;
   label: string;
@@ -702,12 +708,7 @@ export default function Home() {
             {savedScenarios.length > 0 && (
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
                 {savedScenarios.map((s, i) => {
-                  const colors = [
-                    { bg: 'rgba(31,111,235,0.1)', border: 'var(--primary)', text: 'var(--primary)' },
-                    { bg: 'rgba(47,191,113,0.1)', border: 'var(--green)', text: 'var(--green)' },
-                    { bg: 'rgba(251,146,60,0.1)', border: '#fb923c', text: '#fb923c' },
-                  ];
-                  const c = colors[i % 3];
+                  const c = PILL_COLORS[i % 3];
                   return (
                     <span key={s.id} style={{
                       display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -718,6 +719,7 @@ export default function Home() {
                       {s.name}
                       <button
                         onClick={() => handleRemoveScenario(s.id)}
+                        aria-label={`${s.name}'i kaldır`}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.text, padding: 0, lineHeight: 1, fontSize: '1rem' }}
                         title={`${s.name}'i kaldır`}
                       >×</button>
