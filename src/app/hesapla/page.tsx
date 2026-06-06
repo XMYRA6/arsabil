@@ -299,6 +299,10 @@ export default function Home() {
   const handleIlChange = (il: string) => {
     setSelectedIl(il);
     setSelectedIlce('');
+    if (originalUnitPrice !== null) {
+      setGlobalUnitPrice(originalUnitPrice);
+      setOriginalUnitPrice(null);
+    }
   };
 
   const handleIlceChange = (ilce: string) => {

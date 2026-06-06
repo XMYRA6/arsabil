@@ -3,23 +3,16 @@
 import { useEffect, useState } from "react";
 import styles from "../admin.module.css";
 import { Button } from "@/components/ui/Button";
-
-interface DistrictPrice {
-  id: string;
-  il: string;
-  ilce: string;
-  avgSalesPricePerM2: number;
-  avgUnitConstructionPrice: number;
-}
+import { DistrictPriceEntry } from "@/components/LocationSelector";
 
 interface ModalState {
   open: boolean;
   mode: "add" | "edit";
-  item: Partial<DistrictPrice>;
+  item: Partial<DistrictPriceEntry>;
 }
 
 export default function AdminDistrictPrices() {
-  const [prices, setPrices] = useState<DistrictPrice[]>([]);
+  const [prices, setPrices] = useState<DistrictPriceEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterIl, setFilterIl] = useState("");
   const [message, setMessage] = useState<{
@@ -60,7 +53,7 @@ export default function AdminDistrictPrices() {
   const iller = [...new Set(prices.map((p) => p.il))].sort();
 
   const openAdd = () => setModal({ open: true, mode: "add", item: {} });
-  const openEdit = (item: DistrictPrice) =>
+  const openEdit = (item: DistrictPriceEntry) =>
     setModal({ open: true, mode: "edit", item });
   const closeModal = () => {
     setModal({ open: false, mode: "add", item: {} });
@@ -70,7 +63,7 @@ export default function AdminDistrictPrices() {
   const handleSave = async () => {
     const { il, ilce, avgSalesPricePerM2, avgUnitConstructionPrice } =
       modal.item;
-    if (!il || !ilce || !avgSalesPricePerM2 || !avgUnitConstructionPrice) {
+    if (!il || !ilce || avgSalesPricePerM2 === undefined || avgSalesPricePerM2 === null || avgUnitConstructionPrice === undefined || avgUnitConstructionPrice === null) {
       setMessage({ type: "error", text: "Tüm alanlar zorunludur." });
       return;
     }
@@ -131,7 +124,7 @@ export default function AdminDistrictPrices() {
 
   const FIELDS: {
     label: string;
-    key: keyof DistrictPrice;
+    key: keyof DistrictPriceEntry;
     type: string;
     placeholder: string;
   }[] = [
