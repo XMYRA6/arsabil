@@ -689,7 +689,51 @@ export default function Home() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px', verticalAlign: 'middle' }}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 {isSaving ? 'Kaydediliyor...' : 'Rapor Kaydet'}
               </Button>
+              <Button
+                variant="outline"
+                onClick={handleAddScenario}
+                disabled={!result || savedScenarios.length >= 3}
+                title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
+                style={{ color: 'var(--green)', borderColor: 'var(--green)', background: 'rgba(47, 191, 113, 0.08)' }}
+              >
+                + Karşılaştır
+              </Button>
             </div>
+            {savedScenarios.length > 0 && (
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                {savedScenarios.map((s, i) => {
+                  const colors = [
+                    { bg: 'rgba(31,111,235,0.1)', border: 'var(--primary)', text: 'var(--primary)' },
+                    { bg: 'rgba(47,191,113,0.1)', border: 'var(--green)', text: 'var(--green)' },
+                    { bg: 'rgba(251,146,60,0.1)', border: '#fb923c', text: '#fb923c' },
+                  ];
+                  const c = colors[i % 3];
+                  return (
+                    <span key={s.id} style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      padding: '4px 12px', borderRadius: '20px',
+                      background: c.bg, border: `1px solid ${c.border}`,
+                      fontSize: '0.8rem', fontWeight: 700, color: c.text,
+                    }}>
+                      {s.name}
+                      <button
+                        onClick={() => handleRemoveScenario(s.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.text, padding: 0, lineHeight: 1, fontSize: '1rem' }}
+                        title={`${s.name}'i kaldır`}
+                      >×</button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            {savedScenarios.length >= 2 && (
+              <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                <h3 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 800, color: 'var(--card-title)' }}>
+                  Senaryo Karşılaştırması
+                </h3>
+                <ScenarioCompare scenarios={savedScenarios} />
+              </div>
+            )}
           </main>
 
           {/* Hesap Özeti */}
