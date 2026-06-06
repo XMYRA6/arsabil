@@ -44,6 +44,7 @@
   --radius-xl: 1.5rem;
 
   --input-bg: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .04));
+  --input-solid: rgba(255, 255, 255, 0.06);
   --input-focus-border: rgba(31, 111, 235, .55);
   --input-focus-shadow: 0 0 0 4px rgba(31, 111, 235, .15);
 
@@ -73,6 +74,7 @@
   --shadow: 0 18px 55px rgba(20, 60, 120, .16);
   --shadow2: 0 10px 30px rgba(20, 60, 120, .12);
   --primary: #2b7cff;
+  --primary-rgb: 43, 124, 255;
   --primary-2: #1a59c7;
   --primary-glow: rgba(43, 124, 255, .22);
   --green: #2fbf71;
@@ -92,6 +94,7 @@
   --topbar-border: rgba(0, 0, 0, .08);
   --topbar-text: #0b1b2b;
   --input-bg: linear-gradient(180deg, #fff, #f7faff);
+  --input-solid: #ffffff;
   --stat-bg: linear-gradient(180deg, #fff, #f7faff);
   --input-focus-border: rgba(43, 124, 255, .55);
   --input-focus-shadow: 0 0 0 4px rgba(43, 124, 255, .15);
@@ -119,6 +122,7 @@
   --shadow: 0 18px 55px rgba(10, 70, 60, .14);
   --shadow2: 0 10px 30px rgba(10, 70, 60, .10);
   --primary: #1fbf9a;
+  --primary-rgb: 31, 191, 154;
   --primary-2: #139a7c;
   --primary-glow: rgba(31, 191, 154, .22);
   --green: #1fbf9a;
@@ -138,6 +142,7 @@
   --topbar-border: rgba(0, 0, 0, .08);
   --topbar-text: #0b2420;
   --input-bg: linear-gradient(180deg, #fff, #f0fff9);
+  --input-solid: #ffffff;
   --stat-bg: linear-gradient(180deg, #fff, #f0fff9);
   --input-focus-border: rgba(31, 191, 154, .55);
   --input-focus-shadow: 0 0 0 4px rgba(31, 191, 154, .15);
@@ -165,6 +170,7 @@
   --shadow: 0 18px 55px rgba(110, 60, 10, .14);
   --shadow2: 0 10px 30px rgba(110, 60, 10, .10);
   --primary: #f2a23a;
+  --primary-rgb: 242, 162, 58;
   --primary-2: #d98318;
   --primary-glow: rgba(242, 162, 58, .22);
   --green: #2fbf71;
@@ -184,12 +190,15 @@
   --topbar-border: rgba(0, 0, 0, .08);
   --topbar-text: #2a1a06;
   --input-bg: linear-gradient(180deg, #fff, #fff9f0);
+  --input-solid: #ffffff;
   --stat-bg: linear-gradient(180deg, #fff, #fff9f0);
   --input-focus-border: rgba(242, 162, 58, .55);
   --input-focus-shadow: 0 0 0 4px rgba(242, 162, 58, .15);
   --hero-bg: linear-gradient(135deg, #f2a23a 0%, #d98318 100%);
   --hero-shadow: 0 10px 30px -5px rgba(242, 162, 58, .35);
   --hero-border: rgba(255, 255, 255, .15);
+  --shell-bg: rgba(255, 255, 255, .65);
+  --shell-border: rgba(170, 110, 35, .15);
   --radius: 18px;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -233,6 +242,7 @@
   --shadow2: 0 10px 30px rgba(0, 0, 0, .05);
 
   --input-bg: linear-gradient(180deg, #fff, #f7faff);
+  --input-solid: #ffffff;
   --stat-bg: linear-gradient(180deg, #fff, #f7faff);
   --card-title: #10243c;
   --label-color: #19324f;

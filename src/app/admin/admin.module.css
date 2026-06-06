@@ -212,6 +212,13 @@
     font-size: 0.95rem;
 }
 
+.formGroup select {
+    background: var(--input-solid);
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
 .formGroup input:focus,
 .formGroup select:focus {
     border-color: var(--input-focus-border);
@@ -297,13 +304,15 @@
     height: 36px;
     border-radius: 10px;
     border: 1px solid var(--border);
-    background: var(--input-bg);
+    background: var(--input-solid);
     padding: 0 8px;
     font-weight: 700;
     color: var(--label-color);
     font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 /* Toolbar */

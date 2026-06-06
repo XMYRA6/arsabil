@@ -205,10 +205,12 @@ export default function AdminDistrictPrices() {
               padding: "8px 12px",
               borderRadius: 8,
               border: "1px solid var(--border)",
-              background: "var(--input-bg)",
+              background: "var(--input-solid)",
               color: "var(--text)",
               fontSize: "0.9rem",
               fontFamily: "inherit",
+              WebkitAppearance: "none",
+              appearance: "none",
             }}
           >
             <option value="">Tüm İller</option>
