@@ -181,3 +181,16 @@ model Scenario {
   createdAt       DateTime @default(now())
   project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
+
+model DistrictPrice {
+  id                       String   @id @default(cuid())
+  il                       String
+  ilce                     String
+  avgSalesPricePerM2       Float
+  avgUnitConstructionPrice Float
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@unique([il, ilce])
+  @@index([il])
+}
