@@ -6,6 +6,9 @@
     "postinstall": "npx prisma@5.22.0 generate",
     "dev": "concurrently \"next dev --webpack\" \"prisma studio\"",
     "dev:next": "next dev --webpack",
+    "dev:db": "docker compose -f docker-compose.dev.yml up -d",
+    "dev:db:stop": "docker compose -f docker-compose.dev.yml down",
+    "dev:migrate": "prisma migrate dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
