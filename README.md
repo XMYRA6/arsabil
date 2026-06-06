@@ -115,6 +115,12 @@ arsabil/
 
 ## ⚡ Kurulum
 
+### Gereksinimler
+- Node.js 20+
+- Docker Desktop
+
+### Adımlar
+
 ```bash
 # 1. Depo klonla
 git clone <repo-url>
@@ -123,22 +129,30 @@ cd arsabil
 # 2. Bağımlılıkları kur
 npm install
 
-# 3. Veritabanını oluştur
-npx prisma db push
+# 3. Environment dosyasını oluştur
+cp .env.example .env.local
+# .env.local içindeki değerler local dev için hazır, değiştirme
 
-# 4. Geliştirme sunucusunu başlat
+# 4. PostgreSQL container'ını başlat
+npm run dev:db
+
+# 5. Tabloları oluştur (ilk kurulumda bir kez)
+npx prisma migrate dev
+
+# 6. Uygulamayı başlat
 npm run dev
 ```
 
 Uygulama `http://localhost:3000` adresinde çalışır.
+Prisma Studio `http://localhost:5555` adresinde çalışır.
 
-### Ortam Değişkenleri (.env)
+### Ortam Değişkenleri
 
-```env
-NEXTAUTH_SECRET=<rastgele-gizli-anahtar>
-NEXTAUTH_URL=http://localhost:3000
-DATABASE_URL=file:./dev.db
-```
+| Değişken | Açıklama |
+|----------|----------|
+| `DATABASE_URL` | PostgreSQL bağlantı URL'i |
+| `NEXTAUTH_SECRET` | JWT imzalama anahtarı (32+ karakter) |
+| `NEXTAUTH_URL` | Uygulamanın tam URL'i |
 
 ---
 
