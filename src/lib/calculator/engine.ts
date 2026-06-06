@@ -17,7 +17,7 @@
  */
 
 export interface CalculationParams {
-    luxLevelModifier: number; // Standart: 1.0, Orta: 1.2, Lüks: 1.5 vb.
+    luxLevelModifier: number; // Standart: 1.0, Orta: 1.2, Lüks: 1.4
     apartmentSizeSqm: number; // Daire Metrekaresi
     totalApartments: number; // N
     landShareRatio: number; // x (0.10 to 0.50 arası)
