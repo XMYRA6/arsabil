@@ -29,6 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         { href: '/admin/analytics', label: 'Analitik', icon: '📈' },
         { href: '/admin/users', label: 'Kullanıcılar', icon: '👥' },
         { href: '/admin/settings', label: 'Motor Ayarları', icon: '⚙️' },
+        { href: '/admin/district-prices', label: 'İlçe Fiyatları', icon: '📍' },
     ];
 
     return (
