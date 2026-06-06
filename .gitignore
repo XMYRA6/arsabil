@@ -46,3 +46,6 @@ next-env.d.ts
 # SQLite dev database (artık kullanılmıyor)
 dev.db
 dev.db-journal
+
+# visual brainstorming session files
+.superpowers/
