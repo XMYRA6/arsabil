@@ -363,7 +363,10 @@ export function Navbar() {
                                 setIsInboxOpen(false);
                                 setIsNotifOpen(false);
                             }}>
-                                {getInitials()}
+                                {session?.user?.image
+                                    ? <img src={session.user.image} className={styles.navAvatarImg} alt="Profil" />
+                                    : getInitials()
+                                }
                             </button>
 
                             {/* User Profile Dropdown */}
@@ -372,7 +375,12 @@ export function Navbar() {
                                     <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setIsUserMenuOpen(false)} />
                                     <div className={styles.userDropdown}>
                                         <div className={styles.dropdownHeader}>
-                                            <div className={styles.userInitialsLarge}>{getInitials()}</div>
+                                            <div className={styles.userInitialsLarge}>
+                                            {session?.user?.image
+                                                ? <img src={session.user.image} className={styles.navAvatarImgLarge} alt="Profil" />
+                                                : getInitials()
+                                            }
+                                        </div>
                                             <div className={styles.userInfo}>
                                                 <div className={styles.userName}>{session.user?.name || 'Kullanıcı'}</div>
                                                 <div className={styles.userEmail}>{session.user?.email || ''}</div>
