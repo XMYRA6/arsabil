@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { createNotification } from '@/lib/notifications';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { sendEmail, buildApprovalEmail, getEmailPrefs } from '@/lib/email';
+import { sendEmail, buildApprovalEmail, buildRejectionEmail, getEmailPrefs } from '@/lib/email';
 
 export async function GET() {
     try {
@@ -62,10 +62,32 @@ export async function PATCH(req: Request) {
         }
 
         if (action === 'reject') {
-            await prisma.listing.update({
+            const listing = await prisma.listing.update({
                 where: { id: listingId },
                 data: { status: 'REJECTED', isActive: false },
+                include: { user: { select: { id: true, name: true, email: true } } },
             });
+
+            if (!listing.user) return NextResponse.json({ ok: true });
+
+            createNotification({
+                userId: listing.user.id,
+                type: 'ILAN_REDDEDILDI',
+                title: 'İlan Onaylanmadı',
+                body: 'İlanınız incelendi ve onaylanmadı.',
+                entityId: listing.id,
+            }).catch(() => {});
+
+            getEmailPrefs(listing.user.id).then(prefs => {
+                if (!prefs.ilan) return;
+                if (!listing.user?.email) return;
+                return sendEmail({
+                    to: listing.user.email,
+                    subject: 'İlanınız Onaylanmadı — ArsaBil',
+                    html: buildRejectionEmail(listing.title),
+                });
+            }).catch(() => {});
+
             return NextResponse.json({ ok: true });
         }
 
