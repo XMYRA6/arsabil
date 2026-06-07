@@ -1,23 +1,35 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkPlanLimit } from "@/lib/plan";
 
-// POST — Projeye senaryo ekle
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id: projectId } = await params;
-        const session = await getServerSession();
-        if (!session?.user) {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
             return NextResponse.json({ message: "Yetkisiz." }, { status: 403 });
         }
 
-        // Projenin kullanıcıya ait olduğunu doğrula
-        const project = await prisma.project.findFirst({
-            where: { id: projectId, userId: session.user.id },
-        });
+        const userId = session.user.id as string;
 
+        const project = await prisma.project.findFirst({
+            where: { id: projectId, userId },
+        });
         if (!project) {
             return NextResponse.json({ message: "Proje bulunamadı." }, { status: 404 });
+        }
+
+        const limitCheck = await checkPlanLimit(userId, 'scenarios');
+        if (!limitCheck.allowed) {
+            return NextResponse.json({
+                error: 'PLAN_LIMIT',
+                message: limitCheck.reason,
+                upgradeRequired: true,
+                current: limitCheck.current,
+                limit: limitCheck.limit,
+            }, { status: 403 });
         }
 
         const body = await req.json();

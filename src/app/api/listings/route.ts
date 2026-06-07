@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkPlanLimit } from "@/lib/plan";
 
 export async function GET() {
     try {
@@ -27,6 +28,17 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions)
         if (!session?.user?.id) {
             return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 })
+        }
+
+        const limitCheck = await checkPlanLimit(session.user.id as string, 'listings')
+        if (!limitCheck.allowed) {
+            return NextResponse.json({
+                error: 'PLAN_LIMIT',
+                message: limitCheck.reason,
+                upgradeRequired: true,
+                current: limitCheck.current,
+                limit: limitCheck.limit,
+            }, { status: 403 })
         }
 
         const {

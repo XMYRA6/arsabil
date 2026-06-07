@@ -1,26 +1,32 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { checkPlanLimit } from '@/lib/plan';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-
-        // Geçici olarak mock bir kullanıcı oluştur/bul (MVP için Auth olmadan)
-        let user = await prisma.user.findFirst({
-            where: { email: 'test@arsabil.com' }
-        });
-
-        if (!user) {
-            user = await prisma.user.create({
-                data: {
-                    email: 'test@arsabil.com',
-                    name: 'Test Kullanıcısı',
-                    role: 'USER'
-                }
-            });
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ success: false, error: 'Yetkisiz erişim.' }, { status: 401 });
         }
+
+        const userId = session.user.id as string;
+        const limitCheck = await checkPlanLimit(userId, 'reports');
+        if (!limitCheck.allowed) {
+            return NextResponse.json({
+                success: false,
+                error: 'PLAN_LIMIT',
+                message: limitCheck.reason,
+                upgradeRequired: true,
+                current: limitCheck.current,
+                limit: limitCheck.limit,
+            }, { status: 403 });
+        }
+
+        const body = await req.json();
 
         const report = await prisma.report.create({
             data: {
@@ -31,7 +37,7 @@ export async function POST(req: Request) {
                 landShareRatio: body.landShareRatio,
                 minApartmentPrice: body.minApartmentPrice,
                 landCost: body.landCost,
-                userId: user.id
+                userId,
             },
         });
 
