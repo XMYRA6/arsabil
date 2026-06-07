@@ -124,7 +124,7 @@ model CompareShare {
 | Olay | Tip | Tetikleyen API | Alıcı |
 |------|-----|----------------|-------|
 | Yeni mesaj | `MESAJ_VAR` | `POST /api/messages` | `receiverId` |
-| Yeni teklif | `TEKLIF_GELDI` | `POST /api/listings/[id]/offers` | ilan sahibi |
+| Yeni teklif | `TEKLIF_GELDI` | `POST /api/offers` | ilan sahibi (`listing.userId`) |
 | İlan onayı | `ILAN_ONAYLANDI` | Admin (manuel, Faz 2'de otomatik) | ilan sahibi |
 
 ### 4.2 API
