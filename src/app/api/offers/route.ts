@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(req: Request) {
     try {
@@ -45,6 +46,15 @@ export async function POST(req: Request) {
                 status: "PENDING"
             }
         });
+
+        // İlan sahibine bildirim oluştur (hata olursa sessizce geç)
+        createNotification({
+            userId: listing.userId,
+            type: 'TEKLIF_GELDI',
+            title: 'Yeni teklif',
+            body: `${session.user.name || 'Biri'} ilanınıza %${Number(offeredShare).toFixed(0)} pay teklifi verdi`,
+            entityId: listingId,
+        }).catch(() => {})
 
         return NextResponse.json({ message: "Teklif başarıyla gönderildi.", offer }, { status: 201 });
     } catch (error) {

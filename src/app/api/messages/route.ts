@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,6 +70,15 @@ export async function POST(req: Request) {
             data: { senderId, receiverId, content: content.trim(), reportId: reportId || null },
             include: { sender: { select: { id: true, name: true, image: true } } },
         })
+
+        // Alıcıya bildirim oluştur (hata olursa sessizce geç)
+        createNotification({
+            userId: receiverId,
+            type: 'MESAJ_VAR',
+            title: 'Yeni mesaj',
+            body: `${session.user.name || 'Biri'} size mesaj gönderdi`,
+            entityId: senderId,
+        }).catch(() => {})
 
         return NextResponse.json({ success: true, message }, { status: 201 })
     } catch {
