@@ -49,7 +49,7 @@ export function Navbar() {
     // Pages where the top navbar should be HIDDEN on mobile
     const isHiddenOnMobile = isInbox || isProfile;
     // Pages where the top navbar should be COMPACT on mobile
-    const isCompactOnMobile = isHome;
+    const isCompactOnMobile = pathname === "/hesapla";
 
     return (
         <div className={`
@@ -78,6 +78,9 @@ export function Navbar() {
                     {/* Navigation Links next to Logo for Desktop */}
                     <div className={styles.desktopLinks}>
                         <Link href="/" className={pathname === "/" ? styles.activeLink : ""}>
+                            Anasayfa
+                        </Link>
+                        <Link href="/hesapla" className={pathname === "/hesapla" ? styles.activeLink : ""}>
                             Hesapla
                         </Link>
                         <Link href="/marketplace" className={pathname.startsWith("/marketplace") || pathname.startsWith("/listing") ? styles.activeLink : ""}>
