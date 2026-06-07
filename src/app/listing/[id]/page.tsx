@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { FizibiliteScoreBadge } from '@/components/marketplace/FizibiliteScoreBadge';
 import { toast } from 'react-hot-toast';
@@ -44,6 +45,7 @@ export default function ListingDetailPage() {
     const params = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { data: session } = useSession();
     const id = params?.id as string;
 
     const initialTab = (searchParams.get('tab') as Tab) ?? 'genel';
@@ -171,7 +173,21 @@ export default function ListingDetailPage() {
 
                     {/* Title row */}
                     <div style={{ marginBottom: 20 }}>
-                        <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--card-title)', marginBottom: 4 }}>{listing.title}</h1>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                            <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--card-title)', marginBottom: 4 }}>{listing.title}</h1>
+                            {session?.user?.id && listing.user?.id && (session.user.id as string) === (listing.user.id as string) && (
+                                <button
+                                    onClick={() => router.push(`/listings/${id}/edit`)}
+                                    style={{
+                                        padding: '6px 14px', background: 'var(--border)', color: 'var(--card-title)',
+                                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700,
+                                        fontSize: '0.8rem', whiteSpace: 'nowrap', flexShrink: 0,
+                                    }}
+                                >
+                                    ✏️ Düzenle
+                                </button>
+                            )}
+                        </div>
                         <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>📍 {listing.district}, {listing.city}</div>
                     </div>
 
