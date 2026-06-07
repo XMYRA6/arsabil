@@ -32,6 +32,7 @@ model User {
   emailPrefs  String   @default("{}")
   notifications Notification[]
   compareShares CompareShare[]
+  favorites     Favorite[]
 }
 
 model Account {
@@ -170,6 +171,18 @@ model Listing {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   report      Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
   offers      Offer[]
+  favorites   Favorite[]
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
 }
 
 model Offer {
