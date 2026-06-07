@@ -1,0 +1,245 @@
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input, .select, .textarea {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--primary);
+}
+
+.textarea { resize: vertical; min-height: 100px; }
+
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.dropZone {
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropZone:hover {
+  border-color: var(--primary);
+  background: rgba(59,130,246,0.04);
+}
+
+.dropZoneText {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.625rem;
+}
+
+.photoItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photoRemove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.65);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photoCount {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.errorText {
+  font-size: 0.8rem;
+  color: var(--red, #dc2626);
+}
+
+.reportList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reportOption {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.reportOption:hover { border-color: var(--primary); background: rgba(59,130,246,0.03); }
+.reportOptionSelected { border-color: var(--primary); background: rgba(59,130,246,0.07); }
+
+.reportOptionInfo { flex: 1; }
+
+.reportOptionTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.reportOptionMeta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.radioCircle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.radioCircleSelected {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.skipBtn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  text-align: left;
+}
+
+.previewCard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.previewImgPlaceholder {
+  width: 100%;
+  height: 180px;
+  background: var(--panel-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.previewBody { padding: 1rem; }
+
+.previewTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 0.375rem;
+}
+
+.previewLocation {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.previewMeta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.625rem;
+}
+
+.previewPrice {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--primary);
+}
+
+.publishBtn {
+  width: 100%;
+  padding: 0.875rem 2rem;
+  border-radius: 14px;
+  background: var(--primary);
+  border: none;
+  color: white;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: opacity 0.15s;
+}
+
+.publishBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.validationError {
+  font-size: 0.8rem;
+  color: var(--red, #dc2626);
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .twoCol { grid-template-columns: 1fr; }
+}
