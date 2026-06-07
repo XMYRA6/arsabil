@@ -1,0 +1,46 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem 6rem;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.5rem;
+}
+
+.cta {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.ctaBtn {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  background: var(--primary);
+  color: white;
+  border-radius: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
