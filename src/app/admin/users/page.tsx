@@ -8,6 +8,8 @@ interface UserRow {
     name: string | null;
     email: string | null;
     role: string;
+    plan: string;
+    isVerified: boolean;
     isBanned?: boolean;
     createdAt: string;
     _count: { reports: number; listings: number; offers: number };
@@ -76,6 +78,37 @@ export default function AdminUsers() {
             });
             if (res.ok) {
                 setMessage({ type: 'success', text: ban ? '🚫 Kullanıcı askıya alındı.' : '✅ Askı kaldırıldı.' });
+                fetchUsers();
+            }
+        } catch {
+            setMessage({ type: 'error', text: 'Sunucu hatası.' });
+        }
+        setTimeout(() => setMessage(null), 3000);
+    };
+
+    const handleVerified = async (userId: string, isVerified: boolean) => {
+        try {
+            await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, isVerified }),
+            });
+            fetchUsers();
+        } catch {
+            setMessage({ type: 'error', text: 'Sunucu hatası.' });
+            setTimeout(() => setMessage(null), 3000);
+        }
+    };
+
+    const handlePlan = async (userId: string, plan: string) => {
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, plan }),
+            });
+            if (res.ok) {
+                setMessage({ type: 'success', text: `✅ Plan güncellendi: ${plan}` });
                 fetchUsers();
             }
         } catch {
@@ -159,6 +192,8 @@ export default function AdminUsers() {
                             <th>E-posta</th>
                             <th>Rol</th>
                             <th>Durum</th>
+                            <th>Doğrulandı</th>
+                            <th>Plan</th>
                             <th style={{ textAlign: 'center' }}>Rapor</th>
                             <th style={{ textAlign: 'center' }}>İlan</th>
                             <th style={{ textAlign: 'center' }}>Teklif</th>
@@ -196,6 +231,40 @@ export default function AdminUsers() {
                                     }>
                                         {user.isBanned ? '🚫 Askıda' : '✅ Aktif'}
                                     </span>
+                                </td>
+                                <td>
+                                    <div
+                                        onClick={() => handleVerified(user.id, !user.isVerified)}
+                                        title={user.isVerified ? 'Doğrulamayı Kaldır' : 'Doğrula'}
+                                        style={{
+                                            width: 36, height: 18, borderRadius: 9,
+                                            background: user.isVerified ? '#10b981' : '#30363d',
+                                            position: 'relative', cursor: 'pointer',
+                                            transition: 'background 0.2s',
+                                        }}
+                                    >
+                                        <div style={{
+                                            width: 14, height: 14, background: 'white', borderRadius: '50%',
+                                            position: 'absolute',
+                                            top: 2,
+                                            left: user.isVerified ? 20 : 2,
+                                            transition: 'left 0.2s',
+                                        }} />
+                                    </div>
+                                </td>
+                                <td>
+                                    <select
+                                        value={user.plan ?? 'FREE'}
+                                        onChange={e => handlePlan(user.id, e.target.value)}
+                                        className={styles.roleSelect}
+                                        style={{
+                                            fontSize: '0.78rem', height: 28,
+                                            color: user.plan === 'PRO' ? '#f59e0b' : 'var(--muted)',
+                                        }}
+                                    >
+                                        <option value="FREE">FREE</option>
+                                        <option value="PRO">PRO</option>
+                                    </select>
                                 </td>
                                 <td style={{ textAlign: 'center' }}>{user._count.reports}</td>
                                 <td style={{ textAlign: 'center' }}>{user._count.listings}</td>
