@@ -4,22 +4,42 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkPlanLimit } from "@/lib/plan";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url)
+        const city = searchParams.get('city')
+        const district = searchParams.get('district')
+        const minPrice = searchParams.get('minPrice')
+        const maxPrice = searchParams.get('maxPrice')
+
+        const where: Record<string, unknown> = {
+            status: 'APPROVED',
+            isActive: true,
+        }
+
+        if (city) where.city = city
+        if (district) where.district = district
+        if (minPrice || maxPrice) {
+            where.price = {
+                ...(minPrice ? { gte: Number(minPrice) } : {}),
+                ...(maxPrice ? { lte: Number(maxPrice) } : {}),
+            }
+        }
+
         const listings = await prisma.listing.findMany({
-            where: { isActive: true },
+            where,
             include: {
                 report: true,
                 user: { select: { id: true, name: true, email: true } },
-                offers: true
+                offers: true,
             },
-            orderBy: { createdAt: "desc" }
-        });
+            orderBy: { createdAt: 'desc' },
+        })
 
-        return NextResponse.json(listings);
+        return NextResponse.json(listings)
     } catch (error) {
-        console.error("Listings fetch error:", error);
-        return NextResponse.json({ message: "İlanlar getirilemedi." }, { status: 500 });
+        console.error('Listings fetch error:', error)
+        return NextResponse.json({ message: 'İlanlar getirilemedi.' }, { status: 500 })
     }
 }
 
