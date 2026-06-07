@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import styles from "./Navbar.module.css";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { getNotificationIcon, getNotificationUrl } from '@/lib/notifications'
 
 export function Navbar() {
     const { data: session, status } = useSession();
@@ -17,17 +18,52 @@ export function Navbar() {
     const [isInboxOpen, setIsInboxOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [readNotifs, setReadNotifs] = useState<number[]>([]);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [notifFilter, setNotifFilter] = useState<'ALL' | 'MESAJ_VAR' | 'TEKLIF_GELDI' | 'ILAN_ONAYLANDI'>('ALL')
+    const [notifications, setNotifications] = useState<Array<{
+        id: string
+        type: string
+        title: string
+        body: string
+        read: boolean
+        entityId: string | null
+        createdAt: string
+    }>>([])
+    const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-    const NOTIFS = [
-        { id: 1, icon: '📄', text: 'Raporunuz başarıyla kaydedildi', sub: 'Hesaplama · ArsaBil', time: '2dk' },
-        { id: 2, icon: '💬', text: 'Ahmet Yılmaz size mesaj gönderdi', sub: 'DM Kutusu', time: '15dk' },
-        { id: 3, icon: '🏪', text: 'İlanınıza yeni bir teklif geldi', sub: 'Pazar Yeri · %33 Arsa Payı', time: '1s' },
-        { id: 4, icon: '📊', text: 'Proje analiziniz tamamlandı', sub: 'Finansal Modelleme', time: '3s' },
-        { id: 5, icon: '🔔', text: 'ArsaBil güncellemesi hazır', sub: 'Sistem Bildirimi', time: '1g' },
-    ];
-    const unreadCount = NOTIFS.filter(n => !readNotifs.includes(n.id)).length;
+    const fetchNotifications = useCallback(async () => {
+        if (!session?.user) return
+        try {
+            const res = await fetch('/api/notifications')
+            if (res.ok) {
+                const data = await res.json()
+                setNotifications(data.notifications ?? [])
+            }
+        } catch { /* sessizce geç */ }
+    }, [session?.user])
+
+    useEffect(() => {
+        if (!session?.user) return
+        fetchNotifications()
+        pollingRef.current = setInterval(fetchNotifications, 30_000)
+        return () => { if (pollingRef.current) clearInterval(pollingRef.current) }
+    }, [session?.user, fetchNotifications])
+
+    const unreadCount = notifications.filter(n => !n.read).length
+
+    const markAllRead = async () => {
+        await fetch('/api/notifications', { method: 'PATCH' })
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    }
+
+    const markOneRead = async (id: string) => {
+        await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' })
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    }
+
+    const filteredNotifs = notifFilter === 'ALL'
+        ? notifications
+        : notifications.filter(n => n.type === notifFilter)
 
     // Compute Initials for Avatar (EA etc.)
     const getInitials = () => {
@@ -136,42 +172,81 @@ export function Navbar() {
                                 <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setIsNotifOpen(false)} />
                                 <div style={{
                                     position: 'absolute', top: 'calc(100% + 10px)', right: 0,
-                                    width: 320, maxHeight: 420,
+                                    width: 380, maxHeight: 440,
                                     background: 'var(--panel)', border: '1px solid var(--border)',
                                     borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,.25)',
-                                    zIndex: 100, overflow: 'hidden', animation: 'fadeSlideIn 0.2s ease',
+                                    zIndex: 100, overflow: 'hidden', display: 'flex', flexDirection: 'column',
                                 }}>
                                     {/* Header */}
-                                    <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--card-title)' }}>Bildirimler</span>
-                                        <button onClick={() => setReadNotifs(NOTIFS.map(n => n.id))} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Tümünü Okundu İşaretle</button>
+                                    <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)' }}>Bildirimler</span>
+                                        <button onClick={markAllRead} style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Tümünü Okundu İşaretle</button>
                                     </div>
-                                    {/* List */}
-                                    <div style={{ overflowY: 'auto', maxHeight: 350 }}>
-                                        {NOTIFS.map(n => {
-                                            const isRead = readNotifs.includes(n.id);
-                                            return (
-                                                <div key={n.id} onClick={() => setReadNotifs(prev => [...prev, n.id])} style={{
-                                                    padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'flex-start',
-                                                    cursor: 'pointer', transition: 'background 0.15s',
-                                                    background: isRead ? 'transparent' : 'rgba(31,111,235,.06)',
-                                                    borderBottom: '1px solid var(--border)',
-                                                }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(31,111,235,.08)'}
-                                                    onMouseLeave={e => e.currentTarget.style.background = isRead ? 'transparent' : 'rgba(31,111,235,.06)'}>
-                                                    {/* Icon */}
-                                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(31,111,235,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>{n.icon}</div>
-                                                    {/* Content */}
-                                                    <div style={{ flex: 1 }}>
-                                                        <div style={{ fontSize: '0.8rem', fontWeight: isRead ? 500 : 700, color: 'var(--card-title)', lineHeight: 1.4, marginBottom: 2 }}>{n.text}</div>
-                                                        <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{n.sub}</div>
+                                    {/* Body: sol filtre + sağ liste */}
+                                    <div style={{ display: 'flex', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+                                        {/* Sol filtre */}
+                                        <div style={{ width: 110, borderRight: '1px solid var(--border)', padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+                                            {([
+                                                { key: 'ALL', label: 'Tümü' },
+                                                { key: 'MESAJ_VAR', label: '💬 Mesajlar' },
+                                                { key: 'TEKLIF_GELDI', label: '🏷️ Teklifler' },
+                                                { key: 'ILAN_ONAYLANDI', label: '✅ Sistem' },
+                                            ] as const).map(f => (
+                                                <button key={f.key} onClick={() => setNotifFilter(f.key)} style={{
+                                                    background: notifFilter === f.key ? 'rgba(59,130,246,.1)' : 'none',
+                                                    border: 'none', color: notifFilter === f.key ? 'var(--primary)' : 'var(--muted)',
+                                                    fontWeight: notifFilter === f.key ? 700 : 500,
+                                                    fontSize: '0.7rem', padding: '6px 10px', cursor: 'pointer',
+                                                    textAlign: 'left', fontFamily: 'inherit', borderRadius: 6,
+                                                    margin: '0 4px',
+                                                }}>
+                                                    {f.label}
+                                                    {f.key !== 'ALL' && notifications.filter(n => n.type === f.key && !n.read).length > 0 && (
+                                                        <span style={{ marginLeft: 4, background: 'var(--primary)', color: 'white', borderRadius: 8, padding: '1px 5px', fontSize: '0.55rem' }}>
+                                                            {notifications.filter(n => n.type === f.key && !n.read).length}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {/* Sağ liste */}
+                                        <div style={{ flex: 1, overflowY: 'auto', maxHeight: 380 }}>
+                                            {filteredNotifs.length === 0 && (
+                                                <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--muted)', fontSize: '0.8rem' }}>
+                                                    Bildirim yok
+                                                </div>
+                                            )}
+                                            {filteredNotifs.map(n => (
+                                                <div key={n.id}
+                                                    onClick={() => {
+                                                        markOneRead(n.id)
+                                                        const url = getNotificationUrl(n.type, n.entityId ?? '')
+                                                        if (url) { router.push(url); setIsNotifOpen(false) }
+                                                    }}
+                                                    style={{
+                                                        padding: '10px 12px', display: 'flex', gap: 10, alignItems: 'flex-start',
+                                                        cursor: 'pointer', background: n.read ? 'transparent' : 'rgba(59,130,246,.06)',
+                                                        borderBottom: '1px solid var(--border)', transition: 'background 0.15s',
+                                                    }}
+                                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(59,130,246,.1)')}
+                                                    onMouseLeave={e => (e.currentTarget.style.background = n.read ? 'transparent' : 'rgba(59,130,246,.06)')}
+                                                >
+                                                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(59,130,246,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', flexShrink: 0 }}>
+                                                        {getNotificationIcon(n.type)}
+                                                    </div>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <div style={{ fontSize: '0.77rem', fontWeight: n.read ? 500 : 700, color: 'var(--card-title)', lineHeight: 1.4 }}>{n.title}</div>
+                                                        <div style={{ fontSize: '0.7rem', color: 'var(--muted)', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{n.body}</div>
                                                     </div>
                                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-                                                        <span style={{ fontSize: '0.62rem', color: 'var(--muted)' }}>{n.time}</span>
-                                                        {!isRead && <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary)' }} />}
+                                                        <span style={{ fontSize: '0.6rem', color: 'var(--muted)' }}>
+                                                            {new Date(n.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                        {!n.read && <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--primary)' }} />}
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </>
