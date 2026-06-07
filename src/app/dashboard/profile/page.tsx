@@ -40,6 +40,7 @@ export default function ProfilePage() {
     const [theme, setTheme] = useState<Theme>('dark')
     const [emailPrefs, setEmailPrefs] = useState({ mesaj: true, teklif: true, ilan: true })
     const [savingPrefs, setSavingPrefs] = useState(false)
+    const [savedPrefs, setSavedPrefs] = useState(false)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -90,11 +91,15 @@ export default function ProfilePage() {
     const saveEmailPrefs = async () => {
         setSavingPrefs(true)
         try {
-            await fetch('/api/user/profile', {
+            const res = await fetch('/api/user/profile', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ emailPrefs }),
             })
+            if (res.ok) {
+                setSavedPrefs(true)
+                setTimeout(() => setSavedPrefs(false), 2000)
+            }
         } finally {
             setSavingPrefs(false)
         }
@@ -259,13 +264,13 @@ export default function ProfilePage() {
                                         disabled={savingPrefs}
                                         style={{
                                             marginTop: 16, padding: '8px 20px',
-                                            background: 'var(--primary)', color: 'white',
+                                            background: savedPrefs ? '#10b981' : 'var(--primary)', color: 'white',
                                             border: 'none', borderRadius: 8, cursor: 'pointer',
                                             fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                                            opacity: savingPrefs ? 0.6 : 1,
+                                            opacity: savingPrefs ? 0.6 : 1, transition: 'background 0.3s',
                                         }}
                                     >
-                                        {savingPrefs ? 'Kaydediliyor…' : 'Kaydet'}
+                                        {savingPrefs ? 'Kaydediliyor…' : savedPrefs ? 'Kaydedildi ✓' : 'Kaydet'}
                                     </button>
                                 </div>
                             </>

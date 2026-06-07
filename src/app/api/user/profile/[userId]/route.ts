@@ -7,13 +7,14 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
     req: Request,
-    { params }: { params: { userId: string } }
+    context: { params: Promise<{ userId: string }> }
 ) {
+    const { userId } = await context.params
     const session = await getServerSession(authOptions)
-    const isOwner = session?.user?.id === params.userId
+    const isOwner = session?.user?.id === userId
 
     const user = await prisma.user.findUnique({
-        where: { id: params.userId },
+        where: { id: userId },
         select: {
             id: true,
             name: true,
