@@ -166,6 +166,27 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         onClick={e => e.stopPropagation()}
                         style={{ fontSize: '0.72rem', padding: '6px 14px', borderRadius: 8, background: 'rgba(16,185,129,.10)', color: '#10b981', border: '1.5px solid rgba(16,185,129,.25)', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
                     >📤 Teklif Ver</button>
+                    {onFavoriteToggle && (
+                        <button
+                            onClick={e => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                onFavoriteToggle(listing.id)
+                            }}
+                            title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                fontSize: '1.1rem',
+                                padding: '4px',
+                                lineHeight: 1,
+                                transition: 'transform 0.15s',
+                            }}
+                        >
+                            {isFavorite ? '❤️' : '🤍'}
+                        </button>
+                    )}
                 </div>
             </div>
         );
@@ -251,6 +272,34 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     <span style={{ fontSize: '0.62rem', fontWeight: 800, color: scoreColor }}>{score}</span>
                 </div>
             </div>
+
+            {/* Favorite button — absolute top-right of card */}
+            {onFavoriteToggle && (
+                <button
+                    onClick={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onFavoriteToggle(listing.id)
+                    }}
+                    title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+                    style={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        background: 'rgba(255,255,255,0.9)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        fontSize: '1rem',
+                        padding: '6px',
+                        lineHeight: 1,
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                        transition: 'transform 0.15s',
+                    }}
+                >
+                    {isFavorite ? '❤️' : '🤍'}
+                </button>
+            )}
         </div>
     );
 }
