@@ -42,12 +42,24 @@ export default function ProfilePage() {
     const [savingPrefs, setSavingPrefs] = useState(false)
     const [savedPrefs, setSavedPrefs] = useState(false)
     const [mounted, setMounted] = useState(false)
+    const [favorites, setFavorites] = useState<any[]>([])
+    const [loadingFavs, setLoadingFavs] = useState(false)
 
     useEffect(() => {
         setMounted(true)
         const saved = (localStorage.getItem('arsabil-theme') as Theme) || 'dark'
         setTheme(saved)
     }, [])
+
+    useEffect(() => {
+        if (tab !== 'favorites' || !session?.user) return
+        setLoadingFavs(true)
+        fetch('/api/favorites')
+            .then(r => r.json())
+            .then(data => setFavorites(Array.isArray(data) ? data : []))
+            .catch(() => setFavorites([]))
+            .finally(() => setLoadingFavs(false))
+    }, [tab, session?.user])
 
     useEffect(() => {
         if (!session?.user?.id) return
@@ -178,6 +190,7 @@ export default function ProfilePage() {
                         {([
                             { key: 'portfolio', label: 'Portfolyo' },
                             { key: 'listings',  label: 'İlanlarım' },
+                            { key: 'favorites', label: '❤️ Favorilerim' },
                             { key: 'settings',  label: 'Tema & Ayarlar' },
                         ] as const).map(t => (
                             <button
@@ -211,6 +224,50 @@ export default function ProfilePage() {
                             )) : (
                                 <p className={styles.emptyNote}>Aktif ilan yok. <Link href="/listings/new" style={{ color: 'var(--primary)' }}>İlan Oluştur →</Link></p>
                             )
+                        )}
+
+                        {tab === 'favorites' && (
+                            <div>
+                                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>
+                                    Favorilerim
+                                </h3>
+                                {loadingFavs ? (
+                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>Yükleniyor…</div>
+                                ) : favorites.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
+                                        <div style={{ fontSize: '2rem', marginBottom: 8 }}>❤️</div>
+                                        Henüz favori ilan eklemediniz
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                        {favorites.map((fav: any) => (
+                                            <a
+                                                key={fav.id}
+                                                href={`/listing/${fav.listingId}`}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: 12,
+                                                    padding: '12px 14px',
+                                                    background: 'var(--bg)', borderRadius: 10,
+                                                    border: '1.5px solid var(--border)',
+                                                    textDecoration: 'none', color: 'inherit',
+                                                }}
+                                            >
+                                                <span style={{ fontSize: '1.2rem' }}>🏗️</span>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--card-title)' }}>
+                                                        {fav.listing?.title ?? fav.listing?.report?.title ?? 'İlan'}
+                                                    </div>
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                                                        {fav.listing?.district && `${fav.listing.district}, `}{fav.listing?.city ?? '—'}
+                                                        {fav.listing?.price ? ` · ${fav.listing.price.toLocaleString('tr-TR')} TL` : ''}
+                                                    </div>
+                                                </div>
+                                                <span style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>→</span>
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         )}
 
                         {tab === 'settings' && (
