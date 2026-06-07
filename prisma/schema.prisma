@@ -28,6 +28,8 @@ model User {
   linkedin      String?
   website       String?
   isVerified    Boolean        @default(false)
+  plan        String   @default("FREE")
+  emailPrefs  String   @default("{}")
   notifications Notification[]
   compareShares CompareShare[]
 }
@@ -154,6 +156,7 @@ model Listing {
   district    String?
   notes       String?
   isActive    Boolean  @default(true)
+  status      String   @default("PENDING")
   title       String?
   address     String?
   phone       String?

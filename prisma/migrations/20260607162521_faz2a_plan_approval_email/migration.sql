@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Listing" ADD COLUMN     "status" TEXT NOT NULL DEFAULT 'PENDING';
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "emailPrefs" TEXT NOT NULL DEFAULT '{}',
+ADD COLUMN     "plan" TEXT NOT NULL DEFAULT 'FREE';
