@@ -1227,7 +1227,7 @@ In the POST handler, after the existing `createNotification(...).catch(() => {})
         }
 ```
 
-Note: Adapt variable names (`listingOwner`, `listingTitle`, `offerShare`) to match what already exists in the offers route. Read the file before editing.
+The offers route has: `const { listingId, offeredShare, message } = await req.json()` and `const listing = await prisma.listing.findUnique(...)`. The listing owner is `listing.userId`. You'll need to fetch the owner's email: add `user: { select: { id: true, email: true } }` to the `listing` include, then use `listing.user.email` and `listing.user.id`. Use `listing.title ?? 'İlanınız'` for listingTitle and `offeredShare` for the share amount.
 
 - [ ] **Step 3: Add email trigger to admin/listings approve action**
 

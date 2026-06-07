@@ -807,7 +807,7 @@ In `src/app/listing/[id]/page.tsx`, replace the existing `handleOffer` function:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     listingId: id,
-                    sharePercent: offerShare,
+                    offeredShare: offerShare,
                     message: offerMsg,
                 }),
             });
