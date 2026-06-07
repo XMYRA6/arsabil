@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -23,49 +24,54 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession();
-        if (!session || !session.user) {
-            return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
+        const session = await getServerSession(authOptions)
+        if (!session?.user?.id) {
+            return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 })
         }
 
-        const { reportId, city, district, notes } = await req.json();
+        const {
+            reportId, city, district, notes,
+            title, address, phone, description,
+            price, landSizeSqm, zoning, titleDeed, photos,
+        } = await req.json()
 
-        if (!reportId) {
-            return NextResponse.json({ message: "Rapor ID zorunludur." }, { status: 400 });
-        }
-
-        // Check if report belongs to user
-        const report = await prisma.report.findFirst({
-            where: { id: reportId, userId: session.user.id }
-        });
-
-        if (!report) {
-            return NextResponse.json({ message: "Rapor bulunamadı veya size ait değil." }, { status: 404 });
-        }
-
-        // Check if already listed
-        const existingListing = await prisma.listing.findUnique({
-            where: { reportId }
-        });
-
-        if (existingListing) {
-            return NextResponse.json({ message: "Bu rapor zaten ilanda." }, { status: 400 });
+        // reportId varsa sahipliği kontrol et
+        if (reportId) {
+            const report = await prisma.report.findFirst({
+                where: { id: reportId, userId: session.user.id as string },
+            })
+            if (!report) {
+                return NextResponse.json({ message: "Rapor bulunamadı veya size ait değil." }, { status: 404 })
+            }
+            const existing = await prisma.listing.findUnique({ where: { reportId } })
+            if (existing) {
+                return NextResponse.json({ message: "Bu rapor zaten ilanda." }, { status: 400 })
+            }
         }
 
         const listing = await prisma.listing.create({
             data: {
-                reportId,
-                userId: session.user.id,
-                city,
-                district,
-                notes,
-                isActive: true
-            }
-        });
+                userId: session.user.id as string,
+                reportId: reportId || null,
+                city: city || null,
+                district: district || null,
+                notes: notes || null,
+                title: title || null,
+                address: address || null,
+                phone: phone || null,
+                description: description || null,
+                price: price ? Number(price) : null,
+                landSizeSqm: landSizeSqm ? Number(landSizeSqm) : null,
+                zoning: zoning || null,
+                titleDeed: titleDeed || null,
+                photos: photos || [],
+                isActive: true,
+            },
+        })
 
-        return NextResponse.json({ message: "İlan başarıyla oluşturuldu.", listing }, { status: 201 });
+        return NextResponse.json(listing, { status: 201 })
     } catch (error) {
-        console.error("Listing create error:", error);
-        return NextResponse.json({ message: "İlan oluşturulurken hata oluştu." }, { status: 500 });
+        console.error("Listing create error:", error)
+        return NextResponse.json({ message: "İlan oluşturulurken hata oluştu." }, { status: 500 })
     }
 }
