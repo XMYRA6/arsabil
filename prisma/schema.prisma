@@ -24,6 +24,12 @@ model User {
   projects         Project[]
   reports          Report[]
   sessions         Session[]
+  bio           String?
+  linkedin      String?
+  website       String?
+  isVerified    Boolean        @default(false)
+  notifications Notification[]
+  compareShares CompareShare[]
 }
 
 model Account {
@@ -85,6 +91,27 @@ model Message {
   createdAt  DateTime @default(now())
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  entityId  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CompareShare {
+  id          String   @id @default(cuid())
+  token       String   @unique @default(cuid())
+  userId      String
+  scenarioIds String[]
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model GlobalSettings {
