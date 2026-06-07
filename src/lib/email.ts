@@ -63,3 +63,18 @@ export function buildApprovalEmail(listingTitle: string): string {
         <p style="margin-top:24px;font-size:0.8rem;color:#6b7280">Bu bildirimi almak istemiyorsanız profil ayarlarınızdan e-posta tercihlerinizi güncelleyebilirsiniz.</p>
     </div>`
 }
+
+export function buildRejectionEmail(listingTitle: string | null): string {
+    const title = listingTitle ?? 'İlanınız'
+    return `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+        <h2 style="color:#ef4444">❌ İlan Onaylanmadı</h2>
+        <p>"<strong>${title}</strong>" başlıklı ilanınız incelendi ve onaylanmadı.</p>
+        <p style="color:#666;font-size:0.9rem">
+            Daha fazla bilgi için destek ekibimizle iletişime geçebilirsiniz.
+        </p>
+        <a href="https://arsabil.com/dashboard"
+           style="display:inline-block;margin-top:16px;padding:10px 20px;background:#6366f1;color:white;border-radius:8px;text-decoration:none">
+            Dashboard'a Git
+        </a>
+    </div>`
+}

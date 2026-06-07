@@ -14,7 +14,7 @@ jest.mock('@/lib/prisma', () => ({
     },
 }))
 
-import { sendEmail, getEmailPrefs, buildMessageEmail, buildOfferEmail, buildApprovalEmail } from './email'
+import { sendEmail, getEmailPrefs, buildMessageEmail, buildOfferEmail, buildApprovalEmail, buildRejectionEmail } from './email'
 import { prisma } from '@/lib/prisma'
 
 describe('buildMessageEmail', () => {
@@ -80,5 +80,22 @@ describe('sendEmail', () => {
     it('calls resend.emails.send', async () => {
         await sendEmail({ to: 'test@example.com', subject: 'Test', html: '<p>hi</p>' })
         // sendEmail creates its own Resend instance — just ensure no throw
+    })
+})
+
+describe('buildRejectionEmail', () => {
+    it('includes listing title', () => {
+        const html = buildRejectionEmail('Kadıköy 300m²')
+        expect(html).toContain('Kadıköy 300m²')
+    })
+
+    it('handles null title gracefully', () => {
+        const html = buildRejectionEmail(null)
+        expect(html).toContain('İlanınız')
+    })
+
+    it('includes dashboard link', () => {
+        const html = buildRejectionEmail('Test')
+        expect(html).toContain('/dashboard')
     })
 })
