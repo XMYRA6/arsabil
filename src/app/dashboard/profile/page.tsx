@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import styles from './profile.module.css'
@@ -29,9 +29,12 @@ interface ProfileData {
 }
 
 export default function ProfilePage() {
-    const { data: session } = useSession()
+    const { data: session, update } = useSession()
     const [tab, setTab] = useState<Tab>('portfolio')
     const [profile, setProfile] = useState<ProfileData | null>(null)
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(session?.user?.image ?? null)
+    const [uploadingAvatar, setUploadingAvatar] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [bio, setBio] = useState('')
     const [linkedin, setLinkedin] = useState('')
     const [website, setWebsite] = useState('')
@@ -65,11 +68,12 @@ export default function ProfilePage() {
         if (!session?.user?.id) return
         fetch(`/api/user/profile/${session.user.id}`)
             .then(r => r.json())
-            .then((data: ProfileData) => {
+            .then((data: ProfileData & { image?: string | null }) => {
                 setProfile(data)
                 setBio(data.bio ?? '')
                 setLinkedin(data.linkedin ?? '')
                 setWebsite(data.website ?? '')
+                if (data.image) setAvatarUrl(data.image)
                 if (data.emailPrefs) {
                     try {
                         setEmailPrefs(JSON.parse(data.emailPrefs))
@@ -117,6 +121,24 @@ export default function ProfilePage() {
         }
     }
 
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        const formData = new FormData()
+        formData.append('file', file)
+        setUploadingAvatar(true)
+        try {
+            const res = await fetch('/api/user/avatar', { method: 'POST', body: formData })
+            const data = await res.json()
+            if (res.ok) {
+                setAvatarUrl(data.imageUrl)
+                await update({ image: data.imageUrl })
+            }
+        } finally {
+            setUploadingAvatar(false)
+        }
+    }
+
     const getInitials = () => {
         if (!session?.user?.name) return 'US'
         const parts = session.user.name.trim().split(' ')
@@ -133,7 +155,22 @@ export default function ProfilePage() {
             <div className={styles.layout}>
                 {/* Sol: Profil kartı */}
                 <div className={styles.profileCard}>
-                    <div className={styles.avatarCircle}>{getInitials()}</div>
+                    <div className={styles.avatarWrapper} onClick={() => fileInputRef.current?.click()}>
+                        {avatarUrl
+                            ? <img src={avatarUrl} className={styles.avatarImg} alt="Profil fotoğrafı" />
+                            : <div className={styles.avatarCircle}>{getInitials()}</div>
+                        }
+                        <div className={styles.avatarOverlay}>
+                            {uploadingAvatar ? '⏳' : '📷'}
+                        </div>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            style={{ display: 'none' }}
+                            onChange={handleAvatarUpload}
+                        />
+                    </div>
                     <h2 className={styles.displayName}>{session.user?.name || 'Kullanıcı'}</h2>
                     <p className={styles.roleTag}>{(session.user as { role?: string })?.role || 'USER'}</p>
 
