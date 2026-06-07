@@ -72,9 +72,36 @@ return NextResponse.json({ imageUrl: result.secure_url })
 
 `public_id: user_${userId}` + `overwrite: true` → her kullanıcının tek bir Cloudinary dosyası olur, güncelleme eski dosyanın üzerine yazar.
 
-### 2.4 Navbar Avatar
+### 2.4 Session Refresh
 
-`src/components/Navbar.tsx`'de `useSession()` ile `session.user.image` kontrol edilir:
+NextAuth JWT token'ı upload sonrası otomatik güncellenmez. `handleAvatarUpload` başarılı olunca `update({ image: imageUrl })` çağrılır:
+
+```typescript
+// src/app/dashboard/profile/page.tsx
+const { data: session, update } = useSession()
+
+const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    setUploadingAvatar(true)
+    try {
+        const res = await fetch('/api/user/avatar', { method: 'POST', body: formData })
+        const data = await res.json()
+        if (res.ok) {
+            setAvatarUrl(data.imageUrl)
+            await update({ image: data.imageUrl })  // JWT refresh → Navbar güncellenir
+        }
+    } finally {
+        setUploadingAvatar(false)
+    }
+}
+```
+
+### 2.5 Navbar Avatar
+
+`src/components/Navbar.tsx`'de `useSession()` ile `session.user.image` kontrol edilir. Session `update()` sonrası Navbar otomatik re-render edilir:
 
 ```tsx
 {session.user.image
@@ -211,8 +238,9 @@ if (action === 'reject') {
 
     getEmailPrefs(listing.user.id).then(prefs => {
         if (!prefs.ilan) return
+        if (!listing.user.email) return
         return sendEmail({
-            to: listing.user.email!,
+            to: listing.user.email,
             subject: 'İlanınız Onaylanmadı — ArsaBil',
             html: buildRejectionEmail(listing.title),
         })
