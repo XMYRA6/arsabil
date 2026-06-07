@@ -43,20 +43,80 @@ export default function Inbox() {
     const [searchTerm, setSearchTerm] = useState('')
     const bottomRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const activeOtherIdRef = useRef<string | null>(null)
+
+    const currentUserId = (session?.user as { id?: string })?.id
 
     useEffect(() => {
         if (status === 'unauthenticated') router.push('/login')
     }, [status, router])
 
-    const loadConversations = useCallback(async () => {
-        const res = await fetch('/api/messages')
-        const data = await res.json()
-        if (data.conversations) setConversations(data.conversations)
-    }, [])
-
     useEffect(() => {
-        if (status === 'authenticated') loadConversations()
-    }, [status, loadConversations])
+        if (status !== 'authenticated') return
+        if (!currentUserId) return
+
+        const es = new EventSource('/api/messages/sse')
+
+        es.onmessage = (event: MessageEvent) => {
+            const data = JSON.parse(event.data as string)
+
+            if (data.type === 'init') {
+                setConversations(data.conversations)
+                return
+            }
+
+            if (data.type === 'new_message') {
+                const msg = data.message as {
+                    id: string; content: string; senderId: string; receiverId: string
+                    createdAt: string; read: boolean; reportId: string | null
+                    sender: { id: string; name: string | null; image: string | null }
+                }
+                const otherId = msg.senderId === currentUserId ? msg.receiverId : msg.senderId
+
+                setConversations(prev => {
+                    const exists = prev.some(c => c.otherUser.id === otherId)
+                    if (exists) {
+                        return prev.map(c =>
+                            c.otherUser.id === otherId
+                                ? {
+                                    ...c,
+                                    lastMessage:    msg.content,
+                                    lastMessageAt:  msg.createdAt,
+                                    unreadCount:
+                                        msg.senderId !== currentUserId &&
+                                        activeOtherIdRef.current !== otherId
+                                            ? c.unreadCount + 1
+                                            : c.unreadCount,
+                                }
+                                : c
+                        )
+                    }
+                    return [
+                        {
+                            otherUser:      msg.sender,
+                            lastMessage:    msg.content,
+                            lastMessageAt:  msg.createdAt,
+                            unreadCount:    msg.senderId !== currentUserId ? 1 : 0,
+                        },
+                        ...prev,
+                    ]
+                })
+
+                if (
+                    activeOtherIdRef.current === msg.senderId ||
+                    activeOtherIdRef.current === msg.receiverId
+                ) {
+                    setMessages(prev => [...prev, msg])
+                }
+            }
+        }
+
+        es.onerror = () => {
+            // EventSource auto-reconnects — no action needed
+        }
+
+        return () => es.close()
+    }, [status, currentUserId])
 
     const loadMessages = useCallback(async (otherId: string) => {
         const res = await fetch(`/api/messages/${otherId}`)
@@ -88,6 +148,10 @@ export default function Inbox() {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages.length])
 
+    useEffect(() => {
+        activeOtherIdRef.current = activeOtherId
+    }, [activeOtherId])
+
     const sendMessage = async () => {
         if (!draft.trim() || !activeOtherId || sending) return
         setSending(true)
@@ -99,7 +163,6 @@ export default function Inbox() {
         if (res.ok) {
             setDraft('')
             await loadMessages(activeOtherId)
-            await loadConversations()
         } else {
             toast.error('Mesaj gönderilemedi')
         }
@@ -111,7 +174,6 @@ export default function Inbox() {
     }
 
     const activeConv = conversations.find(c => c.otherUser.id === activeOtherId)
-    const currentUserId = (session?.user as { id?: string })?.id
 
     const filtered = conversations.filter(c =>
         (c.otherUser.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
