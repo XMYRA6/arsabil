@@ -25,8 +25,10 @@ interface Listing {
 interface Props {
     listing: Listing;
     highlighted?: boolean;
-    view: 'split' | 'list' | 'map';
+    view?: 'split' | 'list' | 'map';
     onHover?: (id: string | null) => void;
+    isFavorite?: boolean;
+    onFavoriteToggle?: (id: string) => void;
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -42,7 +44,7 @@ const IMAR_LABEL: Record<string, string> = {
     DIGER: 'Diğer',
 };
 
-export function ListingCard({ listing, highlighted, view, onHover }: Props) {
+export function ListingCard({ listing, highlighted, view, onHover, isFavorite, onFavoriteToggle }: Props) {
     const router = useRouter();
     const score = listing.fizibiliteSkoru ?? Math.floor(50 + Math.random() * 40);
     const price = listing.price ?? listing.report?.minApartmentPrice ?? 0;

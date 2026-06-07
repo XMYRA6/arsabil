@@ -171,3 +171,115 @@
         position: relative;
     }
 }
+
+/* =========================================================================
+   TAB LAYOUT STYLES (Faz 2B)
+   ========================================================================= */
+
+.tabBar {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+}
+
+.tabActive {
+    color: var(--primary);
+    font-weight: 800;
+    border-bottom-color: var(--primary);
+}
+
+.filterBar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    padding: 16px;
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.filterField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filterLabel {
+    font-size: 0.68rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.filterInput {
+    padding: 7px 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.82rem;
+    outline: none;
+    width: 120px;
+}
+
+.filterInput:focus {
+    border-color: var(--primary);
+}
+
+.filterBtn {
+    padding: 8px 18px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.82rem;
+    align-self: flex-end;
+}
+
+.listingGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.mapContainer {
+    width: 100%;
+    height: calc(100vh - 280px);
+    min-height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--muted);
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
