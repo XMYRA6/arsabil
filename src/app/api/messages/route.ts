@@ -1,55 +1,77 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
-export async function POST(req: Request) {
+export async function GET() {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const userId = session.user.id as string
+
     try {
-        const { content, reportId, senderId, receiverId } = await req.json();
+        const messages = await prisma.message.findMany({
+            where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                sender: { select: { id: true, name: true, image: true } },
+                receiver: { select: { id: true, name: true, image: true } },
+            },
+        })
 
-        if (!content || !senderId || !receiverId) {
-            return NextResponse.json({ success: false, error: 'Eksik parametre' }, { status: 400 });
+        // Konuşmalara grupla: her unique karşı kullanıcı bir konuşmadır
+        const map = new Map<string, {
+            otherUser: { id: string; name: string | null; image: string | null }
+            lastMessage: string
+            lastMessageAt: string
+            unreadCount: number
+        }>()
+
+        for (const msg of messages) {
+            const otherUser = msg.senderId === userId ? msg.receiver : msg.sender
+            if (!map.has(otherUser.id)) {
+                map.set(otherUser.id, {
+                    otherUser,
+                    lastMessage: msg.content,
+                    lastMessageAt: msg.createdAt.toISOString(),
+                    unreadCount: 0,
+                })
+            }
+            if (msg.receiverId === userId && !msg.read) {
+                map.get(otherUser.id)!.unreadCount += 1
+            }
         }
 
-        const message = await prisma.message.create({
-            data: {
-                content,
-                reportId,
-                senderId,
-                receiverId
-            }
-        });
-
-        return NextResponse.json({ success: true, message }, { status: 201 });
-    } catch (error) {
-        console.error('Mesaj gönderme hatası:', error);
-        return NextResponse.json({ success: false, error: 'Sunucu hatası' }, { status: 500 });
+        const conversations = Array.from(map.values())
+        return NextResponse.json({ conversations })
+    } catch {
+        return NextResponse.json({ error: 'Sunucu hatası' }, { status: 500 })
     }
 }
 
-export async function GET(req: Request) {
-    try {
-        const url = new URL(req.url);
-        const userId = url.searchParams.get('userId');
+export async function POST(req: Request) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const senderId = session.user.id as string
 
-        if (!userId) {
-            return NextResponse.json({ success: false, error: 'Kullanıcı ID gerekli' }, { status: 400 });
+    try {
+        const { receiverId, content, reportId } = await req.json()
+        if (!receiverId || !content?.trim()) {
+            return NextResponse.json({ error: 'receiverId ve content zorunlu' }, { status: 400 })
         }
 
-        const messages = await prisma.message.findMany({
-            where: {
-                receiverId: userId
-            },
-            include: {
-                sender: {
-                    select: { name: true, role: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        const message = await prisma.message.create({
+            data: { senderId, receiverId, content: content.trim(), reportId: reportId || null },
+            include: { sender: { select: { id: true, name: true, image: true } } },
+        })
 
-        return NextResponse.json({ success: true, messages });
-    } catch (error) {
-        return NextResponse.json({ success: false, error: 'Sunucu hatası' }, { status: 500 });
+        return NextResponse.json({ success: true, message }, { status: 201 })
+    } catch {
+        return NextResponse.json({ error: 'Sunucu hatası' }, { status: 500 })
     }
 }
