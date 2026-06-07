@@ -18,14 +18,14 @@ const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] =
  * Persists in localStorage under "arsabil-theme".
  */
 export const ThemeToggle: React.FC = () => {
-    const [theme, setTheme] = useState<Mode>('dark');
+    const [theme, setTheme] = useState<Mode>('light');
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setMounted(true);
-        const saved = (localStorage.getItem('arsabil-theme') as Mode) || 'dark';
+        const saved = (localStorage.getItem('arsabil-theme') as Mode) || 'light';
         setTheme(saved);
         document.documentElement.setAttribute('data-theme', saved);
     }, []);

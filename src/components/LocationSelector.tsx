@@ -112,19 +112,29 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "8px",
-        background: "var(--panel-2)",
+        gap: "12px",
+        background: "var(--panel)",
         border: "1px solid var(--border)",
-        borderRadius: 12,
-        padding: "8px 14px",
+        borderRadius: 14,
+        padding: "10px 12px",
         marginBottom: "10px",
       }}
     >
-      <span style={{ fontSize: "1.1rem" }}>📍</span>
+      <span style={{
+        width: "36px",
+        height: "36px",
+        borderRadius: "10px",
+        background: "var(--primary)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        fontSize: "1rem",
+      }}>📍</span>
       <span style={{ flex: 1, fontSize: "0.85rem", color: "var(--muted)" }}>
         {selectedIl
           ? "İlçe seçince fiyatlar güncellenir"
-          : "Proje konumunu seç — piyasa fiyatı otomatik dolsun"}
+          : "İl / İlçe seçin →"}
       </span>
       <select
         value={selectedIl}
