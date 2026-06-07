@@ -22,7 +22,7 @@ export function WizardStep5Preview({ data, publishing, onPublish }: Props) {
 
       <div className={styles.previewCard}>
         {data.photos.length > 0 ? (
-          <img src={data.photos[0]} alt={data.title} style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
+          <img src={data.photos[0].url} alt={data.title} style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
         ) : (
           <div className={styles.previewImgPlaceholder}>📷 Fotoğraf eklenmedi</div>
         )}

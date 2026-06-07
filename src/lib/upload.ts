@@ -18,3 +18,11 @@ export function mimeToExtension(mimeType: string): string {
     }
     return map[mimeType] ?? 'jpg'
 }
+
+export function publicIdFromUrl(url: string): string {
+    // Extracts Cloudinary public_id from URL.
+    // https://res.cloudinary.com/cloud/image/upload/v123/arsabil/listings/xyz/abc.jpg
+    // → arsabil/listings/xyz/abc
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z]+$/)
+    return match ? match[1] : ''
+}

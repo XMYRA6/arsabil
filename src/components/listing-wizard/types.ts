@@ -9,7 +9,7 @@ export interface WizardFormData {
     titleDeed: string
     description: string
     phone: string
-    photos: string[]
+    photos: { url: string; publicId: string }[]
     reportId: string
 }
 

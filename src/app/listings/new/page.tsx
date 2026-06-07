@@ -57,7 +57,7 @@ export default function NewListingPage() {
           titleDeed: form.titleDeed || null,
           description: form.description || null,
           phone: form.phone || null,
-          photos: form.photos,
+          photos: form.photos.map(p => p.url),
           reportId: form.reportId || null,
         }),
       })

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import styles from './wizard.module.css'
 import { WizardFormData } from './types'
-import { MAX_FILES_PER_LISTING } from '@/lib/upload'
+import { MAX_FILES_PER_LISTING, publicIdFromUrl } from '@/lib/upload'
 
 interface Props {
   data: WizardFormData
@@ -20,15 +20,15 @@ export function WizardStep3Photos({ data, onChange, tempListingId }: Props) {
     if (slots <= 0) { setError(`En fazla ${MAX_FILES_PER_LISTING} fotoğraf yüklenebilir`); return }
     setUploading(true)
     setError('')
-    const uploaded: string[] = []
+    const uploaded: { url: string; publicId: string }[] = []
     for (const file of Array.from(files).slice(0, slots)) {
       const fd = new FormData()
       fd.append('file', file)
       fd.append('listingId', tempListingId)
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       if (res.ok) {
-        const { url } = await res.json()
-        uploaded.push(url)
+        const { url, publicId } = await res.json()
+        uploaded.push({ url, publicId })
       } else {
         const { error: err } = await res.json()
         setError(err || 'Yükleme hatası')
@@ -36,6 +36,18 @@ export function WizardStep3Photos({ data, onChange, tempListingId }: Props) {
     }
     onChange({ photos: [...data.photos, ...uploaded] })
     setUploading(false)
+  }
+
+  const handleRemove = (photo: { url: string; publicId: string }) => {
+    onChange({ photos: data.photos.filter(p => p.url !== photo.url) })
+    const pid = photo.publicId || publicIdFromUrl(photo.url)
+    if (pid) {
+      fetch('/api/upload', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicId: pid }),
+      }).catch(() => {})
+    }
   }
 
   return (
@@ -66,12 +78,12 @@ export function WizardStep3Photos({ data, onChange, tempListingId }: Props) {
 
       {data.photos.length > 0 && (
         <div className={styles.photoGrid}>
-          {data.photos.map(url => (
-            <div key={url} className={styles.photoItem}>
-              <img src={url} alt="" className={styles.photoImg} />
+          {data.photos.map(photo => (
+            <div key={photo.url} className={styles.photoItem}>
+              <img src={photo.url} alt="" className={styles.photoImg} />
               <button
                 className={styles.photoRemove}
-                onClick={() => onChange({ photos: data.photos.filter(p => p !== url) })}
+                onClick={() => handleRemove(photo)}
               >
                 ×
               </button>
