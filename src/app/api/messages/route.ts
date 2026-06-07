@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { sendEmail, buildMessageEmail, getEmailPrefs } from '@/lib/email'
+import { notifyUser } from '@/lib/sse'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,6 +77,21 @@ export async function POST(req: Request) {
         const message = await prisma.message.create({
             data: { senderId, receiverId, content: content.trim(), reportId: reportId || null },
             include: { sender: { select: { id: true, name: true, image: true } } },
+        })
+
+        // Push new message to receiver's open SSE stream (fire-and-forget)
+        notifyUser(receiverId, {
+            type: 'new_message',
+            message: {
+                id:         message.id,
+                content:    message.content,
+                senderId:   message.senderId,
+                receiverId: message.receiverId,
+                createdAt:  message.createdAt.toISOString(),
+                read:       false,
+                reportId:   message.reportId,
+                sender:     message.sender,
+            },
         })
 
         // Alıcıya bildirim oluştur (hata olursa sessizce geç)
