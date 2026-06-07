@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
+import { sendEmail, buildOfferEmail, getEmailPrefs } from "@/lib/email";
 
 export async function POST(req: Request) {
     try {
@@ -17,7 +18,8 @@ export async function POST(req: Request) {
         }
 
         const listing = await prisma.listing.findUnique({
-            where: { id: listingId }
+            where: { id: listingId },
+            include: { user: { select: { id: true, email: true } } }
         });
 
         if (!listing || !listing.isActive) {
@@ -55,6 +57,19 @@ export async function POST(req: Request) {
             body: `${session.user.name || 'Biri'} ilanınıza %${Number(offeredShare).toFixed(0)} pay teklifi verdi`,
             entityId: listingId,
         }).catch(() => {})
+
+        // Email trigger
+        const listingOwnerEmail = listing.user?.email ?? null
+        if (listingOwnerEmail) {
+            getEmailPrefs(listing.userId).then(prefs => {
+                if (!prefs.teklif) return
+                return sendEmail({
+                    to: listingOwnerEmail,
+                    subject: 'Yeni Teklif Geldi — ArsaBil',
+                    html: buildOfferEmail(listing.title ?? 'İlanınız', Number(offeredShare)),
+                })
+            }).catch(() => {})
+        }
 
         return NextResponse.json({ message: "Teklif başarıyla gönderildi.", offer }, { status: 201 });
     } catch (error) {

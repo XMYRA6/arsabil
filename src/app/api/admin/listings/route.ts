@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { createNotification } from '@/lib/notifications';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { sendEmail, buildApprovalEmail, getEmailPrefs } from '@/lib/email';
 
 export async function GET() {
     try {
@@ -38,7 +39,7 @@ export async function PATCH(req: Request) {
             const listing = await prisma.listing.update({
                 where: { id: listingId },
                 data: { status: 'APPROVED', isActive: true },
-                include: { user: { select: { id: true, name: true } } },
+                include: { user: { select: { id: true, name: true, email: true } } },
             });
             createNotification({
                 type: 'ILAN_ONAYLANDI',
@@ -47,6 +48,16 @@ export async function PATCH(req: Request) {
                 body: `"${listing.title ?? 'İlanınız'}" pazar yerine eklendi.`,
                 entityId: listing.id,
             }).catch(() => {});
+            if (listing.user.email) {
+                getEmailPrefs(listing.user.id).then(prefs => {
+                    if (!prefs.ilan) return
+                    return sendEmail({
+                        to: listing.user.email!,
+                        subject: 'İlanınız Onaylandı — ArsaBil',
+                        html: buildApprovalEmail(listing.title ?? 'İlanınız'),
+                    })
+                }).catch(() => {})
+            }
             return NextResponse.json({ ok: true });
         }
 

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
+import { sendEmail, buildMessageEmail, getEmailPrefs } from '@/lib/email'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,6 +67,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'receiverId ve content zorunlu' }, { status: 400 })
         }
 
+        const receiverUser = await prisma.user.findUnique({
+            where: { id: receiverId },
+            select: { email: true },
+        })
+        const receiverEmail = receiverUser?.email ?? null
+
         const message = await prisma.message.create({
             data: { senderId, receiverId, content: content.trim(), reportId: reportId || null },
             include: { sender: { select: { id: true, name: true, image: true } } },
@@ -79,6 +86,18 @@ export async function POST(req: Request) {
             body: `${session.user.name || 'Biri'} size mesaj gönderdi`,
             entityId: senderId,
         }).catch(() => {})
+
+        // Email trigger
+        if (receiverEmail) {
+            getEmailPrefs(receiverId).then(prefs => {
+                if (!prefs.mesaj) return
+                return sendEmail({
+                    to: receiverEmail,
+                    subject: 'Yeni Mesajınız Var — ArsaBil',
+                    html: buildMessageEmail(session.user.name || 'Biri'),
+                })
+            }).catch(() => {})
+        }
 
         return NextResponse.json({ success: true, message }, { status: 201 })
     } catch {
