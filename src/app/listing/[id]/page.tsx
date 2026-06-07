@@ -37,6 +37,7 @@ const MOCK_LISTING = {
     description: 'Beşiktaş merkezi konumda, ulaşıma yakın, imar planlı arsa. Kat karşılığı veya satış seçenekleri görüşmeye açık.',
     lat: 41.042,
     lng: 29.008,
+    user: null as null | { id: string; name: string | null; email: string; isVerified: boolean },
 };
 
 export default function ListingDetailPage() {
@@ -73,9 +74,28 @@ export default function ListingDetailPage() {
 
     const handleOffer = async () => {
         setSending(true);
-        await new Promise(r => setTimeout(r, 800));
-        setSending(false);
-        toast.success(`%${offerShare} arsa payı teklifiniz iletildi!`);
+        try {
+            const res = await fetch('/api/offers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    listingId: id,
+                    offeredShare: offerShare,
+                    message: offerMsg,
+                }),
+            });
+            if (res.ok) {
+                toast.success(`%${offerShare} arsa payı teklifiniz iletildi!`);
+                setOfferMsg('');
+            } else {
+                const data = await res.json();
+                toast.error(data.message || 'Teklif gönderilemedi.');
+            }
+        } catch {
+            toast.error('Bağlantı hatası.');
+        } finally {
+            setSending(false);
+        }
     };
 
     if (loading) return (
@@ -330,6 +350,36 @@ export default function ListingDetailPage() {
                             padding: '11px', background: 'var(--bg)', color: 'var(--muted)',
                             border: '1.5px solid var(--border)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
                         }}>💬 Mesaj At</button>
+                    </div>
+
+                    {/* Share + Owner */}
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(window.location.href)
+                                    .then(() => toast.success('Link kopyalandı!'))
+                                    .catch(() => toast.error('Kopyalanamadı.'));
+                            }}
+                            style={{
+                                padding: '9px', background: 'var(--bg)', color: 'var(--muted)',
+                                border: '1.5px solid var(--border)', borderRadius: 10,
+                                cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem',
+                            }}
+                        >🔗 Paylaş</button>
+
+                        {listing.user?.id && (
+                            <a
+                                href={`/profile/${listing.user.id}`}
+                                style={{
+                                    display: 'block', padding: '9px', textAlign: 'center',
+                                    background: 'var(--bg)', color: 'var(--muted)',
+                                    border: '1.5px solid var(--border)', borderRadius: 10,
+                                    textDecoration: 'none', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem',
+                                }}
+                            >
+                                👤 İlan Sahibinin Profili
+                            </a>
+                        )}
                     </div>
 
                     <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textAlign: 'center', lineHeight: 1.5 }}>
