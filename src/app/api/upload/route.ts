@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { isAllowedMimeType, isWithinSizeLimit, mimeToExtension } from '@/lib/upload'
+import { v2 as cloudinary } from 'cloudinary'
+import { isAllowedMimeType, isWithinSizeLimit } from '@/lib/upload'
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
@@ -25,13 +30,34 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Dosya 5MB limitini aşıyor' }, { status: 400 })
     }
 
-    const ext = mimeToExtension(file.type)
-    const fileName = `${crypto.randomUUID()}.${ext}`
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'listings', listingId)
+    try {
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const dataUri = `data:${file.type};base64,${buffer.toString('base64')}`
+        const result = await cloudinary.uploader.upload(dataUri, {
+            folder: 'arsabil/listings',
+            public_id: `${listingId}/${crypto.randomUUID()}`,
+            overwrite: false,
+        })
+        return NextResponse.json({ url: result.secure_url, publicId: result.public_id }, { status: 201 })
+    } catch {
+        return NextResponse.json({ error: 'Yükleme başarısız oldu.' }, { status: 500 })
+    }
+}
 
-    await mkdir(uploadDir, { recursive: true })
-    const bytes = await file.arrayBuffer()
-    await writeFile(join(uploadDir, fileName), Buffer.from(bytes))
+export async function DELETE(req: NextRequest) {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    return NextResponse.json({ url: `/uploads/listings/${listingId}/${fileName}` }, { status: 201 })
+    try {
+        const { publicId } = await req.json()
+        if (!publicId) {
+            return NextResponse.json({ error: 'publicId zorunlu' }, { status: 400 })
+        }
+        await cloudinary.uploader.destroy(publicId)
+        return NextResponse.json({ ok: true })
+    } catch {
+        return NextResponse.json({ error: 'Silme başarısız oldu.' }, { status: 500 })
+    }
 }
