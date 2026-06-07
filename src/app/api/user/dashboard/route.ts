@@ -3,42 +3,61 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-    try {
-        const session = await getServerSession();
-        if (!session || !session.user) {
-            return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
-        }
+    const session = await getServerSession();
+    if (!session?.user?.id) {
+        return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
+    }
 
-        const userId = session.user.id;
+    const userId = session.user.id as string;
 
-        // Kullanıcının Raporları
-        const reports = await prisma.report.findMany({
+    const [
+        reportCount,
+        activeListingCount,
+        offerCount,
+        unreadMessageCount,
+        recentReports,
+        recentMessages,
+        recentOffers,
+    ] = await Promise.all([
+        prisma.report.count({ where: { userId } }),
+        prisma.listing.count({ where: { userId, isActive: true } }),
+        prisma.offer.count({ where: { listing: { userId } } }),
+        prisma.message.count({ where: { receiverId: userId, read: false } }),
+        prisma.report.findMany({
             where: { userId },
             orderBy: { createdAt: "desc" },
-            include: { listing: true } // İlan durumunu görmek için
-        });
+            take: 5,
+            select: {
+                id: true,
+                title: true,
+                createdAt: true,
+                landShareRatio: true,
+                minApartmentPrice: true,
+            },
+        }),
+        prisma.message.findMany({
+            where: { receiverId: userId },
+            orderBy: { createdAt: "desc" },
+            take: 3,
+            include: {
+                sender: { select: { id: true, name: true, image: true } },
+            },
+        }),
+        prisma.offer.findMany({
+            where: { listing: { userId } },
+            orderBy: { createdAt: "desc" },
+            take: 3,
+            include: {
+                listing: { select: { id: true, title: true, city: true } },
+                bidder: { select: { id: true, name: true } },
+            },
+        }),
+    ]);
 
-        // Kullanıcının oluşturduğu İlanlar ve gelen teklifleri
-        const myListings = await prisma.listing.findMany({
-            where: { userId },
-            include: { offers: { include: { bidder: { select: { name: true, email: true } } } }, report: true },
-            orderBy: { createdAt: "desc" }
-        });
-
-        // Kullanıcının başkalarının ilanlarına yaptığı Teklifler
-        const myOffers = await prisma.offer.findMany({
-            where: { bidderId: userId },
-            include: { listing: { include: { report: true, user: { select: { name: true } } } } },
-            orderBy: { createdAt: "desc" }
-        });
-
-        return NextResponse.json({
-            reports,
-            myListings,
-            myOffers
-        });
-    } catch (error) {
-        console.error("Dashboard data fetch error:", error);
-        return NextResponse.json({ message: "Dashboard verileri getirilemedi." }, { status: 500 });
-    }
+    return NextResponse.json({
+        stats: { reportCount, activeListingCount, offerCount, unreadMessageCount },
+        recentReports,
+        recentMessages,
+        recentOffers,
+    });
 }
