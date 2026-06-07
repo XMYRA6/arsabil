@@ -29,6 +29,14 @@
   flex-shrink: 0;
 }
 
+.avatarImg {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .name {
   font-size: 1.4rem;
   font-weight: 900;

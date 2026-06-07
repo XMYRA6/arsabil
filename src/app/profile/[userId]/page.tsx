@@ -5,6 +5,7 @@ import styles from './page.module.css'
 interface ProfileData {
     id: string
     name: string | null
+    image: string | null
     bio: string | null
     linkedin: string | null
     website: string | null
@@ -31,14 +32,18 @@ function getInitials(name: string | null) {
     return parts[0].substring(0, 2).toUpperCase()
 }
 
-export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
-    const profile = await getProfile(params.userId)
+export default async function PublicProfilePage(context: { params: Promise<{ userId: string }> }) {
+    const { userId } = await context.params
+    const profile = await getProfile(userId)
     if (!profile) notFound()
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.avatarCircle}>{getInitials(profile.name)}</div>
+                {profile.image
+                    ? <img src={profile.image} className={styles.avatarImg} alt="Profil fotoğrafı" />
+                    : <div className={styles.avatarCircle}>{getInitials(profile.name)}</div>
+                }
                 <div>
                     <h1 className={styles.name}>
                         {profile.name || 'Kullanıcı'}
