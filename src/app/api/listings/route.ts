@@ -65,7 +65,8 @@ export async function POST(req: Request) {
                 zoning: zoning || null,
                 titleDeed: titleDeed || null,
                 photos: photos || [],
-                isActive: true,
+                isActive: false,
+                status: 'PENDING',
             },
         })
 

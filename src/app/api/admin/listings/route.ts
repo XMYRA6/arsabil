@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createNotification } from '@/lib/notifications';
 
 export async function GET() {
     try {
@@ -20,14 +21,43 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
     try {
-        const { listingId, isActive } = await req.json();
+        const { listingId, isActive, action } = await req.json();
         if (!listingId) return NextResponse.json({ message: 'listingId gerekli' }, { status: 400 });
 
-        await prisma.listing.update({
-            where: { id: listingId },
-            data: { isActive },
-        });
-        return NextResponse.json({ ok: true });
+        if (action === 'approve') {
+            const listing = await prisma.listing.update({
+                where: { id: listingId },
+                data: { status: 'APPROVED', isActive: true },
+                include: { user: { select: { id: true, name: true } } },
+            });
+            createNotification({
+                type: 'ILAN_ONAYLANDI',
+                userId: listing.user.id,
+                title: 'İlanınız Onaylandı',
+                body: `"${listing.title ?? 'İlanınız'}" pazar yerine eklendi.`,
+                entityId: listing.id,
+            }).catch(() => {});
+            return NextResponse.json({ ok: true });
+        }
+
+        if (action === 'reject') {
+            await prisma.listing.update({
+                where: { id: listingId },
+                data: { status: 'REJECTED', isActive: false },
+            });
+            return NextResponse.json({ ok: true });
+        }
+
+        // Legacy: toggle isActive
+        if (isActive !== undefined) {
+            await prisma.listing.update({
+                where: { id: listingId },
+                data: { isActive },
+            });
+            return NextResponse.json({ ok: true });
+        }
+
+        return NextResponse.json({ message: 'action veya isActive gerekli' }, { status: 400 });
     } catch (e) {
         console.error(e);
         return NextResponse.json({ message: 'Hata oluştu' }, { status: 500 });
