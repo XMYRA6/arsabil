@@ -5,7 +5,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import styles from './profile.module.css'
 
-type Tab = 'portfolio' | 'listings' | 'settings'
+type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
 type Theme = 'dark' | 'light' | 'sky' | 'mint' | 'sand'
 
 const PALETTES: { id: Theme; label: string; color: string; icon: string }[] = [
@@ -23,6 +23,7 @@ interface ProfileData {
     linkedin: string | null
     website: string | null
     isVerified: boolean
+    emailPrefs: string | null
     reports: { id: string; title: string; landShareRatio: number; createdAt: string }[]
     listings: { id: string; title: string | null; city: string | null; price: number | null; isActive: boolean; createdAt: string }[]
 }
@@ -37,6 +38,8 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
     const [theme, setTheme] = useState<Theme>('dark')
+    const [emailPrefs, setEmailPrefs] = useState({ mesaj: true, teklif: true, ilan: true })
+    const [savingPrefs, setSavingPrefs] = useState(false)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -54,6 +57,11 @@ export default function ProfilePage() {
                 setBio(data.bio ?? '')
                 setLinkedin(data.linkedin ?? '')
                 setWebsite(data.website ?? '')
+                if (data.emailPrefs) {
+                    try {
+                        setEmailPrefs(JSON.parse(data.emailPrefs))
+                    } catch { /* keep defaults */ }
+                }
             })
     }, [session?.user?.id])
 
@@ -77,6 +85,19 @@ export default function ProfilePage() {
             setTimeout(() => setSaved(false), 2000)
         }
         setSaving(false)
+    }
+
+    const saveEmailPrefs = async () => {
+        setSavingPrefs(true)
+        try {
+            await fetch('/api/user/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emailPrefs }),
+            })
+        } finally {
+            setSavingPrefs(false)
+        }
     }
 
     const getInitials = () => {
@@ -188,18 +209,66 @@ export default function ProfilePage() {
                         )}
 
                         {tab === 'settings' && (
-                            <div className={styles.themeGrid}>
-                                {PALETTES.map(p => (
+                            <>
+                                <div className={styles.themeGrid}>
+                                    {PALETTES.map(p => (
+                                        <button
+                                            key={p.id}
+                                            className={`${styles.themeBtn} ${theme === p.id ? styles.themeBtnActive : ''}`}
+                                            onClick={() => applyTheme(p.id)}
+                                        >
+                                            <div className={styles.themeColor} style={{ background: p.color }} />
+                                            {p.icon} {p.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* E-posta Tercihleri */}
+                                <div style={{ marginTop: 28 }}>
+                                    <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>
+                                        E-posta Bildirimleri
+                                    </h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        {([
+                                            { key: 'mesaj', label: 'Yeni mesaj bildirimleri' },
+                                            { key: 'teklif', label: 'Yeni teklif bildirimleri' },
+                                            { key: 'ilan', label: 'İlan durum bildirimleri' },
+                                        ] as const).map(({ key, label }) => (
+                                            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '0.85rem', color: 'var(--text)' }}>{label}</span>
+                                                <div
+                                                    onClick={() => setEmailPrefs(p => ({ ...p, [key]: !p[key] }))}
+                                                    style={{
+                                                        width: 40, height: 22, borderRadius: 11,
+                                                        background: emailPrefs[key] ? 'var(--primary)' : 'var(--border)',
+                                                        position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
+                                                    }}
+                                                >
+                                                    <div style={{
+                                                        width: 16, height: 16, background: 'white', borderRadius: '50%',
+                                                        position: 'absolute', top: 3,
+                                                        left: emailPrefs[key] ? 21 : 3,
+                                                        transition: 'left 0.2s',
+                                                    }} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                     <button
-                                        key={p.id}
-                                        className={`${styles.themeBtn} ${theme === p.id ? styles.themeBtnActive : ''}`}
-                                        onClick={() => applyTheme(p.id)}
+                                        onClick={saveEmailPrefs}
+                                        disabled={savingPrefs}
+                                        style={{
+                                            marginTop: 16, padding: '8px 20px',
+                                            background: 'var(--primary)', color: 'white',
+                                            border: 'none', borderRadius: 8, cursor: 'pointer',
+                                            fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
+                                            opacity: savingPrefs ? 0.6 : 1,
+                                        }}
                                     >
-                                        <div className={styles.themeColor} style={{ background: p.color }} />
-                                        {p.icon} {p.label}
+                                        {savingPrefs ? 'Kaydediliyor…' : 'Kaydet'}
                                     </button>
-                                ))}
-                            </div>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>

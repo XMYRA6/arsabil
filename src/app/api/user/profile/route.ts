@@ -10,7 +10,7 @@ export async function PATCH(req: Request) {
     }
     const userId = session.user.id as string
 
-    const { bio, linkedin, website } = await req.json()
+    const { bio, linkedin, website, emailPrefs } = await req.json()
 
     const updated = await prisma.user.update({
         where: { id: userId },
@@ -18,6 +18,7 @@ export async function PATCH(req: Request) {
             bio: bio ?? undefined,
             linkedin: linkedin ?? undefined,
             website: website ?? undefined,
+            ...(emailPrefs !== undefined ? { emailPrefs: JSON.stringify(emailPrefs) } : {}),
         },
         select: { id: true, name: true, bio: true, linkedin: true, website: true, isVerified: true },
     })

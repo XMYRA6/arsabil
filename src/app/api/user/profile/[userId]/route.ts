@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(
-    _req: Request,
+    req: Request,
     { params }: { params: { userId: string } }
 ) {
+    const session = await getServerSession(authOptions)
+    const isOwner = session?.user?.id === params.userId
+
     const user = await prisma.user.findUnique({
         where: { id: params.userId },
         select: {
@@ -17,6 +22,7 @@ export async function GET(
             website: true,
             isVerified: true,
             createdAt: true,
+            ...(isOwner ? { emailPrefs: true } : {}),
             reports: {
                 orderBy: { createdAt: 'desc' },
                 take: 20,
