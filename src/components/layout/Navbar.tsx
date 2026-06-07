@@ -42,7 +42,6 @@ export function Navbar() {
         setIsMenuOpen(false);
     };
 
-    const isHome = pathname === "/";
     const isInbox = pathname.startsWith("/inbox");
     const isProfile = pathname.startsWith("/dashboard/profile");
     
@@ -347,7 +346,8 @@ export function Navbar() {
                             <ThemeToggle />
                         </div>
                         <div style={{ borderTop: '1px solid var(--topbar-border)', marginBottom: 4 }} />
-                        <Link href="/" onClick={() => setIsMenuOpen(false)} className={pathname === "/" ? styles.activeLink : ""}>Hesap Makinesi</Link>
+                        <Link href="/" onClick={() => setIsMenuOpen(false)} className={pathname === "/" ? styles.activeLink : ""}>Anasayfa</Link>
+                        <Link href="/hesapla" onClick={() => setIsMenuOpen(false)} className={pathname === "/hesapla" ? styles.activeLink : ""}>Hesapla</Link>
                         <Link href="/marketplace" onClick={() => setIsMenuOpen(false)} className={pathname.startsWith("/marketplace") || pathname.startsWith("/listing") ? styles.activeLink : ""}>Pazar Yeri</Link>
 
                         {session ? (
