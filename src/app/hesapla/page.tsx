@@ -820,7 +820,19 @@ export default function Home() {
                 <h3 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 800, color: 'var(--card-title)' }}>
                   Senaryo Karşılaştırması
                 </h3>
-                <ScenarioCompare scenarios={savedScenarios} />
+                <ScenarioCompare
+                  scenarios={savedScenarios}
+                  onShareRequest={async (ids) => {
+                    const res = await fetch('/api/compare/share', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ scenarioIds: ids }),
+                    });
+                    if (!res.ok) return null;
+                    const { token } = await res.json();
+                    return `${window.location.origin}/compare/${token}`;
+                  }}
+                />
               </div>
             )}
           </main>

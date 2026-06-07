@@ -1,6 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface Scenario {
     id: string;
@@ -22,9 +24,10 @@ interface Scenario {
 
 interface Props {
     scenarios: Scenario[];
+    onShareRequest?: (ids: string[]) => Promise<string | null>;
 }
 
-export const ScenarioCompare: React.FC<Props> = ({ scenarios }) => {
+export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) => {
     if (scenarios.length < 2) {
         return (
             <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
@@ -54,59 +57,132 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios }) => {
         s.fdTotal < scenarios[best].fdTotal ? i : best, 0
     );
 
+    const [shareUrl, setShareUrl] = useState<string | null>(null);
+    const [sharing, setSharing] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const handlePdf = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(14);
+        doc.text('ArsaBil — Senaryo Karşılaştırma', 14, 18);
+        doc.setFontSize(9);
+        doc.text(`Oluşturulma: ${new Date().toLocaleDateString('tr-TR')}`, 14, 25);
+        autoTable(doc, {
+            startY: 30,
+            head: [['Parametre', ...scenarios.map(s => s.name)]],
+            body: rows.map(r => [r.label, ...r.values]),
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [59, 130, 246] },
+        });
+        const dateStr = new Date().toISOString().slice(0, 10);
+        doc.save(`arsabil-karsilastirma-${dateStr}.pdf`);
+    };
+
+    const handleShare = async () => {
+        if (!onShareRequest) return;
+        setSharing(true);
+        const url = await onShareRequest(scenarios.map(s => s.id));
+        setShareUrl(url);
+        setSharing(false);
+    };
+
+    const handleCopy = () => {
+        if (!shareUrl) return;
+        navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
-        <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
-                <thead>
-                    <tr>
-                        <th style={{ padding: '0.85rem 1rem', background: 'var(--panel-2)', fontWeight: 800, fontSize: '0.8rem', color: 'var(--muted)', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Parametre
-                        </th>
-                        {scenarios.map((s, i) => (
-                            <th key={s.id} style={{
-                                padding: '0.85rem 1rem',
-                                background: i === bestIdx ? 'rgba(31,111,235,0.08)' : 'var(--panel-2)',
-                                fontWeight: 800,
-                                fontSize: '0.85rem',
-                                color: i === bestIdx ? 'var(--primary)' : 'var(--card-title)',
-                                textAlign: 'center',
-                                borderLeft: '1px solid var(--border)',
-                            }}>
-                                {s.name} {i === bestIdx && '⭐'}
+        <div>
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.875rem', flexWrap: 'wrap' }}>
+                <button onClick={handlePdf} style={{
+                    padding: '0.5rem 1rem', borderRadius: 8, background: 'var(--panel)',
+                    border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer',
+                    fontSize: '0.8rem', fontWeight: 700, fontFamily: 'inherit',
+                }}>
+                    📄 PDF İndir
+                </button>
+                {onShareRequest && (
+                    <button onClick={handleShare} disabled={sharing} style={{
+                        padding: '0.5rem 1rem', borderRadius: 8, background: 'var(--panel)',
+                        border: '1px solid var(--border)', color: 'var(--text)', cursor: sharing ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem', fontWeight: 700, fontFamily: 'inherit', opacity: sharing ? 0.6 : 1,
+                    }}>
+                        {sharing ? 'Link oluşturuluyor...' : '🔗 Paylaş'}
+                    </button>
+                )}
+            </div>
+            {shareUrl && (
+                <div style={{
+                    display: 'flex', gap: 8, alignItems: 'center', padding: '0.625rem 0.875rem',
+                    background: 'rgba(59,130,246,.07)', border: '1px solid rgba(59,130,246,.2)',
+                    borderRadius: 10, marginBottom: '0.875rem',
+                }}>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{shareUrl}</span>
+                    <button onClick={handleCopy} style={{
+                        padding: '3px 10px', borderRadius: 6, background: 'var(--primary)', border: 'none',
+                        color: 'white', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit',
+                    }}>
+                        {copied ? '✓ Kopyalandı' : 'Kopyala'}
+                    </button>
+                </div>
+            )}
+            {/* Original table content */}
+            <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+                    <thead>
+                        <tr>
+                            <th style={{ padding: '0.85rem 1rem', background: 'var(--panel-2)', fontWeight: 800, fontSize: '0.8rem', color: 'var(--muted)', textAlign: 'left', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Parametre
                             </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((row, ri) => (
-                        <tr key={ri}>
-                            <td style={{
-                                padding: '0.75rem 1rem',
-                                borderTop: '1px solid var(--border)',
-                                fontWeight: 700,
-                                fontSize: '0.85rem',
-                                color: 'var(--label-color)',
-                            }}>
-                                {row.label}
-                            </td>
-                            {row.values.map((v, vi) => (
-                                <td key={vi} style={{
-                                    padding: '0.75rem 1rem',
-                                    borderTop: '1px solid var(--border)',
-                                    borderLeft: '1px solid var(--border)',
-                                    fontWeight: row.highlight ? 900 : 600,
-                                    fontSize: row.highlight ? '1rem' : '0.85rem',
-                                    color: row.highlight ? 'var(--primary)' : 'var(--text)',
+                            {scenarios.map((s, i) => (
+                                <th key={s.id} style={{
+                                    padding: '0.85rem 1rem',
+                                    background: i === bestIdx ? 'rgba(31,111,235,0.08)' : 'var(--panel-2)',
+                                    fontWeight: 800,
+                                    fontSize: '0.85rem',
+                                    color: i === bestIdx ? 'var(--primary)' : 'var(--card-title)',
                                     textAlign: 'center',
-                                    background: vi === bestIdx ? 'rgba(31,111,235,0.03)' : 'transparent',
+                                    borderLeft: '1px solid var(--border)',
                                 }}>
-                                    {v}
-                                </td>
+                                    {s.name} {i === bestIdx && '⭐'}
+                                </th>
                             ))}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {rows.map((row, ri) => (
+                            <tr key={ri}>
+                                <td style={{
+                                    padding: '0.75rem 1rem',
+                                    borderTop: '1px solid var(--border)',
+                                    fontWeight: 700,
+                                    fontSize: '0.85rem',
+                                    color: 'var(--label-color)',
+                                }}>
+                                    {row.label}
+                                </td>
+                                {row.values.map((v, vi) => (
+                                    <td key={vi} style={{
+                                        padding: '0.75rem 1rem',
+                                        borderTop: '1px solid var(--border)',
+                                        borderLeft: '1px solid var(--border)',
+                                        fontWeight: row.highlight ? 900 : 600,
+                                        fontSize: row.highlight ? '1rem' : '0.85rem',
+                                        color: row.highlight ? 'var(--primary)' : 'var(--text)',
+                                        textAlign: 'center',
+                                        background: vi === bestIdx ? 'rgba(31,111,235,0.03)' : 'transparent',
+                                    }}>
+                                        {v}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

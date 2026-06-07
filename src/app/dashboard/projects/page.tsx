@@ -111,7 +111,19 @@ export default function ProjectsPage() {
                             {/* Comparison Table */}
                             {selectedProject?.id === project.id && (
                                 <div style={{ marginTop: '1.5rem' }}>
-                                    <ScenarioCompare scenarios={project.scenarios} />
+                                    <ScenarioCompare
+                                    scenarios={project.scenarios}
+                                    onShareRequest={async (ids) => {
+                                        const res = await fetch('/api/compare/share', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ scenarioIds: ids }),
+                                        });
+                                        if (!res.ok) return null;
+                                        const { token } = await res.json();
+                                        return `${window.location.origin}/compare/${token}`;
+                                    }}
+                                />
                                 </div>
                             )}
                         </div>
