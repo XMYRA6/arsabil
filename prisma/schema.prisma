@@ -81,6 +81,7 @@ model Message {
   reportId   String?
   senderId   String
   receiverId String
+  read       Boolean  @default(false)
   createdAt  DateTime @default(now())
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
@@ -119,17 +120,26 @@ model RiskLevel {
 }
 
 model Listing {
-  id        String   @id @default(cuid())
-  reportId  String   @unique
-  userId    String
-  city      String?
-  district  String?
-  notes     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  offers    Offer[]
+  id          String   @id @default(cuid())
+  reportId    String?  @unique
+  userId      String
+  city        String?
+  district    String?
+  notes       String?
+  isActive    Boolean  @default(true)
+  title       String?
+  address     String?
+  phone       String?
+  description String?
+  price       Float?
+  landSizeSqm Float?
+  zoning      String?
+  titleDeed   String?
+  photos      String[] @default([])
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  report      Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  offers      Offer[]
 }
 
 model Offer {
