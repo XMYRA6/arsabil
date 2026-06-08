@@ -53,3 +53,7 @@ dev.db-journal
 # local design/archive files
 Arsabil Denklemleri.docx
 prisma.zip
+
+# Downloaded reference copy
+/arsabil-main/
+arsabil-main.zip

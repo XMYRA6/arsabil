@@ -132,7 +132,7 @@
 }
 
 .secondaryBtn:hover {
-  background: var(--panel-2);
+  background: var(--hover);
   transform: translateY(-2px);
 }
 
@@ -252,7 +252,7 @@
 .blogImage {
   width: 100%;
   height: 180px;
-  background: var(--panel-2);
+  background: var(--hover);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -353,23 +353,23 @@
   .heroTitle {
     font-size: 2.5rem;
   }
-
+  
   .heroSubtitle {
     font-size: 1rem;
   }
-
+  
   .heroCta {
     flex-direction: column;
   }
-
+  
   .visionMission {
     grid-template-columns: 1fr;
   }
-
+  
   .sectionTitle {
     font-size: 2rem;
   }
-
+  
   .ctaTitle {
     font-size: 2rem;
   }

@@ -6,7 +6,7 @@
     flex-direction: column;
     height: calc(100vh - 106px);
     overflow: hidden;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    border-radius: 0 0 18px 18px;
     border: 1px solid var(--border);
     border-top: none;
     background: var(--panel);
@@ -32,7 +32,7 @@
 .sidebar {
     width: 240px;
     flex-shrink: 0;
-    background: var(--bg-body);
+    background: var(--panel);
     border-right: 1px solid var(--border);
     overflow-y: auto;
     padding: 16px 14px;
@@ -101,7 +101,7 @@
         display: flex;
         align-items: center;
         width: 100%;
-        background: var(--bg-body);
+        background: var(--panel);
         border-bottom: 1px solid var(--border);
         padding: 8px 16px;
         gap: 8px;
@@ -111,10 +111,10 @@
     .mobileTabs button {
         flex: 1;
         padding: 8px 0;
-        background: var(--bg-body);
+        background: var(--bg);
         border: 1px solid var(--border);
         color: var(--muted);
-        border-radius: var(--radius);
+        border-radius: 8px;
         font-family: inherit;
         font-size: 0.8rem;
         font-weight: 600;
@@ -123,18 +123,21 @@
     }
 
     .mobileTabs button.activeTab {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+        background: var(--primary);
         color: white;
         border-color: var(--primary);
-        box-shadow: 0 4px 12px rgba(26, 60, 94, 0.25);
+        box-shadow: 0 4px 12px var(--primary-glow);
     }
 
+    /* Container for the active tab */
     .bodyContainer {
         flex-direction: column;
         height: calc(100vh - 160px);
+        /* Adjust based on topbars */
         overflow: hidden;
     }
 
+    /* Hide all sub-panels by default on mobile so we can toggle them */
     .sidebarWrapper,
     .listPanel,
     .mapPanel {
@@ -153,8 +156,10 @@
         height: 100%;
     }
 
+    /* Show the correct panel based on mobileTab state */
     .bodyContainer[data-mobile-tab="filter"] .sidebarWrapper {
         display: contents !important;
+        /* Aside inside it will take full space */
     }
 
     .bodyContainer[data-mobile-tab="list"] .listPanel {
@@ -165,142 +170,4 @@
         display: block !important;
         position: relative;
     }
-}
-
-/* =========================================================================
-   TAB LAYOUT
-   ========================================================================= */
-.tabBar {
-    display: flex;
-    gap: 0;
-    border-bottom: 2px solid var(--border);
-    margin-bottom: 20px;
-}
-
-.tab {
-    padding: 10px 20px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.15s;
-}
-
-.tabActive {
-    color: var(--primary);
-    font-weight: 800;
-    border-bottom-color: var(--primary);
-}
-
-/* =========================================================================
-   FILTER BAR — Terracotta CTA
-   ========================================================================= */
-.filterBar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    padding: 1rem 1.25rem;
-    background: var(--panel);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
-}
-
-.filterField {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.filterLabel {
-    font-size: 0.65rem;
-    color: var(--muted);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-}
-
-.filterInput {
-    padding: 8px 12px;
-    background: var(--bg-body);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.85rem;
-    outline: none;
-    width: 130px;
-    transition: border-color 0.15s;
-}
-
-.filterInput:focus {
-    border-color: var(--primary);
-    box-shadow: var(--input-focus-shadow);
-    background: var(--input-bg);
-}
-
-.filterBtn {
-    padding: 9px 20px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 0.85rem;
-    align-self: flex-end;
-    transition: all 0.2s;
-    box-shadow: 0 2px 8px rgba(200, 132, 90, .30);
-}
-
-.filterBtn:hover {
-    background: var(--accent-2);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(200, 132, 90, .40);
-}
-
-/* =========================================================================
-   LISTING GRID
-   ========================================================================= */
-.listingGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-}
-
-/* =========================================================================
-   MAP
-   ========================================================================= */
-.mapContainer {
-    width: 100%;
-    height: calc(100vh - 280px);
-    min-height: 500px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    border: 1.5px solid var(--border);
-    box-shadow: var(--shadow-sm);
-}
-
-/* =========================================================================
-   EMPTY STATE
-   ========================================================================= */
-.emptyState {
-    text-align: center;
-    padding: 5rem 2rem;
-    color: var(--muted);
-}
-
-.emptyIcon {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    opacity: 0.5;
-    display: block;
 }

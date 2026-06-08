@@ -49,9 +49,9 @@
     border-radius: 99px;
     font-size: 0.7rem;
     font-weight: 800;
-    background: var(--primary-glow);
+    background: rgba(31, 111, 235, 0.12);
     color: var(--primary);
-    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    border: 1px solid rgba(31, 111, 235, 0.2);
     letter-spacing: 0.5px;
 }
 
@@ -81,10 +81,9 @@
 }
 
 .navItemActive {
-    background: rgba(26, 60, 94, .10) !important;
-    color: var(--primary) !important;
-    border-left: 3px solid var(--primary);
-    padding-left: calc(1rem - 3px);
+    background: var(--primary) !important;
+    color: white !important;
+    box-shadow: 0 4px 14px rgba(31, 111, 235, 0.25);
 }
 
 .sidebarFooter {
@@ -144,13 +143,7 @@
     border-radius: 16px;
     background: var(--stat-bg);
     border: 1px solid var(--border);
-    border-top: 3px solid var(--primary);
     text-align: center;
-    transition: box-shadow 0.2s;
-}
-
-.statBox:hover {
-    box-shadow: var(--shadow-hover);
 }
 
 .statBox .icon {
@@ -219,13 +212,6 @@
     font-size: 0.95rem;
 }
 
-.formGroup select {
-    background: var(--input-solid);
-    -webkit-appearance: none;
-    appearance: none;
-    cursor: pointer;
-}
-
 .formGroup input:focus,
 .formGroup select:focus {
     border-color: var(--input-focus-border);
@@ -284,7 +270,7 @@
 }
 
 .table tr:hover td {
-    background: var(--bg-body);
+    background: var(--panel-2);
 }
 
 .roleBadge {
@@ -296,9 +282,9 @@
 }
 
 .roleAdmin {
-    background: var(--primary-glow);
+    background: rgba(31, 111, 235, 0.12);
     color: var(--primary);
-    border: 1px solid rgba(26, 60, 94, .2);
+    border: 1px solid rgba(31, 111, 235, 0.2);
 }
 
 .roleUser {
@@ -311,15 +297,13 @@
     height: 36px;
     border-radius: 10px;
     border: 1px solid var(--border);
-    background: var(--input-solid);
+    background: var(--input-bg);
     padding: 0 8px;
     font-weight: 700;
     color: var(--label-color);
     font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
 }
 
 /* Toolbar */
@@ -523,9 +507,9 @@
 }
 
 .defaultBadgeActive {
-    background: var(--primary-glow);
+    background: rgba(31, 111, 235, 0.15);
     border-color: var(--primary);
-    box-shadow: var(--input-focus-shadow);
+    box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.15);
 }
 
 .deleteBtn {
@@ -572,5 +556,5 @@
 .addLevelBtn:hover {
     border-color: var(--primary);
     color: var(--primary);
-    background: var(--primary-glow);
+    background: rgba(31, 111, 235, 0.05);
 }

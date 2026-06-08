@@ -18,7 +18,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 18px;
-    border-radius: var(--radius-xl);
+    border-radius: 22px;
     background: var(--topbar-bg);
     border: 1px solid var(--topbar-border);
     max-width: 1280px;
@@ -72,9 +72,6 @@
 
 .desktopLinks .activeLink {
     opacity: 1 !important;
-    color: var(--primary) !important;
-    border-bottom: 2px solid var(--primary);
-    padding-bottom: 2px;
 }
 
 /* CENTER: Slogan */
@@ -142,7 +139,7 @@
     align-items: center;
     border-radius: 14px;
     background: linear-gradient(180deg, var(--primary), var(--primary-2));
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 16px 26px rgba(31, 111, 235, .22);
     color: white;
     font-weight: 700;
     cursor: pointer;
@@ -151,7 +148,7 @@
 }
 
 .primaryBtn:hover {
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 16px 26px rgba(31, 111, 235, .35);
 }
 
 .hamburger {
@@ -353,7 +350,7 @@
 }
 
 .dropdownItem:hover {
-    background: var(--primary-glow);
+    background: rgba(31, 111, 235, 0.08);
     color: var(--primary);
 }
 
@@ -381,18 +378,4 @@
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.navAvatarImg {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    object-fit: cover;
-}
-
-.navAvatarImgLarge {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    object-fit: cover;
 }
