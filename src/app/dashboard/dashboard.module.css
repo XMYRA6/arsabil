@@ -21,7 +21,7 @@
 
 /* Sidebar */
 .sidebar {
-    background: var(--panel);
+    background: var(--bg-body);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow2);
@@ -50,7 +50,7 @@
     font-weight: 800;
     font-size: 1.1rem;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
 .profileInfo h3 {
@@ -92,9 +92,10 @@
 }
 
 .navItemActive {
-    background: var(--primary) !important;
-    color: white !important;
-    box-shadow: 0 4px 14px rgba(31, 111, 235, 0.25);
+    background: rgba(26, 60, 94, .10) !important;
+    color: var(--primary) !important;
+    border-left: 3px solid var(--primary);
+    padding-left: calc(1rem - 3px);
 }
 
 .sidebarFooter {
@@ -173,7 +174,13 @@
     border-radius: 16px;
     background: var(--stat-bg);
     border: 1px solid var(--border);
+    border-top: 3px solid var(--primary);
     text-align: center;
+    transition: box-shadow 0.2s;
+}
+
+.statBox:hover {
+    box-shadow: var(--shadow-hover);
 }
 
 .statBox .icon {
@@ -185,13 +192,16 @@
     font-size: 1.75rem;
     font-weight: 900;
     color: var(--val-color);
+    letter-spacing: -1px;
 }
 
 .statBox .label {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--muted);
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
 }
 
 /* Section */
@@ -200,12 +210,16 @@
 }
 
 .sectionTitle {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--card-title);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted);
     margin-bottom: 1rem;
+    padding-left: var(--space-3);
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -227,8 +241,8 @@
 }
 
 .reportCard:hover {
-    box-shadow: var(--shadow2);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
 }
 
 .reportCard h4 {
@@ -297,8 +311,9 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.85rem 1rem;
-    background: var(--panel-2);
-    border-radius: 12px;
+    background: var(--bg-body);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
     margin-top: 0.5rem;
 }
 
@@ -339,9 +354,9 @@
 }
 
 .formGroup input {
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
+    height: 48px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
     background: var(--input-bg);
     padding: 0 14px;
     outline: none;
@@ -349,6 +364,7 @@
     color: var(--label-color);
     font-family: inherit;
     font-size: 0.95rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .formGroup input:focus {

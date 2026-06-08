@@ -18,10 +18,10 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 18px;
-    border-radius: 22px;
+    border-radius: var(--radius-xl);
     background: var(--topbar-bg);
     border: 1px solid var(--topbar-border);
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -72,6 +72,9 @@
 
 .desktopLinks .activeLink {
     opacity: 1 !important;
+    color: var(--primary) !important;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 2px;
 }
 
 /* CENTER: Slogan */
@@ -139,7 +142,7 @@
     align-items: center;
     border-radius: 14px;
     background: linear-gradient(180deg, var(--primary), var(--primary-2));
-    box-shadow: 0 16px 26px rgba(31, 111, 235, .22);
+    box-shadow: var(--shadow-md);
     color: white;
     font-weight: 700;
     cursor: pointer;
@@ -148,7 +151,7 @@
 }
 
 .primaryBtn:hover {
-    box-shadow: 0 16px 26px rgba(31, 111, 235, .35);
+    box-shadow: var(--shadow-lg);
 }
 
 .hamburger {
@@ -175,7 +178,7 @@
 }
 
 /* ===== TABLET ===== */
-@media (min-width: 768px) and (max-width: 1200px) {
+@media (min-width: 768px) and (max-width: 1280px) {
     .centerNav {
         display: none;
     }
@@ -350,7 +353,7 @@
 }
 
 .dropdownItem:hover {
-    background: rgba(31, 111, 235, 0.08);
+    background: var(--primary-glow);
     color: var(--primary);
 }
 

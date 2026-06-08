@@ -5,9 +5,11 @@ import styles from '../admin.module.css';
 
 interface ListingRow {
     id: string;
+    title: string | null;
     city: string | null;
     district: string | null;
     isActive: boolean;
+    status: string;
     createdAt: string;
     user: { name: string | null; email: string | null };
     report: { title: string; minApartmentPrice: number; landShareRatio: number; totalApartments: number };
@@ -18,7 +20,7 @@ export default function AdminListings() {
     const [listings, setListings] = useState<ListingRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-    const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all');
+    const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'inactive'>('all');
 
     const fetchListings = () => {
         setLoading(true);
@@ -65,16 +67,35 @@ export default function AdminListings() {
         setTimeout(() => setMessage(null), 3000);
     };
 
+    const approveAction = async (id: string, action: 'approve' | 'reject') => {
+        try {
+            const res = await fetch('/api/admin/listings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ listingId: id, action }),
+            });
+            if (res.ok) {
+                setMessage({ type: 'success', text: action === 'approve' ? '✅ İlan onaylandı.' : '❌ İlan reddedildi.' });
+                fetchListings();
+            }
+        } catch {
+            setMessage({ type: 'error', text: 'Sunucu hatası.' });
+        }
+        setTimeout(() => setMessage(null), 3000);
+    };
+
     const formatDate = (d: string) => new Date(d).toLocaleDateString('tr-TR');
     const formatPrice = (n: number) => n.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
 
     const filtered = listings.filter(l => {
-        if (filter === 'active') return l.isActive;
-        if (filter === 'inactive') return !l.isActive;
+        if (filter === 'pending') return l.status === 'PENDING';
+        if (filter === 'active') return l.isActive && l.status === 'APPROVED';
+        if (filter === 'inactive') return !l.isActive && l.status !== 'PENDING';
         return true;
     });
 
-    const activeCount = listings.filter(l => l.isActive).length;
+    const pendingCount = listings.filter(l => l.status === 'PENDING').length;
+    const activeCount = listings.filter(l => l.isActive && l.status === 'APPROVED').length;
     const totalOffers = listings.reduce((s, l) => s + l._count.offers, 0);
 
     return (
@@ -87,8 +108,8 @@ export default function AdminListings() {
             <div className={styles.statsGrid}>
                 {[
                     { icon: '🏗️', value: listings.length, label: 'Toplam İlan' },
+                    { icon: '⏳', value: pendingCount, label: 'Bekliyor' },
                     { icon: '✅', value: activeCount, label: 'Aktif' },
-                    { icon: '⏸️', value: listings.length - activeCount, label: 'Pasif' },
                     { icon: '📩', value: totalOffers, label: 'Toplam Teklif' },
                 ].map(s => (
                     <div key={s.label} className={styles.statBox}>
@@ -101,13 +122,18 @@ export default function AdminListings() {
 
             <div className={styles.toolbar}>
                 <div className={styles.segmentTabs}>
-                    {(['all', 'active', 'inactive'] as const).map(f => (
+                    {([
+                        { value: 'all', label: 'Tümü' },
+                        { value: 'pending', label: '⏳ Bekliyor' },
+                        { value: 'active', label: '✅ Aktif' },
+                        { value: 'inactive', label: '⏸️ Pasif' },
+                    ] as const).map(f => (
                         <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={filter === f ? styles.segmentTabActive : styles.segmentTab}
+                            key={f.value}
+                            onClick={() => setFilter(f.value)}
+                            className={filter === f.value ? styles.segmentTabActive : styles.segmentTab}
                         >
-                            {f === 'all' ? 'Tümü' : f === 'active' ? '✅ Aktif' : '⏸️ Pasif'}
+                            {f.label}
                         </button>
                     ))}
                 </div>
@@ -172,32 +198,49 @@ export default function AdminListings() {
                                 </td>
                                 <td>
                                     <span className={styles.roleBadge} style={
-                                        listing.isActive
+                                        listing.status === 'PENDING'
+                                            ? { background: 'rgba(245,158,11,.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,.25)' }
+                                            : listing.isActive
                                             ? { background: 'rgba(16,185,129,.12)', color: '#10b981', border: '1px solid rgba(16,185,129,.25)' }
-                                            : { background: 'rgba(245,158,11,.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,.25)' }
+                                            : { background: 'rgba(107,114,128,.12)', color: '#6b7280', border: '1px solid rgba(107,114,128,.25)' }
                                     }>
-                                        {listing.isActive ? 'Aktif' : 'Pasif'}
+                                        {listing.status === 'PENDING' ? '⏳ Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif'}
                                     </span>
                                 </td>
                                 <td style={{ fontSize: '0.82rem' }}>{formatDate(listing.createdAt)}</td>
                                 <td>
                                     <div style={{ display: 'flex', gap: 6 }}>
-                                        <button
-                                            onClick={() => toggleActive(listing.id, !listing.isActive)}
-                                            title={listing.isActive ? 'Pasife Al' : 'Aktif Et'}
-                                            className={styles.iconBtn}
-                                            style={{ color: listing.isActive ? '#f59e0b' : '#10b981' }}
-                                        >
-                                            {listing.isActive ? '⏸️' : '▶️'}
-                                        </button>
+                                        {listing.status === 'PENDING' ? (
+                                            <>
+                                                <button
+                                                    onClick={() => approveAction(listing.id, 'approve')}
+                                                    className={styles.iconBtn}
+                                                    style={{ color: '#10b981', fontSize: '0.75rem', padding: '2px 8px' }}
+                                                    title="Onayla"
+                                                >✅ Onayla</button>
+                                                <button
+                                                    onClick={() => approveAction(listing.id, 'reject')}
+                                                    className={styles.iconBtn}
+                                                    style={{ color: '#ef4444', fontSize: '0.75rem', padding: '2px 8px' }}
+                                                    title="Reddet"
+                                                >❌ Reddet</button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => toggleActive(listing.id, !listing.isActive)}
+                                                title={listing.isActive ? 'Pasife Al' : 'Aktif Et'}
+                                                className={styles.iconBtn}
+                                                style={{ color: listing.isActive ? '#f59e0b' : '#10b981' }}
+                                            >
+                                                {listing.isActive ? '⏸️' : '▶️'}
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => deleteListing(listing.id)}
                                             title="Sil"
                                             className={styles.iconBtn}
                                             style={{ color: '#ef4444' }}
-                                        >
-                                            🗑️
-                                        </button>
+                                        >🗑️</button>
                                     </div>
                                 </td>
                             </tr>

@@ -4,7 +4,7 @@
 
 /* Shell Container (Glassmorphism wrapper) */
 .container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
     background: var(--shell-bg);
     border: 1px solid var(--shell-border);
