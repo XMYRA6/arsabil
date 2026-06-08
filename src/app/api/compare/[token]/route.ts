@@ -5,10 +5,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
     _req: Request,
-    { params }: { params: { token: string } }
+    context: { params: Promise<{ token: string }> }
 ) {
+    const { token } = await context.params
     const share = await prisma.compareShare.findUnique({
-        where: { token: params.token },
+        where: { token },
         select: { scenarioIds: true, createdAt: true },
     })
 
@@ -16,7 +17,6 @@ export async function GET(
 
     // scenarioIds is String[] (PostgreSQL array) — use directly, no JSON.parse needed
     const ids = share.scenarioIds
-
     const scenarios = await prisma.scenario.findMany({
         where: { id: { in: ids } },
     })
