@@ -10,6 +10,8 @@
     border: 1px solid var(--border);
     border-top: none;
     background: var(--panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .topBar {
@@ -21,6 +23,8 @@
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
     flex-wrap: wrap;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
 }
 
 .bodyContainer {
@@ -47,6 +51,8 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .mapPanel {

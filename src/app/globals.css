@@ -198,6 +198,7 @@
 }
 
 /* ===== GLASS CARD STANDARD ===== */
+[data-theme="light"] .glass-card,
 [data-theme="sky"] .glass-card,
 [data-theme="mint"] .glass-card,
 [data-theme="sand"] .glass-card {
@@ -208,40 +209,50 @@
   -webkit-backdrop-filter: blur(18px);
 }
 
+
 /* ===== LIGHT THEME ===== */
 [data-theme="light"] {
-  --bg: #f1f5f9;
+  --bg: #eef2fb;
   --bg-body:
-    radial-gradient(1200px 600px at 20% 0%, rgba(31, 111, 235, .06), transparent 60%),
-    radial-gradient(900px 600px at 80% 10%, rgba(47, 191, 113, .04), transparent 55%),
-    linear-gradient(180deg, #f1f5f9 0%, #e8edf5 40%, #f1f5f9 100%);
+    radial-gradient(900px 600px at 18% 8%,  rgba(31, 111, 235, .18), transparent 62%),
+    radial-gradient(750px 500px at 84% 14%, rgba(47, 191, 113, .13), transparent 58%),
+    radial-gradient(700px 550px at 48% 82%, rgba(31, 111, 235, .10), transparent 60%),
+    linear-gradient(180deg, #eef2fb 0%, #e6edf8 45%, #edf1fa 100%);
 
-  /* Paneller beyaz — Light arka plana uygun */
-  --panel: #ffffff;
-  --panel-2: #f3f6fb;
+  /* Paneller yarı-saydam cam */
+  --panel: linear-gradient(180deg, rgba(255, 255, 255, .82), rgba(255, 255, 255, .62));
+  --panel-2: rgba(255, 255, 255, .72);
   --text: #0b1b2b;
-  --muted: #6b7a90;
-  --border: #e6edf6;
+  --muted: #5f7290;
+  --border: rgba(31, 111, 235, .13);
 
-  --shell-bg: rgba(255, 255, 255, .65);
-  --shell-border: rgba(0, 0, 0, .06);
-  --topbar-bg: linear-gradient(180deg, rgba(255, 255, 255, .85), rgba(255, 255, 255, .70));
-  --topbar-border: rgba(0, 0, 0, .08);
+  --shell-bg: rgba(255, 255, 255, .72);
+  --shell-border: rgba(31, 111, 235, .18);
+  --topbar-bg: linear-gradient(180deg, rgba(255, 255, 255, .90), rgba(255, 255, 255, .76));
+  --topbar-border: rgba(31, 111, 235, .13);
   --topbar-text: #0b1b2b;
 
-  --shadow: 0 18px 50px rgba(0, 0, 0, .06);
-  --shadow2: 0 10px 30px rgba(0, 0, 0, .05);
+  --shadow: 0 18px 50px rgba(15, 50, 120, .13);
+  --shadow2: 0 10px 30px rgba(15, 50, 120, .09);
 
-  --input-bg: linear-gradient(180deg, #fff, #f7faff);
-  --stat-bg: linear-gradient(180deg, #fff, #f7faff);
+  --input-bg: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .74));
+  --stat-bg: linear-gradient(180deg, rgba(255, 255, 255, .86), rgba(255, 255, 255, .66));
   --card-title: #10243c;
   --label-color: #19324f;
   --val-color: #0f2a4a;
 
+  --primary: #1f6feb;
+  --primary-rgb: 31, 111, 235;
+  --primary-2: #134ea5;
+  --primary-glow: rgba(31, 111, 235, .22);
+  --green: #2fbf71;
+  --orange: #ff9f2f;
+  --red: #ff5a5f;
+
   /* Hero card — solid gradient in light mode */
   --hero-bg: linear-gradient(135deg, #1f6feb 0%, #134ea5 100%);
-  --hero-shadow: 0 10px 30px -5px rgba(31, 111, 235, .35);
-  --hero-border: rgba(255, 255, 255, .15);
+  --hero-shadow: 0 12px 35px -5px rgba(31, 111, 235, .38);
+  --hero-border: rgba(255, 255, 255, .22);
 
   --page-title-color: #0f172a;
 }

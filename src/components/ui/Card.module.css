@@ -6,6 +6,8 @@
     overflow: hidden;
     transition: all 0.25s ease;
     color: var(--text);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .card:hover {

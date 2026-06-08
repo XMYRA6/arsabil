@@ -21,6 +21,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .hero::before {

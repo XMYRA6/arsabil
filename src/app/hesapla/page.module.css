@@ -64,6 +64,8 @@
     box-shadow: var(--shadow2);
     overflow: hidden;
     color: var(--text);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 /* Card Header */
