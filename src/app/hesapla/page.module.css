@@ -1339,12 +1339,12 @@
     }
 
     .statGridCard {
-        background: #fff;
+        background: var(--stat-bg);
         border: 1px solid var(--border);
         border-top: 3px solid var(--primary);
         border-radius: 14px;
         padding: 12px;
-        box-shadow: 0 2px 8px rgba(26, 60, 94, 0.04);
+        box-shadow: var(--shadow2);
     }
 
     .statGridCard.green {
