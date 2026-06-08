@@ -7,14 +7,14 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
     _req: Request,
-    { params }: { params: { userId: string } }
+    { params }: { params: { id: string } }
 ) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const currentUserId = session.user.id as string
-    const { userId: otherId } = params
+    const { id: otherId } = params
 
     try {
         const messages = await prisma.message.findMany({
