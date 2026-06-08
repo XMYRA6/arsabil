@@ -1,10 +1,33 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
 
 export default function HomePage() {
+  const featuresRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const grid = featuresRef.current;
+    if (!grid) return;
+    const cards = grid.querySelectorAll<HTMLElement>(`.${styles.featureCard}`);
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            cards.forEach((card, i) => {
+              setTimeout(() => card.classList.add(styles.featureCardVisible), i * 120);
+            });
+            obs.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    obs.observe(grid);
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <div className={styles.container}>
       
@@ -34,9 +57,10 @@ export default function HomePage() {
       {/* Features Section */}
       <section>
         <h2 className={styles.sectionTitle}>Neden ArsaBil?</h2>
-        <div className={styles.featuresGrid}>
-          
+        <div className={styles.featuresGrid} ref={featuresRef}>
+
           <div className={styles.featureCard}>
+            <span className={styles.featureNum}>01</span>
             <div className={styles.featureIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
             </div>
@@ -45,6 +69,7 @@ export default function HomePage() {
           </div>
 
           <div className={styles.featureCard}>
+            <span className={styles.featureNum}>02</span>
             <div className={styles.featureIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
             </div>
@@ -53,6 +78,7 @@ export default function HomePage() {
           </div>
 
           <div className={styles.featureCard}>
+            <span className={styles.featureNum}>03</span>
             <div className={styles.featureIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
             </div>
@@ -61,6 +87,7 @@ export default function HomePage() {
           </div>
 
           <div className={styles.featureCard}>
+            <span className={styles.featureNum}>04</span>
             <div className={styles.featureIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
             </div>

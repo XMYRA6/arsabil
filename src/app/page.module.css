@@ -154,33 +154,106 @@
   gap: 1.5rem;
 }
 
+/* Entry animation — başlangıç durumu */
 .featureCard {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 2rem;
   text-align: left;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow2);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  /* Scroll ile görününce anime olacak */
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+/* IntersectionObserver bu class'ı ekleyecek */
+.featureCardVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hover lift + glow */
 .featureCard:hover {
-  transform: translateY(-5px);
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transform: translateY(-6px);
+  border-color: rgba(var(--primary-rgb, 31, 111, 235), 0.35);
+  box-shadow:
+    0 20px 40px rgba(var(--primary-rgb, 31, 111, 235), 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
+/* Üstten gelen accent çizgisi */
+.featureCard::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: 64%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--primary),
+    transparent
+  );
+  border-radius: 0 0 4px 4px;
+  transform: scaleX(0);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.featureCard:hover::after {
+  transform: scaleX(1);
+}
+
+/* Kart numarası (01–04) */
+.featureNum {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  opacity: 0.35;
+  transition: opacity 0.25s ease;
+}
+
+.featureCard:hover .featureNum {
+  opacity: 0.75;
+}
+
+/* İkon kutusu */
 .featureIcon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 16px;
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(var(--primary-rgb, 31, 111, 235), 0.10);
   color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.featureCard:hover .featureIcon {
+  background: rgba(var(--primary-rgb, 31, 111, 235), 0.18);
+  box-shadow: 0 8px 22px rgba(var(--primary-rgb, 31, 111, 235), 0.22);
+  transform: scale(1.12) rotate(-5deg);
 }
 
 .featureTitle {
@@ -188,6 +261,11 @@
   font-weight: 800;
   margin-bottom: 0.75rem;
   color: var(--card-title);
+  transition: color 0.2s ease;
+}
+
+.featureCard:hover .featureTitle {
+  color: var(--primary);
 }
 
 .featureDesc {
@@ -195,6 +273,12 @@
   line-height: 1.6;
   font-size: 0.95rem;
 }
+
+/* Stagger gecikmeler */
+.featureCard:nth-child(1) { transition-delay: 0ms; }
+.featureCard:nth-child(2) { transition-delay: 110ms; }
+.featureCard:nth-child(3) { transition-delay: 220ms; }
+.featureCard:nth-child(4) { transition-delay: 330ms; }
 
 /* --- Vision & Mission --- */
 .visionMission {
