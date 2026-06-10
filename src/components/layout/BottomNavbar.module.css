@@ -31,9 +31,6 @@
 }
 
 /* Light theme overrides */
-:global([data-theme="sky"]) .bottomNav,
-:global([data-theme="mint"]) .bottomNav,
-:global([data-theme="sand"]) .bottomNav,
 :global([data-theme="light"]) .bottomNav {
     background: rgba(244, 248, 255, 0.82);
     border-top: 0.5px solid rgba(0, 0, 0, 0.10);
@@ -97,7 +94,7 @@
 }
 
 .active .iconWrap {
-    background: rgba(var(--primary-rgb, 31, 111, 235), 0.13);
+    background: rgba(var(--primary-rgb), 0.14);
 }
 
 /* SVG icons */
@@ -118,7 +115,7 @@
 .navItem:active .iconWrap {
     transform: scale(0.84);
     transition: transform 0.08s ease;
-    background: rgba(var(--primary-rgb, 31, 111, 235), 0.18);
+    background: rgba(var(--primary-rgb), 0.18);
 }
 
 .navItem:active svg {
@@ -148,7 +145,7 @@
 }
 
 .fabItem {
-    background: linear-gradient(148deg, var(--primary) 0%, var(--primary-2) 100%);
+    background: var(--brand-gradient);
     width: 54px;
     height: 54px;
     border-radius: 18px;
@@ -159,11 +156,10 @@
 
     /* Apple-quality layered shadow */
     box-shadow:
-        0 2px 4px rgba(0, 0, 0, 0.12),
-        0 8px 22px rgba(var(--primary-rgb, 31, 111, 235), 0.42),
+        0 8px 24px var(--primary-glow),
+        inset 0 1px 0 rgba(255, 255, 255, .25),
         0 0 0 3.5px var(--bg),
-        inset 0 1px 0 rgba(255, 255, 255, 0.28),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+        0 2px 4px rgba(0, 0, 0, 0.12);
 
     transition:
         transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -173,11 +169,10 @@
 
 .fabActive {
     box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.16),
-        0 14px 30px rgba(var(--primary-rgb, 31, 111, 235), 0.55),
+        0 8px 24px var(--primary-glow),
+        inset 0 1px 0 rgba(255, 255, 255, .25),
         0 0 0 3.5px var(--bg),
-        inset 0 1px 0 rgba(255, 255, 255, 0.32),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.10);
+        0 2px 6px rgba(0, 0, 0, 0.16);
     transform: scale(1.07);
 }
 
@@ -185,8 +180,8 @@
     transform: scale(0.88) !important;
     transition: transform 0.08s ease !important;
     box-shadow:
-        0 1px 2px rgba(0, 0, 0, 0.10),
-        0 4px 10px rgba(var(--primary-rgb, 31, 111, 235), 0.28),
+        0 4px 10px var(--primary-glow),
+        inset 0 1px 0 rgba(255, 255, 255, .25),
         0 0 0 3.5px var(--bg);
 }
 

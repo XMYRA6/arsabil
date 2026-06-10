@@ -67,8 +67,8 @@ export function Navbar() {
                             <circle cx="20" cy="20" r="8" fill="rgba(0,0,0,0.3)" />
                             <defs>
                                 <linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                                    <stop stopColor="#3b82f6" />
-                                    <stop offset="1" stopColor="#f59e0b" />
+                                    <stop stopColor="#6d5bf6" />
+                                    <stop offset="1" stopColor="#27c4e8" />
                                 </linearGradient>
                             </defs>
                         </svg>
