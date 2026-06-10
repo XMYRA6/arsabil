@@ -1,0 +1,22 @@
+.shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 2rem 1.5rem;
+}
+
+.flush {
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .shell {
+        padding: 1rem;
+        padding-bottom: var(--mobile-nav-pb, 1rem);
+    }
+
+    .flush {
+        padding: 0;
+    }
+}
