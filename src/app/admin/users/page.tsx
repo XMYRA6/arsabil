@@ -185,6 +185,7 @@ export default function AdminUsers() {
             {loading ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>Yükleniyor...</div>
             ) : (
+                <div className={styles.tableWrap}>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -302,6 +303,7 @@ export default function AdminUsers() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             )}
         </>
     );

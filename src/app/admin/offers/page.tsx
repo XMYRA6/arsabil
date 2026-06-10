@@ -80,6 +80,7 @@ export default function AdminOffers() {
                     Henüz teklif bulunmuyor
                 </div>
             ) : (
+                <div className={styles.tableWrap}>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -116,6 +117,7 @@ export default function AdminOffers() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             )}
         </>
     );

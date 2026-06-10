@@ -236,6 +236,7 @@ export default function AdminDistrictPrices() {
             Yükleniyor...
           </div>
         ) : (
+          <div className={styles.tableWrap}>
           <table
             style={{
               width: "100%",
@@ -381,6 +382,7 @@ export default function AdminDistrictPrices() {
               )}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

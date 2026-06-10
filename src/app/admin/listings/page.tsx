@@ -156,6 +156,7 @@ export default function AdminListings() {
                     Henüz ilan bulunmuyor
                 </div>
             ) : (
+                <div className={styles.tableWrap}>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -247,6 +248,7 @@ export default function AdminListings() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             )}
         </>
     );

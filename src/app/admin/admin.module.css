@@ -241,6 +241,12 @@
 }
 
 /* Users Table */
+.tableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
 .table {
     width: 100%;
     border-collapse: separate;
@@ -438,19 +444,6 @@
         padding: 0.6rem 0.75rem;
     }
 
-    .profitLevelHeader,
-    .profitLevelRow {
-        grid-template-columns: minmax(0, 1fr) 80px 50px;
-        font-size: 0.75rem;
-    }
-
-    /* Hide Sıra (3rd col) and Vars. (4th col) on mobile */
-    .profitLevelHeader span:nth-child(3),
-    .profitLevelHeader span:nth-child(4),
-    .profitLevelRow > *:nth-child(3),
-    .profitLevelRow > *:nth-child(4) {
-        display: none;
-    }
 }
 
 /* Profit Levels CRUD */
@@ -571,4 +564,21 @@
     border-color: var(--primary);
     color: var(--primary);
     background: rgba(var(--primary-rgb), 0.05);
+}
+
+/* Profit level grid — must come AFTER the base .profitLevelRow/.profitLevelHeader rules */
+@media (max-width: 900px) {
+    .profitLevelHeader,
+    .profitLevelRow {
+        grid-template-columns: minmax(0, 1fr) 80px 50px;
+        font-size: 0.75rem;
+    }
+
+    /* Hide Sıra (3rd col) and Vars. (4th col) on mobile */
+    .profitLevelHeader span:nth-child(3),
+    .profitLevelHeader span:nth-child(4),
+    .profitLevelRow > *:nth-child(3),
+    .profitLevelRow > *:nth-child(4) {
+        display: none;
+    }
 }
