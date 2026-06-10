@@ -72,7 +72,7 @@
 }
 
 .heroTitle span {
-  background: linear-gradient(100deg, var(--primary) 0%, #ef4444 100%);
+  background: linear-gradient(100deg, var(--aurora-violet) 0%, var(--aurora-cyan) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -431,13 +431,13 @@
 }
 
 .accentTeal {
-  background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 55%, #38bdf8 100%);
+  background: linear-gradient(135deg, #0d1a3a 0%, var(--aurora-blue) 55%, var(--aurora-cyan) 100%);
   color: #ffffff;
-  box-shadow: 0 8px 32px rgba(2, 132, 199, 0.25);
+  box-shadow: 0 8px 32px rgba(var(--primary-rgb), 0.25);
 }
 
 .accentTeal:hover {
-  box-shadow: 0 20px 48px rgba(2, 132, 199, 0.38);
+  box-shadow: 0 20px 48px rgba(var(--primary-rgb), 0.38);
 }
 
 /* ══════════════════════════════════════════
