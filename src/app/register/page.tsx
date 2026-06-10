@@ -42,7 +42,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--panel)" }}>
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--panel)" }}>
             <div style={{ width: "100%", maxWidth: "450px" }}>
                 <div style={{ textAlign: "center", marginBottom: "2rem" }}>
                     <h1 style={{ color: "var(--primary)", fontWeight: 700, letterSpacing: "-0.5px" }}>ARSABİL</h1>
