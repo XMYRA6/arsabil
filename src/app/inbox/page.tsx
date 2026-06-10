@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
@@ -30,7 +30,7 @@ interface Message {
     sender: OtherUser
 }
 
-export default function Inbox() {
+function InboxContent() {
     const { data: session, status } = useSession()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -310,5 +310,13 @@ export default function Inbox() {
                 )}
             </main>
         </div>
+    )
+}
+
+export default function Inbox() {
+    return (
+        <Suspense fallback={null}>
+            <InboxContent />
+        </Suspense>
     )
 }
