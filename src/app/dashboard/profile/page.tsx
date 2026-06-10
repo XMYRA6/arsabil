@@ -6,14 +6,11 @@ import Link from 'next/link'
 import styles from './profile.module.css'
 
 type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
-type Theme = 'dark' | 'light' | 'sky' | 'mint' | 'sand'
+type Theme = 'dark' | 'light'
 
 const PALETTES: { id: Theme; label: string; color: string; icon: string }[] = [
     { id: 'dark',  label: 'Gece',     color: '#1f6feb', icon: '🌙' },
     { id: 'light', label: 'Gündüz',   color: '#e0e8f4', icon: '☀️' },
-    { id: 'sky',   label: 'Gökyüzü',  color: '#2b7cff', icon: '☁️' },
-    { id: 'mint',  label: 'Nane',     color: '#1fbf9a', icon: '🍃' },
-    { id: 'sand',  label: 'Kum',      color: '#f2a23a', icon: '🏜️' },
 ]
 
 interface ProfileData {

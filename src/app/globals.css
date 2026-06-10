@@ -101,6 +101,7 @@
   --primary-rgb: 109, 91, 246;
   --primary-2: var(--aurora-blue);
   --primary-glow: rgba(109, 91, 246, .22);
+  --green: #16a34a;
   --accent-violet: var(--aurora-violet);
   --accent-cyan: var(--aurora-cyan);
 
@@ -122,7 +123,7 @@
 }
 
 /* ===== GLASS CARD STANDARD ===== */
-[data-theme="light"] .glass-card {
+.glass-card {
   background: var(--panel);
   border: 1px solid var(--border);
   box-shadow: var(--shadow2);

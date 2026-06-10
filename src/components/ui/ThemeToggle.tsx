@@ -2,14 +2,11 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 
-type Mode = 'dark' | 'light' | 'sky' | 'mint' | 'sand';
+type Mode = 'dark' | 'light';
 
 const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] = [
     { id: 'dark', label: 'Gece', color: '#1f6feb', isLight: false },
     { id: 'light', label: 'Gündüz', color: '#e0e8f4', isLight: true },
-    { id: 'sky', label: 'Gökyüzü', color: '#2b7cff', isLight: true },
-    { id: 'mint', label: 'Nane', color: '#1fbf9a', isLight: true },
-    { id: 'sand', label: 'Kum', color: '#f2a23a', isLight: true },
 ];
 
 /**
