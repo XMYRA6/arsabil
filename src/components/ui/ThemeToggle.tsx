@@ -10,9 +10,8 @@ const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] =
 ];
 
 /**
- * ThemePicker — Moon/Sun button expands to a dropdown with
- * 2 rows: Dark/Light toggle + Sky/Mint/Sand palette.
- * Persists in localStorage under "arsabil-theme".
+ * ThemeToggle — Moon/Sun button expands to a dropdown with
+ * Dark/Light theme toggle. Persists in localStorage under "arsabil-theme".
  */
 export const ThemeToggle: React.FC = () => {
     const [theme, setTheme] = useState<Mode>('dark');
@@ -126,49 +125,6 @@ export const ThemeToggle: React.FC = () => {
                                 <span style={{ fontSize: '1rem' }}>{p.id === 'dark' ? '🌙' : '☀️'}</span>
                                 {p.label}
                             </button>
-                        ))}
-                    </div>
-
-                    {/* Divider */}
-                    <div style={{ borderTop: '1px solid var(--border)', marginBottom: 10 }} />
-
-                    {/* Palette Label */}
-                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.08em', marginBottom: 8 }}>
-                        RENK PALETİ
-                    </div>
-
-                    {/* Sky / Mint / Sand Circles */}
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 4 }}>
-                        {PALETTES.slice(2).map(p => (
-                            <button
-                                key={p.id}
-                                onClick={() => apply(p.id)}
-                                title={p.label}
-                                style={{
-                                    width: 40, height: 40, borderRadius: '50%',
-                                    background: p.color,
-                                    border: theme === p.id ? '3px solid var(--card-title, white)' : '3px solid transparent',
-                                    cursor: 'pointer',
-                                    boxShadow: theme === p.id ? `0 0 0 2px ${p.color}` : '0 2px 8px rgba(0,0,0,.15)',
-                                    transition: 'all 0.15s',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    position: 'relative',
-                                }}
-                            >
-                                {theme === p.id && (
-                                    <span style={{ color: 'white', fontSize: '0.85rem', fontWeight: 900 }}>✓</span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                    {/* Labels below circles */}
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                        {PALETTES.slice(2).map(p => (
-                            <div key={p.id} style={{
-                                width: 40, textAlign: 'center', fontSize: '0.6rem',
-                                color: theme === p.id ? 'var(--primary)' : 'var(--muted)',
-                                fontWeight: theme === p.id ? 800 : 500,
-                            }}>{p.label}</div>
                         ))}
                     </div>
                 </div>
