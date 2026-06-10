@@ -18,7 +18,7 @@ export function WizardProgress({ currentStep }: Props) {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 }}>
               <div style={{
                 width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                background: done || active ? 'var(--primary)' : 'var(--panel)',
+                background: active ? 'var(--brand-gradient)' : done ? 'var(--primary)' : 'var(--panel)',
                 border: `2px solid ${done || active ? 'var(--primary)' : 'var(--border)'}`,
                 color: done || active ? 'white' : 'var(--muted)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -37,7 +37,7 @@ export function WizardProgress({ currentStep }: Props) {
             {i < STEP_LABELS.length - 1 && (
               <div style={{
                 height: 2, flex: 1, marginBottom: 20,
-                background: done ? 'var(--primary)' : 'var(--border)',
+                background: done ? 'var(--primary)' : active ? 'var(--brand-gradient)' : 'var(--border)',
               }} />
             )}
           </React.Fragment>

@@ -52,7 +52,7 @@
 .nextBtn {
   padding: 0.75rem 2rem;
   border-radius: 12px;
-  background: var(--primary);
+  background: var(--brand-gradient);
   border: none;
   color: white;
   font-weight: 800;

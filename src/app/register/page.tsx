@@ -42,17 +42,17 @@ export default function RegisterPage() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--bg-color)" }}>
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--panel)" }}>
             <div style={{ width: "100%", maxWidth: "450px" }}>
                 <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                    <h1 style={{ color: "var(--primary-color)", fontWeight: 700, letterSpacing: "-0.5px" }}>ARSABİL</h1>
-                    <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>Sisteme Kayıt Olun</p>
+                    <h1 style={{ color: "var(--primary)", fontWeight: 700, letterSpacing: "-0.5px" }}>ARSABİL</h1>
+                    <p style={{ color: "var(--muted)", marginTop: "0.5rem" }}>Sisteme Kayıt Olun</p>
                 </div>
 
                 <Card>
                     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                         {error && (
-                            <div style={{ backgroundColor: "#fee2e2", color: "var(--danger)", padding: "0.75rem", borderRadius: "var(--radius-md)", fontSize: "0.9rem" }}>
+                            <div style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--red)", padding: "0.75rem", borderRadius: "var(--radius-md)", fontSize: "0.9rem" }}>
                                 {error}
                             </div>
                         )}
@@ -88,9 +88,9 @@ export default function RegisterPage() {
                         </div>
                     </form>
 
-                    <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.9rem", color: "var(--text-muted)" }}>
+                    <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.9rem", color: "var(--muted)" }}>
                         Zaten hesabınız var mı?{" "}
-                        <Link href="/login" style={{ color: "var(--primary-color)", fontWeight: 600 }}>
+                        <Link href="/login" style={{ color: "var(--primary)", fontWeight: 600 }}>
                             Giriş Yapın
                         </Link>
                     </div>

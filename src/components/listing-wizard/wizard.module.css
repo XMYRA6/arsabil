@@ -55,7 +55,7 @@
 
 .dropZone:hover {
   border-color: var(--primary);
-  background: rgba(59,130,246,0.04);
+  background: rgba(var(--primary-rgb),0.04);
 }
 
 .dropZoneText {
@@ -130,8 +130,8 @@
   transition: border-color 0.15s, background 0.15s;
 }
 
-.reportOption:hover { border-color: var(--primary); background: rgba(59,130,246,0.03); }
-.reportOptionSelected { border-color: var(--primary); background: rgba(59,130,246,0.07); }
+.reportOption:hover { border-color: var(--primary); background: rgba(var(--primary-rgb),0.03); }
+.reportOptionSelected { border-color: var(--primary); background: rgba(var(--primary-rgb),0.07); }
 
 .reportOptionInfo { flex: 1; }
 
@@ -221,7 +221,7 @@
   width: 100%;
   padding: 0.875rem 2rem;
   border-radius: 14px;
-  background: var(--primary);
+  background: var(--brand-gradient);
   border: none;
   color: white;
   font-weight: 800;

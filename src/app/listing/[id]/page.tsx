@@ -127,7 +127,7 @@ export default function ListingDetailPage() {
                     {/* Photo area */}
                     <div style={{
                         width: '100%', height: 340, borderRadius: 18, overflow: 'hidden',
-                        background: 'linear-gradient(135deg, #1a3a6e, #0b2443)',
+                        background: 'var(--panel-2)',
                         position: 'relative', marginBottom: 16,
                     }}>
                         <div style={{
@@ -247,7 +247,7 @@ export default function ListingDetailPage() {
                                 <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>Ön Fizibilite Sonuçları</h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                                     {[
-                                        ['Tahmini Arsa Değeri', '4.371.200 TL', '#3b82f6'],
+                                        ['Tahmini Arsa Değeri', '4.371.200 TL', 'var(--primary)'],
                                         ['Tahmini Net Kâr', '+%34 (▲+1.76M TL)', '#10b981'],
                                         ['Fizibilite Skoru', `${score}/100`, scoreColor],
                                         ['Piyasa Karşılaştırma', `+${listing.changePercent}%`, '#10b981'],
