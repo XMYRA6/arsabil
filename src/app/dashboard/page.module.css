@@ -29,7 +29,7 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -58,7 +58,7 @@
 
 .twoCol {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -249,6 +249,9 @@
 }
 
 @media (max-width: 768px) {
-  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .statsGrid > * { min-width: 0; }
   .twoCol { grid-template-columns: 1fr; }
+  .reportRow { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .offerRow { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
