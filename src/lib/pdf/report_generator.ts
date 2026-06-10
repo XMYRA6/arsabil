@@ -55,7 +55,7 @@ export function generatePdfReport(input: ReportInput): void {
 
     // ========== DAİRE FİYATI KUTUSU ==========
     let y = 55;
-    doc.setFillColor(31, 111, 235); // Primary blue
+    doc.setFillColor(109, 91, 246); // Aurora violet
     doc.roundedRect(margin, y, pageWidth - 2 * margin, 30, 5, 5, 'F');
 
     doc.setTextColor(255, 255, 255);
@@ -127,7 +127,7 @@ export function generatePdfReport(input: ReportInput): void {
         head: [['Sonuç', 'Değer']],
         body: resultData,
         margin: { left: margin, right: margin },
-        headStyles: { fillColor: [31, 111, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+        headStyles: { fillColor: [109, 91, 246], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
         bodyStyles: { fontSize: 9, textColor: [11, 27, 43] },
         alternateRowStyles: { fillColor: [243, 246, 251] },
         columnStyles: { 0: { fontStyle: 'bold', cellWidth: 70 } },

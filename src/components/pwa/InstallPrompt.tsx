@@ -251,7 +251,7 @@ export function InstallPrompt() {
                                 padding: "14px",
                                 borderRadius: 14,
                                 border: "none",
-                                background: "linear-gradient(135deg, var(--primary, #6d5bf6), var(--primary-2, #3b82f6))",
+                                background: "linear-gradient(135deg, var(--primary, #6d5bf6), var(--primary-2, #3f8efc))",
                                 color: "white",
                                 fontSize: "0.95rem",
                                 fontWeight: 800,
