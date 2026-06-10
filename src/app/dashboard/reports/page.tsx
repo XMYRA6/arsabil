@@ -51,7 +51,7 @@ export default function ReportsPage() {
                                 <div><strong>Tarih:</strong> {formatDate(report.createdAt)}</div>
                             </div>
                             {report.listing && (
-                                <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(31,111,235,0.08)', borderRadius: '10px', color: 'var(--primary)', fontWeight: 700, fontSize: '0.8rem', textAlign: 'center' }}>
+                                <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(var(--primary-rgb),0.08)', borderRadius: '10px', color: 'var(--primary)', fontWeight: 700, fontSize: '0.8rem', textAlign: 'center' }}>
                                     ✓ Pazar Yerinde İlanda
                                 </div>
                             )}

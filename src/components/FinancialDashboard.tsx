@@ -72,10 +72,10 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
                 {[
                     { label: 'Net Kâr', value: formatTL(financial.netProfit), color: financial.netProfit >= 0 ? 'var(--green)' : 'var(--red)', bg: financial.netProfit >= 0 ? 'rgba(47,191,113,0.08)' : 'rgba(255,90,95,0.08)' },
-                    { label: 'ROI', value: formatPct(financial.roi), color: 'var(--primary)', bg: 'rgba(31,111,235,0.08)' },
+                    { label: 'ROI', value: formatPct(financial.roi), color: 'var(--primary)', bg: 'rgba(var(--primary-rgb),0.08)' },
                     { label: 'IRR', value: formatPct(financial.irr), color: 'var(--orange)', bg: 'rgba(255,159,47,0.08)' },
                     { label: 'NPV', value: formatTL(financial.npv), color: financial.npv >= 0 ? 'var(--green)' : 'var(--red)', bg: financial.npv >= 0 ? 'rgba(47,191,113,0.08)' : 'rgba(255,90,95,0.08)' },
-                    { label: 'Geri Ödeme', value: `${financial.paybackMonth} ay`, color: 'var(--primary)', bg: 'rgba(31,111,235,0.08)' },
+                    { label: 'Geri Ödeme', value: `${financial.paybackMonth} ay`, color: 'var(--primary)', bg: 'rgba(var(--primary-rgb),0.08)' },
                 ].map((kpi, i) => (
                     <div key={i} style={{ padding: '10px', borderRadius: '12px', background: kpi.bg, border: `1px solid ${kpi.bg}`, textAlign: 'center' }}>
                         <div style={{ fontSize: '0.65rem', color: 'var(--muted)', fontWeight: 700, marginBottom: '2px' }}>{kpi.label}</div>
@@ -213,7 +213,7 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
                                     <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--muted)' }}>Toplam Faiz</div>
                                     <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--orange)' }}>{formatTL(loan.totalInterest)}</div>
                                 </div>
-                                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(31,111,235,0.06)', textAlign: 'center' }}>
+                                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(var(--primary-rgb),0.06)', textAlign: 'center' }}>
                                     <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--muted)' }}>Efektif Maliyet</div>
                                     <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--primary)' }}>{formatPct(loan.effectiveRate)}</div>
                                 </div>

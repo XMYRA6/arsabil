@@ -140,7 +140,7 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                             {scenarios.map((s, i) => (
                                 <th key={s.id} style={{
                                     padding: '0.85rem 1rem',
-                                    background: i === bestIdx ? 'rgba(31,111,235,0.08)' : 'var(--panel-2)',
+                                    background: i === bestIdx ? 'rgba(var(--primary-rgb),0.08)' : 'var(--panel-2)',
                                     fontWeight: 800,
                                     fontSize: '0.85rem',
                                     color: i === bestIdx ? 'var(--primary)' : 'var(--card-title)',
@@ -173,7 +173,7 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                                         fontSize: row.highlight ? '1rem' : '0.85rem',
                                         color: row.highlight ? 'var(--primary)' : 'var(--text)',
                                         textAlign: 'center',
-                                        background: vi === bestIdx ? 'rgba(31,111,235,0.03)' : 'transparent',
+                                        background: vi === bestIdx ? 'rgba(var(--primary-rgb),0.03)' : 'transparent',
                                     }}>
                                         {v}
                                     </td>

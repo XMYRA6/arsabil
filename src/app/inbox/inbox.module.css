@@ -117,8 +117,8 @@
 }
 
 .convItemActive {
-    background: rgba(31, 111, 235, 0.08) !important;
-    border-color: rgba(31, 111, 235, 0.15);
+    background: rgba(var(--primary-rgb), 0.08) !important;
+    border-color: rgba(var(--primary-rgb), 0.15);
 }
 
 .avatar {
@@ -244,7 +244,7 @@
     flex-direction: column;
     gap: 8px;
     background-image: 
-        radial-gradient(circle at 10% 90%, rgba(31, 111, 235, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 10% 90%, rgba(var(--primary-rgb), 0.05) 0%, transparent 40%),
         radial-gradient(circle at 90% 10%, rgba(47, 191, 113, 0.05) 0%, transparent 40%);
 }
 

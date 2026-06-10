@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef } from 'react';
 type Mode = 'dark' | 'light';
 
 const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] = [
-    { id: 'dark', label: 'Gece', color: '#1f6feb', isLight: false },
+    { id: 'dark', label: 'Gece', color: '#6d5bf6', isLight: false },
     { id: 'light', label: 'Gündüz', color: '#e0e8f4', isLight: true },
 ];
 
@@ -115,7 +115,7 @@ export const ThemeToggle: React.FC = () => {
                                 style={{
                                     flex: 1, padding: '7px 4px', borderRadius: 10,
                                     border: theme === p.id ? '2px solid var(--primary)' : '1.5px solid var(--border)',
-                                    background: theme === p.id ? 'rgba(31,111,235,.12)' : 'var(--bg, #0b2443)',
+                                    background: theme === p.id ? 'rgba(var(--primary-rgb),.12)' : 'var(--bg, #0b2443)',
                                     color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit',
                                     fontSize: '0.75rem', fontWeight: theme === p.id ? 800 : 600,
                                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,

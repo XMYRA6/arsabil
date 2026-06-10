@@ -139,7 +139,7 @@
     align-items: center;
     border-radius: 14px;
     background: linear-gradient(180deg, var(--primary), var(--primary-2));
-    box-shadow: 0 16px 26px rgba(31, 111, 235, .22);
+    box-shadow: 0 16px 26px rgba(var(--primary-rgb), .22);
     color: white;
     font-weight: 700;
     cursor: pointer;
@@ -148,7 +148,7 @@
 }
 
 .primaryBtn:hover {
-    box-shadow: 0 16px 26px rgba(31, 111, 235, .35);
+    box-shadow: 0 16px 26px rgba(var(--primary-rgb), .35);
 }
 
 .hamburger {
@@ -350,7 +350,7 @@
 }
 
 .dropdownItem:hover {
-    background: rgba(31, 111, 235, 0.08);
+    background: rgba(var(--primary-rgb), 0.08);
     color: var(--primary);
 }
 

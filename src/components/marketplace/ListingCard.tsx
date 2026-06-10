@@ -64,13 +64,13 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 onClick={() => router.push(`/listing/${listing.id}`)}
                 style={{
                     display: 'flex', alignItems: 'stretch',
-                    background: highlighted ? 'rgba(31,111,235,.06)' : 'var(--bg)',
+                    background: highlighted ? 'rgba(var(--primary-rgb),.06)' : 'var(--bg)',
                     border: highlighted ? '1.5px solid var(--primary)' : '1.5px solid var(--border)',
                     borderRadius: 14,
                     overflow: 'hidden',
                     cursor: 'pointer',
                     transition: 'all 0.18s',
-                    boxShadow: highlighted ? '0 6px 20px rgba(31,111,235,.15)' : '0 2px 8px rgba(0,0,0,.06)',
+                    boxShadow: highlighted ? '0 6px 20px rgba(var(--primary-rgb),.15)' : '0 2px 8px rgba(0,0,0,.06)',
                     minHeight: 120,
                 }}
             >
@@ -200,13 +200,13 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
             onClick={() => router.push(`/listing/${listing.id}`)}
             style={{
                 display: 'flex', flexDirection: 'column',
-                background: highlighted ? 'rgba(31,111,235,.08)' : 'var(--bg)',
+                background: highlighted ? 'rgba(var(--primary-rgb),.08)' : 'var(--bg)',
                 border: highlighted ? '2px solid var(--primary)' : '1.5px solid var(--border)',
                 borderRadius: 14,
                 overflow: 'hidden',
                 cursor: 'pointer',
                 transition: 'all 0.18s',
-                boxShadow: highlighted ? '0 8px 30px rgba(31,111,235,.20)' : '0 2px 8px rgba(0,0,0,.06)',
+                boxShadow: highlighted ? '0 8px 30px rgba(var(--primary-rgb),.20)' : '0 2px 8px rgba(0,0,0,.06)',
                 position: 'relative',
             }}
         >

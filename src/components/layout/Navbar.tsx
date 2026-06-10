@@ -155,12 +155,12 @@ export function Navbar() {
                                                 <div key={n.id} onClick={() => setReadNotifs(prev => [...prev, n.id])} style={{
                                                     padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'flex-start',
                                                     cursor: 'pointer', transition: 'background 0.15s',
-                                                    background: isRead ? 'transparent' : 'rgba(31,111,235,.06)',
+                                                    background: isRead ? 'transparent' : 'rgba(var(--primary-rgb),.06)',
                                                     borderBottom: '1px solid var(--border)',
-                                                }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(31,111,235,.08)'}
-                                                    onMouseLeave={e => e.currentTarget.style.background = isRead ? 'transparent' : 'rgba(31,111,235,.06)'}>
+                                                }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = isRead ? 'transparent' : 'rgba(var(--primary-rgb),.06)'}>
                                                     {/* Icon */}
-                                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(31,111,235,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>{n.icon}</div>
+                                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'rgba(var(--primary-rgb),.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>{n.icon}</div>
                                                     {/* Content */}
                                                     <div style={{ flex: 1 }}>
                                                         <div style={{ fontSize: '0.8rem', fontWeight: isRead ? 500 : 700, color: 'var(--card-title)', lineHeight: 1.4, marginBottom: 2 }}>{n.text}</div>
@@ -231,15 +231,15 @@ export function Navbar() {
                                             { name: 'Elif Demir', msg: 'Teşekkürler, raporu inceledim 👍', time: '15dk', unread: true, initials: 'ED', color: '#10b981' },
                                             { name: 'Mehmet Kaya', msg: 'Proje detaylarını gönderebilir mi...', time: '1s', unread: false, initials: 'MK', color: '#f59e0b' },
                                             { name: 'Fatma Çelik', msg: 'İyi akşamlar, fiyat konusunda...', time: '3s', unread: false, initials: 'FÇ', color: '#8b5cf6' },
-                                            { name: 'ArsaBil Destek', msg: 'Hoş geldiniz! Yardıma hazırız.', time: '1h', unread: false, initials: 'AB', color: '#1f6feb' },
+                                            { name: 'ArsaBil Destek', msg: 'Hoş geldiniz! Yardıma hazırız.', time: '1h', unread: false, initials: 'AB', color: '#6d5bf6' },
                                         ].map((conv, i) => (
                                             <div key={i} onClick={() => { setIsInboxOpen(false); router.push('/inbox'); }} style={{
                                                 padding: '12px 16px', display: 'flex', gap: '12px', alignItems: 'center',
                                                 cursor: 'pointer', transition: 'background 0.15s',
-                                                background: conv.unread ? 'rgba(31,111,235,.06)' : 'transparent',
+                                                background: conv.unread ? 'rgba(var(--primary-rgb),.06)' : 'transparent',
                                                 borderBottom: '1px solid var(--border)',
-                                            }} onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,111,235,.08)')}
-                                                onMouseLeave={e => (e.currentTarget.style.background = conv.unread ? 'rgba(31,111,235,.06)' : 'transparent')}>
+                                            }} onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
+                                                onMouseLeave={e => (e.currentTarget.style.background = conv.unread ? 'rgba(var(--primary-rgb),.06)' : 'transparent')}>
                                                 {/* Avatar */}
                                                 <div style={{
                                                     width: 42, height: 42, borderRadius: '50%',

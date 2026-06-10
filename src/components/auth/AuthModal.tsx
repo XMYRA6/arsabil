@@ -53,7 +53,7 @@ export function AuthModal({ isOpen, onClose, message }: { isOpen: boolean; onClo
                 
                 <div style={{
                     width: '64px', height: '64px', borderRadius: '50%',
-                    background: 'rgba(31, 111, 235, 0.1)', color: 'var(--primary)',
+                    background: 'rgba(var(--primary-rgb), 0.1)', color: 'var(--primary)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginBottom: '20px', marginTop: '10px'
                 }}>

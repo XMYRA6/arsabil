@@ -187,9 +187,9 @@ export function InstallPrompt() {
                                     fontWeight: 700,
                                     padding: "4px 10px",
                                     borderRadius: 8,
-                                    background: "rgba(31, 111, 235, 0.1)",
-                                    color: "var(--primary, #1f6feb)",
-                                    border: "1px solid rgba(31, 111, 235, 0.2)",
+                                    background: "rgba(var(--primary-rgb), 0.1)",
+                                    color: "var(--primary, #6d5bf6)",
+                                    border: "1px solid rgba(var(--primary-rgb), 0.2)",
                                 }}
                             >
                                 {f}
@@ -201,10 +201,10 @@ export function InstallPrompt() {
                         /* iOS Instructions */
                         <div
                             style={{
-                                background: "rgba(31, 111, 235, 0.06)",
+                                background: "rgba(var(--primary-rgb), 0.06)",
                                 borderRadius: 14,
                                 padding: "14px 16px",
-                                border: "1px solid rgba(31, 111, 235, 0.12)",
+                                border: "1px solid rgba(var(--primary-rgb), 0.12)",
                             }}
                         >
                             <div
@@ -228,7 +228,7 @@ export function InstallPrompt() {
                                         padding: "2px 8px",
                                         borderRadius: 6,
                                         fontWeight: 700,
-                                        color: "var(--primary, #1f6feb)",
+                                        color: "var(--primary, #6d5bf6)",
                                     }}
                                 >
                                     ⬆️ Paylaş
@@ -251,12 +251,12 @@ export function InstallPrompt() {
                                 padding: "14px",
                                 borderRadius: 14,
                                 border: "none",
-                                background: "linear-gradient(135deg, var(--primary, #1f6feb), var(--primary-2, #3b82f6))",
+                                background: "linear-gradient(135deg, var(--primary, #6d5bf6), var(--primary-2, #3b82f6))",
                                 color: "white",
                                 fontSize: "0.95rem",
                                 fontWeight: 800,
                                 cursor: "pointer",
-                                boxShadow: "0 4px 16px rgba(31, 111, 235, 0.3)",
+                                boxShadow: "0 4px 16px rgba(var(--primary-rgb), 0.3)",
                                 transition: "all 0.2s ease",
                                 fontFamily: "inherit",
                             }}

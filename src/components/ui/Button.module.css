@@ -30,11 +30,11 @@
 .primary {
     background: linear-gradient(180deg, var(--primary), var(--primary-2));
     color: white;
-    box-shadow: 0 16px 26px rgba(31, 111, 235, .22);
+    box-shadow: 0 16px 26px rgba(var(--primary-rgb), .22);
 }
 
 .primary:hover:not(:disabled) {
-    box-shadow: 0 16px 26px rgba(31, 111, 235, .35);
+    box-shadow: 0 16px 26px rgba(var(--primary-rgb), .35);
 }
 
 .secondary {

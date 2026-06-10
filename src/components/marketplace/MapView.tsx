@@ -280,7 +280,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                             <span style="font-size:0.8rem;font-weight:700;color:#0b2443;">${payStr}</span>
                         </div>
                         <div style="display:flex;gap:6px;margin-top:8px;">
-                            <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
+                            <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#6d5bf6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
                             <button onclick="window.location.href='/listing/${listing.id}'" style="flex:1;padding:6px 8px;background:#10b98122;color:#10b981;border:1.5px solid #10b981;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Teklif Ver</button>
                         </div>
                     </div>`;
@@ -382,7 +382,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                             <div style="font-weight:800;font-size:0.85rem;color:#0b2443;margin-bottom:4px;">📍 Seçilen Konum</div>
                             <div style="font-size:0.75rem;color:#5a7090;margin-bottom:6px;">${address || data.display_name}</div>
                             <div style="font-size:0.68rem;color:#94a3b8;margin-bottom:8px;">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
-                            <button onclick="window.location.href='/'" style="width:100%;padding:8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:700;">🧮 Fizibilite Raporu Oluştur</button>
+                            <button onclick="window.location.href='/'" style="width:100%;padding:8px;background:#6d5bf6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:700;">🧮 Fizibilite Raporu Oluştur</button>
                         </div>
                     `)).openPopup();
                 } catch {
@@ -423,12 +423,12 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
                 // Add dot
                 L.circleMarker([lat, lng], {
-                    radius: 5, fillColor: '#1f6feb', color: 'white', weight: 2, fillOpacity: 1,
+                    radius: 5, fillColor: '#6d5bf6', color: 'white', weight: 2, fillOpacity: 1,
                 }).addTo(measureLayerRef.current);
 
                 if (pts.length > 1) {
                     // Draw line
-                    L.polyline(pts, { color: '#1f6feb', weight: 3, dashArray: '6 4' }).addTo(measureLayerRef.current);
+                    L.polyline(pts, { color: '#6d5bf6', weight: 3, dashArray: '6 4' }).addTo(measureLayerRef.current);
 
                     // Calculate distance
                     let totalM = 0;
@@ -574,8 +574,8 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 if (feature) {
                     provinceBorderRef.current = L.geoJSON(feature, {
                         style: {
-                            color: '#1f6feb',
-                            fillColor: '#1f6feb',
+                            color: '#6d5bf6',
+                            fillColor: '#6d5bf6',
                             fillOpacity: 0.08,
                             weight: 2.5,
                             dashArray: '6 3',
@@ -648,7 +648,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                                         display: 'block', width: '100%', textAlign: 'left',
                                         padding: '8px 12px', fontSize: '0.78rem', fontWeight: tileKey === k ? 800 : 500,
                                         color: tileKey === k ? 'var(--primary)' : 'rgba(255,255,255,.8)',
-                                        background: tileKey === k ? 'rgba(31,111,235,.12)' : 'transparent',
+                                        background: tileKey === k ? 'rgba(var(--primary-rgb),.12)' : 'transparent',
                                         border: 'none', cursor: 'pointer', borderRadius: 6,
                                         fontFamily: 'inherit', transition: 'all 0.1s',
                                     }}

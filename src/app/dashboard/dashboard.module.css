@@ -52,7 +52,7 @@
     font-weight: 800;
     font-size: 1.1rem;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(31, 111, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
 }
 
 .profileInfo h3 {
@@ -96,7 +96,7 @@
 .navItemActive {
     background: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 4px 14px rgba(31, 111, 235, 0.25);
+    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.25);
 }
 
 .sidebarFooter {

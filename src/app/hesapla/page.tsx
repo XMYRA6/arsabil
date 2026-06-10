@@ -23,7 +23,7 @@ import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 
 const PILL_COLORS = [
-  { bg: 'rgba(31,111,235,0.1)', border: 'var(--primary)', text: 'var(--primary)' },
+  { bg: 'rgba(var(--primary-rgb),0.1)', border: 'var(--primary)', text: 'var(--primary)' },
   { bg: 'rgba(47,191,113,0.1)', border: 'var(--green)', text: 'var(--green)' },
   { bg: 'rgba(251,146,60,0.1)', border: '#fb923c', text: '#fb923c' },
 ] as const;

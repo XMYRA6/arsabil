@@ -271,14 +271,14 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                         transition: 'background 0.1s',
                                         display: 'flex', alignItems: 'center', gap: 8,
                                     }}
-                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,111,235,.08)')}
+                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
                                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                                 >
                                     <span style={{ fontSize: '0.75rem' }}>📍</span>
                                     {city.name}
                                     {DISTRICTS[city.name] && (
                                         <span style={{
-                                            marginLeft: 'auto', fontSize: '0.58rem', background: 'rgba(31,111,235,.1)',
+                                            marginLeft: 'auto', fontSize: '0.58rem', background: 'rgba(var(--primary-rgb),.1)',
                                             color: 'var(--primary)', padding: '1px 5px', borderRadius: 4, fontWeight: 700,
                                         }}>{DISTRICTS[city.name].length} ilçe</span>
                                     )}
@@ -332,7 +332,7 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                         transition: 'background 0.1s',
                                         display: 'flex', alignItems: 'center', gap: 6,
                                     }}
-                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(31,111,235,.08)')}
+                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
                                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                                 >
                                     <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>🏘️</span>

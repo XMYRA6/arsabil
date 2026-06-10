@@ -64,7 +64,7 @@ export const BreakEvenChart: React.FC<Props> = ({ baseInput, marketPrice }) => {
 
             {/* Market comparison */}
             {marketPrice > 0 && (
-                <div style={{ padding: '8px 12px', borderRadius: '10px', background: 'rgba(31,111,235,0.06)', border: '1px solid rgba(31,111,235,0.12)', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', marginBottom: '8px' }}>
+                <div style={{ padding: '8px 12px', borderRadius: '10px', background: 'rgba(var(--primary-rgb),0.06)', border: '1px solid rgba(var(--primary-rgb),0.12)', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', marginBottom: '8px' }}>
                     Piyasa Fiyatı: ₺{formatTL(marketPrice)} — {' '}
                     {currentResult.FD_total <= marketPrice ? (
                         <span style={{ color: 'var(--green)' }}>✓ Piyasadan {((1 - currentResult.FD_total / marketPrice) * 100).toFixed(1)}% ucuz</span>

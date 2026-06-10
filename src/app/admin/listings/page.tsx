@@ -189,9 +189,9 @@ export default function AdminListings() {
                                 </td>
                                 <td style={{ textAlign: 'center' }}>
                                     <span className={styles.roleBadge} style={{
-                                        background: listing._count.offers > 0 ? 'rgba(31,111,235,.1)' : 'rgba(107,114,128,.1)',
+                                        background: listing._count.offers > 0 ? 'rgba(var(--primary-rgb),.1)' : 'rgba(107,114,128,.1)',
                                         color: listing._count.offers > 0 ? 'var(--primary)' : 'var(--muted)',
-                                        border: listing._count.offers > 0 ? '1px solid rgba(31,111,235,.2)' : '1px solid rgba(107,114,128,.2)',
+                                        border: listing._count.offers > 0 ? '1px solid rgba(var(--primary-rgb),.2)' : '1px solid rgba(107,114,128,.2)',
                                     }}>
                                         {listing._count.offers}
                                     </span>

@@ -108,7 +108,7 @@ export function FilterSidebar({ filters, onChange, totalCount }: Props) {
                                 style={{
                                     padding: '4px 10px', borderRadius: 8,
                                     border: `1.5px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
-                                    background: active ? 'rgba(31,111,235,.10)' : 'transparent',
+                                    background: active ? 'rgba(var(--primary-rgb),.10)' : 'transparent',
                                     color: active ? 'var(--primary)' : 'var(--muted)',
                                     fontSize: '0.72rem', fontWeight: active ? 700 : 500,
                                     cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s',

@@ -73,8 +73,8 @@ export function MiniMap({ lat, lng, label, listingId }: Props) {
             // Accuracy circle
             L.circle([lat, lng], {
                 radius: 80,
-                color: '#1f6feb',
-                fillColor: '#1f6feb',
+                color: '#6d5bf6',
+                fillColor: '#6d5bf6',
                 fillOpacity: 0.1,
                 weight: 1.5,
                 dashArray: '4 3',
@@ -110,8 +110,8 @@ export function MiniMap({ lat, lng, label, listingId }: Props) {
                         style={{
                             fontSize: '0.68rem', fontWeight: 700, color: 'var(--primary)',
                             textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4,
-                            padding: '4px 10px', background: 'rgba(31,111,235,.1)',
-                            borderRadius: 6, border: '1px solid rgba(31,111,235,.2)',
+                            padding: '4px 10px', background: 'rgba(var(--primary-rgb),.1)',
+                            borderRadius: 6, border: '1px solid rgba(var(--primary-rgb),.2)',
                             transition: 'all 0.15s',
                         }}
                     >

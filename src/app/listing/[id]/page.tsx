@@ -260,7 +260,7 @@ export default function ListingDetailPage() {
                                         </div>
                                     ))}
                                 </div>
-                                <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(31,111,235,.08)', borderRadius: 10, fontSize: '0.78rem', color: 'var(--muted)' }}>
+                                <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(var(--primary-rgb),.08)', borderRadius: 10, fontSize: '0.78rem', color: 'var(--muted)' }}>
                                     💡 Bu değerler ArsaBil Engine v2 tarafından otomatik hesaplanmıştır. Detaylı analiz için Senaryo sekmesini kullanın.
                                 </div>
                             </div>
@@ -339,7 +339,7 @@ export default function ListingDetailPage() {
                             <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Net Kâr</div>
                             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#10b981' }}>+%{listing.netKar}</div>
                         </div>
-                        <div style={{ flex: 1, background: 'rgba(31,111,235,.10)', borderRadius: 10, padding: '10px 12px' }}>
+                        <div style={{ flex: 1, background: 'rgba(var(--primary-rgb),.10)', borderRadius: 10, padding: '10px 12px' }}>
                             <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Arsa Payı</div>
                             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary)' }}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
                         </div>

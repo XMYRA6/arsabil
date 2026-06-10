@@ -39,9 +39,9 @@ export async function getEmailPrefs(userId: string): Promise<{
 
 export function buildMessageEmail(senderName: string): string {
     return `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-        <h2 style="color:#1f6feb">Yeni Mesajınız Var</h2>
+        <h2 style="color:#6d5bf6">Yeni Mesajınız Var</h2>
         <p><strong>${senderName}</strong> size bir mesaj gönderdi.</p>
-        <a href="https://arsabil.com/inbox" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1f6feb;color:white;text-decoration:none;border-radius:8px;font-weight:700">Mesajı Görüntüle →</a>
+        <a href="https://arsabil.com/inbox" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#6d5bf6;color:white;text-decoration:none;border-radius:8px;font-weight:700">Mesajı Görüntüle →</a>
         <p style="margin-top:24px;font-size:0.8rem;color:#6b7280">Bu bildirimi almak istemiyorsanız profil ayarlarınızdan e-posta tercihlerinizi güncelleyebilirsiniz.</p>
     </div>`
 }
@@ -59,7 +59,7 @@ export function buildApprovalEmail(listingTitle: string): string {
     return `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
         <h2 style="color:#10b981">İlanınız Onaylandı!</h2>
         <p>"<strong>${listingTitle}</strong>" ilanınız yönetici tarafından onaylandı ve pazar yerine eklendi.</p>
-        <a href="https://arsabil.com/marketplace" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1f6feb;color:white;text-decoration:none;border-radius:8px;font-weight:700">Pazar Yerini Görüntüle →</a>
+        <a href="https://arsabil.com/marketplace" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#6d5bf6;color:white;text-decoration:none;border-radius:8px;font-weight:700">Pazar Yerini Görüntüle →</a>
         <p style="margin-top:24px;font-size:0.8rem;color:#6b7280">Bu bildirimi almak istemiyorsanız profil ayarlarınızdan e-posta tercihlerinizi güncelleyebilirsiniz.</p>
     </div>`
 }
