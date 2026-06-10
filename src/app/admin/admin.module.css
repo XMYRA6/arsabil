@@ -11,8 +11,8 @@
 
 .adminShell {
     display: grid;
-    grid-template-columns: 280px 1fr;
-    min-height: calc(100vh - 100px);
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: calc(100dvh - 100px);
     max-width: 1400px;
     margin: 0 auto;
     padding: 14px;
@@ -437,12 +437,26 @@
         font-size: 0.85rem;
         padding: 0.6rem 0.75rem;
     }
+
+    .profitLevelHeader,
+    .profitLevelRow {
+        grid-template-columns: minmax(0, 1fr) 80px 50px;
+        font-size: 0.75rem;
+    }
+
+    /* Hide Sıra (3rd col) and Vars. (4th col) on mobile */
+    .profitLevelHeader span:nth-child(3),
+    .profitLevelHeader span:nth-child(4),
+    .profitLevelRow > *:nth-child(3),
+    .profitLevelRow > *:nth-child(4) {
+        display: none;
+    }
 }
 
 /* Profit Levels CRUD */
 .profitLevelRow {
     display: grid;
-    grid-template-columns: 1fr 100px 60px 60px 80px;
+    grid-template-columns: minmax(0, 1fr) 100px 60px 60px 80px;
     gap: 8px;
     align-items: center;
     padding: 10px 0;
@@ -473,7 +487,7 @@
 
 .profitLevelHeader {
     display: grid;
-    grid-template-columns: 1fr 100px 60px 60px 80px;
+    grid-template-columns: minmax(0, 1fr) 100px 60px 60px 80px;
     gap: 8px;
     padding: 8px 0;
     border-bottom: 2px solid var(--border);
