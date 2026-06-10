@@ -139,6 +139,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const geoJsonCacheRef = useRef<any>(null);
     const lastView = useRef<{ lat: number; lng: number; zoom: number }>({ lat: 41.015, lng: 28.979, zoom: 12 });
     const LRef = useRef<any>(null);
+    const roRef = useRef<ResizeObserver | null>(null);
 
     const [tileKey, setTileKey] = useState<TileKey>(() => {
         if (typeof window !== 'undefined') {
@@ -192,6 +193,13 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             });
 
             mapRef.current = map;
+
+            // ResizeObserver: invalidate map size when container becomes visible (e.g. mobile tab switch)
+            if (mapContainerRef.current) {
+                const ro = new ResizeObserver(() => { map.invalidateSize(); });
+                ro.observe(mapContainerRef.current);
+                roRef.current = ro;
+            }
 
             // MarkerCluster
             try {
@@ -297,6 +305,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
         initMap();
         return () => {
             cancelled = true;
+            if (roRef.current) { roRef.current.disconnect(); roRef.current = null; }
             if (mapRef.current) {
                 const c = mapRef.current.getCenter();
                 lastView.current = { lat: c.lat, lng: c.lng, zoom: mapRef.current.getZoom() };
