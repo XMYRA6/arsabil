@@ -34,6 +34,11 @@ export function resetRateLimits(): void {
     buckets.clear()
 }
 
+/**
+ * GÜVENİLEN PROXY VARSAYIMI: x-forwarded-for yalnız reverse proxy (Coolify/Traefik)
+ * arkasında güvenilirdir. Proxy'siz (doğrudan) erişimde header bulunmaz ve tüm
+ * istemciler 'unknown' anahtarında birleşir — bilinçli fail-closed davranış.
+ */
 export function getClientIp(req: Request): string {
     const fwd = req.headers.get('x-forwarded-for')
     if (fwd) return fwd.split(',')[0].trim()
