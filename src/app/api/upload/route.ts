@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { v2 as cloudinary } from 'cloudinary'
 import { isAllowedMimeType, isWithinSizeLimit } from '@/lib/upload'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -14,6 +15,14 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const rl = checkRateLimit(`upload:${session.user.id}`, RATE_LIMITS.UPLOAD)
+    if (!rl.ok) {
+        return NextResponse.json(
+            { error: 'Yükleme limiti aşıldı. Lütfen daha sonra tekrar deneyin.' },
+            { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec ?? 60) } }
+        )
     }
 
     const formData = await req.formData()

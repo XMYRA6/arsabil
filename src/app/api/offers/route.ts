@@ -3,12 +3,21 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { sendEmail, buildOfferEmail, getEmailPrefs } from "@/lib/email";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
     try {
         const session = await getServerSession();
         if (!session || !session.user) {
             return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
+        }
+
+        const rl = checkRateLimit(`write:${session.user.id}`, RATE_LIMITS.WRITE);
+        if (!rl.ok) {
+            return NextResponse.json(
+                { message: "Çok hızlı işlem yapıyorsunuz. Lütfen biraz bekleyin." },
+                { status: 429, headers: { "Retry-After": String(rl.retryAfterSec ?? 60) } }
+            );
         }
 
         const { listingId, offeredShare, message } = await req.json();

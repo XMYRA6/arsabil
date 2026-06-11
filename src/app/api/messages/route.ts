@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { createNotification } from '@/lib/notifications'
 import { sendEmail, buildMessageEmail, getEmailPrefs } from '@/lib/email'
 import { notifyUser } from '@/lib/sse'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,6 +62,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const senderId = session.user.id as string
+
+    const rl = checkRateLimit(`write:${senderId}`, RATE_LIMITS.WRITE)
+    if (!rl.ok) {
+        return NextResponse.json(
+            { error: 'Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyin.' },
+            { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec ?? 60) } }
+        )
+    }
 
     try {
         const { receiverId, content, reportId } = await req.json()
