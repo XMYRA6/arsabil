@@ -35,14 +35,26 @@ export function resetRateLimits(): void {
 }
 
 /**
- * GÜVENİLEN PROXY VARSAYIMI: x-forwarded-for yalnız reverse proxy (Coolify/Traefik)
- * arkasında güvenilirdir. Proxy'siz (doğrudan) erişimde header bulunmaz ve tüm
- * istemciler 'unknown' anahtarında birleşir — bilinçli fail-closed davranış.
+ * GÜVENİLEN PROXY VARSAYIMI: bu fonksiyon tek güvenilen reverse proxy
+ * (Coolify/Traefik) arkasında çalışmak üzere tasarlandı. Proxy, istemcinin
+ * gönderdiği x-forwarded-for'a GERÇEK istemci IP'sini SONA EKLER — bu yüzden
+ * SON girdi alınır (ilk girdi istemci kontrolündedir, spoof edilebilir).
+ * Proxy'siz (doğrudan) erişimde header'lar tamamen istemci kontrolündedir;
+ * header yoksa tüm istemciler 'unknown' anahtarında birleşir (fail-closed).
  */
+export function clientIpFromHeaders(
+    forwardedFor: string | null | undefined,
+    realIp: string | null | undefined,
+): string {
+    if (forwardedFor) {
+        const parts = forwardedFor.split(',')
+        return parts[parts.length - 1].trim()
+    }
+    return realIp ?? 'unknown'
+}
+
 export function getClientIp(req: Request): string {
-    const fwd = req.headers.get('x-forwarded-for')
-    if (fwd) return fwd.split(',')[0].trim()
-    return req.headers.get('x-real-ip') ?? 'unknown'
+    return clientIpFromHeaders(req.headers.get('x-forwarded-for'), req.headers.get('x-real-ip'))
 }
 
 export const RATE_LIMITS = {

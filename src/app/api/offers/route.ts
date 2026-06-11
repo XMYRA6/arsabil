@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { createNotification } from "@/lib/notifications";
 import { sendEmail, buildOfferEmail, getEmailPrefs } from "@/lib/email";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
         if (!session || !session.user) {
             return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
         }

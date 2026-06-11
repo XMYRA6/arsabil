@@ -1,4 +1,4 @@
-import { checkRateLimit, resetRateLimits, getClientIp, RATE_LIMITS } from '../rate-limit'
+import { checkRateLimit, resetRateLimits, getClientIp, clientIpFromHeaders, RATE_LIMITS } from '../rate-limit'
 
 describe('checkRateLimit', () => {
     beforeEach(() => resetRateLimits())
@@ -58,8 +58,12 @@ describe('checkRateLimit', () => {
 })
 
 describe('getClientIp', () => {
-    it('x-forwarded-for ilk IP alınır', () => {
-        const req = new Request('http://x', { headers: { 'x-forwarded-for': '1.2.3.4, 10.0.0.1' } })
+    it('x-forwarded-for SON IP alınır (ilki spoof edilebilir)', () => {
+        const req = new Request('http://x', { headers: { 'x-forwarded-for': 'spoofed-ip, 10.0.0.1' } })
+        expect(getClientIp(req)).toBe('10.0.0.1')
+    })
+    it('tek girdili x-forwarded-for aynen döner', () => {
+        const req = new Request('http://x', { headers: { 'x-forwarded-for': '1.2.3.4' } })
         expect(getClientIp(req)).toBe('1.2.3.4')
     })
     it('x-forwarded-for yoksa x-real-ip kullanılır', () => {
@@ -68,6 +72,12 @@ describe('getClientIp', () => {
     })
     it('header yoksa unknown döner', () => {
         expect(getClientIp(new Request('http://x'))).toBe('unknown')
+    })
+})
+
+describe('clientIpFromHeaders', () => {
+    it('çok girdili zincirde son girdiyi trimleyerek döner', () => {
+        expect(clientIpFromHeaders('a, b,  9.9.9.9 ', null)).toBe('9.9.9.9')
     })
 })
 
