@@ -22,7 +22,7 @@ const nextConfig = {
                     { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
                     {
                         key: 'Content-Security-Policy-Report-Only',
-                        value: "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.tile.openstreetmap.org; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.ingest.sentry.io https://*.sentry.io; font-src 'self' data:; frame-ancestors 'none'",
+                        value: "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://*.ingest.sentry.io https://*.sentry.io https://nominatim.openstreetmap.org; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'",
                     },
                 ],
             },

@@ -1,5 +1,6 @@
 "use client";
 
+import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef } from 'react';
 
 interface Props {
@@ -18,15 +19,6 @@ export function MiniMap({ lat, lng, label, listingId }: Props) {
 
         const init = async () => {
             const L = (await import('leaflet')).default;
-
-            // Leaflet CSS
-            if (!document.getElementById('leaflet-css')) {
-                const link = document.createElement('link');
-                link.id = 'leaflet-css';
-                link.rel = 'stylesheet';
-                link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-                document.head.appendChild(link);
-            }
 
             const el = containerRef.current;
             if (!el) return;
