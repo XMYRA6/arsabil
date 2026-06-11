@@ -6,8 +6,12 @@ Sentry.init({
     tracesSampleRate: 0.1,
     sendDefaultPii: false,
     beforeSend(event, hint) {
-        const msg = String((hint?.originalException as Error | undefined)?.message ?? '')
-        if (msg.includes('NEXT_NOT_FOUND') || msg.includes('NEXT_REDIRECT')) return null
+        const err = hint?.originalException as { message?: string; digest?: string } | undefined
+        const sig = `${err?.digest ?? ''} ${err?.message ?? ''}`
+        // Next kontrol-akışı hataları: redirect() ve notFound()/HTTP fallback
+        if (sig.includes('NEXT_REDIRECT') || sig.includes('NEXT_HTTP_ERROR_FALLBACK') || sig.includes('NEXT_NOT_FOUND')) {
+            return null
+        }
         return event
     },
 })
