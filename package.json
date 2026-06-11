@@ -16,6 +16,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "^5.22.0",
+    "@sentry/nextjs": "^10.57.0",
     "@types/leaflet": "^1.9.21",
     "@types/leaflet.markercluster": "^1.5.6",
     "bcryptjs": "^3.0.3",
