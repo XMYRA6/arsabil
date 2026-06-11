@@ -8,7 +8,7 @@ interface PriceEvaluationChartProps {
 }
 
 export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minPrice, marketPrice }) => {
-    if (!marketPrice) return <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', textAlign: 'center', width: '100%', padding: '1rem' }}>Piyasa Fiyatı Girilmedi</div>;
+    if (!marketPrice) return <div style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', width: '100%', padding: '1rem' }}>Piyasa Fiyatı Girilmedi</div>;
 
     // Positive = Market price is higher (Pahalı)
     // Negative = Market price is lower (Ucuz)
@@ -47,7 +47,7 @@ export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minP
                 }}>
                     {statusText}
                 </span>
-                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)' }}>
                     {diffPercent > 0 ? '+' : ''}{diffPercent.toFixed(1)}%
                 </span>
             </div>
@@ -61,7 +61,7 @@ export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minP
                     width: '4px',
                     height: '20px',
                     backgroundColor: 'white',
-                    border: '1px solid var(--text-main)',
+                    border: '1px solid var(--text)',
                     borderRadius: '2px',
                     transform: 'translateX(-50%)',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
@@ -75,12 +75,12 @@ export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minP
                     left: '50%',
                     transform: 'translateX(-50%)',
                     fontSize: '0.65rem',
-                    color: 'var(--text-muted)',
+                    color: 'var(--muted)',
                     fontWeight: 600
                 }}>Adil (0%)</div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--muted)' }}>
                 <span>-30%</span>
                 <span>+30%</span>
             </div>

@@ -361,7 +361,7 @@ export function Navbar() {
                         ) : (
                             <>
                                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Giriş Yap</Link>
-                                <Link href="/register" onClick={() => setIsMenuOpen(false)} style={{ color: 'var(--primary-color)' }}>Hesap Oluştur</Link>
+                                <Link href="/register" onClick={() => setIsMenuOpen(false)} style={{ color: 'var(--primary)' }}>Hesap Oluştur</Link>
                             </>
                         )}
                     </div>

@@ -41,7 +41,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
     padding: "4px 8px",
     borderRadius: 8,
     border: "1px solid var(--border)",
-    background: "var(--input-solid)",
+    background: "var(--input-bg)",
     color: "var(--text)",
     fontSize: "0.85rem",
     fontFamily: "inherit",

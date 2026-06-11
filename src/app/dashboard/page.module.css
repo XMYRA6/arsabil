@@ -74,6 +74,9 @@
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.25rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow2);
 }
 
 .sectionHeader {

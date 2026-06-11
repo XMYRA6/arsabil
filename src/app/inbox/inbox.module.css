@@ -294,7 +294,6 @@
     color: #fff;
     border: none;
     border-radius: 22px 22px 4px 22px;
-    backdrop-filter: blur(10px);
 }
 
 .bubbleTheirs {
@@ -303,6 +302,20 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 22px 22px 22px 4px;
     backdrop-filter: blur(10px);
+}
+
+/* Light-theme overrides for white-alpha surfaces */
+:global([data-theme="light"]) .bubbleTheirs {
+    background: rgba(var(--primary-rgb), 0.06);
+    border: 1px solid var(--border);
+}
+
+:global([data-theme="light"]) .dateText {
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+:global([data-theme="light"]) .convItem:hover {
+    background: rgba(var(--primary-rgb), 0.05);
 }
 
 .msgMeta {

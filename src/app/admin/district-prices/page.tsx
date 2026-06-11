@@ -205,7 +205,7 @@ export default function AdminDistrictPrices() {
               padding: "8px 12px",
               borderRadius: 8,
               border: "1px solid var(--border)",
-              background: "var(--input-solid)",
+              background: "var(--input-bg)",
               color: "var(--text)",
               fontSize: "0.9rem",
               fontFamily: "inherit",

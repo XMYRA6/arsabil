@@ -13,7 +13,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
 
     /* Dark mode: deep iOS frosted glass */
-    background: rgba(10, 20, 42, 0.76);
+    background: var(--topbar-bg);
     border-top: 0.5px solid rgba(255, 255, 255, 0.13);
     box-shadow:
         0 -0.5px 0 rgba(255, 255, 255, 0.06),
@@ -32,7 +32,7 @@
 
 /* Light theme overrides */
 :global([data-theme="light"]) .bottomNav {
-    background: rgba(244, 248, 255, 0.82);
+    background: rgba(248, 246, 255, 0.85);
     border-top: 0.5px solid rgba(0, 0, 0, 0.10);
     box-shadow:
         0 -0.5px 0 rgba(0, 0, 0, 0.05),

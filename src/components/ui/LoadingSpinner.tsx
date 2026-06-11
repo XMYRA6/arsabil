@@ -14,7 +14,7 @@ export const LoadingSpinner: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '3rem',
-            color: 'var(--primary-color)'
+            color: 'var(--primary)'
         }}>
             <svg
                 width="64"

@@ -52,7 +52,7 @@ export const RiskGaugeChart: React.FC<RiskGaugeProps> = ({ score, title }) => {
                 transform: 'translate(-50%, -50%)',
                 textAlign: 'center'
             }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1 }}>{Math.round(score)}</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{Math.round(score)}</div>
             </div>
             <div style={{
                 position: 'absolute',
@@ -60,7 +60,7 @@ export const RiskGaugeChart: React.FC<RiskGaugeProps> = ({ score, title }) => {
                 width: '100%',
                 textAlign: 'center',
                 fontSize: '0.8rem',
-                color: 'var(--text-muted)',
+                color: 'var(--muted)',
                 fontWeight: 500
             }}>
                 {title}
