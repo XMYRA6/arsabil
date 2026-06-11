@@ -12,5 +12,4 @@ Sentry.init({
     },
 })
 
-// NOTE: captureRouterTransitionStart is not available in @sentry/nextjs v10.57.0
-// (it was a v9 API). Export omitted intentionally.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
