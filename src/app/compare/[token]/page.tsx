@@ -32,8 +32,9 @@ async function getCompare(token: string): Promise<{ scenarios: Scenario[]; creat
     }
 }
 
-export default async function ComparePage({ params }: { params: { token: string } }) {
-    const data = await getCompare(params.token)
+export default async function ComparePage({ params }: { params: Promise<{ token: string }> }) {
+    const { token } = await params
+    const data = await getCompare(token)
     if (!data) notFound()
 
     const dateStr = new Date(data.createdAt).toLocaleDateString('tr-TR', {
