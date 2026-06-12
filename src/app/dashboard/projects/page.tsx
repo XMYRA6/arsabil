@@ -8,11 +8,27 @@ import { exportToExcel } from "@/lib/export/excel";
 import { toast } from "react-hot-toast";
 import styles from '../dashboard.module.css';
 
+interface Scenario {
+    id: string;
+    name: string;
+    fdTotal: number;
+    fdPerM2: number;
+    landShareRatio: number;
+}
+
+interface Project {
+    id: string;
+    name: string;
+    description?: string;
+    _count?: { scenarios: number };
+    scenarios?: Scenario[];
+}
+
 export default function ProjectsPage() {
     const { status } = useSession();
-    const [projects, setProjects] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedProject, setSelectedProject] = useState<any | null>(null);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
     const fetchProjects = () => {
         setLoading(true);
@@ -23,10 +39,11 @@ export default function ProjectsPage() {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- oturum açıkken veri çekme; setState fetchProjects içinde gerçekleşiyor
         if (status === 'authenticated') fetchProjects();
     }, [status]);
 
-    const handleExcel = (project: any) => {
+    const handleExcel = (project: Project) => {
         if (!project.scenarios?.length) {
             toast.error('Bu projede henüz senaryo yok.');
             return;
@@ -78,7 +95,7 @@ export default function ProjectsPage() {
                                         Senaryolar
                                     </h5>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px' }}>
-                                        {project.scenarios.map((s: any) => (
+                                        {project.scenarios.map((s: Scenario) => (
                                             <div key={s.id} className={styles.reportCard} style={{ padding: '0.85rem' }}>
                                                 <h4 style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>{s.name}</h4>
                                                 <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>

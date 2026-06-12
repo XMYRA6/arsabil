@@ -6,6 +6,7 @@ import { NextAuthOptions } from "next-auth";
 import { checkRateLimit, clientIpFromHeaders, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- @auth/prisma-adapter v1 ve next-auth v4 Adapter tipi uyumsuzluğu
     adapter: PrismaAdapter(prisma) as any,
     session: {
         strategy: "jwt",
@@ -47,22 +48,22 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     name: user.name,
                     role: user.role,
-                } as any;
+                } as { id: string; email: string | null; name: string | null; role: string };
             }
         })
     ],
     callbacks: {
         async session({ session, token }) {
             if (token && session.user) {
-                (session.user as any).id = token.id as string;
-                (session.user as any).role = token.role as string;
+                (session.user as Record<string, unknown>).id = token.id as string;
+                (session.user as Record<string, unknown>).role = token.role as string;
             }
             return session;
         },
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
-                token.role = (user as any).role;
+                token.role = (user as { role?: string }).role;
             }
             return token;
         }

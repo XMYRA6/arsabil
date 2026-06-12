@@ -23,7 +23,8 @@ export function InstallPrompt() {
         // Check if already in standalone mode
         const standalone =
             window.matchMedia("(display-mode: standalone)").matches ||
-            (window.navigator as any).standalone === true;
+            (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- PWA standalone modu tespit ediliyor
         setIsStandalone(standalone);
         if (standalone) return;
 

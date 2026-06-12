@@ -30,6 +30,7 @@ export default function AdminListings() {
             .catch(() => setLoading(false));
     };
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- bileşen montajında veri çekme; setState fetchListings içinde gerçekleşiyor
     useEffect(() => { fetchListings(); }, []);
 
     const toggleActive = async (id: string, isActive: boolean) => {

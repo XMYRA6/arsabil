@@ -7,9 +7,18 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
+interface BoardListing {
+    id: string;
+    city?: string;
+    district?: string;
+    notes?: string;
+    user?: { name?: string };
+    report: { totalApartments: number; apartmentSizeSqm: number; minApartmentPrice: number; landShareRatio: number };
+}
+
 export default function BoardPage() {
     const { data: session } = useSession();
-    const [listings, setListings] = useState<any[]>([]);
+    const [listings, setListings] = useState<BoardListing[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [selectedListingId, setSelectedListingId] = useState<string | null>(null);

@@ -9,6 +9,12 @@ import styles from './profile.module.css'
 type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
 type Theme = 'dark' | 'light'
 
+interface Favorite {
+    id: string;
+    listingId: string;
+    listing?: { title?: string; city?: string; district?: string; price?: number; report?: { title?: string } };
+}
+
 const PALETTES: { id: Theme; label: string; color: string; icon: string }[] = [
     { id: 'dark',  label: 'Gece',     color: '#6d5bf6', icon: '🌙' },
     { id: 'light', label: 'Gündüz',   color: '#e0e8f4', icon: '☀️' },
@@ -43,10 +49,11 @@ export default function ProfilePage() {
     const [savingPrefs, setSavingPrefs] = useState(false)
     const [savedPrefs, setSavedPrefs] = useState(false)
     const [mounted, setMounted] = useState(false)
-    const [favorites, setFavorites] = useState<any[]>([])
+    const [favorites, setFavorites] = useState<Favorite[]>([])
     const [loadingFavs, setLoadingFavs] = useState(false)
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
         setMounted(true)
         const saved = (localStorage.getItem('arsabil-theme') as Theme) || 'dark'
         setTheme(saved)
@@ -54,6 +61,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (tab !== 'favorites' || !session?.user) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- sekme değişiminde favori listesi çekiliyor
         setLoadingFavs(true)
         fetch('/api/favorites')
             .then(r => r.json())
@@ -275,7 +283,7 @@ export default function ProfilePage() {
                                     </div>
                                 ) : (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                        {favorites.map((fav: any) => (
+                                        {favorites.map((fav) => (
                                             <a
                                                 key={fav.id}
                                                 href={`/listing/${fav.listingId}`}

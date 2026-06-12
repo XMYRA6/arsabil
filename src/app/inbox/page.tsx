@@ -135,11 +135,13 @@ function InboxContent() {
 
     useEffect(() => {
         const withParam = searchParams.get('with')
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- URL parametresinden başlangıç konuşması açılıyor
         if (withParam && status === 'authenticated') openConversation(withParam)
     }, [searchParams, status, openConversation])
 
     useEffect(() => {
         if (typeof window !== 'undefined' && window.innerWidth > 768 && !activeOtherId && conversations.length > 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- geniş ekranda otomatik ilk konuşma seçimi
             openConversation(conversations[0].otherUser.id)
         }
     }, [conversations, activeOtherId, openConversation])

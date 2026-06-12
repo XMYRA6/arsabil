@@ -4,9 +4,21 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import styles from '../dashboard.module.css';
 
+interface Report {
+    id: string;
+    title: string;
+    totalApartments: number;
+    apartmentSizeSqm: number;
+    landShareRatio: number;
+    luxLevelModifier: number;
+    minApartmentPrice: number;
+    landCost: number;
+    createdAt: string;
+}
+
 export default function ReportsPage() {
     const { status } = useSession();
-    const [reports, setReports] = useState<any[]>([]);
+    const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

@@ -7,14 +7,14 @@ import { FilterSidebar } from '@/components/marketplace/FilterSidebar';
 import { ListingCard } from '@/components/marketplace/ListingCard';
 import { ViewToggle } from '@/components/marketplace/ViewToggle';
 import { CitySearch } from '@/components/marketplace/CitySearch';
-import type { MapViewHandle } from '@/components/marketplace/MapView';
+import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
 import styles from './page.module.css';
 
 // SSR-safe map import
-const MapView = dynamic(
+const MapView = dynamic<MapViewProps>(
     () => import('@/components/marketplace/MapView').then(m => m.MapView),
     { ssr: false, loading: () => <div style={{ flex: 1, background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>🗺 Harita yükleniyor…</div> }
-) as any;
+);
 
 type View = 'split' | 'map' | 'list';
 
@@ -58,7 +58,7 @@ function MarketplaceContent() {
     const [view, setView] = useState<View>((searchParams.get('view') as View) || 'split');
     const [mobileTab, setMobileTab] = useState<'filter' | 'list' | 'map'>('list');
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
-    const [listings, setListings] = useState<any[]>([]);
+    const [listings, setListings] = useState<Record<string, unknown>[]>([]);
     const [loading, setLoading] = useState(true);
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('score_desc');
@@ -68,6 +68,7 @@ function MarketplaceContent() {
 
     useEffect(() => {
         const saved = localStorage.getItem('arsabil-marketplace-view') as View | null;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage'dan başlangıç görünüm tercihi okunuyor
         if (saved) setView(saved);
     }, []);
 
@@ -80,13 +81,14 @@ function MarketplaceContent() {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- bileşen montajında ilan listesi çekiliyor
         setLoading(true);
         fetch('/api/listings')
             .then(r => r.json())
             .then(data => {
                 const arr = Array.isArray(data) ? data : [];
                 // Enrich API data with mock fizibilite fields for demo
-                const enriched = arr.map((l: any, i: number) => ({
+                const enriched = arr.map((l: Record<string, unknown>, i: number) => ({
                     ...l,
                     ...(MOCK_LISTINGS_EXTRA[i % MOCK_LISTINGS_EXTRA.length] || {}),
                     type: l.type ?? 'KAT_KARSILIGI',

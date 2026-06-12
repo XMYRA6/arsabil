@@ -168,6 +168,7 @@ export default function Home() {
       : landShareRatio / 100;
 
     if (isApartmentCountEnabled) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- arsa payı/daire sayısı türev durumu senkronizasyonu
       setLandShareRatio(Math.round(activeLandShare * 100));
     } else {
       setOwnerApartmentCount(Math.round(totalApartments * activeLandShare));
@@ -203,6 +204,7 @@ export default function Home() {
     );
     if (!entry) return;
     const market = Math.round(entry.avgSalesPricePerM2 * apartmentSize);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- ilçe fiyat verisi değiştiğinde piyasa fiyatı hesaplanıyor
     setManualMarketPrice(market.toLocaleString('tr-TR', { maximumFractionDigits: 0 }));
   }, [apartmentSize, selectedIl, selectedIlce, districtPrices]);
 

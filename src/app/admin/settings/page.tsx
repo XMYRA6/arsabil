@@ -44,26 +44,6 @@ export default function AdminSettings() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-    useEffect(() => {
-        // Global ayarları çek
-        fetch('/api/settings')
-            .then(r => r.json())
-            .then(data => {
-                if (data.excavationLowPercent) setExcavationLow(data.excavationLowPercent);
-                if (data.excavationMediumPercent) setExcavationMedium(data.excavationMediumPercent);
-                if (data.qualityStandard) setQualityStandard(data.qualityStandard);
-                if (data.qualityMedium) setQualityMedium(data.qualityMedium);
-                if (data.qualityLux) setQualityLux(data.qualityLux);
-                if (data.defaultUnitPrice) setDefaultUnitPrice(data.defaultUnitPrice);
-            })
-            .catch(console.error);
-
-        // Kâr katsayılarını çek
-        fetchProfitLevels();
-        // Risk seviyelerini çek
-        fetchRiskLevels();
-    }, []);
-
     const fetchProfitLevels = async () => {
         setProfitLoading(true);
         try {
@@ -97,6 +77,25 @@ export default function AdminSettings() {
             setRiskLoading(false);
         }
     };
+
+    useEffect(() => {
+        // Global ayarları çek
+        fetch('/api/settings')
+            .then(r => r.json())
+            .then(data => {
+                if (data.excavationLowPercent) setExcavationLow(data.excavationLowPercent);
+                if (data.excavationMediumPercent) setExcavationMedium(data.excavationMediumPercent);
+                if (data.qualityStandard) setQualityStandard(data.qualityStandard);
+                if (data.qualityMedium) setQualityMedium(data.qualityMedium);
+                if (data.qualityLux) setQualityLux(data.qualityLux);
+                if (data.defaultUnitPrice) setDefaultUnitPrice(data.defaultUnitPrice);
+            })
+            .catch(console.error);
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- bileşen montajında ayar verisi çekiliyor; setState fetchProfitLevels/fetchRiskLevels içinde gerçekleşiyor
+        fetchProfitLevels();
+        fetchRiskLevels();
+    }, []);
 
     const handleSave = async () => {
         setLoading(true);

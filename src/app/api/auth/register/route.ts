@@ -33,8 +33,8 @@ export async function POST(req: Request) {
                 name,
                 email,
                 password: hashedPassword,
-                role: role || "USER"
-            } as any
+                role: (role || "USER") as "USER" | "ADMIN"
+            }
         });
 
         return NextResponse.json({ message: "Kayıt başarılı", user: newUser }, { status: 201 });

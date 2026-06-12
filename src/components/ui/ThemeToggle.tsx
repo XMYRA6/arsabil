@@ -20,6 +20,7 @@ export const ThemeToggle: React.FC = () => {
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
         setMounted(true);
         const saved = (localStorage.getItem('arsabil-theme') as Mode) || 'dark';
         setTheme(saved);

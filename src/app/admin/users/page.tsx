@@ -44,6 +44,7 @@ export default function AdminUsers() {
             .catch(() => setLoading(false));
     };
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- bileşen montajında veri çekme; setState fetchUsers içinde gerçekleşiyor
     useEffect(() => { fetchUsers(); }, []);
 
     const handleRoleChange = async (userId: string, newRole: string) => {

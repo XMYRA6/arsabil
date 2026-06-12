@@ -27,10 +27,6 @@ export default function AdminDistrictPrices() {
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchPrices();
-  }, []);
-
   const fetchPrices = async () => {
     setLoading(true);
     try {
@@ -43,6 +39,11 @@ export default function AdminDistrictPrices() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- bileşen montajında fiyat listesi çekiliyor; setState fetchPrices içinde gerçekleşiyor
+    fetchPrices();
+  }, []);
 
   const filtered = filterIl
     ? prices.filter((p) =>

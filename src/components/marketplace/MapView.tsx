@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { Map as LMap, TileLayer, LayerGroup, Marker, MarkerOptions, LeafletMouseEvent } from 'leaflet';
+import type { MarkerClusterGroup, MarkerCluster } from 'leaflet.markercluster';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -48,14 +50,16 @@ interface Listing {
     isNew?: boolean;
     lat?: number;
     lng?: number;
-    report?: any;
+    report?: Record<string, unknown>;
 }
 
-interface Props {
+export interface MapViewProps {
     listings: Listing[];
     highlightedId: string | null;
     onHighlight: (id: string | null) => void;
 }
+
+type Props = MapViewProps;
 
 export interface MapViewHandle {
     flyTo: (lat: number, lng: number, zoom?: number) => void;
@@ -125,20 +129,20 @@ function ToolBtn({ icon, label, active, onClick, disabled, badge }: {
 export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listings, highlightedId, onHighlight }, ref) {
     const router = useRouter();
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<any>(null);
-    const markersRef = useRef<Record<string, any>>({});
-    const clusterGroupRef = useRef<any>(null);
-    const tileLayerRef = useRef<any>(null);
-    const heatLayerRef = useRef<any>(null);
-    const pinMarkerRef = useRef<any>(null);
-    const measureLayerRef = useRef<any>(null);
+    const mapRef = useRef<LMap | null>(null);
+    const markersRef = useRef<Record<string, { marker: Marker; lat: number; lng: number; score: number }>>({});
+    const clusterGroupRef = useRef<MarkerClusterGroup | LayerGroup | null>(null);
+    const tileLayerRef = useRef<TileLayer | null>(null);
+    const heatLayerRef = useRef<LayerGroup | null>(null);
+    const pinMarkerRef = useRef<Marker | null>(null);
+    const measureLayerRef = useRef<LayerGroup | null>(null);
     const measurePointsRef = useRef<[number, number][]>([]);
-    const drawLayerRef = useRef<any>(null);
+    const drawLayerRef = useRef<LayerGroup | null>(null);
     const drawPointsRef = useRef<[number, number][]>([]);
-    const provinceBorderRef = useRef<any>(null);
-    const geoJsonCacheRef = useRef<any>(null);
+    const provinceBorderRef = useRef<LayerGroup | null>(null);
+    const geoJsonCacheRef = useRef<{ features?: Array<{ properties?: Record<string, string | undefined> }> } | null>(null);
     const lastView = useRef<{ lat: number; lng: number; zoom: number }>({ lat: 41.015, lng: 28.979, zoom: 12 });
-    const LRef = useRef<any>(null);
+    const LRef = useRef<typeof import('leaflet') | null>(null);
     const roRef = useRef<ResizeObserver | null>(null);
 
     const [tileKey, setTileKey] = useState<TileKey>(() => {
@@ -168,7 +172,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             if (cancelled) return;
             LRef.current = L;
 
-            const container = mapContainerRef.current as any;
+            const container = mapContainerRef.current as HTMLElement & { _leaflet_id?: number };
             if (!container || cancelled) return;
             if (container._leaflet_id) container._leaflet_id = undefined;
 
@@ -208,14 +212,15 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
             if (cancelled) return;
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- leaflet.markercluster dinamik import ile L namespace augmentation uygulanmıyor
             const clusterGroup = (L as any).markerClusterGroup ? (L as any).markerClusterGroup({
                 maxClusterRadius: 50,
                 spiderfyOnMaxZoom: true,
                 showCoverageOnHover: false,
-                iconCreateFunction: (cluster: any) => {
+                iconCreateFunction: (cluster: MarkerCluster) => {
                     const markers = cluster.getAllChildMarkers();
                     const count = markers.length;
-                    const avgScore = markers.reduce((s: number, m: any) => s + (m.options.score || 70), 0) / count;
+                    const avgScore = markers.reduce((s: number, m: Marker & { options: MarkerOptions & { score?: number } }) => s + (m.options.score || 70), 0) / count;
                     const color = avgScore >= 80 ? '#10b981' : avgScore >= 60 ? '#f59e0b' : '#ff5a5f';
                     return L.divIcon({
                         html: `<div style="
@@ -268,7 +273,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                     popupAnchor: [0, -35],
                 });
 
-                const marker = L.marker([lat, lng], { icon: divIcon, score } as any);
+                const marker = L.marker([lat, lng], { icon: divIcon, score } as MarkerOptions & { score?: number });
                 markersRef.current[listing.id] = { marker, lat, lng, score };
 
                 const payStr = listing.type === 'SALE'
@@ -313,6 +318,8 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 mapRef.current = null;
             }
         };
+    // Harita bir kez başlatılır; listings/onHighlight değişikliği ayrı effect ile işlenir
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /* ─── Tile Switcher ─── */
@@ -332,14 +339,17 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
         if (heatmapOn) {
             import('leaflet.heat').then(() => {
                 const L = LRef.current;
-                const points = Object.values(markersRef.current).map((e: any) => [
+                const points = Object.values(markersRef.current).map((e) => [
                     e.lat, e.lng, (e.score || 70) / 100,
                 ]);
-                if ((L as any).heatLayer) {
-                    heatLayerRef.current = (L as any).heatLayer(points, {
+                // leaflet.heat @types paketi yok; runtime'da L.heatLayer ekleniyor
+                type LWithHeat = typeof L & { heatLayer?: (pts: number[][], opts: Record<string, unknown>) => LayerGroup };
+                const LHeat = L as LWithHeat;
+                if (LHeat.heatLayer) {
+                    heatLayerRef.current = LHeat.heatLayer(points, {
                         radius: 35, blur: 25, maxZoom: 15,
                         gradient: { 0.2: '#ff5a5f', 0.5: '#f59e0b', 0.8: '#10b981', 1: '#059669' },
-                    }).addTo(mapRef.current);
+                    }).addTo(mapRef.current) as LayerGroup;
                 }
             }).catch(() => { });
         } else {
@@ -358,7 +368,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
         if (pinMode) {
             if (container) container.style.cursor = 'crosshair';
-            const handleClick = async (e: any) => {
+            const handleClick = async (e: LeafletMouseEvent) => {
                 const { lat, lng } = e.latlng;
                 const L = LRef.current;
                 if (!L) return;
@@ -407,6 +417,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 map.removeLayer(pinMarkerRef.current);
                 pinMarkerRef.current = null;
             }
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- pin modu kapatıldığında harita state'i sıfırlanıyor
             setPinInfo(null);
         }
     }, [pinMode]);
@@ -423,9 +434,10 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             measurePointsRef.current = [];
             if (measureLayerRef.current) map.removeLayer(measureLayerRef.current);
             measureLayerRef.current = L.layerGroup().addTo(map);
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- ölçüm modu başlangıç talimatı gösteriliyor
             setMeasureResult('Ölçmek için haritada tıklayın');
 
-            const handleClick = (e: any) => {
+            const handleClick = (e: LeafletMouseEvent) => {
                 const { lat, lng } = e.latlng;
                 const pts = measurePointsRef.current;
                 pts.push([lat, lng]);
@@ -474,9 +486,10 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             drawPointsRef.current = [];
             if (drawLayerRef.current) map.removeLayer(drawLayerRef.current);
             drawLayerRef.current = L.layerGroup().addTo(map);
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- çizim modu başlangıç talimatı gösteriliyor
             setDrawResult('Bölge çizmek için tıklayın, bitirmek için çift tıklayın');
 
-            const handleClick = (e: any) => {
+            const handleClick = (e: LeafletMouseEvent) => {
                 const { lat, lng } = e.latlng;
                 const pts = drawPointsRef.current;
                 pts.push([lat, lng]);
@@ -504,7 +517,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
                 // Count listings inside polygon
                 let count = 0;
-                Object.values(markersRef.current).forEach((entry: any) => {
+                Object.values(markersRef.current).forEach((entry) => {
                     if (pointInPolygon(entry.lat, entry.lng, pts)) count++;
                 });
 
@@ -575,7 +588,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
                 // Find matching province
                 const normalise = (s: string) => s.toLocaleLowerCase('tr-TR').replace(/[İ]/g, 'i').replace(/[ı]/g, 'i');
-                const feature = geojson.features.find((f: any) => {
+                const feature = geojson.features.find((f) => {
                     const name = f.properties?.name || f.properties?.NAME_1 || '';
                     return normalise(name) === normalise(cityName);
                 });

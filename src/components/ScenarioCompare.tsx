@@ -28,6 +28,11 @@ interface Props {
 }
 
 export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) => {
+    // Hooks must be at the top level, before any early returns
+    const [shareUrl, setShareUrl] = useState<string | null>(null);
+    const [sharing, setSharing] = useState(false);
+    const [copied, setCopied] = useState(false);
+
     if (scenarios.length < 2) {
         return (
             <div style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
@@ -56,10 +61,6 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
     const bestIdx = scenarios.reduce((best, s, i) =>
         s.fdTotal < scenarios[best].fdTotal ? i : best, 0
     );
-
-    const [shareUrl, setShareUrl] = useState<string | null>(null);
-    const [sharing, setSharing] = useState(false);
-    const [copied, setCopied] = useState(false);
 
     const handlePdf = () => {
         const doc = new jsPDF();

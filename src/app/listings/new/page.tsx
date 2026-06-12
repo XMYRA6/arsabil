@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
@@ -26,7 +26,7 @@ export default function NewListingPage() {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<WizardFormData>(emptyFormData)
   const [publishing, setPublishing] = useState(false)
-  const tempIdRef = useRef<string>(`temp-${crypto.randomUUID()}`)
+  const [tempId] = useState(() => `temp-${crypto.randomUUID()}`)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -87,7 +87,7 @@ export default function NewListingPage() {
 
         {step === 1 && <WizardStep1Location data={form} onChange={update} />}
         {step === 2 && <WizardStep2Detail data={form} onChange={update} />}
-        {step === 3 && <WizardStep3Photos data={form} onChange={update} tempListingId={tempIdRef.current} />}
+        {step === 3 && <WizardStep3Photos data={form} onChange={update} tempListingId={tempId} />}
         {step === 4 && <WizardStep4Feasibility data={form} onChange={update} />}
         {step === 5 && <WizardStep5Preview data={form} publishing={publishing} onPublish={handlePublish} />}
 

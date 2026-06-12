@@ -9,7 +9,6 @@ import { CalculationOutput } from '@/lib/calculator/engine_v2';
 // jspdf-autotable type extension
 declare module 'jspdf' {
     interface jsPDF {
-        autoTable: (options: any) => jsPDF;
         lastAutoTable: { finalY: number };
     }
 }
@@ -102,7 +101,7 @@ export function generatePdfReport(input: ReportInput): void {
     });
 
     // ========== HESAPLAMA SONUÇLARI ==========
-    y = (doc as any).lastAutoTable.finalY + 15;
+    y = doc.lastAutoTable.finalY + 15;
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Hesaplama Sonuçları', margin, y);
@@ -134,7 +133,7 @@ export function generatePdfReport(input: ReportInput): void {
     });
 
     // ========== MALİYET DAĞILIMI ==========
-    y = (doc as any).lastAutoTable.finalY + 15;
+    y = doc.lastAutoTable.finalY + 15;
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('Maliyet Dağılımı', margin, y);
@@ -163,7 +162,7 @@ export function generatePdfReport(input: ReportInput): void {
     });
 
     // ========== FOOTER ==========
-    y = (doc as any).lastAutoTable.finalY + 20;
+    y = doc.lastAutoTable.finalY + 20;
     doc.setDrawColor(200, 200, 200);
     doc.line(margin, y, pageWidth - margin, y);
 

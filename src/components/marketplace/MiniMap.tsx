@@ -1,6 +1,7 @@
 "use client";
 
 import 'leaflet/dist/leaflet.css';
+import type { Map as LeafletMap } from 'leaflet';
 import { useEffect, useRef } from 'react';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 export function MiniMap({ lat, lng, label, listingId }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<any>(null);
+    const mapRef = useRef<LeafletMap | null>(null);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
@@ -22,7 +23,8 @@ export function MiniMap({ lat, lng, label, listingId }: Props) {
 
             const el = containerRef.current;
             if (!el) return;
-            if ((el as any)._leaflet_id) (el as any)._leaflet_id = undefined;
+            const leafletEl = el as HTMLElement & { _leaflet_id?: number };
+            if (leafletEl._leaflet_id) leafletEl._leaflet_id = undefined;
 
             const map = L.map(el, {
                 center: [lat, lng],

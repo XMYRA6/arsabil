@@ -4,6 +4,12 @@ import Image from 'next/image';
 import { FizibiliteScoreBadge } from './FizibiliteScoreBadge';
 import { useRouter } from 'next/navigation';
 
+function seededInt(seed: string, min: number, max: number): number {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) { h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0; }
+    return min + (Math.abs(h) % (max - min + 1));
+}
+
 interface Listing {
     id: string;
     title: string;
@@ -47,11 +53,13 @@ const IMAR_LABEL: Record<string, string> = {
 
 export function ListingCard({ listing, highlighted, view, onHover, isFavorite, onFavoriteToggle }: Props) {
     const router = useRouter();
-    const score = listing.fizibiliteSkoru ?? Math.floor(50 + Math.random() * 40);
+    const score = listing.fizibiliteSkoru ?? seededInt(listing.id, 50, 90);
     const price = listing.price ?? listing.report?.minApartmentPrice ?? 0;
     const payiMin = listing.arsaPayiMin ?? (listing.report?.landShareRatio ? listing.report.landShareRatio * 100 * 0.85 : 28);
     const payiMax = listing.arsaPayiMax ?? (listing.report?.landShareRatio ? listing.report.landShareRatio * 100 * 1.15 : 42);
-    const change = listing.changePercent ?? (Math.random() > 0.3 ? +(Math.random() * 55 + 5).toFixed(1) : -(Math.random() * 15 + 1).toFixed(1));
+    const change = listing.changePercent ?? (seededInt(listing.id + 'c', 0, 9) > 2
+        ? +(seededInt(listing.id + 'v', 5, 60) / 10).toFixed(1)
+        : -(seededInt(listing.id + 'n', 1, 15) / 10).toFixed(1));
     const scoreColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ff5a5f';
     const typeColor = listing.type === 'SALE' ? '#3b82f6' : '#10b981';
     const isList = view === 'list';
