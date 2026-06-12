@@ -211,7 +211,7 @@ export function buildApprovalEmail(listingTitle: string): string
 | `src/app/marketplace/marketplace.module.css` | Modify/Create |
 | `src/components/marketplace/ListingMap.tsx` | Yeni — react-leaflet harita bileşeni |
 | `src/components/marketplace/ListingCard.tsx` | Yeni — favori butonu dahil kart |
-| `src/app/api/marketplace/route.ts` | Yeni/Modify — filtre query params desteği |
+| `src/app/api/listings/route.ts` | Modify — GET'e filtre query params ekle (il, ilçe, minFiyat, maxFiyat, minPay, maxPay, sadece APPROVED ilanlar) |
 
 **Kurulum:** `npm install react-leaflet leaflet @types/leaflet`
 
