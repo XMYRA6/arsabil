@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function LoginPage() {
-    const router = useRouter();
     const [view, setView] = useState<"login" | "register" | "forgot">("login");
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -54,7 +51,7 @@ export default function LoginPage() {
             } else {
                 setError(data.message || "Kayıt sırasında bir hata oluştu.");
             }
-        } catch (err) {
+        } catch {
             setError("Bağlantı hatası.");
         } finally {
             setLoading(false);

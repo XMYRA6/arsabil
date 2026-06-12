@@ -2,15 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
-import { RiskGaugeChart } from '@/components/charts/RiskGaugeChart';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
@@ -64,7 +60,6 @@ interface ScenarioItem {
 
 export default function Home() {
   const { data: session } = useSession();
-  const router = useRouter();
 
   // State: Kullanım Girdileri
   const [luxLevel, setLuxLevel] = useState<number>(1.4); // Standart (1.0), Orta (1.2), Lüks (1.4)
@@ -109,12 +104,12 @@ export default function Home() {
   const [iksaPercentage, setIksaPercentage] = useState<number>(5); // %
   const [iksaManualTL, setIksaManualTL] = useState<number>(0);
 
-  const [globalExcavationLow, setGlobalExcavationLow] = useState<number>(0.01);
-  const [globalExcavationMedium, setGlobalExcavationMedium] = useState<number>(0.02);
+  const [, setGlobalExcavationLow] = useState<number>(0.01);
+  const [, setGlobalExcavationMedium] = useState<number>(0.02);
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
 
   // Swipe Carousel Tracking (Mobile iOS PageControl)
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [, setActiveCardIndex] = useState(0);
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
 
   const handleMobileScroll = (e: React.UIEvent<HTMLDivElement>) => {

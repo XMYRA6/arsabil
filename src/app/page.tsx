@@ -201,7 +201,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>✨ Türkiye'nin İlk Arsa Fizibilite Motoru</div>
+          <div className={styles.heroBadge}>✨ Türkiye&apos;nin İlk Arsa Fizibilite Motoru</div>
           <h1 className={styles.heroTitle}>
             Arsanızın Gerçek Değerini <br />
             <span>Tahmin Etmeyin, Hesaplayın.</span>
@@ -242,7 +242,7 @@ export default function HomePage() {
             <div className={styles.visionIcon}>🌌</div>
             <h3 className={styles.visionTitle}>Vizyonumuz</h3>
             <p className={styles.visionText}>
-              Türkiye'nin her parselinde, inşaat potansiyelini bir tıkla şeffaflaştıran, dijital gayrimenkul geliştirme standartlarını belirleyen bir ekosistem olmak.
+              Türkiye&apos;nin her parselinde, inşaat potansiyelini bir tıkla şeffaflaştıran, dijital gayrimenkul geliştirme standartlarını belirleyen bir ekosistem olmak.
             </p>
           </div>
           <div className={styles.visionCard}>
@@ -263,7 +263,7 @@ export default function HomePage() {
             <div className={styles.blogImage}>📈</div>
             <div className={styles.blogContent}>
               <div className={styles.blogDate}>23 Nisan 2026</div>
-              <h3 className={styles.blogTitle}>2026'da Kat Karşılığı İnşaat Trendleri</h3>
+              <h3 className={styles.blogTitle}>2026&apos;da Kat Karşılığı İnşaat Trendleri</h3>
               <p className={styles.blogDesc}>Yeni inşaat maliyet endeksleri ve değişen arsa payı oranları ışığında, bu yıl müteahhitler ve arsa sahipleri nelere dikkat etmeli?</p>
               <Link href="#" className={styles.blogReadMore}>
                 Devamını Oku
@@ -288,7 +288,7 @@ export default function HomePage() {
             <div className={styles.blogContent}>
               <div className={styles.blogDate}>10 Nisan 2026</div>
               <h3 className={styles.blogTitle}>Müteahhit-Arsa Sahibi İlişkisinde Şeffaflığın Önemi</h3>
-              <p className={styles.blogDesc}>İnşaat sözleşmelerinde yaşanan iptallerin %80'i maliyet şeffaflığı eksikliğinden kaynaklanıyor. Verilerle güven nasıl inşa edilir?</p>
+              <p className={styles.blogDesc}>İnşaat sözleşmelerinde yaşanan iptallerin %80&apos;i maliyet şeffaflığı eksikliğinden kaynaklanıyor. Verilerle güven nasıl inşa edilir?</p>
               <Link href="#" className={styles.blogReadMore}>
                 Devamını Oku
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>

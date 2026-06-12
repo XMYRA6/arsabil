@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
+import Image from 'next/image'
 import Link from 'next/link'
 import styles from './profile.module.css'
 
@@ -154,7 +155,7 @@ export default function ProfilePage() {
                 <div className={styles.profileCard}>
                     <div className={styles.avatarWrapper} onClick={() => fileInputRef.current?.click()}>
                         {avatarUrl
-                            ? <img src={avatarUrl} className={styles.avatarImg} alt="Profil fotoğrafı" />
+                            ? <Image fill unoptimized src={avatarUrl} alt="Profil fotoğrafı" style={{ objectFit: 'cover', borderRadius: '50%' }} />
                             : <div className={styles.avatarCircle}>{getInitials()}</div>
                         }
                         <div className={styles.avatarOverlay}>

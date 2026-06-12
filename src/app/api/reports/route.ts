@@ -55,7 +55,7 @@ export async function GET() {
             orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json({ success: true, reports });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ success: false }, { status: 500 });
     }
 }

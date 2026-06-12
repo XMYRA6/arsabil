@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import styles from "./Navbar.module.css";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -42,7 +41,6 @@ export function Navbar() {
         setIsMenuOpen(false);
     };
 
-    const isHome = pathname === "/";
     const isInbox = pathname.startsWith("/inbox");
     const isProfile = pathname.startsWith("/dashboard/profile");
     

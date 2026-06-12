@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { CalculatorEngineV2, CalculationInput } from '@/lib/calculator/engine_v2';
 
 /**
@@ -13,18 +13,6 @@ interface Props {
 }
 
 export const BreakEvenChart: React.FC<Props> = ({ baseInput, marketPrice }) => {
-    const data = useMemo(() => {
-        const points: { k: number; fd: number; profit: number }[] = [];
-        for (let kPercent = 80; kPercent <= 160; kPercent += 5) {
-            const K = kPercent / 100;
-            const input = { ...baseInput, K };
-            const result = CalculatorEngineV2.calculate(input);
-            const profit = result.FD_total - result.M;
-            points.push({ k: kPercent, fd: result.FD_total, profit });
-        }
-        return points;
-    }, [baseInput]);
-
     // Break-even K: profit ≈ 0 → K = 1.0 (maliyet = fiyat)
     const breakEvenResult = CalculatorEngineV2.calculate({ ...baseInput, K: 1.0 });
     const breakEvenFD = breakEvenResult.FD_total;

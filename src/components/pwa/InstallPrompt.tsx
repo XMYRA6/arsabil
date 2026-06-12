@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
@@ -11,7 +12,7 @@ export function InstallPrompt() {
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [showBanner, setShowBanner] = useState(false);
     const [isIOS, setIsIOS] = useState(false);
-    const [isAndroidManual, setIsAndroidManual] = useState(false);
+    const [, setIsAndroidManual] = useState(false);
     const [isStandalone, setIsStandalone] = useState(false);
 
     useEffect(() => {
@@ -123,12 +124,12 @@ export function InstallPrompt() {
                 >
                     {/* Header with icon */}
                     <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-                        <img
+                        <Image
                             src="/icons/icon-192x192.png"
                             alt="ArsaBil"
+                            width={52}
+                            height={52}
                             style={{
-                                width: 52,
-                                height: 52,
                                 borderRadius: 14,
                                 boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                             }}
@@ -237,7 +238,7 @@ export function InstallPrompt() {
                                 <br />
                                 2.{" "}
                                 <span style={{ fontWeight: 700, color: "var(--card-title, #fff)" }}>
-                                    "Ana Ekrana Ekle"
+                                    &quot;Ana Ekrana Ekle&quot;
                                 </span>{" "}
                                 seçeneğini seçin
                             </div>

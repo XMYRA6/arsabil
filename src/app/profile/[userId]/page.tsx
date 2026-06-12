@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import styles from './page.module.css'
@@ -41,7 +42,7 @@ export default async function PublicProfilePage(context: { params: Promise<{ use
         <div className={styles.container}>
             <div className={styles.header}>
                 {profile.image
-                    ? <img src={profile.image} className={styles.avatarImg} alt="Profil fotoğrafı" />
+                    ? <Image unoptimized src={profile.image} width={64} height={64} className={styles.avatarImg} alt="Profil fotoğrafı" />
                     : <div className={styles.avatarCircle}>{getInitials(profile.name)}</div>
                 }
                 <div>

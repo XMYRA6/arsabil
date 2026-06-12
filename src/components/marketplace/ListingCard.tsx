@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { FizibiliteScoreBadge } from './FizibiliteScoreBadge';
 import { useRouter } from 'next/navigation';
 
@@ -79,7 +80,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     width: 180, flexShrink: 0, position: 'relative', overflow: 'hidden',
                 }}>
                     {listing.photoUrl ? (
-                        <img src={listing.photoUrl} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <Image fill unoptimized src={listing.photoUrl} alt={listing.title} style={{ objectFit: 'cover' }} />
                     ) : (
                         <div style={{
                             width: '100%', height: '100%',
@@ -217,7 +218,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 position: 'relative', overflow: 'hidden',
             }}>
                 {listing.photoUrl ? (
-                    <img src={listing.photoUrl} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image fill unoptimized src={listing.photoUrl} alt={listing.title} style={{ objectFit: 'cover' }} />
                 ) : (
                     <div style={{
                         width: '100%', height: '100%',

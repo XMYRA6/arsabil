@@ -9,7 +9,7 @@ export function Footer() {
 
                 <div className={styles.bottom}>
                     <div className={styles.copyright}>
-                        © 2026 ArsaBil — Türkiye'nin Arsa Payı ve Kat Karşılığı Fizibilite Motoru
+                        © 2026 ArsaBil — Türkiye&apos;nin Arsa Payı ve Kat Karşılığı Fizibilite Motoru
                     </div>
                     <div className={styles.links}>
                         <Link href="/terms">Kullanım Koşulları</Link>

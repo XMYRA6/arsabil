@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import Image from 'next/image'
 import styles from './wizard.module.css'
 import { WizardFormData } from './types'
 import { MAX_FILES_PER_LISTING, publicIdFromUrl } from '@/lib/upload'
@@ -80,7 +81,7 @@ export function WizardStep3Photos({ data, onChange, tempListingId }: Props) {
         <div className={styles.photoGrid}>
           {data.photos.map(photo => (
             <div key={photo.url} className={styles.photoItem}>
-              <img src={photo.url} alt="" className={styles.photoImg} />
+              <Image fill unoptimized src={photo.url} alt="" style={{ objectFit: 'cover' }} />
               <button
                 className={styles.photoRemove}
                 onClick={() => handleRemove(photo)}

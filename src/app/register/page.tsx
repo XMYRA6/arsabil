@@ -35,7 +35,7 @@ export default function RegisterPage() {
                 setError(data.message || "Kayıt sırasında bir hata oluştu.");
                 setLoading(false);
             }
-        } catch (err) {
+        } catch {
             setError("Bağlantı hatası.");
             setLoading(false);
         }

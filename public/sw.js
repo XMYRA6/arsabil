@@ -12,6 +12,7 @@ const STATIC_ASSETS = [
 
 // Install event: pre-cache static assets
 self.addEventListener('install', (event) => {
+    console.log('[SW] Installing version', SW_VERSION);
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(STATIC_ASSETS);

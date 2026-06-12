@@ -16,7 +16,6 @@ export default function BoardPage() {
     const [offerShare, setOfferShare] = useState<number>(30);
     const [offerMessage, setOfferMessage] = useState<string>("");
     const [submitting, setSubmitting] = useState(false);
-    const [feedback, setFeedback] = useState("");
 
     useEffect(() => {
         fetch("/api/listings")
@@ -55,7 +54,7 @@ export default function BoardPage() {
             } else {
                 toast.error(data.message || "Hata oluştu.");
             }
-        } catch (error) {
+        } catch {
             toast.error("Bağlantı hatası.");
         } finally {
             setSubmitting(false);

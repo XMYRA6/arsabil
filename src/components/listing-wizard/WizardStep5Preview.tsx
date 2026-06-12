@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import styles from './wizard.module.css'
 import { WizardFormData } from './types'
 
@@ -22,7 +23,9 @@ export function WizardStep5Preview({ data, publishing, onPublish }: Props) {
 
       <div className={styles.previewCard}>
         {data.photos.length > 0 ? (
-          <img src={data.photos[0].url} alt={data.title} style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
+          <div style={{ position: 'relative', height: 180 }}>
+            <Image fill unoptimized src={data.photos[0].url} alt={data.title} style={{ objectFit: 'cover' }} />
+          </div>
         ) : (
           <div className={styles.previewImgPlaceholder}>📷 Fotoğraf eklenmedi</div>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, forwardRef, useImperativeHandle, useState, useCallback } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -204,7 +204,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             // MarkerCluster
             try {
                 await import('leaflet.markercluster');
-            } catch (e) { /* optional */ }
+            } catch { /* optional */ }
 
             if (cancelled) return;
 
@@ -490,7 +490,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 }
             };
 
-            const handleDblClick = (e: any) => {
+            const handleDblClick = () => {
                 const pts = drawPointsRef.current;
                 if (pts.length < 3) return;
 
