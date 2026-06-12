@@ -13,6 +13,7 @@ const config = {
       },
     }],
   },
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
 }
 
 module.exports = config
