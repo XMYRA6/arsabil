@@ -60,3 +60,6 @@ prisma.zip
 /arsabil-main/
 arsabil-main.zip
 lint-report.json
+
+# Local Claude Code skill data (not project source)
+.claude/

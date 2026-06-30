@@ -16,7 +16,7 @@ interface Favorite {
 }
 
 const PALETTES: { id: Theme; label: string; color: string; icon: string }[] = [
-    { id: 'dark',  label: 'Gece',     color: '#6d5bf6', icon: '🌙' },
+    { id: 'dark',  label: 'Gece',     color: '#1f6feb', icon: '🌙' },
     { id: 'light', label: 'Gündüz',   color: '#e0e8f4', icon: '☀️' },
 ]
 

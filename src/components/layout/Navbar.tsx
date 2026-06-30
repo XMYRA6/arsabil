@@ -65,8 +65,8 @@ export function Navbar() {
                             <circle cx="20" cy="20" r="8" fill="rgba(0,0,0,0.3)" />
                             <defs>
                                 <linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                                    <stop stopColor="#6d5bf6" />
-                                    <stop offset="1" stopColor="#27c4e8" />
+                                    <stop stopColor="#1f6feb" />
+                                    <stop offset="1" stopColor="#2b7cff" />
                                 </linearGradient>
                             </defs>
                         </svg>
@@ -229,7 +229,7 @@ export function Navbar() {
                                             { name: 'Elif Demir', msg: 'Teşekkürler, raporu inceledim 👍', time: '15dk', unread: true, initials: 'ED', color: '#10b981' },
                                             { name: 'Mehmet Kaya', msg: 'Proje detaylarını gönderebilir mi...', time: '1s', unread: false, initials: 'MK', color: '#f59e0b' },
                                             { name: 'Fatma Çelik', msg: 'İyi akşamlar, fiyat konusunda...', time: '3s', unread: false, initials: 'FÇ', color: '#8b5cf6' },
-                                            { name: 'ArsaBil Destek', msg: 'Hoş geldiniz! Yardıma hazırız.', time: '1h', unread: false, initials: 'AB', color: '#6d5bf6' },
+                                            { name: 'ArsaBil Destek', msg: 'Hoş geldiniz! Yardıma hazırız.', time: '1h', unread: false, initials: 'AB', color: '#1f6feb' },
                                         ].map((conv, i) => (
                                             <div key={i} onClick={() => { setIsInboxOpen(false); router.push('/inbox'); }} style={{
                                                 padding: '12px 16px', display: 'flex', gap: '12px', alignItems: 'center',

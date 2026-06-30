@@ -67,8 +67,8 @@ export function MiniMap({ lat, lng, label, listingId }: Props) {
             // Accuracy circle
             L.circle([lat, lng], {
                 radius: 80,
-                color: '#6d5bf6',
-                fillColor: '#6d5bf6',
+                color: '#1f6feb',
+                fillColor: '#1f6feb',
                 fillOpacity: 0.1,
                 weight: 1.5,
                 dashArray: '4 3',

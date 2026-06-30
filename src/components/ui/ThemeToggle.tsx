@@ -5,7 +5,7 @@ import React, { useEffect, useState, useRef } from 'react';
 type Mode = 'dark' | 'light';
 
 const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] = [
-    { id: 'dark', label: 'Gece', color: '#6d5bf6', isLight: false },
+    { id: 'dark', label: 'Gece', color: '#1f6feb', isLight: false },
     { id: 'light', label: 'Gündüz', color: '#e0e8f4', isLight: true },
 ];
 

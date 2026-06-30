@@ -190,7 +190,7 @@ export function InstallPrompt() {
                                     padding: "4px 10px",
                                     borderRadius: 8,
                                     background: "rgba(var(--primary-rgb), 0.1)",
-                                    color: "var(--primary, #6d5bf6)",
+                                    color: "var(--primary, #1f6feb)",
                                     border: "1px solid rgba(var(--primary-rgb), 0.2)",
                                 }}
                             >
@@ -230,7 +230,7 @@ export function InstallPrompt() {
                                         padding: "2px 8px",
                                         borderRadius: 6,
                                         fontWeight: 700,
-                                        color: "var(--primary, #6d5bf6)",
+                                        color: "var(--primary, #1f6feb)",
                                     }}
                                 >
                                     ⬆️ Paylaş
@@ -253,7 +253,7 @@ export function InstallPrompt() {
                                 padding: "14px",
                                 borderRadius: 14,
                                 border: "none",
-                                background: "linear-gradient(135deg, var(--primary, #6d5bf6), var(--primary-2, #3f8efc))",
+                                background: "linear-gradient(135deg, var(--primary, #1f6feb), var(--primary-2, #134ea5))",
                                 color: "white",
                                 fontSize: "0.95rem",
                                 fontWeight: 800,
