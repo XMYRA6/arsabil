@@ -136,13 +136,13 @@ Bu vaka çalışması, ArsaBil platformunda yaşanan tema regresyonunun çok kat
 - Tema dışı işlevsel ilerleme (PDF rapor motoru yeniden yazımı, tip güvenliği düzeltmeleri) etkilenmemiştir.
 - Hesaplama motorunun iş mantığı, bağımsız bir spesifikasyon belgesiyle karşılaştırılarak değişmediği kanıtlanmıştır.
 
-### 5.1 Bilinen Sınırlamalar
+### 5.1 Bilinen Sınırlamalar (2026-07-01 itibarıyla kapatıldı)
 
-Bu çalışmanın doğrulama kapsamı kasıtlı olarak dar tutulmuştur ve aşağıdaki noktalar henüz teyit edilmemiştir:
+İlk yazımda bu çalışmanın doğrulama kapsamı dar tutulmuştu. Takip oturumunda (ARS incelemesinin R2 maddesi + ayrı bir "final doğrulama" turu) bu sınırlamalar kapatıldı:
 
-- **Görsel doğrulama kapsamı:** Playwright ile alınan ekran görüntüleri yalnızca **landing page** ve **login** ekranlarını, yalnızca **masaüstü görünümde (1440×900)** kapsamaktadır. Marketplace listing grid, dashboard, admin tabloları gibi diğer sayfalarda token değişikliğinin (`--primary-rgb` ve ilişkili renk değerleri) görsel yan etkisi doğrulanmamıştır.
-- **Mobil görünüm test edilmemiştir:** Projenin önceki Aurora yeniden tasarımı kapsamında özellikle ele alınmış olan mobil taşma (overflow) düzeltmeleri, bu restorasyon sonrası mobil viewport'ta yeniden test edilmemiştir.
-- **Build/derleme doğrulaması yapılmamıştır:** `npm run build` veya `npx tsc --noEmit` çalıştırılarak tip hatası olup olmadığı ayrıca kontrol edilmemiştir; doğrulama dev sunucusu (webpack dev server) üzerinden yapılmıştır.
+- **Tam komut paketi çalıştırıldı:** `npx tsc --noEmit`, `npx eslint .`, `npx jest --no-coverage` (65/65), `npx playwright test` (e2e), `npm run build` — hepsi temiz sonuçlandı. Süreçte **3 gerçek regresyon** bulunup düzeltildi: (1) önceki `git stash` işleminin `ListingCard.tsx`'teki `Listing` tipi export'unu da götürmesi (build kırıyordu), (2) admin panelinin ilanın kendi başlığı yerine yalnızca bağlı fizibilite raporunun başlığını göstermesi (rapor adımı atlanan ilanlarda başlık hiç görünmüyordu — gerçek bir UI hatası, tema restorasyonuyla ilgisiz, e2e testi sayesinde ortaya çıktı), (3) main'den kopyalanan `page.tsx`'te kaybolan `&apos;` HTML-entity kaçışları (lint hatası). Detay: `docs/case-study-tema-restorasyonu-2026-06-30-review.md` Re-Review Notu.
+- **Görsel doğrulama genişletildi:** Playwright ile marketplace, hesapla, dashboard ve admin/listings sayfaları hem masaüstü (1440×900) hem mobil (390×844) görünümde tekrar tarandı. Tutarlı mavi/lacivert tema doğrulandı, taşma (overflow) sorunu görülmedi. Dashboard'daki mor renkli "Okunmamış Mesaj" istatistik kartı incelendi ve Aurora'dan bağımsız, çok önceden (`2a1d9d3`) eklenmiş kasıtlı bir 4 renkli semantik palet (mavi/yeşil/turuncu/mor) olduğu doğrulandı — düzeltme gerektirmiyor.
+- **Kalan kısıt:** `e2e/ilan-yasam-dongusu.spec.ts` bu geliştirme makinesinde (yoğun Docker/MCP arkaplan yükü altında) kararsız (flaky) — 2 farklı çalıştırmada 2 farklı noktada zaman aşımına uğradı. Bir locator belirsizliği düzeltildi ama kalan kararsızlığın ortam mı yoksa gerçek bir yarış durumu mu olduğu temiz bir CI ortamında ayrıca doğrulanmalı.
 
 ### 5.2 Çalışma Durumu ve Kalıcılık Riski
 
