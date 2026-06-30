@@ -8,10 +8,6 @@ const nextConfig = {
             { protocol: 'https', hostname: 'res.cloudinary.com' },
         ],
     },
-    eslint: {
-        // Task 15 (lint temizliği) tamamlanınca bu blok silinecek
-        ignoreDuringBuilds: true,
-    },
     async headers() {
         return [
             {

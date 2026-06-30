@@ -1,20 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, type ForwardRefExoticComponent, type RefAttributes } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { FilterSidebar } from '@/components/marketplace/FilterSidebar';
 import { ListingCard } from '@/components/marketplace/ListingCard';
+import type { Listing } from '@/components/marketplace/ListingCard';
 import { ViewToggle } from '@/components/marketplace/ViewToggle';
 import { CitySearch } from '@/components/marketplace/CitySearch';
 import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
 import styles from './page.module.css';
 
-// SSR-safe map import
+// SSR-safe map import — dynamic + forwardRef birlikte ForwardRefExoticComponent olarak tip verilmeli
 const MapView = dynamic<MapViewProps>(
     () => import('@/components/marketplace/MapView').then(m => m.MapView),
     { ssr: false, loading: () => <div style={{ flex: 1, background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>🗺 Harita yükleniyor…</div> }
-);
+) as ForwardRefExoticComponent<MapViewProps & RefAttributes<MapViewHandle>>;
 
 type View = 'split' | 'map' | 'list';
 
@@ -58,7 +59,7 @@ function MarketplaceContent() {
     const [view, setView] = useState<View>((searchParams.get('view') as View) || 'split');
     const [mobileTab, setMobileTab] = useState<'filter' | 'list' | 'map'>('list');
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
-    const [listings, setListings] = useState<Record<string, unknown>[]>([]);
+    const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('score_desc');
@@ -88,17 +89,17 @@ function MarketplaceContent() {
             .then(data => {
                 const arr = Array.isArray(data) ? data : [];
                 // Enrich API data with mock fizibilite fields for demo
-                const enriched = arr.map((l: Record<string, unknown>, i: number) => ({
+                const enriched = (arr as Listing[]).map((l, i): Listing => ({
                     ...l,
                     ...(MOCK_LISTINGS_EXTRA[i % MOCK_LISTINGS_EXTRA.length] || {}),
-                    type: l.type ?? 'KAT_KARSILIGI',
+                    type: (l.type ?? 'KAT_KARSILIGI') as Listing['type'],
                 }));
                 // If no listings from API, add mock data
                 if (enriched.length === 0) {
-                    const mock = Array.from({ length: 10 }, (_, i) => ({
+                    const mock: Listing[] = Array.from({ length: 10 }, (_, i) => ({
                         id: `mock-${i}`,
                         title: `${600 + i * 80} m² Arsa`,
-                        type: i % 3 === 0 ? 'SALE' : 'KAT_KARSILIGI',
+                        type: (i % 3 === 0 ? 'SALE' : 'KAT_KARSILIGI') as Listing['type'],
                         city: 'İstanbul',
                         district: ['Beşiktaş', 'Kadıköy', 'Şişli', 'Ümraniye', 'Maltepe'][i % 5],
                         price: i % 3 === 0 ? (5000000 + i * 500000) : 0,
@@ -112,10 +113,10 @@ function MarketplaceContent() {
                 setLoading(false);
             })
             .catch(() => {
-                const mock = Array.from({ length: 10 }, (_, i) => ({
+                const mock: Listing[] = Array.from({ length: 10 }, (_, i) => ({
                     id: `mock-${i}`,
                     title: `${600 + i * 80} m² Arsa`,
-                    type: i % 3 === 0 ? 'SALE' : 'KAT_KARSILIGI',
+                    type: (i % 3 === 0 ? 'SALE' : 'KAT_KARSILIGI') as Listing['type'],
                     city: 'İstanbul',
                     district: ['Beşiktaş', 'Kadıköy', 'Şişli', 'Ümraniye', 'Maltepe'][i % 5],
                     price: i % 3 === 0 ? (5000000 + i * 500000) : 0,
@@ -130,7 +131,7 @@ function MarketplaceContent() {
     // Filter logic
     const filtered = listings.filter(l => {
         if (filters.type.length > 0 && !filters.type.includes(l.type)) return false;
-        if (filters.imar.length > 0 && !filters.imar.includes(l.imarDurumu)) return false;
+        if (filters.imar.length > 0 && !filters.imar.includes(l.imarDurumu ?? '')) return false;
         if (filters.fizibiliteOnly && (!l.fizibiliteSkoru || l.fizibiliteSkoru < filters.minScore)) return false;
         return true;
     });

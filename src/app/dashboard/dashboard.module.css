@@ -93,9 +93,10 @@
     background: var(--panel-2);
 }
 
-.navItemActive {
-    background: var(--primary) !important;
-    color: white !important;
+.navItemActive,
+.navItemActive:hover {
+    background: var(--primary);
+    color: white;
     box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.25);
 }
 

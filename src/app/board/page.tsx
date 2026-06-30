@@ -9,6 +9,7 @@ import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 interface BoardListing {
     id: string;
+    userId?: string;
     city?: string;
     district?: string;
     notes?: string;

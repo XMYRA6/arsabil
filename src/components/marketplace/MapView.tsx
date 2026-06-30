@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Map as LMap, TileLayer, LayerGroup, Marker, MarkerOptions, LeafletMouseEvent } from 'leaflet';
-import type { MarkerClusterGroup, MarkerCluster } from 'leaflet.markercluster';
+import type { Map as LMap, TileLayer, LayerGroup, Marker, MarkerOptions, LeafletMouseEvent, FeatureGroup } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -131,7 +130,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<LMap | null>(null);
     const markersRef = useRef<Record<string, { marker: Marker; lat: number; lng: number; score: number }>>({});
-    const clusterGroupRef = useRef<MarkerClusterGroup | LayerGroup | null>(null);
+    const clusterGroupRef = useRef<FeatureGroup | LayerGroup | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
     const heatLayerRef = useRef<LayerGroup | null>(null);
     const pinMarkerRef = useRef<Marker | null>(null);
@@ -217,10 +216,10 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 maxClusterRadius: 50,
                 spiderfyOnMaxZoom: true,
                 showCoverageOnHover: false,
-                iconCreateFunction: (cluster: MarkerCluster) => {
+                iconCreateFunction: (cluster: { getAllChildMarkers: () => (Marker & { options: MarkerOptions & { score?: number } })[] }) => {
                     const markers = cluster.getAllChildMarkers();
                     const count = markers.length;
-                    const avgScore = markers.reduce((s: number, m: Marker & { options: MarkerOptions & { score?: number } }) => s + (m.options.score || 70), 0) / count;
+                    const avgScore = markers.reduce((s: number, m) => s + (m.options.score || 70), 0) / count;
                     const color = avgScore >= 80 ? '#10b981' : avgScore >= 60 ? '#f59e0b' : '#ff5a5f';
                     return L.divIcon({
                         html: `<div style="
@@ -293,7 +292,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                             <span style="font-size:0.8rem;font-weight:700;color:#0b2443;">${payStr}</span>
                         </div>
                         <div style="display:flex;gap:6px;margin-top:8px;">
-                            <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#6d5bf6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
+                            <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
                             <button onclick="window.location.href='/listing/${listing.id}'" style="flex:1;padding:6px 8px;background:#10b98122;color:#10b981;border:1.5px solid #10b981;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Teklif Ver</button>
                         </div>
                     </div>`;
@@ -349,7 +348,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                     heatLayerRef.current = LHeat.heatLayer(points, {
                         radius: 35, blur: 25, maxZoom: 15,
                         gradient: { 0.2: '#ff5a5f', 0.5: '#f59e0b', 0.8: '#10b981', 1: '#059669' },
-                    }).addTo(mapRef.current) as LayerGroup;
+                    }).addTo(mapRef.current!) as LayerGroup;
                 }
             }).catch(() => { });
         } else {
@@ -401,7 +400,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                             <div style="font-weight:800;font-size:0.85rem;color:#0b2443;margin-bottom:4px;">📍 Seçilen Konum</div>
                             <div style="font-size:0.75rem;color:#5a7090;margin-bottom:6px;">${address || data.display_name}</div>
                             <div style="font-size:0.68rem;color:#94a3b8;margin-bottom:8px;">${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
-                            <button onclick="window.location.href='/'" style="width:100%;padding:8px;background:#6d5bf6;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:700;">🧮 Fizibilite Raporu Oluştur</button>
+                            <button onclick="window.location.href='/'" style="width:100%;padding:8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.75rem;font-weight:700;">🧮 Fizibilite Raporu Oluştur</button>
                         </div>
                     `)).openPopup();
                 } catch {
@@ -444,12 +443,12 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
                 // Add dot
                 L.circleMarker([lat, lng], {
-                    radius: 5, fillColor: '#6d5bf6', color: 'white', weight: 2, fillOpacity: 1,
-                }).addTo(measureLayerRef.current);
+                    radius: 5, fillColor: '#1f6feb', color: 'white', weight: 2, fillOpacity: 1,
+                }).addTo(measureLayerRef.current!);
 
                 if (pts.length > 1) {
                     // Draw line
-                    L.polyline(pts, { color: '#6d5bf6', weight: 3, dashArray: '6 4' }).addTo(measureLayerRef.current);
+                    L.polyline(pts, { color: '#1f6feb', weight: 3, dashArray: '6 4' }).addTo(measureLayerRef.current!);
 
                     // Calculate distance
                     let totalM = 0;
@@ -496,10 +495,10 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
                 L.circleMarker([lat, lng], {
                     radius: 4, fillColor: '#f59e0b', color: 'white', weight: 2, fillOpacity: 1,
-                }).addTo(drawLayerRef.current);
+                }).addTo(drawLayerRef.current!);
 
                 if (pts.length > 1) {
-                    L.polyline(pts, { color: '#f59e0b', weight: 2, dashArray: '5 3' }).addTo(drawLayerRef.current);
+                    L.polyline(pts, { color: '#f59e0b', weight: 2, dashArray: '5 3' }).addTo(drawLayerRef.current!);
                 }
             };
 
@@ -513,7 +512,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
                 L.polygon(pts, {
                     color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.15, weight: 2,
-                }).addTo(drawLayerRef.current);
+                }).addTo(drawLayerRef.current!);
 
                 // Count listings inside polygon
                 let count = 0;
@@ -594,10 +593,10 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 });
 
                 if (feature) {
-                    provinceBorderRef.current = L.geoJSON(feature, {
+                    provinceBorderRef.current = L.geoJSON(feature as Parameters<typeof L.geoJSON>[0], {
                         style: {
-                            color: '#6d5bf6',
-                            fillColor: '#6d5bf6',
+                            color: '#1f6feb',
+                            fillColor: '#1f6feb',
                             fillOpacity: 0.08,
                             weight: 2.5,
                             dashArray: '6 3',
