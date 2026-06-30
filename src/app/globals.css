@@ -10,9 +10,15 @@
   --aurora-cyan: #2b7cff;
   --brand-gradient: linear-gradient(135deg, var(--aurora-violet), var(--aurora-blue) 60%, var(--aurora-cyan));
 
-  --green: #2fbf71;
-  --orange: #ff9f2f;
+  --green: #10b981;
+  --green-rgb: 16, 185, 129;
+  --orange: #f59e0b;
+  --orange-rgb: 245, 158, 11;
   --red: #ff5a5f;
+  --red-rgb: 255, 90, 95;
+  --info: #3b82f6;
+  --info-rgb: 59, 130, 246;
+  --accent-violet-stat: #8b5cf6;
 
   --radius: 18px;
   --radius-sm: 0.5rem;
@@ -52,7 +58,6 @@
   --primary-glow: rgba(31, 111, 235, .25);
   --accent-violet: #1f6feb;
   --accent-cyan: #2b7cff;
-  --green: #2fbf71;
 
   --input-bg: linear-gradient(180deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .04));
   --input-focus-border: rgba(31, 111, 235, .55);
