@@ -4,7 +4,7 @@
  * UTF-8 BOM ile Türkçe karakter desteği.
  */
 
-interface ScenarioData {
+export interface ScenarioData {
     name: string;
     luxLevel: number;
     apartmentSize: number;

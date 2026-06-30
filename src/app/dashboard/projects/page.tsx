@@ -5,16 +5,11 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { ScenarioCompare } from "@/components/ScenarioCompare";
 import { exportToExcel } from "@/lib/export/excel";
+import type { ScenarioData } from "@/lib/export/excel";
 import { toast } from "react-hot-toast";
 import styles from '../dashboard.module.css';
 
-interface Scenario {
-    id: string;
-    name: string;
-    fdTotal: number;
-    fdPerM2: number;
-    landShareRatio: number;
-}
+type Scenario = ScenarioData & { id: string };
 
 interface Project {
     id: string;
@@ -89,13 +84,13 @@ export default function ProjectsPage() {
                             )}
 
                             {/* Senaryolar Listesi */}
-                            {project.scenarios?.length > 0 && (
+                            {(project.scenarios?.length ?? 0) > 0 && (
                                 <div style={{ marginBottom: '1rem' }}>
                                     <h5 style={{ color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem' }}>
                                         Senaryolar
                                     </h5>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px' }}>
-                                        {project.scenarios.map((s: Scenario) => (
+                                        {(project.scenarios ?? []).map((s: Scenario) => (
                                             <div key={s.id} className={styles.reportCard} style={{ padding: '0.85rem' }}>
                                                 <h4 style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>{s.name}</h4>
                                                 <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>
@@ -112,7 +107,7 @@ export default function ProjectsPage() {
 
                             {/* Actions */}
                             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                {project.scenarios?.length >= 2 && (
+                                {(project.scenarios?.length ?? 0) >= 2 && (
                                     <Button
                                         variant="outline"
                                         onClick={() => setSelectedProject(selectedProject?.id === project.id ? null : project)}
@@ -129,7 +124,7 @@ export default function ProjectsPage() {
                             {selectedProject?.id === project.id && (
                                 <div style={{ marginTop: '1.5rem' }}>
                                     <ScenarioCompare
-                                    scenarios={project.scenarios}
+                                    scenarios={project.scenarios ?? []}
                                     onShareRequest={async (ids) => {
                                         const res = await fetch('/api/compare/share', {
                                             method: 'POST',

@@ -14,7 +14,8 @@ import { BreakEvenChart } from '@/components/charts/BreakEvenChart';
 import { FinancialDashboard } from '@/components/FinancialDashboard';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'react-hot-toast';
-import { generatePdfReport } from '@/lib/pdf/report_generator';
+// Dynamically imported to avoid SSR issues with @react-pdf/renderer
+type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 
@@ -247,9 +248,10 @@ export default function Home() {
     }
   };
 
-  const handlePdfDownload = () => {
+  const handlePdfDownload = async () => {
     if (!result) return;
-    generatePdfReport({
+    const { generatePdfReport } = await import('@/lib/pdf/report_generator') as { generatePdfReport: GeneratePdfFn };
+    await generatePdfReport({
       luxLevel,
       apartmentSize,
       landShareRatio,

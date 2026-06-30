@@ -14,6 +14,7 @@ interface Report {
     minApartmentPrice: number;
     landCost: number;
     createdAt: string;
+    listing?: object;
 }
 
 export default function ReportsPage() {
