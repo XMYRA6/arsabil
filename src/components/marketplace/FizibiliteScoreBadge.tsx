@@ -7,7 +7,7 @@ interface Props {
 }
 
 export function FizibiliteScoreBadge({ score, size = 'md', showLabel = false }: Props) {
-    const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ff5a5f';
+    const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
     const bgColor = score >= 80 ? 'rgba(16,185,129,.15)' : score >= 60 ? 'rgba(245,158,11,.15)' : 'rgba(255,90,95,.15)';
     const label = score >= 80 ? 'Yüksek' : score >= 60 ? 'Orta' : 'Riskli';
 

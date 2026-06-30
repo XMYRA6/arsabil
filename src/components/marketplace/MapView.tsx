@@ -117,7 +117,7 @@ function ToolBtn({ icon, label, active, onClick, disabled, badge }: {
             {badge && (
                 <span style={{
                     position: 'absolute', top: -4, right: -4,
-                    fontSize: '0.5rem', background: '#f59e0b', color: 'white',
+                    fontSize: '0.5rem', background: 'var(--orange)', color: 'white',
                     padding: '1px 4px', borderRadius: 4, fontWeight: 800,
                 }}>{badge}</span>
             )}
@@ -220,7 +220,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                     const markers = cluster.getAllChildMarkers();
                     const count = markers.length;
                     const avgScore = markers.reduce((s: number, m) => s + (m.options.score || 70), 0) / count;
-                    const color = avgScore >= 80 ? '#10b981' : avgScore >= 60 ? '#f59e0b' : '#ff5a5f';
+                    const color = avgScore >= 80 ? 'var(--green)' : avgScore >= 60 ? 'var(--orange)' : 'var(--red)';
                     return L.divIcon({
                         html: `<div style="
                             background:${color};color:white;
@@ -245,7 +245,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 const lat = listing.lat ?? ISTANBUL_COORDS[idx % ISTANBUL_COORDS.length][0] + (Math.random() - 0.5) * 0.01;
                 const lng = listing.lng ?? ISTANBUL_COORDS[idx % ISTANBUL_COORDS.length][1] + (Math.random() - 0.5) * 0.01;
                 const score = listing.fizibiliteSkoru ?? Math.floor(55 + Math.random() * 40);
-                const color = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ff5a5f';
+                const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
                 const payiMin = listing.arsaPayiMin ?? 28;
                 const payiMax = listing.arsaPayiMax ?? 42;
                 const displayText = listing.type === 'SALE'
@@ -293,7 +293,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                         </div>
                         <div style="display:flex;gap:6px;margin-top:8px;">
                             <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
-                            <button onclick="window.location.href='/listing/${listing.id}'" style="flex:1;padding:6px 8px;background:#10b98122;color:#10b981;border:1.5px solid #10b981;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Teklif Ver</button>
+                            <button onclick="window.location.href='/listing/${listing.id}'" style="flex:1;padding:6px 8px;background:rgba(var(--green-rgb),.13);color:var(--green);border:1.5px solid var(--green);border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Teklif Ver</button>
                         </div>
                     </div>`;
 

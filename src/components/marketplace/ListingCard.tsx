@@ -60,8 +60,8 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
     const change = listing.changePercent ?? (seededInt(listing.id + 'c', 0, 9) > 2
         ? +(seededInt(listing.id + 'v', 5, 60) / 10).toFixed(1)
         : -(seededInt(listing.id + 'n', 1, 15) / 10).toFixed(1));
-    const scoreColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ff5a5f';
-    const typeColor = listing.type === 'SALE' ? '#3b82f6' : '#10b981';
+    const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
+    const typeColor = listing.type === 'SALE' ? 'var(--info)' : 'var(--green)';
     const isList = view === 'list';
 
     /* ───────────────── LIST VIEW (row card) ───────────────── */
@@ -105,7 +105,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     {listing.isNew && (
                         <span style={{
                             position: 'absolute', top: 8, right: 8,
-                            background: '#ff5a5f', color: 'white',
+                            background: 'var(--red)', color: 'white',
                             fontSize: '0.58rem', fontWeight: 800, padding: '2px 6px', borderRadius: 6,
                         }}>🔥 Yeni</span>
                     )}
@@ -149,7 +149,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         </span>
                         <span style={{
                             fontSize: '0.72rem', fontWeight: 800,
-                            color: change >= 0 ? '#10b981' : '#ff5a5f',
+                            color: change >= 0 ? 'var(--green)' : 'var(--red)',
                             display: 'inline-flex', alignItems: 'center', gap: 2,
                         }}>
                             📈 {change >= 0 ? '+' : ''}{change.toFixed(1)}%
@@ -173,7 +173,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     >📋 Detay</button>
                     <button
                         onClick={e => e.stopPropagation()}
-                        style={{ fontSize: '0.72rem', padding: '6px 14px', borderRadius: 8, background: 'rgba(16,185,129,.10)', color: '#10b981', border: '1.5px solid rgba(16,185,129,.25)', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
+                        style={{ fontSize: '0.72rem', padding: '6px 14px', borderRadius: 8, background: 'rgba(var(--green-rgb),.10)', color: 'var(--green)', border: '1.5px solid rgba(var(--green-rgb),.25)', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
                     >📤 Teklif Ver</button>
                     {onFavoriteToggle && (
                         <button
@@ -241,7 +241,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 {listing.isNew && (
                     <span style={{
                         position: 'absolute', top: 8, right: 8,
-                        background: '#ff5a5f', color: 'white',
+                        background: 'var(--red)', color: 'white',
                         fontSize: '0.6rem', fontWeight: 800, padding: '2px 6px', borderRadius: 6,
                     }}>🔥 Yeni</span>
                 )}
@@ -267,7 +267,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     )}
                     <span style={{
                         fontSize: '0.65rem', fontWeight: 800,
-                        color: change >= 0 ? '#10b981' : '#ff5a5f',
+                        color: change >= 0 ? 'var(--green)' : 'var(--red)',
                     }}>{change >= 0 ? '+' : ''}{change.toFixed(1)}%</span>
                 </div>
                 <div style={{ fontSize: '0.72rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
