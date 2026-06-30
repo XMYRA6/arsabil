@@ -40,7 +40,7 @@
 
 **Files:** yok (git işlemi)
 
-- [ ] **Step 1: Aurora merge'ünü doğrula**
+- [x] **Step 1: Aurora merge'ünü doğrula**
 
 ```powershell
 git checkout main
@@ -48,7 +48,7 @@ git log --oneline -1
 ```
 Beklenen: en üstteki commit aurora redesign merge'ü (veya aurora commit'leri main'de). Değilse DUR ve kullanıcıya sor — bu planın ön koşulu.
 
-- [ ] **Step 2: Yeni branch aç**
+- [x] **Step 2: Yeni branch aç**
 
 ```powershell
 git checkout -b feature/production-readiness
@@ -62,7 +62,7 @@ git checkout -b feature/production-readiness
 - Create: `src/app/api/health/route.ts`
 - Test: `src/app/api/health/__tests__/route.test.ts`
 
-- [ ] **Step 1: Failing test yaz**
+- [x] **Step 1: Failing test yaz**
 
 `src/app/api/health/__tests__/route.test.ts`:
 ```ts
@@ -98,14 +98,14 @@ describe('GET /api/health', () => {
 })
 ```
 
-- [ ] **Step 2: Testi çalıştır, FAIL doğrula**
+- [x] **Step 2: Testi çalıştır, FAIL doğrula**
 
 ```powershell
 npx jest src/app/api/health --no-coverage
 ```
 Beklenen: FAIL — `Cannot find module '../route'`.
 
-- [ ] **Step 3: Endpoint'i yaz**
+- [x] **Step 3: Endpoint'i yaz**
 
 `src/app/api/health/route.ts`:
 ```ts
@@ -130,7 +130,7 @@ export async function GET() {
 }
 ```
 
-- [ ] **Step 4: Testlerin geçtiğini doğrula**
+- [x] **Step 4: Testlerin geçtiğini doğrula**
 
 ```powershell
 npx jest src/app/api/health --no-coverage
@@ -139,7 +139,7 @@ Beklenen: 2 passed. Sonra tüm suite: `npx jest --no-coverage` → hepsi yeşil.
 
 NOT: `/api/health` middleware matcher'ında YOK (`src/middleware.ts` kontrol et) — auth gerektirmemeli; matcher'a EKLEME.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add src/app/api/health
@@ -154,7 +154,7 @@ git commit -m "feat(ops): /api/health endpoint - DB ping + uptime"
 - Create: `src/lib/rate-limit.ts`
 - Test: `src/lib/__tests__/rate-limit.test.ts`
 
-- [ ] **Step 1: Failing testleri yaz**
+- [x] **Step 1: Failing testleri yaz**
 
 `src/lib/__tests__/rate-limit.test.ts`:
 ```ts
@@ -213,14 +213,14 @@ describe('RATE_LIMITS', () => {
 })
 ```
 
-- [ ] **Step 2: FAIL doğrula**
+- [x] **Step 2: FAIL doğrula**
 
 ```powershell
 npx jest src/lib/__tests__/rate-limit --no-coverage
 ```
 Beklenen: FAIL — modül yok.
 
-- [ ] **Step 3: Kütüphaneyi yaz**
+- [x] **Step 3: Kütüphaneyi yaz**
 
 `src/lib/rate-limit.ts`:
 ```ts
@@ -274,14 +274,14 @@ export const RATE_LIMITS = {
 } as const
 ```
 
-- [ ] **Step 4: PASS doğrula**
+- [x] **Step 4: PASS doğrula**
 
 ```powershell
 npx jest src/lib/__tests__/rate-limit --no-coverage
 ```
 Beklenen: hepsi yeşil.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add src/lib/rate-limit.ts src/lib/__tests__/rate-limit.test.ts
@@ -299,7 +299,7 @@ git commit -m "feat(security): in-memory sliding window rate limiter"
 - Modify: `src/app/api/messages/route.ts` (POST)
 - Modify: `src/app/api/offers/route.ts` (POST)
 
-- [ ] **Step 1: Login limiti — `src/lib/auth.ts`**
+- [x] **Step 1: Login limiti — `src/lib/auth.ts`**
 
 Import ekle:
 ```ts
@@ -321,7 +321,7 @@ import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 ```
 NOT: NextAuth v4'te `req.headers` düz obje olarak gelir (Headers instance değil) — bu yüzden `getClientIp` burada KULLANILMAZ.
 
-- [ ] **Step 2: Register limiti — `src/app/api/auth/register/route.ts`**
+- [x] **Step 2: Register limiti — `src/app/api/auth/register/route.ts`**
 
 Import ekle:
 ```ts
@@ -342,7 +342,7 @@ export async function POST(req: Request) {
         // ... mevcut gövde aynen ...
 ```
 
-- [ ] **Step 3: Upload limiti — `src/app/api/upload/route.ts`**
+- [x] **Step 3: Upload limiti — `src/app/api/upload/route.ts`**
 
 Import ekle: `import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'`
 
@@ -357,7 +357,7 @@ Import ekle: `import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'`
     }
 ```
 
-- [ ] **Step 4: Mesaj limiti — `src/app/api/messages/route.ts`**
+- [x] **Step 4: Mesaj limiti — `src/app/api/messages/route.ts`**
 
 Import ekle: `import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'`
 
@@ -372,7 +372,7 @@ Import ekle: `import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'`
     }
 ```
 
-- [ ] **Step 5: Teklif limiti — `src/app/api/offers/route.ts`**
+- [x] **Step 5: Teklif limiti — `src/app/api/offers/route.ts`**
 
 Import ekle: `import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";`
 
@@ -388,7 +388,7 @@ Import ekle: `import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";`
 ```
 NOT: mesaj ve teklif AYNI `write:` anahtarını paylaşır — spec gereği toplam 30/dk.
 
-- [ ] **Step 6: Derleme + test doğrula**
+- [x] **Step 6: Derleme + test doğrula**
 
 ```powershell
 npx tsc --noEmit
@@ -396,7 +396,7 @@ npx jest --no-coverage
 ```
 Beklenen: 0 hata, tüm testler yeşil.
 
-- [ ] **Step 7: Manuel duman testi**
+- [x] **Step 7: Manuel duman testi**
 
 ```powershell
 npm run dev:db
@@ -408,7 +408,7 @@ Ayrı terminalde 4 kez üst üste hatalı kayıt isteği at (4.: 429 beklenir):
 ```
 Beklenen çıktı: `400 400 400 429` (3 deneme limiti; ilk üçü validasyon/duplicate hatası, dördüncüsü rate limit).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```powershell
 git add src/lib/auth.ts src/app/api/auth/register/route.ts src/app/api/upload/route.ts src/app/api/messages/route.ts src/app/api/offers/route.ts
@@ -422,7 +422,7 @@ git commit -m "feat(security): login/register/upload/mesaj/teklif rate limit"
 **Files:**
 - Modify: `next.config.mjs`
 
-- [ ] **Step 1: headers() ekle ve ignoreBuildErrors'u kaldır**
+- [x] **Step 1: headers() ekle ve ignoreBuildErrors'u kaldır**
 
 `next.config.mjs` — `typescript` bloğunu tamamen SİL (tsc temiz), `eslint.ignoreDuringBuilds` ŞİMDİLİK KALIR (Task 15'te kalkacak), `headers()` ekle:
 ```js
@@ -461,7 +461,7 @@ const nextConfig = {
 export default nextConfig;
 ```
 
-- [ ] **Step 2: Build doğrula**
+- [x] **Step 2: Build doğrula**
 
 ```powershell
 npx tsc --noEmit
@@ -469,7 +469,7 @@ npm run build
 ```
 Beklenen: ikisi de hatasız. Build kırılırsa `ignoreBuildErrors` gizli hata saklıyordu demektir — hataları DÜZELT, bayrağı geri koyma.
 
-- [ ] **Step 3: Header'ları doğrula**
+- [x] **Step 3: Header'ları doğrula**
 
 ```powershell
 npm run dev:next
@@ -480,7 +480,7 @@ Ayrı terminalde:
 ```
 Beklenen: `DENY`.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add next.config.mjs
@@ -499,13 +499,13 @@ git commit -m "feat(security): HSTS/XFO/CSP-RO header'lari + ignoreBuildErrors k
 
 NOT: @sentry/nextjs'in major sürümüne göre dosya adları/hook isimleri değişebilir. Aşağıdaki yapı v9/v10 içindir. Kurulumdan sonra `npx @sentry/wizard` ÇALIŞTIRMA (interaktif); dosyaları elle oluştur. API farklıysa resmi Next.js kurulum dokümanındaki karşılığını kullan ama şu davranışları koru: DSN env'den + DSN boşken devre dışı, trace %10, PII kapalı, NEXT_NOT_FOUND/NEXT_REDIRECT filtreli.
 
-- [ ] **Step 1: Paketi kur**
+- [x] **Step 1: Paketi kur**
 
 ```powershell
 npm install @sentry/nextjs
 ```
 
-- [ ] **Step 2: Server/edge config**
+- [x] **Step 2: Server/edge config**
 
 `sentry.server.config.ts`:
 ```ts
@@ -530,7 +530,7 @@ Sentry.init({
 })
 ```
 
-- [ ] **Step 3: Instrumentation**
+- [x] **Step 3: Instrumentation**
 
 `src/instrumentation.ts`:
 ```ts
@@ -567,7 +567,7 @@ Sentry.init({
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
 ```
 
-- [ ] **Step 4: next.config.mjs sarmala**
+- [x] **Step 4: next.config.mjs sarmala**
 
 En üste: `import { withSentryConfig } from '@sentry/nextjs'`
 En altta `export default nextConfig;` yerine:
@@ -581,7 +581,7 @@ export default withSentryConfig(nextConfig, {
 });
 ```
 
-- [ ] **Step 5: .env.example'a ekle**
+- [x] **Step 5: .env.example'a ekle**
 
 ```bash
 # Sentry (boş bırakılırsa Sentry tamamen devre dışı)
@@ -591,7 +591,7 @@ SENTRY_PROJECT=
 SENTRY_AUTH_TOKEN=  # yalnız CI/build'de source map upload için
 ```
 
-- [ ] **Step 6: Doğrula**
+- [x] **Step 6: Doğrula**
 
 ```powershell
 npx tsc --noEmit
@@ -600,7 +600,7 @@ npx jest --no-coverage
 ```
 Beklenen: hepsi temiz (DSN boş → Sentry pasif, davranış değişikliği yok).
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```powershell
 git add package.json package-lock.json next.config.mjs sentry.server.config.ts sentry.edge.config.ts src/instrumentation.ts src/instrumentation-client.ts .env.example
@@ -616,7 +616,7 @@ git commit -m "feat(ops): Sentry entegrasyonu - DSN bos ise pasif, trace %10, PI
 - Create: `docker-compose.prod.yml`
 - Modify: `.env.example`
 
-- [ ] **Step 1: Dockerfile runner stage'ini güncelle**
+- [x] **Step 1: Dockerfile runner stage'ini güncelle**
 
 Runner stage'i şu hale getir (deps/builder stage'leri AYNEN kalır):
 ```dockerfile
@@ -648,7 +648,7 @@ CMD ["sh", "-c", "prisma migrate deploy && node server.js"]
 ```
 NOT: alpine'da busybox `wget` mevcut, ek paket gerekmez. `USER node`, global prisma kurulumundan SONRA gelmeli.
 
-- [ ] **Step 2: docker-compose.prod.yml oluştur**
+- [x] **Step 2: docker-compose.prod.yml oluştur**
 
 ```yaml
 services:
@@ -683,7 +683,7 @@ volumes:
     name: arsabil_pgdata_prod
 ```
 
-- [ ] **Step 3: .env.example'ı tamamla**
+- [x] **Step 3: .env.example'ı tamamla**
 
 Mevcut içeriğe ekle (Sentry bloğu Task 6'da eklendi):
 ```bash
@@ -702,7 +702,7 @@ RESEND_API_KEY=
 ```
 `.gitignore`'da `.env.production`'ın kapsandığını doğrula (genelde `.env*` kalıbı vardır; yoksa ekle).
 
-- [ ] **Step 4: Lokal compose doğrulaması**
+- [x] **Step 4: Lokal compose doğrulaması**
 
 `.env.production` oluştur (lokal deneme değerleriyle: `DATABASE_URL=postgresql://arsabil:test123@postgres:5432/arsabil`, `POSTGRES_PASSWORD=test123`, `NEXTAUTH_URL=http://localhost:3000`, `NEXTAUTH_SECRET=lokal-test-sirri-32-karakter-uzun`), sonra:
 ```powershell
@@ -713,7 +713,7 @@ docker compose -f docker-compose.prod.yml down
 ```
 Beklenen: `{"status":"ok","db":"ok",...}`. NOT: dev postgres (5432) çalışıyorsa önce `npm run dev:db:stop`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add Dockerfile docker-compose.prod.yml .env.example .gitignore
@@ -727,7 +727,7 @@ git commit -m "feat(ops): non-root container + HEALTHCHECK + docker-compose.prod
 **Files:**
 - Create: `docs/DEPLOYMENT.md`
 
-- [ ] **Step 1: Dokümanı yaz**
+- [x] **Step 1: Dokümanı yaz**
 
 `docs/DEPLOYMENT.md` şu bölümleri İÇERMELİ (her biri çalıştırılabilir komutlarla):
 
@@ -774,7 +774,7 @@ Yatay ölçeklemede `src/lib/rate-limit.ts` Redis'e taşınmalı.
 
 Bu iskeleti gerçek doküman olarak yaz — başlıkları kopyala, komutları aynen kullan, Coolify menü adımlarını kendi sözcüklerinle netleştir.
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```powershell
 git add docs/DEPLOYMENT.md
@@ -789,14 +789,14 @@ git commit -m "docs(ops): Coolify deployment, backup/restore ve rollback rehberi
 - Create: `playwright.config.ts`, `e2e/global-setup.ts`
 - Modify: `jest.config.js` (e2e dışlama), `package.json` (script), `.gitignore`
 
-- [ ] **Step 1: Paket kur**
+- [x] **Step 1: Paket kur**
 
 ```powershell
 npm install -D @playwright/test
 npx playwright install chromium
 ```
 
-- [ ] **Step 2: Jest'i e2e'den izole et**
+- [x] **Step 2: Jest'i e2e'den izole et**
 
 `jest.config.js` içine ekle (config objesine):
 ```js
@@ -804,7 +804,7 @@ npx playwright install chromium
 ```
 Doğrula: `npx jest --listTests` çıktısında `e2e/` altında dosya OLMAMALI (şu an zaten yok ama guard şimdi girer).
 
-- [ ] **Step 3: Test veritabanı oluştur**
+- [x] **Step 3: Test veritabanı oluştur**
 
 ```powershell
 npm run dev:db
@@ -812,7 +812,7 @@ docker exec arsabil_postgres_dev psql -U arsabil -d arsabil_dev -c "CREATE DATAB
 ```
 Beklenen: `CREATE DATABASE` (zaten varsa hata — sorun değil).
 
-- [ ] **Step 4: playwright.config.ts**
+- [x] **Step 4: playwright.config.ts**
 
 ```ts
 import { defineConfig } from '@playwright/test'
@@ -847,7 +847,7 @@ export default defineConfig({
 })
 ```
 
-- [ ] **Step 5: e2e/global-setup.ts**
+- [x] **Step 5: e2e/global-setup.ts**
 
 ÖNCE `prisma/schema.prisma`'daki model adlarını oku; aşağıdaki `deleteMany` zinciri FK bağımlılık sırasına göredir — şemada olmayan model varsa satırını çıkar, eksik varsa ekle:
 ```ts
@@ -889,19 +889,19 @@ export default async function globalSetup() {
 }
 ```
 
-- [ ] **Step 6: package.json script + .gitignore**
+- [x] **Step 6: package.json script + .gitignore**
 
 `scripts`'e ekle: `"test:e2e": "playwright test"`.
 `.gitignore`'a ekle: `test-results/`, `playwright-report/`.
 
-- [ ] **Step 7: Boş suite ile altyapıyı doğrula**
+- [x] **Step 7: Boş suite ile altyapıyı doğrula**
 
 ```powershell
 npm run test:e2e
 ```
 Beklenen: "no tests found" hatası DEĞİL — global setup koşar (migrate + seed), sonra "No tests found" benzeri mesajla biter. Migrate/seed hatası varsa burada çöz (test DB bağlantısı, model adları).
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```powershell
 git add playwright.config.ts e2e/global-setup.ts jest.config.js package.json package-lock.json .gitignore
@@ -915,11 +915,11 @@ git commit -m "test(e2e): Playwright altyapisi - test DB, seed, jest izolasyonu"
 **Files:**
 - Create: `e2e/auth-hesapla.spec.ts`
 
-- [ ] **Step 1: Form alanlarını keşfet**
+- [x] **Step 1: Form alanlarını keşfet**
 
 `src/app/register/page.tsx` (yoksa kayıt formunun yaşadığı sayfayı bul: `Grep "api/auth/register" src/app`), `src/app/login/page.tsx` ve `src/app/hesapla/page.tsx`'i OKU. Aşağıdaki testteki `getByLabel/getByPlaceholder/getByRole` seçicilerini gerçek label/placeholder/buton metinlerine göre AYARLA. Bu keşif adımı atlanamaz.
 
-- [ ] **Step 2: Testi yaz**
+- [x] **Step 2: Testi yaz**
 
 `e2e/auth-hesapla.spec.ts` (seçicileri Step 1'e göre düzelt):
 ```ts
@@ -953,14 +953,14 @@ test('kayit -> login -> hesaplama akisi', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 3: Koş ve yeşile çek**
+- [x] **Step 3: Koş ve yeşile çek**
 
 ```powershell
 npx playwright test e2e/auth-hesapla.spec.ts
 ```
 Kırmızıysa: `npx playwright test --debug` ile seçicileri düzelt. Hesapla formu district-price verisi istiyorsa global-setup'a ilgili modelden 1 seed kaydı ekle (model adını `prisma/schema.prisma`'dan al) ve bunu commit mesajında belirt.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add e2e/auth-hesapla.spec.ts e2e/global-setup.ts
@@ -974,11 +974,11 @@ git commit -m "test(e2e): kayit-login-hesaplama smoke akisi"
 **Files:**
 - Create: `e2e/ilan-yasam-dongusu.spec.ts`
 
-- [ ] **Step 1: Wizard ve admin akışını keşfet**
+- [x] **Step 1: Wizard ve admin akışını keşfet**
 
 `src/app/listings/new/page.tsx` (wizard adımları), `src/app/admin` (onay butonu) ve marketplace kartını OKU; seçicileri gerçek metinlere göre ayarla. Fotoğraf adımı ATLANIR (Cloudinary'ye gerçek istek yok — "Atla"/"İleri" yolu kullanılır).
 
-- [ ] **Step 2: Testi yaz**
+- [x] **Step 2: Testi yaz**
 
 `e2e/ilan-yasam-dongusu.spec.ts`:
 ```ts
@@ -1020,13 +1020,13 @@ test('ilan olustur -> admin onayla -> marketplace gorunur', async ({ page }) => 
 })
 ```
 
-- [ ] **Step 3: Koş ve yeşile çek**
+- [x] **Step 3: Koş ve yeşile çek**
 
 ```powershell
 npx playwright test e2e/ilan-yasam-dongusu.spec.ts
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add e2e/ilan-yasam-dongusu.spec.ts
@@ -1040,11 +1040,11 @@ git commit -m "test(e2e): ilan olusturma-onay-marketplace yasam dongusu"
 **Files:**
 - Create: `e2e/mesajlasma.spec.ts`
 
-- [ ] **Step 1: Inbox akışını keşfet**
+- [x] **Step 1: Inbox akışını keşfet**
 
 `src/app/inbox/page.tsx`'i OKU: yeni konuşma nasıl başlar (profil sayfasından "Mesaj Gönder" butonu mu, inbox içinden mi)? Seçicileri ayarla.
 
-- [ ] **Step 2: Testi yaz**
+- [x] **Step 2: Testi yaz**
 
 `e2e/mesajlasma.spec.ts`:
 ```ts
@@ -1088,7 +1088,7 @@ test('user1 mesaj gonderir, user2 inboxta gorur', async ({ page, request }) => {
 ```
 NOT: Bu test için `e2e/global-setup.ts`'te kullanıcılar sabit id ile seed edilmeli — `createMany` çağrısını üç ayrı `create`'e çevir ve `id: 'e2e-admin' | 'e2e-user-1' | 'e2e-user-2'` ver.
 
-- [ ] **Step 3: global-setup'ı sabit id'lerle güncelle**
+- [x] **Step 3: global-setup'ı sabit id'lerle güncelle**
 
 ```ts
         const password = await bcrypt.hash('Test1234!', 10)
@@ -1097,14 +1097,14 @@ NOT: Bu test için `e2e/global-setup.ts`'te kullanıcılar sabit id ile seed edi
         await prisma.user.create({ data: { id: 'e2e-user-2', email: 'user2@e2e.test', name: 'E2E UserIki', password, role: 'USER' } })
 ```
 
-- [ ] **Step 4: Tüm e2e suite'i koş**
+- [x] **Step 4: Tüm e2e suite'i koş**
 
 ```powershell
 npm run test:e2e
 ```
 Beklenen: 3/3 yeşil.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add e2e/mesajlasma.spec.ts e2e/global-setup.ts
@@ -1118,7 +1118,7 @@ git commit -m "test(e2e): mesajlasma smoke akisi + sabit seed idleri"
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Workflow'u yaz**
+- [x] **Step 1: Workflow'u yaz**
 
 `.github/workflows/ci.yml`:
 ```yaml
@@ -1169,14 +1169,14 @@ jobs:
 ```
 NOT: `npx eslint .` adımı Task 15 bitmeden kırmızı kalır — bu BİLİNÇLİ (lint gate'in amacı bu). Repo'da GitHub remote yoksa workflow hazır durur; aktivasyon kullanıcının remote eklemesiyle olur.
 
-- [ ] **Step 2: Workflow YAML'ını doğrula**
+- [x] **Step 2: Workflow YAML'ını doğrula**
 
 ```powershell
 npx --yes yaml-lint .github/workflows/ci.yml
 ```
 (yaml-lint yoksa: dosyayı `node -e "const yaml=require('js-yaml');yaml.load(require('fs').readFileSync('.github/workflows/ci.yml','utf8'));console.log('OK')"` ile doğrula — js-yaml playwright bağımlılıklarından gelir; o da yoksa GitHub'a push'ta doğrulanır.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```powershell
 git add .github/workflows/ci.yml
@@ -1190,7 +1190,7 @@ git commit -m "ci: lint + tsc + jest + playwright pipeline"
 **Files:**
 - Delete: `arsabil-main/` (iç içe junk kopya — varsa)
 
-- [ ] **Step 1: Junk kopyayı bul ve sil**
+- [x] **Step 1: Junk kopyayı bul ve sil**
 
 ```powershell
 Test-Path "arsabil-main"
@@ -1202,7 +1202,7 @@ git rm -r --cached arsabil-main 2>$null
 ```
 `False` ise bu adımı atla (daha önce temizlenmiş).
 
-- [ ] **Step 2: Envanter çıkar**
+- [x] **Step 2: Envanter çıkar**
 
 ```powershell
 npx eslint . 2>&1 | Select-Object -Last 5
@@ -1210,14 +1210,14 @@ npx eslint . --format json --output-file lint-report.json
 ```
 Son satırdaki toplam hata/uyarı sayısını not et. `lint-report.json`'u commit'leme (geçici çalışma dosyası).
 
-- [ ] **Step 3: Kural bazında dağılımı çıkar**
+- [x] **Step 3: Kural bazında dağılımı çıkar**
 
 ```powershell
 node -e "const r=require('./lint-report.json');const c={};for(const f of r)for(const m of f.messages)c[m.ruleId]=(c[m.ruleId]||0)+1;console.table(Object.entries(c).sort((a,b)=>b[1]-a[1]))"
 ```
 Bu dağılım Task 15'teki düzeltme sırasını belirler (en kalabalık kural önce).
 
-- [ ] **Step 4: Commit (junk silindiyse)**
+- [x] **Step 4: Commit (junk silindiyse)**
 
 ```powershell
 git add -A
@@ -1232,7 +1232,7 @@ git commit -m "chore: ic ice arsabil-main junk kopyasi silindi"
 
 Prensip: **kodu düzelt, kuralı gevşetme.** Satır bazlı `eslint-disable-next-line` yalnız gerçek istisnalara, gerekçe yorumuyla.
 
-- [ ] **Step 1: Kural kural düzelt, kural başına commit**
+- [x] **Step 1: Kural kural düzelt, kural başına commit**
 
 Task 14 Step 3 dağılımındaki her kural için (en kalabalıktan başla):
 1. `npx eslint . --rule-filter` yok — dosya listesini json rapordan al: `node -e "const r=require('./lint-report.json');for(const f of r)if(f.messages.some(m=>m.ruleId==='KURAL'))console.log(f.filePath)"`
@@ -1247,14 +1247,14 @@ git add -A
 git commit -m "chore(lint): <kural-adi> ihlalleri duzeltildi (<N> adet)"
 ```
 
-- [ ] **Step 2: Sıfırı doğrula**
+- [x] **Step 2: Sıfırı doğrula**
 
 ```powershell
 npx eslint .
 ```
 Beklenen: çıktı YOK (0 hata, 0 uyarı). `Remove-Item lint-report.json`.
 
-- [ ] **Step 3: Build gate'i aç**
+- [x] **Step 3: Build gate'i aç**
 
 `next.config.mjs`'ten `eslint: { ignoreDuringBuilds: true }` bloğunu SİL, sonra:
 ```powershell
@@ -1262,7 +1262,7 @@ npm run build
 ```
 Beklenen: build temiz geçer.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```powershell
 git add next.config.mjs
@@ -1273,7 +1273,7 @@ git commit -m "chore(lint): ignoreDuringBuilds kaldirildi - lint artik build gat
 
 ## Task 16: Final Doğrulama
 
-- [ ] **Step 1: Tam suite**
+- [x] **Step 1: Tam suite**
 
 ```powershell
 npx tsc --noEmit
@@ -1284,14 +1284,14 @@ npm run build
 ```
 Beklenen: hepsi temiz; jest'te mevcut 60 + yeni testler (health 2, rate-limit ~6).
 
-- [ ] **Step 2: Compose duman testi**
+- [x] **Step 2: Compose duman testi**
 
 Task 7 Step 4'teki compose doğrulamasını son kodla tekrarla: `/api/health` 200 + `{"status":"ok"}`.
 
-- [ ] **Step 3: Spec kapanış kontrolü**
+- [x] **Step 3: Spec kapanış kontrolü**
 
 `docs/superpowers/specs/2026-06-11-production-readiness-design.md` bölüm 9'daki tamamlama kriterlerini tek tek işaretle. Eksik varsa kapat.
 
-- [ ] **Step 4: Kullanıcıya rapor**
+- [x] **Step 4: Kullanıcıya rapor**
 
 Branch'i push/merge ETME — kullanıcı Coolify'da gerçek deploy'u kendisi yapacak (DEPLOYMENT.md ile). Sentry DSN, domain ve env değerleri kullanıcıdan.
