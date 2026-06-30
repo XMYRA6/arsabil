@@ -1,5 +1,4 @@
 import React from 'react';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { pdf } from '@react-pdf/renderer';
 import { ReportDocument, ReportInput } from './ReportDocument';
 

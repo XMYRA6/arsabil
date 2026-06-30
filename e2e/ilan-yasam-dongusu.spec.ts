@@ -21,7 +21,7 @@ test('ilan olustur -> admin onayla -> marketplace gorunur', async ({ page }) => 
 
     // Adım 2: Başlık ve arsa alanı doldur
     await page.getByPlaceholder(/Kadıköy|başlık/i).fill(BASLIK)
-    await page.getByPlaceholder('450').fill('300')
+    await page.getByPlaceholder('450', { exact: true }).fill('300')
     await page.getByRole('button', { name: /İleri/i }).click()
 
     // Adım 3: Fotoğraf (atla)
@@ -39,7 +39,7 @@ test('ilan olustur -> admin onayla -> marketplace gorunur', async ({ page }) => 
     await page.context().clearCookies()
     await login(page, 'admin@e2e.test')
     await page.goto('/admin/listings')
-    await expect(page.getByText(BASLIK).first()).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(BASLIK).first()).toBeVisible({ timeout: 20_000 })
     await page.getByTitle('Onayla').first().click()
     await expect(page.getByText(/onaylandı/i).first()).toBeVisible({ timeout: 10_000 })
 

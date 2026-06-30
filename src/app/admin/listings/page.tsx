@@ -12,7 +12,7 @@ interface ListingRow {
     status: string;
     createdAt: string;
     user: { name: string | null; email: string | null };
-    report: { title: string; minApartmentPrice: number; landShareRatio: number; totalApartments: number };
+    report: { title: string; minApartmentPrice: number; landShareRatio: number; totalApartments: number } | null;
     _count: { offers: number };
 }
 
@@ -177,10 +177,12 @@ export default function AdminListings() {
                                 <td>
                                     <div style={{ maxWidth: 200 }}>
                                         <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--card-title)' }}>
-                                            {listing.report?.title || 'İlan #' + listing.id.slice(0, 6)}
+                                            {listing.title || listing.report?.title || 'İlan #' + listing.id.slice(0, 6)}
                                         </div>
                                         <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>
-                                            {listing.report?.totalApartments} daire · %{Math.round((listing.report?.landShareRatio || 0) * 100)} arsa payı
+                                            {listing.report
+                                                ? `${listing.report.totalApartments} daire · %${Math.round(listing.report.landShareRatio * 100)} arsa payı`
+                                                : 'Fizibilite raporu yok'}
                                         </div>
                                     </div>
                                 </td>

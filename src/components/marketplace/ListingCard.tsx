@@ -10,7 +10,7 @@ function seededInt(seed: string, min: number, max: number): number {
     return min + (Math.abs(h) % (max - min + 1));
 }
 
-interface Listing {
+export interface Listing {
     id: string;
     title: string;
     type: 'SALE' | 'KAT_KARSILIGI' | 'ORTAKLIK';
