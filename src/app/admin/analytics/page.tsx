@@ -22,9 +22,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-    USER: '#10b981',
-    ARSA_SAHIBI: '#f59e0b',
-    MUTEAHHIT: '#3b82f6',
+    USER: 'var(--green)',
+    ARSA_SAHIBI: 'var(--orange)',
+    MUTEAHHIT: 'var(--info)',
     DANISMAN: '#8b5cf6',
     ADMIN: '#ef4444',
 };
@@ -74,9 +74,9 @@ export default function AdminAnalytics() {
                 <h3>📊 Dönüşüm Hunisi</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
                     {[
-                        { label: 'Hesaplama → İlan', value: `%${conversionRate}`, color: '#3b82f6', width: conversionRate },
-                        { label: 'İlan → Teklif', value: `%${offerRate}`, color: '#10b981', width: offerRate },
-                        { label: 'Ortalama Teklif/İlan', value: data.totalListings > 0 ? (data.totalOffers / data.totalListings).toFixed(1) : '0', color: '#f59e0b', width: String(Math.min(100, data.totalListings > 0 ? (data.totalOffers / data.totalListings) * 20 : 0)) },
+                        { label: 'Hesaplama → İlan', value: `%${conversionRate}`, color: 'var(--info)', width: conversionRate },
+                        { label: 'İlan → Teklif', value: `%${offerRate}`, color: 'var(--green)', width: offerRate },
+                        { label: 'Ortalama Teklif/İlan', value: data.totalListings > 0 ? (data.totalOffers / data.totalListings).toFixed(1) : '0', color: 'var(--orange)', width: String(Math.min(100, data.totalListings > 0 ? (data.totalOffers / data.totalListings) * 20 : 0)) },
                     ].map(f => (
                         <div key={f.label} style={{
                             background: 'var(--bg)', borderRadius: 14, padding: '16px 18px',

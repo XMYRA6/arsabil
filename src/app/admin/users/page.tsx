@@ -16,17 +16,18 @@ interface UserRow {
 }
 
 const ROLES = [
-    { value: 'USER', label: 'Kullanıcı', color: '#10b981' },
-    { value: 'ARSA_SAHIBI', label: 'Arsa Sahibi', color: '#f59e0b' },
-    { value: 'MUTEAHHIT', label: 'Müteahhit', color: '#3b82f6' },
-    { value: 'DANISMAN', label: 'Danışman', color: '#8b5cf6' },
-    { value: 'ADMIN', label: 'Admin', color: '#ef4444' },
+    { value: 'USER', label: 'Kullanıcı', color: 'var(--green)', rgb: 'var(--green-rgb)' },
+    { value: 'ARSA_SAHIBI', label: 'Arsa Sahibi', color: 'var(--orange)', rgb: 'var(--orange-rgb)' },
+    { value: 'MUTEAHHIT', label: 'Müteahhit', color: 'var(--info)', rgb: 'var(--info-rgb)' },
+    { value: 'DANISMAN', label: 'Danışman', color: 'var(--accent-violet-stat)', rgb: '139, 92, 246' },
+    { value: 'ADMIN', label: 'Admin', color: 'var(--red)', rgb: 'var(--red-rgb)' },
 ];
 
 function getRoleStyle(role: string) {
     const r = ROLES.find(x => x.value === role);
-    const c = r?.color || '#6b7280';
-    return { background: `${c}18`, color: c, border: `1px solid ${c}33` };
+    const c = r?.color || 'var(--muted)';
+    const rgb = r?.rgb || '107, 114, 128';
+    return { background: `rgba(${rgb},0.09)`, color: c, border: `1px solid rgba(${rgb},0.2)` };
 }
 
 export default function AdminUsers() {
@@ -228,8 +229,8 @@ export default function AdminUsers() {
                                 <td>
                                     <span className={styles.roleBadge} style={
                                         user.isBanned
-                                            ? { background: 'rgba(239,68,68,.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,.25)' }
-                                            : { background: 'rgba(16,185,129,.12)', color: '#10b981', border: '1px solid rgba(16,185,129,.25)' }
+                                            ? { background: 'rgba(var(--red-rgb),.12)', color: 'var(--red)', border: '1px solid rgba(var(--red-rgb),.25)' }
+                                            : { background: 'rgba(var(--green-rgb),.12)', color: 'var(--green)', border: '1px solid rgba(var(--green-rgb),.25)' }
                                     }>
                                         {user.isBanned ? '🚫 Askıda' : '✅ Aktif'}
                                     </span>
@@ -240,7 +241,7 @@ export default function AdminUsers() {
                                         title={user.isVerified ? 'Doğrulamayı Kaldır' : 'Doğrula'}
                                         style={{
                                             width: 36, height: 18, borderRadius: 9,
-                                            background: user.isVerified ? '#10b981' : '#30363d',
+                                            background: user.isVerified ? 'var(--green)' : '#30363d',
                                             position: 'relative', cursor: 'pointer',
                                             transition: 'background 0.2s',
                                         }}
@@ -261,7 +262,7 @@ export default function AdminUsers() {
                                         className={styles.roleSelect}
                                         style={{
                                             fontSize: '0.78rem', height: 28,
-                                            color: user.plan === 'PRO' ? '#f59e0b' : 'var(--muted)',
+                                            color: user.plan === 'PRO' ? 'var(--orange)' : 'var(--muted)',
                                         }}
                                     >
                                         <option value="FREE">FREE</option>
@@ -291,7 +292,7 @@ export default function AdminUsers() {
                                                 width: 32, height: 32, borderRadius: 8,
                                                 border: '1px solid var(--border)',
                                                 background: user.isBanned ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)',
-                                                color: user.isBanned ? '#10b981' : '#ef4444',
+                                                color: user.isBanned ? 'var(--green)' : 'var(--red)',
                                                 cursor: 'pointer', fontSize: '0.85rem',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             }}

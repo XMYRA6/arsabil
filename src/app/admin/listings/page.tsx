@@ -203,9 +203,9 @@ export default function AdminListings() {
                                 <td>
                                     <span className={styles.roleBadge} style={
                                         listing.status === 'PENDING'
-                                            ? { background: 'rgba(245,158,11,.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,.25)' }
+                                            ? { background: 'rgba(var(--orange-rgb),.12)', color: 'var(--orange)', border: '1px solid rgba(var(--orange-rgb),.25)' }
                                             : listing.isActive
-                                            ? { background: 'rgba(16,185,129,.12)', color: '#10b981', border: '1px solid rgba(16,185,129,.25)' }
+                                            ? { background: 'rgba(var(--green-rgb),.12)', color: 'var(--green)', border: '1px solid rgba(var(--green-rgb),.25)' }
                                             : { background: 'rgba(107,114,128,.12)', color: '#6b7280', border: '1px solid rgba(107,114,128,.25)' }
                                     }>
                                         {listing.status === 'PENDING' ? '⏳ Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif'}
@@ -219,7 +219,7 @@ export default function AdminListings() {
                                                 <button
                                                     onClick={() => approveAction(listing.id, 'approve')}
                                                     className={styles.iconBtn}
-                                                    style={{ color: '#10b981', fontSize: '0.75rem', padding: '2px 8px' }}
+                                                    style={{ color: 'var(--green)', fontSize: '0.75rem', padding: '2px 8px' }}
                                                     title="Onayla"
                                                 >✅ Onayla</button>
                                                 <button
@@ -234,7 +234,7 @@ export default function AdminListings() {
                                                 onClick={() => toggleActive(listing.id, !listing.isActive)}
                                                 title={listing.isActive ? 'Pasife Al' : 'Aktif Et'}
                                                 className={styles.iconBtn}
-                                                style={{ color: listing.isActive ? '#f59e0b' : '#10b981' }}
+                                                style={{ color: listing.isActive ? 'var(--orange)' : 'var(--green)' }}
                                             >
                                                 {listing.isActive ? '⏸️' : '▶️'}
                                             </button>

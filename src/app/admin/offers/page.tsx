@@ -30,9 +30,9 @@ export default function AdminOffers() {
     const filtered = statusFilter === 'ALL' ? offers : offers.filter(o => o.status === statusFilter);
 
     const statusStyle = (s: string) => {
-        if (s === 'ACCEPTED') return { background: 'rgba(16,185,129,.12)', color: '#10b981', border: '1px solid rgba(16,185,129,.25)' };
+        if (s === 'ACCEPTED') return { background: 'rgba(var(--green-rgb),.12)', color: 'var(--green)', border: '1px solid rgba(var(--green-rgb),.25)' };
         if (s === 'REJECTED') return { background: 'rgba(239,68,68,.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,.25)' };
-        return { background: 'rgba(245,158,11,.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,.25)' };
+        return { background: 'rgba(var(--orange-rgb),.12)', color: 'var(--orange)', border: '1px solid rgba(var(--orange-rgb),.25)' };
     };
     const statusLabel = (s: string) => s === 'ACCEPTED' ? '✅ Kabul' : s === 'REJECTED' ? '❌ Red' : '⏳ Bekliyor';
 
