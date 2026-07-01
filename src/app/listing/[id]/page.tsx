@@ -156,7 +156,7 @@ export default function ListingDetailPage() {
                         {/* Change badge */}
                         <span style={{
                             position: 'absolute', top: 16, right: 16,
-                            background: 'rgba(16,185,129,.85)', color: 'white',
+                            background: 'rgba(var(--green-rgb),.85)', color: 'white',
                             fontSize: '0.85rem', fontWeight: 900, padding: '4px 12px', borderRadius: 10,
                             backdropFilter: 'blur(4px)',
                         }}>▲ +{listing.changePercent}%</span>
@@ -335,7 +335,7 @@ export default function ListingDetailPage() {
                     </div>
 
                     <div style={{ display: 'flex', gap: 10 }}>
-                        <div style={{ flex: 1, background: 'rgba(16,185,129,.10)', borderRadius: 10, padding: '10px 12px' }}>
+                        <div style={{ flex: 1, background: 'rgba(var(--green-rgb),.10)', borderRadius: 10, padding: '10px 12px' }}>
                             <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Net Kâr</div>
                             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--green)' }}>+%{listing.netKar}</div>
                         </div>
@@ -360,7 +360,7 @@ export default function ListingDetailPage() {
                         }}>🧮 Senaryo Oluştur</button>
                         <button onClick={() => setActiveTab('teklifler')} style={{
                             padding: '11px', background: 'rgba(var(--green-rgb),.15)', color: 'var(--green)',
-                            border: '1.5px solid rgba(16,185,129,.4)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.85rem',
+                            border: '1.5px solid rgba(var(--green-rgb),.4)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.85rem',
                         }}>📤 Teklif Ver</button>
                         <button onClick={() => setActiveTab('mesajlar')} style={{
                             padding: '11px', background: 'var(--bg)', color: 'var(--muted)',
