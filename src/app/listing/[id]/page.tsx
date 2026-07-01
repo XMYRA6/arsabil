@@ -107,7 +107,7 @@ export default function ListingDetailPage() {
     );
 
     const score = listing.fizibiliteSkoru ?? 82;
-    const scoreColor = score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ff5a5f';
+    const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
 
     return (
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '2rem 1rem' }}>
@@ -248,9 +248,9 @@ export default function ListingDetailPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                                     {[
                                         ['Tahmini Arsa Değeri', '4.371.200 TL', 'var(--primary)'],
-                                        ['Tahmini Net Kâr', '+%34 (▲+1.76M TL)', '#10b981'],
+                                        ['Tahmini Net Kâr', '+%34 (▲+1.76M TL)', 'var(--green)'],
                                         ['Fizibilite Skoru', `${score}/100`, scoreColor],
-                                        ['Piyasa Karşılaştırma', `+${listing.changePercent}%`, '#10b981'],
+                                        ['Piyasa Karşılaştırma', `+${listing.changePercent}%`, 'var(--green)'],
                                         ['Daire/m² Tahmini', '9.5/m²', 'var(--card-title)'],
                                         ['Proje Süresi', '~18–24 ay', 'var(--muted)'],
                                     ].map(([label, val, color]) => (
@@ -297,7 +297,7 @@ export default function ListingDetailPage() {
                                     style={{ width: '100%', padding: '10px', background: 'var(--bg)', border: '1.5px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.85rem', resize: 'none', outline: 'none' }}
                                 />
                                 <button onClick={handleOffer} disabled={sending} style={{
-                                    marginTop: 10, padding: '10px 24px', background: '#10b981', color: 'white',
+                                    marginTop: 10, padding: '10px 24px', background: 'var(--green)', color: 'white',
                                     border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800,
                                     opacity: sending ? 0.6 : 1,
                                 }}>
@@ -337,7 +337,7 @@ export default function ListingDetailPage() {
                     <div style={{ display: 'flex', gap: 10 }}>
                         <div style={{ flex: 1, background: 'rgba(16,185,129,.10)', borderRadius: 10, padding: '10px 12px' }}>
                             <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Net Kâr</div>
-                            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#10b981' }}>+%{listing.netKar}</div>
+                            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--green)' }}>+%{listing.netKar}</div>
                         </div>
                         <div style={{ flex: 1, background: 'rgba(var(--primary-rgb),.10)', borderRadius: 10, padding: '10px 12px' }}>
                             <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Arsa Payı</div>
@@ -359,7 +359,7 @@ export default function ListingDetailPage() {
                             border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.85rem',
                         }}>🧮 Senaryo Oluştur</button>
                         <button onClick={() => setActiveTab('teklifler')} style={{
-                            padding: '11px', background: 'rgba(16,185,129,.15)', color: '#10b981',
+                            padding: '11px', background: 'rgba(var(--green-rgb),.15)', color: 'var(--green)',
                             border: '1.5px solid rgba(16,185,129,.4)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.85rem',
                         }}>📤 Teklif Ver</button>
                         <button onClick={() => setActiveTab('mesajlar')} style={{

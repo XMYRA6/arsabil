@@ -72,7 +72,7 @@
 }
 
 .heroTitle span {
-  background: linear-gradient(100deg, var(--primary) 0%, #ef4444 100%);
+  background: linear-gradient(100deg, var(--primary) 0%, var(--red) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

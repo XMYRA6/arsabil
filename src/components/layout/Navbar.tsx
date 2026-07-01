@@ -225,9 +225,9 @@ export function Navbar() {
                                     {/* Conversations */}
                                     <div style={{ overflowY: 'auto', maxHeight: 350 }}>
                                         {[
-                                            { name: 'Ahmet Yılmaz', msg: 'Arsa için teklifinizi değerlendir...', time: '2dk', unread: true, initials: 'AY', color: '#3b82f6' },
-                                            { name: 'Elif Demir', msg: 'Teşekkürler, raporu inceledim 👍', time: '15dk', unread: true, initials: 'ED', color: '#10b981' },
-                                            { name: 'Mehmet Kaya', msg: 'Proje detaylarını gönderebilir mi...', time: '1s', unread: false, initials: 'MK', color: '#f59e0b' },
+                                            { name: 'Ahmet Yılmaz', msg: 'Arsa için teklifinizi değerlendir...', time: '2dk', unread: true, initials: 'AY', color: 'var(--info)' },
+                                            { name: 'Elif Demir', msg: 'Teşekkürler, raporu inceledim 👍', time: '15dk', unread: true, initials: 'ED', color: 'var(--green)' },
+                                            { name: 'Mehmet Kaya', msg: 'Proje detaylarını gönderebilir mi...', time: '1s', unread: false, initials: 'MK', color: 'var(--orange)' },
                                             { name: 'Fatma Çelik', msg: 'İyi akşamlar, fiyat konusunda...', time: '3s', unread: false, initials: 'FÇ', color: '#8b5cf6' },
                                             { name: 'ArsaBil Destek', msg: 'Hoş geldiniz! Yardıma hazırız.', time: '1h', unread: false, initials: 'AB', color: '#1f6feb' },
                                         ].map((conv, i) => (
