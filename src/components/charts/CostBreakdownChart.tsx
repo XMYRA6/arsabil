@@ -33,7 +33,7 @@ export const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
         datasets: [
             {
                 data: [constructionCost, landValue, profit, risk],
-                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ff5a5f'],
                 borderColor: ['#2563eb', '#059669', '#d97706', '#dc2626'],
                 borderWidth: 2,
                 hoverOffset: 6,
