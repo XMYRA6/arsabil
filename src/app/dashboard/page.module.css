@@ -224,9 +224,9 @@
   flex-shrink: 0;
 }
 
-.statusPending  { background: rgba(245,158,11,.12); color: #f59e0b; }
-.statusAccepted { background: rgba(16,163,74,.12);  color: #10a34a; }
-.statusRejected { background: rgba(239,68,68,.12);  color: #ef4444; }
+.statusPending  { background: rgba(var(--orange-rgb),.12); color: var(--orange); }
+.statusAccepted { background: rgba(var(--green-rgb),.12);  color: var(--green); }
+.statusRejected { background: rgba(var(--red-rgb),.12);  color: var(--red); }
 
 .quickActions {
   display: flex;

@@ -37,10 +37,10 @@ interface DashboardData {
 }
 
 const STAT_CONFIG = [
-  { key: 'reportCount',        label: 'Hesaplama',       color: '#3b82f6' },
-  { key: 'activeListingCount', label: 'Aktif İlan',       color: '#10a34a' },
-  { key: 'offerCount',         label: 'Teklif',          color: '#f59e0b' },
-  { key: 'unreadMessageCount', label: 'Okunmamış Mesaj', color: '#8b5cf6' },
+  { key: 'reportCount',        label: 'Hesaplama',       rgb: '59, 130, 246' },   // --info
+  { key: 'activeListingCount', label: 'Aktif İlan',       rgb: '16, 185, 129' },  // --green
+  { key: 'offerCount',         label: 'Teklif',          rgb: '245, 158, 11' },  // --orange
+  { key: 'unreadMessageCount', label: 'Okunmamış Mesaj', rgb: '139, 92, 246' },  // --accent-violet-stat
 ] as const
 
 export default function DashboardPage() {
@@ -87,9 +87,9 @@ export default function DashboardPage() {
 
       {/* Stat kartları */}
       <div className={styles.statsGrid}>
-        {STAT_CONFIG.map(({ key, label, color }) => (
-          <div key={key} className={styles.statCard} style={{ '--card-accent-rgb': hexToRgb(color) } as React.CSSProperties}>
-            <div className={styles.statValue} style={{ color }}>{statValues[key] ?? 0}</div>
+        {STAT_CONFIG.map(({ key, label, rgb }) => (
+          <div key={key} className={styles.statCard} style={{ '--card-accent-rgb': rgb } as React.CSSProperties}>
+            <div className={styles.statValue} style={{ color: `rgb(${rgb})` }}>{statValues[key] ?? 0}</div>
             <div className={styles.statLabel}>{label}</div>
           </div>
         ))}
@@ -180,11 +180,4 @@ export default function DashboardPage() {
       </div>
     </div>
   )
-}
-
-function hexToRgb(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `${r}, ${g}, ${b}`
 }

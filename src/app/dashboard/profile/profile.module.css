@@ -100,8 +100,8 @@
   gap: 4px;
   font-size: 0.7rem;
   font-weight: 700;
-  color: #10a34a;
-  background: rgba(16, 163, 74, 0.1);
+  color: var(--green);
+  background: rgba(var(--green-rgb), 0.1);
   border-radius: 20px;
   padding: 3px 10px;
 }

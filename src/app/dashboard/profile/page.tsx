@@ -364,7 +364,7 @@ export default function ProfilePage() {
                                         disabled={savingPrefs}
                                         style={{
                                             marginTop: 16, padding: '8px 20px',
-                                            background: savedPrefs ? '#10b981' : 'var(--primary)', color: 'white',
+                                            background: savedPrefs ? 'var(--green)' : 'var(--primary)', color: 'white',
                                             border: 'none', borderRadius: 8, cursor: 'pointer',
                                             fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
                                             opacity: savingPrefs ? 0.6 : 1, transition: 'background 0.3s',
