@@ -61,7 +61,8 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
         ? +(seededInt(listing.id + 'v', 5, 60) / 10).toFixed(1)
         : -(seededInt(listing.id + 'n', 1, 15) / 10).toFixed(1));
     const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
-    const typeColor = listing.type === 'SALE' ? 'var(--info)' : 'var(--green)';
+    const scoreRgb = score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
+    const typeRgb = listing.type === 'SALE' ? 'var(--info-rgb)' : 'var(--green-rgb)';
     const isList = view === 'list';
 
     /* ───────────────── LIST VIEW (row card) ───────────────── */
@@ -142,7 +143,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{
                             display: 'inline-flex', alignItems: 'center', gap: 4,
-                            background: scoreColor + '18', border: `1.5px solid ${scoreColor}44`,
+                            background: `rgba(${scoreRgb},0.09)`, border: `1.5px solid rgba(${scoreRgb},0.27)`,
                             borderRadius: 8, padding: '2px 10px', fontSize: '0.72rem', fontWeight: 800, color: scoreColor,
                         }}>
                             Fizibilite Skoru {score}<span style={{ fontSize: '0.6rem', fontWeight: 600 }}>/100</span>
@@ -247,7 +248,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 )}
                 <span style={{
                     position: 'absolute', bottom: 6, left: 6,
-                    background: typeColor + 'cc', color: 'white',
+                    background: `rgba(${typeRgb},0.8)`, color: 'white',
                     fontSize: '0.62rem', fontWeight: 800, padding: '2px 7px', borderRadius: 6,
                     backdropFilter: 'blur(4px)',
                 }}>{TYPE_LABEL[listing.type] ?? 'Kat Karşılığı'}</span>

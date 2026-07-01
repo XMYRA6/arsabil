@@ -221,6 +221,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                     const count = markers.length;
                     const avgScore = markers.reduce((s: number, m) => s + (m.options.score || 70), 0) / count;
                     const color = avgScore >= 80 ? 'var(--green)' : avgScore >= 60 ? 'var(--orange)' : 'var(--red)';
+                    const rgb = avgScore >= 80 ? 'var(--green-rgb)' : avgScore >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
                     return L.divIcon({
                         html: `<div style="
                             background:${color};color:white;
@@ -228,7 +229,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                             display:flex;align-items:center;justify-content:center;
                             font-weight:900;font-size:0.85rem;font-family:Inter,sans-serif;
                             border:3px solid white;
-                            box-shadow:0 4px 14px ${color}55;
+                            box-shadow:0 4px 14px rgba(${rgb},0.33);
                         ">${count}</div>`,
                         className: '',
                         iconSize: [44, 44],
@@ -246,6 +247,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 const lng = listing.lng ?? ISTANBUL_COORDS[idx % ISTANBUL_COORDS.length][1] + (Math.random() - 0.5) * 0.01;
                 const score = listing.fizibiliteSkoru ?? Math.floor(55 + Math.random() * 40);
                 const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
+                const rgb = score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
                 const payiMin = listing.arsaPayiMin ?? 28;
                 const payiMax = listing.arsaPayiMax ?? 42;
                 const displayText = listing.type === 'SALE'
@@ -257,7 +259,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                     html: `<div style="
                         position:relative;background:${color};color:white;
                         padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:900;
-                        white-space:nowrap;box-shadow:0 4px 12px ${color}55;
+                        white-space:nowrap;box-shadow:0 4px 12px rgba(${rgb},0.33);
                         border:2px solid white;cursor:pointer;font-family:Inter,sans-serif;
                         transition:transform 0.15s;
                     ">
@@ -288,7 +290,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                             📍 ${listing.district ?? 'Beşiktaş'}, ${listing.city ?? 'İstanbul'}
                         </div>
                         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                            <span style="background:${color}22;color:${color};border:1.5px solid ${color};border-radius:6px;padding:2px 8px;font-size:0.75rem;font-weight:800;">${score}/100</span>
+                            <span style="background:rgba(${rgb},0.13);color:${color};border:1.5px solid ${color};border-radius:6px;padding:2px 8px;font-size:0.75rem;font-weight:800;">${score}/100</span>
                             <span style="font-size:0.8rem;font-weight:700;color:#0b2443;">${payStr}</span>
                         </div>
                         <div style="display:flex;gap:6px;margin-top:8px;">
