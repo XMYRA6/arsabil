@@ -155,6 +155,14 @@ Bu çalışma kapsamındaki tüm değişiklikler **commit edilmemiş** durumdad�
 
 ---
 
+### 5.3 Takip: Renk Token Konsolidasyonu + Framer Motion Pilotu (2026-07-01)
+
+Bu vakada tespit edilen token mimarisi (§4.2), aynı gün içinde ayrı bir planla (`docs/superpowers/plans/2026-07-01-renk-token-konsolidasyonu.md`) tamamlanan bir takip çalışmasının temelini oluşturmuştur: kod tabanına dağılmış ~50 sabit onaltılık renk değeri, `globals.css`'teki semantik token sistemine (`--green`, `--orange`, `--red`, yeni eklenen `--info`, `--accent-violet-stat`) bağlanmış; ardından landing page'in `IntersectionObserver` tabanlı elle yazılmış scroll-reveal mantığı `framer-motion`'a taşınmıştır (commit aralığı `dfc2dd9`..`39b535d`, subagent-driven-development metodolojisiyle görev başına implementer + reviewer akışı izlenerek).
+
+- Renk migrasyonu (Task 1-6): marketplace, admin panel, dashboard, chart bileşenleri ve kalan dosyalar tarandı; review turlarında 2 gerçek eksik (bir dosyada tutarsız `rgba()` dönüşümü, eski `--green` RGB'sinin bir yerde unutulması) bulunup düzeltildi. Leaflet/Chart.js canvas/react-pdf/e-posta HTML'i gibi `var()` çözemeyen bağlamlarda literal hex bilinçli olarak korundu.
+- Framer Motion (Task 8-9): `StatsStrip`/`FeaturesGrid` `motion`/`whileInView` API'sine geçirildi — bu, öncekinden farklı olarak `prefers-reduced-motion`'ı yerleşik biçimde destekler (eski elle yazılmış kod bu tercihi hiç gözetmiyordu). Hero ve alt CTA butonlarına `whileHover`/`whileTap` spring-physics geri bildirimi eklendi.
+- Final doğrulama (Task 10): `npx tsc --noEmit`, `npx eslint .`, `npx jest --no-coverage` (65/65), `npm run build` — hepsi temiz. Bu oturumda Docker Desktop çalışmadığından authenticated sayfaların (dashboard/admin/marketplace) görsel doğrulaması yapılamadı; landing page (public) Playwright ile doğrulandı.
+
 ## Ekler
 
 - **Ek A:** Renk token eşlemesi — `--aurora-violet/blue/cyan` → `#1f6feb / #134ea5 / #2b7cff`
