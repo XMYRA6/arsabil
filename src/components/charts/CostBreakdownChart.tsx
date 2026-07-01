@@ -70,7 +70,7 @@ export const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
         { label: 'İnşaat', color: '#3b82f6', value: constructionCost },
         { label: 'Arsa', color: '#10b981', value: landValue },
         { label: 'Kâr', color: '#f59e0b', value: profit },
-        { label: 'Risk', color: '#ef4444', value: risk },
+        { label: 'Risk', color: '#ff5a5f', value: risk }, // --red'in literal degeri (canvas var() cozemez)
     ];
 
     return (

@@ -15,16 +15,16 @@ export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minP
     const diffPercent = ((marketPrice - minPrice) / minPrice) * 100;
 
     // Varsayılan: Fırsat / Ucuz
-    let color = '#10b981';
+    let color = 'var(--green)';
     let statusText = "Fırsat / Ucuz";
     let bgColor = "#dcfce7";
 
     if (diffPercent > 10) {
-        color = '#ef4444'; // Pahalı
+        color = 'var(--red)'; // Pahalı
         statusText = "Pahalı";
         bgColor = "#fee2e2";
     } else if (diffPercent >= -5 && diffPercent <= 10) {
-        color = '#f59e0b'; // Adil
+        color = 'var(--orange)'; // Adil
         statusText = "Adil Değer";
         bgColor = "#fef3c7";
     }
@@ -53,7 +53,7 @@ export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minP
             </div>
 
             {/* Alt Kısım: Linear İbre Grafiği */}
-            <div style={{ position: 'relative', width: '100%', height: '8px', background: 'linear-gradient(to right, #10b981, #f59e0b, #ef4444)', borderRadius: '4px', marginTop: '0.5rem' }}>
+            <div style={{ position: 'relative', width: '100%', height: '8px', background: 'linear-gradient(to right, var(--green), var(--orange), var(--red))', borderRadius: '4px', marginTop: '0.5rem' }}>
                 <div style={{
                     position: 'absolute',
                     top: '-6px',

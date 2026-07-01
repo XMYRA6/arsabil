@@ -13,7 +13,7 @@ interface RiskGaugeProps {
 
 export const RiskGaugeChart: React.FC<RiskGaugeProps> = ({ score, title }) => {
     // Score'a göre renk belirleme (Mockuptaki gibi kırmızıdan yeşile)
-    let color = '#ef4444'; // Red (Düşük)
+    let color = '#ff5a5f'; // Red (Düşük) — Chart.js canvas var() cozemez, --red'in literal degeri
     if (score > 40) color = '#f59e0b'; // Amber (Orta)
     if (score > 60) color = '#10b981'; // Green (İyi)
 
