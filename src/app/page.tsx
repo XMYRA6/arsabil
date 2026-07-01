@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { motion, type Variants } from 'framer-motion';
 import styles from './page.module.css';
 
 /* ── Animated counter hook ── */
@@ -32,41 +33,45 @@ function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
 
 /* ── Stats section ── */
 function StatsStrip() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const c1 = useCounter(12400, 1600, true);
+  const c2 = useCounter(3, 800, true);
+  const c3 = useCounter(97, 1200, true);
+  const c4 = useCounter(500, 1400, true);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } }, { threshold: 0.4 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  const c1 = useCounter(12400, 1600, visible);
-  const c2 = useCounter(3,     800,  visible);
-  const c3 = useCounter(97,    1200, visible);
-  const c4 = useCounter(500,   1400, visible);
+  const containerVariants: Variants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+  };
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  };
 
   return (
-    <div className={styles.statsStrip} ref={ref}>
-      <div className={`${styles.statItem} ${visible ? styles.statVisible : ''}`} style={{ transitionDelay: '0ms' }}>
+    <motion.div
+      className={styles.statsStrip}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.4 }}
+      variants={containerVariants}
+    >
+      <motion.div className={styles.statItem} variants={itemVariants}>
         <span className={styles.statVal}>{c1.toLocaleString('tr-TR')}+</span>
         <span className={styles.statLabel}>Tamamlanan Analiz</span>
-      </div>
-      <div className={`${styles.statItem} ${visible ? styles.statVisible : ''}`} style={{ transitionDelay: '80ms' }}>
+      </motion.div>
+      <motion.div className={styles.statItem} variants={itemVariants}>
         <span className={styles.statVal}>~{c2}sn</span>
         <span className={styles.statLabel}>Ortalama Hesaplama</span>
-      </div>
-      <div className={`${styles.statItem} ${visible ? styles.statVisible : ''}`} style={{ transitionDelay: '160ms' }}>
+      </motion.div>
+      <motion.div className={styles.statItem} variants={itemVariants}>
         <span className={styles.statVal}>%{c3}</span>
         <span className={styles.statLabel}>Model Doğruluğu</span>
-      </div>
-      <div className={`${styles.statItem} ${visible ? styles.statVisible : ''}`} style={{ transitionDelay: '240ms' }}>
+      </motion.div>
+      <motion.div className={styles.statItem} variants={itemVariants}>
         <span className={styles.statVal}>{c4}+</span>
         <span className={styles.statLabel}>Kayıtlı Müteahhit</span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -134,60 +139,46 @@ const FEATURES = [
 
 /* ── Features bento grid ── */
 function FeaturesGrid() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const grid = ref.current;
-    if (!grid) return;
-    const cards = grid.querySelectorAll<HTMLElement>(`.${styles.bentoCard}`);
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          cards.forEach((c, i) => setTimeout(() => c.classList.add(styles.bentoVisible), i * 100));
-          obs.disconnect();
-        }
-      },
-      { threshold: 0.12 }
-    );
-    obs.observe(grid);
-    return () => obs.disconnect();
-  }, []);
+  const containerVariants: Variants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.1 } },
+  };
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+  };
 
   return (
-    <div className={styles.bentoGrid} ref={ref}>
+    <motion.div
+      className={styles.bentoGrid}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.12 }}
+      variants={containerVariants}
+    >
       {FEATURES.map((f) => (
-        <div
+        <motion.div
           key={f.num}
+          variants={cardVariants}
           className={`${styles.bentoCard} ${styles[`accent${f.accent.charAt(0).toUpperCase() + f.accent.slice(1)}`]}`}
           data-span={f.span}
           onMouseMove={onMouseMove}
         >
-          {/* Mouse spotlight */}
           <div className={styles.spotlight} />
-
-          {/* Dekoratif büyük metin */}
           <span className={styles.bigDeco}>{f.big}</span>
-
-          {/* Üst satır */}
           <div className={styles.bentoTop}>
             <span className={styles.bentoTag}>{f.tag}</span>
             <span className={styles.bentoNum}>{f.num}</span>
           </div>
-
-          {/* İkon */}
           <div className={styles.bentoIcon}>{f.icon}</div>
-
-          {/* İçerik */}
           <h3 className={styles.bentoTitle}>{f.title}</h3>
           <p className={styles.bentoDesc}>{f.desc}</p>
-
-          {/* Badge (varsa) */}
           {'badge' in f && (
             <div className={styles.bentoBadge}>{f.badge}</div>
           )}
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
