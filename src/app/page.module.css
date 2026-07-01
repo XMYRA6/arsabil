@@ -225,13 +225,18 @@
 .bentoGrid .bentoCard:nth-child(3) { grid-column: span 1; }
 .bentoGrid .bentoCard:nth-child(4) { grid-column: span 2; }
 
-/* ── Temel kart ── */
+/* ── Temel kart — aksan renginde tonlanmış cam (--acc, .accent* sınıflarından gelir) ── */
 .bentoCard {
   position: relative;
   overflow: hidden;
   border-radius: 24px;
   padding: 2rem;
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(var(--acc), 0.16), rgba(var(--acc), 0.06));
+  border: 1px solid rgba(var(--acc), 0.32);
+  color: var(--text);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 8px 32px rgba(var(--acc), 0.12);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -247,6 +252,13 @@
     border-color 0.3s ease;
 }
 
+/* Light temada tonun altına beyaz cam katmanı — metin kontrastını korur */
+:global([data-theme='light']) .bentoCard {
+  background:
+    linear-gradient(135deg, rgba(var(--acc), 0.10), rgba(var(--acc), 0.04)),
+    rgba(255, 255, 255, 0.50);
+}
+
 .bentoVisible {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -254,8 +266,8 @@
 
 /* Hover lift */
 .bentoCard:hover {
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.14);
-  border-color: transparent;
+  box-shadow: 0 20px 48px rgba(var(--acc), 0.18);
+  border-color: rgba(var(--acc), 0.55);
 }
 
 /* ── Mouse spotlight ── */
@@ -286,7 +298,7 @@
   line-height: 1;
   letter-spacing: -4px;
   opacity: 0.07;
-  color: currentColor;
+  color: rgb(var(--acc));
   pointer-events: none;
   user-select: none;
   transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -313,8 +325,8 @@
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.65;
-  color: currentColor;
+  opacity: 0.85;
+  color: rgb(var(--acc));
 }
 
 .bentoNum {
@@ -334,9 +346,9 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.25rem;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.20);
-  color: currentColor;
+  background: rgba(var(--acc), 0.15);
+  border: 1px solid rgba(var(--acc), 0.30);
+  color: rgb(var(--acc));
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -345,7 +357,7 @@
 
 .bentoCard:hover .bentoIcon {
   transform: scale(1.15) rotate(-6deg);
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(var(--acc), 0.22);
 }
 
 /* ── Başlık & açıklama ── */
@@ -376,12 +388,12 @@
   align-items: center;
   gap: 0.4rem;
   padding: 6px 14px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(var(--acc), 0.12);
+  border: 1px solid rgba(var(--acc), 0.30);
   border-radius: 100px;
   font-size: 0.75rem;
   font-weight: 700;
-  color: currentColor;
+  color: rgb(var(--acc));
   width: fit-content;
   position: relative;
   z-index: 2;
@@ -400,45 +412,11 @@
 /* ══════════════════════════════════════════
    BENTO RENK AKSANLARI
 ═══════════════════════════════════════════ */
-.accentBlue {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1f6feb 55%, #3b9eff 100%);
-  color: #ffffff;
-  box-shadow: 0 8px 32px rgba(31, 111, 235, 0.28);
-}
-
-.accentBlue:hover {
-  box-shadow: 0 20px 48px rgba(31, 111, 235, 0.40);
-}
-
-.accentGreen {
-  background: linear-gradient(135deg, #064e3b 0%, #059669 55%, #34d399 100%);
-  color: #ffffff;
-  box-shadow: 0 8px 32px rgba(5, 150, 105, 0.25);
-}
-
-.accentGreen:hover {
-  box-shadow: 0 20px 48px rgba(5, 150, 105, 0.38);
-}
-
-.accentPurple {
-  background: linear-gradient(135deg, #3b0764 0%, #7c3aed 55%, #a78bfa 100%);
-  color: #ffffff;
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.25);
-}
-
-.accentPurple:hover {
-  box-shadow: 0 20px 48px rgba(124, 58, 237, 0.38);
-}
-
-.accentTeal {
-  background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 55%, #38bdf8 100%);
-  color: #ffffff;
-  box-shadow: 0 8px 32px rgba(2, 132, 199, 0.25);
-}
-
-.accentTeal:hover {
-  box-shadow: 0 20px 48px rgba(2, 132, 199, 0.38);
-}
+/* Her sınıf yalnızca aksan rengini tanımlar; cam görünümü .bentoCard'da */
+.accentBlue { --acc: 31, 111, 235; }
+.accentGreen { --acc: 5, 150, 105; }
+.accentPurple { --acc: 124, 58, 237; }
+.accentTeal { --acc: 2, 132, 199; }
 
 /* ══════════════════════════════════════════
    VISION & MISSION

@@ -79,9 +79,11 @@
 /* ===== LIGHT THEME ===== */
 [data-theme="light"] {
   --bg: #f1f5f9;
+  /* Cam yüzeylerin arkasında blur'un gösterebileceği görünür renk lekeleri */
   --bg-body:
-    radial-gradient(1200px 600px at 20% 0%, rgba(31, 111, 235, .06), transparent 60%),
-    radial-gradient(900px 600px at 80% 10%, rgba(47, 191, 113, .04), transparent 55%),
+    radial-gradient(1200px 600px at 20% 0%, rgba(31, 111, 235, .16), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(47, 191, 113, .12), transparent 55%),
+    radial-gradient(700px 500px at 55% 35%, rgba(124, 58, 237, .08), transparent 60%),
     linear-gradient(180deg, #f1f5f9 0%, #e8edf5 40%, #f1f5f9 100%);
 
   --panel: #ffffff;
