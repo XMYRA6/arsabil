@@ -25,8 +25,8 @@ const ROLE_COLORS: Record<string, string> = {
     USER: 'var(--green)',
     ARSA_SAHIBI: 'var(--orange)',
     MUTEAHHIT: 'var(--info)',
-    DANISMAN: '#8b5cf6',
-    ADMIN: '#ef4444',
+    DANISMAN: 'var(--accent-violet-stat)',
+    ADMIN: 'var(--red)',
 };
 
 export default function AdminAnalytics() {

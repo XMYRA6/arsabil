@@ -31,7 +31,7 @@ export default function AdminOffers() {
 
     const statusStyle = (s: string) => {
         if (s === 'ACCEPTED') return { background: 'rgba(var(--green-rgb),.12)', color: 'var(--green)', border: '1px solid rgba(var(--green-rgb),.25)' };
-        if (s === 'REJECTED') return { background: 'rgba(239,68,68,.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,.25)' };
+        if (s === 'REJECTED') return { background: 'rgba(var(--red-rgb),.12)', color: 'var(--red)', border: '1px solid rgba(var(--red-rgb),.25)' };
         return { background: 'rgba(var(--orange-rgb),.12)', color: 'var(--orange)', border: '1px solid rgba(var(--orange-rgb),.25)' };
     };
     const statusLabel = (s: string) => s === 'ACCEPTED' ? '✅ Kabul' : s === 'REJECTED' ? '❌ Red' : '⏳ Bekliyor';

@@ -225,7 +225,7 @@ export default function AdminListings() {
                                                 <button
                                                     onClick={() => approveAction(listing.id, 'reject')}
                                                     className={styles.iconBtn}
-                                                    style={{ color: '#ef4444', fontSize: '0.75rem', padding: '2px 8px' }}
+                                                    style={{ color: 'var(--red)', fontSize: '0.75rem', padding: '2px 8px' }}
                                                     title="Reddet"
                                                 >❌ Reddet</button>
                                             </>
@@ -243,7 +243,7 @@ export default function AdminListings() {
                                             onClick={() => deleteListing(listing.id)}
                                             title="Sil"
                                             className={styles.iconBtn}
-                                            style={{ color: '#ef4444' }}
+                                            style={{ color: 'var(--red)' }}
                                         >🗑️</button>
                                     </div>
                                 </td>
