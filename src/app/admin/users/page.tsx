@@ -291,7 +291,7 @@ export default function AdminUsers() {
                                             style={{
                                                 width: 32, height: 32, borderRadius: 8,
                                                 border: '1px solid var(--border)',
-                                                background: user.isBanned ? 'rgba(16,185,129,.1)' : 'rgba(239,68,68,.1)',
+                                                background: user.isBanned ? 'rgba(var(--green-rgb),.1)' : 'rgba(var(--red-rgb),.1)',
                                                 color: user.isBanned ? 'var(--green)' : 'var(--red)',
                                                 cursor: 'pointer', fontSize: '0.85rem',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
