@@ -48,6 +48,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -56,13 +57,21 @@ export default function DashboardPage() {
   useEffect(() => {
     if (status !== 'authenticated') return
     fetch('/api/user/dashboard')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error('dashboard fetch failed')
+        return r.json()
+      })
       .then(setData)
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [status])
 
-  if (loading || !data) {
+  if (loading) {
     return <div className={styles.container}><div className={styles.loading}>Yükleniyor...</div></div>
+  }
+
+  if (error || !data) {
+    return <div className={styles.container}><div className={styles.loading}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</div></div>
   }
 
   const { stats, recentReports, recentMessages, recentOffers } = data
