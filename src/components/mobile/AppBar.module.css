@@ -1,0 +1,50 @@
+/* Desktop'ta gizli — mobil sayfa başlığı */
+.appBar {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .appBar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        min-height: calc(52px + var(--safe-top));
+        padding: var(--safe-top) 12px 0 12px;
+        background: var(--topbar-bg);
+        border-bottom: 1px solid var(--topbar-border);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .backBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: var(--touch-target);
+        min-height: var(--touch-target);
+        margin-left: -8px;
+        background: none;
+        border: none;
+        color: var(--topbar-text);
+        cursor: pointer;
+    }
+
+    .title {
+        flex: 1;
+        margin: 0;
+        font-size: var(--font-size-title);
+        font-weight: 700;
+        color: var(--topbar-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .action {
+        display: flex;
+        align-items: center;
+    }
+}
