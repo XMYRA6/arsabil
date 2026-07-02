@@ -1,0 +1,33 @@
+/* Desktop'ta gizli — mobil CTA çubuğu */
+.bar {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .bar {
+        display: flex;
+        gap: 10px;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 90;
+        padding: 10px 14px calc(10px + var(--safe-bottom)) 14px;
+        background: var(--topbar-bg);
+        border-top: 1px solid var(--topbar-border);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    /* BottomNavbar görünürken navbar'ın üstüne oturur; navbar kendi
+       safe-area padding'ini zaten taşıdığı için burada eklenmez */
+    .aboveNav {
+        bottom: var(--bottomnav-height);
+        padding-bottom: 10px;
+    }
+
+    .bar > * {
+        flex: 1;
+        min-height: var(--touch-target);
+    }
+}
