@@ -25,6 +25,16 @@
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+
+  /* ===== MOBİL TEMEL (Faz 0 — mobil UI spec §3.1) ===== */
+  --touch-target: 44px;            /* Apple HIG minimum dokunma hedefi */
+  --input-height-mobile: 48px;     /* mobil form input yüksekliği */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* BottomNavbar.module.css:12 ile senkron: 83px + safe-area */
+  --bottomnav-height: calc(83px + env(safe-area-inset-bottom, 0px));
+  --font-size-title: clamp(1.25rem, 4vw, 1.5rem);
+  --font-size-page-title: clamp(1.5rem, 5vw, 2rem);
 }
 
 /* ===== DARK THEME (Varsayılan) — derin lacivert ===== */
