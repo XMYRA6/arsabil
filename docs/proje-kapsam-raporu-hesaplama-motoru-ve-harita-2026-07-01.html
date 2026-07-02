@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArsaBil — Geliştirme Raporu: Hesaplama Motoru, Parsel &amp; Harita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #dce8f8;
+  --bg-mesh:
+    radial-gradient(1400px 700px at 15% -5%, rgba(31,111,235,0.22), transparent 60%),
+    radial-gradient(1000px 600px at 85% 5%,  rgba(124,58,237,0.16), transparent 55%),
+    radial-gradient(700px  500px at 50% 80%, rgba(16,185,129,0.10), transparent 60%),
+    linear-gradient(160deg, #c8ddf6 0%, #dce8f8 45%, #e8d5f8 100%);
+  --glass: linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.48));
+  --glass-strong: rgba(255,255,255,0.88);
+  --glass-border: rgba(255,255,255,0.70);
+  --glass-subtle: rgba(255,255,255,0.30);
+  --gold: #D97706; --gold2: #B45309; --gold-dim: rgba(217,119,6,0.14);
+  --blue: #1f6feb; --blue-dim: rgba(31,111,235,0.14);
+  --green: #10b981; --green-dim: rgba(16,185,129,0.12);
+  --red: #ff5a5f; --red-dim: rgba(255,90,95,0.12);
+  --purple: #7C3AED; --purple-dim: rgba(124,58,237,0.12);
+  --orange: #f59e0b; --orange-dim: rgba(245,158,11,0.12);
+  --teal: #0891B2; --teal-dim: rgba(8,145,178,0.12);
+  --text: #0b1b2b; --text-muted: #4a5a70; --text-dim: #7a8fa8; --text-body: #1e2d3d; --text-soft: #2d4060;
+  --border: rgba(31,111,235,0.15);
+  --radius: 14px; --radius-lg: 20px; --radius-xl: 28px;
+  --blur: blur(20px); --blur-sm: blur(14px);
+  --font: 'Inter', sans-serif; --font-serif: 'Playfair Display', serif; --font-mono: 'JetBrains Mono', monospace;
+  --shadow: 0 18px 50px rgba(31,111,235,0.12);
+  --shadow-lg: 0 12px 40px rgba(31,111,235,0.16);
+  --nav-bg: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.55));
+  --arch-bg: #0F172A; --arch-border: rgba(31,111,235,0.25); --tag-fg: #FFFFFF;
+  --footer-bg: rgba(15,23,42,0.06);
+  --noise-opacity: 0.025;
+  --orb1: rgba(31,111,235,0.38); --orb2: rgba(124,58,237,0.30); --orb3: rgba(16,185,129,0.22);
+  --progress-grad: linear-gradient(90deg, #1f6feb, #7C3AED, #D97706);
+  --eyebrow-bg: rgba(255,255,255,0.45); --eyebrow-border: rgba(11,27,43,0.12); --eyebrow-fg: #0b1b2b;
+}
+[data-theme="dark"] {
+  --bg: #0b2443;
+  --bg-mesh:
+    radial-gradient(1200px 600px at 20% 0%, rgba(31,111,235,0.35), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(16,185,129,0.25), transparent 55%),
+    linear-gradient(180deg, #0a2240 0%, #0b2443 40%, #0b2443 100%);
+  --glass: rgba(255,255,255,0.08); --glass-strong: rgba(255,255,255,0.14);
+  --glass-border: rgba(255,255,255,0.14); --glass-subtle: rgba(255,255,255,0.04);
+  --gold: #FCD34D; --gold2: #F59E0B; --gold-dim: rgba(252,211,77,0.14);
+  --blue: #60A5FA; --blue-dim: rgba(96,165,250,0.14);
+  --green: #10b981; --green-dim: rgba(16,185,129,0.14);
+  --red: #ff5a5f; --red-dim: rgba(255,90,95,0.14);
+  --purple: #A78BFA; --purple-dim: rgba(167,139,250,0.14);
+  --orange: #f59e0b; --orange-dim: rgba(245,158,11,0.14);
+  --teal: #22D3EE; --teal-dim: rgba(34,211,238,0.13);
+  --text: #e1e8f0; --text-muted: #8da4be; --text-dim: rgba(225,232,240,0.45);
+  --text-body: #c8d6e5; --text-soft: #a0b4c8;
+  --border: rgba(255,255,255,0.10);
+  --shadow: 0 18px 50px rgba(0,0,0,0.25); --shadow-lg: 0 16px 48px rgba(0,0,0,0.55);
+  --nav-bg: rgba(8,13,24,0.80);
+  --arch-bg: #040710; --arch-border: rgba(96,165,250,0.18); --tag-fg: #080D18;
+  --footer-bg: rgba(0,0,0,0.40);
+  --noise-opacity: 0.04;
+  --orb1: rgba(37,99,235,0.20); --orb2: rgba(124,58,237,0.16); --orb3: rgba(5,150,105,0.14);
+  --progress-grad: linear-gradient(90deg, #60A5FA, #A78BFA, #FCD34D);
+  --eyebrow-bg: rgba(255,255,255,0.05); --eyebrow-border: rgba(255,255,255,0.14); --eyebrow-fg: #FFFFFF;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body { font-family: var(--font); background: var(--bg-mesh, var(--bg)); background-color: var(--bg); color: var(--text); line-height: 1.8; min-height: 100vh; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: var(--noise-opacity); pointer-events: none; z-index: 0;
+}
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; animation: orb-drift 18s ease-in-out infinite alternate; }
+.orb-1 { width: 700px; height: 700px; top: -200px; right: -150px; background: radial-gradient(circle, var(--orb1) 0%, transparent 70%); animation: orb-drift 22s ease-in-out infinite alternate, orb-pulse 8s ease-in-out infinite; }
+.orb-2 { width: 560px; height: 560px; bottom: 5%; left: -140px; background: radial-gradient(circle, var(--orb2) 0%, transparent 70%); animation: orb-drift 26s ease-in-out infinite alternate-reverse, orb-pulse 10s ease-in-out infinite 2s; }
+.orb-3 { width: 450px; height: 450px; top: 45%; right: 15%; background: radial-gradient(circle, var(--orb3) 0%, transparent 70%); animation: orb-drift 19s ease-in-out infinite alternate, orb-pulse 7s ease-in-out infinite 4s; }
+@keyframes orb-drift { 0% { transform: translate(0,0) scale(1); } 40% { transform: translate(24px,32px) scale(1.07); } 70% { transform: translate(-12px,18px) scale(0.95); } 100% { transform: translate(34px,44px) scale(1.11); } }
+@keyframes orb-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.58; } }
+#reading-progress { position: fixed; top: 0; left: 0; z-index: 200; height: 3px; width: 0%; background: var(--progress-grad); transition: width 0.1s linear; border-radius: 0 2px 2px 0; box-shadow: 0 0 12px rgba(67,56,202,0.4); }
+.topnav-wrapper { position: sticky; top: 0; z-index: 100; padding: 14px; pointer-events: none; }
+.topnav { pointer-events: auto; max-width: 1200px; margin: 0 auto; height: 74px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06)); border: 1px solid rgba(255,255,255,0.10); border-radius: 22px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: background 0.3s ease, border-color 0.3s ease; }
+[data-theme="light"] .topnav { background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.52)); border-color: rgba(255,255,255,0.65); box-shadow: 0 8px 32px rgba(31,111,235,0.10), inset 0 1px 0 rgba(255,255,255,0.80); }
+.topnav-left { display: flex; align-items: center; gap: 12px; }
+.topnav-right { display: flex; align-items: center; gap: 8px; }
+.nav-logo { width: 42px; height: 42px; border-radius: 14px; flex-shrink: 0; background: linear-gradient(180deg, var(--blue), #134ea5); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: white; }
+[data-theme="light"] .nav-logo { background: linear-gradient(180deg, #2b7cff, #1a59c7); }
+.topnav-brand { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; white-space: nowrap; }
+[data-theme="light"] .topnav-brand { color: #0b1b2b; }
+.nav-divider { width: 1px; height: 28px; background: var(--glass-border); flex-shrink: 0; }
+.topnav-links { display: flex; gap: 0; align-items: center; }
+.topnav-links a { color: var(--text); opacity: 0.65; font-size: 14px; font-weight: 500; text-decoration: none; padding: 6px 12px; border-radius: 10px; transition: all 0.2s; white-space: nowrap; }
+.topnav-links a:hover { opacity: 1; background: rgba(255,255,255,0.08); }
+.icon-btn { width: 42px; height: 42px; border-radius: 14px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.10); cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; transition: all 0.2s; outline: none; }
+[data-theme="light"] .icon-btn { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.08); }
+.icon-btn:hover { background: rgba(255,255,255,0.18); }
+.toggle-icon { font-size: 16px; line-height: 1; pointer-events: none; user-select: none; }
+.hamburger { display: none; width: 42px; height: 42px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.10); cursor: pointer; color: var(--text); align-items: center; justify-content: center; font-size: 20px; line-height: 1; outline: none; transition: all 0.2s; }
+[data-theme="light"] .hamburger { border-color: rgba(0,0,0,0.08); background: rgba(0,0,0,0.05); }
+.hamburger:hover { background: rgba(255,255,255,0.18); }
+.mob-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+.mob-overlay.open { display: block; }
+.mob-menu { position: fixed; top: 102px; left: 14px; right: 14px; z-index: 201; background: linear-gradient(180deg, rgba(15,42,74,0.97), rgba(11,36,67,0.99)); border: 1px solid rgba(255,255,255,0.12); border-radius: 18px; padding: 8px; backdrop-filter: blur(20px); transform: translateY(-12px); opacity: 0; pointer-events: none; transition: all 0.22s cubic-bezier(0.4,0,0.2,1); }
+[data-theme="light"] .mob-menu { background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(240,246,255,0.99)); border-color: rgba(0,0,0,0.10); }
+.mob-menu.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.mob-menu a { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 12px; color: var(--text); opacity: 0.75; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+.mob-menu a:hover { opacity: 1; background: rgba(255,255,255,0.08); }
+.mob-num { font-size: 10px; font-weight: 800; color: #fff; background: var(--blue); border-radius: 6px; padding: 2px 7px; letter-spacing: 0.5px; flex-shrink: 0; opacity: 0.9; }
+.mob-divider { height: 1px; background: var(--border); margin: 4px 8px; }
+.hero { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 32px 96px; text-align: center; }
+.hero > * { position: relative; z-index: 1; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: var(--eyebrow-bg); border: 1px solid var(--eyebrow-border); color: var(--eyebrow-fg); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 6px 18px 6px 14px; border-radius: 24px; margin-bottom: 28px; }
+.hero-eyebrow::before { content: '◈'; font-size: 10px; opacity: 0.80; }
+.hero h1 { font-family: var(--font-serif); font-size: clamp(24px, 4vw, 46px); font-weight: 700; line-height: 1.28; max-width: 920px; margin: 0 auto 20px; background: linear-gradient(135deg, var(--text) 0%, var(--blue) 55%, var(--purple) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-size: clamp(14px, 1.8vw, 17px); color: var(--text-muted); max-width: 680px; margin: 0 auto 56px; font-weight: 300; line-height: 1.75; }
+.hero-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 860px; margin: 0 auto; }
+.stat-pill { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(14px); border-radius: 16px; padding: 16px 22px; text-align: center; min-width: 116px; transition: border-color 0.3s, transform 0.3s; }
+.stat-pill:hover { border-color: var(--gold); transform: translateY(-3px); }
+.stat-val { font-size: 26px; font-weight: 800; color: var(--gold); display: block; line-height: 1; }
+.stat-key { font-size: 10px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1.1px; margin-top: 5px; display: block; }
+.hero-scroll { margin-top: 56px; color: var(--text-soft); font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; animation: bob 2s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+.page { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 24px; display: flex; gap: 32px; align-items: flex-start; }
+.sidebar { width: 230px; flex-shrink: 0; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 20px 0 40px; }
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.toc-head { font-size: 9.5px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-soft); padding: 0 12px 10px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.toc a { display: block; font-size: 12.5px; color: var(--text); text-decoration: none; padding: 5px 12px; border-radius: 8px; transition: all 0.2s; line-height: 1.4; border-left: 2px solid transparent; font-weight: 500; }
+[data-theme="dark"] .toc a { color: var(--text-muted); }
+.toc a:hover { color: var(--gold); background: var(--glass); }
+.toc a.sub { padding-left: 22px; font-size: 11.5px; color: var(--text-muted); font-weight: 400; }
+.toc a.active { color: var(--gold); border-left-color: var(--gold); background: var(--gold-dim); font-weight: 600; }
+main { flex: 1; min-width: 0; padding: 48px 0 120px; }
+.glass { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(18px); border-radius: var(--radius-lg); padding: 32px 36px; box-shadow: var(--shadow); transition: box-shadow 0.25s, transform 0.25s; }
+.glass:hover { box-shadow: var(--shadow-lg); }
+.abstract { margin-bottom: 56px; position: relative; padding-left: 28px; }
+.abstract::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, var(--gold), var(--blue)); border-radius: 3px; }
+.abs-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; display: block; }
+.abstract p { font-size: 15.5px; color: var(--text-body); line-height: 1.9; margin-bottom: 14px; }
+.kw-row { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.kw-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-soft); font-weight: 700; }
+.kw { background: var(--blue-dim); border: 1px solid var(--blue); color: var(--blue); font-size: 11.5px; padding: 4px 13px; border-radius: 20px; font-weight: 600; }
+.sec { margin-bottom: 72px; }
+.sec-head { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+.sec-num { background: linear-gradient(135deg, var(--gold), var(--orange)); color: var(--tag-fg); font-size: 11px; font-weight: 800; padding: 5px 14px; border-radius: 30px; white-space: nowrap; }
+.sec-head h2 { font-family: var(--font-serif); font-size: clamp(20px, 2.5vw, 28px); font-weight: 700; color: var(--text); }
+.sec-head-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+h3 { font-size: 17px; font-weight: 600; color: var(--text); margin: 36px 0 14px; display: flex; align-items: center; gap: 10px; }
+h3::before { content: ''; display: block; width: 20px; height: 2px; background: var(--gold); border-radius: 2px; flex-shrink: 0; }
+p { font-size: 15.5px; color: var(--text-body); margin-bottom: 16px; line-height: 1.85; }
+strong { color: var(--text); font-weight: 600; }
+em { color: var(--gold2); font-style: normal; font-weight: 500; }
+code { font-family: var(--font-mono); font-size: 13px; background: var(--blue-dim); border: 1px solid var(--border); color: var(--blue); padding: 1px 7px; border-radius: 5px; }
+.callout { border-radius: var(--radius); padding: 18px 22px 18px 52px; margin: 20px 0; font-size: 14px; color: var(--text-body); position: relative; line-height: 1.75; }
+.callout-icon { position: absolute; left: 18px; top: 18px; font-size: 18px; }
+.ci { background: var(--blue-dim); border: 1px solid rgba(79,142,247,0.2); }
+.cw { background: var(--orange-dim); border: 1px solid rgba(251,146,60,0.2); }
+.cn { background: var(--purple-dim); border: 1px solid rgba(167,139,250,0.2); }
+.cg { background: var(--green-dim); border: 1px solid var(--green); border-left-width: 3px; }
+.tbl-wrap { overflow-x: auto; border-radius: var(--radius); margin: 24px 0; box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead tr { background: var(--blue-dim); }
+thead th { padding: 13px 16px; text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--blue); white-space: nowrap; border-bottom: 1px solid var(--border); }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(99,102,241,0.06); }
+td { padding: 11px 16px; color: var(--text-body); vertical-align: middle; }
+td:first-child { color: var(--text); font-weight: 500; }
+.b { display: inline-flex; align-items: center; gap: 4px; padding: 4.5px 10px; border-radius: 10px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.b-ok { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+.b-warn { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange); }
+.b-hi { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+.b-lo { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+.rq-list { display: flex; flex-direction: column; gap: 12px; margin: 24px 0; }
+.rq { display: flex; gap: 16px; align-items: flex-start; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 18px 20px; transition: border-color 0.2s; }
+.rq:hover { border-color: rgba(212,168,67,0.3); }
+.rq-tag { background: linear-gradient(135deg, var(--gold), var(--orange)); color: var(--tag-fg); font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; }
+.rq p { font-size: 14.5px; margin: 0; color: var(--text-body); }
+.contrib-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+.cc { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 26px; position: relative; overflow: hidden; transition: transform 0.25s, border-color 0.25s; }
+.cc:hover { transform: translateY(-3px); }
+.cc-1 { border-top: 2px solid var(--blue); } .cc-1:hover { border-color: var(--blue); }
+.cc-2 { border-top: 2px solid var(--green); } .cc-2:hover { border-color: var(--green); }
+.cc-3 { border-top: 2px solid var(--purple); } .cc-3:hover { border-color: var(--purple); }
+.cc-4 { border-top: 2px solid var(--orange); } .cc-4:hover { border-color: var(--orange); }
+.cc-type { font-size: 9.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; display: block; }
+.cc h4 { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.cc p { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin: 0; }
+.arch { background: var(--arch-bg); border: 1px solid var(--arch-border); border-radius: var(--radius-lg); padding: 28px; font-family: var(--font-mono); font-size: 13px; line-height: 1.9; overflow-x: auto; margin: 24px 0; white-space: pre-wrap; }
+.arch .hl { color: #7dd3fc; font-weight: 500; }
+.arch .hl2 { color: #86efac; }
+.arch .hl3 { color: var(--gold2); }
+.arch .cm { color: #64748b; }
+.tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 28px 0; }
+.tier { border-radius: var(--radius-lg); padding: 30px; position: relative; overflow: hidden; backdrop-filter: var(--blur-sm); box-shadow: var(--shadow); }
+.tier-a { background: var(--glass); border: 2px solid var(--blue); border-top: 4px solid var(--blue); }
+.tier-b { background: var(--glass); border: 2px solid var(--green); border-top: 4px solid var(--green); }
+.tier-age { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.tier-a .tier-age { color: var(--blue); } .tier-b .tier-age { color: var(--green); }
+.tier-name { font-size: 19px; font-weight: 700; margin-bottom: 14px; }
+.tier-a .tier-name { color: var(--blue); } .tier-b .tier-name { color: var(--green); }
+.tier ul { list-style: none; }
+.tier ul li { font-size: 13.5px; color: var(--text-body); padding: 5px 0; display: flex; gap: 8px; line-height: 1.6; }
+.tier ul li::before { content: '·'; color: var(--text-dim); flex-shrink: 0; }
+.timeline { position: relative; margin: 28px 0; }
+.timeline::before { content: ''; position: absolute; left: 27px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--blue), var(--gold)); border-radius: 2px; }
+.ph { display: flex; gap: 20px; margin-bottom: 16px; align-items: flex-start; }
+.ph-dot { width: 56px; height: 56px; border-radius: 50%; background: var(--glass); border: 2px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--gold2); flex-shrink: 0; z-index: 1; position: relative; }
+.ph-body { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 16px 20px; flex: 1; }
+.ph-body h5 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.ph-body p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+.ph-body p strong { color: var(--text); font-weight: 700; }
+.gap-list, .strength-list { list-style: none; }
+.gap-list li, .strength-list li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 13.5px; line-height: 1.6; }
+.gap-list li { background: var(--red-dim); color: var(--text-body); border: 1px solid rgba(248,113,113,0.15); }
+.strength-list li { background: var(--green-dim); color: var(--text-body); border: 1px solid rgba(16,185,129,0.2); }
+.gap-list li::before { content: '!'; color: var(--red); font-weight: 700; flex-shrink: 0; }
+.strength-list li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+.rec { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+.rec-n { width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), var(--orange)); color: var(--tag-fg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+.rec-b { flex: 1; }
+.rec-b h5 { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.rec-b p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.65; }
+.ref-list { list-style: none; }
+.ref { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.75; color: var(--text-soft); }
+.ref:last-child { border-bottom: none; }
+.ref em { color: var(--text-muted); font-style: italic; font-weight: 400; }
+.divider { height: 1px; background: linear-gradient(to right, transparent, var(--border), transparent); margin: 48px 0; }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+footer { background: #07192e; border-top: 1px solid rgba(255,255,255,0.14); position: relative; z-index: 1; }
+[data-theme="light"] footer { background: #e8eef7; border-top: 1px solid rgba(0,0,0,0.12); }
+.footer-inner { max-width: 1200px; margin: 0 auto; padding: 40px 32px 36px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+.footer-brand { display: flex; align-items: center; gap: 10px; }
+.footer-logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(180deg, var(--blue), #134ea5); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: white; }
+.footer-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.footer-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.footer-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+.footer-stat { text-align: center; }
+.footer-stat-val { font-size: 20px; font-weight: 800; color: var(--gold); display: block; line-height: 1; }
+.footer-stat-key { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; display: block; }
+.footer-back { display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); color: var(--text); font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.footer-back:hover { background: rgba(255,255,255,0.14); transform: translateY(-1px); }
+.footer-copy { width: 100%; text-align: center; font-size: 11px; color: var(--text-dim); padding-top: 20px; border-top: 1px solid var(--glass-border); }
+@media (max-width: 1000px) { .sidebar { display: none; } }
+@media (max-width: 900px) {
+  .topnav-links, .nav-divider { display: none !important; }
+  .hamburger { display: flex; }
+  .topnav { padding: 0 14px; height: 60px; }
+  .topnav-brand { font-size: 15px; }
+  .nav-logo { width: 36px; height: 36px; font-size: 11px; }
+  .topnav-wrapper { padding: 10px; }
+}
+@media (max-width: 768px) {
+  .tier-grid, .contrib-grid { grid-template-columns: 1fr; }
+  .hero { padding: 40px 20px 64px; }
+  .hero h1 { font-size: 22px; }
+  .hero-stats { gap: 8px; }
+  .stat-pill { min-width: 96px; padding: 12px 16px; }
+  .stat-val { font-size: 18px; }
+  .page { padding: 0 16px; }
+  main { padding: 24px 0 80px; }
+  .glass { padding: 20px 18px; }
+  .ph { flex-direction: column; gap: 8px; }
+  .ph-dot { width: 40px; height: 40px; font-size: 15px; }
+  .timeline::before { left: 19px; }
+  .mob-menu { top: 84px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; padding: 28px 20px; }
+  .tbl-wrap table { font-size: 12px; }
+}
+*, *::before, *::after { transition-property: background-color, color, border-color, box-shadow, opacity; transition-duration: 0.28s; transition-timing-function: ease; }
+#reading-progress { transition: width 0.1s linear !important; }
+html, body { transition: background 0.35s, color 0.35s; }
+</style>
+</head>
+<body>
+
+<div id="reading-progress"></div>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+
+<div class="topnav-wrapper">
+  <nav class="topnav">
+    <div class="topnav-left">
+      <div class="nav-logo">AB</div>
+      <span class="topnav-brand">ArsaBil — Geliştirme Raporu</span>
+      <div class="nav-divider"></div>
+      <div class="topnav-links">
+        <a href="#ozet">Özet</a>
+        <a href="#s1">Amaç</a>
+        <a href="#s2">Motor</a>
+        <a href="#s4">Harita</a>
+        <a href="#s5">TKGM</a>
+        <a href="#s6">Öneriler</a>
+        <a href="#s7">3D/AR Vizyon</a>
+      </div>
+    </div>
+    <div class="topnav-right">
+      <button class="icon-btn" id="theme-toggle" aria-label="Tema değiştir" title="Tema değiştir">
+        <span class="toggle-icon" id="toggle-icon">🌙</span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menüyü aç" aria-expanded="false">☰</button>
+    </div>
+  </nav>
+</div>
+
+<div class="mob-overlay" id="mob-overlay"></div>
+<nav class="mob-menu" id="mob-menu" aria-label="Mobil navigasyon">
+  <a href="#ozet" class="mob-link"><span class="mob-num">00</span>Özet</a>
+  <div class="mob-divider"></div>
+  <a href="#s1" class="mob-link"><span class="mob-num">01</span>Proje Amacı</a>
+  <a href="#s2" class="mob-link"><span class="mob-num">02</span>Hesaplama Motoru</a>
+  <a href="#s3" class="mob-link"><span class="mob-num">03</span>Parsel vs Arsa</a>
+  <a href="#s4" class="mob-link"><span class="mob-num">04</span>Harita</a>
+  <a href="#s5" class="mob-link"><span class="mob-num">05</span>TKGM</a>
+  <a href="#s6" class="mob-link"><span class="mob-num">06</span>Öneriler</a>
+  <a href="#s7" class="mob-link"><span class="mob-num">07</span>3D/AR Vizyon</a>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-eyebrow">Proje Kapsam Raporu — Teknik &amp; Ürün</div>
+  <h1>ArsaBil — Hesaplama Motoru, Parsel Mantığı, Harita Özellikleri ve TKGM Entegrasyonu</h1>
+  <p class="hero-sub">Kat karşılığı fizibilite hesabının formülleri ve anlamları, sistemde henüz gerçek veriye bağlanmamış bilgiler, harita üzerinden arsa alanı ölçümü ve tapu-kadastro (TKGM) bağlantısı için gerçekçi bir değerlendirme</p>
+  <div class="hero-stats">
+    <div class="stat-pill"><span class="stat-val">7</span><span class="stat-key">Formül</span></div>
+    <div class="stat-pill"><span class="stat-val">3</span><span class="stat-key">Katsayı Tablosu</span></div>
+    <div class="stat-pill"><span class="stat-val">5</span><span class="stat-key">Eksik Tespiti</span></div>
+    <div class="stat-pill"><span class="stat-val">4</span><span class="stat-key">TKGM Seçeneği</span></div>
+    <div class="stat-pill"><span class="stat-val">7</span><span class="stat-key">Harita Aracı</span></div>
+    <div class="stat-pill"><span class="stat-val">v2</span><span class="stat-key">Motor Sürümü</span></div>
+  </div>
+  <div class="hero-scroll">▼ &nbsp; Aşağı Kaydır</div>
+</section>
+
+<div class="page">
+
+<nav class="sidebar">
+  <div class="toc-head">İçindekiler</div>
+  <div class="toc">
+    <a href="#ozet">Özet</a>
+    <a href="#s1">1. Proje Amacı</a>
+    <a href="#s2">2. Hesaplama Motoru</a>
+    <a href="#s2-1" class="sub">2.1 Girdiler</a>
+    <a href="#s2-2" class="sub">2.2 Formüller</a>
+    <a href="#s2-3" class="sub">2.3 Katsayı Tabloları</a>
+    <a href="#s2-4" class="sub">2.4 Arsa Maliyeti Eksiği</a>
+    <a href="#s2-5" class="sub">2.5 Dış Doğrulama</a>
+    <a href="#s3">3. Parsel vs Arsa</a>
+    <a href="#s4">4. Harita Üzerinden Hesap</a>
+    <a href="#s5">5. TKGM Değerlendirmesi</a>
+    <a href="#s6">6. Boşluklar ve Öneriler</a>
+    <a href="#s7">7. 3D/AR Gelecek Vizyonu</a>
+  </div>
+</nav>
+
+<main>
+
+<div class="abstract glass reveal" id="ozet">
+  <span class="abs-label">Özet</span>
+  <p>ArsaBil, Türkiye'nin kat karşılığı inşaat modelini (arsa sahibi arazisini, tamamlanan dairelerin bir payı karşılığında müteahhide devreder) formüle dayalı, anında ve şeffaf bir hesaplamaya dönüştüren, internet üzerinden çalışan bir yazılım platformudur. Bu rapor dört konuyu ele alıyor: <strong>(1)</strong> hesaplama motorunun kullandığı tüm formüller ve bu formüllerin pratikte ne anlama geldiği; <strong>(2)</strong> sistemdeki gerçek eksikler — özellikle ekranda görünen "emsal" ve "imar durumu" bilgilerinin şu an göstermelik olması, sistemde kayıtlı gerçek verilere dayanmaması; <strong>(3)</strong> haritada parsel sınırı çizerek arsa alanı hesaplayan mevcut araç; <strong>(4)</strong> Tapu ve Kadastro Genel Müdürlüğü (TKGM) verilerine bağlanmanın gerçekçi yolları.</p>
+  <div class="kw-row">
+    <span class="kw-label">Konular:</span>
+    <span class="kw">kat karşılığı</span>
+    <span class="kw">arsa payı</span>
+    <span class="kw">hesap motoru v2</span>
+    <span class="kw">parsel</span>
+    <span class="kw">emsal</span>
+    <span class="kw">harita</span>
+    <span class="kw">TKGM</span>
+  </div>
+</div>
+
+<div class="sec reveal" id="s1">
+  <div class="sec-head"><span class="sec-num">Bölüm 1</span><h2>Proje Amacı ve Değer Önerisi</h2><div class="sec-head-line"></div></div>
+  <p>ArsaBil, kat karşılığı inşaat modelinin çevresinde kurulu, internet üzerinden abonelikle kullanılan bir yazılım platformudur (sektörde "SaaS" denir) — arsa sahibinin arazisini, tamamlanan dairelerin bir payı karşılığında müteahhide devrettiği, Türkiye'deki baskın kentsel dönüşüm/inşaat anlaşma biçimini hedefler.</p>
+  <div class="callout ci"><span class="callout-icon">📜</span><strong>README.md:</strong> "ArsaBil, Türkiye'deki kat karşılığı inşaat projelerinde arsa payı oranlarını, fizibilite skorlarını ve yatırım getirilerini otomatik hesaplayan bir SaaS platformudur."</div>
+  <div class="contrib-grid">
+    <div class="cc cc-1"><span class="cc-type">Vizyon</span><h4>Şeffaf Ekosistem</h4><p>"Türkiye'nin her parselinde, inşaat potansiyelini bir tıkla şeffaflaştıran, dijital gayrimenkul geliştirme standartlarını belirleyen bir ekosistem olmak."</p></div>
+    <div class="cc cc-2"><span class="cc-type">Misyon</span><h4>Güven Bariyerini Yıkmak</h4><p>"Arsa sahipleri ve müteahhitler arasındaki güven bariyerini, veriye dayalı anlık analizlerle yıkarak; adil ve hızlı inşaat süreçlerine öncülük etmek."</p></div>
+  </div>
+  <p><strong>Temel değer önerisi:</strong> Geleneksel kat karşılığı pazarlığı enformel, uzman-raporuna-dayalı ve yavaştır. ArsaBil bunu formüle dayalı, anında ve paylaşılabilir bir hesaplamayla (hesap motoru v2) değiştirip, sonra bunu bir pazar yerine (fizibilite raporuna bağlı ilan → müteahhit teklifi → mesajlaşma) genişletiyor. <strong>Hedef kullanıcılar:</strong> Arsa sahipleri · Müteahhitler · Gayrimenkul danışmanları.</p>
+</div>
+
+<div class="sec reveal" id="s2">
+  <div class="sec-head"><span class="sec-num">Bölüm 2</span><h2>Hesaplama Motoru (v2) — Formüller ve Anlamları</h2><div class="sec-head-line"></div></div>
+  <p>Hesaplama motoru, programın içinde ekrandan tamamen bağımsız, ayrı bir "hesap makinesi" bölümü olarak yazılmış: aynı girdileri verdiğinizde her zaman aynı sonucu üretir, arada tahmin ya da rastgelelik yoktur. Hangi formülün hangi sırayla işleyeceği, ayrı bir kural belgesinde yazılı olarak tanımlanmış ve program bu belgeye birebir uyuyor. <em>Önemli bir nokta:</em> hesabın tamamı <strong>tek bir daire üzerinden</strong> yürür — önce bir dairenin maliyeti ve satış fiyatı bulunur, arsa sahibinin toplam payı buradan çarpılarak hesaplanır.</p>
+
+  <h3 id="s2-1">2.1 Girdiler</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Sembol</th><th>Anlamı</th><th>Zorunlu mu</th></tr></thead>
+    <tbody>
+      <tr><td><code>x</code></td><td>Arsa payı oranı — arsa sahibinin alacağı pay (örn. %40 kat karşılığı anlaşma için 0,40 girilir)</td><td><span class="b b-ok">Evet</span></td></tr>
+      <tr><td><code>L</code></td><td>Kalite sınıfı çarpanı — inşaatın lüks derecesi maliyeti bu çarpanla artırır (Standart=1,0 · Lüks=1,4)</td><td><span class="b b-ok">Evet</span></td></tr>
+      <tr><td><code>Ad</code></td><td>Bir dairenin ortalama brüt alanı (m²)</td><td><span class="b b-ok">Evet</span></td></tr>
+      <tr><td><code>P</code></td><td>1 m² inşaatın taban maliyeti (TL/m², örn. 15.000 TL/m²)</td><td><span class="b b-ok">Evet</span></td></tr>
+      <tr><td><code>K</code></td><td>Müteahhit kâr çarpanı — maliyetin üzerine konan kâr (örn. 1,30 = %30 kâr)</td><td><span class="b b-ok">Evet</span></td></tr>
+      <tr><td><code>Sd</code></td><td>Projedeki toplam daire sayısı (girilirse arsa sahibine düşen daire hesabı açılır)</td><td><span class="b b-lo">Opsiyonel</span></td></tr>
+      <tr><td><code>Aa</code></td><td>Arsanın yüzölçümü (m²) (girilirse arsanın m² birim değeri de hesaplanır)</td><td><span class="b b-lo">Opsiyonel</span></td></tr>
+      <tr><td><code>R</code></td><td>Risk payı çarpanı — beklenmedik maliyetler için ihtiyat (örn. 1,10 = %10 risk payı; girilmezse 1 kabul edilir)</td><td><span class="b b-lo">Opsiyonel</span></td></tr>
+      <tr><td><code>Mz</code></td><td>İksa masrafı (derin kazı/destekleme) — ya ham maliyetin yüzdesi olarak ya da doğrudan TL tutarı olarak girilir</td><td><span class="b b-lo">Opsiyonel</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="s2-2">2.2 Formüller (tek daire üzerinden)</h3>
+  <div class="arch">
+<span class="cm">// A) İnşaat Maliyeti</span>
+<span class="hl">Ham inşaat maliyeti (Mi_base)</span>    = Kalite çarpanı × birim fiyat × daire alanı   (L · P · Ad)
+<span class="hl">İksa masrafı (Mz)</span>                = iksa yüzdesi × ham maliyet
+<span class="hl">Toplam inşaat maliyeti (Mi)</span>      = (ham maliyet + iksa) × risk çarpanı
+
+<span class="cm">// B) Toplam Maliyet ve Daire Satış Fiyatı</span>
+<span class="hl2">Toplam maliyet (M)</span>               = Mi ÷ (1 − arsa payı)     <span class="cm">// inşaat + arsa; geçici yöntem, bkz. §2.4</span>
+<span class="hl2">Arsa maliyeti (Ma)</span>               = M − Mi                   <span class="cm">// aradaki fark arsa maliyeti sayılıyor</span>
+<span class="hl2">Daire satış fiyatı (FD)</span>          = M × kâr çarpanı
+<span class="hl2">Daire m² satış fiyatı</span>            = FD ÷ daire alanı
+
+<span class="cm">// C) Arsa Sahibinin Payı</span>
+<span class="hl3">Arsa sahibine düşen daire (Sdx)</span>  = toplam daire sayısı × arsa payı
+<span class="hl3">Arsa sahibinin payının değeri (FA)</span> = Sdx × daire satış fiyatı
+<span class="hl3">Arsanın m² birim değeri</span>          = FA ÷ arsa alanı</div>
+
+  <div class="callout ci"><span class="callout-icon">🧮</span><strong>Sayısal örnek:</strong> 1.000 m² arsa, %40 arsa payı, 20 daire, daire başına 120 m² brüt alan, birim maliyet 15.000 TL/m², orta kalite (1,2), %2 iksa, %10 risk payı, %30 müteahhit kârı. → Bir dairenin ham inşaat maliyeti 1,2 × 15.000 × 120 = <strong>2.160.000 TL</strong>; iksa eklenince 2.203.200 TL; risk payıyla toplam inşaat maliyeti <strong>2.423.520 TL</strong>. Toplam maliyet 2.423.520 ÷ 0,60 = <strong>4.039.200 TL</strong> (bunun 1.615.680 TL'si arsa maliyeti sayılır). Daire satış fiyatı 4.039.200 × 1,30 = <strong>5.250.960 TL</strong> (≈ 43.758 TL/m²). Arsa sahibine 20 × 0,40 = <strong>8 daire</strong> düşer; payının değeri 8 × 5.250.960 = <strong>42.007.680 TL</strong>; arsanın m² birim değeri ≈ <strong>42.008 TL/m²</strong>.</div>
+
+  <h3 id="s2-3">2.3 Katsayı Tabloları (kullanıcıya sunulan seçenekler)</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Katsayı</th><th>Seçenekler</th><th>Nereden geliyor</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Yapı Standardı (L)</strong></td><td>Standart=1,0 · Orta=1,2 · Lüks=1,4 (varsayılan)</td><td>Programda sabit tanımlı</td></tr>
+      <tr><td><strong>Müteahhit Kazancı (K)</strong></td><td>Düşük=1,15 · Orta=1,30 (varsayılan) · Yüksek=1,50</td><td>Yönetici panelinden değiştirilebilen sistem ayarı</td></tr>
+      <tr><td><strong>Risk Payı (R)</strong></td><td>%0 · %5 · %10 (varsayılan) · %15</td><td>Yönetici panelinden değiştirilebilen sistem ayarı</td></tr>
+      <tr><td><strong>İksa</strong></td><td>Düşük=%1 · Orta=%2 (varsayılan)</td><td>Genel sistem ayarları</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="s2-4">2.4 Bilinen Eksik: Arsa Maliyeti Şu An Geçici Bir Yöntemle Hesaplanıyor</h3>
+  <div class="callout cw"><span class="callout-icon">⚠️</span><strong>Motorun kendi kural belgesindeki not (sadeleştirilmiş):</strong> "Arsa maliyeti için kalıcı yöntem henüz belirlenmedi; üç alternatif yöntem geliştirilecek. O zamana kadar geçici standart model kullanılacak: toplam maliyet, inşaat maliyetinin arsa payına oranlanmasıyla bulunacak; aradaki fark arsa maliyeti sayılacak."</div>
+  <p><strong>Bu pratikte ne demek?</strong> Motor, arsanın maliyetini piyasadaki gerçek arsa fiyatlarına bakarak hesaplamıyor. Bunun yerine tersinden bir varsayım yapıyor: kullanıcı arsa payını %40 girdiyse, motor "arsa maliyeti toplam proje maliyetinin %40'ıdır" kabul ediyor ve arsa değerini bu orandan geriye doğru türetiyor. Arsanın o ilçede gerçekten bu değerde olup olmadığına hiç bakılmıyor.</p>
+  <p><strong>Sonucu:</strong> Girilen arsa payı ne olursa olsun formül onu "doğru" kabul eder. Yani motor bugünkü haliyle, teklif edilen arsa payının <em>adil olup olmadığını</em> sınayamaz — sadece o payın kabulü halinde rakamların ne olacağını gösterir. Bunu düzeltecek yeni yöntem <strong>tasarlanıp onaylandı ama henüz programa yazılmadı:</strong></p>
+  <div class="tier-grid">
+    <div class="tier tier-a">
+      <div class="tier-age">Şu Anki Yöntem (Geçici)</div>
+      <div class="tier-name">Oransal Model</div>
+      <ul><li>Arsa maliyeti = toplam maliyet − inşaat maliyeti</li><li>Arsa değeri, kullanıcının girdiği arsa payından geriye doğru türetiliyor</li><li>Gerçek piyasa arsa fiyatı hiç kullanılmıyor</li></ul>
+    </div>
+    <div class="tier tier-b">
+      <div class="tier-age">Onaylandı, Henüz Programa İşlenmedi</div>
+      <div class="tier-name">Emsal (Piyasa Karşılaştırma) Modeli</div>
+      <ul><li>Arsa maliyeti = arsa alanı × o ilçedeki ortalama arsa m² fiyatı</li><li>Adil arsa payı bu gerçek değerden hesaplanabilecek (pazarlıkta kontrol imkânı)</li><li>Bunun için sisteme, ilçe bazında ortalama arsa m² fiyatı verisinin eklenmesi gerekiyor — bu veri şu an sistemde yok</li></ul>
+    </div>
+  </div>
+
+  <h3 id="s2-5">2.5 Dış Doğrulama: Formül Belgesi ile Program Karşılaştırması</h3>
+  <p>Önceki bir çalışmada, proje sahibinin elindeki formül belgesi ("Arsabil Denklemleri" adlı Word dosyası) ile programın gerçekte yaptığı hesap, formül formül karşılaştırıldı. Sonuç: beş ana formülün beşi de birebir aynı — <strong>program, belgede yazan matematiği doğru uyguluyor.</strong></p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Formül (Belgedeki)</th><th>Anlamı</th><th>Programla Uyum</th></tr></thead>
+    <tbody>
+      <tr><td>Mi = (L·P·Ad + Mz) · R</td><td>Toplam inşaat maliyeti (kalite, iksa ve risk dahil)</td><td><span class="b b-ok">✓ Birebir aynı</span></td></tr>
+      <tr><td>M = Mi / (1−x)</td><td>Toplam maliyet (inşaat + arsa)</td><td><span class="b b-ok">✓ Birebir aynı</span></td></tr>
+      <tr><td>Ma = M − Mi</td><td>Arsa maliyeti (geçici yöntem, bkz. §2.4)</td><td><span class="b b-ok">✓ Birebir aynı</span></td></tr>
+      <tr><td>FD = M · K</td><td>Daire satış fiyatı</td><td><span class="b b-ok">✓ Birebir aynı</span></td></tr>
+      <tr><td>FA = Sdx · FD</td><td>Arsa sahibinin payının toplam değeri</td><td><span class="b b-ok">✓ Birebir aynı</span></td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--text-soft);font-style:italic;">Not: Programın içinde bir de eski (v1) hesap motoru dosyası duruyor — farklı sabitler ve %20 ortak-alan payı içeriyordu. Ancak programın hiçbir yeri artık onu kullanmıyor; sadece silinmemiş eski bir dosya, bugünkü hesaplara hiçbir etkisi yok.</p>
+</div>
+
+<div class="sec reveal" id="s3">
+  <div class="sec-head"><span class="sec-num">Bölüm 3</span><h2>Parsel ve Arsa — Ekranda Görünen ile Sistemde Kayıtlı Olan Farkı</h2><div class="sec-head-line"></div></div>
+  <p>Sistemde "parsel" (tapudaki kadastral parsel) ile "arsa" (hesaba giren arazi) kavramları net biçimde ayrılmış değil. Daha önemlisi, ekranda parselle ilgili görünen bazı bilgiler <strong>gerçek değil:</strong></p>
+  <ul class="gap-list">
+    <li>İlan detay sayfasında "<strong>Parsel Detayları</strong>" başlığı altında İmar Durumu, Emsal ve Arsa Payı (min–max) bilgileri görünüyor — <strong>ama bunlar göstermelik örnek değerler.</strong> Ekrana sabit yazılmışlar; sistemin veri kayıtlarında bu bilgileri tutacak bir yer yok. Yani hiçbir ilanın gerçek imar/emsal bilgisi sistemde kayıtlı değil.</li>
+    <li>İlan arama sayfasındaki emsal aralığı filtresi de aynı durumda: filtre kutusu ekranda var, ama arkasında süzebileceği gerçek bir veri bulunmuyor — çalışıyormuş gibi görünen boş bir filtre.</li>
+    <li>Sisteme gerçekten kaydedilen ilan bilgileri ise "imar durumu" ve "tapu tipi" — ancak bunlar, proje plan belgesinde kararlaştırılan adlardan farklı adlarla kaydedilmiş. Bu bir iç tutarlılık sorunu; kullanıcıya ve hesaplara yansımıyor.</li>
+    <li>Hesaplama tarafı ise sağlam: kaydedilen raporlar ve senaryolar, motorun tüm girdi ve çıktılarını eksiksiz saklıyor. Eksik olan, parsel/emsal/imar bilgilerinin aynı ciddiyetle sisteme oturtulmamış olması.</li>
+  </ul>
+  <div class="callout cn"><span class="callout-icon">💡</span><strong>Sonuç:</strong> "Emsal" ve "İmar Durumu" şu an hesaplamaya hiç girmiyor. Bu bilgiler yalnızca ilan sayfalarında görüntü olarak duruyor; ne hesap motoru ne de arama filtreleri bunları gerçekten kullanıyor.</div>
+</div>
+
+<div class="sec reveal" id="s4">
+  <div class="sec-head"><span class="sec-num">Bölüm 4</span><h2>Harita Üzerinden Arsa Alanı Hesabı</h2><div class="sec-head-line"></div></div>
+  <p>Sitedeki harita sayfasında bugün yedi araç var:</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Araç</th><th>Ne yapıyor</th></tr></thead>
+    <tbody>
+      <tr><td>🗺️ Harita stili</td><td>Harita görünümünü değiştirme (sokak, uydu vb. altlıklar arasında geçiş)</td></tr>
+      <tr><td>📍 Parsel pinle</td><td>Haritada tıklanan noktaya işaret koyma; noktanın adresi otomatik bulunuyor</td></tr>
+      <tr><td>🔥 Isı haritası</td><td>Fizibilite skoru yüksek bölgeleri renk yoğunluğuyla gösterme</td></tr>
+      <tr><td>📐 Mesafe ölç</td><td>İki nokta arasını kuş uçuşu ölçme (Dünya'nın eğriliği hesaba katılıyor)</td></tr>
+      <tr><td>✏️ <strong>Bölge çiz</strong></td><td><strong>Parsel sınırını çizerek doğrudan arsa alanı hesabı</strong> — aşağıda</td></tr>
+      <tr><td>🗺 İl sınırı</td><td>81 ilin sınırlarını harita üzerinde gösterme</td></tr>
+      <tr><td>📏 Kadastro</td><td>Henüz çalışmıyor, üzerinde "Yakında" yazıyor — §5'te ele alınıyor</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>"Bölge Çiz" — Sınır Çizerek Arsa Alanı Hesabı</h3>
+  <p>Bu, "harita üzerinden arsa hesabı" özelliğinin <strong>zaten var olan</strong> karşılığı. Kullanıcı haritada tıklayarak parselin köşe noktalarını işaretliyor, çift tıklayınca sınır kapanıyor ve alan anında hesaplanıyor.</p>
+  <div class="callout ci"><span class="callout-icon">📐</span><strong>Alan nasıl hesaplanıyor?</strong> Çizilen çokgenin köşe koordinatları (enlem/boylam) alınıyor ve haritacılıkta kullanılan standart bir geometri formülüyle, <strong>Dünya'nın küre biçimi hesaba katılarak</strong> alan bulunuyor. Yani ölçüm düz kâğıt üzerinde değil, gerçek yeryüzü üzerinde yapılıyor; normal parsel boyutlarında sapma ihmal edilebilir düzeydedir. Bu formül hazır bir paket kullanılmadan doğrudan programın içine yazılmış — incelendi, matematiği doğru.</div>
+  <p>Sonuç hem <strong>m²</strong>, hem <strong>hektar</strong>, hem de geleneksel birim olan <strong>dönüm</strong> (1 dönüm = 1.000 m²) cinsinden gösteriliyor.</p>
+  <div class="callout ci"><span class="callout-icon">🔗</span><strong>Kopuk akış:</strong> Haritada "Bölge çiz" ile ölçülen alan, hesap sayfasındaki "Arsa Alanı" kutusuna otomatik aktarılmıyor — kullanıcı haritada gördüğü değeri elle yazmak zorunda. Doğal geliştirme: ölçüm sonucunun yanına bir "Bu alanı hesaplamaya aktar" düğmesi eklemek.</div>
+</div>
+
+<div class="sec reveal" id="s5">
+  <div class="sec-head"><span class="sec-num">Bölüm 5</span><h2>TKGM / Kadastro Entegrasyonu Değerlendirmesi</h2><div class="sec-head-line"></div></div>
+  <p>Haritadaki "Kadastro" düğmesi şu an devre dışı ve arkasında hiçbir hazırlık ya da tasarım yok — sadece düğmenin kendisi var. TKGM (Tapu ve Kadastro Genel Müdürlüğü) verilerine gerçekte nasıl ulaşılabileceğini araştırdım:</p>
+  <div class="callout cw"><span class="callout-icon">🏛️</span><strong>TKGM'nin gerçek durumu:</strong> TKGM'nin kadastro haritalarını dijital paylaşan servisleri (MEGSİS) var; ancak bunlar yalnızca <strong>resmi protokol imzalayan kurum, kuruluş ve belediyelerle</strong> paylaşılıyor. Özel bir şirketin yazılımından otomatik parsel verisi çekebileceği, herkese açık bir bağlantı kanalı yok. Vatandaşa açık olan <strong>parselsorgu.tkgm.gov.tr</strong> ise yalnızca elle, tek tek sorgulama yapılan bir internet sayfası — bir yazılımın toplu/otomatik veri çekmesine uygun değil.</div>
+
+  <h3>Gerçekçi Bağlantı Yolları</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Seçenek</th><th>Açıklama</th><th>Efor</th><th>Risk</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A. Yönlendirme bağlantısı (ilk adım)</strong></td><td>Kullanıcıyı, haritada seçtiği konum hazır doldurulmuş şekilde TKGM'nin kendi parsel sorgu sayfasına yönlendirmek</td><td><span class="b b-ok">Çok Düşük</span></td><td><span class="b b-ok">Yok</span></td></tr>
+      <tr><td><strong>B. Kurumsal Protokol</strong></td><td>TKGM'ye resmi başvuru yapıp protokol imzalayarak kadastro katmanını doğrudan ArsaBil haritasında göstermek</td><td><span class="b b-hi">Yüksek</span></td><td><span class="b b-warn">Orta</span></td></tr>
+      <tr><td><strong>C. Aracı Firma</strong></td><td>TKGM protokolüne zaten sahip ticari bir veri sağlayıcıdan hizmet satın almak (böyle bir sağlayıcı varsa)</td><td><span class="b b-warn">Orta</span></td><td><span class="b b-warn">Belirsiz</span></td></tr>
+      <tr><td><strong>D. Belediye Açık Verisi</strong></td><td>Bazı belediyelerin açık paylaştığı imar/parsel verisini kullanmak — ile göre değişiyor, ülke genelini kapsamıyor</td><td><span class="b b-warn">Değişken</span></td><td><span class="b b-ok">Düşük</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout cg"><span class="callout-icon">✅</span><strong>Öneri:</strong> İlk adım için <strong>Seçenek A</strong> — geliştirme maliyeti sıfıra yakın, kullanıcıya gerçek fayda sağlıyor ve hiçbir hukuki riski yok. Düğmedeki "Yakında" yazısı hemen gerçek bir yönlendirmeye dönüştürülebilir. Seçenek B (resmi protokol) ise ayrı planlama ve resmi süreç gerektiren, uzun vadeli bir girişim olarak ele alınmalı.</div>
+</div>
+
+<div class="sec reveal" id="s6">
+  <div class="sec-head"><span class="sec-num">Bölüm 6</span><h2>Eksikler ve Öneriler</h2><div class="sec-head-line"></div></div>
+  <div class="rec"><div class="rec-n">1</div><div class="rec-b"><h5>Arsa maliyeti hâlâ geçici yöntemle hesaplanıyor</h5><p>Motor bugün arsa değerini piyasadan değil, kullanıcının girdiği arsa payından geriye doğru türetiyor (bkz. §2.4) — yani teklif edilen payın adil olup olmadığını sınayamıyor. Onaylanan yeni yöntem (arsa değerini ilçedeki gerçek ortalama m² fiyatından hesaplamak) henüz programa yazılmadı. Bu, hesabın doğruluğunu doğrudan etkileyen en kritik eksik. <span class="b b-hi">Yüksek öncelik</span></p></div></div>
+  <div class="rec"><div class="rec-n">2</div><div class="rec-b"><h5>Emsal ve imar durumu sistemde gerçek veri olarak yok</h5><p>İlan sayfalarında görünen bu bilgiler göstermelik örnek değerler; sisteme kaydedilmiyor, hesaba girmiyor ve arama filtreleri de gerçek veriyle çalışmıyor. <span class="b b-warn">Orta öncelik</span></p></div></div>
+  <div class="rec"><div class="rec-n">3</div><div class="rec-b"><h5>Harita ölçümü hesaba elle taşınmak zorunda</h5><p>"Bölge çiz" ile ölçülen arsa alanı, hesap sayfasındaki Arsa Alanı kutusuna otomatik aktarılmıyor; kullanıcı değeri elle yazıyor. <span class="b b-warn">Orta öncelik</span></p></div></div>
+  <div class="rec"><div class="rec-n">4</div><div class="rec-b"><h5>Kadastro düğmesi boş</h5><p>Düğme var ama arkasında hiçbir hazırlık yok — §5'teki Seçenek A (TKGM sorgu sayfasına yönlendirme) ile çok az emekle işler hale getirilebilir. <span class="b b-lo">Düşük-Orta öncelik</span></p></div></div>
+  <div class="rec"><div class="rec-n">5</div><div class="rec-b"><h5>İç adlandırma tutarsızlığı</h5><p>Plan belgesinde kararlaştırılan veri adları ile programa girmiş adlar birbirinden farklı — kullanıcıya ve hesaplara hiçbir etkisi yok, yalnızca ileride programın bakımını zorlaştırabilecek bir düzen sorunu. <span class="b b-lo">Düşük öncelik</span></p></div></div>
+</div>
+
+<div class="divider"></div>
+
+<div class="sec reveal" id="s7">
+  <div class="sec-head"><span class="sec-num">Bölüm 7 — Gelecek Vizyonu</span><h2>3D Bina Yerleştirme, AR Görselleştirme ve İç Mimari Tasarım Aracı</h2><div class="sec-head-line"></div></div>
+  <p>Talep edilen vizyon: haritada belirlenen bir arsanın üzerine, telefon kamerasıyla bakıldığında gerçek arazide duruyormuş gibi görünen üç boyutlu bir bina maketi yerleştirmek; bu binayı 1+1/2+1/3+1 karma daire tipleriyle yapılandırmak; ve dairenin iç mekânını <strong>Roomstyler</strong> benzeri bir araçla (mobilyayı sürükleyip bırakarak kat planından üç boyutlu görüntü üreten, internet tarayıcısında ve mobilde çalışan) tasarlamak. Bu, ArsaBil'in bugünkü "sayısal fizibilite" ürününden "görsel, uçtan uca proje deneyimi"ne uzanan büyük bir ürün genişlemesidir — birbirine bağımlı fazlardan oluşan bir yol haritası olarak öneriliyor.</p>
+
+  <div class="callout cw"><span class="callout-icon">🔗</span><strong>Kritik ön koşul:</strong> Faz A'da binanın kat sayısı, parselin <strong>emsal</strong> değerinden hesaplanacak — ama §3'te gösterildiği gibi emsal bilgisi şu an sistemde gerçek veri olarak tutulmuyor, sadece ekranda göstermelik duruyor. Faz A'ya başlamadan önce §6 Öneri 2'nin (emsalin gerçek veri olarak sisteme kaydedilmesi) çözülmesi gerekiyor.</div>
+
+  <div class="timeline">
+    <div class="ph">
+      <div class="ph-dot">A</div>
+      <div class="ph-body">
+        <h5>Parselden 3B Bina Kütlesi Üretimi <span class="b b-lo" style="margin-left:8px;">Temel / Ön Koşul</span></h5>
+        <p>Haritada "Bölge çiz" ile çizilen parsel sınırını, emsalden hesaplanan kat sayısı kadar yukarı yükselterek otomatik bir üç boyutlu bina kütlesine dönüştürmek — kabaca, parselin üzerine dijital bir kütle maketi dikmek. <strong>Teknoloji:</strong> İnternet tarayıcısında üç boyutlu görüntü çizen, yaygın ve olgun bir hazır altyapı (Three.js) — kullanıcı ek program kurmaz, mevcut siteyle uyumludur. <strong>Nereye eklenir:</strong> Hesap sayfasına yeni bir "3B Önizleme" sekmesi; arsa alanı, daire alanı ve emsal değerlerini doğrudan hesaptan alır.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">B</div>
+      <div class="ph-body">
+        <h5>Daire Karışımı Ayarlayıcısı <span class="b b-lo" style="margin-left:8px;">A ile paralel yürütülebilir</span></h5>
+        <p>Bugün hesaba yalnızca tek bir "toplam daire sayısı" giriliyor. Bu, "1+1'den 8 adet (55 m²), 2+1'den 10 adet (95 m²), 3+1'den 6 adet (130 m²)" gibi <strong>karma bir listeye</strong> genişletilecek; girilen karışımın toplam inşaat alanını aşmadığı otomatik denetlenecek. Bu bilgiyi saklamak için rapor kayıtlarına yeni bir veri alanı eklenmesi gerekiyor. Üç boyutlu bina kütlesi üzerinde katlar daire tipine göre renklendirilerek görsel geri bildirim de verilebilir.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">C</div>
+      <div class="ph-body">
+        <h5>Kamera ile Gerçek Arazide Gösterim (Mobil, "Artırılmış Gerçeklik") <span class="b b-warn" style="margin-left:8px;">A'ya bağımlı, ayrı mobil uygulama gerektirir</span></h5>
+        <p>Faz A'da üretilen bina kütlesini, telefon kamerasıyla araziye bakıldığında <strong>parselin gerçek konumunda, gerçek boyutunda duruyormuş gibi</strong> canlı görüntünün üzerine bindirmek. <strong>Teknoloji:</strong> Google'ın konum-tabanlı artırılmış gerçeklik altyapısı (ARCore Geospatial) — bina modeli GPS koordinatına "sabitlenir" ve telefonun tam konumu, Google'ın sokak görüntüsü arşiviyle karşılaştırılarak santimetre düzeyinde hassas belirlenir. Hem Android hem iPhone'da çalışır, ancak <strong>uygulama mağazasından indirilen ayrı bir mobil uygulama şarttır</strong>. <strong>Daha basit web alternatifi:</strong> Sitede bir "AR'da Gör" düğmesiyle modeli telefon kamerasında herhangi bir zeminin üzerine koyup bakmak — bu, konuma sabitli değildir; binayı arazide değil, yalnızca genel bir önizleme olarak gösterir.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">D</div>
+      <div class="ph-body">
+        <h5>İç Mimari Tasarım Aracı (Web + Mobil) <span class="b b-lo" style="margin-left:8px;">Bağımsız, paralel başlatılabilir</span></h5>
+        <p>Referans ürün: <strong>Roomstyler</strong> ("Rayon Design" olarak kastedilen, gerçek ve bilinen bir araç) — 120.000'den fazla mobilya kataloğu var; kullanıcı iki boyutlu kat planına mobilyayı sürükleyip bırakıyor, araç bundan fotoğraf gerçekliğinde üç boyutlu görüntü üretiyor; internet tarayıcısında ve tablet/telefonda çalışıyor. Yapı taşları: kat planı çizim editörü (duvar/oda çizimi) + mobilya kataloğu + üç boyutlu görüntüleme ve daire içinde gezinti. <strong>Temel karar: kendimiz mi geliştirelim, hazır bir altyapı mı kullanalım</strong> — aşağıda §7.2.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">E</div>
+      <div class="ph-body">
+        <h5>Mobilya Satış Platformu: 3B Katalog + Kamerada Deneme + Sepet + Kredi <span class="b b-hi" style="margin-left:8px;">D'ye bağımlı, yeni bir iş kolu</span></h5>
+        <p>Faz D'nin iç mimari aracını, gerçek mobilya markalarının ürünleriyle (fiyat, stok, sepet, ödeme) bir alışveriş katmanına dönüştürmek — "yatak odası takımı" gibi çok parçalı set kataloglarına kadar genişletilebilir. Bu, kendi başına dört alt fazlı bir çalışma olarak §7.4'te detaylandırılıyor.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>7.1 Öncelik ve Bağımlılık Sırası</h3>
+  <div class="arch">
+<span class="hl">A</span> (3B bina kütlesi) → <span class="hl2">B</span> (daire karışımı — A ile aynı anda yürütülebilir)
+                        ↓
+<span class="hl3">C</span> (kamerayla arazide gösterim — A'nın ürettiği kütleyi kullanır, ayrı mobil uygulama şart)
+
+<span class="cm">D (iç mimari aracı) — A/B/C'den bağımsız; ayrı bir ekiple, ayrı takvimle paralel başlatılabilir</span>
+                        ↓
+<span class="hl3">E</span> (mobilya satış platformu — D'nin tasarım aracı üzerine kurulur, D olmadan anlamsız)</div>
+
+  <h3>7.2 İç Mimari Aracı: Kendimiz mi Geliştirelim, Hazır Altyapı mı Kullanalım?</h3>
+  <div class="tier-grid">
+    <div class="tier tier-a">
+      <div class="tier-age">Sıfırdan Geliştirme</div>
+      <div class="tier-name">Kendi Oda Tasarım Aracımız</div>
+      <ul><li>Tam kontrol; ArsaBil'in daire planlarına doğrudan bağlanır</li><li>Yüksek emek: plan çizim editörü + üç boyutlu görüntüleme + mobilya kataloğunun sıfırdan üretimi</li><li>Mobilya/malzeme model kütüphanesinin maliyeti zamanla sürekli büyür</li></ul>
+    </div>
+    <div class="tier tier-b">
+      <div class="tier-age">Hazır Altyapı Üzerine Kurulum</div>
+      <div class="tier-name">Mevcut Bir Oda Tasarım Motoru + Özelleştirme</div>
+      <ul><li>Ücretsiz/açık paylaşılan mevcut bir oda tasarım altyapısını alıp ArsaBil markasıyla özelleştirmek (uygun bir tane var mı, kullanım hakları nasıl — ayrıca araştırılmalı)</li><li>Orta emek; ilk sürüm çok daha hızlı çıkar</li><li>Risk: başkasının geliştirdiği altyapının bakımı bir gün durabilir, o zaman yük bize kalır</li></ul>
+    </div>
+  </div>
+  <div class="callout cg"><span class="callout-icon">✅</span><strong>Öneri:</strong> Bu vizyon, ArsaBil'in asıl işinden (arsa payı / kat karşılığı hesabı) tamamen farklı bir yatırım kategorisidir ve ayrı bir uzmanlık gerektirir. Önce Faz A+B ile (mevcut hesap motoruna doğrudan bağlı, düşük-orta emek) bir "3B Önizleme" ilk sürümü çıkarılıp kullanıcı ilgisi ölçülmeli; Faz C (kameralı gösterim) ve Faz D (iç mimari) için karar, bu ölçümden sonra, ayrı bütçelendirilen bir sonraki adım olarak verilmelidir.</div>
+
+  <h3>7.3 Riskler (Faz A-D)</h3>
+  <ul class="gap-list">
+    <li><strong>Konum hassasiyeti Google verisine bağlı:</strong> Kameralı arazi gösteriminin (Faz C) hassasiyeti, Google'ın sokak görüntüsü arşivinin o bölgeyi kapsamasına bağlı — Türkiye'de büyükşehirler dışında zayıf olabilir; hedef bölgelerde sahada doğrulanmalı.</li>
+    <li><strong>Ayrı mobil uygulama zorunluluğu:</strong> Tam konum-sabitli kamera deneyimi internet sitesi üzerinden verilemiyor — App Store/Google Play'de yayımlanan ayrı bir uygulama gerekiyor. ArsaBil bugün yalnızca internet sitesi olarak çalıştığı için bu, yeni bir geliştirme ve bakım yükü demek.</li>
+    <li><strong>Emsal verisi eksik:</strong> §3'te belgelendiği gibi, Faz A'nın kat sayısı hesabı henüz sistemde var olmayan bir veriye dayanıyor — iş sıralaması buna göre planlanmalı.</li>
+    <li><strong>Mobilya modeli üretim maliyeti (Faz D):</strong> Roomstyler'ın 120.000+ ürünlük kataloğu yıllar süren bir içerik yatırımının sonucu — ilk sürüm çok daha dar bir katalogla başlamalı.</li>
+  </ul>
+
+  <h3 id="s7-4">7.4 Faz E Detayı — Mobilya Satış Platformu: 3B Katalog, Kamerada Deneme, Sepet ve Kredi</h3>
+  <p>Talep edilen genişleme: mobilya markalarının ürünlerini üç boyutlu dijital modellere dönüştürüp fiyatlarıyla listelemek; ürünün odanın içinde nasıl duracağını telefon kamerasıyla göstermek; sepete ekleyip satın alabilmek; hatta <strong>ihtiyaç kredisiyle</strong> (tüketici finansmanı) ödeyebilmek — "yatak odası takımı" gibi çok parçalı setlere kadar. Bu, Faz D'nin (iç mimari aracı) üzerine kurulan, ama iş modeli olarak ArsaBil'in asıl işinden (müteahhitlere/profesyonellere yönelik fizibilite hizmeti) <strong>tamamen ayrı, son tüketiciye satış yapan bir e-ticaret ve finansman-bitişik iş kolu</strong>dur — bu ayrımın en baştan netleştirilmesi öneriliyor.</p>
+
+  <div class="timeline">
+    <div class="ph">
+      <div class="ph-dot">E1</div>
+      <div class="ph-body">
+        <h5>Marka Kataloğu ve 3B Model Üretim Hattı</h5>
+        <p>Mobilya markalarıyla veri ve görsel ortaklığı kurulur (ürün fotoğrafı, ölçüler, fiyat, stok bilgisi düzenli akar). Her ürünün üç boyutlu modeli iki yoldan biriyle üretilir: <strong>(a)</strong> markanın elindeki teknik çizim/tasarım dosyalarını yaygın üç boyutlu model formatlarına dönüştürmek (daha ucuz, ama markanın işbirliğine bağlı) veya <strong>(b)</strong> ürünü her açıdan fotoğraflayıp yazılımla üç boyutlu modele dönüştürmek — "fotogrametri" (markadan bağımsız ama pahalı; her ürün için ayrı stüdyo çekimi gerekir). Emsal: IKEA'nın mobil uygulaması, gerçek ölçülere <strong>%98 doğrulukla</strong> uyan modeller kullanıyor — hedeflenecek kalite çıtası bu.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">E2</div>
+      <div class="ph-body">
+        <h5>Odanın İçinde Kamerayla Deneme <span class="b b-warn" style="margin-left:8px;">Faz C'dekinden FARKLI bir teknoloji</span></h5>
+        <p><strong>Önemli ayrım:</strong> Bu, Faz C'deki dış mekân gösteriminden (GPS'e sabitli, arazi üzerinde) farklı bir teknolojidir. Oda içinde mobilya denemek, IKEA'nın uygulamasının da kullandığı <strong>yüzey algılama</strong> yöntemine dayanır: telefon kamerası zemini/duvarı kendisi algılar ve mobilyayı gerçek boyutunda odaya yerleştirir — GPS gerekmez, her yerde çalışır. Faz D'nin oda tasarım aracıyla bütünleşir: kullanıcı ürünü ya kendi telefon kamerasıyla gerçek odasında (mobil uygulama), ya da sitedeki üç boyutlu oda tasarımı içinde dener.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">E3</div>
+      <div class="ph-body">
+        <h5>Fiyatlandırma, Sepet ve Sipariş Yönetimi <span class="b b-hi" style="margin-left:8px;">Net iş modeli kararı gerekli</span></h5>
+        <p>Markaların fiyat ve stok bilgisi sistemle güncel tutulmalı (markanın sistemine otomatik bağlantı ya da düzenli aralıklarla alınan fiyat/stok listesi). <strong>Temel iş modeli sorusu, teknik çalışmadan önce netleşmeli:</strong> ArsaBil bir <em>pazar yeri</em> mi olacak (siparişi markaya yönlendirir, komisyon alır — operasyonel yükü düşük) yoksa <em>doğrudan satıcı</em> mı (kendi stoğunu tutar; kargo, teslimat ve iade sorumluluğu kendisinde — yükü ağır ama kâr payı yüksek)? Bu karar, "yatak odası takımı" gibi çok parçalı setlerin sepete nasıl gireceğini (parça parça mı, paket olarak mı) de belirler.</p>
+      </div>
+    </div>
+    <div class="ph">
+      <div class="ph-dot">E4</div>
+      <div class="ph-body">
+        <h5>İhtiyaç Kredisi / "Şimdi Al Sonra Öde" Bağlantısı <span class="b b-warn" style="margin-left:8px;">Lisans gerektirir — ArsaBil kendisi kredi veremez</span></h5>
+        <p>ArsaBil <strong>lisanslı bir finansman kuruluşu değil</strong> — Türkiye'de tüketici kredisi ve taksitli finansman ("Şimdi Al Sonra Öde"), ilgili kanun (Finansal Kiralama, Faktoring ve Finansman Şirketleri Kanunu) kapsamında yalnızca yetkili finansman şirketlerince sunulabiliyor. Gerçekçi yol: lisanslı bir sağlayıcının hazır çözümünü ödeme sayfasına eklemek — örneğin iyzico gibi ödeme altyapılarının sunduğu "Şimdi Al Sonra Öde" hizmeti, ya da bir bankanın dış sistemlere açtığı resmi bağlantı kanalları (2020'deki kanun değişikliğiyle yasal temeli oluşan "Açık Bankacılık"). Yani kendi kredi altyapısını kurmak değil, <strong>mevcut lisanslı bir ortağın hizmetini ödeme akışına eklemek.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <h3>7.5 Faz E Riskleri</h3>
+  <ul class="gap-list">
+    <li><strong>Yasal/lisans gereksinimleri:</strong> Tüketici kredisi sunmak resmi düzenlemeye tabi — ArsaBil'in kendi başına kredi vermesi mümkün değil, lisanslı bir finansman ortağı şart.</li>
+    <li><strong>Lojistik/teslimat sorumluluğu belirsizliği:</strong> "Pazar yeri mi, doğrudan satıcı mı" kararı verilmeden sistemin stok, iade ve kargo tarafı tasarlanamaz.</li>
+    <li><strong>Marka ortaklığı müzakere süreci:</strong> 3B model, fiyat ve stok verisi almak için her mobilya markasıyla ayrı ayrı iş ortaklığı kurulması gerekiyor — bu teknik değil, iş geliştirme süreci.</li>
+    <li><strong>3B model üretim maliyeti çok parçalı setlerde katlanıyor:</strong> "Yatak odası takımı" gibi setler, her biri ayrı üç boyutlu model gerektiren parçalardan oluşur (yatak, dolap, komodin, aynalı konsol vb.) — üretim maliyeti ürün başına değil, set başına çarpanla büyür.</li>
+    <li><strong>Kapsam ve organizasyon:</strong> Bu faz, ArsaBil'in asıl işi olan profesyonellere yönelik arsa fizibilite hizmetinden tamamen farklı, son tüketiciye satış yapan bir e-ticaret ve finansman işi — muhtemelen ayrı bir ekip, hatta ayrı bir marka/şirket yapısı altında değerlendirilmesi daha sağlıklı olur.</li>
+  </ul>
+</div>
+
+</main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">AB</div>
+      <div>
+        <div class="footer-title">ArsaBil — Geliştirme Raporu</div>
+        <div class="footer-meta">Hesaplama Motoru, Parsel Mantığı, Harita &amp; TKGM Değerlendirmesi</div>
+      </div>
+    </div>
+    <div class="footer-stats">
+      <div class="footer-stat"><span class="footer-stat-val">7</span><span class="footer-stat-key">Denklem</span></div>
+      <div class="footer-stat"><span class="footer-stat-val">5</span><span class="footer-stat-key">Boşluk</span></div>
+      <div class="footer-stat"><span class="footer-stat-val">4</span><span class="footer-stat-key">TKGM Yolu</span></div>
+      <div class="footer-stat"><span class="footer-stat-val">v2</span><span class="footer-stat-key">Motor</span></div>
+    </div>
+    <a href="#hero" class="footer-back">↑ Başa Dön</a>
+    <div class="footer-copy">Teknik &amp; Ürün Geliştirme Raporu &nbsp;·&nbsp; Doğrudan Kod İncelemesi + Harici Araştırma &nbsp;·&nbsp; 2026-07-01</div>
+  </div>
+</footer>
+
+<script>
+const progressBar = document.getElementById('reading-progress');
+function updateProgress() {
+  const scrolled = window.scrollY;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  if (total > 0) progressBar.style.width = ((scrolled / total) * 100) + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+updateProgress();
+
+const revealEls = document.querySelectorAll('.reveal');
+const ro = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } });
+}, { threshold: 0.07 });
+revealEls.forEach(el => ro.observe(el));
+
+const tocLinks = document.querySelectorAll('.toc a');
+const sections = document.querySelectorAll('[id]');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.toc a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px' });
+sections.forEach(s => io.observe(s));
+
+function animateCounter(el, target, duration) {
+  const start = performance.now();
+  const to = parseInt(target, 10);
+  if (isNaN(to)) return;
+  const suffix = target.replace(/^\d+/, '');
+  function step(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(eased * to) + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const statVals = document.querySelectorAll('.stat-val');
+const counterObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const raw = el.textContent.trim();
+      const num = raw.match(/^(\d+)/);
+      if (num) animateCounter(el, raw, 1300);
+      counterObs.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+statVals.forEach(el => counterObs.observe(el));
+
+const toggleBtn = document.getElementById('theme-toggle');
+const toggleIcon = document.getElementById('toggle-icon');
+const html = document.documentElement;
+function applyTheme(theme) {
+  html.setAttribute('data-theme', theme);
+  toggleIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+  localStorage.setItem('arsabil-report-theme', theme);
+}
+const saved = localStorage.getItem('arsabil-report-theme');
+applyTheme(saved || 'dark');
+toggleBtn.addEventListener('click', () => {
+  applyTheme(html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+
+const hamburger = document.getElementById('hamburger');
+const mobMenu = document.getElementById('mob-menu');
+const mobOverlay = document.getElementById('mob-overlay');
+function openMobMenu() {
+  mobMenu.classList.add('open'); mobOverlay.classList.add('open');
+  hamburger.classList.add('active'); hamburger.setAttribute('aria-expanded', 'true');
+  hamburger.textContent = '✕'; document.body.style.overflow = 'hidden';
+}
+function closeMobMenu() {
+  mobMenu.classList.remove('open'); mobOverlay.classList.remove('open');
+  hamburger.classList.remove('active'); hamburger.setAttribute('aria-expanded', 'false');
+  hamburger.textContent = '☰'; document.body.style.overflow = '';
+}
+hamburger.addEventListener('click', () => {
+  mobMenu.classList.contains('open') ? closeMobMenu() : openMobMenu();
+});
+mobOverlay.addEventListener('click', closeMobMenu);
+mobMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobMenu));
+</script>
+
+</body>
+</html>
