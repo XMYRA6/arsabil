@@ -364,7 +364,7 @@
 }
 
 .logoutBtn:hover {
-    background: rgba(255, 90, 95, 0.08);
+    background: rgba(var(--red-rgb), 0.08);
     color: var(--red);
 }
 

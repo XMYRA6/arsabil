@@ -172,7 +172,7 @@ export default function LoginPage() {
 
                             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                                 {error && (
-                                    <div style={{ backgroundColor: error.includes("gönderildi") ? "rgba(47, 191, 113, 0.1)" : "rgba(255, 90, 95, 0.1)", color: error.includes("gönderildi") ? "var(--primary)" : "var(--red)", padding: "1rem", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 500, border: error.includes("gönderildi") ? "1px solid rgba(47, 191, 113, 0.2)" : "1px solid rgba(255, 90, 95, 0.2)" }}>
+                                    <div style={{ backgroundColor: error.includes("gönderildi") ? "rgba(var(--green-rgb), 0.1)" : "rgba(var(--red-rgb), 0.1)", color: error.includes("gönderildi") ? "var(--primary)" : "var(--red)", padding: "1rem", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 500, border: error.includes("gönderildi") ? "1px solid rgba(var(--green-rgb), 0.2)" : "1px solid rgba(var(--red-rgb), 0.2)" }}>
                                         {error}
                                     </div>
                                 )}
@@ -224,7 +224,7 @@ export default function LoginPage() {
 
                             <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
                                 {error && (
-                                    <div style={{ backgroundColor: "rgba(255, 90, 95, 0.1)", color: "var(--red)", padding: "1rem", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 500, border: "1px solid rgba(255, 90, 95, 0.2)" }}>
+                                    <div style={{ backgroundColor: "rgba(var(--red-rgb), 0.1)", color: "var(--red)", padding: "1rem", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 500, border: "1px solid rgba(var(--red-rgb), 0.2)" }}>
                                         {error}
                                     </div>
                                 )}
@@ -282,7 +282,7 @@ export default function LoginPage() {
 
                             <form onSubmit={handleForgot} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                                 {error && (
-                                    <div style={{ backgroundColor: error.includes("gönderildi") ? "rgba(47, 191, 113, 0.1)" : "rgba(255, 90, 95, 0.1)", color: error.includes("gönderildi") ? "var(--primary)" : "var(--red)", padding: "1rem", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 500, border: error.includes("gönderildi") ? "1px solid rgba(47, 191, 113, 0.2)" : "1px solid rgba(255, 90, 95, 0.2)" }}>
+                                    <div style={{ backgroundColor: error.includes("gönderildi") ? "rgba(var(--green-rgb), 0.1)" : "rgba(var(--red-rgb), 0.1)", color: error.includes("gönderildi") ? "var(--primary)" : "var(--red)", padding: "1rem", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 500, border: error.includes("gönderildi") ? "1px solid rgba(var(--green-rgb), 0.2)" : "1px solid rgba(var(--red-rgb), 0.2)" }}>
                                         {error}
                                     </div>
                                 )}

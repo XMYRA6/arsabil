@@ -57,7 +57,7 @@ export const LocationSelector: React.FC<LocationSelectorProps> = ({
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          background: "rgba(47,191,113,0.06)",
+          background: "rgba(var(--green-rgb),0.06)",
           border: "1px solid var(--green)",
           borderRadius: 12,
           padding: "8px 14px",

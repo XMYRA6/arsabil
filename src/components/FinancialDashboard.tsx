@@ -71,10 +71,10 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
             {/* KPI Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px' }}>
                 {[
-                    { label: 'Net Kâr', value: formatTL(financial.netProfit), color: financial.netProfit >= 0 ? 'var(--green)' : 'var(--red)', bg: financial.netProfit >= 0 ? 'rgba(47,191,113,0.08)' : 'rgba(255,90,95,0.08)' },
+                    { label: 'Net Kâr', value: formatTL(financial.netProfit), color: financial.netProfit >= 0 ? 'var(--green)' : 'var(--red)', bg: financial.netProfit >= 0 ? 'rgba(var(--green-rgb),0.08)' : 'rgba(var(--red-rgb),0.08)' },
                     { label: 'ROI', value: formatPct(financial.roi), color: 'var(--primary)', bg: 'rgba(var(--primary-rgb),0.08)' },
-                    { label: 'IRR', value: formatPct(financial.irr), color: 'var(--orange)', bg: 'rgba(255,159,47,0.08)' },
-                    { label: 'NPV', value: formatTL(financial.npv), color: financial.npv >= 0 ? 'var(--green)' : 'var(--red)', bg: financial.npv >= 0 ? 'rgba(47,191,113,0.08)' : 'rgba(255,90,95,0.08)' },
+                    { label: 'IRR', value: formatPct(financial.irr), color: 'var(--orange)', bg: 'rgba(var(--orange-rgb),0.08)' },
+                    { label: 'NPV', value: formatTL(financial.npv), color: financial.npv >= 0 ? 'var(--green)' : 'var(--red)', bg: financial.npv >= 0 ? 'rgba(var(--green-rgb),0.08)' : 'rgba(var(--red-rgb),0.08)' },
                     { label: 'Geri Ödeme', value: `${financial.paybackMonth} ay`, color: 'var(--primary)', bg: 'rgba(var(--primary-rgb),0.08)' },
                 ].map((kpi, i) => (
                     <div key={i} style={{ padding: '10px', borderRadius: '12px', background: kpi.bg, border: `1px solid ${kpi.bg}`, textAlign: 'center' }}>
@@ -107,7 +107,7 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
                     <path d={cumPath} fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" />
 
                     {/* Construction period marker */}
-                    <rect x={pad.l} y={pad.t} width={(constructionMonths / cfData.length) * cW} height={cH} fill="rgba(255,90,95,0.05)" />
+                    <rect x={pad.l} y={pad.t} width={(constructionMonths / cfData.length) * cW} height={cH} fill="rgba(var(--red-rgb),0.05)" />
 
                     {/* Labels */}
                     <text x={pad.l} y={chartH - 3} fill="var(--muted)" fontSize="7" fontWeight="600">1. ay</text>
@@ -205,11 +205,11 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
                         {/* Loan Results */}
                         {loan && (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginTop: '4px' }}>
-                                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(255,90,95,0.06)', textAlign: 'center' }}>
+                                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(var(--red-rgb),0.06)', textAlign: 'center' }}>
                                     <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--muted)' }}>Aylık Taksit</div>
                                     <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--red)' }}>{formatTL(loan.monthlyPayment)}</div>
                                 </div>
-                                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(255,159,47,0.06)', textAlign: 'center' }}>
+                                <div style={{ padding: '8px', borderRadius: '10px', background: 'rgba(var(--orange-rgb),0.06)', textAlign: 'center' }}>
                                     <div style={{ fontSize: '0.6rem', fontWeight: 700, color: 'var(--muted)' }}>Toplam Faiz</div>
                                     <div style={{ fontSize: '0.85rem', fontWeight: 900, color: 'var(--orange)' }}>{formatTL(loan.totalInterest)}</div>
                                 </div>

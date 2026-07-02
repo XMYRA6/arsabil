@@ -160,8 +160,8 @@ export default function AdminDistrictPrices() {
             marginBottom: 14,
             background:
               message.type === "success"
-                ? "rgba(47,191,113,0.1)"
-                : "rgba(255,90,95,0.1)",
+                ? "rgba(var(--green-rgb),0.1)"
+                : "rgba(var(--red-rgb),0.1)",
             border: `1px solid ${
               message.type === "success" ? "var(--green)" : "var(--red)"
             }`,
@@ -335,7 +335,7 @@ export default function AdminDistrictPrices() {
                           <button
                             onClick={() => handleDelete(p.id)}
                             style={{
-                              background: "rgba(255,90,95,0.1)",
+                              background: "rgba(var(--red-rgb),0.1)",
                               border: "1px solid var(--red)",
                               borderRadius: 4,
                               cursor: "pointer",

@@ -759,7 +759,7 @@ export default function Home() {
                 onClick={handleAddScenario}
                 disabled={!result || savedScenarios.length >= 3}
                 title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-                style={{ color: 'var(--green)', borderColor: 'var(--green)', background: 'rgba(47, 191, 113, 0.08)' }}
+                style={{ color: 'var(--green)', borderColor: 'var(--green)', background: 'rgba(var(--green-rgb), 0.08)' }}
               >
                 + Karşılaştır
               </Button>

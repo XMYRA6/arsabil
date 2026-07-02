@@ -34,14 +34,14 @@ export const BreakEvenChart: React.FC<Props> = ({ baseInput, marketPrice }) => {
 
             {/* Summary cards */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-                <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(47,191,113,0.08)', border: '1px solid rgba(47,191,113,0.15)', textAlign: 'center' }}>
+                <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(var(--green-rgb),0.08)', border: '1px solid rgba(var(--green-rgb),0.15)', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 700 }}>Kâr Tutarı</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 900, color: currentProfit >= 0 ? 'var(--green)' : 'var(--red)' }}>
                         ₺{formatTL(Math.abs(currentProfit))}
                     </div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 600 }}>{profitPercent}%</div>
                 </div>
-                <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(255,159,47,0.08)', border: '1px solid rgba(255,159,47,0.15)', textAlign: 'center' }}>
+                <div style={{ padding: '10px', borderRadius: '12px', background: 'rgba(var(--orange-rgb),0.08)', border: '1px solid rgba(var(--orange-rgb),0.15)', textAlign: 'center' }}>
                     <div style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 700 }}>Kırılma Noktası</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--orange)' }}>
                         ₺{formatTL(breakEvenFD)}

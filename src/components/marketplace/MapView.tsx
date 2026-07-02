@@ -748,7 +748,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                     zIndex: 999,
                     background: 'rgba(15,23,42,.92)', backdropFilter: 'blur(12px)',
                     borderRadius: 10, padding: '8px 16px',
-                    border: '1px solid rgba(245,158,11,.3)',
+                    border: '1px solid rgba(var(--orange-rgb),.3)',
                     color: 'white', fontSize: '0.82rem', fontWeight: 700,
                     display: 'flex', alignItems: 'center', gap: 10,
                     boxShadow: '0 4px 20px rgba(0,0,0,.3)',
