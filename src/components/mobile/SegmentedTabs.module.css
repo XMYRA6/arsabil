@@ -1,0 +1,26 @@
+.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.tab {
+    flex: 1;
+    min-height: var(--touch-target);
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.active {
+    background: var(--primary);
+    color: #fff;
+}
