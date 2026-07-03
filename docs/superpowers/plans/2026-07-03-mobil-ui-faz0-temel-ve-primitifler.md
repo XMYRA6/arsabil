@@ -960,7 +960,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
 .backdrop {
     position: fixed;
     inset: 0;
-    z-index: 998;
+    z-index: 1000;
     background: rgba(0, 0, 0, 0.45);
 }
 
@@ -969,7 +969,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 999;
+    z-index: 1001;
     display: flex;
     flex-direction: column;
     max-height: 85dvh;
