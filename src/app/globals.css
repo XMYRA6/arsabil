@@ -35,6 +35,14 @@
   --bottomnav-height: calc(83px + env(safe-area-inset-bottom, 0px));
   --font-size-title: clamp(1.25rem, 4vw, 1.5rem);
   --font-size-page-title: clamp(1.5rem, 5vw, 2rem);
+
+  /* ===== Z-INDEX ÖLÇEĞİ (Faz 0 — final review bulgu #1) =====
+     BottomSheet gibi aria-modal katmanlar her zaman üst navbar'ın
+     üzerinde kalmalı. hesapla sayfasındaki 10000+ değerlerine dokunma. */
+  --z-topnav: 1050;
+  --z-bottomnav: 999;
+  --z-sheet-backdrop: 1100;
+  --z-sheet: 1101;
 }
 
 /* ===== DARK THEME (Varsayılan) — derin lacivert ===== */

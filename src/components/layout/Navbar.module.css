@@ -4,7 +4,7 @@
 .navbarContainer {
     position: sticky;
     top: 0;
-    z-index: 1050;
+    z-index: var(--z-topnav, 1050);
     padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 14px;
     pointer-events: none;
     transition: all 0.3s ease;

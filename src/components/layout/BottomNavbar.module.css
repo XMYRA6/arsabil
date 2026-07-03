@@ -22,7 +22,7 @@
 
     backdrop-filter: saturate(200%) blur(32px);
     -webkit-backdrop-filter: saturate(200%) blur(32px);
-    z-index: 999;
+    z-index: var(--z-bottomnav, 999);
 
     /* GPU layer — buttery smooth */
     -webkit-transform: translateZ(0);
