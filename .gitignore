@@ -63,3 +63,6 @@ lint-report.json
 
 # Local Claude Code skill data (not project source)
 .claude/
+
+# Playwright mobil smoke ekran görüntüleri
+e2e/screenshots/
