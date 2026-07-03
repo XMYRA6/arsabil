@@ -9,6 +9,15 @@ interface SwipeGalleryProps {
     alt: string;
 }
 
+/**
+ * Yatay scroll-snap fotoğraf galerisi; altta aktif slaytı gösteren nokta
+ * göstergesi. `images` boşsa hiçbir şey render etmez.
+ *
+ * @example
+ * ```tsx
+ * <SwipeGallery images={ilan.fotograflar} alt={ilan.baslik} />
+ * ```
+ */
 export function SwipeGallery({ images, alt }: SwipeGalleryProps) {
     const trackRef = useRef<HTMLDivElement>(null);
     const [index, setIndex] = useState(0);

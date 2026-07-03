@@ -13,6 +13,24 @@ interface AppBarProps {
     action?: React.ReactNode;
 }
 
+/**
+ * Mobil sayfa başlığı çubuğu (`sticky top-0`, `z-index: 50`). Desktop'ta
+ * `display: none` — sadece `@media (max-width: 768px)` altında görünür.
+ *
+ * ÖNEMLİ — KOMPOZİSYON KURALI: AppBar global `Navbar` (sticky top-0,
+ * z-index: 1050) ile AYNI ANDA görünürse Navbar her zaman üstte kalır ve
+ * AppBar'ı kaplar. AppBar kullanan sayfalar, global Navbar'ı mobilde
+ * MUTLAKA gizlemelidir (bkz. `Navbar.module.css` `.mobileHidden` /
+ * `.mobileCompact` sınıfları). AppBar'ın kendi z-index: 50 değeri doğrudur
+ * ve DEĞİŞTİRİLMEMELİDİR — sadece Navbar o sayfada gizliyken doğru çalışır.
+ *
+ * @example
+ * ```tsx
+ * // page.tsx — global Navbar'ı mobilde gizleyen sayfa
+ * <Navbar className="mobileHidden" />
+ * <AppBar title="İlan Detayı" showBack action={<FavoriteButton />} />
+ * ```
+ */
 export function AppBar({ title, showBack = false, backHref, action }: AppBarProps) {
     const router = useRouter();
 

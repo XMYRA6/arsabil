@@ -17,6 +17,27 @@ interface DataCardProps {
     href?: string;
 }
 
+/**
+ * Liste/kart görünümünde tek bir kayıt satırı. `href` verilirse başlık +
+ * alanlar tıklanabilir bir bağlantıya dönüşür; `actions` bağlantının
+ * DIŞINDA kalır (iç içe link/buton olmaz).
+ *
+ * @example
+ * ```tsx
+ * <CardList>
+ *   {ilanlar.map((ilan) => (
+ *     <DataCard
+ *       key={ilan.id}
+ *       title={ilan.baslik}
+ *       subtitle={ilan.konum}
+ *       fields={[{ label: 'Fiyat', value: formatPrice(ilan.fiyat) }]}
+ *       href={`/ilan/${ilan.id}`}
+ *       actions={<FavoriteButton ilanId={ilan.id} />}
+ *     />
+ *   ))}
+ * </CardList>
+ * ```
+ */
 export function DataCard({ title, subtitle, fields = [], actions, href }: DataCardProps) {
     const body = (
         <>
@@ -45,6 +66,16 @@ export function DataCard({ title, subtitle, fields = [], actions, href }: DataCa
     );
 }
 
+/**
+ * `DataCard` öğelerini saran `<ul>` listesi.
+ *
+ * @example
+ * ```tsx
+ * <CardList>
+ *   <DataCard title="İlan 1" href="/ilan/1" />
+ * </CardList>
+ * ```
+ */
 export function CardList({ children }: { children: React.ReactNode }) {
     return <ul className={styles.list}>{children}</ul>;
 }
