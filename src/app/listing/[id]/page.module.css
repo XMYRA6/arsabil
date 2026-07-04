@@ -507,3 +507,66 @@
         min-height: var(--touch-target);
     }
 }
+
+/* ── StickyActionBar içeriği (bar zaten yalnızca mobilde görünür) ── */
+.stickyBtns {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.stickyBtn {
+    flex: 1;
+}
+
+/* =========================================================================
+   MOBİL (≤768px) — tek kolon akış
+   ========================================================================= */
+@media (max-width: 768px) {
+    .page {
+        /* alt boşluk: StickyActionBar + BottomNavbar */
+        padding: 12px 12px calc(var(--bottomnav-height) + 76px);
+    }
+
+    /* AppBar'ın geri butonu var; metin geri linki gizlenir */
+    .backBtn {
+        display: none;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Grid blowout fix: min-width:auto varsayılanı, sığmayan içerik (ör.
+       detailGrid/description) yüzünden tek kolonu taşırır; sıfırlanır. */
+    .grid > div {
+        min-width: 0;
+    }
+
+    .photoArea {
+        height: 240px;
+        border-radius: 14px;
+    }
+
+    .title {
+        font-size: var(--font-size-title);
+    }
+
+    .fizGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+    }
+
+    /* aksiyonlar StickyActionBar'a taşındı; sidebar kopyası gizlenir */
+    .sidebarActions {
+        display: none;
+    }
+
+    .offerTextarea {
+        font-size: 16px; /* iOS zoom tetiklenmesin */
+    }
+}

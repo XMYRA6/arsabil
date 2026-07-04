@@ -43,9 +43,10 @@ export function Navbar() {
 
     const isInbox = pathname.startsWith("/inbox");
     const isProfile = pathname.startsWith("/dashboard/profile");
-    
+    const isListingDetail = pathname.startsWith("/listing/");
+
     // Pages where the top navbar should be HIDDEN on mobile
-    const isHiddenOnMobile = isInbox || isProfile;
+    const isHiddenOnMobile = isInbox || isProfile || isListingDetail;
     // Pages where the top navbar should be COMPACT on mobile
     const isCompactOnMobile = pathname === "/hesapla";
 

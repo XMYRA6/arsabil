@@ -6,6 +6,9 @@ import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { FizibiliteScoreBadge } from '@/components/marketplace/FizibiliteScoreBadge';
 import { toast } from 'react-hot-toast';
+import { AppBar } from '@/components/mobile/AppBar';
+import { SwipeGallery } from '@/components/mobile/SwipeGallery';
+import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import styles from './page.module.css';
 
 const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m => m.MiniMap), { ssr: false });
@@ -53,7 +56,6 @@ export default function ListingDetailPage() {
     const [activeTab, setActiveTab] = useState<Tab>(initialTab);
     const [listing, setListing] = useState(MOCK_LISTING);
     const [loading, setLoading] = useState(true);
-    const [photoIndex, setPhotoIndex] = useState(0);
 
     // Offer state
     const [offerShare, setOfferShare] = useState(33);
@@ -113,6 +115,7 @@ export default function ListingDetailPage() {
 
     return (
         <div className={styles.page}>
+            <AppBar title="İlan Detayı" showBack />
 
             {/* ── Back button ── */}
             <button onClick={() => router.back()} className={styles.backBtn}>← Pazar Yerine Dön</button>
@@ -124,21 +127,14 @@ export default function ListingDetailPage() {
                 <div>
                     {/* Photo area */}
                     <div className={styles.photoArea}>
-                        <div
-                            className={styles.photoPlaceholder}
-                            style={{ '--photo-hue': photoHue } as React.CSSProperties}
-                        >🏗️</div>
-
-                        {/* Dots */}
-                        <div style={{ position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
-                            {[0, 1, 2, 3].map(i => (
-                                <div key={i} onClick={() => setPhotoIndex(i)} style={{
-                                    width: i === photoIndex ? 20 : 8, height: 8, borderRadius: 4,
-                                    background: i === photoIndex ? 'white' : 'rgba(255,255,255,.45)',
-                                    cursor: 'pointer', transition: 'all 0.2s',
-                                }} />
-                            ))}
-                        </div>
+                        {listing.photos.length > 0 ? (
+                            <SwipeGallery images={listing.photos} alt={listing.title} />
+                        ) : (
+                            <div
+                                className={styles.photoPlaceholder}
+                                style={{ '--photo-hue': photoHue } as React.CSSProperties}
+                            >🏗️</div>
+                        )}
 
                         {/* Fizibilite score overlay */}
                         <div className={styles.scoreOverlay}>
@@ -353,6 +349,19 @@ export default function ListingDetailPage() {
                     </div>
                 </div>
             </div>
+
+            <StickyActionBar aboveBottomNav>
+                <div className={styles.stickyBtns}>
+                    <button
+                        onClick={() => setActiveTab('teklifler')}
+                        className={`${styles.actionBtn} ${styles.actionGreen} ${styles.stickyBtn}`}
+                    >📤 Teklif Ver</button>
+                    <button
+                        onClick={() => setActiveTab('senaryo')}
+                        className={`${styles.actionBtn} ${styles.actionPrimary} ${styles.stickyBtn}`}
+                    >🧮 Senaryo</button>
+                </div>
+            </StickyActionBar>
         </div>
     );
 }
