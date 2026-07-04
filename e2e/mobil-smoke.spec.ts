@@ -1,10 +1,12 @@
 import { test, expect, Page } from '@playwright/test'
+import { loginAs } from './helpers'
 
 // Mobil UI spec §5: her faz sonunda faz kapsamındaki sayfalar bu listeye taşınır.
 // fixme'li sayfalar bilinen-bozuk envanteridir; ilgili fazda düzeltilip aktive edilir.
+// auth: true olan sayfalar middleware korumalıdır; goto öncesi login yapılır.
 const MOBILE_VIEWPORT = { width: 390, height: 844 }
 
-const PAGES: { path: string; fixme?: string }[] = [
+const PAGES: { path: string; fixme?: string; auth?: boolean }[] = [
     { path: '/' },
     { path: '/login' },
     { path: '/register' },
@@ -21,9 +23,10 @@ async function assertNoHorizontalOverflow(page: Page) {
 
 test.use({ viewport: MOBILE_VIEWPORT })
 
-for (const { path, fixme } of PAGES) {
+for (const { path, fixme, auth } of PAGES) {
     test(`mobil 390px: ${path} yatay taşma yok`, async ({ page }) => {
         if (fixme) test.fixme(true, fixme)
+        if (auth) await loginAs(page)
         await page.goto(path)
         await page.waitForLoadState('networkidle')
         await assertNoHorizontalOverflow(page)
