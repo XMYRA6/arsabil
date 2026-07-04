@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { FizibiliteScoreBadge } from '@/components/marketplace/FizibiliteScoreBadge';
 import { toast } from 'react-hot-toast';
+import styles from './page.module.css';
 
 const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m => m.MiniMap), { ssr: false });
 
@@ -101,41 +102,32 @@ export default function ListingDetailPage() {
     };
 
     if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'var(--muted)' }}>
+        <div className={styles.loading}>
             Yükleniyor…
         </div>
     );
 
     const score = listing.fizibiliteSkoru ?? 82;
     const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
+    const photoHue = 215 + (id?.charCodeAt(0) ?? 0) % 30;
 
     return (
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '2rem 1rem' }}>
+        <div className={styles.page}>
 
             {/* ── Back button ── */}
-            <button onClick={() => router.back()} style={{
-                background: 'transparent', border: 'none', color: 'var(--muted)',
-                cursor: 'pointer', fontSize: '0.8rem', fontFamily: 'inherit',
-                display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: 0,
-            }}>← Pazar Yerine Dön</button>
+            <button onClick={() => router.back()} className={styles.backBtn}>← Pazar Yerine Dön</button>
 
             {/* ── Main Grid ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, alignItems: 'start' }}>
+            <div className={styles.grid}>
 
                 {/* LEFT */}
                 <div>
                     {/* Photo area */}
-                    <div style={{
-                        width: '100%', height: 340, borderRadius: 18, overflow: 'hidden',
-                        background: 'var(--panel-2)',
-                        position: 'relative', marginBottom: 16,
-                    }}>
-                        <div style={{
-                            width: '100%', height: '100%',
-                            background: `linear-gradient(135deg, hsl(${215 + (id?.charCodeAt(0) ?? 0) % 30}, 55%, 18%), hsl(200, 60%, 12%))`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '4rem', opacity: 0.5,
-                        }}>🏗️</div>
+                    <div className={styles.photoArea}>
+                        <div
+                            className={styles.photoPlaceholder}
+                            style={{ '--photo-hue': photoHue } as React.CSSProperties}
+                        >🏗️</div>
 
                         {/* Dots */}
                         <div style={{ position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
@@ -149,66 +141,49 @@ export default function ListingDetailPage() {
                         </div>
 
                         {/* Fizibilite score overlay */}
-                        <div style={{ position: 'absolute', top: 16, left: 16 }}>
+                        <div className={styles.scoreOverlay}>
                             <FizibiliteScoreBadge score={score} size="lg" showLabel />
                         </div>
 
                         {/* Change badge */}
-                        <span style={{
-                            position: 'absolute', top: 16, right: 16,
-                            background: 'rgba(var(--green-rgb),.85)', color: 'white',
-                            fontSize: '0.85rem', fontWeight: 900, padding: '4px 12px', borderRadius: 10,
-                            backdropFilter: 'blur(4px)',
-                        }}>▲ +{listing.changePercent}%</span>
+                        <span className={styles.changeBadge}>▲ +{listing.changePercent}%</span>
                     </div>
 
                     {/* Progress bar */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--muted)', whiteSpace: 'nowrap' }}>Fizibilite Skoru</span>
-                        <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 6, overflow: 'hidden' }}>
-                            <div style={{ width: `${score}%`, height: '100%', background: scoreColor, borderRadius: 6, transition: 'width 1s ease' }} />
+                    <div
+                        className={styles.progressRow}
+                        style={{ '--score-pct': `${score}%`, '--score-color': scoreColor } as React.CSSProperties}
+                    >
+                        <span className={styles.progressLabel}>Fizibilite Skoru</span>
+                        <div className={styles.progressTrack}>
+                            <div className={styles.progressFill} />
                         </div>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: scoreColor }}>{score}/100</span>
+                        <span className={styles.progressValue}>{score}/100</span>
                     </div>
 
                     {/* Title row */}
-                    <div style={{ marginBottom: 20 }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-                            <h1 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--card-title)', marginBottom: 4 }}>{listing.title}</h1>
+                    <div className={styles.titleBlock}>
+                        <div className={styles.titleRow}>
+                            <h1 className={styles.title}>{listing.title}</h1>
                             {session?.user?.id && listing.user?.id && (session.user.id as string) === (listing.user.id as string) && (
                                 <button
                                     onClick={() => router.push(`/listings/${id}/edit`)}
-                                    style={{
-                                        padding: '6px 14px', background: 'var(--border)', color: 'var(--card-title)',
-                                        border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700,
-                                        fontSize: '0.8rem', whiteSpace: 'nowrap', flexShrink: 0,
-                                    }}
+                                    className={styles.editBtn}
                                 >
                                     ✏️ Düzenle
                                 </button>
                             )}
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>📍 {listing.district}, {listing.city}</div>
+                        <div className={styles.location}>📍 {listing.district}, {listing.city}</div>
                     </div>
 
                     {/* Tabs */}
-                    <div style={{
-                        display: 'flex', gap: 2, borderBottom: '2px solid var(--border)',
-                        marginBottom: 20, overflowX: 'auto',
-                    }}>
+                    <div className={styles.tabs}>
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                style={{
-                                    padding: '10px 14px', border: 'none', background: 'transparent',
-                                    cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.8rem',
-                                    fontWeight: activeTab === tab.id ? 800 : 500,
-                                    color: activeTab === tab.id ? 'var(--primary)' : 'var(--muted)',
-                                    borderBottom: activeTab === tab.id ? '2px solid var(--primary)' : '2px solid transparent',
-                                    marginBottom: '-2px', whiteSpace: 'nowrap', transition: 'all 0.15s',
-                                    display: 'flex', alignItems: 'center', gap: 5,
-                                }}
+                                className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
                             >
                                 {tab.icon} {tab.label}
                             </button>
@@ -216,12 +191,12 @@ export default function ListingDetailPage() {
                     </div>
 
                     {/* Tab Content */}
-                    <div style={{ background: 'var(--panel)', border: '1.5px solid var(--border)', borderRadius: 16, padding: '20px' }}>
+                    <div className={styles.tabContent}>
 
                         {activeTab === 'genel' && (
                             <div>
-                                <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>Parsel Detayları</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
+                                <h3 className={styles.sectionTitle}>Parsel Detayları</h3>
+                                <div className={styles.detailGrid}>
                                     {[
                                         ['Alan', `${listing.m2} m²`],
                                         ['İmar Durumu', listing.imarDurumu?.replace('_', ' ') ?? 'Konut + Ticaret'],
@@ -230,22 +205,22 @@ export default function ListingDetailPage() {
                                         ['Şehir', listing.city ?? 'İstanbul'],
                                         ['İlçe', listing.district ?? 'Beşiktaş'],
                                     ].map(([label, val]) => (
-                                        <div key={label} style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 14px' }}>
-                                            <div style={{ fontSize: '0.68rem', color: 'var(--muted)', marginBottom: 2 }}>{label}</div>
-                                            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)' }}>{val}</div>
+                                        <div key={label} className={styles.detailCell}>
+                                            <div className={styles.detailLabel}>{label}</div>
+                                            <div className={styles.detailValue}>{val}</div>
                                         </div>
                                     ))}
                                 </div>
                                 {listing.description && (
-                                    <p style={{ marginTop: 16, fontSize: '0.85rem', color: 'var(--text)', lineHeight: 1.6 }}>{listing.description}</p>
+                                    <p className={styles.description}>{listing.description}</p>
                                 )}
                             </div>
                         )}
 
                         {activeTab === 'fizibilite' && (
                             <div>
-                                <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>Ön Fizibilite Sonuçları</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                <h3 className={styles.sectionTitle}>Ön Fizibilite Sonuçları</h3>
+                                <div className={styles.fizGrid}>
                                     {[
                                         ['Tahmini Arsa Değeri', '4.371.200 TL', 'var(--primary)'],
                                         ['Tahmini Net Kâr', '+%34 (▲+1.76M TL)', 'var(--green)'],
@@ -254,25 +229,29 @@ export default function ListingDetailPage() {
                                         ['Daire/m² Tahmini', '9.5/m²', 'var(--card-title)'],
                                         ['Proje Süresi', '~18–24 ay', 'var(--muted)'],
                                     ].map(([label, val, color]) => (
-                                        <div key={label} style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 14px' }}>
-                                            <div style={{ fontSize: '0.68rem', color: 'var(--muted)', marginBottom: 4 }}>{label}</div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 800, color: color as string }}>{val}</div>
+                                        <div
+                                            key={label}
+                                            className={styles.fizCell}
+                                            style={{ '--cell-color': color as string } as React.CSSProperties}
+                                        >
+                                            <div className={styles.fizLabel}>{label}</div>
+                                            <div className={styles.fizValue}>{val}</div>
                                         </div>
                                     ))}
                                 </div>
-                                <div style={{ marginTop: 14, padding: '10px 14px', background: 'rgba(var(--primary-rgb),.08)', borderRadius: 10, fontSize: '0.78rem', color: 'var(--muted)' }}>
+                                <div className={styles.infoNote}>
                                     💡 Bu değerler ArsaBil Engine v2 tarafından otomatik hesaplanmıştır. Detaylı analiz için Senaryo sekmesini kullanın.
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'senaryo' && (
-                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
-                                <div style={{ fontSize: '2rem', marginBottom: 8 }}>🧮</div>
-                                <div style={{ fontWeight: 700, marginBottom: 12 }}>Bu ilan için özel senaryo oluşturun</div>
+                            <div className={styles.centerCta}>
+                                <div className={styles.centerCtaIcon}>🧮</div>
+                                <div className={styles.centerCtaTitle}>Bu ilan için özel senaryo oluşturun</div>
                                 <button
                                     onClick={() => router.push(`/?listing=${listing.id}`)}
-                                    style={{ padding: '10px 24px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800 }}
+                                    className={styles.primaryBtn}
                                 >
                                     Hesap Makinesini Aç →
                                 </button>
@@ -281,40 +260,33 @@ export default function ListingDetailPage() {
 
                         {activeTab === 'teklifler' && (
                             <div>
-                                <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>Teklif Ver</h3>
-                                <div style={{ marginBottom: 14 }}>
-                                    <label style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Teklif Ettiğim Arsa Payı (%)</label>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <h3 className={styles.sectionTitle}>Teklif Ver</h3>
+                                <div className={styles.offerField}>
+                                    <label className={styles.offerLabel}>Teklif Ettiğim Arsa Payı (%)</label>
+                                    <div className={styles.offerRangeRow}>
                                         <input type="range" min={10} max={60} value={offerShare} onChange={e => setOfferShare(+e.target.value)}
-                                            style={{ flex: 1, accentColor: 'var(--primary)' }} />
-                                        <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--primary)', width: 40 }}>%{offerShare}</span>
+                                            className={styles.offerRange} />
+                                        <span className={styles.offerShare}>%{offerShare}</span>
                                     </div>
                                 </div>
                                 <textarea
                                     placeholder="Teklif notunuz (opsiyonel)"
                                     value={offerMsg} onChange={e => setOfferMsg(e.target.value)}
                                     rows={3}
-                                    style={{ width: '100%', padding: '10px', background: 'var(--bg)', border: '1.5px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.85rem', resize: 'none', outline: 'none' }}
+                                    className={styles.offerTextarea}
                                 />
-                                <button onClick={handleOffer} disabled={sending} style={{
-                                    marginTop: 10, padding: '10px 24px', background: 'var(--green)', color: 'white',
-                                    border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800,
-                                    opacity: sending ? 0.6 : 1,
-                                }}>
+                                <button onClick={handleOffer} disabled={sending} className={styles.offerSubmit}>
                                     {sending ? 'Gönderiliyor…' : '📤 Teklifi Gönder'}
                                 </button>
                             </div>
                         )}
 
                         {activeTab === 'mesajlar' && (
-                            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
-                                <div style={{ fontSize: '2rem', marginBottom: 8 }}>💬</div>
+                            <div className={styles.centerCta}>
+                                <div className={styles.centerCtaIcon}>💬</div>
                                 İlan sahibiyle iletişime geçin
-                                <div style={{ marginTop: 12 }}>
-                                    <button onClick={() => router.push('/inbox')} style={{
-                                        padding: '10px 20px', background: 'var(--primary)', color: 'white',
-                                        border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800,
-                                    }}>Mesaj Aç →</button>
+                                <div className={styles.centerCtaAction}>
+                                    <button onClick={() => router.push('/inbox')} className={styles.primaryBtn}>Mesaj Aç →</button>
                                 </div>
                             </div>
                         )}
@@ -322,26 +294,22 @@ export default function ListingDetailPage() {
                 </div>
 
                 {/* RIGHT — Sticky sidebar */}
-                <div style={{
-                    position: 'sticky', top: 80,
-                    background: 'var(--panel)', border: '1.5px solid var(--border)',
-                    borderRadius: 18, padding: '20px', display: 'flex', flexDirection: 'column', gap: 14,
-                }}>
+                <div className={styles.sidebar}>
                     <div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--muted)', marginBottom: 2 }}>Tahmini Değer</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                        <div className={styles.priceLabel}>Tahmini Değer</div>
+                        <div className={styles.priceValue}>
                             {(listing.price ?? 5171642).toLocaleString('tr-TR')} TL
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 10 }}>
-                        <div style={{ flex: 1, background: 'rgba(var(--green-rgb),.10)', borderRadius: 10, padding: '10px 12px' }}>
-                            <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Net Kâr</div>
-                            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--green)' }}>+%{listing.netKar}</div>
+                    <div className={styles.miniStats}>
+                        <div className={`${styles.miniStat} ${styles.miniStatGreen}`}>
+                            <div className={styles.miniStatLabel}>Net Kâr</div>
+                            <div className={`${styles.miniStatValue} ${styles.miniStatValueGreen}`}>+%{listing.netKar}</div>
                         </div>
-                        <div style={{ flex: 1, background: 'rgba(var(--primary-rgb),.10)', borderRadius: 10, padding: '10px 12px' }}>
-                            <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>Arsa Payı</div>
-                            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--primary)' }}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
+                        <div className={`${styles.miniStat} ${styles.miniStatBlue}`}>
+                            <div className={styles.miniStatLabel}>Arsa Payı</div>
+                            <div className={`${styles.miniStatValue} ${styles.miniStatValueBlue}`}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
                         </div>
                     </div>
 
@@ -353,52 +321,34 @@ export default function ListingDetailPage() {
                         listingId={id}
                     />
 
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        <button onClick={() => setActiveTab('senaryo')} style={{
-                            padding: '11px', background: 'var(--primary)', color: 'white',
-                            border: 'none', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.85rem',
-                        }}>🧮 Senaryo Oluştur</button>
-                        <button onClick={() => setActiveTab('teklifler')} style={{
-                            padding: '11px', background: 'rgba(var(--green-rgb),.15)', color: 'var(--green)',
-                            border: '1.5px solid rgba(var(--green-rgb),.4)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '0.85rem',
-                        }}>📤 Teklif Ver</button>
-                        <button onClick={() => setActiveTab('mesajlar')} style={{
-                            padding: '11px', background: 'var(--bg)', color: 'var(--muted)',
-                            border: '1.5px solid var(--border)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                        }}>💬 Mesaj At</button>
+                    <div className={styles.sidebarActions}>
+                        <button onClick={() => setActiveTab('senaryo')} className={`${styles.actionBtn} ${styles.actionPrimary}`}>🧮 Senaryo Oluştur</button>
+                        <button onClick={() => setActiveTab('teklifler')} className={`${styles.actionBtn} ${styles.actionGreen}`}>📤 Teklif Ver</button>
+                        <button onClick={() => setActiveTab('mesajlar')} className={`${styles.actionBtn} ${styles.actionGhost}`}>💬 Mesaj At</button>
                     </div>
 
                     {/* Share + Owner */}
-                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                    <div className={styles.sidebarFooter}>
                         <button
                             onClick={() => {
                                 navigator.clipboard.writeText(window.location.href)
                                     .then(() => toast.success('Link kopyalandı!'))
                                     .catch(() => toast.error('Kopyalanamadı.'));
                             }}
-                            style={{
-                                padding: '9px', background: 'var(--bg)', color: 'var(--muted)',
-                                border: '1.5px solid var(--border)', borderRadius: 10,
-                                cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem',
-                            }}
+                            className={styles.shareBtn}
                         >🔗 Paylaş</button>
 
                         {listing.user?.id && (
                             <a
                                 href={`/profile/${listing.user.id}`}
-                                style={{
-                                    display: 'block', padding: '9px', textAlign: 'center',
-                                    background: 'var(--bg)', color: 'var(--muted)',
-                                    border: '1.5px solid var(--border)', borderRadius: 10,
-                                    textDecoration: 'none', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem',
-                                }}
+                                className={styles.ownerLink}
                             >
                                 👤 İlan Sahibinin Profili
                             </a>
                         )}
                     </div>
 
-                    <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textAlign: 'center', lineHeight: 1.5 }}>
+                    <div className={styles.footnote}>
                         Tüm anlaşmalar ArsaBil güvencesindedir. İlan No: {id?.slice(0, 8).toUpperCase()}
                     </div>
                 </div>

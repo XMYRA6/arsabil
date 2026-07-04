@@ -1,0 +1,503 @@
+/* =========================================================================
+   LISTING DETAY — Faz 1 mobil refactor (Task 2: inline stil migrasyonu)
+   Desktop görünümü, önceki inline stillerle birebir aynıdır.
+   ========================================================================= */
+
+.page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    color: var(--muted);
+}
+
+.backBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ── Fotoğraf alanı ── */
+.photoArea {
+    width: 100%;
+    height: 340px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--panel-2);
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.photoPlaceholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, hsl(var(--photo-hue, 215), 55%, 18%), hsl(200, 60%, 12%));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    opacity: 0.5;
+}
+
+.scoreOverlay {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+}
+
+.changeBadge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(var(--green-rgb), .85);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 900;
+    padding: 4px 12px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+}
+
+/* ── Skor progress ── */
+.progressRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.progressLabel {
+    font-size: 0.75rem;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.progressTrack {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progressFill {
+    width: var(--score-pct, 0%);
+    height: 100%;
+    background: var(--score-color, var(--green));
+    border-radius: 6px;
+    transition: width 1s ease;
+}
+
+.progressValue {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--score-color, var(--green));
+}
+
+/* ── Başlık ── */
+.titleBlock {
+    margin-bottom: 20px;
+}
+
+.titleRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--card-title);
+    margin-bottom: 4px;
+}
+
+.editBtn {
+    padding: 6px 14px;
+    background: var(--border);
+    color: var(--card-title);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: inherit;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.location {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* ── Sekmeler ── */
+.tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: var(--touch-target);
+}
+
+.tabActive {
+    font-weight: 800;
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tabContent {
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.sectionTitle {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--card-title);
+    margin-bottom: 16px;
+}
+
+/* ── Genel sekmesi ── */
+.detailGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.detailCell {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.detailLabel {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 2px;
+}
+
+.detailValue {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--card-title);
+}
+
+.description {
+    margin-top: 16px;
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* ── Fizibilite sekmesi ── */
+.fizGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.fizCell {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.fizLabel {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.fizValue {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--cell-color, var(--card-title));
+}
+
+.infoNote {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(var(--primary-rgb), .08);
+    border-radius: 10px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+/* ── Senaryo / Mesajlar boş durum CTA ── */
+.centerCta {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+}
+
+.centerCtaIcon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.centerCtaTitle {
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.centerCtaAction {
+    margin-top: 12px;
+}
+
+.primaryBtn {
+    padding: 10px 24px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    min-height: var(--touch-target);
+}
+
+/* ── Teklif sekmesi ── */
+.offerField {
+    margin-bottom: 14px;
+}
+
+.offerLabel {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+}
+
+.offerRangeRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.offerRange {
+    flex: 1;
+    accent-color: var(--primary);
+}
+
+.offerShare {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--primary);
+    width: 40px;
+}
+
+.offerTextarea {
+    width: 100%;
+    padding: 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    resize: none;
+    outline: none;
+}
+
+.offerSubmit {
+    margin-top: 10px;
+    padding: 10px 24px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    min-height: var(--touch-target);
+}
+
+.offerSubmit:disabled {
+    opacity: 0.6;
+}
+
+/* ── Sağ sidebar ── */
+.sidebar {
+    position: sticky;
+    top: 80px;
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.priceLabel {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 2px;
+}
+
+.priceValue {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--card-title);
+}
+
+.miniStats {
+    display: flex;
+    gap: 10px;
+}
+
+.miniStat {
+    flex: 1;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.miniStatGreen {
+    background: rgba(var(--green-rgb), .10);
+}
+
+.miniStatBlue {
+    background: rgba(var(--primary-rgb), .10);
+}
+
+.miniStatLabel {
+    font-size: 0.65rem;
+    color: var(--muted);
+}
+
+.miniStatValue {
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.miniStatValueGreen {
+    color: var(--green);
+}
+
+.miniStatValueBlue {
+    color: var(--primary);
+}
+
+.sidebarActions {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.actionBtn {
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 0.85rem;
+    min-height: var(--touch-target);
+}
+
+.actionPrimary {
+    background: var(--primary);
+    color: white;
+}
+
+.actionGreen {
+    background: rgba(var(--green-rgb), .15);
+    color: var(--green);
+    border: 1.5px solid rgba(var(--green-rgb), .4);
+}
+
+.actionGhost {
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    font-weight: 700;
+}
+
+.sidebarFooter {
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.shareBtn {
+    padding: 9px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.82rem;
+    min-height: var(--touch-target);
+}
+
+.ownerLink {
+    display: block;
+    padding: 9px;
+    text-align: center;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.footnote {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.5;
+}
