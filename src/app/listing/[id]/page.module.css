@@ -178,7 +178,6 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    min-height: var(--touch-target);
 }
 
 .tabActive {
@@ -297,7 +296,6 @@
     cursor: pointer;
     font-family: inherit;
     font-weight: 800;
-    min-height: var(--touch-target);
 }
 
 /* ── Teklif sekmesi ── */
@@ -353,7 +351,6 @@
     cursor: pointer;
     font-family: inherit;
     font-weight: 800;
-    min-height: var(--touch-target);
 }
 
 .offerSubmit:disabled {
@@ -438,7 +435,6 @@
     font-family: inherit;
     font-weight: 800;
     font-size: 0.85rem;
-    min-height: var(--touch-target);
 }
 
 .actionPrimary {
@@ -478,7 +474,6 @@
     font-family: inherit;
     font-weight: 700;
     font-size: 0.82rem;
-    min-height: var(--touch-target);
 }
 
 .ownerLink {
@@ -500,4 +495,15 @@
     color: var(--muted);
     text-align: center;
     line-height: 1.5;
+}
+
+/* Dokunma hedefleri yalnızca mobilde — desktop piksel-birebir kalır (insan kararı, Task 2 review) */
+@media (max-width: 768px) {
+    .tab,
+    .primaryBtn,
+    .offerSubmit,
+    .actionBtn,
+    .shareBtn {
+        min-height: var(--touch-target);
+    }
 }
