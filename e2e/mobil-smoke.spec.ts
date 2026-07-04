@@ -30,6 +30,14 @@ for (const { path, fixme, auth } of PAGES) {
         if (auth) await loginAs(page)
         await page.goto(path)
         await page.waitForLoadState('networkidle')
+        // Client-side fetch networkidle'dan sonra bitebiliyor; "Yükleniyor"
+        // spinner'ı kaybolmadan ölçülen taşma yanlış negatif verir. Spinner
+        // hiç yoksa sorun değil — catch ile geç (desktop-baseline ile aynı yaklaşım).
+        await page
+            .getByText('Yükleniyor')
+            .first()
+            .waitFor({ state: 'hidden', timeout: 15_000 })
+            .catch(() => {})
         await assertNoHorizontalOverflow(page)
         await page.screenshot({
             path: `e2e/screenshots/mobil${path === '/' ? '_home' : path.replace(/\//g, '_')}.png`,
