@@ -14,7 +14,7 @@
 }
 
 .pageTitle {
-  font-size: 2rem;
+  font-size: var(--font-size-page-title);
   font-weight: 900;
   color: var(--page-title-color);
   letter-spacing: -1px;
@@ -46,6 +46,7 @@
   font-weight: 900;
   line-height: 1;
   margin-bottom: 0.4rem;
+  color: rgb(var(--card-accent-rgb, 59, 130, 246));
 }
 
 .statLabel {
@@ -244,6 +245,10 @@
   font-weight: 700;
   text-decoration: none;
   transition: border-color 0.15s, background 0.15s;
+  min-height: var(--touch-target);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .qaBtn:hover {
@@ -252,9 +257,12 @@
 }
 
 @media (max-width: 768px) {
-  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .container { padding: 1.25rem 1rem calc(1.25rem + var(--bottomnav-height)); gap: 1.25rem; }
+  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
   .statsGrid > * { min-width: 0; }
   .twoCol { grid-template-columns: 1fr; }
   .reportRow { flex-direction: column; align-items: flex-start; gap: 6px; }
   .offerRow { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .quickActions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .sectionLink { min-height: var(--touch-target); display: inline-flex; align-items: center; }
 }

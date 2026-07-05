@@ -98,7 +98,7 @@ export default function DashboardPage() {
       <div className={styles.statsGrid}>
         {STAT_CONFIG.map(({ key, label, rgb }) => (
           <div key={key} className={styles.statCard} style={{ '--card-accent-rgb': rgb } as React.CSSProperties}>
-            <div className={styles.statValue} style={{ color: `rgb(${rgb})` }}>{statValues[key] ?? 0}</div>
+            <div className={styles.statValue}>{statValues[key] ?? 0}</div>
             <div className={styles.statLabel}>{label}</div>
           </div>
         ))}
