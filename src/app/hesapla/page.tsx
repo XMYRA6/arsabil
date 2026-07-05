@@ -19,12 +19,6 @@ type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfRepo
 import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 
-const PILL_COLORS = [
-  { bg: 'rgba(var(--primary-rgb),0.1)', border: 'var(--primary)', text: 'var(--primary)' },
-  { bg: 'rgba(var(--green-rgb),0.1)', border: 'var(--green)', text: 'var(--green)' },
-  { bg: 'rgba(var(--orange-rgb),0.1)', border: 'var(--orange)', text: 'var(--orange)' },
-] as const;
-
 interface ProfitLevel {
   id: string;
   label: string;
@@ -331,7 +325,7 @@ export default function Home() {
 
           {/* ===== DESKTOP SIDEBAR: Original full form (visible on web only) ===== */}
           <div className={styles.desktopSidebar}>
-            <div className={styles.sidebarTitle}>Proje Bilgileri <span style={{ cursor: 'pointer' }} onClick={() => setIsSettingsSidebarOpen(true)}>⚙</span></div>
+            <div className={styles.sidebarTitle}>Proje Bilgileri <span className={styles.settingsGear} onClick={() => setIsSettingsSidebarOpen(true)}>⚙</span></div>
 
             <div className={styles.settingsGroup}>
               <h4>Daire Standardı</h4>
@@ -409,7 +403,7 @@ export default function Home() {
                 ))}
               </div>
               {iksaMode === 'percentage' && (
-                <div className={styles.stepperInput} style={{ height: '48px' }}>
+                <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
                   <input type="number" value={iksaPercentage} min={0} max={100} onChange={(e) => setIksaPercentage(Number(e.target.value))} />
                   <div className={styles.stepperRight}>
                     <span>%</span>
@@ -417,7 +411,7 @@ export default function Home() {
                 </div>
               )}
               {iksaMode === 'manual' && (
-                <div className={styles.stepperInput} style={{ height: '48px' }}>
+                <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
                   <input type="number" value={iksaManualTL} min={0} onChange={(e) => setIksaManualTL(Number(e.target.value))} />
                   <div className={styles.stepperRight}>
                     <span>TL</span>
@@ -428,7 +422,7 @@ export default function Home() {
 
             <div className={styles.settingsGroup}>
               <h4>Risk Payı</h4>
-              <div className={styles.luxGrid} style={{ gridTemplateColumns: `repeat(${riskLevels.length}, 1fr)` }}>
+              <div className={`${styles.luxGrid} ${styles.luxGridDynamic}`} style={{ '--lux-cols': riskLevels.length } as React.CSSProperties}>
                 {riskLevels.map(opt => (
                   <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
                     <span>{opt.label}</span>
@@ -451,7 +445,7 @@ export default function Home() {
 
           {/* ===== MOBILE SIDEBAR: Simplified card layout (visible on mobile only) ===== */}
           <div className={styles.mobileSidebar}>
-            <div className={styles.swipeCard} style={{ paddingBottom: '16px' }}>
+            <div className={`${styles.swipeCard} ${styles.swipeCardPadded}`}>
 
             {/* Top Result Card */}
             <div className={styles.topResultCard}>
@@ -497,9 +491,9 @@ export default function Home() {
               </div>
 
               <div className={styles.settingsGroup}>
-                <div className={styles.toggleRow} style={{ margin: 0, padding: 0, border: 'none', background: 'transparent' }}>
+                <div className={`${styles.toggleRow} ${styles.toggleRowFlat}`}>
                   <h4>Arsa Payı</h4>
-                  <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.2rem' }}>%{landShareRatio}</span>
+                  <span className={styles.sharePct}>%{landShareRatio}</span>
                 </div>
                 <RangeSlider
                   min={1}
@@ -545,14 +539,14 @@ export default function Home() {
                 <div className={styles.drawerCardHeader}>Formül Parametreleri</div>
                 
                 <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <div className={styles.drawerRowLabel} style={{ whiteSpace: 'nowrap' }}>Toplam Daire Sayısı</div>
-                    <div style={{ marginLeft: 'auto', display: 'flex' }}>
+                  <div className={styles.drawerRowHead}>
+                    <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Toplam Daire Sayısı</div>
+                    <div className={styles.drawerToggleWrap}>
                       <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
                     </div>
                   </div>
                   {isApartmentCountEnabled && (
-                    <div className={styles.stepperInput} style={{ width: '100%' }}>
+                    <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
                       <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
                       <div className={styles.stepperRight}>
                         <span>daire</span>
@@ -564,14 +558,14 @@ export default function Home() {
                 </div>
 
                 <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <div className={styles.drawerRowLabel} style={{ whiteSpace: 'nowrap' }}>Arsa Alanı (m²)</div>
-                    <div style={{ marginLeft: 'auto', display: 'flex' }}>
+                  <div className={styles.drawerRowHead}>
+                    <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Arsa Alanı (m²)</div>
+                    <div className={styles.drawerToggleWrap}>
                       <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
                     </div>
                   </div>
                   {isAaEnabled && (
-                    <div className={styles.stepperInput} style={{ width: '100%' }}>
+                    <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
                       <input type="number" value={arsaAlani} onChange={(e) => setArsaAlani(Number(e.target.value))} />
                       <div className={styles.stepperRight}>
                         <span>m²</span>
@@ -600,18 +594,18 @@ export default function Home() {
                     ))}
                   </div>
                   {iksaMode === 'percentage' && (
-                    <div className={styles.stepperInput} style={{ height: '48px' }}>
+                    <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
                       <input type="number" value={iksaPercentage} min={0} max={100} onChange={(e) => setIksaPercentage(Number(e.target.value))} />
                       <div className={styles.stepperRight}>
-                        <span style={{ minWidth: '48px', justifyContent: 'center' }}>%</span>
+                        <span className={styles.stepperUnitCenter}>%</span>
                       </div>
                     </div>
                   )}
                   {iksaMode === 'manual' && (
-                    <div className={styles.stepperInput} style={{ height: '48px' }}>
+                    <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
                       <input type="number" value={iksaManualTL} min={0} onChange={(e) => setIksaManualTL(Number(e.target.value))} />
                       <div className={styles.stepperRight}>
-                        <span style={{ minWidth: '48px', justifyContent: 'center' }}>TL</span>
+                        <span className={styles.stepperUnitCenter}>TL</span>
                       </div>
                     </div>
                   )}
@@ -619,7 +613,7 @@ export default function Home() {
 
                 <div className={`${styles.drawerRow} ${styles.column}`}>
                   <div className={styles.drawerRowLabel}>Risk Payı</div>
-                  <div className={styles.luxGrid} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+                  <div className={`${styles.luxGrid} ${styles.drawerRiskGrid}`}>
                     {riskLevels.map(opt => (
                       <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
                         <span>{opt.label}</span>
@@ -647,7 +641,7 @@ export default function Home() {
                   <div className={styles.stepperInput}>
                     <input type="text" value={manualMarketPrice} onChange={(e) => setManualMarketPrice(e.target.value)} />
                     <div className={styles.stepperRight}>
-                      <span style={{ minWidth: '56px', justifyContent: 'center' }}>TL</span>
+                      <span className={styles.stepperUnitWide}>TL</span>
                     </div>
                   </div>
                 </div>
@@ -663,7 +657,7 @@ export default function Home() {
 
           {/* Main Panel */}
           <main id="resultsPanel" className={`${styles.mainPanel} ${styles.swipeCard}`}>
-            <h2 className={styles.mainPanelTitle}>Hesap Sonuçları <span className={styles.pill} style={{ fontSize: '12px', fontWeight: 900 }}>Engine v2</span></h2>
+            <h2 className={styles.mainPanelTitle}>Hesap Sonuçları <span className={`${styles.pill} ${styles.pillSmall}`}>Engine v2</span></h2>
 
             <div className={styles.blueBox}>
               <div className={styles.blueBoxTop}>
@@ -690,7 +684,7 @@ export default function Home() {
                     <span><strong>{result?.Sdx != null ? Number(result.Sdx).toFixed(1) : '—'}</strong> daire</span>
                   </div>
                   {isAaEnabled && result?.FAbirim != null && (
-                    <div className={styles.statCardSub} style={{ marginTop: '6px' }}>
+                    <div className={`${styles.statCardSub} ${styles.statCardSubSpaced}`}>
                       <span>Arsa Birim:</span>
                       <span><strong>{result.FAbirim.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong> TL/m²</span>
                     </div>
@@ -700,7 +694,7 @@ export default function Home() {
 
               <div className={styles.statCard}>
                 <h5>Piyasa Değerine Göre</h5>
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, marginTop: '0.5rem' }}>
+                <div className={styles.chartCenter}>
                   <PriceEvaluationChart
                     minPrice={result ? result.FD_total : 0}
                     marketPrice={parseInt(manualMarketPrice.replace(/\D/g, '') || "0")}
@@ -713,9 +707,9 @@ export default function Home() {
               <h4 className={styles.sliderHeader}>Arsa Payı</h4>
               <div className={styles.sliderContainer}>
                 <div className={styles.sliderTrackWrapper}>
-                  <div className={styles.sliderTrack}>
-                    <div className={styles.sliderFill} style={{ width: `${((landShareRatio - 10) / 90) * 100}%` }}></div>
-                    <div className={styles.sliderThumb} style={{ left: `${((landShareRatio - 10) / 90) * 100}%` }}></div>
+                  <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
+                    <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
+                    <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
                     <input
                       type="range" min="10" max="100"
                       value={landShareRatio}
@@ -723,7 +717,7 @@ export default function Home() {
                         setLandShareRatio(Number(e.target.value));
                         setIsApartmentCountEnabled(false);
                       }}
-                      style={{ position: 'absolute', width: '100%', top: '-10px', height: '30px', opacity: 0, cursor: 'pointer', zIndex: 10 }}
+                      className={styles.sliderInput}
                     />
                     <div className={styles.sliderTicks}>
                       <span>10%</span>
@@ -747,11 +741,11 @@ export default function Home() {
             )}
             <div className={styles.actionBottomRow}>
               <Button variant="outline" onClick={handlePdfDownload} disabled={!result}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px', verticalAlign: 'middle' }}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 PDF İndir
               </Button>
               <Button variant="primary" onClick={handleSaveReport} disabled={isSaving}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: '6px', verticalAlign: 'middle' }}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                 {isSaving ? 'Kaydediliyor...' : 'Rapor Kaydet'}
               </Button>
               <Button
@@ -759,27 +753,22 @@ export default function Home() {
                 onClick={handleAddScenario}
                 disabled={!result || savedScenarios.length >= 3}
                 title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-                style={{ color: 'var(--green)', borderColor: 'var(--green)', background: 'rgba(var(--green-rgb), 0.08)' }}
+                className={styles.compareBtn}
               >
                 + Karşılaştır
               </Button>
             </div>
             {savedScenarios.length > 0 && (
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+              <div className={styles.scenarioPills}>
                 {savedScenarios.map((s, i) => {
-                  const c = PILL_COLORS[i % 3];
+                  const pillClass = [styles.pillBlue, styles.pillGreen, styles.pillOrange][i % 3];
                   return (
-                    <span key={s.id} style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '6px',
-                      padding: '4px 12px', borderRadius: '20px',
-                      background: c.bg, border: `1px solid ${c.border}`,
-                      fontSize: '0.8rem', fontWeight: 700, color: c.text,
-                    }}>
+                    <span key={s.id} className={`${styles.scenarioPill} ${pillClass}`}>
                       {s.name}
                       <button
                         onClick={() => handleRemoveScenario(s.id)}
                         aria-label={`${s.name}'i kaldır`}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: c.text, padding: 0, lineHeight: 1, fontSize: '1rem' }}
+                        className={styles.scenarioPillRemove}
                         title={`${s.name}'i kaldır`}
                       >×</button>
                     </span>
@@ -788,8 +777,8 @@ export default function Home() {
               </div>
             )}
             {savedScenarios.length >= 2 && (
-              <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-                <h3 style={{ margin: '0 0 12px', fontSize: '1rem', fontWeight: 800, color: 'var(--card-title)' }}>
+              <div className={styles.compareSection}>
+                <h3 className={styles.compareTitle}>
                   Senaryo Karşılaştırması
                 </h3>
                 <ScenarioCompare
@@ -813,38 +802,27 @@ export default function Home() {
           <aside className={`${styles.summaryPanel} ${styles.swipeCard}`}>
             <div className={styles.summaryPanelTitle}>
               Hesap Özeti
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <div className={styles.pagerDots}>
                 {['Dağılım', 'Analiz', 'Finans'].map((label, i) => (
                   <button
                     key={i}
                     onClick={() => setSummaryPage(i)}
                     title={label}
-                    style={{
-                      width: summaryPage === i ? 20 : 8,
-                      height: 8,
-                      borderRadius: 10,
-                      border: 'none',
-                      background: summaryPage === i ? 'var(--primary)' : 'var(--muted)',
-                      opacity: summaryPage === i ? 1 : 0.4,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
-                      padding: 0,
-                    }}
+                    className={`${styles.pagerDot} ${summaryPage === i ? styles.pagerDotActive : ''}`}
                   />
                 ))}
               </div>
             </div>
 
             {/* Page Container with slide animation */}
-            <div style={{ overflow: 'hidden', position: 'relative' }}>
-              <div style={{
-                display: 'flex',
-                transition: 'transform 0.4s cubic-bezier(0.4,0,0.2,1)',
-                transform: `translateX(-${summaryPage * 100}%)`,
-              }}>
+            <div className={styles.pagerViewport}>
+              <div
+                className={styles.pagerTrack}
+                style={{ '--pager-x': `-${summaryPage * 100}%` } as React.CSSProperties}
+              >
 
                 {/* Page 0: Maliyet Dağılımı */}
-                <div style={{ minWidth: '100%', padding: '0 16px 16px' }}>
+                <div className={styles.pagerPage}>
                   <CostBreakdownChart
                     constructionCost={result ? result.Mi_base + result.Mz : 0}
                     landValue={result ? result.Ma : 0}
@@ -854,8 +832,8 @@ export default function Home() {
                 </div>
 
                 {/* Page 1: Hassasiyet + Kırılma Noktası */}
-                <div style={{ minWidth: '100%', padding: '0 16px 16px' }}>
-                  <div style={{ marginBottom: '16px' }}>
+                <div className={styles.pagerPage}>
+                  <div className={styles.chartBlock}>
                     <SensitivityChart baseInput={{
                       x: landShareRatio / 100,
                       L: luxLevel,
@@ -872,7 +850,7 @@ export default function Home() {
                       MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
                     }} />
                   </div>
-                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                  <div className={styles.chartDivider}>
                     <BreakEvenChart
                       baseInput={{
                         x: landShareRatio / 100,
@@ -895,7 +873,7 @@ export default function Home() {
                 </div>
 
                 {/* Page 2: Finansal Modelleme */}
-                <div style={{ minWidth: '100%', padding: '0 16px 16px' }}>
+                <div className={styles.pagerPage}>
                   {result && (
                     <FinancialDashboard
                       totalInvestment={result.M}
@@ -908,16 +886,7 @@ export default function Home() {
             </div>
 
             {/* Page label */}
-            <div style={{
-              padding: '8px 16px 12px',
-              borderTop: '1px solid var(--border)',
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '4px',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              color: 'var(--muted)',
-            }}>
+            <div className={styles.pagerLabel}>
               {summaryPage === 0 && '📊 Maliyet Dağılımı'}
               {summaryPage === 1 && '📈 Hassasiyet & Kırılma'}
               {summaryPage === 2 && '💰 Finansal Modelleme'}

@@ -1058,6 +1058,240 @@
     display: none;
 }
 
+/* =========================================================================
+   FAZ 1 TASK 6 — inline stil migrasyonu class'ları
+   ========================================================================= */
+
+.settingsGear {
+    cursor: pointer;
+}
+
+.stepperFixed {
+    height: 48px;
+}
+
+.stepperFull {
+    width: 100%;
+}
+
+.stepperUnitCenter {
+    min-width: 48px;
+    justify-content: center;
+}
+
+.stepperUnitWide {
+    min-width: 56px;
+    justify-content: center;
+}
+
+.luxGridDynamic {
+    grid-template-columns: repeat(var(--lux-cols, 3), 1fr);
+}
+
+.swipeCardPadded {
+    padding-bottom: 16px;
+}
+
+.toggleRowFlat {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.sharePct {
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.drawerRowHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.drawerRowLabelNowrap {
+    white-space: nowrap;
+}
+
+.drawerToggleWrap {
+    margin-left: auto;
+    display: flex;
+}
+
+.drawerRiskGrid {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.pillSmall {
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.statCardSubSpaced {
+    margin-top: 6px;
+}
+
+.chartCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    margin-top: 0.5rem;
+}
+
+.sliderFillDynamic {
+    width: var(--share-pct, 0%);
+}
+
+.sliderThumbDynamic {
+    left: var(--share-pct, 0%);
+}
+
+.sliderInput {
+    position: absolute;
+    width: 100%;
+    top: -10px;
+    height: 30px;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.btnIcon {
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* button.compareBtn (element+class) yerine .compareBtn kullanilirsa, Button.module.css'in
+   .outline sinifiyla ayni ozgunlukte (0,1,0) cakisir ve import sirasina gore mavi kazanabilir
+   (inline style'in garanti ettigi onceligi kaybeder). Ozgunlugu artirmak icin element secici eklendi. */
+button.compareBtn {
+    color: var(--green);
+    border-color: var(--green);
+    background: rgba(var(--green-rgb), 0.08);
+}
+
+.scenarioPills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.scenarioPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.pillBlue {
+    background: rgba(var(--primary-rgb), 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+.pillGreen {
+    background: rgba(var(--green-rgb), 0.1);
+    border: 1px solid var(--green);
+    color: var(--green);
+}
+
+.pillOrange {
+    background: rgba(var(--orange-rgb), 0.1);
+    border: 1px solid var(--orange);
+    color: var(--orange);
+}
+
+.scenarioPillRemove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    padding: 0;
+    line-height: 1;
+    font-size: 1rem;
+}
+
+.compareSection {
+    margin-top: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+}
+
+.compareTitle {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--card-title);
+}
+
+.pagerDots {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.pagerDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 10px;
+    border: none;
+    background: var(--muted);
+    opacity: 0.4;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.pagerDotActive {
+    width: 20px;
+    background: var(--primary);
+    opacity: 1;
+}
+
+.pagerViewport {
+    overflow: hidden;
+    position: relative;
+}
+
+.pagerTrack {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(var(--pager-x, 0%));
+}
+
+.pagerPage {
+    min-width: 100%;
+    padding: 0 16px 16px;
+}
+
+.chartBlock {
+    margin-bottom: 16px;
+}
+
+.chartDivider {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+}
+
+.pagerLabel {
+    padding: 8px 16px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+
 @media (max-width: 768px) {
     .container {
         padding: calc(12px + env(safe-area-inset-top, 40px)) 0 8px !important;
