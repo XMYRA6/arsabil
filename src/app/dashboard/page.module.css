@@ -245,7 +245,6 @@
   font-weight: 700;
   text-decoration: none;
   transition: border-color 0.15s, background 0.15s;
-  min-height: var(--touch-target);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -265,4 +264,5 @@
   .offerRow { flex-direction: column; align-items: flex-start; gap: 6px; }
   .quickActions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
   .sectionLink { min-height: var(--touch-target); display: inline-flex; align-items: center; }
+  .qaBtn { min-height: var(--touch-target); }
 }
