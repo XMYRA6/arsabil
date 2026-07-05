@@ -288,6 +288,10 @@
         height: var(--touch-target);
     }
 
+    .quickChip {
+        min-height: var(--touch-target);
+    }
+
     .bodyContainer {
         flex-direction: column;
         flex: 1;
