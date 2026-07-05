@@ -12,7 +12,7 @@ const PAGES: { path: string; fixme?: string; auth?: boolean }[] = [
     { path: '/register' },
     { path: '/listing/e2e-mock', auth: true },
     { path: '/marketplace', auth: true },
-    { path: '/hesapla', fixme: 'Faz 1 - inline stil grid tasiyor' },
+    { path: '/hesapla' },
 ]
 
 async function assertNoHorizontalOverflow(page: Page) {

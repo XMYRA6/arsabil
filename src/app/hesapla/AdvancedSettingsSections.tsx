@@ -1,0 +1,182 @@
+"use client";
+
+import React from 'react';
+import styles from './page.module.css';
+import { Toggle } from '@/components/ui/Toggle';
+
+interface ProfitLevel {
+  id: string;
+  label: string;
+  value: number;
+  sortOrder: number;
+  isDefault: boolean;
+}
+
+interface RiskLevel {
+  id: string;
+  label: string;
+  value: number;
+  sortOrder: number;
+  isDefault: boolean;
+}
+
+export interface FormulParamsProps {
+  isApartmentCountEnabled: boolean;
+  setIsApartmentCountEnabled: (v: boolean) => void;
+  totalApartments: number;
+  setTotalApartments: React.Dispatch<React.SetStateAction<number>>;
+  isAaEnabled: boolean;
+  setIsAaEnabled: (v: boolean) => void;
+  arsaAlani: number;
+  setArsaAlani: React.Dispatch<React.SetStateAction<number>>;
+}
+
+/** Drawer "Formül Parametreleri" kartının içeriği (kart sarmalayıcısı hariç). */
+export function FormulParamsFields({
+  isApartmentCountEnabled, setIsApartmentCountEnabled,
+  totalApartments, setTotalApartments,
+  isAaEnabled, setIsAaEnabled,
+  arsaAlani, setArsaAlani,
+}: FormulParamsProps) {
+  return (
+    <>
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowHead}>
+          <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Toplam Daire Sayısı</div>
+          <div className={styles.drawerToggleWrap}>
+            <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
+          </div>
+        </div>
+        {isApartmentCountEnabled && (
+          <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
+            <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
+            <div className={styles.stepperRight}>
+              <span>daire</span>
+              <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
+              <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowHead}>
+          <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Arsa Alanı (m²)</div>
+          <div className={styles.drawerToggleWrap}>
+            <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
+          </div>
+        </div>
+        {isAaEnabled && (
+          <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
+            <input type="number" value={arsaAlani} onChange={(e) => setArsaAlani(Number(e.target.value))} />
+            <div className={styles.stepperRight}>
+              <span>m²</span>
+              <button onClick={() => setArsaAlani(p => Math.max(10, p - 10))}>−</button>
+              <button onClick={() => setArsaAlani(p => p + 10)}>+</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export interface RiskCostProps {
+  iksaMode: 'off' | 'percentage' | 'manual';
+  setIksaMode: (v: 'off' | 'percentage' | 'manual') => void;
+  iksaPercentage: number;
+  setIksaPercentage: (v: number) => void;
+  iksaManualTL: number;
+  setIksaManualTL: (v: number) => void;
+  riskLevel: number;
+  setRiskLevel: (v: number) => void;
+  riskLevels: RiskLevel[];
+  builderProfit: number;
+  setBuilderProfit: (v: number) => void;
+  profitLevels: ProfitLevel[];
+}
+
+/** Drawer "Proje Maliyet ve Riskleri" kartının içeriği. */
+export function RiskCostFields({
+  iksaMode, setIksaMode, iksaPercentage, setIksaPercentage,
+  iksaManualTL, setIksaManualTL,
+  riskLevel, setRiskLevel, riskLevels,
+  builderProfit, setBuilderProfit, profitLevels,
+}: RiskCostProps) {
+  return (
+    <>
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowLabel}>İksa Masrafı</div>
+        <div className={styles.luxGrid}>
+          {[
+            { label: 'Yok', value: 'off' as const },
+            { label: 'Yüzde', value: 'percentage' as const },
+            { label: 'Elle', value: 'manual' as const },
+          ].map(opt => (
+            <div key={opt.label} className={`${styles.luxBox} ${iksaMode === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setIksaMode(opt.value)}>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+        {iksaMode === 'percentage' && (
+          <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
+            <input type="number" value={iksaPercentage} min={0} max={100} onChange={(e) => setIksaPercentage(Number(e.target.value))} />
+            <div className={styles.stepperRight}>
+              <span className={styles.stepperUnitCenter}>%</span>
+            </div>
+          </div>
+        )}
+        {iksaMode === 'manual' && (
+          <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
+            <input type="number" value={iksaManualTL} min={0} onChange={(e) => setIksaManualTL(Number(e.target.value))} />
+            <div className={styles.stepperRight}>
+              <span className={styles.stepperUnitCenter}>TL</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowLabel}>Risk Payı</div>
+        <div className={`${styles.luxGrid} ${styles.drawerRiskGrid}`}>
+          {riskLevels.map(opt => (
+            <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
+        <div className={styles.luxGrid}>
+          {profitLevels.map(opt => (
+            <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export interface MarketFieldProps {
+  manualMarketPrice: string;
+  setManualMarketPrice: (v: string) => void;
+}
+
+/** Drawer "Piyasa Analizi" kartının içeriği. */
+export function MarketField({ manualMarketPrice, setManualMarketPrice }: MarketFieldProps) {
+  return (
+    <div className={`${styles.drawerRow} ${styles.column}`}>
+      <div className={styles.drawerRowLabel}>Yaklaşık Piyasa Fiyatı</div>
+      <div className={styles.stepperInput}>
+        <input type="text" value={manualMarketPrice} onChange={(e) => setManualMarketPrice(e.target.value)} />
+        <div className={styles.stepperRight}>
+          <span className={styles.stepperUnitWide}>TL</span>
+        </div>
+      </div>
+    </div>
+  );
+}

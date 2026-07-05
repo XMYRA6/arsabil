@@ -18,6 +18,8 @@ import { toast } from 'react-hot-toast';
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
+import { StickyActionBar } from '@/components/mobile/StickyActionBar';
+import { FormulParamsFields, RiskCostFields, MarketField } from './AdvancedSettingsSections';
 
 interface ProfitLevel {
   id: string;
@@ -103,16 +105,7 @@ export default function Home() {
   const [, setGlobalExcavationMedium] = useState<number>(0.02);
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
 
-  // Swipe Carousel Tracking (Mobile iOS PageControl)
-  const [, setActiveCardIndex] = useState(0);
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
-
-  const handleMobileScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    if (!el || typeof window === 'undefined' || window.innerWidth > 768) return;
-    const index = Math.round(el.scrollLeft / el.clientWidth);
-    setActiveCardIndex(index);
-  };
 
   // Sayfa yüklendiğinde Admin'in belirlediği global ayarları çek
   useEffect(() => {
@@ -319,7 +312,7 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.layout} id="formTop" onScroll={handleMobileScroll}>
+      <div className={styles.layout} id="formTop">
         {/* Left Sidebar (Main Form) */}
         <aside className={styles.leftSidebar}>
 
@@ -508,16 +501,53 @@ export default function Home() {
               </div>
             </div>
 
-            <button className={styles.digerAyarlarBtn} onClick={() => setIsSettingsSidebarOpen(true)}>
-               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-               Diğer Ayarlar
-            </button>
+            </div>
 
-            <button className={styles.primaryActionBtn} onClick={handleSaveReport} disabled={isSaving}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-              {isSaving ? 'Kaydediliyor...' : 'Özet Rapor Oluştur'}
-            </button>
-
+            {/* ── Gelişmiş ayarlar: mobilde accordion (drawer ile aynı bileşenler) ── */}
+            <div className={styles.mobileAccordions}>
+              <details className={styles.accordion}>
+                <summary className={styles.accordionSummary}>Formül Parametreleri</summary>
+                <div className={styles.accordionBody}>
+                  <FormulParamsFields
+                    isApartmentCountEnabled={isApartmentCountEnabled}
+                    setIsApartmentCountEnabled={setIsApartmentCountEnabled}
+                    totalApartments={totalApartments}
+                    setTotalApartments={setTotalApartments}
+                    isAaEnabled={isAaEnabled}
+                    setIsAaEnabled={setIsAaEnabled}
+                    arsaAlani={arsaAlani}
+                    setArsaAlani={setArsaAlani}
+                  />
+                </div>
+              </details>
+              <details className={styles.accordion}>
+                <summary className={styles.accordionSummary}>Proje Maliyet ve Riskleri</summary>
+                <div className={styles.accordionBody}>
+                  <RiskCostFields
+                    iksaMode={iksaMode}
+                    setIksaMode={setIksaMode}
+                    iksaPercentage={iksaPercentage}
+                    setIksaPercentage={setIksaPercentage}
+                    iksaManualTL={iksaManualTL}
+                    setIksaManualTL={setIksaManualTL}
+                    riskLevel={riskLevel}
+                    setRiskLevel={setRiskLevel}
+                    riskLevels={riskLevels}
+                    builderProfit={builderProfit}
+                    setBuilderProfit={setBuilderProfit}
+                    profitLevels={profitLevels}
+                  />
+                </div>
+              </details>
+              <details className={styles.accordion}>
+                <summary className={styles.accordionSummary}>Piyasa Analizi</summary>
+                <div className={styles.accordionBody}>
+                  <MarketField
+                    manualMarketPrice={manualMarketPrice}
+                    setManualMarketPrice={setManualMarketPrice}
+                  />
+                </div>
+              </details>
             </div>
           </div>
 
@@ -537,114 +567,42 @@ export default function Home() {
 
               <div className={styles.drawerCard}>
                 <div className={styles.drawerCardHeader}>Formül Parametreleri</div>
-                
-                <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div className={styles.drawerRowHead}>
-                    <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Toplam Daire Sayısı</div>
-                    <div className={styles.drawerToggleWrap}>
-                      <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
-                    </div>
-                  </div>
-                  {isApartmentCountEnabled && (
-                    <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
-                      <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
-                      <div className={styles.stepperRight}>
-                        <span>daire</span>
-                        <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
-                        <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div className={styles.drawerRowHead}>
-                    <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Arsa Alanı (m²)</div>
-                    <div className={styles.drawerToggleWrap}>
-                      <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
-                    </div>
-                  </div>
-                  {isAaEnabled && (
-                    <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
-                      <input type="number" value={arsaAlani} onChange={(e) => setArsaAlani(Number(e.target.value))} />
-                      <div className={styles.stepperRight}>
-                        <span>m²</span>
-                        <button onClick={() => setArsaAlani(p => Math.max(10, p - 10))}>−</button>
-                        <button onClick={() => setArsaAlani(p => p + 10)}>+</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <FormulParamsFields
+                  isApartmentCountEnabled={isApartmentCountEnabled}
+                  setIsApartmentCountEnabled={setIsApartmentCountEnabled}
+                  totalApartments={totalApartments}
+                  setTotalApartments={setTotalApartments}
+                  isAaEnabled={isAaEnabled}
+                  setIsAaEnabled={setIsAaEnabled}
+                  arsaAlani={arsaAlani}
+                  setArsaAlani={setArsaAlani}
+                />
               </div>
 
               <div className={styles.drawerCard}>
                 <div className={styles.drawerCardHeader}>Proje Maliyet ve Riskleri</div>
-                
-                <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div className={styles.drawerRowLabel}>İksa Masrafı</div>
-                  <div className={styles.luxGrid}>
-                    {[
-                      { label: 'Yok', value: 'off' as const },
-                      { label: 'Yüzde', value: 'percentage' as const },
-                      { label: 'Elle', value: 'manual' as const },
-                    ].map(opt => (
-                      <div key={opt.label} className={`${styles.luxBox} ${iksaMode === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setIksaMode(opt.value)}>
-                        <span>{opt.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {iksaMode === 'percentage' && (
-                    <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
-                      <input type="number" value={iksaPercentage} min={0} max={100} onChange={(e) => setIksaPercentage(Number(e.target.value))} />
-                      <div className={styles.stepperRight}>
-                        <span className={styles.stepperUnitCenter}>%</span>
-                      </div>
-                    </div>
-                  )}
-                  {iksaMode === 'manual' && (
-                    <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
-                      <input type="number" value={iksaManualTL} min={0} onChange={(e) => setIksaManualTL(Number(e.target.value))} />
-                      <div className={styles.stepperRight}>
-                        <span className={styles.stepperUnitCenter}>TL</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div className={styles.drawerRowLabel}>Risk Payı</div>
-                  <div className={`${styles.luxGrid} ${styles.drawerRiskGrid}`}>
-                    {riskLevels.map(opt => (
-                      <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
-                        <span>{opt.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
-                  <div className={styles.luxGrid}>
-                    {profitLevels.map(opt => (
-                      <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-                        <span>{opt.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <RiskCostFields
+                  iksaMode={iksaMode}
+                  setIksaMode={setIksaMode}
+                  iksaPercentage={iksaPercentage}
+                  setIksaPercentage={setIksaPercentage}
+                  iksaManualTL={iksaManualTL}
+                  setIksaManualTL={setIksaManualTL}
+                  riskLevel={riskLevel}
+                  setRiskLevel={setRiskLevel}
+                  riskLevels={riskLevels}
+                  builderProfit={builderProfit}
+                  setBuilderProfit={setBuilderProfit}
+                  profitLevels={profitLevels}
+                />
               </div>
 
               <div className={styles.drawerCard}>
                 <div className={styles.drawerCardHeader}>Piyasa Analizi</div>
-                <div className={`${styles.drawerRow} ${styles.column}`}>
-                  <div className={styles.drawerRowLabel}>Yaklaşık Piyasa Fiyatı</div>
-                  <div className={styles.stepperInput}>
-                    <input type="text" value={manualMarketPrice} onChange={(e) => setManualMarketPrice(e.target.value)} />
-                    <div className={styles.stepperRight}>
-                      <span className={styles.stepperUnitWide}>TL</span>
-                    </div>
-                  </div>
-                </div>
+                <MarketField
+                  manualMarketPrice={manualMarketPrice}
+                  setManualMarketPrice={setManualMarketPrice}
+                />
               </div>
 
             </div>
@@ -894,6 +852,12 @@ export default function Home() {
           </aside>
         </section>
       </div >
+
+      <StickyActionBar aboveBottomNav>
+        <button className={styles.stickyCta} onClick={handleSaveReport} disabled={isSaving}>
+          {isSaving ? 'Kaydediliyor...' : '📄 Özet Rapor Oluştur'}
+        </button>
+      </StickyActionBar>
 
       <AuthModal
         isOpen={showAuthModal}
