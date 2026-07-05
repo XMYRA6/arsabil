@@ -11,7 +11,7 @@ const PAGES: { path: string; fixme?: string; auth?: boolean }[] = [
     { path: '/login' },
     { path: '/register' },
     { path: '/listing/e2e-mock', auth: true },
-    { path: '/marketplace', fixme: 'Faz 1 - filtre sidebar mobilde tasiyor' },
+    { path: '/marketplace', auth: true },
     { path: '/hesapla', fixme: 'Faz 1 - inline stil grid tasiyor' },
 ]
 

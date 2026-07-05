@@ -73,8 +73,162 @@
     display: block;
 }
 
-.mobileTabs {
+/* ── Faz 1: mobil kontroller + inline stil migrasyonu ── */
+
+.suspenseFallback {
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+}
+
+.mapLoading {
+    flex: 1;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+}
+
+.quickChip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 500;
+    transition: all 0.15s;
+    white-space: nowrap;
+    min-height: 32px;
+}
+
+.quickChipActive {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    font-weight: 700;
+}
+
+.emsalChip {
+    font-size: 0.78rem;
+    color: var(--muted);
+    padding: 6px 14px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.sortSelect {
+    padding: 6px 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.listPanelSplit {
+    width: 360px;
+    border-right: 1px solid var(--border);
+}
+
+.listPanelFull {
+    width: 100%;
+    border-right: none;
+}
+
+.skeletonList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.skeletonItem {
+    background: var(--panel);
+    border-radius: 16px;
+    animation: pulse 1.5s infinite;
+    border: 1px solid var(--border);
+}
+
+.skeletonItemSplit {
+    height: 280px;
+}
+
+.skeletonItemList {
+    height: 130px;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+}
+
+.emptyStateIcon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.countLabel {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0 2px;
+}
+
+.pagination {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    padding: 8px 0;
+    flex-wrap: wrap;
+}
+
+.pageBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.pageBtnActive {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.mobileControls {
     display: none;
+}
+
+.filterBtn {
+    flex-shrink: 0;
+    padding: 0 14px;
+    min-height: var(--touch-target);
+    border-radius: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 /* =========================================================================
@@ -108,37 +262,30 @@
         display: none;
     }
 
-    .mobileTabs {
+    .mobileControls {
         display: flex;
         align-items: center;
+        gap: 8px;
         width: 100%;
         background: var(--panel);
         border-bottom: 1px solid var(--border);
         padding: 8px 16px;
-        gap: 8px;
         flex-shrink: 0;
     }
 
-    .mobileTabs button {
+    .mobileControls > :first-child {
         flex: 1;
         min-width: 0;
-        padding: 10px 0;
-        background: var(--panel-2);
-        border: 1px solid var(--border);
-        color: var(--muted);
-        border-radius: 10px;
-        font-family: inherit;
-        font-size: 0.8rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
     }
 
-    .mobileTabs button.activeTab {
-        background: var(--brand-gradient);
-        color: white;
-        border-color: transparent;
-        box-shadow: 0 4px 14px var(--primary-glow);
+    .listPanelSplit,
+    .listPanelFull {
+        width: 100% !important;
+    }
+
+    .pageBtn {
+        width: var(--touch-target);
+        height: var(--touch-target);
     }
 
     .bodyContainer {
@@ -157,13 +304,6 @@
         min-width: 0;
         border-right: none !important;
         border-bottom: none !important;
-    }
-
-    .bodyContainer[data-mobile-tab="filter"] .sidebarWrapper {
-        display: flex !important;
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
     }
 
     .sidebarWrapper > aside {

@@ -9,12 +9,14 @@ import type { Listing } from '@/components/marketplace/ListingCard';
 import { ViewToggle } from '@/components/marketplace/ViewToggle';
 import { CitySearch } from '@/components/marketplace/CitySearch';
 import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
+import { SegmentedTabs } from '@/components/mobile/SegmentedTabs';
+import { BottomSheet } from '@/components/mobile/BottomSheet';
 import styles from './page.module.css';
 
 // SSR-safe map import — dynamic + forwardRef birlikte ForwardRefExoticComponent olarak tip verilmeli
 const MapView = dynamic<MapViewProps>(
     () => import('@/components/marketplace/MapView').then(m => m.MapView),
-    { ssr: false, loading: () => <div style={{ flex: 1, background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>🗺 Harita yükleniyor…</div> }
+    { ssr: false, loading: () => <div className={styles.mapLoading}>🗺 Harita yükleniyor…</div> }
 ) as ForwardRefExoticComponent<MapViewProps & RefAttributes<MapViewHandle>>;
 
 type View = 'split' | 'map' | 'list';
@@ -46,7 +48,7 @@ const MOCK_LISTINGS_EXTRA = [
 
 export default function MarketplacePage() {
     return (
-        <Suspense fallback={<div style={{ padding: '2rem', textAlign: 'center', color: 'var(--muted)' }}>Yükleniyor...</div>}>
+        <Suspense fallback={<div className={styles.suspenseFallback}>Yükleniyor...</div>}>
             <MarketplaceContent />
         </Suspense>
     );
@@ -57,7 +59,8 @@ function MarketplaceContent() {
     const searchParams = useSearchParams();
 
     const [view, setView] = useState<View>((searchParams.get('view') as View) || 'split');
-    const [mobileTab, setMobileTab] = useState<'filter' | 'list' | 'map'>('list');
+    const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
+    const [filterOpen, setFilterOpen] = useState(false);
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
@@ -172,31 +175,20 @@ function MarketplaceContent() {
                         <button key={label} onClick={() => {
                             const has = filters.type.includes(type);
                             setFilters(f => ({ ...f, type: has ? f.type.filter(t => t !== type) : [...f.type, type] }));
-                        }} style={{
-                            padding: '6px 14px', borderRadius: 20,
-                            background: active ? 'var(--primary)' : 'var(--bg)',
-                            color: active ? 'white' : 'var(--muted)',
-                            border: `1.5px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
-                            cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.78rem', fontWeight: active ? 700 : 500,
-                            transition: 'all 0.15s',
-                            whiteSpace: 'nowrap'
-                        }}>{label}</button>
+                        }} className={`${styles.quickChip} ${active ? styles.quickChipActive : ''}`}>{label}</button>
                     );
                 })}
 
                 {/* Emsal quick filter */}
-                <span style={{ fontSize: '0.78rem', color: 'var(--muted)', padding: '6px 14px', background: 'var(--bg)', border: '1.5px solid var(--border)', borderRadius: 20, whiteSpace: 'nowrap' }}>
+                <span className={styles.emsalChip}>
                     Emsal: {filters.minEmsal}–{filters.maxEmsal}
                 </span>
 
                 {/* Spacer (Hidden on mobile via CSS or flex logic) */}
-                <div style={{ flex: 1, minWidth: 10 }} className={styles.desktopOnlySpacer} />
+                <div className={styles.desktopOnlySpacer} />
 
                 {/* Sort */}
-                <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
-                    padding: '6px 10px', background: 'var(--bg)', border: '1.5px solid var(--border)',
-                    borderRadius: 8, color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.78rem', cursor: 'pointer',
-                }}>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={styles.sortSelect}>
                     <option value="score_desc">En Yüksek Skor</option>
                     <option value="price_asc">En Uygun Fiyat</option>
                     <option value="newest">En Yeniler</option>
@@ -208,11 +200,17 @@ function MarketplaceContent() {
                 </div>
             </div>
 
-            {/* ── Mobile Tabs ── */}
-            <div className={styles.mobileTabs}>
-                <button className={mobileTab === 'filter' ? styles.activeTab : ''} onClick={() => setMobileTab('filter')}>Filtreler</button>
-                <button className={mobileTab === 'list' ? styles.activeTab : ''} onClick={() => setMobileTab('list')}>İlanlar</button>
-                <button className={mobileTab === 'map' ? styles.activeTab : ''} onClick={() => setMobileTab('map')}>Harita</button>
+            {/* ── Mobil kontroller: görünüm + filtre ── */}
+            <div className={styles.mobileControls}>
+                <SegmentedTabs
+                    ariaLabel="Görünüm"
+                    options={[{ value: 'list', label: 'İlanlar' }, { value: 'map', label: 'Harita' }]}
+                    value={mobileTab}
+                    onChange={(v) => setMobileTab(v as 'list' | 'map')}
+                />
+                <button type="button" className={styles.filterBtn} onClick={() => setFilterOpen(true)}>
+                    ⚙ Filtreler
+                </button>
             </div>
 
             {/* ── Body ── */}
@@ -227,25 +225,22 @@ function MarketplaceContent() {
 
                 {/* List Panel */}
                 {(view === 'split' || view === 'list') && (
-                    <div className={styles.listPanel} style={{
-                        width: view === 'list' ? '100%' : 360,
-                        borderRight: view === 'split' ? '1px solid var(--border)' : 'none',
-                    }}>
+                    <div className={`${styles.listPanel} ${view === 'list' ? styles.listPanelFull : styles.listPanelSplit}`}>
                         {loading ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div className={styles.skeletonList}>
                                 {Array.from({ length: 4 }).map((_, i) => (
-                                    <div key={i} style={{ height: view === 'list' ? 130 : 280, background: 'var(--panel)', borderRadius: 16, animation: 'pulse 1.5s infinite', border: '1px solid var(--border)' }} />
+                                    <div key={i} className={`${styles.skeletonItem} ${view === 'list' ? styles.skeletonItemList : styles.skeletonItemSplit}`} />
                                 ))}
                             </div>
                         ) : paginated.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
-                                <div style={{ fontSize: '2rem', marginBottom: 8 }}>🔍</div>
+                            <div className={styles.emptyState}>
+                                <div className={styles.emptyStateIcon}>🔍</div>
                                 Kriterlere uyan ilan bulunamadı.
                             </div>
                         ) : (
                             <>
                                 {/* Count */}
-                                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', padding: '0 2px' }}>
+                                <div className={styles.countLabel}>
                                     {sorted.length.toLocaleString('tr-TR')} arsa bulundu
                                 </div>
 
@@ -261,15 +256,10 @@ function MarketplaceContent() {
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div style={{ display: 'flex', gap: 4, justifyContent: 'center', padding: '8px 0', flexWrap: 'wrap' }}>
+                                    <div className={styles.pagination}>
                                         {Array.from({ length: Math.min(totalPages, 6) }, (_, i) => i + 1).map(p => (
-                                            <button key={p} onClick={() => setCurrentPage(p)} style={{
-                                                width: 30, height: 30, borderRadius: 8,
-                                                background: currentPage === p ? 'var(--primary)' : 'var(--bg)',
-                                                color: currentPage === p ? 'white' : 'var(--muted)',
-                                                border: `1.5px solid ${currentPage === p ? 'var(--primary)' : 'var(--border)'}`,
-                                                cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.78rem', fontWeight: 700,
-                                            }}>{p}</button>
+                                            <button key={p} onClick={() => setCurrentPage(p)}
+                                                className={`${styles.pageBtn} ${currentPage === p ? styles.pageBtnActive : ''}`}>{p}</button>
                                         ))}
                                     </div>
                                 )}
@@ -291,12 +281,16 @@ function MarketplaceContent() {
                 )}
             </div>
 
-            <style jsx global>{`
-                @keyframes pulse {
-                    0%, 100% { opacity: 0.6; }
-                    50% { opacity: 1; }
-                }
-            `}</style>
+            {/* ── Mobil filtre sheet'i ── */}
+            <BottomSheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Filtreler">
+                <FilterSidebar
+                    inSheet
+                    filters={filters}
+                    onChange={setFilters}
+                    totalCount={sorted.length}
+                    onApply={() => setFilterOpen(false)}
+                />
+            </BottomSheet>
         </div>
     );
 }
