@@ -130,3 +130,21 @@ describe('aksiyon butonları dual-slot kapsamı', () => {
     expect(pageCss).toMatch(/\.container\[data-revealed="true"\]\s+\.mobileActionsSlot\s*\{[^}]*display:\s*contents/);
   });
 });
+
+describe('kart yüzeyi migrasyonu — seal-ink/seal-ink-2 doğrudan kullanılmamalı', () => {
+  it('topResultCard, statCard, accordion artık --seal-surface kullanmalı (eski --seal-ink-2 gradienti değil)', () => {
+    expect(pageCss).toMatch(/\.topResultCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+    expect(pageCss).toMatch(/\.statCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+    expect(pageCss).toMatch(/\.accordion\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+  });
+
+  it('bu üç kart artık backdrop-filter blur uygulamalı (light temada camsı yüzey için gerekli)', () => {
+    const cardBlockPattern = /\.topResultCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/;
+    expect(pageCss).toMatch(cardBlockPattern);
+  });
+
+  it('topResultLabel/statCard h5 artık --seal-text-muted kullanmalı', () => {
+    expect(pageCss).toMatch(/\.topResultLabel\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
+    expect(pageCss).toMatch(/\.statCard h5\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
+  });
+});

@@ -1400,25 +1400,27 @@ button.compareBtn {
     }
 
     .topResultCard {
-        background: linear-gradient(160deg, var(--seal-ink) 0%, var(--seal-ink-2) 100%);
+        background: var(--seal-surface);
         box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.08);
-        border-color: rgba(var(--seal-accent-rgb), 0.25);
+        border-color: var(--seal-border);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
     }
 
     .topResultLabel {
-        color: rgba(var(--seal-paper-rgb), 0.7);
+        color: var(--seal-text-muted);
     }
 
     .topResultValue {
         font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-variant-numeric: tabular-nums;
-        color: var(--seal-paper);
+        color: var(--seal-text);
     }
 
     .topResultBadge {
         background: rgba(var(--seal-accent-rgb), 0.16);
         border-color: rgba(var(--seal-accent-rgb), 0.4);
-        color: var(--seal-paper);
+        color: var(--seal-text);
     }
 
     .topResultBadgePricier {
@@ -1585,31 +1587,35 @@ button.compareBtn {
     }
 
     .statCard {
-        background: var(--seal-ink-2);
-        border-color: rgba(var(--seal-accent-rgb), 0.18);
+        background: var(--seal-surface);
+        border-color: var(--seal-border-soft);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
     }
 
     .statCard h5 {
-        color: rgba(var(--seal-paper-rgb), 0.65);
+        color: var(--seal-text-muted);
     }
 
     .statCardValue {
         font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-variant-numeric: tabular-nums;
-        color: var(--seal-paper);
+        color: var(--seal-text);
     }
 
     .statCardValue span {
-        color: rgba(var(--seal-paper-rgb), 0.55);
+        color: var(--seal-text-faint);
     }
 
     .accordion {
-        background: var(--seal-ink-2);
-        border-color: rgba(var(--seal-accent-rgb), 0.18);
+        background: var(--seal-surface);
+        border-color: var(--seal-border-soft);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
     }
 
     .accordionSummary {
-        color: var(--seal-paper);
+        color: var(--seal-text);
     }
 
     .container * {
