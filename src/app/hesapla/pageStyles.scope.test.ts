@@ -77,6 +77,9 @@ describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
 
 describe('mainPanelResults gate kapsamı', () => {
   it('.mainPanelResults yalnızca data-revealed="false" iken mobilde gizlenmeli', () => {
-    expect(pageCss).toMatch(/\.container\[data-revealed="false"\]\s+\.mainPanelResults\s*\{[^}]*display:\s*none/);
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const match = pageCss.match(/\.container\[data-revealed="false"\]\s+\.mainPanelResults\s*\{[^}]*display:\s*none/);
+    expect(match).not.toBeNull();
+    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
   });
 });
