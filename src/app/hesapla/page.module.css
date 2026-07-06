@@ -1452,6 +1452,10 @@ button.compareBtn {
         opacity: 0.55;
     }
 
+    .revealButtonWrap {
+        padding: 4px 12px 0;
+    }
+
     /* Tek kolon dikey akış (carousel kaldırıldı) */
     .layout {
         display: flex !important;

@@ -107,6 +107,7 @@ export default function Home() {
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
 
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
+  const [isResultsRevealed, setIsResultsRevealed] = useState(false);
 
   // Sayfa yüklendiğinde Admin'in belirlediği global ayarları çek
   useEffect(() => {
@@ -314,7 +315,7 @@ export default function Home() {
   const marketPriceNum = parseInt(manualMarketPrice.replace(/\D/g, '') || '0');
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-revealed={isResultsRevealed}>
       <div className={styles.layout} id="formTop">
         {/* Left Sidebar (Main Form) */}
         <aside className={styles.leftSidebar}>
@@ -443,18 +444,6 @@ export default function Home() {
           <div className={styles.mobileSidebar}>
             <div className={`${styles.swipeCard} ${styles.swipeCardPadded}`}>
 
-            {/* Top Result Card */}
-            <div className={styles.topResultCard}>
-              <div className={styles.topResultLabel}>MİNİMUM DAİRE FİYATI</div>
-              <div className={styles.topResultValue}>
-                {result?.FD_total ? `${Math.round(result.FD_total).toLocaleString('tr-TR')} TL` : '---'}
-              </div>
-              <SealBadge
-                show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum > result.FD_total}
-                percentage={result?.FD_total ? Math.round(((marketPriceNum - result.FD_total) / marketPriceNum) * 100) : 0}
-              />
-            </div>
-
             <div className={styles.unifiedGlassPanel}>
               <div className={styles.settingsGroup}>
                 <h4>Yapı Standardı</h4>
@@ -551,6 +540,27 @@ export default function Home() {
                 </div>
               </details>
             </div>
+
+            {!isResultsRevealed && (
+              <div className={styles.revealButtonWrap}>
+                <Button variant="primary" className={styles.sealPrimaryBtn} onClick={() => setIsResultsRevealed(true)}>
+                  Sonuçları Göster
+                </Button>
+              </div>
+            )}
+
+            {isResultsRevealed && (
+              <div className={styles.topResultCard}>
+                <div className={styles.topResultLabel}>MİNİMUM DAİRE FİYATI</div>
+                <div className={styles.topResultValue}>
+                  {result?.FD_total ? `${Math.round(result.FD_total).toLocaleString('tr-TR')} TL` : '---'}
+                </div>
+                <SealBadge
+                  show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum > result.FD_total}
+                  percentage={result?.FD_total ? Math.round(((marketPriceNum - result.FD_total) / marketPriceNum) * 100) : 0}
+                />
+              </div>
+            )}
           </div>
 
         </aside>
