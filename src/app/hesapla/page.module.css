@@ -1373,6 +1373,7 @@ button.compareBtn {
         --seal-accent: #C9A15A;
         --seal-accent-rgb: 201, 161, 90;
         --seal-paper: #F4F0E6;
+        --seal-paper-rgb: 244, 240, 230;
     }
 
     .topResultCard {
@@ -1382,7 +1383,7 @@ button.compareBtn {
     }
 
     .topResultLabel {
-        color: rgba(244, 240, 230, 0.7);
+        color: rgba(var(--seal-paper-rgb), 0.7);
     }
 
     .topResultValue {
@@ -1540,7 +1541,7 @@ button.compareBtn {
     }
 
     .statCard h5 {
-        color: rgba(244, 240, 230, 0.65);
+        color: rgba(var(--seal-paper-rgb), 0.65);
     }
 
     .statCardValue {
@@ -1550,7 +1551,7 @@ button.compareBtn {
     }
 
     .statCardValue span {
-        color: rgba(244, 240, 230, 0.55);
+        color: rgba(var(--seal-paper-rgb), 0.55);
     }
 
     .accordion {

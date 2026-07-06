@@ -22,4 +22,15 @@ describe('hesapla mobil Mühür Lacivert token kapsamı', () => {
     expect(lastMobileMediaIndex).toBeGreaterThan(-1);
     expect(sealAccentIndex).toBeGreaterThan(lastMobileMediaIndex);
   });
+
+  it('--seal-paper-rgb token\'ı page.module.css içinde tanımlı olmalı', () => {
+    expect(pageCss).toMatch(/--seal-paper-rgb:\s*244,\s*240,\s*230/);
+  });
+
+  it('--seal-paper-rgb tanımı, mobil @media (max-width: 768px) bloğunun içinde olmalı', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const sealPaperRgbIndex = pageCss.indexOf('--seal-paper-rgb:');
+    expect(lastMobileMediaIndex).toBeGreaterThan(-1);
+    expect(sealPaperRgbIndex).toBeGreaterThan(lastMobileMediaIndex);
+  });
 });
