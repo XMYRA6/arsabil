@@ -1,5 +1,9 @@
 # Hesapla Mobil Görsel Kimlik — "Mühür Lacivert" (Faz 1.5)
 
+## Durum
+
+**Tamamlandı.** Bu plan `feature/hesapla-muhur-lacivert` branch'inde uygulandı ve 7 görevin tamamı (token temeli, palet uygulaması, kat-dilimi şeridi, brass CTA/slider override, SealBadge animasyonu, sticky CTA SVG ikonu, final doğrulama) bitti. Commit aralığı: `2940a48..fbf89f8` (6 uygulama commit'i) + bu final doğrulama commit'i. Bu spec artık açık iş değil — gelecekteki oturumlar bunu bekleyen bir plan olarak yeniden açmamalı.
+
 ## Bağlam ve Problem
 
 Faz 0+1 (2026-07-03 — 2026-07-06, `feature/mobil-ui-faz0`, main'e merge `a6397ed`) hesapla, listing, marketplace ve dashboard sayfalarını mobil-first olarak **yapısal** biçimde yeniden kurdu: inline stiller CSS module'e taşındı, dokunma hedefleri düzeltildi, `StickyActionBar`/`SegmentedTabs`/`BottomSheet` gibi primitifler entegre edildi. Bu iş ekranda görünmeyen bir refactor'dü — kullanıcı sonucu canlı ortamda gördüğünde ("yatay carousel → dikey tek kolon" dışında bir şey görmedim) hayal kırıklığına uğradı ve gerçek bir **görsel kimlik** talep etti.
