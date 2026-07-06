@@ -1654,6 +1654,10 @@ button.compareBtn {
         display: none;
     }
 
+    .container[data-revealed="false"] .mainPanel {
+        display: none;
+    }
+
     .desktopActionsSlot {
         display: none;
     }

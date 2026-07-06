@@ -93,6 +93,15 @@ describe('summaryPanel gate kapsamı', () => {
   });
 });
 
+describe('mainPanel gate kapsamı', () => {
+  it('.mainPanel yalnızca data-revealed="false" iken mobilde gizlenmeli', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const match = pageCss.match(/\.container\[data-revealed="false"\]\s+\.mainPanel\s*\{[^}]*display:\s*none/);
+    expect(match).not.toBeNull();
+    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+});
+
 describe('aksiyon butonları dual-slot kapsamı', () => {
   it('.desktopActionsSlot mobilde gizlenmeli', () => {
     const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
