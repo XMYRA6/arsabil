@@ -1366,6 +1366,13 @@ button.compareBtn {
         max-width: 100% !important;
         margin: 0 !important;
         min-height: 100dvh !important;
+
+        /* Faz 1.5 — Mühür Lacivert: mobil-only kimlik token'ları (bkz. docs/superpowers/specs/2026-07-06-hesapla-mobil-muhur-lacivert-design.md) */
+        --seal-ink: #0F2A43;
+        --seal-ink-2: #16324F;
+        --seal-accent: #C9A15A;
+        --seal-accent-rgb: 201, 161, 90;
+        --seal-paper: #F4F0E6;
     }
 
     /* Mobilde: desktop sidebar gizli, mobil form + accordion görünür */
