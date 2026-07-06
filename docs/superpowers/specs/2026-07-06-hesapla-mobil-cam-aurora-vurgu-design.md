@@ -1,8 +1,17 @@
 # Hesapla Mobil — Cam Kart Düzeltmesi + Aurora Mavi Vurgu
 
-## Durum
+## Durum — Tamamlandı
 
-**Tasarım onaylandı, plan yazılacak.** Bu spec, Mühür Lacivert (bkz. `2026-07-06-hesapla-mobil-muhur-lacivert-design.md`) sonrası kullanıcının light temada bulduğu bir kontrast hatasını ve bir renk/görsel tercihini ele alır. Mühür Lacivert planı **iptal edilmiyor** — bu spec onun üzerine bir düzeltme/revizyon katmanıdır.
+**Tamamlandı.** Bu plan `feature/hesapla-cam-aurora-vurgu` branch'inde uygulandı ve 4 görevin tamamı (seal token'larını tema-duyarlı yapma, topResultCard/statCard/accordion'ı light temada beyaz cama geçirme, PDF İndir + Karşılaştır butonlarını mobilde dolgulu yapma, final doğrulama) bitti. Commit aralığı: `15534db..94cfa37` (3 uygulama commit'i: `f305f09`, `b6973cd`, `94cfa37`) + bu final doğrulama commit'i. Bu spec artık açık iş değil.
+
+**Final doğrulama özeti (2026-07-06/07):**
+- `npx tsc --noEmit`: 0 hata. `npm run lint`: 0 ihlal. `npx jest --no-coverage`: 17 suite / 135 test, tamamı PASS.
+- Gerçek Playwright oturumuyla (390×844 mobil viewport) doğrulandı: **light temada** `topResultCard` artık beyaz/krem buzlu cam üzerinde koyu lacivert (`#19324f` tonu) metinle okunaklı; "Formül Parametreleri" ve "Proje Maliyet ve Riskleri" accordion'ları açıldığında **"Risk Payı" dahil tüm etiket ve segment butonları (Risksiz/Düşük/Orta/Yüksek) net okunur durumda** — bu, spec'in kök nedeni olan "koyu lacivert zemin üstünde koyu lacivert metin" hatasının giderildiğinin doğrudan kanıtıdır. 4 aksiyon butonu incelendi: PDF İndir mavi dolgulu, Rapor Kaydet mavi dolgulu, Karşılaştır yeşil dolgulu (beklendiği gibi).
+- **Dark temada** aynı adımlar tekrarlandı: kartlar hâlâ koyu lacivert gradient (`--seal-ink`→`--seal-ink-2`, önceki görünümle birebir), "Risk Payı" etiketi krem/açık metinle okunaklı, yatay taşma yok (`scrollWidth === clientWidth === 390` her iki temada da doğrulandı).
+- **Masaüstü regresyon** (1280px): Karşılaştır butonu hâlâ yeşil outline (`background: rgba(16,185,129,0.08)`, dolgulu değil) hem light hem dark masaüstü temada; kartlar (blueBox/statCard/PDF İndir/Rapor Kaydet) tamamen değişmeden site varsayılan görünümünde kaldı.
+- Küçük bulgu (engelleyici değil): Next.js dev sunucusunda bir taramada geçici bir "1 Issue" dev-indicator rozeti görüldü; tekrar denendiğinde konsol tamamen temizdi (sadece performans/HMR logları) — Mühür Lacivert spec'indeki "Fast-Refresh kesintisi" kalıntısıyla tutarlı, tek seferlik/anekdot, kod değişikliğiyle ilgisi yok.
+
+Bu spec, Mühür Lacivert (bkz. `2026-07-06-hesapla-mobil-muhur-lacivert-design.md`) sonrası kullanıcının light temada bulduğu bir kontrast hatasını ve bir renk/görsel tercihini ele alır. Mühür Lacivert planı **iptal edilmiyor** — bu spec onun üzerine bir düzeltme/revizyon katmanıdır.
 
 ## Bağlam ve Problem
 
