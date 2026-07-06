@@ -2,7 +2,7 @@
 
 ## Durum
 
-**Aktif — henüz uygulanmadı.** Bu spec, `2026-07-06-hesapla-mobil-muhur-lacivert-design.md` (görsel kimlik, uygulandı: `feature/hesapla-muhur-lacivert`) ile AYNI branch üzerinde, onun ÜZERİNE inşa edilecek ayrı bir iş. Görsel kimlik "nasıl göründüğü"nü değiştirdi; bu spec "nasıl kullanıldığı"nı (bilgi mimarisi/akış) değiştiriyor.
+**Tamamlandı.** Branch: `feature/hesapla-muhur-lacivert`. Uygulama commit aralığı: `bc99389..57a878a` (7 commit: 6 implementasyon adımı + review sırasında eklenen 1 test-güçlendirme commiti `b21d66b`). Final doğrulama (tam komut paketi, mobil Playwright smoke, uçtan uca manuel 390×844 + masaüstü ≥1100px karşılaştırması) 2026-07-06'da temiz sonuçla tamamlandı; detaylar `.superpowers/sdd/task-7-report.md`'de. Bu spec, `2026-07-06-hesapla-mobil-muhur-lacivert-design.md` (görsel kimlik, uygulandı: `feature/hesapla-muhur-lacivert`) ile AYNI branch üzerinde, onun ÜZERİNE inşa edilen ayrı bir iş olarak uygulandı. Görsel kimlik "nasıl göründüğü"nü değiştirdi; bu spec "nasıl kullanıldığı"nı (bilgi mimarisi/akış) değiştirdi.
 
 ## Bağlam ve Problem
 
