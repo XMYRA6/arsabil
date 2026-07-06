@@ -148,3 +148,25 @@ describe('kart yüzeyi migrasyonu — seal-ink/seal-ink-2 doğrudan kullanılmam
     expect(pageCss).toMatch(/\.statCard h5\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
   });
 });
+
+describe('buton reverse — PDF İndir ve Karşılaştır dolgulu stile geçmeli', () => {
+  it('PDF İndir artık sealPrimaryBtn (dolgulu) class\'ını kullanmalı, sealOutlineBtn değil', () => {
+    const pageTsx = fs.readFileSync(
+      path.join(__dirname, 'page.tsx'),
+      'utf8'
+    );
+    expect(pageTsx).toMatch(/handlePdfDownload[^>]*className=\{styles\.sealPrimaryBtn\}/);
+  });
+
+  it('button.compareBtn mobilde dolgulu yeşil override almalı, override mobil media query içinde olmalı', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const matches = [...pageCss.matchAll(/button\.compareBtn\s*\{[^}]*background:\s*var\(--green\)/g)];
+    expect(matches.length).toBe(1);
+    expect(matches[0].index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+
+  it('masaüstü (media query dışı) button.compareBtn hâlâ outline (transparan/açık arka plan) olmalı', () => {
+    const outsideMobileCss = pageCss.slice(0, pageCss.lastIndexOf('@media (max-width: 768px)'));
+    expect(outsideMobileCss).toMatch(/button\.compareBtn\s*\{[^}]*background:\s*rgba\(var\(--green-rgb\), 0\.08\)/);
+  });
+});

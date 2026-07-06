@@ -1642,6 +1642,16 @@ button.compareBtn {
         background: rgba(var(--seal-accent-rgb), 0.12);
     }
 
+    button.compareBtn {
+        background: var(--green);
+        color: white;
+        border-color: var(--green);
+    }
+
+    button.compareBtn:hover:not(:disabled) {
+        filter: brightness(1.05);
+    }
+
     .stickyCta {
         background: var(--seal-accent);
         color: var(--seal-ink);
