@@ -1375,9 +1375,50 @@ button.compareBtn {
         --seal-paper: #F4F0E6;
     }
 
+    .topResultCard {
+        background: linear-gradient(160deg, var(--seal-ink) 0%, var(--seal-ink-2) 100%);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.08);
+        border-color: rgba(var(--seal-accent-rgb), 0.25);
+    }
+
+    .topResultLabel {
+        color: rgba(244, 240, 230, 0.7);
+    }
+
+    .topResultValue {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+        color: var(--seal-paper);
+    }
+
+    .topResultBadge {
+        background: rgba(var(--seal-accent-rgb), 0.16);
+        border-color: rgba(var(--seal-accent-rgb), 0.4);
+        color: var(--seal-paper);
+    }
+
     /* Mobilde: desktop sidebar gizli, mobil form + accordion görünür */
     .desktopSidebar {
         display: none !important;
+    }
+
+    .blueBox {
+        background: linear-gradient(160deg, var(--seal-ink) 0%, var(--seal-ink-2) 100%);
+        border-color: rgba(var(--seal-accent-rgb), 0.25);
+    }
+
+    .blueBoxTop h2 {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+        font-size: 2rem; /* mevcut mobil override ile aynı deger, sadece font eklendi */
+    }
+
+    .blueBoxBottom {
+        background: rgba(var(--seal-accent-rgb), 0.14);
+    }
+
+    .blueCircle {
+        background: var(--seal-accent);
     }
 
     .mobileSidebar {
@@ -1438,10 +1479,6 @@ button.compareBtn {
         gap: 8px;
     }
 
-    .blueBoxTop h2 {
-        font-size: 2rem;
-    }
-
     .blueBox {
         margin: 0 8px;
     }
@@ -1495,6 +1532,34 @@ button.compareBtn {
 
     .pagerLabel {
         display: none;
+    }
+
+    .statCard {
+        background: var(--seal-ink-2);
+        border-color: rgba(var(--seal-accent-rgb), 0.18);
+    }
+
+    .statCard h5 {
+        color: rgba(244, 240, 230, 0.65);
+    }
+
+    .statCardValue {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+        color: var(--seal-paper);
+    }
+
+    .statCardValue span {
+        color: rgba(244, 240, 230, 0.55);
+    }
+
+    .accordion {
+        background: var(--seal-ink-2);
+        border-color: rgba(var(--seal-accent-rgb), 0.18);
+    }
+
+    .accordionSummary {
+        color: var(--seal-paper);
     }
 
     .container * {
