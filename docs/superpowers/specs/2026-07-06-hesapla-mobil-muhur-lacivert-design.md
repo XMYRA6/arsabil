@@ -2,7 +2,9 @@
 
 ## Durum
 
-**Tamamlandı.** Bu plan `feature/hesapla-muhur-lacivert` branch'inde uygulandı ve 7 görevin tamamı (token temeli, palet uygulaması, kat-dilimi şeridi, brass CTA/slider override, SealBadge animasyonu, sticky CTA SVG ikonu, final doğrulama) bitti. Commit aralığı: `2940a48..fbf89f8` (6 uygulama commit'i) + bu final doğrulama commit'i. Bu spec artık açık iş değil — gelecekteki oturumlar bunu bekleyen bir plan olarak yeniden açmamalı.
+**Tamamlandı.** Bu plan `feature/hesapla-muhur-lacivert` branch'inde uygulandı ve 7 görevin tamamı (token temeli, palet uygulaması, kat-dilimi şeridi, brass CTA/slider override, SealBadge animasyonu, sticky CTA SVG ikonu, final doğrulama) bitti. Commit aralığı: `2940a48..fbf89f8` (7 uygulama commit'i — Task 2, review bulgusu düzeltmesiyle 2 commit üretti) + bu final doğrulama commit'i. Bu spec artık açık iş değil — gelecekteki oturumlar bunu bekleyen bir plan olarak yeniden açmamalı.
+
+**Not (final review, 2026-07-06):** Task 7'nin doğrulama raporundaki "Failed to fetch" (rapor kaydetme sırasında Fast-Refresh reload'a denk gelen tek seferlik ağ hatası) bulgusu, hydration-warning bulgusunun aksine tek bir anekdota dayanıyor (deliberate repro-and-clear yapılmadı) — kod incelemesiyle (`handleSaveReport`'ta abort/cancellation mantığı yok) makul bir Fast-Refresh kesintisi olarak değerlendirildi, ama kapatılmış değil "düşük güvenli, engelleyici olmayan" bir kalıntı olarak kabul edildi.
 
 ## Bağlam ve Problem
 
