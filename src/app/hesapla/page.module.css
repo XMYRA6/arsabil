@@ -1632,4 +1632,8 @@ button.compareBtn {
     .sliderArea {
         display: none;
     }
+
+    .container[data-revealed="false"] .mainPanelResults {
+        display: none;
+    }
 }
