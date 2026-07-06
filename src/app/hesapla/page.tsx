@@ -20,6 +20,7 @@ import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { FormulParamsFields, RiskCostFields, MarketField } from './AdvancedSettingsSections';
+import { SealBadge } from './SealBadge';
 
 interface ProfitLevel {
   id: string;
@@ -310,6 +311,8 @@ export default function Home() {
     }
   };
 
+  const marketPriceNum = parseInt(manualMarketPrice.replace(/\D/g, '') || '0');
+
   return (
     <div className={styles.container}>
       <div className={styles.layout} id="formTop">
@@ -446,12 +449,10 @@ export default function Home() {
               <div className={styles.topResultValue}>
                 {result?.FD_total ? `${Math.round(result.FD_total).toLocaleString('tr-TR')} TL` : '---'}
               </div>
-              {parseInt(manualMarketPrice.replace(/\D/g, '') || '0') > 0 && result?.FD_total && parseInt(manualMarketPrice.replace(/\D/g, '') || '0') > result.FD_total ? (
-                <div className={styles.topResultBadge}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-                  Piyasaya Göre: %{Math.round(((parseInt(manualMarketPrice.replace(/\D/g, '') || '0') - result.FD_total) / parseInt(manualMarketPrice.replace(/\D/g, '') || '0')) * 100)} DAHA UCUZ
-                </div>
-              ) : null}
+              <SealBadge
+                show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum > result.FD_total}
+                percentage={result?.FD_total ? Math.round(((marketPriceNum - result.FD_total) / marketPriceNum) * 100) : 0}
+              />
             </div>
 
             <div className={styles.unifiedGlassPanel}>
