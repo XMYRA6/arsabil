@@ -139,8 +139,9 @@ describe('kart yüzeyi migrasyonu — seal-ink/seal-ink-2 doğrudan kullanılmam
   });
 
   it('bu üç kart artık backdrop-filter blur uygulamalı (light temada camsı yüzey için gerekli)', () => {
-    const cardBlockPattern = /\.topResultCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/;
-    expect(pageCss).toMatch(cardBlockPattern);
+    expect(pageCss).toMatch(/\.topResultCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
+    expect(pageCss).toMatch(/\.statCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
+    expect(pageCss).toMatch(/\.accordion\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
   });
 
   it('topResultLabel/statCard h5 artık --seal-text-muted kullanmalı', () => {

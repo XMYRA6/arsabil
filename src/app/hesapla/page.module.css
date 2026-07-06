@@ -1433,11 +1433,6 @@ button.compareBtn {
         display: none !important;
     }
 
-    .blueBox {
-        background: linear-gradient(160deg, var(--seal-ink) 0%, var(--seal-ink-2) 100%);
-        border-color: rgba(var(--seal-accent-rgb), 0.25);
-    }
-
     .blueBoxTop h2 {
         font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-variant-numeric: tabular-nums;
