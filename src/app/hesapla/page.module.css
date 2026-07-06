@@ -1624,4 +1624,12 @@ button.compareBtn {
     .sealRangeSlider input[type="range"]::-moz-range-thumb {
         border-color: var(--seal-accent);
     }
+
+    .blueBox {
+        display: none;
+    }
+
+    .sliderArea {
+        display: none;
+    }
 }

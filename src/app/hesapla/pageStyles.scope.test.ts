@@ -58,3 +58,19 @@ describe('paylaşılan bileşen override\'larının özgünlük deseni', () => {
     expect(pageCss).toMatch(/\.sealRangeSlider input\[type="range"\]/);
   });
 });
+
+describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
+  it('.blueBox mobilde gizlenmeli, kural mobil media query içinde olmalı', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const blueBoxHideMatch = pageCss.match(/\.blueBox\s*\{[^}]*display:\s*none/);
+    expect(blueBoxHideMatch).not.toBeNull();
+    expect(blueBoxHideMatch!.index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+
+  it('.sliderArea mobilde gizlenmeli, kural mobil media query içinde olmalı', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const sliderAreaHideMatch = pageCss.match(/\.sliderArea\s*\{[^}]*display:\s*none/);
+    expect(sliderAreaHideMatch).not.toBeNull();
+    expect(sliderAreaHideMatch!.index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+});
