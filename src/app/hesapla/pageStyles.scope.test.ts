@@ -34,3 +34,16 @@ describe('hesapla mobil Mühür Lacivert token kapsamı', () => {
     expect(sealPaperRgbIndex).toBeGreaterThan(lastMobileMediaIndex);
   });
 });
+
+describe('kat dilimi şeridi kapsamı', () => {
+  it('.mobileAccordions .drawerRow::before selektörü tanımlı olmalı', () => {
+    expect(pageCss).toMatch(/\.mobileAccordions\s+\.drawerRow::before/);
+  });
+
+  it('çıplak .drawerRow::before (mobileAccordions olmadan) TANIMLI OLMAMALI', () => {
+    // .mobileAccordions .drawerRow::before dışında hiçbir yerde bare .drawerRow::before olmamalı
+    const bareRulePattern = /(?<!\.mobileAccordions\s)\.drawerRow::before/g;
+    const matches = pageCss.match(bareRulePattern) ?? [];
+    expect(matches.length).toBe(0);
+  });
+});

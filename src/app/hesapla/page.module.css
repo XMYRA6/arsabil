@@ -1435,6 +1435,23 @@ button.compareBtn {
         padding: 0 12px;
     }
 
+    .mobileAccordions .drawerRow {
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .mobileAccordions .drawerRow::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 6px;
+        bottom: 6px;
+        width: 2.5px;
+        border-radius: 2px;
+        background: var(--seal-accent);
+        opacity: 0.55;
+    }
+
     /* Tek kolon dikey akış (carousel kaldırıldı) */
     .layout {
         display: flex !important;
