@@ -1406,6 +1406,11 @@ button.compareBtn {
         color: var(--seal-paper);
     }
 
+    .topResultBadgePricier {
+        background: rgba(var(--red-rgb), 0.16);
+        border-color: rgba(var(--red-rgb), 0.4);
+    }
+
     /* Mobilde: desktop sidebar gizli, mobil form + accordion görünür */
     .desktopSidebar {
         display: none !important;

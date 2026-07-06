@@ -620,6 +620,12 @@ export default function Home() {
                 <SealBadge
                   show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum > result.FD_total}
                   percentage={result?.FD_total ? Math.round(((marketPriceNum - result.FD_total) / marketPriceNum) * 100) : 0}
+                  variant="cheaper"
+                />
+                <SealBadge
+                  show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum < result.FD_total}
+                  percentage={result?.FD_total ? Math.round(((result.FD_total - marketPriceNum) / marketPriceNum) * 100) : 0}
+                  variant="pricier"
                 />
               </div>
             )}
