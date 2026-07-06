@@ -696,6 +696,14 @@
     font-weight: 700;
 }
 
+.desktopActionsSlot {
+    display: contents;
+}
+
+.mobileActionsSlot {
+    display: none;
+}
+
 /* Action Bottom Row */
 .actionBottomRow {
     display: flex;
@@ -1639,5 +1647,17 @@ button.compareBtn {
 
     .container[data-revealed="false"] .summaryPanel {
         display: none;
+    }
+
+    .desktopActionsSlot {
+        display: none;
+    }
+
+    .mobileActionsSlot {
+        display: none;
+    }
+
+    .container[data-revealed="true"] .mobileActionsSlot {
+        display: contents;
     }
 }

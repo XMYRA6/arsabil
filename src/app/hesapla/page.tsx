@@ -314,6 +314,68 @@ export default function Home() {
 
   const marketPriceNum = parseInt(manualMarketPrice.replace(/\D/g, '') || '0');
 
+  const actionsSection = (
+    <>
+      <div className={styles.actionBottomRow}>
+        <Button variant="outline" onClick={handlePdfDownload} disabled={!result} className={styles.sealOutlineBtn}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          PDF İndir
+        </Button>
+        <Button variant="primary" onClick={handleSaveReport} disabled={isSaving} className={styles.sealPrimaryBtn}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          {isSaving ? 'Kaydediliyor...' : 'Rapor Kaydet'}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={handleAddScenario}
+          disabled={!result || savedScenarios.length >= 3}
+          title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
+          className={styles.compareBtn}
+        >
+          + Karşılaştır
+        </Button>
+      </div>
+      {savedScenarios.length > 0 && (
+        <div className={styles.scenarioPills}>
+          {savedScenarios.map((s, i) => {
+            const pillClass = [styles.pillBlue, styles.pillGreen, styles.pillOrange][i % 3];
+            return (
+              <span key={s.id} className={`${styles.scenarioPill} ${pillClass}`}>
+                {s.name}
+                <button
+                  onClick={() => handleRemoveScenario(s.id)}
+                  aria-label={`${s.name}'i kaldır`}
+                  className={styles.scenarioPillRemove}
+                  title={`${s.name}'i kaldır`}
+                >×</button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {savedScenarios.length >= 2 && (
+        <div className={styles.compareSection}>
+          <h3 className={styles.compareTitle}>
+            Senaryo Karşılaştırması
+          </h3>
+          <ScenarioCompare
+            scenarios={savedScenarios}
+            onShareRequest={async (ids) => {
+              const res = await fetch('/api/compare/share', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ scenarioIds: ids }),
+              });
+              if (!res.ok) return null;
+              const { token } = await res.json();
+              return `${window.location.origin}/compare/${token}`;
+            }}
+          />
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className={styles.container} data-revealed={isResultsRevealed}>
       <div className={styles.layout} id="formTop">
@@ -713,63 +775,9 @@ export default function Home() {
               />
             )}
             </div>
-            <div className={styles.actionBottomRow}>
-              <Button variant="outline" onClick={handlePdfDownload} disabled={!result} className={styles.sealOutlineBtn}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                PDF İndir
-              </Button>
-              <Button variant="primary" onClick={handleSaveReport} disabled={isSaving} className={styles.sealPrimaryBtn}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                {isSaving ? 'Kaydediliyor...' : 'Rapor Kaydet'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleAddScenario}
-                disabled={!result || savedScenarios.length >= 3}
-                title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-                className={styles.compareBtn}
-              >
-                + Karşılaştır
-              </Button>
+            <div className={styles.desktopActionsSlot}>
+              {actionsSection}
             </div>
-            {savedScenarios.length > 0 && (
-              <div className={styles.scenarioPills}>
-                {savedScenarios.map((s, i) => {
-                  const pillClass = [styles.pillBlue, styles.pillGreen, styles.pillOrange][i % 3];
-                  return (
-                    <span key={s.id} className={`${styles.scenarioPill} ${pillClass}`}>
-                      {s.name}
-                      <button
-                        onClick={() => handleRemoveScenario(s.id)}
-                        aria-label={`${s.name}'i kaldır`}
-                        className={styles.scenarioPillRemove}
-                        title={`${s.name}'i kaldır`}
-                      >×</button>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-            {savedScenarios.length >= 2 && (
-              <div className={styles.compareSection}>
-                <h3 className={styles.compareTitle}>
-                  Senaryo Karşılaştırması
-                </h3>
-                <ScenarioCompare
-                  scenarios={savedScenarios}
-                  onShareRequest={async (ids) => {
-                    const res = await fetch('/api/compare/share', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ scenarioIds: ids }),
-                    });
-                    if (!res.ok) return null;
-                    const { token } = await res.json();
-                    return `${window.location.origin}/compare/${token}`;
-                  }}
-                />
-              </div>
-            )}
           </main>
 
           {/* Hesap Özeti */}
@@ -866,6 +874,10 @@ export default function Home() {
               {summaryPage === 2 && '💰 Finansal Modelleme'}
             </div>
           </aside>
+
+          <div className={styles.mobileActionsSlot}>
+            {actionsSection}
+          </div>
         </section>
       </div >
 

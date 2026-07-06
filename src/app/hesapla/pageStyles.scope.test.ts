@@ -92,3 +92,16 @@ describe('summaryPanel gate kapsamı', () => {
     expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
   });
 });
+
+describe('aksiyon butonları dual-slot kapsamı', () => {
+  it('.desktopActionsSlot mobilde gizlenmeli', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const match = pageCss.match(/\.desktopActionsSlot\s*\{[^}]*display:\s*none/);
+    expect(match).not.toBeNull();
+    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+
+  it('.mobileActionsSlot yalnızca data-revealed="true" iken mobilde görünmeli', () => {
+    expect(pageCss).toMatch(/\.container\[data-revealed="true"\]\s+\.mobileActionsSlot\s*\{[^}]*display:\s*contents/);
+  });
+});
