@@ -47,3 +47,14 @@ describe('kat dilimi şeridi kapsamı', () => {
     expect(matches.length).toBe(0);
   });
 });
+
+describe('paylaşılan bileşen override\'larının özgünlük deseni', () => {
+  it('Rapor Kaydet/PDF İndir butonları element+class selektörüyle override edilmeli (bkz. compareBtn hata geçmişi)', () => {
+    expect(pageCss).toMatch(/button\.sealPrimaryBtn/);
+    expect(pageCss).toMatch(/button\.sealOutlineBtn/);
+  });
+
+  it('mobil RangeSlider brass override\'ı input\\[type="range"\\] elementine scope\'lanmalı', () => {
+    expect(pageCss).toMatch(/\.sealRangeSlider input\[type="range"\]/);
+  });
+});

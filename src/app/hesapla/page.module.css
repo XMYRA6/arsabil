@@ -1583,4 +1583,41 @@ button.compareBtn {
     .container * {
         overflow-wrap: break-word;
     }
+
+    button.sealPrimaryBtn {
+        background: var(--seal-accent);
+        color: var(--seal-ink);
+        box-shadow: none;
+    }
+
+    button.sealPrimaryBtn:hover:not(:disabled) {
+        filter: brightness(1.05);
+        box-shadow: none;
+    }
+
+    button.sealOutlineBtn {
+        color: var(--seal-accent);
+        border-color: var(--seal-accent);
+    }
+
+    button.sealOutlineBtn:hover:not(:disabled) {
+        background: rgba(var(--seal-accent-rgb), 0.12);
+    }
+
+    .stickyCta {
+        background: var(--seal-accent);
+        color: var(--seal-ink);
+    }
+
+    .sealRangeSlider input[type="range"] {
+        background: linear-gradient(to right, var(--seal-accent) var(--progress), rgba(255, 255, 255, 0.12) var(--progress));
+    }
+
+    .sealRangeSlider input[type="range"]::-webkit-slider-thumb {
+        border-color: var(--seal-accent);
+    }
+
+    .sealRangeSlider input[type="range"]::-moz-range-thumb {
+        border-color: var(--seal-accent);
+    }
 }
