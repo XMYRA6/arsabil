@@ -7,13 +7,18 @@ const globalsCss = fs.readFileSync(
   'utf8'
 );
 
-describe('hesapla mobil Mühür Lacivert token kapsamı', () => {
+describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
   it('yeni seal token\'ları globals.css içine hiç sızmamış olmalı', () => {
-    expect(globalsCss).not.toMatch(/--seal-(ink|accent|paper)/);
+    expect(globalsCss).not.toMatch(/--seal-(ink|accent|surface|border|text)/);
   });
 
-  it('--seal-accent token\'ı page.module.css içinde tanımlı olmalı', () => {
-    expect(pageCss).toMatch(/--seal-accent:\s*#C9A15A/);
+  it('--seal-accent açık Aurora mavisi olmalı (#4C8DFF), pirinç sarısı olmamalı', () => {
+    expect(pageCss).toMatch(/--seal-accent:\s*#4C8DFF/);
+    expect(pageCss).not.toMatch(/--seal-accent:\s*#C9A15A/);
+  });
+
+  it('--seal-accent-rgb, --seal-accent ile tutarlı olmalı (76, 141, 255)', () => {
+    expect(pageCss).toMatch(/--seal-accent-rgb:\s*76,\s*141,\s*255/);
   });
 
   it('--seal-accent tanımı, mobil @media (max-width: 768px) bloğunun içinde olmalı', () => {
@@ -23,15 +28,26 @@ describe('hesapla mobil Mühür Lacivert token kapsamı', () => {
     expect(sealAccentIndex).toBeGreaterThan(lastMobileMediaIndex);
   });
 
-  it('--seal-paper-rgb token\'ı page.module.css içinde tanımlı olmalı', () => {
-    expect(pageCss).toMatch(/--seal-paper-rgb:\s*244,\s*240,\s*230/);
+  it('--seal-surface hem dark hem light tema bloğunda tanımlı olmalı', () => {
+    expect(pageCss).toMatch(/\[data-theme="dark"\]\s*\.container\s*\{[^}]*--seal-surface:/);
+    expect(pageCss).toMatch(/\[data-theme="light"\]\s*\.container\s*\{[^}]*--seal-surface:/);
   });
 
-  it('--seal-paper-rgb tanımı, mobil @media (max-width: 768px) bloğunun içinde olmalı', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const sealPaperRgbIndex = pageCss.indexOf('--seal-paper-rgb:');
-    expect(lastMobileMediaIndex).toBeGreaterThan(-1);
-    expect(sealPaperRgbIndex).toBeGreaterThan(lastMobileMediaIndex);
+  it('light temada --seal-surface, mevcut --shell-bg camsı token\'ını kullanmalı (yeni rgba icat edilmemeli)', () => {
+    expect(pageCss).toMatch(/\[data-theme="light"\]\s*\.container\s*\{[^}]*--seal-surface:\s*var\(--shell-bg\)/);
+  });
+
+  it('dark temada --seal-surface, eski lacivert gradienti korumalı', () => {
+    expect(pageCss).toMatch(/\[data-theme="dark"\]\s*\.container\s*\{[^}]*--seal-surface:\s*linear-gradient\(160deg, #0F2A43 0%, #16324F 100%\)/);
+  });
+
+  it('--seal-text hem dark hem light tema bloğunda tanımlı olmalı', () => {
+    expect(pageCss).toMatch(/\[data-theme="dark"\]\s*\.container\s*\{[^}]*--seal-text:/);
+    expect(pageCss).toMatch(/\[data-theme="light"\]\s*\.container\s*\{[^}]*--seal-text:/);
+  });
+
+  it('light temada --seal-text, mevcut --card-title token\'ını kullanmalı', () => {
+    expect(pageCss).toMatch(/\[data-theme="light"\]\s*\.container\s*\{[^}]*--seal-text:\s*var\(--card-title\)/);
   });
 });
 
