@@ -83,3 +83,12 @@ describe('mainPanelResults gate kapsamı', () => {
     expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
   });
 });
+
+describe('summaryPanel gate kapsamı', () => {
+  it('.summaryPanel yalnızca data-revealed="false" iken mobilde gizlenmeli', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const match = pageCss.match(/\.container\[data-revealed="false"\]\s+\.summaryPanel\s*\{[^}]*display:\s*none/);
+    expect(match).not.toBeNull();
+    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+});
