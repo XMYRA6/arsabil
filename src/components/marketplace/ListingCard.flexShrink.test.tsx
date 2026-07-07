@@ -10,15 +10,6 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock next/image (it will error without a proper next.config image loader)
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />;
-  },
-}));
-
 describe('ListingCard — flexShrink fix', () => {
   // Minimal mock Listing object
   const mockListing: Listing = {
