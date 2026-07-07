@@ -256,12 +256,53 @@
 }
 
 @media (max-width: 768px) {
-  .container { padding: 1.25rem 1rem calc(1.25rem + var(--bottomnav-height)); gap: 1.25rem; }
+  /* Mühür kimliği — sayfa-scope'lu token'lar (bkz. hesapla/page.module.css) */
+  .container {
+    --seal-ink: #0F2A43;
+    --seal-accent: var(--aurora-cyan);
+    --seal-accent-rgb: 43, 124, 255;
+    padding: 1.25rem 1rem calc(1.25rem + var(--bottomnav-height));
+    gap: 1.25rem;
+  }
+
+  [data-theme="dark"] .container {
+    --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+    --seal-border-soft: rgba(43, 124, 255, 0.18);
+    --seal-recessed: rgba(0, 0, 0, 0.2);
+  }
+
+  [data-theme="light"] .container {
+    --seal-surface: var(--shell-bg);
+    --seal-border-soft: var(--shell-border);
+    --seal-recessed: rgba(0, 0, 0, 0.03);
+  }
+
   .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
   .statsGrid > * { min-width: 0; }
   .twoCol { grid-template-columns: 1fr; }
-  .reportRow { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .offerRow { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  .section {
+    background: var(--seal-surface);
+    border-color: var(--seal-border-soft);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .reportRow,
+  .offerRow {
+    background: var(--seal-recessed);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .statValue,
+  .reportMeta,
+  .offerAmount {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
   .quickActions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
   .sectionLink { min-height: var(--touch-target); display: inline-flex; align-items: center; }
   .qaBtn { min-height: var(--touch-target); }
