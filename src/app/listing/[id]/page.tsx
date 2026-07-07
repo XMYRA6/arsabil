@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
-import { FizibiliteScoreBadge } from '@/components/marketplace/FizibiliteScoreBadge';
+import { ScoreRevealBadge } from './ScoreRevealBadge';
 import { toast } from 'react-hot-toast';
 import { AppBar } from '@/components/mobile/AppBar';
 import { SwipeGallery } from '@/components/mobile/SwipeGallery';
@@ -138,7 +138,7 @@ export default function ListingDetailPage() {
 
                         {/* Fizibilite score overlay */}
                         <div className={styles.scoreOverlay}>
-                            <FizibiliteScoreBadge score={score} size="lg" showLabel />
+                            <ScoreRevealBadge score={score} size="lg" showLabel />
                         </div>
 
                         {/* Change badge */}
