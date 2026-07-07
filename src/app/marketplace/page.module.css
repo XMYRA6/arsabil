@@ -279,6 +279,8 @@
         min-width: 0;
         background: var(--seal-surface);
         border-bottom-color: var(--seal-border-soft);
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+        mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
     }
 
     .topBar::-webkit-scrollbar {
