@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { FizibiliteScoreBadge } from './FizibiliteScoreBadge';
 import { useRouter } from 'next/navigation';
+import styles from './ListingCard.module.css';
 
 function seededInt(seed: string, min: number, max: number): number {
     let h = 0;
@@ -117,11 +118,11 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     {/* Price + type */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         {price > 0 ? (
-                            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                            <span className={styles.dataNum} style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--card-title)' }}>
                                 {price.toLocaleString('tr-TR')} TL
                             </span>
                         ) : (
-                            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                            <span className={styles.dataNum} style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--card-title)' }}>
                                 {payiMin.toFixed(0)}–{payiMax.toFixed(0)}%
                             </span>
                         )}
@@ -146,9 +147,9 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                             background: `rgba(${scoreRgb},0.09)`, border: `1.5px solid rgba(${scoreRgb},0.27)`,
                             borderRadius: 8, padding: '2px 10px', fontSize: '0.72rem', fontWeight: 800, color: scoreColor,
                         }}>
-                            Fizibilite Skoru {score}<span style={{ fontSize: '0.6rem', fontWeight: 600 }}>/100</span>
+                            Fizibilite Skoru <span className={styles.dataNum}>{score}</span><span className={styles.dataNum} style={{ fontSize: '0.6rem', fontWeight: 600 }}>/100</span>
                         </span>
-                        <span style={{
+                        <span className={styles.dataNum} style={{
                             fontSize: '0.72rem', fontWeight: 800,
                             color: change >= 0 ? 'var(--green)' : 'var(--red)',
                             display: 'inline-flex', alignItems: 'center', gap: 2,
@@ -258,15 +259,15 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
             <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     {price > 0 ? (
-                        <span style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                        <span className={styles.dataNum} style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
                             {(price / 1000000).toFixed(1)}M TL
                         </span>
                     ) : (
-                        <span style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                        <span className={styles.dataNum} style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
                             {payiMin.toFixed(0)}–{payiMax.toFixed(0)}%
                         </span>
                     )}
-                    <span style={{
+                    <span className={styles.dataNum} style={{
                         fontSize: '0.65rem', fontWeight: 800,
                         color: change >= 0 ? 'var(--green)' : 'var(--red)',
                     }}>{change >= 0 ? '+' : ''}{change.toFixed(1)}%</span>
@@ -279,7 +280,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     <div style={{ flex: 1, height: 3, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
                         <div style={{ width: `${score}%`, height: '100%', borderRadius: 3, background: scoreColor }} />
                     </div>
-                    <span style={{ fontSize: '0.62rem', fontWeight: 800, color: scoreColor }}>{score}</span>
+                    <span className={styles.dataNum} style={{ fontSize: '0.62rem', fontWeight: 800, color: scoreColor }}>{score}</span>
                 </div>
             </div>
 

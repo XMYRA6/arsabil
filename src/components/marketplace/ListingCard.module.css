@@ -1,0 +1,6 @@
+@media (max-width: 768px) {
+    .dataNum {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+    }
+}
