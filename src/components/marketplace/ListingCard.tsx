@@ -83,6 +83,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     transition: 'all 0.18s',
                     boxShadow: highlighted ? '0 6px 20px rgba(var(--primary-rgb),.15)' : '0 2px 8px rgba(0,0,0,.06)',
                     minHeight: 120,
+                    flexShrink: 0,
                 }}
             >
                 {/* Photo */}
@@ -219,6 +220,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 transition: 'all 0.18s',
                 boxShadow: highlighted ? '0 8px 30px rgba(var(--primary-rgb),.20)' : '0 2px 8px rgba(0,0,0,.06)',
                 position: 'relative',
+                flexShrink: 0,
             }}
         >
             {/* Photo */}
