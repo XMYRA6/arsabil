@@ -236,6 +236,25 @@
    ========================================================================= */
 @media (max-width: 768px) {
 
+    /* Mühür kimliği — sayfa-scope'lu token'lar (bkz. hesapla/page.module.css) */
+    .container {
+        --seal-ink: #0F2A43;
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
+    }
+
+    [data-theme="dark"] .container {
+        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+        --seal-border: rgba(43, 124, 255, 0.25);
+        --seal-border-soft: rgba(43, 124, 255, 0.18);
+    }
+
+    [data-theme="light"] .container {
+        --seal-surface: var(--shell-bg);
+        --seal-border: var(--shell-border);
+        --seal-border-soft: var(--shell-border);
+    }
+
     .desktopOnlySpacer,
     .desktopViewToggle {
         display: none !important;
@@ -247,6 +266,8 @@
         border: none;
         border-radius: 0;
         max-width: 100vw;
+        background: var(--seal-surface);
+        border-bottom-color: var(--seal-border-soft);
     }
 
     .topBar {
@@ -256,6 +277,8 @@
         padding: 8px 12px;
         gap: 8px;
         min-width: 0;
+        background: var(--seal-surface);
+        border-bottom-color: var(--seal-border-soft);
     }
 
     .topBar::-webkit-scrollbar {
@@ -330,5 +353,20 @@
         flex: 1;
         min-height: 0;
         height: auto !important;
+    }
+
+    .listPanel {
+        background: var(--seal-surface);
+    }
+
+    .emsalChip {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .quickChipActive,
+    .pageBtnActive {
+        background: var(--seal-accent);
+        border-color: var(--seal-accent);
     }
 }
