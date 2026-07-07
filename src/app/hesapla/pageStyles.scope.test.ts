@@ -12,13 +12,13 @@ describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
     expect(globalsCss).not.toMatch(/--seal-(ink|accent|surface|border|text)/);
   });
 
-  it('--seal-accent açık Aurora mavisi olmalı (#4C8DFF), pirinç sarısı olmamalı', () => {
-    expect(pageCss).toMatch(/--seal-accent:\s*#4C8DFF/);
+  it('--seal-accent marka Aurora cyan\'ı kullanmalı, pirinç sarısı olmamalı', () => {
+    expect(pageCss).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
     expect(pageCss).not.toMatch(/--seal-accent:\s*#C9A15A/);
   });
 
-  it('--seal-accent-rgb, --seal-accent ile tutarlı olmalı (76, 141, 255)', () => {
-    expect(pageCss).toMatch(/--seal-accent-rgb:\s*76,\s*141,\s*255/);
+  it('--seal-accent-rgb, --aurora-cyan (#2b7cff) ile tutarlı olmalı (43, 124, 255)', () => {
+    expect(pageCss).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
   });
 
   it('--seal-accent tanımı, mobil @media (max-width: 768px) bloğunun içinde olmalı', () => {

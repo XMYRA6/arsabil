@@ -1377,8 +1377,8 @@ button.compareBtn {
 
         /* Faz 1.5 revizyonu — Cam Kart + Aurora Mavi Vurgu (bkz. docs/superpowers/specs/2026-07-06-hesapla-mobil-cam-aurora-vurgu-design.md) */
         --seal-ink: #0F2A43;
-        --seal-accent: #4C8DFF;
-        --seal-accent-rgb: 76, 141, 255;
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
     }
 
     [data-theme="dark"] .container {
@@ -1444,7 +1444,7 @@ button.compareBtn {
     }
 
     .blueCircle {
-        background: var(--seal-accent);
+        background: var(--brand-gradient);
     }
 
     .mobileSidebar {
@@ -1618,8 +1618,8 @@ button.compareBtn {
     }
 
     button.sealPrimaryBtn {
-        background: var(--seal-accent);
-        color: var(--seal-ink);
+        background: var(--brand-gradient);
+        color: white;
         box-shadow: none;
     }
 
@@ -1648,12 +1648,12 @@ button.compareBtn {
     }
 
     .stickyCta {
-        background: var(--seal-accent);
-        color: var(--seal-ink);
+        background: var(--brand-gradient);
+        color: white;
     }
 
     .sealRangeSlider input[type="range"] {
-        background: linear-gradient(to right, var(--seal-accent) var(--progress), rgba(255, 255, 255, 0.12) var(--progress));
+        background: linear-gradient(to right, var(--aurora-violet) 0%, var(--seal-accent) var(--progress), rgba(255, 255, 255, 0.12) var(--progress));
     }
 
     .sealRangeSlider input[type="range"]::-webkit-slider-thumb {
