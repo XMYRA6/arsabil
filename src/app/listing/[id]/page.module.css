@@ -526,6 +526,31 @@
     .page {
         /* alt boşluk: StickyActionBar + BottomNavbar */
         padding: 12px 12px calc(var(--bottomnav-height) + 76px);
+
+        /* Mühür kimliği — sayfa-scope'lu token'lar (bkz. hesapla/page.module.css) */
+        --seal-ink: #0F2A43;
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
+    }
+
+    [data-theme="dark"] .page {
+        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+        --seal-border: rgba(43, 124, 255, 0.25);
+        --seal-border-soft: rgba(43, 124, 255, 0.18);
+        --seal-text: #F4F0E6;
+        --seal-text-muted: rgba(244, 240, 230, 0.7);
+        --seal-text-faint: rgba(244, 240, 230, 0.55);
+        --seal-recessed: rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="light"] .page {
+        --seal-surface: var(--shell-bg);
+        --seal-border: var(--shell-border);
+        --seal-border-soft: var(--shell-border);
+        --seal-text: var(--card-title);
+        --seal-text-muted: var(--muted);
+        --seal-text-faint: var(--muted);
+        --seal-recessed: rgba(0, 0, 0, 0.03);
     }
 
     /* AppBar'ın geri butonu var; metin geri linki gizlenir */
@@ -559,6 +584,39 @@
 
     .sidebar {
         position: static;
+        background: var(--seal-surface);
+        border-color: var(--seal-border-soft);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .tabContent {
+        background: var(--seal-surface);
+        border-color: var(--seal-border-soft);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .detailCell,
+    .fizCell {
+        background: var(--seal-recessed);
+    }
+
+    .priceValue,
+    .fizValue,
+    .detailValue,
+    .miniStatValue,
+    .progressValue,
+    .offerShare,
+    .changeBadge {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .primaryBtn,
+    .actionPrimary {
+        background: var(--brand-gradient);
+        color: white;
     }
 
     /* aksiyonlar StickyActionBar'a taşındı; sidebar kopyası gizlenir */
