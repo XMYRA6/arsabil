@@ -68,18 +68,30 @@
 .avatarEditBadge {
   display: none;
   position: absolute;
-  bottom: -2px;
-  right: -2px;
+  bottom: -10px;
+  right: -10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.avatarEditBadgeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
   border-radius: 50%;
   background: var(--primary);
   border: 2px solid var(--panel);
-  align-items: center;
-  justify-content: center;
   font-size: 0.75rem;
-  cursor: pointer;
-  padding: 0;
+  pointer-events: none;
 }
 
 .avatarCircle {
@@ -187,6 +199,9 @@
 .saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .settingsSignOutBtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);

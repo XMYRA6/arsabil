@@ -47,4 +47,17 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     const mobileBlock = css.slice(mediaIndex)
     expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.menuList\s*\{[^}]*display:\s*none/)
   })
+
+  it('.avatarEditBadge dokunma hedefi ≥44px olmalı (görünür rozet .avatarEditBadgeIcon içinde, ayrı)', () => {
+    const baseIndex = css.indexOf('.avatarEditBadge {')
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(block).toMatch(/width:\s*44px/)
+    expect(block).toMatch(/height:\s*44px/)
+  })
+
+  it('.settingsSignOutBtn dokunma hedefi ≥44px olmalı', () => {
+    const baseIndex = css.indexOf('.settingsSignOutBtn {')
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(block).toMatch(/min-height:\s*44px/)
+  })
 })
