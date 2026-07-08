@@ -67,6 +67,7 @@ export default function ProfilePage() {
     const [favorites, setFavorites] = useState<Favorite[]>([])
     const [loadingFavs, setLoadingFavs] = useState(false)
     const [mobileSectionOpen, setMobileSectionOpen] = useState(false)
+    const [isEditingProfile, setIsEditingProfile] = useState(false)
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
@@ -111,6 +112,15 @@ export default function ProfilePage() {
 
     const closeSection = () => setMobileSectionOpen(false)
 
+    const startEditingProfile = () => setIsEditingProfile(true)
+
+    const cancelEditingProfile = () => {
+        setBio(profile?.bio ?? '')
+        setLinkedin(profile?.linkedin ?? '')
+        setWebsite(profile?.website ?? '')
+        setIsEditingProfile(false)
+    }
+
     const applyTheme = (mode: Theme) => {
         setTheme(mode)
         document.documentElement.setAttribute('data-theme', mode)
@@ -128,6 +138,7 @@ export default function ProfilePage() {
             const updated = await res.json()
             setProfile(prev => prev ? { ...prev, ...updated } : prev)
             setSaved(true)
+            setIsEditingProfile(false)
             setTimeout(() => setSaved(false), 2000)
         }
         setSaving(false)
@@ -184,7 +195,11 @@ export default function ProfilePage() {
                 showBack={mobileSectionOpen}
                 onBack={closeSection}
             />
-            <div className={styles.container} data-mobile-section={mobileSectionOpen ? 'true' : 'false'}>
+            <div
+                className={styles.container}
+                data-mobile-section={mobileSectionOpen ? 'true' : 'false'}
+                data-profile-edit={isEditingProfile ? 'true' : 'false'}
+            >
                 <h1 className={styles.pageTitle}>Profilim</h1>
 
             <div className={styles.layout}>
@@ -216,47 +231,85 @@ export default function ProfilePage() {
                             onChange={handleAvatarUpload}
                         />
                     </div>
-                    <h2 className={styles.displayName}>{session.user?.name || 'Kullanıcı'}</h2>
-                    <p className={styles.roleTag}>{(session.user as { role?: string })?.role || 'USER'}</p>
+                    <div className={styles.nameRow}>
+                        <div>
+                            <h2 className={styles.displayName}>{session.user?.name || 'Kullanıcı'}</h2>
+                            <p className={styles.roleTag}>{(session.user as { role?: string })?.role || 'USER'}</p>
+                        </div>
+                        <button
+                            type="button"
+                            className={styles.editProfileBtn}
+                            onClick={startEditingProfile}
+                            aria-label="Profili düzenle"
+                        >
+                            ✏️
+                        </button>
+                    </div>
 
                     {profile?.isVerified && (
                         <div className={styles.verifiedBadge}>✓ Doğrulandı</div>
                     )}
 
-                    <div className={styles.fieldGroup}>
-                        <label className={styles.label}>Hakkında</label>
-                        <textarea
-                            className={styles.textarea}
-                            placeholder="Kendinizi tanıtın..."
-                            value={bio}
-                            onChange={e => setBio(e.target.value)}
-                            maxLength={300}
-                        />
+                    <div className={styles.profileViewBlock}>
+                        <div className={styles.viewField}>
+                            <span className={styles.viewLabel}>Hakkında</span>
+                            <p className={styles.viewValue}>{profile?.bio || 'Henüz bilgi eklenmedi'}</p>
+                        </div>
+                        <div className={styles.viewField}>
+                            <span className={styles.viewLabel}>LinkedIn</span>
+                            {profile?.linkedin
+                                ? <a href={profile.linkedin} target="_blank" rel="noreferrer" className={styles.viewLink}>{profile.linkedin}</a>
+                                : <p className={styles.viewValue}>Henüz bilgi eklenmedi</p>
+                            }
+                        </div>
+                        <div className={styles.viewField}>
+                            <span className={styles.viewLabel}>Website</span>
+                            {profile?.website
+                                ? <a href={profile.website} target="_blank" rel="noreferrer" className={styles.viewLink}>{profile.website}</a>
+                                : <p className={styles.viewValue}>Henüz bilgi eklenmedi</p>
+                            }
+                        </div>
                     </div>
 
-                    <div className={styles.fieldGroup}>
-                        <label className={styles.label}>LinkedIn</label>
-                        <input
-                            className={styles.input}
-                            placeholder="https://linkedin.com/in/..."
-                            value={linkedin}
-                            onChange={e => setLinkedin(e.target.value)}
-                        />
-                    </div>
+                    <div className={styles.profileEditForm}>
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.label}>Hakkında</label>
+                            <textarea
+                                className={styles.textarea}
+                                placeholder="Kendinizi tanıtın..."
+                                value={bio}
+                                onChange={e => setBio(e.target.value)}
+                                maxLength={300}
+                            />
+                        </div>
 
-                    <div className={styles.fieldGroup}>
-                        <label className={styles.label}>Website</label>
-                        <input
-                            className={styles.input}
-                            placeholder="https://..."
-                            value={website}
-                            onChange={e => setWebsite(e.target.value)}
-                        />
-                    </div>
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.label}>LinkedIn</label>
+                            <input
+                                className={styles.input}
+                                placeholder="https://linkedin.com/in/..."
+                                value={linkedin}
+                                onChange={e => setLinkedin(e.target.value)}
+                            />
+                        </div>
 
-                    <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
-                        {saved ? '✓ Kaydedildi' : saving ? 'Kaydediliyor...' : 'Kaydet'}
-                    </button>
+                        <div className={styles.fieldGroup}>
+                            <label className={styles.label}>Website</label>
+                            <input
+                                className={styles.input}
+                                placeholder="https://..."
+                                value={website}
+                                onChange={e => setWebsite(e.target.value)}
+                            />
+                        </div>
+
+                        <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
+                            {saved ? '✓ Kaydedildi' : saving ? 'Kaydediliyor...' : 'Kaydet'}
+                        </button>
+                        <button type="button" className={styles.cancelBtn} onClick={cancelEditingProfile}>
+                            İptal
+                        </button>
+                    </div>
                 </div>
 
                 {/* Sağ: Sekmeli panel */}

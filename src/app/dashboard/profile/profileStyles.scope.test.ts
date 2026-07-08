@@ -65,4 +65,47 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     const mobileBlock = css.slice(mediaIndex)
     expect(mobileBlock).toMatch(/\.pageTitle\s*\{[^}]*display:\s*none/)
   })
+
+  it('.profileViewBlock masaüstünde gizli, mobilde varsayılan görünür olmalı', () => {
+    const baseIndex = css.indexOf('.profileViewBlock {')
+    expect(baseIndex).toBeGreaterThan(-1)
+    expect(baseIndex).toBeLessThan(mediaIndex)
+    const baseBlock = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(baseBlock).toMatch(/display:\s*none/)
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.profileViewBlock\s*\{[^}]*display:\s*block/)
+  })
+
+  it('data-profile-edit="true" iken .profileViewBlock mobilde gizli olmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.container\[data-profile-edit="true"\]\s+\.profileViewBlock\s*\{[^}]*display:\s*none/)
+  })
+
+  it('data-profile-edit="false" iken .profileEditForm mobilde gizli olmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.container\[data-profile-edit="false"\]\s+\.profileEditForm\s*\{[^}]*display:\s*none/)
+  })
+
+  it('.editProfileBtn dokunma hedefi ≥44px olmalı ve masaüstünde gizli olmalı', () => {
+    const baseIndex = css.indexOf('.editProfileBtn {')
+    expect(baseIndex).toBeGreaterThan(-1)
+    expect(baseIndex).toBeLessThan(mediaIndex)
+    const baseBlock = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(baseBlock).toMatch(/display:\s*none/)
+    const mobileBlock = css.slice(mediaIndex)
+    const mobileMatch = mobileBlock.match(/\.editProfileBtn\s*\{[^}]*\}/)
+    expect(mobileMatch).not.toBeNull()
+    expect(mobileMatch![0]).toMatch(/width:\s*44px/)
+    expect(mobileMatch![0]).toMatch(/height:\s*44px/)
+  })
+
+  it('.cancelBtn dokunma hedefi ≥44px olmalı ve masaüstünde gizli olmalı (Kaydet ile birebir aynı davranış, desktop pixel-parity)', () => {
+    const baseIndex = css.indexOf('.cancelBtn {')
+    expect(baseIndex).toBeGreaterThan(-1)
+    expect(baseIndex).toBeLessThan(mediaIndex)
+    const baseBlock = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(baseBlock).toMatch(/display:\s*none/)
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.cancelBtn\s*\{[^}]*min-height:\s*44px/)
+  })
 })

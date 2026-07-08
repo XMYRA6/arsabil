@@ -122,6 +122,14 @@
   margin: -0.5rem 0 0;
 }
 
+.nameRow {
+  display: block;
+}
+
+.editProfileBtn {
+  display: none;
+}
+
 .verifiedBadge {
   display: flex;
   align-items: center;
@@ -361,6 +369,42 @@
   border-radius: 50%;
 }
 
+.profileViewBlock {
+  display: none;
+}
+
+.viewField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.viewLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.viewValue {
+  font-size: 0.85rem;
+  color: var(--text);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.viewLink {
+  font-size: 0.85rem;
+  color: var(--primary);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.cancelBtn {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
   .profileCard { position: static; }
@@ -389,5 +433,61 @@
 
   .container[data-mobile-section="true"] .menuList {
     display: none;
+  }
+
+  .nameRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .nameRow .displayName,
+  .nameRow .roleTag {
+    text-align: left;
+  }
+
+  .editProfileBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: none;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .profileViewBlock {
+    display: block;
+  }
+
+  .container[data-profile-edit="true"] .profileViewBlock {
+    display: none;
+  }
+
+  .container[data-profile-edit="false"] .profileEditForm {
+    display: none;
+  }
+
+  .cancelBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    width: 100%;
+    margin-top: 8px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
   }
 }
