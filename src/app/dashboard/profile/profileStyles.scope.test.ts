@@ -60,4 +60,9 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
     expect(block).toMatch(/min-height:\s*44px/)
   })
+
+  it('.pageTitle mobilde gizli olmalı (AppBar zaten başlığı gösteriyor, çift başlık önlenir)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.pageTitle\s*\{[^}]*display:\s*none/)
+  })
 })

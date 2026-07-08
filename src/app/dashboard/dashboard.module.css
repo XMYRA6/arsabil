@@ -395,3 +395,14 @@
         display: none; /* Fully wipe out the annoying horizontal scrolling sidebar. BottomNavbar rules now. */
     }
 }
+
+/* AppBar sticky düzeltmesi — backdrop-filter yeni bir containing block oluşturup
+   position:sticky'yi kırıyor (mainContent'in kendisi hiç kaymıyor, pencere kayıyor,
+   AppBar viewport dışına çıkıyor). AppBar yalnızca ≤768px'te göründüğü için düzeltme
+   de bu eşikte; mevcut 900px bloğu (sidebar çöküşü) farklı bir amaç, karıştırılmaz. */
+@media (max-width: 768px) {
+  .mainContent {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

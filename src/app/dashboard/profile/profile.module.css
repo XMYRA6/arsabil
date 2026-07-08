@@ -366,6 +366,10 @@
   .profileCard { position: static; }
   .themeGrid { grid-template-columns: repeat(2, 1fr); }
 
+  .pageTitle {
+    display: none;
+  }
+
   .avatarEditBadge {
     display: flex;
   }
