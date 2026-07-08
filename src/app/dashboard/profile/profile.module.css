@@ -119,7 +119,7 @@
   text-align: center;
   font-size: 0.72rem;
   color: var(--muted);
-  margin: -0.5rem 0 0;
+  margin: 0;
 }
 
 .nameRow {
@@ -238,14 +238,14 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-height: 44px;
-  padding: 14px 16px;
+  min-height: 56px;
+  padding: 10px 16px;
   background: none;
   border: none;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
@@ -255,9 +255,20 @@
   border-bottom: none;
 }
 
-.menuIcon {
-  font-size: 1.1rem;
+.menuIconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
+
+.menuIconBoxBlue { background: var(--primary); }
+.menuIconBoxOrange { background: var(--orange); }
+.menuIconBoxRed { background: var(--red); }
+.menuIconBoxGray { background: #64748b; }
 
 .menuLabel {
   flex: 1;
@@ -265,7 +276,7 @@
 
 .menuChevron {
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .tabs {

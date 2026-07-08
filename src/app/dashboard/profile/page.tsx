@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,11 +17,26 @@ const SECTION_TITLES: Record<Tab, string> = {
     settings:  'Tema & Ayarlar',
 }
 
-const MENU_ITEMS: { key: Tab; icon: string; label: string }[] = [
-    { key: 'portfolio', icon: '📁', label: 'Portfolyo' },
-    { key: 'listings',  icon: '🏗️', label: 'İlanlarım' },
-    { key: 'favorites', icon: '❤️', label: 'Favorilerim' },
-    { key: 'settings',  icon: '⚙️', label: 'Tema & Ayarlar' },
+const ICON_PROPS = { width: 17, height: 17, viewBox: '0 0 24 24', fill: 'none', stroke: 'white', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+
+const FolderIcon = () => (
+    <svg {...ICON_PROPS}><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" /></svg>
+)
+const BuildingIcon = () => (
+    <svg {...ICON_PROPS}><rect x="4" y="3" width="16" height="18" rx="1" /><path d="M9 21v-4h6v4M9 8h1M14 8h1M9 12h1M14 12h1" /></svg>
+)
+const HeartIcon = () => (
+    <svg {...ICON_PROPS} fill="white"><path d="M12 21s-7.5-4.7-10-9.3C.5 8 2 4.5 5.5 4c2.1-.3 4 .8 6.5 3.3C14.5 4.8 16.4 3.7 18.5 4 22 4.5 23.5 8 22 11.7 19.5 16.3 12 21 12 21Z" /></svg>
+)
+const GearIcon = () => (
+    <svg {...ICON_PROPS}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>
+)
+
+const MENU_ITEMS: { key: Tab; icon: ReactNode; colorClass: string; label: string }[] = [
+    { key: 'portfolio', icon: <FolderIcon />,   colorClass: styles.menuIconBoxBlue,   label: 'Portfolyo' },
+    { key: 'listings',  icon: <BuildingIcon />, colorClass: styles.menuIconBoxOrange, label: 'İlanlarım' },
+    { key: 'favorites', icon: <HeartIcon />,    colorClass: styles.menuIconBoxRed,    label: 'Favorilerim' },
+    { key: 'settings',  icon: <GearIcon />,     colorClass: styles.menuIconBoxGray,   label: 'Tema & Ayarlar' },
 ]
 
 interface Favorite {
@@ -339,7 +354,7 @@ export default function ProfilePage() {
                                 className={styles.menuRow}
                                 onClick={() => openSection(item.key)}
                             >
-                                <span className={styles.menuIcon}>{item.icon}</span>
+                                <span className={`${styles.menuIconBox} ${item.colorClass}`}>{item.icon}</span>
                                 <span className={styles.menuLabel}>{item.label}</span>
                                 <span className={styles.menuChevron}>›</span>
                             </button>
