@@ -37,4 +37,13 @@ describe('AppBar', () => {
         render(<AppBar title="Başlık" action={<button>Paylaş</button>} />)
         expect(screen.getByRole('button', { name: 'Paylaş' })).toBeInTheDocument()
     })
+
+    it('onBack verilirse onBack() çağırır, router.back()/push çağrılmaz', () => {
+        const onBack = jest.fn()
+        render(<AppBar title="Başlık" showBack onBack={onBack} backHref="/inbox" />)
+        fireEvent.click(screen.getByRole('button', { name: 'Geri' }))
+        expect(onBack).toHaveBeenCalledTimes(1)
+        expect(back).not.toHaveBeenCalled()
+        expect(push).not.toHaveBeenCalled()
+    })
 })

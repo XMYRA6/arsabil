@@ -9,6 +9,8 @@ interface AppBarProps {
     /** Geri butonunu göster; tıklanınca router.back() (backHref verilirse oraya push) */
     showBack?: boolean;
     backHref?: string;
+    /** Verilirse geri tıklamasında backHref/router.back() yerine bu çağrılır (route değişmeyen, state-tabanlı geri dönüşler için — örn. profil alt-ekranından menüye dönüş) */
+    onBack?: () => void;
     /** Sağ tarafta gösterilecek opsiyonel aksiyon (ikon butonu vb.) */
     action?: React.ReactNode;
 }
@@ -31,10 +33,11 @@ interface AppBarProps {
  * <AppBar title="İlan Detayı" showBack action={<FavoriteButton />} />
  * ```
  */
-export function AppBar({ title, showBack = false, backHref, action }: AppBarProps) {
+export function AppBar({ title, showBack = false, backHref, onBack, action }: AppBarProps) {
     const router = useRouter();
 
     const handleBack = () => {
+        if (onBack) { onBack(); return; }
         if (backHref) router.push(backHref);
         else router.back();
     };
