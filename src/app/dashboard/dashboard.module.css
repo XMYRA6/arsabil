@@ -396,12 +396,22 @@
     }
 }
 
-/* AppBar sticky düzeltmesi — backdrop-filter yeni bir containing block oluşturup
-   position:sticky'yi kırıyor (mainContent'in kendisi hiç kaymıyor, pencere kayıyor,
-   AppBar viewport dışına çıkıyor). AppBar yalnızca ≤768px'te göründüğü için düzeltme
-   de bu eşikte; mevcut 900px bloğu (sidebar çöküşü) farklı bir amaç, karıştırılmaz. */
+/* AppBar sticky düzeltmesi — asıl kök neden .mainContent'in overflow-y:auto'su.
+   CSS spec'e göre overflow'u visible olmayan bir ata, içindeki position:sticky
+   elemanların "scroll container" referansı olur — mainContent'in KENDİSİ hiç
+   kaymasa bile (scrollTop hep 0, gerçek kayan pencere/document), sticky bu
+   referansa bağlı kaldığı için hiç devreye girmiyor, AppBar document ile birlikte
+   akıp viewport dışına çıkıyor. Çözüm: mobilde overflow-y:auto'yu visible'a
+   çevirmek, böylece sticky'nin referansı gerçek pencere oluyor. (Önceki
+   backdrop-filter kaldırma denemesi zararsız ama etkisizdi — --panel opak
+   olduğu için backdrop-filter zaten görsel bir rol oynamıyordu; sticky/fixed
+   containing-block etkisi position:fixed'i ilgilendirir, position:sticky'nin
+   referansını overflow belirler — dokunulmadan bırakıldı.)
+   AppBar yalnızca ≤768px'te göründüğü için düzeltme de bu eşikte; mevcut 900px
+   bloğu (sidebar çöküşü) farklı bir amaç, karıştırılmaz. */
 @media (max-width: 768px) {
   .mainContent {
+    overflow: visible;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
