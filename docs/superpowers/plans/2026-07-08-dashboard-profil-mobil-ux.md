@@ -182,20 +182,34 @@ Expected: FAIL — ilk assertion (`mediaIndex`) hariç çoğu `toBeGreaterThan(-
 .avatarEditBadge {
   display: none;
   position: absolute;
-  bottom: -2px;
-  right: -2px;
+  bottom: -10px;
+  right: -10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.avatarEditBadgeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
   border-radius: 50%;
   background: var(--primary);
   border: 2px solid var(--panel);
-  align-items: center;
-  justify-content: center;
   font-size: 0.75rem;
-  cursor: pointer;
-  padding: 0;
+  pointer-events: none;
 }
 ```
+
+(`.avatarEditBadge` artık 44×44 görünmez dokunma alanı; içindeki `.avatarEditBadgeIcon` 28px'lik görünür rozet — Instagram tarzı küçük görünüm korunuyor, dokunma hedefi kuralı da karşılanıyor.)
 
 `.tabs` tanımının hemen üstüne (sağ sekme paneli bölümü, `.tabPanel`'den sonra) ekle:
 
@@ -244,6 +258,9 @@ Expected: FAIL — ilk assertion (`mediaIndex`) hariç çoğu `toBeGreaterThan(-
 
 ```css
 .settingsSignOutBtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   background: none;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -420,7 +437,9 @@ Mevcut:
                             onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
                             aria-label="Profil fotoğrafını değiştir"
                         >
-                            {uploadingAvatar ? '⏳' : '✏️'}
+                            <span className={styles.avatarEditBadgeIcon}>
+                                {uploadingAvatar ? '⏳' : '✏️'}
+                            </span>
                         </button>
                         <input
 ```
