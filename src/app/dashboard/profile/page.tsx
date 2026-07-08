@@ -4,10 +4,25 @@ import { useEffect, useRef, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { AppBar } from '@/components/mobile/AppBar'
 import styles from './profile.module.css'
 
 type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
 type Theme = 'dark' | 'light'
+
+const SECTION_TITLES: Record<Tab, string> = {
+    portfolio: 'Portfolyo',
+    listings:  'İlanlarım',
+    favorites: 'Favorilerim',
+    settings:  'Tema & Ayarlar',
+}
+
+const MENU_ITEMS: { key: Tab; icon: string; label: string }[] = [
+    { key: 'portfolio', icon: '📁', label: 'Portfolyo' },
+    { key: 'listings',  icon: '🏗️', label: 'İlanlarım' },
+    { key: 'favorites', icon: '❤️', label: 'Favorilerim' },
+    { key: 'settings',  icon: '⚙️', label: 'Tema & Ayarlar' },
+]
 
 interface Favorite {
     id: string;
@@ -51,6 +66,7 @@ export default function ProfilePage() {
     const [mounted, setMounted] = useState(false)
     const [favorites, setFavorites] = useState<Favorite[]>([])
     const [loadingFavs, setLoadingFavs] = useState(false)
+    const [mobileSectionOpen, setMobileSectionOpen] = useState(false)
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
@@ -87,6 +103,13 @@ export default function ProfilePage() {
                 }
             })
     }, [session?.user?.id])
+
+    const openSection = (key: Tab) => {
+        setTab(key)
+        setMobileSectionOpen(true)
+    }
+
+    const closeSection = () => setMobileSectionOpen(false)
 
     const applyTheme = (mode: Theme) => {
         setTheme(mode)
@@ -155,8 +178,14 @@ export default function ProfilePage() {
     if (!session || !mounted) return null
 
     return (
-        <div className={styles.container}>
-            <h1 className={styles.pageTitle}>Profilim</h1>
+        <>
+            <AppBar
+                title={mobileSectionOpen ? SECTION_TITLES[tab] : 'Profilim'}
+                showBack={mobileSectionOpen}
+                onBack={closeSection}
+            />
+            <div className={styles.container} data-mobile-section={mobileSectionOpen ? 'true' : 'false'}>
+                <h1 className={styles.pageTitle}>Profilim</h1>
 
             <div className={styles.layout}>
                 {/* Sol: Profil kartı */}
@@ -169,6 +198,16 @@ export default function ProfilePage() {
                         <div className={styles.avatarOverlay}>
                             {uploadingAvatar ? '⏳' : '📷'}
                         </div>
+                        <button
+                            type="button"
+                            className={styles.avatarEditBadge}
+                            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
+                            aria-label="Profil fotoğrafını değiştir"
+                        >
+                            <span className={styles.avatarEditBadgeIcon}>
+                                {uploadingAvatar ? '⏳' : '✏️'}
+                            </span>
+                        </button>
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -218,13 +257,6 @@ export default function ProfilePage() {
                     <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>
                         {saved ? '✓ Kaydedildi' : saving ? 'Kaydediliyor...' : 'Kaydet'}
                     </button>
-
-                    <button
-                        onClick={() => signOut()}
-                        style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)', borderRadius: 10, padding: '0.5rem', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit' }}
-                    >
-                        Çıkış Yap
-                    </button>
                 </div>
 
                 {/* Sağ: Sekmeli panel */}
@@ -242,6 +274,21 @@ export default function ProfilePage() {
                                 onClick={() => setTab(t.key)}
                             >
                                 {t.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className={styles.menuList}>
+                        {MENU_ITEMS.map(item => (
+                            <button
+                                key={item.key}
+                                type="button"
+                                className={styles.menuRow}
+                                onClick={() => openSection(item.key)}
+                            >
+                                <span className={styles.menuIcon}>{item.icon}</span>
+                                <span className={styles.menuLabel}>{item.label}</span>
+                                <span className={styles.menuChevron}>›</span>
                             </button>
                         ))}
                     </div>
@@ -373,11 +420,16 @@ export default function ProfilePage() {
                                         {savingPrefs ? 'Kaydediliyor…' : savedPrefs ? 'Kaydedildi ✓' : 'Kaydet'}
                                     </button>
                                 </div>
+
+                                <button onClick={() => signOut()} className={styles.settingsSignOutBtn}>
+                                    Çıkış Yap
+                                </button>
                             </>
                         )}
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     )
 }
