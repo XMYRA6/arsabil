@@ -201,6 +201,9 @@ export default function ProfilePage() {
         return parts[0].substring(0, 2).toUpperCase()
     }
 
+    const completionChecks = [!!avatarUrl, !!profile?.bio, !!profile?.linkedin, !!profile?.website]
+    const completionPct = Math.round((completionChecks.filter(Boolean).length / completionChecks.length) * 100)
+
     if (!session || !mounted) return null
 
     return (
@@ -251,39 +254,35 @@ export default function ProfilePage() {
                             <h2 className={styles.displayName}>{session.user?.name || 'Kullanıcı'}</h2>
                             <p className={styles.roleTag}>{(session.user as { role?: string })?.role || 'USER'}</p>
                         </div>
-                        <button
-                            type="button"
-                            className={styles.editProfileBtn}
-                            onClick={startEditingProfile}
-                            aria-label="Profili düzenle"
-                        >
-                            ✏️
-                        </button>
                     </div>
 
                     {profile?.isVerified && (
                         <div className={styles.verifiedBadge}>✓ Doğrulandı</div>
                     )}
 
-                    <div className={styles.profileViewBlock}>
-                        <div className={styles.viewField}>
-                            <span className={styles.viewLabel}>Hakkında</span>
-                            <p className={styles.viewValue}>{profile?.bio || 'Henüz bilgi eklenmedi'}</p>
+                    <div className={styles.heroName}>
+                        <span className={styles.heroNameText}>{session.user?.name || 'Kullanıcı'}</span>
+                        <span className={styles.heroSubline}>
+                            {(session.user as { role?: string })?.role || 'USER'}
+                            {profile?.isVerified ? ' · ✓ Doğrulandı' : ''}
+                        </span>
+                    </div>
+
+                    <div className={styles.completionCard}>
+                        <div className={styles.completionTop}>
+                            <span className={styles.completionTitle}>
+                                {completionPct === 100 ? 'Profilin tamam' : `Profilin %${completionPct} tamamlandı`}
+                            </span>
+                            {completionPct < 100 && <span className={styles.completionPct}>{completionPct}%</span>}
                         </div>
-                        <div className={styles.viewField}>
-                            <span className={styles.viewLabel}>LinkedIn</span>
-                            {profile?.linkedin
-                                ? <a href={profile.linkedin} target="_blank" rel="noreferrer" className={styles.viewLink}>{profile.linkedin}</a>
-                                : <p className={styles.viewValue}>Henüz bilgi eklenmedi</p>
-                            }
-                        </div>
-                        <div className={styles.viewField}>
-                            <span className={styles.viewLabel}>Website</span>
-                            {profile?.website
-                                ? <a href={profile.website} target="_blank" rel="noreferrer" className={styles.viewLink}>{profile.website}</a>
-                                : <p className={styles.viewValue}>Henüz bilgi eklenmedi</p>
-                            }
-                        </div>
+                        {completionPct < 100 && (
+                            <div className={styles.completionTrack}>
+                                <div className={styles.completionFill} style={{ width: `${completionPct}%` }} />
+                            </div>
+                        )}
+                        <button type="button" className={styles.completionCta} onClick={startEditingProfile}>
+                            {completionPct === 100 ? 'Profili düzenle' : 'Profili tamamla'} →
+                        </button>
                     </div>
 
                     <div className={styles.profileEditForm}>

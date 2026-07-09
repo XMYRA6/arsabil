@@ -126,10 +126,6 @@
   display: block;
 }
 
-.editProfileBtn {
-  display: none;
-}
-
 .verifiedBadge {
   display: flex;
   align-items: center;
@@ -380,36 +376,73 @@
   border-radius: 50%;
 }
 
-.profileViewBlock {
+.heroName {
   display: none;
 }
 
-.viewField {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.viewLabel {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.viewValue {
-  font-size: 0.85rem;
+.heroNameText {
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 1.5rem;
+  font-weight: 400;
   color: var(--text);
-  margin: 0;
-  white-space: pre-wrap;
 }
 
-.viewLink {
+.heroSubline {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.completionCard {
+  display: none;
+  background: var(--bg-body);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.completionTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.completionTitle {
   font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.completionPct {
+  font-size: 0.95rem;
+  font-weight: 800;
   color: var(--primary);
-  text-decoration: none;
-  word-break: break-all;
+}
+
+.completionTrack {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.completionFill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--primary);
+}
+
+.completionCta {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .cancelBtn {
@@ -459,25 +492,34 @@
     text-align: left;
   }
 
-  .editProfileBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: none;
-    border: 1px solid var(--border);
-    font-size: 1rem;
-    cursor: pointer;
-    flex-shrink: 0;
+  .avatarWrapper,
+  .avatarCircle {
+    width: 96px;
+    height: 96px;
   }
 
-  .profileViewBlock {
+  .nameRow {
+    display: none;
+  }
+
+  .verifiedBadge {
+    display: none;
+  }
+
+  .heroName {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  .completionCard {
     display: block;
   }
 
-  .container[data-profile-edit="true"] .profileViewBlock {
+  .container[data-profile-edit="true"] .completionCard {
     display: none;
   }
 
