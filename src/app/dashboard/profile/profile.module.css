@@ -217,6 +217,22 @@
   margin-top: 20px;
 }
 
+.mobileSignOut {
+  display: none;
+}
+
+.mobileSignOutBtn {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 12px;
+  min-height: 44px;
+}
+
 /* Sağ sekme paneli */
 .tabPanel {
   background: var(--panel);
@@ -583,5 +599,19 @@
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;
+  }
+
+  .settingsSignOutBtn {
+    display: none;
+  }
+
+  .mobileSignOut {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+  }
+
+  .container[data-mobile-section="true"] .mobileSignOut {
+    display: none;
   }
 }

@@ -121,4 +121,23 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     const mobileBlock = css.slice(mediaIndex)
     expect(mobileBlock).toMatch(/\.container\[data-mobile-section="false"\]\s+\.tabPanel\s*\{[^}]*background:\s*none/)
   })
+
+  it('.settingsSignOutBtn mobilde gizli, masaüstünde (temel kural) hâlâ görünür olmalı', () => {
+    const baseIndex = css.indexOf('.settingsSignOutBtn {')
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(block).not.toMatch(/display:\s*none/)
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.settingsSignOutBtn\s*\{[^}]*display:\s*none/)
+  })
+
+  it('.mobileSignOut masaüstünde gizli, mobilde görünür, alt-ekran açıkken tekrar gizli olmalı', () => {
+    const baseIndex = css.indexOf('.mobileSignOut {')
+    expect(baseIndex).toBeGreaterThan(-1)
+    expect(baseIndex).toBeLessThan(mediaIndex)
+    const baseBlock = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(baseBlock).toMatch(/display:\s*none/)
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.mobileSignOut\s*\{[^}]*display:\s*flex/)
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.mobileSignOut\s*\{[^}]*display:\s*none/)
+  })
 })

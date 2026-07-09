@@ -523,6 +523,12 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            <div className={styles.mobileSignOut}>
+                <button type="button" className={styles.mobileSignOutBtn} onClick={() => signOut()}>
+                    Çıkış Yap
+                </button>
+            </div>
             </div>
         </>
     )
