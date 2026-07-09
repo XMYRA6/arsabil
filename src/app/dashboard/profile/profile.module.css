@@ -529,6 +529,14 @@
     display: none;
   }
 
+  .container[data-mobile-section="true"] .heroName {
+    display: none;
+  }
+
+  .container[data-mobile-section="true"] .completionCard {
+    display: none;
+  }
+
   .container[data-mobile-section="false"] .tabPanel {
     background: none;
     border: none;

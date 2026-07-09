@@ -140,4 +140,10 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(mobileBlock).toMatch(/\.mobileSignOut\s*\{[^}]*display:\s*flex/)
     expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.mobileSignOut\s*\{[^}]*display:\s*none/)
   })
+
+  it('data-mobile-section="true" iken .heroName ve .completionCard mobilde gizli olmalı (alt-ekran acikken hero/tamamlanma karti arka planda gorunmemeli)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.heroName\s*\{[^}]*display:\s*none/)
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.completionCard\s*\{[^}]*display:\s*none/)
+  })
 })
