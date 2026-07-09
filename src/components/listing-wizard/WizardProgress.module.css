@@ -1,0 +1,87 @@
+.progress {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.circleActive {
+  background: var(--brand-gradient);
+  border-color: var(--primary);
+  color: white;
+}
+
+.circleDone {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.label {
+  font-size: 0.6rem;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.labelActive {
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.labelDone {
+  color: var(--text);
+}
+
+.connector {
+  height: 2px;
+  flex: 1;
+  margin-bottom: 20px;
+  background: var(--border);
+}
+
+.connectorDone {
+  background: var(--primary);
+}
+
+.connectorActive {
+  background: var(--brand-gradient);
+}
+
+@media (max-width: 768px) {
+  .circle {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+  }
+
+  .label {
+    display: none;
+  }
+
+  .connector {
+    margin-bottom: 0;
+  }
+}
