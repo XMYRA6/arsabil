@@ -146,4 +146,19 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.heroName\s*\{[^}]*display:\s*none/)
     expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.completionCard\s*\{[^}]*display:\s*none/)
   })
+
+  it('data-mobile-section="true" iken .profileEditForm da mobilde gizli olmalı (profil duzenleme formu ACIKKEN bir menu kartina dokunulursa alt-ekranin arkasinda gorunmemeli — onceden var olan, bu branch disinda kesfedilen bir bosluk)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="true"\]\s+\.profileEditForm\s*\{[^}]*display:\s*none/)
+  })
+
+  it('mobil .nameRow blogunda olu (asla calismayan) display:flex/text-align kurali kalmamali (.nameRow zaten display:none, once gelen kurallar erisilemez)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const nameRowNoneIndex = mobileBlock.search(/\.nameRow\s*\{[^}]*display:\s*none/)
+    expect(nameRowNoneIndex).toBeGreaterThan(-1)
+    const beforeNoneRule = mobileBlock.slice(0, nameRowNoneIndex)
+    expect(beforeNoneRule).not.toMatch(/\.nameRow\s*\{/)
+    expect(beforeNoneRule).not.toMatch(/\.nameRow\s+\.displayName/)
+    expect(beforeNoneRule).not.toMatch(/\.nameRow\s+\.roleTag/)
+  })
 })

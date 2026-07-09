@@ -544,19 +544,6 @@
     padding: 0;
   }
 
-  .nameRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    text-align: left;
-  }
-
-  .nameRow .displayName,
-  .nameRow .roleTag {
-    text-align: left;
-  }
-
   .avatarWrapper,
   .avatarCircle {
     width: 96px;
@@ -589,6 +576,10 @@
   }
 
   .container[data-profile-edit="false"] .profileEditForm {
+    display: none;
+  }
+
+  .container[data-mobile-section="true"] .profileEditForm {
     display: none;
   }
 
