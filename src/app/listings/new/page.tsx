@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import styles from './page.module.css'
-import { WizardProgress } from '@/components/listing-wizard/WizardProgress'
+import { WizardShell } from '@/components/listing-wizard/WizardShell'
 import { WizardStep1Location } from '@/components/listing-wizard/WizardStep1Location'
 import { WizardStep2Detail } from '@/components/listing-wizard/WizardStep2Detail'
 import { WizardStep3Photos } from '@/components/listing-wizard/WizardStep3Photos'
@@ -78,38 +77,19 @@ export default function NewListingPage() {
   if (status === 'loading') return null
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.pageTitle}>Yeni İlan Oluştur</h1>
-
-      <div className={styles.card}>
-        <WizardProgress currentStep={step} />
-        <h2 className={styles.stepTitle}>{STEP_TITLES[step - 1]}</h2>
-
-        {step === 1 && <WizardStep1Location data={form} onChange={update} />}
-        {step === 2 && <WizardStep2Detail data={form} onChange={update} />}
-        {step === 3 && <WizardStep3Photos data={form} onChange={update} tempListingId={tempId} />}
-        {step === 4 && <WizardStep4Feasibility data={form} onChange={update} />}
-        {step === 5 && <WizardStep5Preview data={form} publishing={publishing} onPublish={handlePublish} />}
-
-        {step < 5 && (
-          <div className={styles.nav}>
-            {step > 1
-              ? <button className={styles.backBtn} onClick={() => setStep(s => s - 1)}>← Geri</button>
-              : <div />
-            }
-            <button className={styles.nextBtn} onClick={() => setStep(s => s + 1)} disabled={!canGoNext()}>
-              İleri →
-            </button>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div className={styles.nav}>
-            <button className={styles.backBtn} onClick={() => setStep(s => s - 1)}>← Geri</button>
-            <div />
-          </div>
-        )}
-      </div>
-    </div>
+    <WizardShell
+      pageTitle="Yeni İlan Oluştur"
+      stepTitle={STEP_TITLES[step - 1]}
+      step={step}
+      onBack={step > 1 ? () => setStep(s => s - 1) : undefined}
+      onNext={step < 5 ? () => setStep(s => s + 1) : undefined}
+      nextDisabled={!canGoNext()}
+    >
+      {step === 1 && <WizardStep1Location data={form} onChange={update} />}
+      {step === 2 && <WizardStep2Detail data={form} onChange={update} />}
+      {step === 3 && <WizardStep3Photos data={form} onChange={update} tempListingId={tempId} />}
+      {step === 4 && <WizardStep4Feasibility data={form} onChange={update} />}
+      {step === 5 && <WizardStep5Preview data={form} publishing={publishing} onPublish={handlePublish} />}
+    </WizardShell>
   )
 }
