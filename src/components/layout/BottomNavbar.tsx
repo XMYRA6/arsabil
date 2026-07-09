@@ -8,6 +8,8 @@ import styles from './BottomNavbar.module.css';
 export function BottomNavbar() {
     const pathname = usePathname();
 
+    if (pathname === '/login' || pathname === '/register') return null;
+
     return (
         <nav className={styles.bottomNav}>
             <Link href="/marketplace" className={`${styles.navItem} ${pathname === '/marketplace' ? styles.active : ''}`}>
