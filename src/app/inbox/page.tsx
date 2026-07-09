@@ -207,7 +207,7 @@ function InboxContent() {
 
                 <div className={styles.convList}>
                     {filtered.length === 0 && (
-                        <div style={{ padding: '1.5rem', color: 'var(--muted)', fontSize: '0.85rem' }}>
+                        <div className={styles.emptyConvList}>
                             Henüz mesaj yok.
                         </div>
                     )}
@@ -217,10 +217,8 @@ function InboxContent() {
                             className={`${styles.convItem} ${c.otherUser.id === activeOtherId ? styles.convItemActive : ''}`}
                             onClick={() => openConversation(c.otherUser.id)}
                         >
-                            <div className={styles.avatar} style={{ width: 56, height: 56, background: 'var(--primary)' }}>
-                                <div style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--primary)', color: 'white', fontWeight: 800 }}>
-                                    {avatarInitials(c.otherUser.name)}
-                                </div>
+                            <div className={`${styles.avatar} ${styles.avatarSidebar}`}>
+                                {avatarInitials(c.otherUser.name)}
                             </div>
                             <div className={styles.convText}>
                                 <div className={styles.convNameRow}>
@@ -231,7 +229,7 @@ function InboxContent() {
                                 </div>
                             </div>
                             {c.unreadCount > 0 && (
-                                <div style={{ width: 20, height: 20, background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.65rem', fontWeight: 800, marginLeft: 'auto', flexShrink: 0 }}>
+                                <div className={styles.unreadCountBadge}>
                                     {c.unreadCount}
                                 </div>
                             )}
@@ -245,12 +243,12 @@ function InboxContent() {
                 {activeConv ? (
                     <>
                         <div className={styles.chatHeader}>
-                            <button className={styles.backButton} onClick={() => setIsMobileChatActive(false)}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <button className={styles.backButton} onClick={() => setIsMobileChatActive(false)} aria-label="Geri">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="15 18 9 12 15 6" />
                                 </svg>
                             </button>
-                            <div className={styles.avatar} style={{ width: 36, height: 36, fontSize: '0.75rem', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, borderRadius: '50%' }}>
+                            <div className={`${styles.avatar} ${styles.avatarChatHeader}`}>
                                 {avatarInitials(activeConv.otherUser.name)}
                             </div>
                             <div className={styles.chatInfo}>
@@ -266,7 +264,7 @@ function InboxContent() {
                                         <div className={`${styles.bubble} ${isMine ? styles.bubbleMine : styles.bubbleTheirs}`}>
                                             <div>{msg.content}</div>
                                             <div className={styles.msgMeta}>
-                                                <span style={{ fontSize: '0.6rem' }}>
+                                                <span className={styles.msgTimestamp}>
                                                     {new Date(msg.createdAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </div>
@@ -291,7 +289,7 @@ function InboxContent() {
                                 {draft.trim() && (
                                     <span
                                         onClick={sendMessage}
-                                        style={{ color: 'var(--primary)', fontWeight: 800, cursor: sending ? 'not-allowed' : 'pointer', padding: '0 8px', fontSize: '0.95rem', opacity: sending ? 0.5 : 1 }}
+                                        className={`${styles.sendLink} ${sending ? styles.sendLinkDisabled : ''}`}
                                     >
                                         Gönder
                                     </span>
@@ -300,14 +298,14 @@ function InboxContent() {
                         </div>
                     </>
                 ) : (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', opacity: 0.6 }}>
-                        <div style={{ width: 96, height: 96, borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+                    <div className={styles.emptyChatState}>
+                        <div className={styles.emptyChatIcon}>
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                             </svg>
                         </div>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--card-title)', letterSpacing: '-0.5px' }}>Mesajların</h3>
-                        <p style={{ marginTop: 8, fontSize: '0.9rem', textAlign: 'center', maxWidth: 260 }}>Soldaki listeden bir konuşma seç.</p>
+                        <h3 className={styles.emptyChatTitle}>Mesajların</h3>
+                        <p className={styles.emptyChatText}>Soldaki listeden bir konuşma seç.</p>
                     </div>
                 )}
             </main>

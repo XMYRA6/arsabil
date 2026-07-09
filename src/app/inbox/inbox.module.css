@@ -401,6 +401,92 @@
     background: var(--primary-2);
 }
 
+.avatarSidebar {
+    width: 56px;
+    height: 56px;
+    background: var(--primary);
+}
+
+.avatarChatHeader {
+    width: 36px;
+    height: 36px;
+    font-size: 0.75rem;
+    background: var(--primary);
+}
+
+.unreadCountBadge {
+    width: 20px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.emptyConvList {
+    padding: 1.5rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.msgTimestamp {
+    font-size: 0.6rem;
+}
+
+.sendLink {
+    color: var(--primary);
+    font-weight: 800;
+    cursor: pointer;
+    padding: 0 8px;
+    font-size: 0.95rem;
+}
+
+.sendLinkDisabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.emptyChatState {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    opacity: 0.6;
+}
+
+.emptyChatIcon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.emptyChatTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--card-title);
+    letter-spacing: -0.5px;
+}
+
+.emptyChatText {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    max-width: 260px;
+}
+
 /* Mobile Breakpoints */
 @media (max-width: 768px) {
     .inboxContainer {
