@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import styles from "./register.module.css";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -42,17 +43,17 @@ export default function RegisterPage() {
     };
 
     return (
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--panel)" }}>
-            <div style={{ width: "100%", maxWidth: "450px" }}>
-                <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-                    <h1 style={{ color: "var(--primary)", fontWeight: 700, letterSpacing: "-0.5px" }}>ARSABİL</h1>
-                    <p style={{ color: "var(--muted)", marginTop: "0.5rem" }}>Sisteme Kayıt Olun</p>
+        <div className={styles.page}>
+            <div className={styles.column}>
+                <div className={styles.header}>
+                    <h1 className={styles.logo}>ARSABİL</h1>
+                    <p className={styles.subtitle}>Sisteme Kayıt Olun</p>
                 </div>
 
                 <Card>
-                    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                    <form onSubmit={handleSubmit} className={styles.form}>
                         {error && (
-                            <div style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--red)", padding: "0.75rem", borderRadius: "var(--radius-md)", fontSize: "0.9rem" }}>
+                            <div className={styles.errorBanner}>
                                 {error}
                             </div>
                         )}
@@ -81,16 +82,16 @@ export default function RegisterPage() {
                             required
                         />
 
-                        <div style={{ marginTop: "1rem" }}>
+                        <div className={styles.submitRow}>
                             <Button type="submit" variant="primary" fullWidth disabled={loading}>
                                 {loading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}
                             </Button>
                         </div>
                     </form>
 
-                    <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.9rem", color: "var(--muted)" }}>
+                    <div className={styles.footerText}>
                         Zaten hesabınız var mı?{" "}
-                        <Link href="/login" style={{ color: "var(--primary)", fontWeight: 600 }}>
+                        <Link href="/login" className={styles.footerLink}>
                             Giriş Yapın
                         </Link>
                     </div>

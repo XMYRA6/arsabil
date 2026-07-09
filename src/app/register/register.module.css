@@ -1,0 +1,68 @@
+.page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel);
+}
+
+.column {
+    width: 100%;
+    max-width: 450px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: var(--muted);
+    margin-top: 0.5rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.errorBanner {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--red);
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+}
+
+.submitRow {
+    margin-top: 1rem;
+}
+
+.footerText {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.footerLink {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .page {
+        padding: 0 1rem;
+    }
+
+    .header {
+        margin-bottom: 1.5rem;
+    }
+}
