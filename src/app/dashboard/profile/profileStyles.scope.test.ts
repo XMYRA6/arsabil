@@ -110,4 +110,15 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(css).not.toMatch(/\.profileViewBlock/)
     expect(css).not.toMatch(/\.editProfileBtn/)
   })
+
+  it('.menuRow yeni min-height 76px olmalı (eski 56px kart deseni yerine yüzen kart)', () => {
+    const baseIndex = css.indexOf('.menuRow {')
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(block).toMatch(/min-height:\s*76px/)
+  })
+
+  it('menü görünürken (.data-mobile-section=false) .tabPanel mobilde şeffaflaşmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="false"\]\s+\.tabPanel\s*\{[^}]*background:\s*none/)
+  })
 })

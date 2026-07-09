@@ -32,11 +32,11 @@ const GearIcon = () => (
     <svg {...ICON_PROPS}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></svg>
 )
 
-const MENU_ITEMS: { key: Tab; icon: ReactNode; colorClass: string; label: string }[] = [
-    { key: 'portfolio', icon: <FolderIcon />,   colorClass: styles.menuIconBoxBlue,   label: 'Portfolyo' },
-    { key: 'listings',  icon: <BuildingIcon />, colorClass: styles.menuIconBoxOrange, label: 'İlanlarım' },
-    { key: 'favorites', icon: <HeartIcon />,    colorClass: styles.menuIconBoxRed,    label: 'Favorilerim' },
-    { key: 'settings',  icon: <GearIcon />,     colorClass: styles.menuIconBoxGray,   label: 'Tema & Ayarlar' },
+const MENU_ITEMS: { key: Tab; icon: ReactNode; colorClass: string; label: string; subtitle: string }[] = [
+    { key: 'portfolio', icon: <FolderIcon />,   colorClass: styles.menuIconBoxBlue,   label: 'Portfolyo',       subtitle: 'Hesapladığın fizibilite raporları' },
+    { key: 'listings',  icon: <BuildingIcon />, colorClass: styles.menuIconBoxOrange, label: 'İlanlarım',       subtitle: 'Yayınladığın ve taslak ilanların' },
+    { key: 'favorites', icon: <HeartIcon />,    colorClass: styles.menuIconBoxRed,    label: 'Favorilerim',     subtitle: 'Kaydettiğin ilanlar' },
+    { key: 'settings',  icon: <GearIcon />,     colorClass: styles.menuIconBoxGray,   label: 'Tema & Ayarlar',  subtitle: 'Görünüm, bildirimler ve hesap' },
 ]
 
 interface Favorite {
@@ -126,6 +126,12 @@ export default function ProfilePage() {
     }
 
     const closeSection = () => setMobileSectionOpen(false)
+
+    const menuCount = (key: Tab): number | null => {
+        if (key === 'portfolio') return profile?.reports?.length ?? 0
+        if (key === 'listings') return profile?.listings?.length ?? 0
+        return null
+    }
 
     const startEditingProfile = () => setIsEditingProfile(true)
 
@@ -346,7 +352,8 @@ export default function ProfilePage() {
                     </div>
 
                     <div className={styles.menuList}>
-                        {MENU_ITEMS.map(item => (
+                        <p className={styles.sectionLabel}>Hesabım</p>
+                        {MENU_ITEMS.filter(item => item.key !== 'settings').map(item => (
                             <button
                                 key={item.key}
                                 type="button"
@@ -354,7 +361,27 @@ export default function ProfilePage() {
                                 onClick={() => openSection(item.key)}
                             >
                                 <span className={`${styles.menuIconBox} ${item.colorClass}`}>{item.icon}</span>
-                                <span className={styles.menuLabel}>{item.label}</span>
+                                <span className={styles.menuRowBody}>
+                                    <span className={styles.menuLabel}>{item.label}</span>
+                                    <span className={styles.menuSubtitle}>{item.subtitle}</span>
+                                </span>
+                                {menuCount(item.key) !== null && <span className={styles.menuCount}>{menuCount(item.key)}</span>}
+                                <span className={styles.menuChevron}>›</span>
+                            </button>
+                        ))}
+                        <p className={styles.sectionLabel}>Tercihler</p>
+                        {MENU_ITEMS.filter(item => item.key === 'settings').map(item => (
+                            <button
+                                key={item.key}
+                                type="button"
+                                className={styles.menuRow}
+                                onClick={() => openSection(item.key)}
+                            >
+                                <span className={`${styles.menuIconBox} ${item.colorClass}`}>{item.icon}</span>
+                                <span className={styles.menuRowBody}>
+                                    <span className={styles.menuLabel}>{item.label}</span>
+                                    <span className={styles.menuSubtitle}>{item.subtitle}</span>
+                                </span>
                                 <span className={styles.menuChevron}>›</span>
                             </button>
                         ))}
