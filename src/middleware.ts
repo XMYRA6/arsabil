@@ -13,7 +13,6 @@ export const config = {
          * Add any other routes you want to restrict to authenticated users.
          */
         "/admin", "/admin/:path*",
-        "/board", "/board/:path*",
         "/dashboard", "/dashboard/:path*",
         "/inbox", "/inbox/:path*",
         "/listing", "/listing/:path*",
