@@ -62,4 +62,5 @@ export const RATE_LIMITS = {
     REGISTER: { limit: 3,  windowMs: 3_600_000 },  // IP başına 3/saat
     UPLOAD:   { limit: 10, windowMs: 3_600_000 },  // kullanıcı başına 10/saat
     WRITE:    { limit: 30, windowMs: 60_000 },     // kullanıcı başına 30/dk (mesaj+teklif)
+    PASSWORD_RESET: { limit: 3, windowMs: 3_600_000 }, // IP başına 3/saat (REGISTER ile aynı eşik)
 } as const
