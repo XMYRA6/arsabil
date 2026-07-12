@@ -33,11 +33,16 @@ export async function DELETE(req: Request) {
         // Listing otomatik cascade olur (Listing.report: onDelete Cascade). Geri kalan
         // her şey (Account/Session/Notification/CompareShare/Listing/Favorite/Offer/
         // Project->Scenario) User.delete() ile otomatik cascade olur.
-        await prisma.message.deleteMany({
-            where: { OR: [{ senderId: userId }, { receiverId: userId }] },
-        });
-        await prisma.report.deleteMany({ where: { userId } });
-        await prisma.user.delete({ where: { id: userId } });
+        // Üç işlem prisma.$transaction ile atomik yürütülür: herhangi biri
+        // (özellikle son adımdaki user.delete()) başarısız olursa hepsi rollback olur,
+        // yarı-silinmiş (Message/Report gitti ama User duruyor) bir durum oluşmaz.
+        await prisma.$transaction([
+            prisma.message.deleteMany({
+                where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+            }),
+            prisma.report.deleteMany({ where: { userId } }),
+            prisma.user.delete({ where: { id: userId } }),
+        ]);
 
         return NextResponse.json({ message: "Hesabınız silindi." });
     } catch (error) {
