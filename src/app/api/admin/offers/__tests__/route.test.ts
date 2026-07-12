@@ -10,6 +10,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 import { GET } from '../route'
+import { authOptions } from '@/lib/auth'
 
 describe('GET /api/admin/offers', () => {
     beforeEach(() => {
@@ -33,5 +34,6 @@ describe('GET /api/admin/offers', () => {
         getServerSessionMock.mockResolvedValue({ user: { id: 'admin1', role: 'ADMIN' } })
         const res = await GET()
         expect(res.status).toBe(200)
+        expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
     })
 })

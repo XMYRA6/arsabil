@@ -16,6 +16,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 import { GET, POST } from '../route'
+import { authOptions } from '@/lib/auth'
 
 function postReq(body: unknown) {
     return new Request('http://localhost/api/projects', { method: 'POST', body: JSON.stringify(body) })
@@ -39,6 +40,7 @@ describe('GET /api/projects', () => {
         expect(findManyMock).toHaveBeenCalledTimes(1)
         expect(findManyMock.mock.calls[0][0].where.userId).toBe('u1')
         expect(findManyMock.mock.calls[0][0].where.userId).not.toBeUndefined()
+        expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
     })
 })
 
@@ -58,5 +60,13 @@ describe('POST /api/projects', () => {
         getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
         await POST(postReq({ name: 'Test Proje' }))
         expect(createMock.mock.calls[0][0].data.userId).toBe('u1')
+        expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
+    })
+
+    it('client tarafından gönderilen sahte userId yok sayılır, session id kullanılır', async () => {
+        getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+        await POST(postReq({ name: 'Test Proje', userId: 'saldirgan-id' }))
+        expect(createMock.mock.calls[0][0].data.userId).toBe('u1')
+        expect(createMock.mock.calls[0][0].data.userId).not.toBe('saldirgan-id')
     })
 })
