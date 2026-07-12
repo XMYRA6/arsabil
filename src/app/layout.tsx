@@ -2,9 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { Navbar } from "@/components/layout/Navbar";
-import { BottomNavbar } from "@/components/layout/BottomNavbar";
-import { Footer } from "@/components/layout/Footer";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { Toaster } from "react-hot-toast";
@@ -69,14 +67,7 @@ export default function RootLayout({
           <Toaster position="bottom-right" />
           <ServiceWorkerRegister />
           <InstallPrompt />
-          <Navbar />
-          <main style={{ minHeight: "calc(100vh - 70px)", paddingBottom: "var(--mobile-nav-pb, 0px)" }}>
-            {children}
-          </main>
-          <div className="desktop-footer">
-            <Footer />
-          </div>
-          <BottomNavbar />
+          <SiteChrome>{children}</SiteChrome>
         </AuthProvider>
       </body>
     </html>
