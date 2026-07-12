@@ -55,16 +55,16 @@ export default function ReportsPage() {
                         <div key={report.id} className={styles.reportCard}>
                             <h4>{report.title}</h4>
                             <div className={styles.reportMeta}>
-                                <div><strong>Daire Sayısı:</strong> {report.totalApartments}</div>
-                                <div><strong>Daire Alanı:</strong> {report.apartmentSizeSqm} m²</div>
-                                <div><strong>Arsa Payı:</strong> %{(report.landShareRatio * 100).toFixed(0)}</div>
-                                <div><strong>Kalite Katsayısı:</strong> x{report.luxLevelModifier}</div>
-                                <div><strong>Daire Fiyatı:</strong> ₺{report.minApartmentPrice.toLocaleString("tr-TR")}</div>
-                                <div><strong>Arsa Değeri:</strong> ₺{report.landCost.toLocaleString("tr-TR")}</div>
+                                <div><strong>Daire Sayısı:</strong> <span className={styles.metaValue}>{report.totalApartments}</span></div>
+                                <div><strong>Daire Alanı:</strong> <span className={styles.metaValue}>{report.apartmentSizeSqm} m²</span></div>
+                                <div><strong>Arsa Payı:</strong> <span className={styles.metaValue}>%{(report.landShareRatio * 100).toFixed(0)}</span></div>
+                                <div><strong>Kalite Katsayısı:</strong> <span className={styles.metaValue}>x{report.luxLevelModifier}</span></div>
+                                <div><strong>Daire Fiyatı:</strong> <span className={styles.metaValue}>₺{report.minApartmentPrice.toLocaleString("tr-TR")}</span></div>
+                                <div><strong>Arsa Değeri:</strong> <span className={styles.metaValue}>₺{report.landCost.toLocaleString("tr-TR")}</span></div>
                                 <div><strong>Tarih:</strong> {formatDate(report.createdAt)}</div>
                             </div>
                             {report.listing && (
-                                <div style={{ padding: '0.4rem 0.75rem', background: 'rgba(var(--primary-rgb),0.08)', borderRadius: '10px', color: 'var(--primary)', fontWeight: 700, fontSize: '0.8rem', textAlign: 'center' }}>
+                                <div className={styles.listingBadge}>
                                     ✓ Pazar Yerinde İlanda
                                 </div>
                             )}

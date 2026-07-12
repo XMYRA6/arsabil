@@ -323,6 +323,87 @@
     color: var(--muted);
 }
 
+.projectsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.projectBadges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.projectDescription {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.scenariosBlock {
+    margin-bottom: 1rem;
+}
+
+.scenariosTitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.scenariosGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+}
+
+.scenarioMiniCard {
+    padding: 0.85rem;
+}
+
+.scenarioMiniCard h4 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.scenarioMiniValue {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--primary);
+}
+
+.scenarioMiniMeta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+}
+
+.projectActions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.compareWrap {
+    margin-top: 1.5rem;
+}
+
+.emptyStateHint {
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.listingBadge {
+    padding: 0.4rem 0.75rem;
+    background: rgba(var(--primary-rgb), 0.08);
+    border-radius: 10px;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
 /* Profile Form */
 .profileForm {
     display: flex;
@@ -414,5 +495,31 @@
     overflow: visible;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
+  }
+
+  [data-theme="dark"] .listingCard,
+  [data-theme="dark"] .reportCard {
+    --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+    --seal-border-soft: rgba(43, 124, 255, 0.18);
+  }
+
+  [data-theme="light"] .listingCard,
+  [data-theme="light"] .reportCard {
+    --seal-surface: var(--shell-bg);
+    --seal-border-soft: var(--shell-border);
+  }
+
+  .listingCard,
+  .reportCard {
+    background: var(--seal-surface);
+    border-color: var(--seal-border-soft);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .scenarioMiniValue,
+  .metaValue {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
   }
 }

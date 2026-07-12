@@ -60,17 +60,17 @@ export default function ProjectsPage() {
                 <div className={styles.emptyState}>
                     <div className={styles.emptyIcon}>📁</div>
                     <div>Henüz projeniz yok.</div>
-                    <div style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                    <div className={styles.emptyStateHint}>
                         Hesap makinesindeki &quot;Rapor Kaydet&quot; butonu ile ilk projenizi oluşturun.
                     </div>
                 </div>
             ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className={styles.projectsList}>
                     {projects.map(project => (
                         <div key={project.id} className={styles.listingCard}>
                             <div className={styles.listingHeader}>
                                 <h4>{project.name}</h4>
-                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <div className={styles.projectBadges}>
                                     <span className={`${styles.statusBadge} ${styles.statusActive}`}>
                                         {project._count?.scenarios || 0} senaryo
                                     </span>
@@ -78,25 +78,24 @@ export default function ProjectsPage() {
                             </div>
 
                             {project.description && (
-                                <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                                <p className={styles.projectDescription}>
                                     {project.description}
                                 </p>
                             )}
 
-                            {/* Senaryolar Listesi */}
                             {(project.scenarios?.length ?? 0) > 0 && (
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <h5 style={{ color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+                                <div className={styles.scenariosBlock}>
+                                    <h5 className={styles.scenariosTitle}>
                                         Senaryolar
                                     </h5>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px' }}>
+                                    <div className={styles.scenariosGrid}>
                                         {(project.scenarios ?? []).map((s: Scenario) => (
-                                            <div key={s.id} className={styles.reportCard} style={{ padding: '0.85rem' }}>
-                                                <h4 style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>{s.name}</h4>
-                                                <div style={{ fontSize: '1.1rem', fontWeight: 900, color: 'var(--primary)' }}>
+                                            <div key={s.id} className={`${styles.reportCard} ${styles.scenarioMiniCard}`}>
+                                                <h4>{s.name}</h4>
+                                                <div className={styles.scenarioMiniValue}>
                                                     ₺{s.fdTotal.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}
                                                 </div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+                                                <div className={styles.scenarioMiniMeta}>
                                                     {s.fdPerM2.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} TL/m² | %{(s.landShareRatio * 100).toFixed(0)} arsa payı
                                                 </div>
                                             </div>
@@ -105,8 +104,7 @@ export default function ProjectsPage() {
                                 </div>
                             )}
 
-                            {/* Actions */}
-                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <div className={styles.projectActions}>
                                 {(project.scenarios?.length ?? 0) >= 2 && (
                                     <Button
                                         variant="outline"
@@ -120,22 +118,21 @@ export default function ProjectsPage() {
                                 </Button>
                             </div>
 
-                            {/* Comparison Table */}
                             {selectedProject?.id === project.id && (
-                                <div style={{ marginTop: '1.5rem' }}>
+                                <div className={styles.compareWrap}>
                                     <ScenarioCompare
-                                    scenarios={project.scenarios ?? []}
-                                    onShareRequest={async (ids) => {
-                                        const res = await fetch('/api/compare/share', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ scenarioIds: ids }),
-                                        });
-                                        if (!res.ok) return null;
-                                        const { token } = await res.json();
-                                        return `${window.location.origin}/compare/${token}`;
-                                    }}
-                                />
+                                        scenarios={project.scenarios ?? []}
+                                        onShareRequest={async (ids) => {
+                                            const res = await fetch('/api/compare/share', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ scenarioIds: ids }),
+                                            });
+                                            if (!res.ok) return null;
+                                            const { token } = await res.json();
+                                            return `${window.location.origin}/compare/${token}`;
+                                        }}
+                                    />
                                 </div>
                             )}
                         </div>
