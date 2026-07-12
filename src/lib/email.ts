@@ -87,3 +87,12 @@ export function buildPasswordResetEmail(resetUrl: string): string {
         <p style="margin-top:24px;font-size:0.8rem;color:#6b7280">Bu talebi siz oluşturmadıysanız bu e-postayı yok sayabilirsiniz — hesabınızda hiçbir değişiklik yapılmayacaktır. Bağlantı 1 saat sonra geçersiz olur.</p>
     </div>`
 }
+
+export function buildEmailVerificationEmail(verifyUrl: string): string {
+    return `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
+        <h2 style="color:#1f6feb">ArsaBil'e Hoş Geldiniz</h2>
+        <p>Hesabınızı doğrulamak için aşağıdaki bağlantıya tıklayın.</p>
+        <a href="${verifyUrl}" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1f6feb;color:white;text-decoration:none;border-radius:8px;font-weight:700">E-postamı Doğrula →</a>
+        <p style="margin-top:24px;font-size:0.8rem;color:#6b7280">Doğrulama isteğe bağlıdır — hesabınızı doğrulamadan da kullanmaya devam edebilirsiniz. Bağlantı 24 saat sonra geçersiz olur.</p>
+    </div>`
+}
