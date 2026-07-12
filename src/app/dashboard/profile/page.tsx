@@ -83,6 +83,11 @@ export default function ProfilePage() {
     const [loadingFavs, setLoadingFavs] = useState(false)
     const [mobileSectionOpen, setMobileSectionOpen] = useState(false)
     const [isEditingProfile, setIsEditingProfile] = useState(false)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [deletePassword, setDeletePassword] = useState('')
+    const [deleteError, setDeleteError] = useState('')
+    const [deleting, setDeleting] = useState(false)
+    const [exporting, setExporting] = useState(false)
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
@@ -179,6 +184,52 @@ export default function ProfilePage() {
             }
         } finally {
             setSavingPrefs(false)
+        }
+    }
+
+    const handleExportData = async () => {
+        setExporting(true)
+        try {
+            const res = await fetch('/api/user/export')
+            if (!res.ok) throw new Error('export failed')
+            const data = await res.json()
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `arsabil-verilerim-${new Date().toISOString().slice(0, 10)}.json`
+            a.click()
+            URL.revokeObjectURL(url)
+        } catch {
+            alert('Veri indirme sırasında bir hata oluştu.')
+        } finally {
+            setExporting(false)
+        }
+    }
+
+    const handleDeleteAccount = async () => {
+        if (!deletePassword) {
+            setDeleteError('Şifrenizi girmelisiniz.')
+            return
+        }
+        setDeleting(true)
+        setDeleteError('')
+        try {
+            const res = await fetch('/api/user/account', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: deletePassword }),
+            })
+            const data = await res.json()
+            if (res.ok) {
+                await signOut({ callbackUrl: '/' })
+            } else {
+                setDeleteError(data.message || 'Hesap silinemedi.')
+                setDeleting(false)
+            }
+        } catch {
+            setDeleteError('Bağlantı hatası.')
+            setDeleting(false)
         }
     }
 
@@ -515,6 +566,35 @@ export default function ProfilePage() {
                                     </button>
                                 </div>
 
+                                {/* Hesap Yönetimi */}
+                                <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+                                    <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 12 }}>
+                                        Hesap
+                                    </h3>
+                                    <button
+                                        onClick={handleExportData}
+                                        disabled={exporting}
+                                        style={{
+                                            padding: '8px 20px', background: 'var(--panel)', color: 'var(--text)',
+                                            border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer',
+                                            fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
+                                            opacity: exporting ? 0.6 : 1, marginRight: 10,
+                                        }}
+                                    >
+                                        {exporting ? 'Hazırlanıyor…' : '📥 Verilerimi İndir'}
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeleteModal(true)}
+                                        style={{
+                                            padding: '8px 20px', background: 'transparent', color: '#ef4444',
+                                            border: '1px solid #ef4444', borderRadius: 8, cursor: 'pointer',
+                                            fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
+                                        }}
+                                    >
+                                        Hesabımı Sil
+                                    </button>
+                                </div>
+
                                 <button onClick={() => signOut()} className={styles.settingsSignOutBtn}>
                                     Çıkış Yap
                                 </button>
@@ -523,6 +603,71 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {showDeleteModal && (
+                <div
+                    style={{
+                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+                    }}
+                    onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError('') }}
+                >
+                    <div
+                        style={{
+                            background: 'var(--panel)', borderRadius: 16, padding: 24,
+                            maxWidth: 400, width: '90%', border: '1px solid var(--border)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 8 }}>
+                            Hesabını silmek istediğine emin misin?
+                        </h3>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: 16 }}>
+                            Bu işlem geri alınamaz. Tüm projelerin, ilanların, mesajların ve raporların kalıcı olarak silinecek.
+                        </p>
+                        {deleteError && (
+                            <div style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', borderRadius: 8, fontSize: '0.8rem', marginBottom: 12 }}>
+                                {deleteError}
+                            </div>
+                        )}
+                        <input
+                            type="password"
+                            placeholder="Şifreni gir"
+                            value={deletePassword}
+                            onChange={(e) => setDeletePassword(e.target.value)}
+                            style={{
+                                width: '100%', padding: '10px 12px', borderRadius: 8,
+                                border: '1px solid var(--border)', background: 'var(--bg)',
+                                color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.85rem', marginBottom: 16,
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            <button
+                                onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError('') }}
+                                style={{
+                                    flex: 1, padding: '10px', borderRadius: 8, border: '1px solid var(--border)',
+                                    background: 'transparent', color: 'var(--text)', cursor: 'pointer',
+                                    fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
+                                }}
+                            >
+                                Vazgeç
+                            </button>
+                            <button
+                                onClick={handleDeleteAccount}
+                                disabled={deleting}
+                                style={{
+                                    flex: 1, padding: '10px', borderRadius: 8, border: 'none',
+                                    background: '#ef4444', color: 'white', cursor: 'pointer',
+                                    fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
+                                    opacity: deleting ? 0.6 : 1,
+                                }}
+                            >
+                                {deleting ? 'Siliniyor…' : 'Evet, Hesabımı Sil'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className={styles.mobileSignOut}>
                 <button type="button" className={styles.mobileSignOutBtn} onClick={() => signOut()}>
