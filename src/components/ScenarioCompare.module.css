@@ -1,0 +1,131 @@
+.emptyMessage {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+    flex-wrap: wrap;
+}
+
+.actionBtn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: inherit;
+}
+
+.actionBtnSharing {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.shareBox {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 0.625rem 0.875rem;
+    background: rgba(59, 130, 246, 0.07);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 10px;
+    margin-bottom: 0.875rem;
+}
+
+.shareUrlText {
+    font-size: 0.78rem;
+    color: var(--text);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.copyBtn {
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: var(--primary);
+    border: none;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.tableWrap {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.thLabel {
+    padding: 0.85rem 1rem;
+    background: var(--panel-2);
+    font-weight: 800;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.thScenario {
+    padding: 0.85rem 1rem;
+    background: var(--panel-2);
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--card-title);
+    text-align: center;
+    border-left: 1px solid var(--border);
+}
+
+.thScenarioBest {
+    background: rgba(var(--primary-rgb), 0.08);
+    color: var(--primary);
+}
+
+.tdLabel {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--label-color);
+}
+
+.tdValue {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text);
+    text-align: center;
+    background: transparent;
+}
+
+.tdValueHighlight {
+    font-weight: 900;
+    font-size: 1rem;
+    color: var(--primary);
+}
+
+.tdValueBest {
+    background: rgba(var(--primary-rgb), 0.03);
+}
