@@ -64,15 +64,23 @@ export default function LoginPage() {
         setLoading(true);
         setError("");
 
-        // Simüle edilmiş şifre hatırlatma işlemi
-        setTimeout(() => {
-            setError("Şifre sıfırlama talimatları e-posta adresinize gönderildi.");
-            setLoading(false);
+        try {
+            const res = await fetch("/api/auth/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            setError(data.message || "Şifre sıfırlama talimatları e-posta adresinize gönderildi.");
             setTimeout(() => {
                 setError("");
                 setView("login");
-            }, 3000);
-        }, 1500);
+            }, 4000);
+        } catch {
+            setError("Bağlantı hatası. Lütfen tekrar deneyin.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
