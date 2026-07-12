@@ -195,3 +195,22 @@
     line-height: 1;
     transition: color 0.22s ease;
 }
+
+.badge {
+    position: absolute;
+    top: -2px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    padding: 0 4px;
+    background: var(--red);
+    border: 2px solid var(--bg);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 900;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
