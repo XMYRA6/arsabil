@@ -35,8 +35,9 @@ export function BottomNavbar() {
 
     if (pathname === '/login' || pathname === '/register') return null;
 
-    const showBadge = status === 'authenticated' && unreadTotal > 0;
-    const unreadLabel = unreadTotal > 9 ? '9+' : String(unreadTotal);
+    const displayTotal = status === 'authenticated' ? unreadTotal : 0;
+    const showBadge = displayTotal > 0;
+    const unreadLabel = displayTotal > 9 ? '9+' : String(displayTotal);
 
     return (
         <nav className={styles.bottomNav}>
