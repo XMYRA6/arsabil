@@ -78,3 +78,12 @@ export function buildRejectionEmail(listingTitle: string | null): string {
         </a>
     </div>`
 }
+
+export function buildPasswordResetEmail(resetUrl: string): string {
+    return `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
+        <h2 style="color:#1f6feb">Şifre Sıfırlama Talebi</h2>
+        <p>Hesabınız için bir şifre sıfırlama talebi aldık. Aşağıdaki bağlantıya tıklayarak yeni bir şifre belirleyebilirsiniz.</p>
+        <a href="${resetUrl}" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1f6feb;color:white;text-decoration:none;border-radius:8px;font-weight:700">Şifremi Sıfırla →</a>
+        <p style="margin-top:24px;font-size:0.8rem;color:#6b7280">Bu talebi siz oluşturmadıysanız bu e-postayı yok sayabilirsiniz — hesabınızda hiçbir değişiklik yapılmayacaktır. Bağlantı 1 saat sonra geçersiz olur.</p>
+    </div>`
+}
