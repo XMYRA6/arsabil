@@ -26,6 +26,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 import { DELETE } from '../route'
+import { authOptions } from '@/lib/auth'
 
 function req(body: unknown) {
     return new Request('http://localhost/api/user/account', {
@@ -80,6 +81,7 @@ describe('DELETE /api/user/account', () => {
 
         expect(res.status).toBe(200)
         expect(body.message).toMatch(/hesabınız silindi/i)
+        expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
         expect(messageDeleteManyMock).toHaveBeenCalledWith({
             where: { OR: [{ senderId: 'u1' }, { receiverId: 'u1' }] },
         })

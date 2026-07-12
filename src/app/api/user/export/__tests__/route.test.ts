@@ -27,6 +27,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 import { GET } from '../route'
+import { authOptions } from '@/lib/auth'
 
 describe('GET /api/user/export', () => {
     beforeEach(() => {
@@ -50,6 +51,7 @@ describe('GET /api/user/export', () => {
         const res = await GET()
         const body = await res.json()
         expect(res.status).toBe(200)
+        expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
         expect(body.user).not.toHaveProperty('password')
         expect(body.user.email).toBe('test@test.com')
 
