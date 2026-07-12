@@ -39,6 +39,18 @@ describe('POST /api/auth/verify-email', () => {
         expect(res.status).toBe(400)
     })
 
+    it('yanlış türdeki (örn. password-reset) token 400 döner, kullanıcı güncellenmez', async () => {
+        findTokenMock.mockResolvedValue({
+            identifier: 'password-reset:kullanici@test.com',
+            token: 'yanlis-tur',
+            expires: new Date(Date.now() + 60_000),
+        })
+        const res = await POST(req({ token: 'yanlis-tur' }))
+        expect(res.status).toBe(400)
+        expect(updateUserMock).not.toHaveBeenCalled()
+        expect(deleteTokenMock).not.toHaveBeenCalled()
+    })
+
     it('süresi dolmuş token 400 döner ve silinir', async () => {
         findTokenMock.mockResolvedValue({
             identifier: 'email-verify:kullanici@test.com',
