@@ -20,7 +20,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }, [status, session, router]);
 
     if (status === 'loading' || session?.user?.role !== 'ADMIN') {
-        return <div className={styles.loading}>Yükleniyor...</div>;
+        return (
+            <>
+                <AdminTopBar />
+                <div className={styles.loading}>Yükleniyor...</div>
+            </>
+        );
     }
 
     const navItems = [

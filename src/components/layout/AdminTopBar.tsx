@@ -19,7 +19,7 @@ export function AdminTopBar() {
             <div className={styles.right}>
                 <span className={styles.adminName}>{session?.user?.name || 'Yönetici'}</span>
                 <span className={styles.badge}>ADMIN</span>
-                <ThemeToggle />
+                <ThemeToggle forceDarkSurface />
                 <Link href="/dashboard" className={styles.backLink}>← Müşteri Paneline Dön</Link>
             </div>
         </header>

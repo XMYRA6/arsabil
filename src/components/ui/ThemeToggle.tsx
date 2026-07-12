@@ -9,11 +9,20 @@ const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] =
     { id: 'light', label: 'Gündüz', color: '#e0e8f4', isLight: true },
 ];
 
+interface ThemeToggleProps {
+    /** AdminTopBar gibi sabit-koyu bir yüzeye oturduğunda butonun KENDİ
+     * çerçeve stilini (border/background/icon rengi) zorla koyu-yüzey
+     * moduna alır — gerçek tema durumunu (hangi ikon gösterilir, dropdown
+     * içeriği) DEĞİŞTİRMEZ, yalnızca görsel kapsayıcının host yüzeyle
+     * kontrastını düzeltir. */
+    forceDarkSurface?: boolean;
+}
+
 /**
  * ThemeToggle — Moon/Sun button expands to a dropdown with
  * Dark/Light theme toggle. Persists in localStorage under "arsabil-theme".
  */
-export const ThemeToggle: React.FC = () => {
+export const ThemeToggle: React.FC<ThemeToggleProps> = ({ forceDarkSurface = false }) => {
     const [theme, setTheme] = useState<Mode>('dark');
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -46,6 +55,7 @@ export const ThemeToggle: React.FC = () => {
     if (!mounted) return <div style={{ width: 44, height: 44 }} />;
 
     const isDark = theme === 'dark';
+    const surfaceDark = forceDarkSurface || isDark;
     const current = PALETTES.find(p => p.id === theme)!;
 
     return (
@@ -57,9 +67,9 @@ export const ThemeToggle: React.FC = () => {
                 title="Tema değiştir"
                 style={{
                     width: 42, height: 42, borderRadius: 14,
-                    border: isDark ? '1px solid rgba(255,255,255,.18)' : '1px solid rgba(0,0,0,.12)',
-                    background: isDark ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.06)',
-                    color: isDark ? 'white' : '#0b1b2b',
+                    border: surfaceDark ? '1px solid rgba(255,255,255,.18)' : '1px solid rgba(0,0,0,.12)',
+                    background: surfaceDark ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.06)',
+                    color: surfaceDark ? 'white' : '#0b1b2b',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', transition: 'all 0.3s ease',
                     position: 'relative',
