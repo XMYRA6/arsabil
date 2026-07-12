@@ -45,10 +45,16 @@ export async function POST(req: Request) {
         const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
         const resetUrl = `${baseUrl}/reset-password/${token}`;
 
-        await sendEmail({
+        // Fire-and-forget: sendEmail'i await ETME — await etmek bir timing
+        // side-channel açar (bilinen e-posta yolu gerçek bir Resend API
+        // round-trip'i kadar uzun sürer), bu da endpoint'in enumeration
+        // önleme amacını (her iki durumda da aynı response) boşa çıkarır.
+        sendEmail({
             to: user.email,
             subject: "ArsaBil — Şifre Sıfırlama Talebi",
             html: buildPasswordResetEmail(resetUrl),
+        }).catch((emailError) => {
+            console.error("Şifre sıfırlama e-postası gönderilemedi:", emailError);
         });
 
         return NextResponse.json(GENERIC_SUCCESS);

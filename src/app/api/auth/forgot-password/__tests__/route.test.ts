@@ -32,6 +32,10 @@ describe('POST /api/auth/forgot-password', () => {
         findUniqueMock.mockReset()
         createTokenMock.mockReset()
         sendEmailMock.mockReset()
+        // route.ts artık sendEmail(...).catch(...) şeklinde fire-and-forget
+        // çağırıyor — mock'un bir Promise döndürmesi gerekir, aksi halde
+        // .catch(...) undefined üzerinde çağrılır ve senkron biçimde fırlar.
+        sendEmailMock.mockResolvedValue(undefined)
     })
 
     it('email eksikse 400 döner', async () => {
