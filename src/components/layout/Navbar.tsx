@@ -319,8 +319,8 @@ export function Navbar() {
                                                 <span>💬</span> Mesajlarım
                                             </Link>
                                             {session.user?.role === "ADMIN" && (
-                                                <Link href="/admin" onClick={() => setIsUserMenuOpen(false)} className={styles.dropdownItem}>
-                                                    <span>⚙️</span> Admin Paneli
+                                                <Link href="/admin" onClick={() => setIsUserMenuOpen(false)} className={`${styles.dropdownItem} ${styles.dropdownItemAdmin}`}>
+                                                    <span>⚙️</span> Yönetim Paneli
                                                 </Link>
                                             )}
                                             <div className={styles.dropdownDivider} />
@@ -354,7 +354,7 @@ export function Navbar() {
                             <>
                                 <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>Kontrol Paneli (Dashboard)</Link>
                                 {session.user?.role === "ADMIN" && (
-                                    <Link href="/admin" onClick={() => setIsMenuOpen(false)} className={styles.dangerText}>⚙️ Admin Paneli</Link>
+                                    <Link href="/admin" onClick={() => setIsMenuOpen(false)} className={styles.adminLink}>⚙️ Yönetim Paneli</Link>
                                 )}
                                 <button onClick={handleLogout} className={styles.dangerText}>X Çıkış Yap</button>
                             </>
