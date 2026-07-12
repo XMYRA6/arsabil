@@ -15,6 +15,19 @@ export function BottomNavbar() {
     const { status } = useSession();
     const [unreadTotal, setUnreadTotal] = useState(0);
 
+    // Render-time reset (NOT inside useEffect, so react-hooks/set-state-in-effect
+    // does not apply): when the session transitions away from 'authenticated'
+    // (e.g. client-side logout in the same tab), unreadTotal must be zeroed
+    // immediately so that a later re-authentication in the same tab can never
+    // briefly display a stale count left over from the previous session.
+    const [prevStatus, setPrevStatus] = useState(status);
+    if (status !== prevStatus) {
+        setPrevStatus(status);
+        if (status !== 'authenticated') {
+            setUnreadTotal(0);
+        }
+    }
+
     useEffect(() => {
         if (status !== 'authenticated') {
             return;
@@ -35,9 +48,8 @@ export function BottomNavbar() {
 
     if (pathname === '/login' || pathname === '/register') return null;
 
-    const displayTotal = status === 'authenticated' ? unreadTotal : 0;
-    const showBadge = displayTotal > 0;
-    const unreadLabel = displayTotal > 9 ? '9+' : String(displayTotal);
+    const showBadge = status === 'authenticated' && unreadTotal > 0;
+    const unreadLabel = unreadTotal > 9 ? '9+' : String(unreadTotal);
 
     return (
         <nav className={styles.bottomNav}>

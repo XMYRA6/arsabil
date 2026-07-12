@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { BottomNavbar } from '../BottomNavbar'
 
@@ -77,5 +77,53 @@ describe('BottomNavbar', () => {
     render(<BottomNavbar />)
     await waitFor(() => expect(global.fetch).toHaveBeenCalled())
     expect(screen.queryByText(/^\d+\+?$/)).not.toBeInTheDocument()
+  })
+
+  it('aynı sekmede oturum kapatılıp yeniden açıldığında eski (stale) rozet sayısı sızmaz', async () => {
+    // 1. Aynı sekmede önce authenticated: unreadTotal 5 olsun.
+    mockStatus = 'authenticated'
+    ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ conversations: [{ unreadCount: 2 }, { unreadCount: 3 }] }),
+    })
+    const { rerender } = render(<BottomNavbar />)
+    expect(await screen.findByText('5')).toBeInTheDocument()
+
+    // 2. Client-side logout: status 'unauthenticated' olur, component aynı
+    //    instance üzerinde yeniden render edilir (unmount/mount yok).
+    mockStatus = 'unauthenticated'
+    act(() => {
+      rerender(<BottomNavbar />)
+    })
+    expect(screen.queryByText('5')).not.toBeInTheDocument()
+    expect(screen.queryByText(/^\d+\+?$/)).not.toBeInTheDocument()
+
+    // 3. Aynı sekmede yeniden login: status tekrar 'authenticated' olur.
+    //    Yeni oturumun fetch'i henüz çözülmeden (sıfır okunmamış mesajlı
+    //    farklı bir kullanıcı senaryosu), rozet eski "5" değerini ASLA
+    //    göstermemeli.
+    let resolveFetch: (value: unknown) => void = () => {}
+    ;(global.fetch as jest.Mock).mockReturnValueOnce(
+      new Promise((resolve) => { resolveFetch = resolve })
+    )
+    mockStatus = 'authenticated'
+    act(() => {
+      rerender(<BottomNavbar />)
+    })
+
+    // Fetch henüz çözülmedi — stale "5" görünmemeli.
+    expect(screen.queryByText('5')).not.toBeInTheDocument()
+    expect(screen.queryByText(/^\d+\+?$/)).not.toBeInTheDocument()
+
+    // Yeni oturumun fetch'i çözülür: bu sefer 0 okunmamış mesaj var.
+    await act(async () => {
+      resolveFetch({
+        ok: true,
+        json: async () => ({ conversations: [{ unreadCount: 0 }] }),
+      })
+    })
+
+    expect(screen.queryByText('5')).not.toBeInTheDocument()
+    expect(screen.queryByText('0')).not.toBeInTheDocument()
   })
 })
