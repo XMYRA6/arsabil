@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test'
 import { loginAs } from './helpers'
 
 test('admin girişinde müşteri kabuğu (Navbar/Footer/BottomNavbar) DOM\'da yok, AdminTopBar var', async ({ page }) => {
+    // /admin rotasının bu test dosyasındaki İLK ziyareti — taze dev server'da
+    // soğuk derleme (login + /admin route compile) varsayılan 60s test
+    // limitini zorlayabiliyor (bu oturumda /hesapla ve hesap-silme canlı
+    // testlerinde de aynı desenle karşılaşıldı, gerçek bir hata değil).
+    test.setTimeout(120_000)
     await loginAs(page, 'admin@e2e.test', 'Test1234!')
     await page.goto('/admin')
     await page.waitForLoadState('networkidle')
