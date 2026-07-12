@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import styles from './ScenarioCompare.module.css';
@@ -32,6 +32,8 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
     const [shareUrl, setShareUrl] = useState<string | null>(null);
     const [sharing, setSharing] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [activeCard, setActiveCard] = useState(0);
+    const cardTrackRef = useRef<HTMLDivElement>(null);
 
     if (scenarios.length < 2) {
         return (
@@ -93,8 +95,14 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const onCardScroll = () => {
+        const el = cardTrackRef.current;
+        if (!el || el.clientWidth === 0) return;
+        setActiveCard(Math.round(el.scrollLeft / el.clientWidth));
+    };
+
     return (
-        <div>
+        <div className={styles.root}>
             <div className={styles.actions}>
                 <button onClick={handlePdf} className={styles.actionBtn}>
                     📄 PDF İndir
@@ -152,6 +160,36 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                         ))}
                     </tbody>
                 </table>
+            </div>
+            <div className={styles.mobileCards}>
+                <div className={styles.cardTrack} ref={cardTrackRef} onScroll={onCardScroll}>
+                    {scenarios.map((s, i) => (
+                        <div
+                            key={s.id}
+                            className={`${styles.scenarioCard} ${i === bestIdx ? styles.scenarioCardBest : ''}`}
+                        >
+                            <div className={styles.cardHeader}>
+                                <span className={styles.cardName}>{s.name}</span>
+                                {i === bestIdx && <span className={styles.cardBadge}>⭐ En Uygun</span>}
+                            </div>
+                            {rows.map((row, ri) => (
+                                <div key={ri} className={styles.cardRow}>
+                                    <span className={styles.cardLabel}>{row.label}</span>
+                                    <span className={`${styles.cardValue} ${row.highlight ? styles.cardValueHighlight : ''}`}>
+                                        {row.values[i]}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+                {scenarios.length > 1 && (
+                    <div className={styles.cardDots} aria-hidden="true">
+                        {scenarios.map((_, i) => (
+                            <span key={i} className={`${styles.dot} ${i === activeCard ? styles.dotActive : ''}`} />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

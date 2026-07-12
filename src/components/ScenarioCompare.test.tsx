@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ScenarioCompare } from './ScenarioCompare';
 
@@ -37,11 +37,22 @@ describe('ScenarioCompare', () => {
 
     it('senaryo isimlerini tablo başlığında gösterir, en düşük maliyetliyi yıldızla işaretler', () => {
         render(<ScenarioCompare scenarios={scenarios} />);
-        expect(screen.getByText(/Ekonomik/)).toBeInTheDocument();
-        expect(screen.getAllByText(/Lüks/).length).toBeGreaterThan(0);
+        // Mobil kart görünümü de aynı senaryo adlarını render ettiği için (bkz. aşağıdaki test),
+        // sorguyu masaüstü tablosuyla sınırlıyoruz — aksi halde getByText belirsiz hale gelir.
+        const table = within(screen.getByRole('table'));
+        expect(table.getByText(/Ekonomik/)).toBeInTheDocument();
+        expect(table.getAllByText(/Lüks/).length).toBeGreaterThan(0);
         // fdTotal'i en düşük olan (Ekonomik, 4M < 6M) best — yıldız o sütunun başlığında
-        const ekonomikHeader = screen.getByText(/Ekonomik/).closest('th');
+        const ekonomikHeader = table.getByText(/Ekonomik/).closest('th');
         expect(ekonomikHeader?.textContent).toContain('⭐');
+    });
+
+    it('mobil kart görünümünde de her iki senaryo adı bulunur (jsdom media query uygulamaz, DOM\'da ikisi de var olmalı)', () => {
+        render(<ScenarioCompare scenarios={scenarios} />);
+        const nameEls = screen.getAllByText(/Ekonomik/);
+        // Biri <th> içinde (tablo, yıldızlı best senaryo olduğu için "Ekonomik ⭐"), biri .cardName
+        // içinde (mobil kart, salt "Ekonomik") — ikisi de DOM'da
+        expect(nameEls.length).toBeGreaterThanOrEqual(2);
     });
 
     it('onShareRequest verilmezse Paylaş butonu render edilmez', () => {

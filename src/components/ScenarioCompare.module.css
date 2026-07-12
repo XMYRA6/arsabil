@@ -1,3 +1,10 @@
+.root {
+}
+
+.mobileCards {
+    display: none;
+}
+
 .emptyMessage {
     text-align: center;
     padding: 1.5rem;
@@ -128,4 +135,123 @@
 
 .tdValueBest {
     background: rgba(var(--primary-rgb), 0.03);
+}
+
+@media (max-width: 768px) {
+    .tableWrap {
+        display: none;
+    }
+
+    .mobileCards {
+        display: block;
+    }
+
+    [data-theme="dark"] .root {
+        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+        --seal-border-soft: rgba(43, 124, 255, 0.18);
+        --seal-text: #E8EEF7;
+        --seal-text-muted: rgba(232, 238, 247, 0.68);
+        --seal-accent: var(--aurora-cyan);
+    }
+
+    [data-theme="light"] .root {
+        --seal-surface: var(--shell-bg);
+        --seal-border-soft: var(--shell-border);
+        --seal-text: var(--card-title);
+        --seal-text-muted: var(--muted);
+        --seal-accent: var(--aurora-cyan);
+    }
+
+    .cardTrack {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .scenarioCard {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+        background: var(--seal-surface);
+        border: 1px solid var(--seal-border-soft);
+        border-radius: 16px;
+        padding: 1rem;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .scenarioCardBest {
+        border-color: var(--seal-accent);
+    }
+
+    .cardHeader {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--seal-border-soft);
+    }
+
+    .cardName {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: var(--seal-text);
+    }
+
+    .cardBadge {
+        font-size: 0.68rem;
+        font-weight: 800;
+        color: var(--seal-accent);
+    }
+
+    .cardRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0;
+    }
+
+    .cardLabel {
+        font-size: 0.78rem;
+        color: var(--seal-text-muted);
+        font-weight: 600;
+    }
+
+    .cardValue {
+        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--seal-text);
+    }
+
+    .cardValueHighlight {
+        font-size: 0.95rem;
+        font-weight: 900;
+        color: var(--seal-accent);
+    }
+
+    .cardDots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 10px;
+    }
+
+    .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--seal-border-soft);
+        transition: background 0.2s, width 0.2s;
+    }
+
+    .dotActive {
+        background: var(--seal-accent);
+        width: 16px;
+        border-radius: 3px;
+    }
 }
