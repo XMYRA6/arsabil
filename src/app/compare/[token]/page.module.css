@@ -44,3 +44,35 @@
   text-decoration: none;
   font-size: 0.9rem;
 }
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  [data-theme="dark"] .container {
+    --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+    --seal-border-soft: rgba(43, 124, 255, 0.18);
+  }
+
+  [data-theme="light"] .container {
+    --seal-surface: var(--shell-bg);
+    --seal-border-soft: var(--shell-border);
+  }
+
+  .card {
+    background: var(--seal-surface);
+    border-color: var(--seal-border-soft);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 1.25rem;
+  }
+
+  .ctaBtn {
+    width: 100%;
+    min-height: var(--touch-target);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
