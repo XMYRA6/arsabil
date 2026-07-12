@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { AdminTopBar } from '@/components/layout/AdminTopBar';
 import styles from './admin.module.css';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -33,36 +34,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     ];
 
     return (
-        <div className={styles.adminShell}>
-            <aside className={styles.sidebar}>
-                <div className={styles.sidebarHeader}>
-                    <h2>Admin Panel</h2>
-                    <span className={styles.badge}>ADMIN</span>
-                </div>
-                <nav className={styles.sidebarNav}>
-                    {navItems.map(item => {
-                        const isActive = item.href === '/admin'
-                            ? pathname === '/admin'
-                            : pathname.startsWith(item.href);
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
-                            >
-                                <span>{item.icon}</span>
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-                <div className={styles.sidebarFooter}>
-                    <Link href="/" className={styles.backLink}>← Hesap Makinesine Dön</Link>
-                </div>
-            </aside>
-            <main className={styles.mainContent}>
-                {children}
-            </main>
-        </div>
+        <>
+            <AdminTopBar />
+            <div className={styles.adminShell}>
+                <aside className={styles.sidebar}>
+                    <div className={styles.sidebarHeader}>
+                        <h2>Admin Panel</h2>
+                        <span className={styles.badge}>ADMIN</span>
+                    </div>
+                    <nav className={styles.sidebarNav}>
+                        {navItems.map(item => {
+                            const isActive = item.href === '/admin'
+                                ? pathname === '/admin'
+                                : pathname.startsWith(item.href);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                                >
+                                    <span>{item.icon}</span>
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+                </aside>
+                <main className={styles.mainContent}>
+                    {children}
+                </main>
+            </div>
+        </>
     );
 }

@@ -10,6 +10,7 @@
 }
 
 .adminShell {
+    --admin-accent: #C9A15A;
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
     min-height: calc(100dvh - 100px);
@@ -49,9 +50,9 @@
     border-radius: 99px;
     font-size: 0.7rem;
     font-weight: 800;
-    background: rgba(var(--primary-rgb), 0.12);
-    color: var(--primary);
-    border: 1px solid rgba(var(--primary-rgb), 0.2);
+    background: rgba(201, 161, 90, 0.12);
+    color: var(--admin-accent);
+    border: 1px solid rgba(201, 161, 90, 0.2);
     letter-spacing: 0.5px;
 }
 
@@ -84,23 +85,6 @@
     background: var(--primary) !important;
     color: white !important;
     box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.25);
-}
-
-.sidebarFooter {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border);
-}
-
-.backLink {
-    color: var(--muted);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.backLink:hover {
-    color: var(--primary);
 }
 
 /* Main Content */
@@ -433,8 +417,7 @@
         padding: 0.5rem;
     }
 
-    .sidebarHeader,
-    .sidebarFooter {
+    .sidebarHeader {
         display: none;
     }
 
