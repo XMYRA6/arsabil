@@ -15,6 +15,8 @@ interface DataCardProps {
     actions?: React.ReactNode;
     /** Verilirse başlık+alanlar tıklanabilir linke dönüşür */
     href?: string;
+    /** Ek CSS class'ı — kök <li>'ye eklenir, `styles.card`'ın YANINA (üzerine yazmaz) */
+    className?: string;
 }
 
 /**
@@ -38,7 +40,7 @@ interface DataCardProps {
  * </CardList>
  * ```
  */
-export function DataCard({ title, subtitle, fields = [], actions, href }: DataCardProps) {
+export function DataCard({ title, subtitle, fields = [], actions, href, className }: DataCardProps) {
     const body = (
         <>
             <div className={styles.header}>
@@ -59,7 +61,7 @@ export function DataCard({ title, subtitle, fields = [], actions, href }: DataCa
     );
 
     return (
-        <li className={styles.card}>
+        <li className={`${styles.card}${className ? ` ${className}` : ""}`}>
             {href ? <Link href={href} className={styles.link}>{body}</Link> : body}
             {actions && <div className={styles.actions}>{actions}</div>}
         </li>
