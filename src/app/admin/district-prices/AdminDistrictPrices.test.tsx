@@ -28,4 +28,16 @@ describe('AdminDistrictPrices — mobil DataCard görünümü', () => {
         await waitFor(() => screen.getByText('+ Yeni Ekle'))
         expect(screen.getByText('+ Yeni Ekle').className).toMatch(/adminPrimaryBtn/)
     })
+
+    it('boş sonuç durumunda mobilde "Kayıt bulunamadı." gösterir', async () => {
+        global.fetch = jest.fn(() =>
+            Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+        ) as unknown as jest.Mock
+
+        render(<AdminDistrictPrices />)
+        await waitFor(() => {
+            const emptyMessages = screen.getAllByText('Kayıt bulunamadı.')
+            expect(emptyMessages.length).toBeGreaterThanOrEqual(2)
+        })
+    })
 })

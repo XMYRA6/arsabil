@@ -387,34 +387,38 @@ export default function AdminDistrictPrices() {
           </div>
         )}
 
-        {!loading && filtered.length > 0 && (
+        {!loading && (
           <div className={styles.mobileCardList}>
-            <CardList>
-              {filtered.map((p) => (
-                <DataCard
-                  key={p.id}
-                  className={styles.dataCardGlass}
-                  title={`${p.il} — ${p.ilce}`}
-                  fields={[
-                    { label: 'Piyasa (TL/m²)', value: <span className={styles.tabularNums}>{p.avgSalesPricePerM2.toLocaleString('tr-TR')}</span> },
-                    { label: 'İnşaat (TL/m²)', value: <span className={styles.tabularNums}>{p.avgUnitConstructionPrice.toLocaleString('tr-TR')}</span> },
-                  ]}
-                  actions={
-                    <>
-                      <button onClick={() => openEdit(p)} className={styles.iconBtn} title="Düzenle">✏️ Düzenle</button>
-                      {deleteId === p.id ? (
-                        <>
-                          <button onClick={() => handleDelete(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }}>Evet, sil</button>
-                          <button onClick={() => setDeleteId(null)} className={styles.iconBtn}>İptal</button>
-                        </>
-                      ) : (
-                        <button onClick={() => setDeleteId(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Sil">🗑️ Sil</button>
-                      )}
-                    </>
-                  }
-                />
-              ))}
-            </CardList>
+            {filtered.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>Kayıt bulunamadı.</div>
+            ) : (
+              <CardList>
+                {filtered.map((p) => (
+                  <DataCard
+                    key={p.id}
+                    className={styles.dataCardGlass}
+                    title={`${p.il} — ${p.ilce}`}
+                    fields={[
+                      { label: 'Piyasa (TL/m²)', value: <span className={styles.tabularNums}>{p.avgSalesPricePerM2.toLocaleString('tr-TR')}</span> },
+                      { label: 'İnşaat (TL/m²)', value: <span className={styles.tabularNums}>{p.avgUnitConstructionPrice.toLocaleString('tr-TR')}</span> },
+                    ]}
+                    actions={
+                      <>
+                        <button onClick={() => openEdit(p)} className={styles.iconBtn} title="Düzenle">✏️ Düzenle</button>
+                        {deleteId === p.id ? (
+                          <>
+                            <button onClick={() => handleDelete(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }}>Evet, sil</button>
+                            <button onClick={() => setDeleteId(null)} className={styles.iconBtn}>İptal</button>
+                          </>
+                        ) : (
+                          <button onClick={() => setDeleteId(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Sil">🗑️ Sil</button>
+                        )}
+                      </>
+                    }
+                  />
+                ))}
+              </CardList>
+            )}
           </div>
         )}
       </div>
