@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
+import { DataCard, CardList } from '@/components/mobile/DataCard';
 
 interface ListingRow {
     id: string;
@@ -251,6 +252,57 @@ export default function AdminListings() {
                         ))}
                     </tbody>
                 </table>
+                </div>
+            )}
+
+            {!loading && filtered.length > 0 && (
+                <div className={styles.mobileCardList}>
+                    <CardList>
+                        {filtered.map(listing => (
+                            <DataCard
+                                key={listing.id}
+                                className={styles.dataCardGlass}
+                                title={listing.title || listing.report?.title || 'İlan #' + listing.id.slice(0, 6)}
+                                subtitle={listing.user?.name || listing.user?.email || '—'}
+                                fields={[
+                                    {
+                                        label: 'Konum',
+                                        value: listing.district ? `${listing.district}, ${listing.city}` : listing.city || '—',
+                                    },
+                                    {
+                                        label: 'Fiyat',
+                                        value: <span className={styles.tabularNums}>{formatPrice(listing.report?.minApartmentPrice || 0)} TL</span>,
+                                    },
+                                    { label: 'Teklif', value: <span className={styles.tabularNums}>{listing._count.offers}</span> },
+                                    {
+                                        label: 'Durum',
+                                        value: listing.status === 'PENDING' ? '⏳ Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif',
+                                    },
+                                    { label: 'Tarih', value: formatDate(listing.createdAt) },
+                                ]}
+                                actions={
+                                    listing.status === 'PENDING' ? (
+                                        <>
+                                            <button onClick={() => approveAction(listing.id, 'approve')} className={styles.iconBtn} style={{ color: 'var(--green)' }} title="Onayla">✅ Onayla</button>
+                                            <button onClick={() => approveAction(listing.id, 'reject')} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Reddet">❌ Reddet</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                onClick={() => toggleActive(listing.id, !listing.isActive)}
+                                                title={listing.isActive ? 'Pasife Al' : 'Aktif Et'}
+                                                className={styles.iconBtn}
+                                                style={{ color: listing.isActive ? 'var(--orange)' : 'var(--green)' }}
+                                            >
+                                                {listing.isActive ? '⏸️ Pasife Al' : '▶️ Aktif Et'}
+                                            </button>
+                                            <button onClick={() => deleteListing(listing.id)} title="Sil" className={styles.iconBtn} style={{ color: 'var(--red)' }}>🗑️ Sil</button>
+                                        </>
+                                    )
+                                }
+                            />
+                        ))}
+                    </CardList>
                 </div>
             )}
         </>
