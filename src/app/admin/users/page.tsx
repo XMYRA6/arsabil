@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
+import { DataCard, CardList } from '@/components/mobile/DataCard';
 
 interface UserRow {
     id: string;
@@ -187,6 +188,7 @@ export default function AdminUsers() {
             {loading ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>Yükleniyor...</div>
             ) : (
+                <>
                 <div className={styles.tableWrap}>
                 <table className={styles.table}>
                     <thead>
@@ -306,6 +308,102 @@ export default function AdminUsers() {
                     </tbody>
                 </table>
                 </div>
+                {!loading && (
+                    <div className={styles.mobileCardList}>
+                        <CardList>
+                            {filteredUsers.map(user => (
+                                <DataCard
+                                    key={user.id}
+                                    className={styles.dataCardGlass}
+                                    title={user.name || '—'}
+                                    subtitle={user.email || '—'}
+                                    fields={[
+                                        {
+                                            label: 'Rol',
+                                            value: (
+                                                <span className={styles.roleBadge} style={getRoleStyle(user.role)}>
+                                                    {ROLES.find(r => r.value === user.role)?.label || user.role}
+                                                </span>
+                                            ),
+                                        },
+                                        {
+                                            label: 'Durum',
+                                            value: user.isBanned ? '🚫 Askıda' : '✅ Aktif',
+                                        },
+                                        {
+                                            label: 'Doğrulandı',
+                                            value: (
+                                                <div
+                                                    onClick={() => handleVerified(user.id, !user.isVerified)}
+                                                    style={{
+                                                        width: 36, height: 18, borderRadius: 9,
+                                                        background: user.isVerified ? 'var(--green)' : '#30363d',
+                                                        position: 'relative', cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    <div style={{
+                                                        width: 14, height: 14, background: 'white', borderRadius: '50%',
+                                                        position: 'absolute', top: 2,
+                                                        left: user.isVerified ? 20 : 2,
+                                                    }} />
+                                                </div>
+                                            ),
+                                        },
+                                        {
+                                            label: 'Plan',
+                                            value: (
+                                                <select
+                                                    value={user.plan ?? 'FREE'}
+                                                    onChange={e => handlePlan(user.id, e.target.value)}
+                                                    className={styles.roleSelect}
+                                                    style={{ fontSize: '0.78rem', height: 28 }}
+                                                >
+                                                    <option value="FREE">FREE</option>
+                                                    <option value="PRO">PRO</option>
+                                                </select>
+                                            ),
+                                        },
+                                        {
+                                            label: 'Rapor / İlan / Teklif',
+                                            value: (
+                                                <span className={styles.tabularNums}>
+                                                    {user._count.reports} / {user._count.listings} / {user._count.offers}
+                                                </span>
+                                            ),
+                                        },
+                                        { label: 'Kayıt', value: formatDate(user.createdAt) },
+                                    ]}
+                                    actions={
+                                        <>
+                                            <select
+                                                className={styles.roleSelect}
+                                                value={user.role}
+                                                onChange={e => handleRoleChange(user.id, e.target.value)}
+                                                style={{ fontSize: '0.78rem', height: 32, flex: 1 }}
+                                            >
+                                                {ROLES.map(r => (
+                                                    <option key={r.value} value={r.value}>{r.label}</option>
+                                                ))}
+                                            </select>
+                                            <button
+                                                onClick={() => handleBan(user.id, !user.isBanned)}
+                                                title={user.isBanned ? 'Askıyı Kaldır' : 'Askıya Al'}
+                                                className={styles.iconBtn}
+                                                style={{
+                                                    background: user.isBanned ? 'rgba(var(--green-rgb),.1)' : 'rgba(var(--red-rgb),.1)',
+                                                    color: user.isBanned ? 'var(--green)' : 'var(--red)',
+                                                }}
+                                            >
+                                                {user.isBanned ? '✓' : '⛔'}
+                                            </button>
+                                        </>
+                                    }
+                                />
+                            ))}
+                        </CardList>
+                    </div>
+                )}
+                </>
             )}
         </>
     );
