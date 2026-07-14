@@ -62,7 +62,6 @@ describe('DataCard', () => {
         expect(screen.getByRole('list')).toBeInTheDocument()
         expect(screen.getAllByRole('listitem')).toHaveLength(2)
     })
-})
 
     it('className prop\'u verilirse kök <li>\'ye eklenir (varsayılan .card sınıfının yanına)', () => {
         const { container } = render(
@@ -73,3 +72,4 @@ describe('DataCard', () => {
         const li = container.querySelector('li')
         expect(li?.className).toContain('customGlass')
     })
+})
