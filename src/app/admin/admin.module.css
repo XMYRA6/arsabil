@@ -82,9 +82,9 @@
 }
 
 .navItemActive {
-    background: var(--primary) !important;
-    color: white !important;
-    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.25);
+    background: var(--admin-accent) !important;
+    color: #0F2A43 !important;
+    box-shadow: 0 4px 14px rgba(201, 161, 90, 0.35);
 }
 
 /* Main Content */
@@ -229,6 +229,11 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
+}
+
+/* DataCard/CardList sayfaları — masaüstünde tablo görünür, kart listesi gizli (self-gating, JS kontrolü yok) */
+.mobileCardList {
+    display: none;
 }
 
 .table {
@@ -376,8 +381,8 @@
 }
 
 .segmentTabActive {
-    background: var(--primary);
-    color: white;
+    background: var(--admin-accent);
+    color: #0F2A43;
     font-weight: 700;
 }
 
@@ -410,6 +415,13 @@
     .sidebar {
         flex-direction: row;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+        mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+    }
+
+    .sidebar::-webkit-scrollbar {
+        display: none;
     }
 
     .sidebarNav {
@@ -427,6 +439,40 @@
         padding: 0.6rem 0.75rem;
     }
 
+    /* Faz 4 — Mühür kimliği: mobil cam yüzey (bkz. docs/superpowers/specs/2026-07-14-admin-panel-mobil-muhur-kimlik-design.md) */
+    [data-theme="dark"] .adminShell {
+        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+        --seal-border: rgba(201, 161, 90, 0.25);
+    }
+
+    [data-theme="light"] .adminShell {
+        --seal-surface: var(--shell-bg);
+        --seal-border: var(--shell-border);
+    }
+
+    .statBox,
+    .settingsCard,
+    .toolbar {
+        background: var(--seal-surface);
+        border-color: var(--seal-border);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .dataCardGlass {
+        background: var(--seal-surface) !important;
+        border-color: var(--seal-border) !important;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+
+    .tableWrap {
+        display: none;
+    }
+
+    .mobileCardList {
+        display: block;
+    }
 }
 
 /* Profit Levels CRUD */
@@ -564,4 +610,21 @@
     .profitLevelRow > *:nth-child(4) {
         display: none;
     }
+}
+
+/* Admin birincil buton — pirinç vurgu (masaüstü + mobil, admin geneli) */
+.adminPrimaryBtn {
+    background: linear-gradient(135deg, #C9A15A 0%, #B08A45 100%) !important;
+    color: #0F2A43 !important;
+    box-shadow: 0 8px 24px rgba(201, 161, 90, 0.35), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
+}
+
+.adminPrimaryBtn:hover:not(:disabled) {
+    box-shadow: 0 12px 32px rgba(201, 161, 90, 0.35), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
+    filter: brightness(1.05) !important;
+}
+
+/* Sayı/para değerleri — DataCard fields içinde kullanılır */
+.tabularNums {
+    font-variant-numeric: tabular-nums;
 }
