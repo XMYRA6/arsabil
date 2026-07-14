@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import styles from "../admin.module.css";
 import { Button } from "@/components/ui/Button";
 import { DistrictPriceEntry } from "@/components/LocationSelector";
+import { DataCard, CardList } from "@/components/mobile/DataCard";
 
 interface ModalState {
   open: boolean;
@@ -221,7 +222,7 @@ export default function AdminDistrictPrices() {
               </option>
             ))}
           </select>
-          <Button variant="primary" onClick={openAdd}>
+          <Button variant="primary" onClick={openAdd} className={styles.adminPrimaryBtn}>
             + Yeni Ekle
           </Button>
         </div>
@@ -385,6 +386,38 @@ export default function AdminDistrictPrices() {
           </table>
           </div>
         )}
+
+        {!loading && filtered.length > 0 && (
+          <div className={styles.mobileCardList}>
+            <CardList>
+              {filtered.map((p) => (
+                <DataCard
+                  key={p.id}
+                  className={styles.dataCardGlass}
+                  title={`${p.il} — ${p.ilce}`}
+                  fields={[
+                    { label: 'İlçe', value: p.ilce },
+                    { label: 'Piyasa (TL/m²)', value: <span className={styles.tabularNums}>{p.avgSalesPricePerM2.toLocaleString('tr-TR')}</span> },
+                    { label: 'İnşaat (TL/m²)', value: <span className={styles.tabularNums}>{p.avgUnitConstructionPrice.toLocaleString('tr-TR')}</span> },
+                  ]}
+                  actions={
+                    <>
+                      <button onClick={() => openEdit(p)} className={styles.iconBtn} title="Düzenle">✏️ Düzenle</button>
+                      {deleteId === p.id ? (
+                        <>
+                          <button onClick={() => handleDelete(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }}>Evet, sil</button>
+                          <button onClick={() => setDeleteId(null)} className={styles.iconBtn}>İptal</button>
+                        </>
+                      ) : (
+                        <button onClick={() => setDeleteId(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Sil">🗑️ Sil</button>
+                      )}
+                    </>
+                  }
+                />
+              ))}
+            </CardList>
+          </div>
+        )}
       </div>
 
       {modal.open && (
@@ -486,7 +519,7 @@ export default function AdminDistrictPrices() {
               <Button variant="outline" onClick={closeModal}>
                 İptal
               </Button>
-              <Button variant="primary" onClick={handleSave} disabled={saving}>
+              <Button variant="primary" onClick={handleSave} disabled={saving} className={styles.adminPrimaryBtn}>
                 {saving ? "Kaydediliyor..." : "Kaydet"}
               </Button>
             </div>
