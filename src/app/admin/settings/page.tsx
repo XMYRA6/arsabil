@@ -452,7 +452,7 @@ export default function AdminSettings() {
                         </button>
 
                         <div style={{ marginTop: '1rem' }}>
-                            <Button variant="primary" onClick={handleSaveProfitLevels} disabled={loading}>
+                            <Button variant="primary" onClick={handleSaveProfitLevels} disabled={loading} className={styles.adminPrimaryBtn}>
                                 {loading ? 'Kaydediliyor...' : '💾 Kâr Katsayılarını Kaydet'}
                             </Button>
                         </div>
@@ -516,7 +516,7 @@ export default function AdminSettings() {
                         </button>
 
                         <div style={{ marginTop: '1rem' }}>
-                            <Button variant="primary" onClick={handleSaveRiskLevels} disabled={loading}>
+                            <Button variant="primary" onClick={handleSaveRiskLevels} disabled={loading} className={styles.adminPrimaryBtn}>
                                 {loading ? 'Kaydediliyor...' : '💾 Risk Katsayılarını Kaydet'}
                             </Button>
                         </div>
@@ -566,7 +566,7 @@ export default function AdminSettings() {
                 </div>
             </div>
 
-            <Button variant="primary" onClick={handleSave} disabled={loading}>
+            <Button variant="primary" onClick={handleSave} disabled={loading} className={styles.adminPrimaryBtn}>
                 {loading ? 'Kaydediliyor...' : '💾 Genel Ayarları Kaydet'}
             </Button>
         </>
