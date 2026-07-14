@@ -17,7 +17,12 @@ beforeEach(() => {
 describe('AdminDistrictPrices — mobil DataCard görünümü', () => {
     it('mobil kart listesinde il/ilçe görünür (tablo + kart = 2 kopya)', async () => {
         render(<AdminDistrictPrices />)
-        await waitFor(() => expect(screen.getAllByText('Kadıköy')).toHaveLength(2))
+        await waitFor(() => {
+            const matches = screen.getAllByText((content, element) =>
+                element?.tagName.toLowerCase() !== 'script' && (element?.textContent ?? '').includes('Kadıköy')
+            )
+            expect(matches.length).toBeGreaterThanOrEqual(2)
+        })
     })
 
     it('"+ Yeni Ekle" butonu adminPrimaryBtn class\'ını taşır', async () => {

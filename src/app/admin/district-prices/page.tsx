@@ -396,7 +396,6 @@ export default function AdminDistrictPrices() {
                   className={styles.dataCardGlass}
                   title={`${p.il} — ${p.ilce}`}
                   fields={[
-                    { label: 'İlçe', value: p.ilce },
                     { label: 'Piyasa (TL/m²)', value: <span className={styles.tabularNums}>{p.avgSalesPricePerM2.toLocaleString('tr-TR')}</span> },
                     { label: 'İnşaat (TL/m²)', value: <span className={styles.tabularNums}>{p.avgUnitConstructionPrice.toLocaleString('tr-TR')}</span> },
                   ]}
