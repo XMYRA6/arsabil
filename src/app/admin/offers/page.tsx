@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
+import { DataCard, CardList } from '@/components/mobile/DataCard';
 
 interface OfferRow {
     id: string;
@@ -80,44 +81,72 @@ export default function AdminOffers() {
                     Henüz teklif bulunmuyor
                 </div>
             ) : (
-                <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>Teklif Veren</th>
-                            <th>İlan</th>
-                            <th>Konum</th>
-                            <th style={{ textAlign: 'center' }}>Arsa Payı</th>
-                            <th>Mesaj</th>
-                            <th>Durum</th>
-                            <th>Tarih</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map(offer => (
-                            <tr key={offer.id}>
-                                <td style={{ fontWeight: 700, fontSize: '0.85rem' }}>{offer.bidder?.name || offer.bidder?.email || '—'}</td>
-                                <td style={{ fontSize: '0.82rem' }}>{offer.listing?.report?.title || '—'}</td>
-                                <td style={{ fontSize: '0.82rem' }}>
-                                    {offer.listing?.district ? `${offer.listing.district}, ${offer.listing.city}` : offer.listing?.city || '—'}
-                                </td>
-                                <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--primary)' }}>
-                                    %{Math.round(offer.offeredShare * 100)}
-                                </td>
-                                <td style={{ fontSize: '0.78rem', color: 'var(--muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                    {offer.message || '—'}
-                                </td>
-                                <td>
-                                    <span className={styles.roleBadge} style={statusStyle(offer.status)}>
-                                        {statusLabel(offer.status)}
-                                    </span>
-                                </td>
-                                <td style={{ fontSize: '0.82rem' }}>{formatDate(offer.createdAt)}</td>
+                <>
+                    <div className={styles.tableWrap}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>Teklif Veren</th>
+                                <th>İlan</th>
+                                <th>Konum</th>
+                                <th style={{ textAlign: 'center' }}>Arsa Payı</th>
+                                <th>Mesaj</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-                </div>
+                        </thead>
+                        <tbody>
+                            {filtered.map(offer => (
+                                <tr key={offer.id}>
+                                    <td style={{ fontWeight: 700, fontSize: '0.85rem' }}>{offer.bidder?.name || offer.bidder?.email || '—'}</td>
+                                    <td style={{ fontSize: '0.82rem' }}>{offer.listing?.report?.title || '—'}</td>
+                                    <td style={{ fontSize: '0.82rem' }}>
+                                        {offer.listing?.district ? `${offer.listing.district}, ${offer.listing.city}` : offer.listing?.city || '—'}
+                                    </td>
+                                    <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--primary)' }}>
+                                        %{Math.round(offer.offeredShare * 100)}
+                                    </td>
+                                    <td style={{ fontSize: '0.78rem', color: 'var(--muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {offer.message || '—'}
+                                    </td>
+                                    <td>
+                                        <span className={styles.roleBadge} style={statusStyle(offer.status)}>
+                                            {statusLabel(offer.status)}
+                                        </span>
+                                    </td>
+                                    <td style={{ fontSize: '0.82rem' }}>{formatDate(offer.createdAt)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    </div>
+
+                    <div className={styles.mobileCardList}>
+                        <CardList>
+                            {filtered.map(offer => (
+                                <DataCard
+                                    key={offer.id}
+                                    className={styles.dataCardGlass}
+                                    title={offer.bidder?.name || offer.bidder?.email || '—'}
+                                    subtitle={offer.listing?.report?.title || '—'}
+                                    fields={[
+                                        {
+                                            label: 'Konum',
+                                            value: offer.listing?.district ? `${offer.listing.district}, ${offer.listing.city}` : offer.listing?.city || '—',
+                                        },
+                                        {
+                                            label: 'Arsa Payı',
+                                            value: <span className={styles.tabularNums}>%{Math.round(offer.offeredShare * 100)}</span>,
+                                        },
+                                        { label: 'Mesaj', value: offer.message || '—' },
+                                        { label: 'Durum', value: statusLabel(offer.status) },
+                                        { label: 'Tarih', value: formatDate(offer.createdAt) },
+                                    ]}
+                                />
+                            ))}
+                        </CardList>
+                    </div>
+                </>
             )}
         </>
     );
