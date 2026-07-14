@@ -18,10 +18,8 @@ describe('AdminDistrictPrices — mobil DataCard görünümü', () => {
     it('mobil kart listesinde il/ilçe görünür (tablo + kart = 2 kopya)', async () => {
         render(<AdminDistrictPrices />)
         await waitFor(() => {
-            const matches = screen.getAllByText((content, element) =>
-                element?.tagName.toLowerCase() !== 'script' && (element?.textContent ?? '').includes('Kadıköy')
-            )
-            expect(matches.length).toBeGreaterThanOrEqual(2)
+            const matches = screen.getAllByText((content) => content.includes('Kadıköy'))
+            expect(matches).toHaveLength(2)
         })
     })
 
