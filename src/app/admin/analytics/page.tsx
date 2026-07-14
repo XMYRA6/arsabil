@@ -72,7 +72,7 @@ export default function AdminAnalytics() {
             {/* Funnel */}
             <div className={styles.settingsCard}>
                 <h3>📊 Dönüşüm Hunisi</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                <div className={styles.funnelGrid}>
                     {[
                         { label: 'Hesaplama → İlan', value: `%${conversionRate}`, color: 'var(--info)', width: conversionRate },
                         { label: 'İlan → Teklif', value: `%${offerRate}`, color: 'var(--green)', width: offerRate },
@@ -92,7 +92,7 @@ export default function AdminAnalytics() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className={styles.distributionGrid}>
                 {/* Role Distribution */}
                 <div className={styles.settingsCard}>
                     <h3>👥 Rol Dağılımı</h3>

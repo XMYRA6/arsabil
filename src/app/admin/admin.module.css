@@ -406,6 +406,18 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
 }
 
+.funnelGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.distributionGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .adminShell {
@@ -472,6 +484,11 @@
 
     .mobileCardList {
         display: block;
+    }
+
+    .funnelGrid,
+    .distributionGrid {
+        grid-template-columns: 1fr;
     }
 }
 

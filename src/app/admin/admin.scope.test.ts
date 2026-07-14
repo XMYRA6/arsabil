@@ -78,3 +78,23 @@ describe('admin.module.css — Faz 4 mobil cam yüzey token kapsamı', () => {
     expect(mobileBlock).toMatch(/\.tableWrap\s*\{[^}]*display:\s*none/)
   })
 })
+
+describe('admin.module.css — Analitik grid fix (Faz 4 task 7)', () => {
+  it('.funnelGrid masaüstünde 3 kolon, mobilde 1 kolon olmalı', () => {
+    const desktopIdx = css.indexOf('.funnelGrid {')
+    expect(desktopIdx).toBeGreaterThan(-1)
+    const desktopBlock = css.slice(desktopIdx, css.indexOf('}', desktopIdx))
+    expect(desktopBlock).toMatch(/grid-template-columns:\s*repeat\(3,\s*1fr\)/)
+
+    const mediaIdx = css.indexOf('@media (max-width: 900px)')
+    const mobileBlock = css.slice(mediaIdx, css.indexOf('@media (max-width: 900px)', mediaIdx + 1))
+    expect(mobileBlock).toMatch(/\.funnelGrid,\s*\n?\s*\.distributionGrid\s*\{[^}]*grid-template-columns:\s*1fr/)
+  })
+
+  it('.distributionGrid masaüstünde 2 kolon olmalı', () => {
+    const desktopIdx = css.indexOf('.distributionGrid {')
+    expect(desktopIdx).toBeGreaterThan(-1)
+    const desktopBlock = css.slice(desktopIdx, css.indexOf('}', desktopIdx))
+    expect(desktopBlock).toMatch(/grid-template-columns:\s*1fr 1fr/)
+  })
+})
