@@ -66,3 +66,6 @@ lint-report.json
 
 # Playwright mobil smoke ekran görüntüleri
 e2e/screenshots/
+
+# git worktree isolation (superpowers)
+/.worktrees/
