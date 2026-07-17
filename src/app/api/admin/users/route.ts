@@ -17,6 +17,7 @@ export async function GET() {
                 name: true,
                 email: true,
                 role: true,
+                isBanned: true,
                 createdAt: true,
                 _count: {
                     select: {
@@ -76,7 +77,7 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ message: "Güncellenecek alan yok." }, { status: 400 });
         }
 
-        if (isBanned === true) {
+        if (data.isBanned === true) {
             const [updatedUser] = await prisma.$transaction([
                 prisma.user.update({ where: { id: userId }, data }),
                 prisma.listing.updateMany({
