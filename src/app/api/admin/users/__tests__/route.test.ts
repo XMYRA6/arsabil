@@ -11,7 +11,7 @@ jest.mock('@/lib/prisma', () => ({
     prisma: {
         user: { update: (...args: unknown[]) => userUpdateMock(...args) },
         listing: { updateMany: (...args: unknown[]) => listingUpdateManyMock(...args) },
-        $transaction: (...args: unknown[]) => transactionMock(...args),
+        $transaction: (ops: unknown[]) => transactionMock(ops),
     },
 }))
 
