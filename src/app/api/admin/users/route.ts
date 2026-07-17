@@ -36,7 +36,7 @@ export async function GET() {
     }
 }
 
-// PATCH — Kullanıcı rol/plan/isVerified güncelle
+// PATCH — Kullanıcı rol/plan/isVerified/isBanned güncelle
 export async function PATCH(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -44,13 +44,13 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ message: "Yetkisiz." }, { status: 403 });
         }
 
-        const { userId, role, isVerified, plan } = await req.json();
+        const { userId, role, isVerified, plan, isBanned } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ message: "userId gereklidir." }, { status: 400 });
         }
 
-        if (userId === session.user.id && role !== undefined) {
+        if (userId === session.user.id && (role !== undefined || isBanned !== undefined)) {
             return NextResponse.json({ message: "Kendi hesabınızı değiştiremezsiniz." }, { status: 400 });
         }
 
@@ -70,9 +70,21 @@ export async function PATCH(req: Request) {
             }
             data.plan = plan;
         }
+        if (isBanned !== undefined) data.isBanned = Boolean(isBanned);
 
         if (Object.keys(data).length === 0) {
             return NextResponse.json({ message: "Güncellenecek alan yok." }, { status: 400 });
+        }
+
+        if (isBanned === true) {
+            const [updatedUser] = await prisma.$transaction([
+                prisma.user.update({ where: { id: userId }, data }),
+                prisma.listing.updateMany({
+                    where: { userId, isActive: true },
+                    data: { isActive: false },
+                }),
+            ]);
+            return NextResponse.json({ message: "Güncellendi.", user: updatedUser });
         }
 
         const updatedUser = await prisma.user.update({
