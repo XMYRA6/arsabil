@@ -29,6 +29,7 @@ model User {
   linkedin      String?
   website       String?
   isVerified    Boolean        @default(false)
+  isBanned      Boolean        @default(false)
   plan        String   @default("FREE")
   emailPrefs  String   @default("{}")
   notifications Notification[]
