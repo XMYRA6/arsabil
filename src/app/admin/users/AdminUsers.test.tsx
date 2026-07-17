@@ -51,4 +51,29 @@ describe('AdminUsers — mobil DataCard görünümü', () => {
             expect(patchCall).toBeDefined()
         })
     })
+
+    it('banlı kullanıcıda "Askıyı Kaldır" butonu tıklanınca PATCH isteği isBanned:false ile atılır', async () => {
+        window.confirm = jest.fn(() => true)
+        global.fetch = jest.fn((url: string, opts?: RequestInit) => {
+            if (!opts || opts.method === undefined) {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ users: [{ ...mockUser, isBanned: true }] }),
+                }) as unknown as Promise<Response>
+            }
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({}) }) as unknown as Promise<Response>
+        }) as jest.Mock
+
+        render(<AdminUsers />)
+        await waitFor(() => expect(screen.getAllByText('Ayşe Yılmaz').length).toBeGreaterThan(0))
+
+        const unbanButtons = screen.getAllByTitle('Askıyı Kaldır')
+        fireEvent.click(unbanButtons[unbanButtons.length - 1])
+
+        await waitFor(() => {
+            const calls = (global.fetch as jest.Mock).mock.calls
+            const patchCall = calls.find(c => c[1]?.method === 'PATCH' && JSON.parse(c[1].body).isBanned === false)
+            expect(patchCall).toBeDefined()
+        })
+    })
 })
