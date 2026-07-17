@@ -17,9 +17,7 @@ const config = {
     }],
   },
   testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(next-auth|@auth|@prisma)/)',
-  ],
 }
+
 
 module.exports = config
