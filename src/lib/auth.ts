@@ -43,6 +43,10 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Şifre yanlış.");
                 }
 
+                if (user.isBanned) {
+                    throw new Error("Hesabınız askıya alınmıştır.");
+                }
+
                 return {
                     id: user.id,
                     email: user.email,
