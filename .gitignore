@@ -69,3 +69,6 @@ e2e/screenshots/
 
 # git worktree isolation (superpowers)
 /.worktrees/
+
+# e2e debug scratch output
+e2e/tmp/
