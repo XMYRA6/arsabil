@@ -74,7 +74,7 @@ export default function ProfilePage() {
     const [website, setWebsite] = useState('')
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
-    const [theme, setTheme] = useState<Theme>('dark')
+    const [theme, setTheme] = useState<Theme>('light')
     const [emailPrefs, setEmailPrefs] = useState({ mesaj: true, teklif: true, ilan: true })
     const [savingPrefs, setSavingPrefs] = useState(false)
     const [savedPrefs, setSavedPrefs] = useState(false)
@@ -92,7 +92,7 @@ export default function ProfilePage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
         setMounted(true)
-        const saved = (localStorage.getItem('arsabil-theme') as Theme) || 'dark'
+        const saved = (localStorage.getItem('arsabil-theme') as Theme) || 'light'
         setTheme(saved)
     }, [])
 
