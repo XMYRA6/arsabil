@@ -528,6 +528,15 @@
         display: flex;
     }
 
+    .sidebarHeader {
+        padding-top: calc(20px + var(--safe-top));
+    }
+
+    .chatHeader {
+        height: calc(64px + var(--safe-top));
+        padding-top: calc(10px + var(--safe-top));
+    }
+
     .bubble {
         max-width: 85%;
     }
