@@ -70,3 +70,27 @@ describe('anasayfa Apple Liquid Glass — süreç kartları veri kutusu', () => 
     }
   });
 });
+
+describe('anasayfa Apple Liquid Glass — vision/mission cam yüzey hizalaması', () => {
+  it('.visionCard tam olarak bir kez tanımlı olmalı (ölü ikinci blok silinmiş)', () => {
+    const matches = pageCss.match(/^\.visionCard\s*\{/gm) || [];
+    expect(matches.length).toBe(1);
+  });
+
+  it('.visionMission tam olarak bir kez tanımlı olmalı (base kural; @media içindeki responsive override hariç)', () => {
+    const matches = pageCss.match(/^\.visionMission\s*\{/gm) || [];
+    expect(matches.length).toBe(1);
+  });
+
+  it('.visionCard:hover tam olarak bir kez tanımlı olmalı', () => {
+    const matches = pageCss.match(/^\.visionCard:hover\s*\{/gm) || [];
+    expect(matches.length).toBe(1);
+  });
+
+  it('light-tema .visionCard nested-glass referans desenini kullanmalı (mavi tint gradient + kenar parıltısı box-shadow)', () => {
+    const lightMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.visionCard\s*\{([^}]*)\}/);
+    expect(lightMatch).not.toBeNull();
+    expect(lightMatch![1]).toMatch(/linear-gradient\(165deg/);
+    expect(lightMatch![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.85\)/);
+  });
+});
