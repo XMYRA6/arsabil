@@ -94,3 +94,16 @@ describe('anasayfa Apple Liquid Glass — vision/mission cam yüzey hizalaması'
     expect(lightMatch![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.85\)/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — blog kartları', () => {
+  it('.blogCard hover kenar parıltısı mavi-ailesi olmalı (zaten öyleydi, regresyon guard\'ı)', () => {
+    expect(pageCss).toMatch(/\.blogCard:hover\s*\{[^}]*rgba\(31,\s*111,\s*235/);
+  });
+
+  it('.blogCategoryTag border\'ı mavi-aileye geçmeli ve arka plan opaklığı düşmeli (0.75→0.55, navy zemin okunabilirlik için korunur)', () => {
+    const match = pageCss.match(/\.blogCategoryTag\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/rgba\(31,\s*111,\s*235,\s*0\.35\)/);
+    expect(match![1]).toMatch(/rgba\(15,\s*23,\s*42,\s*0\.55\)/);
+  });
+});
