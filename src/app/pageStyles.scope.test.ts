@@ -59,3 +59,14 @@ describe('anasayfa Apple Liquid Glass — bento tag/num tipografisi', () => {
     expect(pageCss).toMatch(/\.cardBgImage\s*\{[^}]*opacity:\s*0\.22/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — süreç kartları veri kutusu', () => {
+  it('.dataVal/.dataValBold/.dataValHighlight/.dataValOk tabular-nums + mono olmalı', () => {
+    for (const cls of ['dataVal', 'dataValBold', 'dataValHighlight', 'dataValOk']) {
+      const re = new RegExp(`\\.${cls}\\s*\\{([^}]*)\\}`);
+      const match = pageCss.match(re);
+      expect(match).not.toBeNull();
+      expect(match![1]).toMatch(/font-variant-numeric:\s*tabular-nums/);
+    }
+  });
+});
