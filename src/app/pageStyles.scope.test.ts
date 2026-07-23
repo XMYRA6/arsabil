@@ -30,3 +30,19 @@ describe('anasayfa Apple Liquid Glass — hero kicker', () => {
     expect(kickerLineMatch![1]).not.toMatch(/✨/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — stats strip', () => {
+  it('.statsStrip blueprint grid dokusu içermeli (repeating-linear-gradient, mavi çok düşük alfa)', () => {
+    const match = pageCss.match(/\.statsStrip\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/repeating-linear-gradient/);
+    expect(match![1]).toMatch(/rgba\(31,\s*111,\s*235,\s*0\.0[3-8]\)/);
+  });
+
+  it('.statVal tabular-nums + mono font kullanmalı', () => {
+    const match = pageCss.match(/\.statVal\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/font-variant-numeric:\s*tabular-nums/);
+    expect(match![1]).toMatch(/JetBrains Mono/);
+  });
+});
