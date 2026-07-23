@@ -356,6 +356,8 @@
   letter-spacing: 0.06em;
   opacity: 0.35;
   color: currentColor;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── İkon kutusu ── */

@@ -46,3 +46,16 @@ describe('anasayfa Apple Liquid Glass — stats strip', () => {
     expect(match![1]).toMatch(/JetBrains Mono/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — bento tag/num tipografisi', () => {
+  it('.bentoNum mono font + tabular-nums kullanmalı (kadastro numaralandırma hissi)', () => {
+    const match = pageCss.match(/\.bentoNum\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/JetBrains Mono/);
+    expect(match![1]).toMatch(/font-variant-numeric:\s*tabular-nums/);
+  });
+
+  it('.cardBgImage dokunulmamış olmalı (fotoğraf overlay korunuyor)', () => {
+    expect(pageCss).toMatch(/\.cardBgImage\s*\{[^}]*opacity:\s*0\.22/);
+  });
+});
