@@ -22,6 +22,7 @@ import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelec
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { FormulParamsFields, RiskCostFields, MarketField } from './AdvancedSettingsSections';
 import { HesapOzetiSeridi } from './HesapOzetiSeridi';
+import { HesapFisi } from './HesapFisi';
 
 interface ProfitLevel {
   id: string;
@@ -731,16 +732,7 @@ export default function Home() {
           <main id="resultsPanel" className={`${styles.mainPanel} ${styles.swipeCard}`}>
             <h2 className={styles.mainPanelTitle}>Hesap Sonuçları <span className={`${styles.pill} ${styles.pillSmall}`}>Engine v2</span></h2>
 
-            <div className={styles.blueBox}>
-              <div className={styles.blueBoxTop}>
-                <h2>{result ? result.FD_total.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '0'}<span>TL</span></h2>
-                <span>📐 {result ? result.FD_per_m2.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '0'} TL / m²</span>
-              </div>
-              <div className={styles.blueBoxBottom}>
-                <div className={styles.blueCircle}></div>
-                <strong>{result ? result.FD_per_m2.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '0'} TL / m²</strong>
-              </div>
-            </div>
+            <HesapFisi result={result} />
 
             <div className={styles.mainPanelResults}>
             <div className={styles.statsRow}>

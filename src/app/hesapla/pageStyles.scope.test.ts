@@ -77,11 +77,11 @@ describe('paylaşılan bileşen override\'larının özgünlük deseni', () => {
 });
 
 describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
-  it('.blueBox mobilde gizlenmeli, kural mobil media query içinde olmalı', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const blueBoxHideMatch = pageCss.match(/\.blueBox\s*\{[^}]*display:\s*none/);
-    expect(blueBoxHideMatch).not.toBeNull();
-    expect(blueBoxHideMatch!.index).toBeGreaterThan(lastMobileMediaIndex);
+  it('.blueBox artık hiç kullanılmamalı — HesapFisi bileşeni onun yerini aldı (2026-07-24)', () => {
+    expect(pageCss).not.toMatch(/\.blueBox\b/);
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).not.toMatch(/styles\.blueBox\b/);
+    expect(pageTsx).toMatch(/<HesapFisi result={result} \/>/);
   });
 
   it('.sliderArea mobilde gizlenmeli, kural mobil media query içinde olmalı', () => {
