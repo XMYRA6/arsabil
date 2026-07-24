@@ -81,7 +81,7 @@ export default function Home() {
     { id: 'default-2', label: 'Orta', value: 1.30, sortOrder: 1, isDefault: true },
     { id: 'default-3', label: 'Yüksek', value: 1.50, sortOrder: 2, isDefault: false },
   ]);
-  const [manualMarketPrice, setManualMarketPrice] = useState<string>("7.500.000");
+  const [manualMarketPrice, setManualMarketPrice] = useState<string>("");
 
   const [result, setResult] = useState<CalculationOutput | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -826,7 +826,7 @@ export default function Home() {
                       x: landShareRatio / 100,
                       L: luxLevel,
                       Ad: apartmentSize,
-                      P: 10000,
+                      P: globalUnitPrice,
                       K: builderProfit,
                       Sd: isApartmentCountEnabled ? totalApartments : undefined,
                       Aa: isAaEnabled ? arsaAlani : undefined,
@@ -844,7 +844,7 @@ export default function Home() {
                         x: landShareRatio / 100,
                         L: luxLevel,
                         Ad: apartmentSize,
-                        P: 10000,
+                        P: globalUnitPrice,
                         K: builderProfit,
                         Sd: isApartmentCountEnabled ? totalApartments : undefined,
                         Aa: isAaEnabled ? arsaAlani : undefined,

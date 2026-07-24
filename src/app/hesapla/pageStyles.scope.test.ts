@@ -171,3 +171,19 @@ describe('buton reverse — PDF İndir ve Karşılaştır dolgulu stile geçmeli
     expect(outsideMobileCss).toMatch(/button\.compareBtn\s*\{[^}]*background:\s*rgba\(var\(--green-rgb\), 0\.08\)/);
   });
 });
+
+describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)', () => {
+  it('manualMarketPrice varsayılanı boş olmalı (yanlış 7.500.000 sabiti kaldırıldı)', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).toMatch(/useState<string>\(""\)/);
+    expect(pageTsx).not.toMatch(/useState<string>\("7\.500\.000"\)/);
+  });
+
+  it('SensitivityChart ve BreakEvenChart artık P: globalUnitPrice kullanmalı, sabit 10000 değil', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    const hardcodedMatches = pageTsx.match(/P:\s*10000,/g) ?? [];
+    expect(hardcodedMatches.length).toBe(0);
+    const dynamicMatches = pageTsx.match(/P:\s*globalUnitPrice,/g) ?? [];
+    expect(dynamicMatches.length).toBeGreaterThanOrEqual(2);
+  });
+});
