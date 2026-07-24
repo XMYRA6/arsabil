@@ -21,11 +21,12 @@ describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
     expect(pageCss).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
   });
 
-  it('--seal-accent tanımı, mobil @media (max-width: 768px) bloğunun içinde olmalı', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+  it('--seal-accent tanımı artık sayfa geneli (masaüstü dahil) olmalı — mobil media query\'nin İÇİNDE OLMAMALI (2026-07-24 hesapla redesign kararı)', () => {
+    const firstMobileMediaIndex = pageCss.indexOf('@media (max-width: 768px)');
     const sealAccentIndex = pageCss.indexOf('--seal-accent:');
-    expect(lastMobileMediaIndex).toBeGreaterThan(-1);
-    expect(sealAccentIndex).toBeGreaterThan(lastMobileMediaIndex);
+    expect(firstMobileMediaIndex).toBeGreaterThan(-1);
+    expect(sealAccentIndex).toBeGreaterThan(-1);
+    expect(sealAccentIndex).toBeLessThan(firstMobileMediaIndex);
   });
 
   it('--seal-surface hem dark hem light tema bloğunda tanımlı olmalı', () => {

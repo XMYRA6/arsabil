@@ -16,6 +16,31 @@
     min-height: calc(100dvh - 120px);
 }
 
+/* Faz 1.5 revizyonu — Cam Kart + Aurora Mavi Vurgu, 2026-07-24'te sayfa geneline (masaüstü dahil) genişletildi */
+.container {
+    --seal-ink: #0F2A43;
+    --seal-accent: var(--aurora-cyan);
+    --seal-accent-rgb: 43, 124, 255;
+}
+
+[data-theme="dark"] .container {
+    --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+    --seal-border: rgba(76, 141, 255, 0.25);
+    --seal-border-soft: rgba(76, 141, 255, 0.18);
+    --seal-text: #F4F0E6;
+    --seal-text-muted: rgba(244, 240, 230, 0.7);
+    --seal-text-faint: rgba(244, 240, 230, 0.55);
+}
+
+[data-theme="light"] .container {
+    --seal-surface: var(--shell-bg);
+    --seal-border: var(--shell-border);
+    --seal-border-soft: var(--shell-border);
+    --seal-text: var(--card-title);
+    --seal-text-muted: var(--muted);
+    --seal-text-faint: var(--muted);
+}
+
 /* Inner Page Header */
 .header {
     display: flex;
@@ -1374,29 +1399,6 @@ button.compareBtn {
         max-width: 100% !important;
         margin: 0 !important;
         min-height: 100dvh !important;
-
-        /* Faz 1.5 revizyonu — Cam Kart + Aurora Mavi Vurgu (bkz. docs/superpowers/specs/2026-07-06-hesapla-mobil-cam-aurora-vurgu-design.md) */
-        --seal-ink: #0F2A43;
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
-    }
-
-    [data-theme="dark"] .container {
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border: rgba(76, 141, 255, 0.25);
-        --seal-border-soft: rgba(76, 141, 255, 0.18);
-        --seal-text: #F4F0E6;
-        --seal-text-muted: rgba(244, 240, 230, 0.7);
-        --seal-text-faint: rgba(244, 240, 230, 0.55);
-    }
-
-    [data-theme="light"] .container {
-        --seal-surface: var(--shell-bg);
-        --seal-border: var(--shell-border);
-        --seal-border-soft: var(--shell-border);
-        --seal-text: var(--card-title);
-        --seal-text-muted: var(--muted);
-        --seal-text-faint: var(--muted);
     }
 
     .topResultCard {
