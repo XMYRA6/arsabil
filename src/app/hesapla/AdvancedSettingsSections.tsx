@@ -3,6 +3,7 @@
 import React from 'react';
 import styles from './page.module.css';
 import { Toggle } from '@/components/ui/Toggle';
+import { RangeSlider } from '@/components/ui/RangeSlider';
 
 interface ProfitLevel {
   id: string;
@@ -25,6 +26,8 @@ export interface FormulParamsProps {
   setIsApartmentCountEnabled: (v: boolean) => void;
   totalApartments: number;
   setTotalApartments: React.Dispatch<React.SetStateAction<number>>;
+  ownerApartmentShare: number;
+  setOwnerApartmentShare: React.Dispatch<React.SetStateAction<number>>;
   isAaEnabled: boolean;
   setIsAaEnabled: (v: boolean) => void;
   arsaAlani: number;
@@ -35,6 +38,7 @@ export interface FormulParamsProps {
 export function FormulParamsFields({
   isApartmentCountEnabled, setIsApartmentCountEnabled,
   totalApartments, setTotalApartments,
+  ownerApartmentShare, setOwnerApartmentShare,
   isAaEnabled, setIsAaEnabled,
   arsaAlani, setArsaAlani,
 }: FormulParamsProps) {
@@ -48,14 +52,25 @@ export function FormulParamsFields({
           </div>
         </div>
         {isApartmentCountEnabled && (
-          <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
-            <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
-            <div className={styles.stepperRight}>
-              <span>daire</span>
-              <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
-              <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
+          <>
+            <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
+              <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
+              <div className={styles.stepperRight}>
+                <span>daire</span>
+                <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
+                <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
+              </div>
             </div>
-          </div>
+            <RangeSlider
+              label="Arsa Sahibine Düşen Daire"
+              min={0}
+              max={totalApartments}
+              step={1}
+              value={ownerApartmentShare}
+              unit="daire"
+              onChange={(e) => setOwnerApartmentShare(Number(e.target.value))}
+            />
+          </>
         )}
       </div>
 

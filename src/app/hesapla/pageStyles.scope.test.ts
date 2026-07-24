@@ -186,4 +186,14 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     const dynamicMatches = pageTsx.match(/P:\s*globalUnitPrice,/g) ?? [];
     expect(dynamicMatches.length).toBeGreaterThanOrEqual(2);
   });
+
+  it('Sd modu (Toplam Daire Sayısı) sayfa açılışında varsayılan kapalı olmalı', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).toMatch(/\[isApartmentCountEnabled, setIsApartmentCountEnabled\] = useState<boolean>\(false\)/);
+  });
+
+  it('ownerApartmentCount ölü state\'i tamamen kaldırılmış olmalı', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).not.toMatch(/ownerApartmentCount/);
+  });
 });

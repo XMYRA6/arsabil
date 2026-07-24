@@ -7,6 +7,7 @@ import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice } from './calculatorUiHelpers';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
@@ -62,10 +63,17 @@ export default function Home() {
   // State: Kullanım Girdileri
   const [luxLevel, setLuxLevel] = useState<number>(1.4); // Standart (1.0), Orta (1.2), Lüks (1.4)
   const [apartmentSize, setApartmentSize] = useState<number>(140);
-  const [isApartmentCountEnabled, setIsApartmentCountEnabled] = useState<boolean>(true);
+  const [isApartmentCountEnabled, setIsApartmentCountEnabled] = useState<boolean>(false);
   const [totalApartments, setTotalApartments] = useState<number>(24);
-  const [ownerApartmentCount, setOwnerApartmentCount] = useState<number>(8);
+  const [ownerApartmentShare, setOwnerApartmentShare] = useState<number>(0);
   const [landShareRatio, setLandShareRatio] = useState<number>(33); // %
+
+  const effectiveLandShareRatio = computeEffectiveLandShareX({
+    isApartmentCountEnabled,
+    ownerApartmentShare,
+    totalApartments,
+    landShareRatio,
+  }) * 100;
 
 
   const [riskLevel, setRiskLevel] = useState<number>(10); // 0, 5, 10, 15
@@ -153,16 +161,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const activeLandShare = isApartmentCountEnabled
-      ? (totalApartments > 0 ? ownerApartmentCount / totalApartments : landShareRatio / 100)
-      : landShareRatio / 100;
-
     if (isApartmentCountEnabled) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- arsa payı/daire sayısı türev durumu senkronizasyonu
-      setLandShareRatio(Math.round(activeLandShare * 100));
-    } else {
-      setOwnerApartmentCount(Math.round(totalApartments * activeLandShare));
+      const clamped = clampOwnerApartmentShare(ownerApartmentShare, totalApartments);
+      if (clamped !== ownerApartmentShare) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- totalApartments azaltılınca ownerApartmentShare'i sınırlar
+        setOwnerApartmentShare(clamped);
+        return;
+      }
     }
+
+    const activeLandShare = computeEffectiveLandShareX({
+      isApartmentCountEnabled,
+      ownerApartmentShare,
+      totalApartments,
+      landShareRatio,
+    });
 
     const input: CalculationInput = {
       x: activeLandShare,
@@ -185,7 +198,7 @@ export default function Home() {
 
     const res = CalculatorEngineV2.calculate(input);
     setResult(res);
-  }, [luxLevel, apartmentSize, totalApartments, ownerApartmentCount, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
+  }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
 
   useEffect(() => {
     if (!selectedIlce) return;
@@ -216,7 +229,7 @@ export default function Home() {
           totalApartments: isApartmentCountEnabled ? totalApartments : 12,
           apartmentSizeSqm: apartmentSize,
           luxLevelModifier: luxLevel,
-          landShareRatio: landShareRatio / 100,
+          landShareRatio: effectiveLandShareRatio / 100,
           minApartmentPrice: result.FD_total,
           landCost: result.FA || result.Ma // Eğer Toplam hesaplanıyorsa FA, yoksa tek arsa maliyeti
         })
@@ -243,7 +256,7 @@ export default function Home() {
     await generatePdfReport({
       luxLevel,
       apartmentSize,
-      landShareRatio,
+      landShareRatio: effectiveLandShareRatio,
       totalApartments: isApartmentCountEnabled ? totalApartments : undefined,
       arsaAlani: isAaEnabled ? arsaAlani : undefined,
       riskLevel,
@@ -251,7 +264,7 @@ export default function Home() {
       iksaMode,
       iksaPercentage,
       iksaManualTL,
-      marketPrice: parseInt(manualMarketPrice.replace(/\D/g, '') || '0'),
+      marketPrice: parseMarketPrice(manualMarketPrice),
       result,
     });
   };
@@ -265,7 +278,7 @@ export default function Home() {
         name: `Senaryo ${prev.length + 1}`,
         luxLevel,
         apartmentSize,
-        landShareRatio: landShareRatio / 100,
+        landShareRatio: effectiveLandShareRatio / 100,
         totalApartments: isApartmentCountEnabled ? totalApartments : undefined,
         riskLevel: riskLevel > 0 ? 1 + riskLevel / 100 : 1,
         builderProfit,
@@ -312,7 +325,7 @@ export default function Home() {
     }
   };
 
-  const marketPriceNum = parseInt(manualMarketPrice.replace(/\D/g, '') || '0');
+  const marketPriceNum = parseMarketPrice(manualMarketPrice);
 
   const actionsSection = (
     <>
@@ -420,14 +433,25 @@ export default function Home() {
                 <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
               </div>
               {isApartmentCountEnabled && (
-                <div className={styles.stepperInput}>
-                  <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
-                  <div className={styles.stepperRight}>
-                    <span>daire</span>
-                    <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
-                    <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
+                <>
+                  <div className={styles.stepperInput}>
+                    <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
+                    <div className={styles.stepperRight}>
+                      <span>daire</span>
+                      <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
+                      <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
+                    </div>
                   </div>
-                </div>
+                  <RangeSlider
+                    label="Arsa Sahibine Düşen Daire"
+                    min={0}
+                    max={totalApartments}
+                    step={1}
+                    value={ownerApartmentShare}
+                    unit="daire"
+                    onChange={(e) => setOwnerApartmentShare(Number(e.target.value))}
+                  />
+                </>
               )}
             </div>
 
@@ -538,19 +562,21 @@ export default function Home() {
               <div className={styles.settingsGroup}>
                 <div className={`${styles.toggleRow} ${styles.toggleRowFlat}`}>
                   <h4>Arsa Payı</h4>
-                  <span className={styles.sharePct}>%{landShareRatio}</span>
+                  <span className={styles.sharePct}>
+                    %{Math.round(effectiveLandShareRatio)}
+                    {isApartmentCountEnabled && ` (${ownerApartmentShare}/${totalApartments} daire)`}
+                  </span>
                 </div>
-                <RangeSlider
-                  min={1}
-                  max={100}
-                  step={1}
-                  value={landShareRatio}
-                  onChange={(e) => {
-                    setLandShareRatio(Number(e.target.value));
-                    setIsApartmentCountEnabled(false);
-                  }}
-                  className={styles.sealRangeSlider}
-                />
+                {!isApartmentCountEnabled && (
+                  <RangeSlider
+                    min={1}
+                    max={100}
+                    step={1}
+                    value={landShareRatio}
+                    onChange={(e) => setLandShareRatio(Number(e.target.value))}
+                    className={styles.sealRangeSlider}
+                  />
+                )}
               </div>
             </div>
 
@@ -566,6 +592,8 @@ export default function Home() {
                     setIsApartmentCountEnabled={setIsApartmentCountEnabled}
                     totalApartments={totalApartments}
                     setTotalApartments={setTotalApartments}
+                    ownerApartmentShare={ownerApartmentShare}
+                    setOwnerApartmentShare={setOwnerApartmentShare}
                     isAaEnabled={isAaEnabled}
                     setIsAaEnabled={setIsAaEnabled}
                     arsaAlani={arsaAlani}
@@ -652,6 +680,8 @@ export default function Home() {
                   setIsApartmentCountEnabled={setIsApartmentCountEnabled}
                   totalApartments={totalApartments}
                   setTotalApartments={setTotalApartments}
+                  ownerApartmentShare={ownerApartmentShare}
+                  setOwnerApartmentShare={setOwnerApartmentShare}
                   isAaEnabled={isAaEnabled}
                   setIsAaEnabled={setIsAaEnabled}
                   arsaAlani={arsaAlani}
@@ -736,7 +766,7 @@ export default function Home() {
                 <div className={styles.chartCenter}>
                   <PriceEvaluationChart
                     minPrice={result ? result.FD_total : 0}
-                    marketPrice={parseInt(manualMarketPrice.replace(/\D/g, '') || "0")}
+                    marketPrice={marketPriceNum}
                   />
                 </div>
               </div>
@@ -745,28 +775,31 @@ export default function Home() {
 
             <div className={styles.sliderArea}>
               <h4 className={styles.sliderHeader}>Arsa Payı</h4>
-              <div className={styles.sliderContainer}>
-                <div className={styles.sliderTrackWrapper}>
-                  <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
-                    <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
-                    <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
-                    <input
-                      type="range" min="10" max="100"
-                      value={landShareRatio}
-                      onChange={(e) => {
-                        setLandShareRatio(Number(e.target.value));
-                        setIsApartmentCountEnabled(false);
-                      }}
-                      className={styles.sliderInput}
-                    />
-                    <div className={styles.sliderTicks}>
-                      <span>10%</span>
-                      <span>100%</span>
+              {isApartmentCountEnabled ? (
+                <div className={styles.sliderValueBox}>
+                  %{Math.round(effectiveLandShareRatio)} ({ownerApartmentShare}/{totalApartments} daire)
+                </div>
+              ) : (
+                <div className={styles.sliderContainer}>
+                  <div className={styles.sliderTrackWrapper}>
+                    <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
+                      <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
+                      <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
+                      <input
+                        type="range" min="10" max="100"
+                        value={landShareRatio}
+                        onChange={(e) => setLandShareRatio(Number(e.target.value))}
+                        className={styles.sliderInput}
+                      />
+                      <div className={styles.sliderTicks}>
+                        <span>10%</span>
+                        <span>100%</span>
+                      </div>
                     </div>
                   </div>
+                  <div className={styles.sliderValueBox}>{landShareRatio}%</div>
                 </div>
-                <div className={styles.sliderValueBox}>{landShareRatio}%</div>
-              </div>
+              )}
             </div>
 
             <div className={styles.mainPanelResults}>
@@ -823,7 +856,7 @@ export default function Home() {
                 <div className={styles.pagerPage}>
                   <div className={styles.chartBlock}>
                     <SensitivityChart baseInput={{
-                      x: landShareRatio / 100,
+                      x: effectiveLandShareRatio / 100,
                       L: luxLevel,
                       Ad: apartmentSize,
                       P: globalUnitPrice,
@@ -841,7 +874,7 @@ export default function Home() {
                   <div className={styles.chartDivider}>
                     <BreakEvenChart
                       baseInput={{
-                        x: landShareRatio / 100,
+                        x: effectiveLandShareRatio / 100,
                         L: luxLevel,
                         Ad: apartmentSize,
                         P: globalUnitPrice,
@@ -855,7 +888,7 @@ export default function Home() {
                         Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
                         MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
                       }}
-                      marketPrice={parseInt(manualMarketPrice.replace(/\D/g, '') || '0')}
+                      marketPrice={marketPriceNum}
                     />
                   </div>
                 </div>
