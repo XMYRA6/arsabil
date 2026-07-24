@@ -753,6 +753,63 @@
 }
 
 /* =========================================================================
+   HESAP ÖZETİ ŞERİDİ — Her zaman görünür, masaüstünde sticky (2026-07-24)
+   ========================================================================= */
+.hesapOzetiSeridi {
+    grid-column: 1 / -1;
+    position: sticky;
+    top: 80px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--seal-surface);
+    border: 1px solid var(--seal-border);
+    color: var(--seal-text);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    margin-bottom: 14px;
+}
+
+.hesapOzetiFiyat {
+    font-size: 1.4rem;
+    font-weight: 900;
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.hesapOzetiArsaPayi {
+    font-size: 0.9rem;
+    color: var(--seal-text-muted);
+}
+
+.hesapOzetiArsaPayiDetay {
+    opacity: 0.75;
+}
+
+.hesapOzetiPiyasa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--seal-text-muted);
+}
+
+.hesapOzetiPiyasaInput {
+    width: 130px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--seal-border-soft);
+    background: transparent;
+    color: var(--seal-text);
+    font-size: 0.85rem;
+}
+
+/* =========================================================================
    RESPONSIVE — Right side becomes full-width grid
    ========================================================================= */
 .rightGrid {
@@ -1494,6 +1551,19 @@ button.compareBtn {
     .leftSidebar,
     .rightGrid {
         display: contents;
+    }
+
+    .hesapOzetiSeridi {
+        position: static;
+        border-radius: 20px;
+        margin: 8px 12px 12px;
+    }
+
+    /* .rightGrid, display:contents sayesinde mobilde .layout'un düz akışına
+       katılıyor; masaüstüne özel üstteki kopya burada tekrar görünmesin diye
+       (mobil kopya zaten .mobileSidebar içinde, isResultsRevealed ile kontrollü) */
+    .rightGrid>.hesapOzetiSeridi {
+        display: none;
     }
 
     .swipeCard,

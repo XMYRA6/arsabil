@@ -21,7 +21,7 @@ import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { FormulParamsFields, RiskCostFields, MarketField } from './AdvancedSettingsSections';
-import { SealBadge } from './SealBadge';
+import { HesapOzetiSeridi } from './HesapOzetiSeridi';
 
 interface ProfitLevel {
   id: string;
@@ -640,22 +640,16 @@ export default function Home() {
             )}
 
             {isResultsRevealed && (
-              <div className={styles.topResultCard}>
-                <div className={styles.topResultLabel}>MİNİMUM DAİRE FİYATI</div>
-                <div className={styles.topResultValue}>
-                  {result?.FD_total ? `${Math.round(result.FD_total).toLocaleString('tr-TR')} TL` : '---'}
-                </div>
-                <SealBadge
-                  show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum > result.FD_total}
-                  percentage={result?.FD_total ? Math.round(((marketPriceNum - result.FD_total) / marketPriceNum) * 100) : 0}
-                  variant="cheaper"
-                />
-                <SealBadge
-                  show={marketPriceNum > 0 && !!result?.FD_total && marketPriceNum < result.FD_total}
-                  percentage={result?.FD_total ? Math.round(((result.FD_total - marketPriceNum) / marketPriceNum) * 100) : 0}
-                  variant="pricier"
-                />
-              </div>
+              <HesapOzetiSeridi
+                fdTotal={result?.FD_total}
+                isApartmentCountEnabled={isApartmentCountEnabled}
+                effectiveLandSharePercent={effectiveLandShareRatio}
+                ownerApartmentShare={ownerApartmentShare}
+                totalApartments={totalApartments}
+                manualMarketPrice={manualMarketPrice}
+                onMarketPriceChange={setManualMarketPrice}
+                marketPriceNum={marketPriceNum}
+              />
             )}
           </div>
 
@@ -722,6 +716,16 @@ export default function Home() {
 
         {/* Right Grid: Hesap Sonuçları + Hesap Özeti */}
         <section className={styles.rightGrid}>
+          <HesapOzetiSeridi
+            fdTotal={result?.FD_total}
+            isApartmentCountEnabled={isApartmentCountEnabled}
+            effectiveLandSharePercent={effectiveLandShareRatio}
+            ownerApartmentShare={ownerApartmentShare}
+            totalApartments={totalApartments}
+            manualMarketPrice={manualMarketPrice}
+            onMarketPriceChange={setManualMarketPrice}
+            marketPriceNum={marketPriceNum}
+          />
 
           {/* Main Panel */}
           <main id="resultsPanel" className={`${styles.mainPanel} ${styles.swipeCard}`}>
