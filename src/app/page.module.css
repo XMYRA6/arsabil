@@ -1644,7 +1644,10 @@
 }
 
 .faqItem {
-  background: rgba(31, 111, 235, 0.05);
+  background:
+    repeating-linear-gradient(0deg, rgba(31, 111, 235, 0.04) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(90deg, rgba(31, 111, 235, 0.04) 0 1px, transparent 1px 20px),
+    rgba(31, 111, 235, 0.05);
   border: 1px solid rgba(31, 111, 235, 0.18);
   border-radius: 20px;
   padding: 1.25rem 1.5rem;
@@ -1655,8 +1658,14 @@
 }
 
 :global([data-theme='light']) .faqItem {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(31, 111, 235, 0.15);
+  background:
+    repeating-linear-gradient(0deg, rgba(31, 111, 235, 0.03) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(90deg, rgba(31, 111, 235, 0.03) 0 1px, transparent 1px 20px),
+    linear-gradient(165deg, rgba(219, 234, 254, 0.34), rgba(255, 255, 255, 0.24));
+  border-color: rgba(31, 111, 235, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(31, 111, 235, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .faqItem:hover {
@@ -1665,7 +1674,10 @@
 
 .faqOpen {
   border-color: var(--primary);
-  background: linear-gradient(135deg, rgba(31, 111, 235, 0.1), rgba(31, 111, 235, 0.03));
+  background:
+    repeating-linear-gradient(0deg, rgba(31, 111, 235, 0.04) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(90deg, rgba(31, 111, 235, 0.04) 0 1px, transparent 1px 20px),
+    linear-gradient(135deg, rgba(31, 111, 235, 0.1), rgba(31, 111, 235, 0.03));
 }
 
 .faqQuestionRow {

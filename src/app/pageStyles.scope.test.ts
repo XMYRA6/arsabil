@@ -107,3 +107,23 @@ describe('anasayfa Apple Liquid Glass — blog kartları', () => {
     expect(match![1]).toMatch(/rgba\(15,\s*23,\s*42,\s*0\.55\)/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — FAQ', () => {
+  it('light-tema .faqItem nested-glass referans desenini kullanmalı', () => {
+    const lightMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.faqItem\s*\{([^}]*)\}/);
+    expect(lightMatch).not.toBeNull();
+    expect(lightMatch![1]).toMatch(/linear-gradient\(165deg/);
+  });
+
+  it('.faqItem blueprint grid dokusu içermeli (fotoğrafsız yüzey, aksan uygun)', () => {
+    const match = pageCss.match(/\.faqItem\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/repeating-linear-gradient/);
+  });
+
+  it('.faqOpen da blueprint doku katmanını korumalı (açık accordion durumunda doku kaybolmamalı)', () => {
+    const match = pageCss.match(/\.faqOpen\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/repeating-linear-gradient/);
+  });
+});
