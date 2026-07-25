@@ -1680,6 +1680,14 @@
     linear-gradient(135deg, rgba(31, 111, 235, 0.1), rgba(31, 111, 235, 0.03));
 }
 
+:global([data-theme='light']) .faqOpen {
+  border-color: var(--primary);
+  background:
+    repeating-linear-gradient(0deg, rgba(31, 111, 235, 0.03) 0 1px, transparent 1px 20px),
+    repeating-linear-gradient(90deg, rgba(31, 111, 235, 0.03) 0 1px, transparent 1px 20px),
+    linear-gradient(135deg, rgba(31, 111, 235, 0.10), rgba(31, 111, 235, 0.04));
+}
+
 .faqQuestionRow {
   display: flex;
   justify-content: space-between;

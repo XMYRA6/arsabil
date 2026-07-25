@@ -93,6 +93,23 @@ describe('anasayfa Apple Liquid Glass — vision/mission cam yüzey hizalaması'
     expect(lightMatch![1]).toMatch(/linear-gradient\(165deg/);
     expect(lightMatch![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.85\)/);
   });
+
+  it('.visionCard konsolide blok birleşik property setini korumalı (final review I2 fix — .visionImageContainer/.visionImg CSS\'te tanımsız, overflow:hidden tek clip mekanizması; bu guard olmadan "gereksiz görünen" bir satır silindiğinde suite 345/345 geçerdi ama vision bölümü görsel olarak bozulurdu)', () => {
+    const match = pageCss.match(/^\.visionCard\s*\{([^}]*)\}/m);
+    expect(match).not.toBeNull();
+    const body = match![1];
+    for (const prop of [
+      /overflow:\s*hidden/,
+      /display:\s*flex/,
+      /flex-direction:\s*column/,
+      /align-items:\s*center/,
+      /padding:\s*2\.5rem 2rem/,
+      /text-align:\s*center/,
+      /border-radius:\s*24px/,
+    ]) {
+      expect(body).toMatch(prop);
+    }
+  });
 });
 
 describe('anasayfa Apple Liquid Glass — blog kartları', () => {
@@ -125,6 +142,13 @@ describe('anasayfa Apple Liquid Glass — FAQ', () => {
     const match = pageCss.match(/\.faqOpen\s*\{([^}]*)\}/);
     expect(match).not.toBeNull();
     expect(match![1]).toMatch(/repeating-linear-gradient/);
+  });
+
+  it('light-tema .faqOpen override tanımlı olmalı ve var(--primary) kenar + doku taşımalı (final review I1 fix — .faqOpen light temada dead rule idi, specificity (0,2,0) .faqItem override tarafından eziliyordu)', () => {
+    const lightOpenMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.faqOpen\s*\{([^}]*)\}/);
+    expect(lightOpenMatch).not.toBeNull();
+    expect(lightOpenMatch![1]).toMatch(/border-color:\s*var\(--primary\)/);
+    expect(lightOpenMatch![1]).toMatch(/repeating-linear-gradient/);
   });
 });
 
