@@ -170,3 +170,11 @@ describe('anasayfa Apple Liquid Glass — CTA', () => {
     expect(lightMatch![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.[0-9]+\)/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — bento --acc scope guard', () => {
+  it('.bentoGrid --acc custom property tanımlamalı (bug fix: --acc daha önce yalnızca hiç uygulanmayan .accent* sınıflarında tanımlıydı, bu yüzden .bentoCard ve içindeki tüm var(--acc) referansları unset\'e düşüyordu — kart kenarlığı/gölgesi/arka planı, PDF indirme butonu, cipler ve avatar görünmüyordu)', () => {
+    const match = pageCss.match(/\.bentoGrid\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/--acc:\s*31,\s*111,\s*235/);
+  });
+});
