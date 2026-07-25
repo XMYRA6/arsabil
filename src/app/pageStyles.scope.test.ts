@@ -127,3 +127,18 @@ describe('anasayfa Apple Liquid Glass — FAQ', () => {
     expect(match![1]).toMatch(/repeating-linear-gradient/);
   });
 });
+
+describe('anasayfa Apple Liquid Glass — CTA', () => {
+  it('.ctaSection kenar parıltısı (inset highlight) içermeli, referans desenle tutarlı', () => {
+    const match = pageCss.match(/\.ctaSection\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.[0-9]+\)/);
+  });
+
+  it('light-tema .ctaSection nested-glass referans desenini kullanmalı (flat beyaz yerine mavi tint gradient + kenar parıltısı)', () => {
+    const lightMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.ctaSection\s*\{([^}]*)\}/);
+    expect(lightMatch).not.toBeNull();
+    expect(lightMatch![1]).toMatch(/linear-gradient\(165deg/);
+    expect(lightMatch![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.[0-9]+\)/);
+  });
+});
