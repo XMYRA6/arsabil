@@ -20,6 +20,22 @@ describe('HesapOzetiSeridi', () => {
     expect(screen.queryByText(/daire\)/)).not.toBeInTheDocument();
   });
 
+  it('fiyatın "Min." niteleyicisiyle etiketlendiğini gösterir (bkz. final review Finding 1)', () => {
+    render(
+      <HesapOzetiSeridi
+        fdTotal={23328000}
+        isApartmentCountEnabled={false}
+        effectiveLandSharePercent={30}
+        ownerApartmentShare={0}
+        totalApartments={0}
+        manualMarketPrice=""
+        onMarketPriceChange={() => {}}
+        marketPriceNum={0}
+      />
+    );
+    expect(screen.getByText('Min. Daire Fiyatı')).toBeInTheDocument();
+  });
+
   it('Sd açıkken daire detayını da gösterir', () => {
     render(
       <HesapOzetiSeridi

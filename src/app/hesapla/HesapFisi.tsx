@@ -10,6 +10,9 @@ export interface HesapFisiProps {
 /** Her zaman açık hesap dökümü — izlenebilirlik = güven (bkz. spec 2026-07-24). */
 export function HesapFisi({ result }: HesapFisiProps) {
   const fmt = (n: number) => Math.round(n).toLocaleString('tr-TR');
+  // K (kâr katsayısı) CalculationOutput'ta ayrı bir alan olarak yok (engine_v2 dondurulmuş,
+  // kapsam dışı); FD_total = M * K olduğundan izlenebilirlik için orandan türetiliyor.
+  const kMultiplier = result && result.M > 0 ? result.FD_total / result.M : null;
 
   return (
     <div className={styles.hesapFisi}>
@@ -26,7 +29,11 @@ export function HesapFisi({ result }: HesapFisiProps) {
         <span>{result ? `${fmt(result.M)} TL` : '—'}</span>
       </div>
       <div className={styles.hesapFisiRow}>
-        <span className={styles.hesapFisiRowLabel}>Daire Fiyatı (FD)</span>
+        <span className={styles.hesapFisiRowLabel}>× Kâr Katsayısı (K)</span>
+        <span>{kMultiplier !== null ? `× ${kMultiplier.toFixed(2)}` : '—'}</span>
+      </div>
+      <div className={styles.hesapFisiRow}>
+        <span className={styles.hesapFisiRowLabel}>Min. Daire Fiyatı (FD)</span>
         <span>{result ? `${fmt(result.FD_total)} TL` : '—'}</span>
       </div>
       <div className={styles.hesapFisiRow}>

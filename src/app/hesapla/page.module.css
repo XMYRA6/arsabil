@@ -694,6 +694,20 @@
     margin-bottom: 14px;
 }
 
+.hesapOzetiFiyatWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hesapOzetiFiyatLabel {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--seal-text-muted);
+}
+
 .hesapOzetiFiyat {
     font-size: 1.4rem;
     font-weight: 900;

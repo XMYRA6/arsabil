@@ -32,6 +32,24 @@ describe('HesapFisi', () => {
     expect(screen.getByText('159.183 TL/m²')).toBeInTheDocument();
   });
 
+  it('Daire Fiyatı satırı "Min." niteleyicisiyle etiketlenir (bkz. final review Finding 1)', () => {
+    render(<HesapFisi result={baseResult} />);
+    expect(screen.getByText('Min. Daire Fiyatı (FD)')).toBeInTheDocument();
+    expect(screen.queryByText('Daire Fiyatı (FD)')).not.toBeInTheDocument();
+  });
+
+  it('M ile FD arasında ×K izlenebilirlik satırını FD_total/M oranıyla gösterir (bkz. final review Finding 2)', () => {
+    render(<HesapFisi result={baseResult} />);
+    expect(screen.getByText('× Kâr Katsayısı (K)')).toBeInTheDocument();
+    // FD_total / M = 22285714 / 17142857 ≈ 1.30
+    expect(screen.getByText('× 1.30')).toBeInTheDocument();
+  });
+
+  it('result null iken ×K satırı da "—" gösterir', () => {
+    render(<HesapFisi result={null} />);
+    expect(screen.getByText('× Kâr Katsayısı (K)')).toBeInTheDocument();
+  });
+
   it('FA null iken Arsa Fiyatı satırı hiç render edilmez', () => {
     render(<HesapFisi result={baseResult} />);
     expect(screen.queryByText(/Arsa Fiyatı \(FA\)/)).not.toBeInTheDocument();

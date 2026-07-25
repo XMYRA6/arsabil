@@ -30,8 +30,11 @@ export function HesapOzetiSeridi({
 
   return (
     <div className={styles.hesapOzetiSeridi}>
-      <div className={styles.hesapOzetiFiyat}>
-        {fdTotal ? `${Math.round(fdTotal).toLocaleString('tr-TR')} TL` : '---'}
+      <div className={styles.hesapOzetiFiyatWrap}>
+        <span className={styles.hesapOzetiFiyatLabel}>Min. Daire Fiyatı</span>
+        <div className={styles.hesapOzetiFiyat}>
+          {fdTotal ? `${Math.round(fdTotal).toLocaleString('tr-TR')} TL` : '---'}
+        </div>
       </div>
       <div className={styles.hesapOzetiArsaPayi}>
         Arsa Payı: <strong>%{Math.round(effectiveLandSharePercent)}</strong>
