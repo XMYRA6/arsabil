@@ -625,7 +625,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>✨ Türkiye&apos;nin İlk Dijital Arsa Fizibilite Platformu</div>
+          <span className={styles.heroKicker}>Türkiye&apos;nin İlk Dijital Arsa Fizibilite Platformu</span>
           <h1 className={styles.heroTitle}>
             Arsanızın Gerçek Değerini <br />
             <span>Tahmin Etmeyin, Hesaplayın.</span>
