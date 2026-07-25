@@ -1680,7 +1680,7 @@
     linear-gradient(135deg, rgba(31, 111, 235, 0.1), rgba(31, 111, 235, 0.03));
 }
 
-:global([data-theme='light']) .faqOpen {
+:global([data-theme='light']) .faqItem.faqOpen {
   border-color: var(--primary);
   background:
     repeating-linear-gradient(0deg, rgba(31, 111, 235, 0.03) 0 1px, transparent 1px 20px),

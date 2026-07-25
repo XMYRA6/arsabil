@@ -145,10 +145,14 @@ describe('anasayfa Apple Liquid Glass — FAQ', () => {
   });
 
   it('light-tema .faqOpen override tanımlı olmalı ve var(--primary) kenar + doku taşımalı (final review I1 fix — .faqOpen light temada dead rule idi, specificity (0,2,0) .faqItem override tarafından eziliyordu)', () => {
-    const lightOpenMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.faqOpen\s*\{([^}]*)\}/);
+    const lightOpenMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.faqItem\.faqOpen\s*\{([^}]*)\}/);
     expect(lightOpenMatch).not.toBeNull();
     expect(lightOpenMatch![1]).toMatch(/border-color:\s*var\(--primary\)/);
     expect(lightOpenMatch![1]).toMatch(/repeating-linear-gradient/);
+  });
+
+  it('light-tema .faqOpen override bileşik seçici (.faqItem.faqOpen) kullanmalı — tek sınıflı hâle sadeleştirme specificity (0,2,0) eşitliğine ve sıra bağımlılığına geri döner (re-review specificity hardening)', () => {
+    expect(pageCss).toMatch(/:global\(\[data-theme='light'\]\)\s*\.faqItem\.faqOpen\s*\{/);
   });
 });
 
