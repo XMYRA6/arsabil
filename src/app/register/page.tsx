@@ -50,7 +50,7 @@ export default function RegisterPage() {
                     <p className={styles.subtitle}>Sisteme Kayıt Olun</p>
                 </div>
 
-                <Card>
+                <Card className={styles.sealCard}>
                     <form onSubmit={handleSubmit} className={styles.form}>
                         {error && (
                             <div className={styles.errorBanner}>
@@ -64,6 +64,7 @@ export default function RegisterPage() {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
+                            className={styles.sealInput}
                         />
 
                         <Input
@@ -72,6 +73,7 @@ export default function RegisterPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            className={styles.sealInput}
                         />
 
                         <Input
@@ -80,10 +82,11 @@ export default function RegisterPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            className={styles.sealInput}
                         />
 
                         <div className={styles.submitRow}>
-                            <Button type="submit" variant="primary" fullWidth disabled={loading}>
+                            <Button type="submit" variant="primary" fullWidth disabled={loading} className={styles.sealSubmit}>
                                 {loading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}
                             </Button>
                         </div>
