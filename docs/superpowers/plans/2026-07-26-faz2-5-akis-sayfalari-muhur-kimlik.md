@@ -49,7 +49,8 @@
 - Test: `src/app/login/login.scope.test.ts` (mevcut dosyanın sonuna yeni `describe`)
 
 **Interfaces:**
-- Produces: bu dosyada tanımlanan `--seal-*` token isimleri, sonraki task'ların birebir aynısını kullanacağı sözleşmedir: `--seal-accent`, `--seal-accent-rgb`, `--seal-surface`, `--seal-border`, `--seal-border-soft`, `--seal-text`.
+- Produces: bu dosyada tanımlanan `--seal-*` token isimleri, sonraki task'ların birebir aynısını kullanacağı sözleşmedir: `--seal-accent`, `--seal-accent-rgb`, `--seal-surface`, `--seal-border`, `--seal-text`.
+  (`--seal-border-soft` Task 1 review'unda DUSURULDU: hicbir sayfa tuketmiyordu ve planin "kullanilmayan token tanimlama" kisitini ihlal ediyordu — insan partner kararı, 2026-07-26.)
 - Consumes: yok (ilk task).
 
 **Mevcut mobil blok (dosyanın sonu, dokunmadan önce birebir bu):**
@@ -161,7 +162,6 @@ Expected: FAIL — `--seal-accent` bulunamadı.
         --seal-accent-rgb: 43, 124, 255;
         --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
         --seal-border: rgba(43, 124, 255, 0.25);
-        --seal-border-soft: rgba(43, 124, 255, 0.18);
         --seal-text: #F4F0E6;
     }
 
@@ -170,7 +170,6 @@ Expected: FAIL — `--seal-accent` bulunamadı.
         --seal-accent-rgb: 43, 124, 255;
         --seal-surface: var(--shell-bg);
         --seal-border: var(--shell-border);
-        --seal-border-soft: var(--shell-border);
         --seal-text: var(--card-title);
     }
 
