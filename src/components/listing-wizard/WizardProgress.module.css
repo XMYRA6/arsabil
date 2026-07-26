@@ -84,4 +84,22 @@
   .connector {
     margin-bottom: 0;
   }
+
+  .circleActive {
+    background: var(--seal-accent);
+    border-color: var(--seal-accent);
+  }
+
+  .circleDone {
+    background: var(--seal-accent);
+    border-color: var(--seal-accent);
+  }
+
+  .connectorDone {
+    background: var(--seal-accent);
+  }
+
+  .connectorActive {
+    background: var(--seal-accent);
+  }
 }
