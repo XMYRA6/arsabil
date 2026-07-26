@@ -12,7 +12,8 @@
 
 ## Global Constraints
 
-- **Yalnızca mobil.** Her yeni kural `@media (max-width: 768px)` bloğunun İÇİNDE olacak. Masaüstü çıktısı değişmeyecek.
+- **Yalnızca mobil.** Her yeni **görsel/token** kuralı `@media (max-width: 768px)` bloğunun İÇİNDE olacak. Masaüstünün rengi, yüzeyi ve kenarlığı değişmeyecek.
+  - **Tek istisna — Task 6'nın damga animasyonu** (spec §5, kullanıcı onaylı): animasyon bir token/renk değişimi değildir ve masaüstünde de oynar. Bu, yukarıdaki kuralın ihlali DEĞİLDİR; Task 6 dışındaki hiçbir task bu istisnayı kullanamaz.
 - **Kanonik aksan:** `--seal-accent: var(--aurora-cyan)` ve `--seal-accent-rgb: 43, 124, 255`. Literal hex yazılmayacak (`#4C8DFF` YANLIŞ değerdir).
 - **Light dalında yeni rgba icat edilmeyecek:** `--seal-surface: var(--shell-bg)`, `--seal-border: var(--shell-border)`, `--seal-text: var(--card-title)`.
 - **`globals.css` değiştirilmeyecek.** Her task'ta sızma guard'ı var.
@@ -142,7 +143,7 @@ describe('login mobil mühür kimliği (Faz 2.5)', () => {
 });
 ```
 
-> `css` ve `fs`/`path` mevcut dosyanın başında zaten tanımlı; yeniden import etme. Değişken adı farklıysa (`loginCss` gibi) o adı kullan — dosyayı açıp ilk 6 satıra bak.
+> Doğrulandı (2026-07-26): `login.scope.test.ts:1-5` zaten `fs`, `path`, `const css` (login.module.css) ve `const tsx` (page.tsx) tanımlıyor. Bunları yeniden import/tanımlama; yukarıdaki testte `css` ve `globalsCss` kullanılıyor, `globalsCss` yeni eklenecek tek satırdır.
 
 - [ ] **Step 2: Test'i çalıştır, başarısız olduğunu gör**
 
@@ -305,7 +306,7 @@ describe('register mobil mühür kimliği (Faz 2.5)', () => {
 });
 ```
 
-> Mevcut dosyada CSS ve TSX değişkenlerinin adına bak (`css`/`tsx` değilse o adları kullan).
+> Doğrulandı (2026-07-26): `register.scope.test.ts:1-5` zaten `fs`, `path`, `const css` (register.module.css) ve `const tsx` (page.tsx) tanımlıyor. Yeniden tanımlama.
 
 - [ ] **Step 2: Test'i çalıştır, başarısız olduğunu gör**
 
