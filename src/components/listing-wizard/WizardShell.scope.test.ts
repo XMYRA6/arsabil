@@ -82,6 +82,7 @@ describe('wizard mobil mühür kimliği (Faz 2.5)', () => {
     expect(mobile).toMatch(/\.circleActive\s*\{[^}]*background:\s*var\(--seal-accent\)/);
     expect(mobile).toMatch(/\.circleDone\s*\{[^}]*background:\s*var\(--seal-accent\)/);
     expect(mobile).toMatch(/\.connectorDone\s*\{[^}]*background:\s*var\(--seal-accent\)/);
+    expect(mobile).toMatch(/\.connectorActive\s*\{[^}]*background:\s*var\(--seal-accent\)/);
   });
 
   it('masaüstü dalları korunmalı: .nav/.pageTitle/.stepTitle mobilde hâlâ gizli', () => {
