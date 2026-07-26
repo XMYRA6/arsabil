@@ -262,7 +262,6 @@
         --seal-accent-rgb: 43, 124, 255;
         --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
         --seal-border: rgba(43, 124, 255, 0.25);
-        --seal-border-soft: rgba(43, 124, 255, 0.18);
         --seal-text: #F4F0E6;
     }
 
@@ -271,7 +270,6 @@
         --seal-accent-rgb: 43, 124, 255;
         --seal-surface: var(--shell-bg);
         --seal-border: var(--shell-border);
-        --seal-border-soft: var(--shell-border);
         --seal-text: var(--card-title);
     }
 

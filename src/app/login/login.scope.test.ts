@@ -66,7 +66,12 @@ describe('login mobil mühür kimliği (Faz 2.5)', () => {
   });
 
   it('light dalı mevcut global cam token\'larını yeniden kullanmalı', () => {
-    expect(css).toMatch(/\[data-theme="light"\]\s*\.panel\s*\{[^}]*--seal-surface:\s*var\(--shell-bg\)/);
+    const lightBlockMatch = css.match(/\[data-theme="light"\]\s*\.panel\s*\{([^}]*)\}/);
+    expect(lightBlockMatch).not.toBeNull();
+    const lightBlock = lightBlockMatch![1];
+    expect(lightBlock).toMatch(/--seal-surface:\s*var\(--shell-bg\)/);
+    expect(lightBlock).toMatch(/--seal-border:\s*var\(--shell-border\)/);
+    expect(lightBlock).toMatch(/--seal-text:\s*var\(--card-title\)/);
   });
 
   it('.formSide ve .input mobilde seal yüzeyine geçmeli', () => {
@@ -88,7 +93,7 @@ describe('login mobil mühür kimliği (Faz 2.5)', () => {
 
   it('.brandSide kimliğe girmemeli (kendi marka yüzeyi korunuyor)', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).not.toMatch(/\.brandSide\s*\{[^}]*--seal|\.brandSide\s*\{[^}]*seal-surface/);
+    expect(mobile).not.toMatch(/\.brandSide\s*\{[^}]*--seal/);
   });
 
   it('masaüstü dalı değişmemeli: .panel masaüstünde hâlâ 2 kolon', () => {
