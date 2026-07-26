@@ -178,3 +178,92 @@ describe('anasayfa Apple Liquid Glass — bento --acc scope guard', () => {
     expect(match![1]).toMatch(/--acc:\s*31,\s*111,\s*235/);
   });
 });
+
+describe('anasayfa takip kalemleri (2026-07-26) — adım ve vizyon görselleri boyutlandırılmalı', () => {
+  // Regresyon: bu 4 sınıf page.tsx'te uygulandığı halde CSS'i HİÇ YOKTU; <img>'ler
+  // kendi ham genişliğinde render olup yalnızca kartın overflow:hidden'ı ile
+  // gelişigüzel kırpılıyordu. Kural silinirse aynı kusur sessizce geri gelir.
+  it.each([
+    ['howStepImageContainer', 'howStepImg'],
+    ['visionImageContainer', 'visionImg'],
+  ])('.%s sabit en-boy oranı, .%s object-fit:cover tanımlamalı', (container, img) => {
+    const containerMatch = pageCss.match(new RegExp('\\.' + container + '\\s*\\{([^}]*)\\}'));
+    expect(containerMatch).not.toBeNull();
+    expect(containerMatch![1]).toMatch(/aspect-ratio:\s*4\s*\/\s*3/);
+    expect(containerMatch![1]).toMatch(/overflow:\s*hidden/);
+
+    const imgMatch = pageCss.match(new RegExp('\\.' + img + '\\s*\\{([^}]*)\\}'));
+    expect(imgMatch).not.toBeNull();
+    expect(imgMatch![1]).toMatch(/object-fit:\s*cover/);
+    expect(imgMatch![1]).toMatch(/width:\s*100%/);
+  });
+
+  it('page.tsx bu 4 sınıfı gerçekten kullanıyor (test boşa güvence vermesin)', () => {
+    expect(pageTsx).toMatch(/styles\.howStepImageContainer/);
+    expect(pageTsx).toMatch(/styles\.howStepImg/);
+    expect(pageTsx).toMatch(/styles\.visionImageContainer/);
+    expect(pageTsx).toMatch(/styles\.visionImg/);
+  });
+});
+
+describe('anasayfa takip kalemleri (2026-07-26) — stats strip ölü animasyon CSS\'i', () => {
+  it('.statItem giriş animasyonu CSS\'i taşımamalı (framer-motion itemVariants sahibi; opacity:0 JS\'siz durumda şeridi kalıcı görünmez bırakıyordu)', () => {
+    const match = pageCss.match(/\.statItem\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).not.toMatch(/opacity:\s*0\s*;/);
+    expect(match![1]).not.toMatch(/transform:\s*translateY/);
+  });
+
+  it('yetim .statVisible sınıfı tanımlı olmamalı', () => {
+    expect(pageCss).not.toMatch(/\.statVisible\s*\{/);
+  });
+
+  it('page.tsx stats girişini framer-motion variants ile sürmeli', () => {
+    expect(pageTsx).toMatch(/itemVariants/);
+    expect(pageTsx).not.toMatch(/styles\.statVisible/);
+  });
+});
+
+describe('anasayfa takip kalemleri (2026-07-26) — bentoTag dark tema kontrastı', () => {
+  it('dark temada .bentoTag açık mavi tona geçmeli (ölçülen: 2.6:1 → 7.3:1, WCAG AA 4.5:1)', () => {
+    const match = pageCss.match(/:global\(\[data-theme='dark'\]\)\s*\.bentoTag\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/color:\s*rgb\(124,\s*168,\s*255\)/);
+    expect(match![1]).toMatch(/opacity:\s*1/);
+  });
+
+  it('taban .bentoTag ve --acc dokunulmamış olmalı (light tema + kart kenarlığı/gölgesi etkilenmemeli)', () => {
+    const base = pageCss.match(/\n\.bentoTag\s*\{([^}]*)\}/);
+    expect(base).not.toBeNull();
+    expect(base![1]).toMatch(/color:\s*rgb\(var\(--acc\)\)/);
+    expect(pageCss).toMatch(/\.bentoGrid\s*\{[^}]*--acc:\s*31,\s*111,\s*235/);
+  });
+});
+
+describe('anasayfa takip kalemleri (2026-07-26) — blog rozeti cam yarıçapı', () => {
+  it('.blogCategoryTag blur yarıçapı >= 14px olmalı, opaklık 0.55 korunmalı', () => {
+    const match = pageCss.match(/\.blogCategoryTag\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    // Opaklık düşürmek fotoğraf üzerinde beyaz metni okunmaz yapar — kaldıraç blur.
+    expect(match![1]).toMatch(/rgba\(15,\s*23,\s*42,\s*0\.55\)/);
+    const blur = match![1].match(/backdrop-filter:\s*blur\((\d+)px\)/);
+    expect(blur).not.toBeNull();
+    expect(Number(blur![1])).toBeGreaterThanOrEqual(14);
+  });
+});
+
+describe('anasayfa takip kalemleri (2026-07-26) — light cam reçetesi hizalaması', () => {
+  it('light .faqItem de .visionCard/.ctaSection gibi üç katmanlı gölge kullanmalı (difüz + halka + iç parıltı)', () => {
+    const match = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.faqItem\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    const shadow = match![1].match(/box-shadow:([^;]*);/);
+    expect(shadow).not.toBeNull();
+    const layers = shadow![1].split(',').map((s) => s.trim()).filter(Boolean);
+    // rgba(...) içindeki virgüller yüzünden katman sayısını doğrudan sayamayız;
+    // üç katmanın imzasını ayrı ayrı arıyoruz.
+    expect(layers.length).toBeGreaterThan(3);
+    expect(shadow![1]).toMatch(/0 8px 22px rgba\(31,\s*111,\s*235/);   // dış difüz
+    expect(shadow![1]).toMatch(/0 0 0 1px rgba\(31,\s*111,\s*235/);    // halka
+    expect(shadow![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255/); // iç parıltı
+  });
+});
