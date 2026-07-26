@@ -117,15 +117,23 @@ Dokunulmayan: `.bubbleTheirs`, `.messagesArea` (blur katmanı eklenmeyecek), `.u
 
 **Dikkat:** inbox'ın mobil bloğunda mevcut `!important` kullanımları var (ör. `.sidebar { width: 100% !important }`). Yeni kurallar bunlarla çakışan property'lere dokunmayacak; dokunması gerekiyorsa `!important` zincirini büyütmek yerine mevcut kuralı düzeltmek tercih edilecek.
 
-## 5. İmza öge — Canlı Mühür
+## 5. İmza öge — Adım Tamamlama Mührü
 
-Wizard'ın son adımında (`WizardStep5Preview`, "İlanı Yayınla" başarısı) tek seferlik damga oturma animasyonu. Emsaller: `SealBadge.tsx` (hesapla, `false→true` geçişinde) ve `ScoreRevealBadge.tsx` (listing, paylaşılan rozeti sarmalayarak).
+**Revize edildi (2026-07-26, plan yazımı sırasında koddan doğrulandı.)** İlk tasarım "İlanı Yayınla başarısında damga" diyordu; bu, mevcut akışta uygulanamaz:
+
+- `WizardStep5Preview` salt sunum bileşeni — props'ları yalnızca `data`, `publishing`, `onPublish`; bir "başarı" state'i yok.
+- `src/app/listings/new/page.tsx:63-65`'te yayınlama başarılı olur olmaz `router.push('/listing/<id>')` çağrılıyor. Rozet render edilse bile yönlendirme onu anında siler.
+
+Yerine geçen (kullanıcı onaylı): **imza anı `WizardProgress`'e taşındı.** Bir adım tamamlandığında o adımın dairesi `.circleDone`'a dönerken tek seferlik damga oturma animasyonu oynar.
 
 Kurallar:
-- Yeni bileşen wizard-local olacak (`src/components/listing-wizard/PublishSealBadge.tsx`).
+- Yeni bileşen yok; animasyon `WizardProgress.tsx` içinde yerinde eklenir (`motion.div` + keyframe dizisi). Yeni state gerekmez — `currentStep` prop'undan türeyen mevcut `done`/`active` değerleri yeterlidir.
 - `framer-motion` + `useReducedMotion` zorunlu; reduced-motion açıkken animasyon yok, son durum doğrudan render edilir.
-- Animasyon **yalnızca mobilde** görünür; masaüstünde bileşen render edilse bile `display:none` ile gizlenir (kapsam kuralı).
-- TDD ile yazılacak (emsallerinde olduğu gibi).
+- `WizardProgress.tsx`'e `'use client'` eklenecek (framer-motion istemci bileşeni gerektirir).
+- Renk/kimlik tarafı yalnızca mobil; animasyonun kendisi zararsız olduğu için masaüstünde de oynar (görsel token değişimi değildir).
+- Mevcut dört `WizardProgress.test.tsx` testi bozulmadan geçmeye devam etmeli.
+
+Bu değişim motifi zayıflatmıyor, güçlendiriyor: mühür artık akışta beş kez tekrar eden bir onay jesti oluyor ve "mühür = onay/kesinlik" anlamına tek seferlik bir kutlamadan daha sadık kalıyor.
 
 ## 6. Bilinen tuzaklar (plana taşınacak)
 
@@ -149,7 +157,7 @@ Kurallar:
 
 ## 8. Kabul edilen borçlar
 
-- **Canlı Mühür üçüncü kopya:** `SealBadge` (hesapla) / `ScoreRevealBadge` (listing) / `PublishSealBadge` (wizard) aynı animasyon mantığını üç kez taşıyacak. Ortak bileşene çıkarma, üç sayfayı birden riske atmadan yapılabileceği bir zamana ertelendi. Kullanıcı bu borcu onayladı (2026-07-26).
+- **Canlı Mühür kopya borcu — §5 revizyonuyla küçüldü.** Üçüncü bir rozet bileşeni (`PublishSealBadge`) artık yazılmıyor; animasyon `WizardProgress.tsx` içinde yerinde ekleniyor. Geriye kalan tekrar, `SealBadge` (hesapla) ve `ScoreRevealBadge` (listing) ile paylaşılan damga *zamanlama/easing değerleridir* — bileşen kopyası değil. Ortak bir animasyon sabiti dosyasına çıkarma yine de yapılmadı; gerekirse ayrı bir temizlik işi olarak ele alınır.
 - **Masaüstü tutarsızlığı sürüyor:** hesapla masaüstünde kimliği taşırken diğer sayfalar taşımıyor. Bu faz bu farkı kapatmıyor, büyütmüyor da.
 
 ## 9. Kapsam dışı
