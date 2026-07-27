@@ -26,7 +26,7 @@ Her task'ın gereksinimleri bu bölümü kapsar.
 - **Yeni Prisma alanlarının hepsi nullable.** Mevcut kayıtlar bozulmaz.
 - **Dokunma hedefi kuralı (proje konvansiyonu):** `min-height: 44px` gibi dokunma hedefi kuralları YALNIZCA `@media (max-width: 768px)` bloğunun içine yazılır. Media query dışına konursa masaüstü birkaç piksel büyür — bu projede daha önce üç kez regresyon üretti.
 - **Test komutu:** worktree içinden `npx jest --no-coverage`. (Ana checkout'ta `npx jest --no-coverage --roots "<rootDir>/src"` gerekir — worktree kopyalarındaki testler toplanıp sahte hata vermesin diye.)
-- **Baseline:** `main` = `dce07b1`, tsc 0, jest 385/385.
+- **Baseline:** `main` = `dce07b1`, tsc 0, **jest 375/375**. (Plan ilk yazıldığında 385 denmişti — o sayı `fix/anasayfa-takip-kalemleri` branch'ine aitti, bu branch'e değil. Task 3 review'unda git geçmişiyle doğrulandı: `dce07b1` ve `292feab` yalnızca doküman commit'i, hiçbir test silinmedi/atlanmadı.)
 
 ---
 
@@ -2037,7 +2037,7 @@ npx jest --no-coverage
 npm run build
 ```
 
-Expected: tsc 0 hata · eslint yeni ihlal yok · jest tüm testler yeşil (385 baseline + ~66 yeni ≈ 451) · build başarılı.
+Expected: tsc 0 hata · eslint yeni ihlal yok · jest tüm testler yeşil (375 baseline + ~66 yeni ≈ 441) · build başarılı.
 
 - [ ] **Step 2: Ortamı ayağa kaldır**
 
