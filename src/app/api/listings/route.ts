@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkPlanLimit } from "@/lib/plan";
+import { buildParcelSnapshot } from "@/lib/listing/parcelSnapshot";
 
 export async function GET(req: Request) {
     try {
@@ -65,7 +66,12 @@ export async function POST(req: Request) {
             reportId, city, district, notes,
             title, address, phone, description,
             price, landSizeSqm, zoning, titleDeed, photos,
+            lat, lng,
         } = await req.json()
+        // NOT: adaNo / parselNo / neighborhood / parcelAreaSqm / parcelQuality /
+        // parcelGeometry / parcelVerifiedAt / parcelLookupStatus gövdeden OKUNMAZ.
+        // Snapshot'ı yalnızca sunucu üretir — aksi halde "TKGM ile doğrulandı"
+        // rozeti istemci tarafından taklit edilebilirdi.
 
         // reportId varsa sahipliği kontrol et
         if (reportId) {
@@ -80,6 +86,10 @@ export async function POST(req: Request) {
                 return NextResponse.json({ message: "Bu rapor zaten ilanda." }, { status: 400 })
             }
         }
+
+        const latNum = lat != null && Number.isFinite(Number(lat)) ? Number(lat) : null
+        const lngNum = lng != null && Number.isFinite(Number(lng)) ? Number(lng) : null
+        const parcelSnapshot = await buildParcelSnapshot(latNum, lngNum)
 
         const listing = await prisma.listing.create({
             data: {
@@ -97,6 +107,9 @@ export async function POST(req: Request) {
                 zoning: zoning || null,
                 titleDeed: titleDeed || null,
                 photos: photos || [],
+                lat: latNum,
+                lng: lngNum,
+                ...parcelSnapshot,
                 isActive: false,
                 status: 'PENDING',
             },

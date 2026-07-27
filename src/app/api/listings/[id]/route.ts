@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { buildParcelSnapshot } from '@/lib/listing/parcelSnapshot'
 
 export async function GET(
     _req: Request,
@@ -44,7 +45,7 @@ export async function PATCH(
     try {
         const existing = await prisma.listing.findUnique({
             where: { id },
-            select: { userId: true },
+            select: { userId: true, lat: true, lng: true },
         })
         if (!existing) {
             return NextResponse.json({ error: 'İlan bulunamadı' }, { status: 404 })
@@ -54,7 +55,23 @@ export async function PATCH(
         }
 
         const body = await req.json()
-        const { title, address, phone, description, price, landSizeSqm, zoning, titleDeed, photos, city, district, reportId } = body
+        const { title, address, phone, description, price, landSizeSqm, zoning, titleDeed, photos, city, district, reportId, lat, lng } = body
+        // NOT: parsel alanları (adaNo, parselNo, neighborhood, parcelAreaSqm,
+        // parcelQuality, parcelGeometry, parcelVerifiedAt, parcelLookupStatus)
+        // gövdeden OKUNMAZ — snapshot'ı yalnızca sunucu üretir.
+
+        const latNum = lat != null && Number.isFinite(Number(lat)) ? Number(lat) : null
+        const lngNum = lng != null && Number.isFinite(Number(lng)) ? Number(lng) : null
+
+        // Snapshot yalnızca koordinat GERÇEKTEN değiştiyse yeniden üretilir.
+        // Aksi halde her kaydetmede TKGM'ye gereksiz bir istek giderdi.
+        const coordsChanged =
+            latNum != null && lngNum != null &&
+            (existing.lat !== latNum || existing.lng !== lngNum)
+
+        const parcelFields = coordsChanged
+            ? { lat: latNum, lng: lngNum, ...(await buildParcelSnapshot(latNum, lngNum)) }
+            : {}
 
         const updated = await prisma.listing.update({
             where: { id },
@@ -71,6 +88,7 @@ export async function PATCH(
                 ...(phone !== undefined ? { phone } : {}),
                 ...(photos !== undefined ? { photos } : {}),
                 ...(reportId !== undefined ? { reportId: reportId || null } : {}),
+                ...parcelFields,
                 status: 'PENDING',
                 isActive: false,
             },
