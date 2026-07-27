@@ -1,0 +1,85 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mapBox {
+    width: 100%;
+    height: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+}
+
+.hint {
+    font-size: 0.8rem;
+    color: var(--label-color);
+}
+
+.coordRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--label-color);
+}
+
+.verifyBtn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    background: var(--brand-gradient);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.verifyBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.resultCard {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--green-rgb), 0.35);
+    background: rgba(var(--green-rgb), 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.resultTitle {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--card-title);
+}
+
+.resultMeta {
+    font-size: 0.8rem;
+    color: var(--label-color);
+}
+
+.warnCard {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--orange-rgb), 0.35);
+    background: rgba(var(--orange-rgb), 0.07);
+    font-size: 0.82rem;
+    color: var(--label-color);
+}
+
+@media (max-width: 768px) {
+    .mapBox {
+        height: 220px;
+    }
+
+    .verifyBtn {
+        min-height: 44px;
+        width: 100%;
+    }
+}
