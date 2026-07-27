@@ -1,0 +1,52 @@
+import { formatParcelIdentity, formatAreaCells } from './listingDisplay'
+
+describe('formatParcelIdentity', () => {
+    it('ada/parsel/mahalle varsa okunur bir satır üretir', () => {
+        expect(formatParcelIdentity({ adaNo: '0', parselNo: '1871', neighborhood: 'Kirkkepenekli' }))
+            .toBe('Ada 0 · Parsel 1871 · Kirkkepenekli')
+    })
+
+    it('mahalle yoksa onu atlar', () => {
+        expect(formatParcelIdentity({ adaNo: '12', parselNo: '5', neighborhood: null }))
+            .toBe('Ada 12 · Parsel 5')
+    })
+
+    it('parsel numarası yoksa null döner', () => {
+        expect(formatParcelIdentity({ adaNo: '0', parselNo: null, neighborhood: 'X' })).toBeNull()
+    })
+
+    it('hiç veri yoksa null döner', () => {
+        expect(formatParcelIdentity({})).toBeNull()
+    })
+})
+
+describe('formatAreaCells', () => {
+    it('beyan yoksa tire gösterir — sabit 820 mock değeri ASLA görünmemeli', () => {
+        const r = formatAreaCells({ landSizeSqm: null, parcelAreaSqm: null })
+        expect(r.declared).toBe('—')
+        expect(r.official).toBeNull()
+        expect(r.warning).toBeNull()
+    })
+
+    it('beyanı Türkçe biçimde gösterir', () => {
+        expect(formatAreaCells({ landSizeSqm: 1240, parcelAreaSqm: null }).declared).toBe('1.240 m²')
+    })
+
+    it('resmi alanı ayrı hücre olarak döner', () => {
+        expect(formatAreaCells({ landSizeSqm: 830, parcelAreaSqm: 830 }).official).toBe('830 m²')
+    })
+
+    it('%5 altı farkta uyarı vermez', () => {
+        expect(formatAreaCells({ landSizeSqm: 840, parcelAreaSqm: 830 }).warning).toBeNull()
+    })
+
+    it('%5 üstü farkta uyarı metni döner', () => {
+        const r = formatAreaCells({ landSizeSqm: 1240, parcelAreaSqm: 830 })
+        expect(r.warning).toMatch(/%49,4/)
+    })
+
+    it('uyarı metni suçlayıcı değil — hisseli tapuda farkın normal olabileceğini söyler', () => {
+        const r = formatAreaCells({ landSizeSqm: 1240, parcelAreaSqm: 830 })
+        expect(r.warning).toMatch(/[Hh]isseli/)
+    })
+})

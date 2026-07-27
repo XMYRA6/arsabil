@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import { AppBar } from '@/components/mobile/AppBar';
 import { SwipeGallery } from '@/components/mobile/SwipeGallery';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
+import { formatParcelIdentity, formatAreaCells } from '@/lib/listing/listingDisplay';
 import styles from './page.module.css';
 
 const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m => m.MiniMap), { ssr: false });
@@ -35,13 +36,23 @@ const MOCK_LISTING = {
     changePercent: 42.5,
     imarDurumu: 'KONUT_TICARET',
     emsal: 2.0,
-    m2: 820,
     price: 5171642,
     netKar: 34,
     photos: [] as string[],
     description: 'Beşiktaş merkezi konumda, ulaşıma yakın, imar planlı arsa. Kat karşılığı veya satış seçenekleri görüşmeye açık.',
-    lat: 41.042,
-    lng: 29.008,
+    // Gerçek veriden gelmesi gereken alanlar burada SABİT DEĞER TAŞIMAZ.
+    // Daha önce m2:820 ve lat/lng:Beşiktaş sabitleri vardı; API bu alanları
+    // döndürmediği için her ilan detayında sabit "820 m²" ve Beşiktaş konumu
+    // görünüyordu. Boş bırakılıyorlar, gösterim tarafı "—" basıyor.
+    landSizeSqm: null as number | null,
+    lat: null as number | null,
+    lng: null as number | null,
+    adaNo: null as string | null,
+    parselNo: null as string | null,
+    neighborhood: null as string | null,
+    parcelAreaSqm: null as number | null,
+    parcelQuality: null as string | null,
+    parcelVerifiedAt: null as string | null,
     user: null as null | { id: string; name: string | null; email: string; isVerified: boolean },
 };
 
@@ -112,6 +123,8 @@ export default function ListingDetailPage() {
     const score = listing.fizibiliteSkoru ?? 82;
     const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
     const photoHue = 215 + (id?.charCodeAt(0) ?? 0) % 30;
+    const areaCells = formatAreaCells(listing);
+    const parcelId = formatParcelIdentity(listing);
 
     return (
         <div className={styles.page}>
@@ -192,9 +205,20 @@ export default function ListingDetailPage() {
                         {activeTab === 'genel' && (
                             <div>
                                 <h3 className={styles.sectionTitle}>Parsel Detayları</h3>
+                                {parcelId && (
+                                    <div className={styles.parcelRow}>
+                                        <span className={styles.parcelId}>{parcelId}</span>
+                                        <span className={listing.parcelVerifiedAt ? styles.parcelBadgeOk : styles.parcelBadgeNo}>
+                                            {listing.parcelVerifiedAt
+                                                ? `TKGM ile doğrulandı · ${new Date(listing.parcelVerifiedAt).toLocaleDateString('tr-TR')}`
+                                                : 'Doğrulanmadı'}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className={styles.detailGrid}>
                                     {[
-                                        ['Alan', `${listing.m2} m²`],
+                                        ['Alan (beyan)', areaCells.declared],
+                                        ...(areaCells.official ? [['Alan (tapu · TKGM)', areaCells.official] as [string, string]] : []),
                                         ['İmar Durumu', listing.imarDurumu?.replace('_', ' ') ?? 'Konut + Ticaret'],
                                         ['Emsal', listing.emsal?.toString() ?? '2.0'],
                                         ['Arsa Payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
@@ -207,6 +231,9 @@ export default function ListingDetailPage() {
                                         </div>
                                     ))}
                                 </div>
+                                {areaCells.warning && (
+                                    <div className={styles.areaWarning}>⚠️ {areaCells.warning}</div>
+                                )}
                                 {listing.description && (
                                     <p className={styles.description}>{listing.description}</p>
                                 )}
@@ -309,13 +336,21 @@ export default function ListingDetailPage() {
                         </div>
                     </div>
 
-                    {/* Mini Map */}
-                    <MiniMap
-                        lat={listing.lat ?? 41.042}
-                        lng={listing.lng ?? 29.008}
-                        label={`${listing.district}, ${listing.city}`}
-                        listingId={id}
-                    />
+                    {/* Mini Map — koordinat yoksa harita GÖSTERİLMEZ.
+                        Önceden `listing.lat ?? 41.042` ile Beşiktaş'a düşüyordu:
+                        konumu olmayan her ilan haritada yanlış yerde görünüyordu. */}
+                    {listing.lat != null && listing.lng != null ? (
+                        <MiniMap
+                            lat={listing.lat}
+                            lng={listing.lng}
+                            label={`${listing.district}, ${listing.city}`}
+                            listingId={id}
+                        />
+                    ) : (
+                        <div className={styles.noLocationNote}>
+                            Bu ilan için konum belirtilmemiş.
+                        </div>
+                    )}
 
                     <div className={styles.sidebarActions}>
                         <button onClick={() => setActiveTab('senaryo')} className={`${styles.actionBtn} ${styles.actionPrimary}`}>🧮 Senaryo Oluştur</button>

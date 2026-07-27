@@ -628,3 +628,56 @@
         font-size: 16px; /* iOS zoom tetiklenmesin */
     }
 }
+
+.parcelRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.parcelId {
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--card-title);
+}
+
+.parcelBadgeOk {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--green);
+    background: rgba(var(--green-rgb), 0.12);
+}
+
+.parcelBadgeNo {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--label-color);
+    background: rgba(148, 163, 184, 0.16);
+}
+
+.areaWarning {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--label-color);
+    background: rgba(var(--orange-rgb), 0.08);
+    border: 1px solid rgba(var(--orange-rgb), 0.3);
+}
+
+.noLocationNote {
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    background: var(--input-bg);
+    color: var(--label-color);
+    font-size: 0.82rem;
+    text-align: center;
+}
