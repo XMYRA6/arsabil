@@ -6,6 +6,7 @@ import type { Map as LMap, TileLayer, LayerGroup, Marker, MarkerOptions, Leaflet
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { splitListingsByCoords } from '@/lib/listing/listingCoords';
 
 /* ─── Tile Sources (all free, no API key) ─── */
 const TILES = {
@@ -27,14 +28,6 @@ const TILES = {
 };
 
 type TileKey = keyof typeof TILES;
-
-/* ─── Default marker positions around Istanbul ─── */
-const ISTANBUL_COORDS: [number, number][] = [
-    [41.043, 29.008], [41.068, 29.045], [41.015, 28.978],
-    [41.030, 29.020], [41.055, 28.990], [40.998, 29.015],
-    [41.082, 28.960], [40.975, 28.970], [41.045, 28.955],
-    [41.010, 29.050],
-];
 
 interface Listing {
     id: string;
@@ -156,6 +149,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const [measureMode, setMeasureMode] = useState(false);
     const [drawMode, setDrawMode] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
+    const [unplacedCount, setUnplacedCount] = useState(0);
     const [pinInfo, setPinInfo] = useState<{ lat: number; lng: number; address?: string; loading: boolean } | null>(null);
     const [measureResult, setMeasureResult] = useState<string>('');
     const [drawResult, setDrawResult] = useState<string>('');
@@ -242,10 +236,17 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             map.addLayer(clusterGroup);
 
             // Add markers to cluster
-            listings.forEach((listing, idx) => {
-                const lat = listing.lat ?? ISTANBUL_COORDS[idx % ISTANBUL_COORDS.length][0] + (Math.random() - 0.5) * 0.01;
-                const lng = listing.lng ?? ISTANBUL_COORDS[idx % ISTANBUL_COORDS.length][1] + (Math.random() - 0.5) * 0.01;
-                const score = listing.fizibiliteSkoru ?? Math.floor(55 + Math.random() * 40);
+            // Koordinatı olmayan ilan haritaya KONMAZ. Eskiden burada
+            // `listing.lat ?? ISTANBUL_COORDS[...] + Math.random()` vardı ve
+            // Listing şemasında lat/lng hiç bulunmadığı için harita tamamen
+            // uydurmaydı. Kural artık saf splitListingsByCoords'ta ve testli.
+            const { placed, unplaced } = splitListingsByCoords(listings);
+            setUnplacedCount(unplaced.length);
+
+            placed.forEach((listing) => {
+                const lat = listing.lat;
+                const lng = listing.lng;
+                const score = listing.fizibiliteSkoru ?? 70;
                 const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
                 const rgb = score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
                 const payiMin = listing.arsaPayiMin ?? 28;
@@ -649,6 +650,20 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     return (
         <div style={{ flex: 1, position: 'relative', height: '100%', minHeight: 400 }}>
             <div ref={mapContainerRef} style={{ width: '100%', height: '100%', minHeight: 400 }} />
+
+            {unplacedCount > 0 && (
+                <div style={{
+                    position: 'absolute', left: 12, bottom: 12, zIndex: 500,
+                    padding: '6px 12px', borderRadius: 999,
+                    fontSize: '0.74rem', fontWeight: 600,
+                    color: 'var(--label-color)',
+                    background: 'var(--panel)',
+                    border: '1px solid var(--border)',
+                    backdropFilter: 'blur(8px)',
+                }}>
+                    {unplacedCount} ilanın konumu belirtilmemiş, haritada gösterilmiyor.
+                </div>
+            )}
 
             {/* ─── Toolbar ─── */}
             <div style={{
