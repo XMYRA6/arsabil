@@ -169,6 +169,16 @@ model Listing {
   zoning      String?
   titleDeed   String?
   photos      String[] @default([])
+  lat                 Float?
+  lng                 Float?
+  neighborhood        String?
+  adaNo               String?
+  parselNo            String?
+  parcelAreaSqm       Float?
+  parcelQuality       String?
+  parcelGeometry      Json?
+  parcelVerifiedAt    DateTime?
+  parcelLookupStatus  String?
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   report      Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
