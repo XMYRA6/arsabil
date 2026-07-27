@@ -34,7 +34,7 @@ export default function NewListingPage() {
   const update = (patch: Partial<WizardFormData>) => setForm(prev => ({ ...prev, ...patch }))
 
   const canGoNext = (): boolean => {
-    if (step === 1) return !!form.city
+    if (step === 1) return !!form.city && form.lat != null && form.lng != null
     if (step === 2) return !!form.title && !!form.landSizeSqm
     return true
   }

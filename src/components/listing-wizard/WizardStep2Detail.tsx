@@ -1,5 +1,6 @@
 import styles from './wizard.module.css'
 import { WizardFormData } from './types'
+import { compareArea } from '@/lib/listing/areaComparison'
 
 interface Props {
   data: WizardFormData
@@ -31,6 +32,17 @@ export function WizardStep2Detail({ data, onChange }: Props) {
             onChange={e => onChange({ landSizeSqm: e.target.value })}
             min={1}
           />
+          {data.parcel && (() => {
+            const cmp = compareArea(data.landSizeSqm ? Number(data.landSizeSqm) : null, data.parcel.areaSqm)
+            return (
+              <p className={styles.hintText}>
+                Tapu kaydı: {data.parcel.areaSqm.toLocaleString('tr-TR')} m²
+                {cmp.status === 'mismatch' && cmp.diffPct !== null && (
+                  <strong> — beyanınızla %{cmp.diffPct.toFixed(1)} fark var. Hisseli tapuda bu normaldir; emin değilseniz kontrol edin.</strong>
+                )}
+              </p>
+            )
+          })()}
         </div>
         <div className={styles.fieldGroup}>
           <label className={styles.label}>İstenen Fiyat (₺)</label>

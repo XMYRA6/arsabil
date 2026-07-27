@@ -43,6 +43,23 @@ export default function EditListingPage() {
                     city: listing.city ?? '',
                     district: listing.district ?? '',
                     address: listing.address ?? '',
+                    lat: listing.lat ?? null,
+                    lng: listing.lng ?? null,
+                    // Doğrulanmış parselin kartı ve sınırı düzenlemede de görünsün;
+                    // eksik alan varsa doğrulanmamış sayılır (uydurma kart gösterilmez).
+                    parcel: (listing.parselNo && listing.parcelGeometry && listing.parcelAreaSqm != null)
+                        ? {
+                            il: listing.city ?? '',
+                            ilce: listing.district ?? '',
+                            mahalle: listing.neighborhood ?? '',
+                            adaNo: listing.adaNo ?? '',
+                            parselNo: listing.parselNo,
+                            areaSqm: listing.parcelAreaSqm,
+                            quality: listing.parcelQuality ?? '',
+                            geometry: listing.parcelGeometry,
+                        }
+                        : null,
+                    parcelStatus: listing.parcelVerifiedAt ? 'verified' : 'idle',
                     title: listing.title ?? '',
                     landSizeSqm: listing.landSizeSqm ? String(listing.landSizeSqm) : '',
                     price: listing.price ? String(listing.price) : '',
@@ -61,6 +78,10 @@ export default function EditListingPage() {
     const update = (patch: Partial<WizardFormData>) => setForm(prev => ({ ...prev, ...patch }))
 
     const canGoNext = (): boolean => {
+        // Pin zorunluluğu YALNIZCA yeni ilanda uygulanır (bkz. listings/new/page.tsx).
+        // Düzenlemede uygulanmaz: parsel alanları bu sürümle geldiği için mevcut
+        // ilanların hiçbirinde koordinat yok — burada da zorunlu tutmak, eski
+        // ilanları düzenlenemez hale getirirdi. Kullanıcı isterse pin ekleyebilir.
         if (step === 1) return !!form.city
         if (step === 2) return !!form.title && !!form.landSizeSqm
         return true
@@ -85,6 +106,8 @@ export default function EditListingPage() {
                     phone: form.phone || null,
                     photos: form.photos.map(p => p.url),
                     reportId: form.reportId || null,
+                    lat: form.lat,
+                    lng: form.lng,
                 }),
             })
             if (res.ok) {
