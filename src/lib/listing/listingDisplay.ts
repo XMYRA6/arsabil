@@ -8,7 +8,12 @@ export function formatParcelIdentity(l: {
     neighborhood?: string | null
 }): string | null {
     if (!l.parselNo) return null
-    const parts = [`Ada ${l.adaNo ?? '—'}`, `Parsel ${l.parselNo}`]
+    // TKGM ada numarası olmayan parseller için boş string döndürüyor
+    // (canlı örnek: Kalaba/Tarla, parsel 1689). Boşsa "Ada" parçası hiç
+    // yazılmaz — aksi halde sallanan bir "Ada ·" kalıyor.
+    const parts: string[] = []
+    if (l.adaNo) parts.push(`Ada ${l.adaNo}`)
+    parts.push(`Parsel ${l.parselNo}`)
     if (l.neighborhood) parts.push(l.neighborhood)
     return parts.join(' · ')
 }

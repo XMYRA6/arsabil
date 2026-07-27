@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Map as LeafletMap, Marker, Polygon } from 'leaflet'
 import type { ParcelInfo } from '@/lib/tkgm/parcel'
+import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import styles from './ParcelPicker.module.css'
 
 export type ParcelPickerStatus = 'idle' | 'verified' | 'not_found' | 'unavailable'
@@ -52,7 +53,16 @@ export function ParcelPicker({ value, onChange }: Props) {
                 const { lat, lng } = e.latlng
                 if (markerRef.current) map.removeLayer(markerRef.current)
                 if (polygonRef.current) { map.removeLayer(polygonRef.current); polygonRef.current = null }
-                markerRef.current = L.marker([lat, lng]).addTo(map)
+                // Leaflet'in varsayılan ikonu görsel yollarını sayfa URL'ine göre
+                // çözüyor; /listings/new altında /listings/marker-icon.png isteyip
+                // 404 alıyordu. MapView'daki desen izlenerek divIcon kullanılıyor.
+                const pinIcon = L.divIcon({
+                    className: '',
+                    html: '<div style="font-size:1.9rem;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));">📍</div>',
+                    iconSize: [30, 40],
+                    iconAnchor: [15, 40],
+                })
+                markerRef.current = L.marker([lat, lng], { icon: pinIcon }).addTo(map)
                 onChangeRef.current({ lat, lng, parcel: null, status: 'idle' })
             })
 
@@ -127,7 +137,11 @@ export function ParcelPicker({ value, onChange }: Props) {
             {value.status === 'verified' && value.parcel && (
                 <div className={styles.resultCard}>
                     <div className={styles.resultTitle}>
-                        Ada {value.parcel.adaNo} · Parsel {value.parcel.parselNo}
+                        {formatParcelIdentity({
+                            adaNo: value.parcel.adaNo,
+                            parselNo: value.parcel.parselNo,
+                            neighborhood: null,
+                        })}
                     </div>
                     <div className={styles.resultMeta}>
                         {value.parcel.mahalle} · {value.parcel.quality} · {value.parcel.areaSqm.toLocaleString('tr-TR')} m²

@@ -11,6 +11,21 @@ describe('formatParcelIdentity', () => {
             .toBe('Ada 12 · Parsel 5')
     })
 
+    it('ada numarası boş string ise Ada parçası hiç yazılmaz (canlıda görülen TKGM davranışı)', () => {
+        expect(formatParcelIdentity({ adaNo: '', parselNo: '1689', neighborhood: 'Kalaba' }))
+            .toBe('Parsel 1689 · Kalaba')
+    })
+
+    it('ada numarası null ise de Ada parçası yazılmaz', () => {
+        expect(formatParcelIdentity({ adaNo: null, parselNo: '1689', neighborhood: null }))
+            .toBe('Parsel 1689')
+    })
+
+    it('ada numarası "0" ise gösterilir — geçerli bir ada numarasıdır', () => {
+        expect(formatParcelIdentity({ adaNo: '0', parselNo: '1871', neighborhood: null }))
+            .toBe('Ada 0 · Parsel 1871')
+    })
+
     it('parsel numarası yoksa null döner', () => {
         expect(formatParcelIdentity({ adaNo: '0', parselNo: null, neighborhood: 'X' })).toBeNull()
     })

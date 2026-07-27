@@ -149,7 +149,12 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const [measureMode, setMeasureMode] = useState(false);
     const [drawMode, setDrawMode] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
-    const [unplacedCount, setUnplacedCount] = useState(0);
+
+    // Konumsuz ilan sayısı RENDER sırasında türetilir, state'te tutulmaz:
+    // marker'ları kuran effect'in bağımlılık dizisi [] (harita bir kez kurulur),
+    // dolayısıyla orada hesaplanan bir sayı ilanlar sonradan geldiğinde
+    // güncellenmezdi.
+    const unplacedCount = splitListingsByCoords(listings).unplaced.length;
     const [pinInfo, setPinInfo] = useState<{ lat: number; lng: number; address?: string; loading: boolean } | null>(null);
     const [measureResult, setMeasureResult] = useState<string>('');
     const [drawResult, setDrawResult] = useState<string>('');
@@ -240,8 +245,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             // `listing.lat ?? ISTANBUL_COORDS[...] + Math.random()` vardı ve
             // Listing şemasında lat/lng hiç bulunmadığı için harita tamamen
             // uydurmaydı. Kural artık saf splitListingsByCoords'ta ve testli.
-            const { placed, unplaced } = splitListingsByCoords(listings);
-            setUnplacedCount(unplaced.length);
+            const { placed } = splitListingsByCoords(listings);
 
             placed.forEach((listing) => {
                 const lat = listing.lat;
