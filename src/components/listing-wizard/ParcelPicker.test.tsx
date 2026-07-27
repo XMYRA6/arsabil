@@ -1,6 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ParcelPicker, ParcelPickerValue } from './ParcelPicker'
 
@@ -36,7 +35,7 @@ describe('ParcelPicker', () => {
         const onChange = jest.fn()
         render(<ParcelPicker value={PINNED} onChange={onChange} />)
 
-        await userEvent.click(screen.getByRole('button', { name: /Parseli Doğrula/i }))
+        fireEvent.click(screen.getByRole('button', { name: /Parseli Doğrula/i }))
 
         await waitFor(() => {
             expect(onChange).toHaveBeenCalledWith({ parcel: PARCEL, status: 'verified' })
@@ -56,7 +55,7 @@ describe('ParcelPicker', () => {
         const onChange = jest.fn()
         render(<ParcelPicker value={PINNED} onChange={onChange} />)
 
-        await userEvent.click(screen.getByRole('button', { name: /Parseli Doğrula/i }))
+        fireEvent.click(screen.getByRole('button', { name: /Parseli Doğrula/i }))
 
         await waitFor(() => {
             expect(onChange).toHaveBeenCalledWith({ parcel: null, status: 'not_found' })
@@ -78,7 +77,7 @@ describe('ParcelPicker', () => {
         const onChange = jest.fn()
         render(<ParcelPicker value={PINNED} onChange={onChange} />)
 
-        await userEvent.click(screen.getByRole('button', { name: /Parseli Doğrula/i }))
+        fireEvent.click(screen.getByRole('button', { name: /Parseli Doğrula/i }))
 
         await waitFor(() => {
             expect(onChange).toHaveBeenCalledWith({ parcel: null, status: 'unavailable' })
