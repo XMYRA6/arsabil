@@ -10,6 +10,7 @@ import { WizardStep3Photos } from '@/components/listing-wizard/WizardStep3Photos
 import { WizardStep4Feasibility } from '@/components/listing-wizard/WizardStep4Feasibility'
 import { WizardStep5Preview } from '@/components/listing-wizard/WizardStep5Preview'
 import { WizardFormData, emptyFormData } from '@/components/listing-wizard/types'
+import { buildListingPublishBody } from './publishBody'
 
 const STEP_TITLES = [
   'Konum Bilgisi',
@@ -45,20 +46,7 @@ export default function NewListingPage() {
       const res = await fetch('/api/listings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          city: form.city,
-          district: form.district || null,
-          address: form.address || null,
-          title: form.title,
-          landSizeSqm: form.landSizeSqm ? Number(form.landSizeSqm) : null,
-          price: form.price ? Number(form.price) : null,
-          zoning: form.zoning || null,
-          titleDeed: form.titleDeed || null,
-          description: form.description || null,
-          phone: form.phone || null,
-          photos: form.photos.map(p => p.url),
-          reportId: form.reportId || null,
-        }),
+        body: JSON.stringify(buildListingPublishBody(form)),
       })
       if (res.ok) {
         const listing = await res.json()
