@@ -1,8 +1,52 @@
 /** @jest-environment jsdom */
-import { render, screen, fireEvent } from '@testing-library/react'
+
+// jsdom Leaflet'i gercekten "boyayamaz" (bkz. gorev notu); onceki surumde
+// `leaflet` mock'lanmamisti, bu yuzden `await import('leaflet')` hicbir zaman
+// senkron cozulmuyordu ve `init()` testler bitene kadar hep asilida kaliyordu.
+// mapRef.current asla set edilmedigi icin remount testi sadece controlled
+// checkbox state'ini olcuyordu, faultRef/floodRef mantigina hic girmiyordu.
+// Bu yuzden burada minimal ama gercek bir Leaflet sahtesi kuruluyor: her
+// L.map() cagrisi izlenebilir ayri bir sahte harita, her
+// L.tileLayer.wms() cagrisi izlenebilir ayri bir sahte katman dondurur.
+jest.mock('leaflet', () => {
+    const makeLayer = () => {
+        const layer: { addTo: jest.Mock } = { addTo: jest.fn() }
+        layer.addTo.mockImplementation(() => layer)
+        return layer
+    }
+    const makeMap = () => ({
+        removeLayer: jest.fn(),
+        remove: jest.fn(),
+    })
+    const tileLayer = jest.fn(() => makeLayer()) as unknown as jest.Mock & { wms: jest.Mock }
+    tileLayer.wms = jest.fn(() => makeLayer())
+    return {
+        map: jest.fn(() => makeMap()),
+        tileLayer,
+        marker: jest.fn(() => makeLayer()),
+        circle: jest.fn(() => makeLayer()),
+        divIcon: jest.fn(() => ({})),
+        CRS: { EPSG4326: 'EPSG4326' },
+    }
+})
+
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import leafletDefault from 'leaflet'
 import { MiniMap } from './MiniMap'
 
+// MiniMap.tsx `(await import('leaflet')).default` uzerinden erisiyor; statik
+// default import ayni sahte modul nesnesine cozulur (esModuleInterop), yani
+// burada gorulen cagri kayitlari bilesenin gercekten yaptigi cagrilardir.
+const mockL = leafletDefault as unknown as {
+    map: jest.Mock
+    tileLayer: jest.Mock & { wms: jest.Mock }
+}
+
 describe('MiniMap risk katmanlari', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
     it('riskLayers verilmediginde katman kontrolu gosterilmez', () => {
         render(<MiniMap lat={41} lng={29} />)
         expect(screen.queryByLabelText('Diri fay katmani')).toBeNull()
@@ -19,28 +63,50 @@ describe('MiniMap risk katmanlari', () => {
         expect(screen.getByLabelText('Diri fay katmani')).not.toBeChecked()
     })
 
-    // lat/lng degisince ilk effect haritayi yok edip yeniden kurar (bkz. `[lat, lng]`
-    // bagimliligi). Bu, faultRef/floodRef'in artik var olmayan bir haritaya ait
-    // katman nesnelerine isaret etmesine yol acabilirdi: onceden isaretli kutu
-    // sessizce yeniden eklenemez, isareti kaldirmak da artik gecerli olmayan bir
-    // katman nesnesinde `map.removeLayer` cagirip patlardi. jsdom'da Leaflet
-    // gercekten "boyayamadigi" icin katmanin fiilen haritaya eklenip eklenmedigini
-    // dogrudan test edemiyoruz (bkz. gorev notu); asagida dogrulanabilir olan iki
-    // sey test ediliyor: (1) checkbox durumu remount sonrasi tutarli kaliyor,
-    // (2) remount sonrasi isareti kaldirmak hata firlatmiyor.
-    it('lat/lng degisip harita yeniden kurulunca katman kontrolu tutarli kalir ve kaldirma hata vermez', () => {
+    // lat/lng degisince ilk effect haritayi yok edip yeniden kurar (`[lat, lng]`
+    // bagimliligi). faultRef/floodRef sifirlanmazsa: (1) onceden isaretli katman
+    // yeni haritaya sessizce yeniden eklenmez ("!ref.current" koşulu artik
+    // yeniden var olmayan bir haritaya ait sahte-olmayan bir nesneyi gorup
+    // no-op yapar), (2) isareti kaldirmak eski (yok edilmis) haritanin katman
+    // nesnesini YENI haritadan kaldirmaya calisir. Asagida her iki sonuc da
+    // sahte Leaflet uzerinden dogrudan gozlemleniyor.
+    it('lat/lng degisip harita yeniden kurulunca eski katman referansi yeni haritaya sizmaz', async () => {
         const { rerender } = render(<MiniMap lat={41} lng={29} riskLayers />)
-        const faultToggle = screen.getByLabelText('Diri fay katmani')
+        await waitFor(() => expect(mockL.map).toHaveBeenCalledTimes(1))
+        const firstMap = mockL.map.mock.results[0].value
 
-        fireEvent.click(faultToggle)
-        expect(faultToggle).toBeChecked()
+        // Diri fay'i ac: katman ilk haritaya eklenir.
+        fireEvent.click(screen.getByLabelText('Diri fay katmani'))
+        await waitFor(() => expect(mockL.tileLayer.wms).toHaveBeenCalledTimes(1))
+        const firstFaultLayer = mockL.tileLayer.wms.mock.results[0].value
+        expect(firstFaultLayer.addTo).toHaveBeenCalledWith(firstMap)
 
+        // lat/lng degisir: ilk harita yok edilir, ikincisi kurulur.
         rerender(<MiniMap lat={42} lng={30} riskLayers />)
+        expect(firstMap.remove).toHaveBeenCalledTimes(1)
+        await waitFor(() => expect(mockL.map).toHaveBeenCalledTimes(2))
+        const secondMap = mockL.map.mock.results[1].value
 
-        const faultToggleAfterRemount = screen.getByLabelText('Diri fay katmani')
-        expect(faultToggleAfterRemount).toBeChecked()
+        // Diri fay checkbox'i hala isaretli (React state remount'tan etkilenmez),
+        // ama katman artik yok edilen haritaya bagliydi. Baska bir katmani
+        // (Taskin) acmak ayni effect'i tekrar calistirir; bu calisma sirasinda
+        // faultRef sifirlanmis olmali ki 'diri_fay' yeni haritaya yeniden eklensin.
+        expect(screen.getByLabelText('Diri fay katmani')).toBeChecked()
+        fireEvent.click(screen.getByLabelText('Taskin katmani'))
+        await waitFor(() => expect(mockL.tileLayer.wms).toHaveBeenCalledTimes(3))
 
-        expect(() => fireEvent.click(faultToggleAfterRemount)).not.toThrow()
-        expect(faultToggleAfterRemount).not.toBeChecked()
+        const wmsCalls = mockL.tileLayer.wms.mock.calls as [string, { layers?: string }][]
+        const faultReattachIndex = wmsCalls.findIndex(
+            (call, i) => i > 0 && call[1]?.layers === 'diri_fay',
+        )
+        expect(faultReattachIndex).toBeGreaterThan(-1)
+        const reattachedFaultLayer = mockL.tileLayer.wms.mock.results[faultReattachIndex].value
+        expect(reattachedFaultLayer.addTo).toHaveBeenCalledWith(secondMap)
+
+        // Simdi isareti kaldirmak, eski degil, YENI haritanin katmanini hedeflemeli.
+        expect(() => fireEvent.click(screen.getByLabelText('Diri fay katmani'))).not.toThrow()
+        await waitFor(() => expect(secondMap.removeLayer).toHaveBeenCalledTimes(1))
+        expect(secondMap.removeLayer).toHaveBeenCalledWith(reattachedFaultLayer)
+        expect(firstMap.removeLayer).not.toHaveBeenCalled()
     })
 })
