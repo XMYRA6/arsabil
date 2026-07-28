@@ -90,6 +90,7 @@ export default function Home() {
   // bugunku gibi calisir ve hicbir risk UI'i gosterilmez.
   useEffect(() => {
     const { lat, lng } = parcelValue;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- konum kaldırıldığında (veya seçilmediğinde) önceki riski hemen temizler
     if (lat == null || lng == null) { setRisk(null); return; }
 
     let cancelled = false;
