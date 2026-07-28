@@ -265,6 +265,7 @@ Geriye dönük veri: mevcut ilanlar için alanlar `null` kalır, UI bunu "risk v
 - Mevcut ilanların risk verisiyle toplu doldurulması.
 - İlan wizard'ında risk gösterimi (yalnızca kaydetme sırasında snapshot alınır).
 - Marketplace haritasında risk katmanı.
+- **Mobil destek** — `/hesapla`'daki `ParcelPicker` ve `RiskSuggestionCard` (dolayısıyla Leaflet haritası) yalnızca masaüstü genişliğinde (`min-width: 769px`) mount edilir; mobilde bilinçli olarak hiç render edilmezler. Bu, ayrı bir kararla ele alınacak; şimdilik bilinen bir eksiklik değil, kasıtlı bir sınırdır.
 
 ## 11. Bağımlılık
 

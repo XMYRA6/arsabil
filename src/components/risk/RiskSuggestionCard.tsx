@@ -36,9 +36,16 @@ export function RiskSuggestionCard({ risk, onApply }: Props) {
                 <strong>R = {risk.suggestedR.toFixed(2).replace('.', ',')}</strong>
             </p>
 
-            <button type="button" className={styles.applyBtn} onClick={() => onApply(percent)}>
-                Uygula
-            </button>
+            <p className={styles.line}>
+                Bu öneri yalnızca bu ölçümün kapsadığı payı yansıtır; projenin piyasa, inşaat ve
+                diğer bilinmezliklerini içeren toplam riskini temsil etmez.
+            </p>
+
+            {percent > 0 && (
+                <button type="button" className={styles.applyBtn} onClick={() => onApply(percent)}>
+                    Uygula
+                </button>
+            )}
 
             <small className={styles.disclaimer}>
                 γF, TBDY 2018 uyarınca deprem tasarım talebini ölçekler; maliyet etkisi tahminidir.

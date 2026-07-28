@@ -6,7 +6,7 @@ import type { ParcelInfo } from '@/lib/tkgm/parcel'
 import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import styles from './ParcelPicker.module.css'
 
-export type ParcelPickerStatus = 'idle' | 'verified' | 'not_found' | 'unavailable'
+export type ParcelPickerStatus = 'idle' | 'verified' | 'not_found' | 'unavailable' | 'unauthorized'
 
 export type ParcelPickerValue = {
     lat: number | null
@@ -24,14 +24,36 @@ interface Props {
      * olduğu /hesapla) çağıran taraf kendi metnini geçebilir.
      */
     hint?: string
+    /**
+     * `not_found` / `unavailable` sonuç kartlarının metni. Varsayılanlar ilan
+     * sihirbazına ("İlanınız...") özgüdür; /hesapla gibi ilan üretmeyen
+     * bağlamlar kendi metnini geçer. Verilmezse mevcut sihirbaz çıktısı
+     * bayt bayt aynı kalır.
+     */
+    notFoundText?: string
+    unavailableText?: string
 }
 
 const DEFAULT_HINT =
     'Arsanızın bulunduğu noktaya haritadan tıklayın. Konum, ilanın haritada doğru görünmesi için zorunludur.'
 
+const DEFAULT_NOT_FOUND_TEXT =
+    'Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın — yol, dere veya kadastro dışı ' +
+    'bir noktaya denk gelmiş olabilir. Doğrulamadan da devam edebilirsiniz.'
+
+const DEFAULT_UNAVAILABLE_TEXT =
+    'TKGM servisi şu an yanıt vermiyor. İlanınız doğrulanmadan yayınlanabilir, daha sonra tekrar ' +
+    'deneyebilirsiniz.'
+
 const TURKEY_CENTER: [number, number] = [39.0, 35.0]
 
-export function ParcelPicker({ value, onChange, hint = DEFAULT_HINT }: Props) {
+export function ParcelPicker({
+    value,
+    onChange,
+    hint = DEFAULT_HINT,
+    notFoundText = DEFAULT_NOT_FOUND_TEXT,
+    unavailableText = DEFAULT_UNAVAILABLE_TEXT,
+}: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const mapRef = useRef<LeafletMap | null>(null)
     const markerRef = useRef<Marker | null>(null)
@@ -108,6 +130,13 @@ export function ParcelPicker({ value, onChange, hint = DEFAULT_HINT }: Props) {
         setVerifying(true)
         try {
             const res = await fetch(`/api/parcel/lookup?lat=${value.lat}&lng=${value.lng}`)
+            // /hesapla auth-gated degil ama /api/parcel/lookup anonim kullaniciya
+            // 401 doner. Bunu 'unavailable' (TKGM cevap vermiyor) ile karistirmak
+            // kullaniciya yanlis teshis verir — asil sebep oturum acmamis olmasi.
+            if (res.status === 401) {
+                onChange({ parcel: null, status: 'unauthorized' })
+                return
+            }
             const data = await res.json()
             if (data.status === 'verified' && data.parcel) {
                 onChange({ parcel: data.parcel, status: 'verified' })
@@ -159,15 +188,19 @@ export function ParcelPicker({ value, onChange, hint = DEFAULT_HINT }: Props) {
 
             {value.status === 'not_found' && (
                 <div className={styles.warnCard}>
-                    Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın — yol, dere veya kadastro dışı
-                    bir noktaya denk gelmiş olabilir. Doğrulamadan da devam edebilirsiniz.
+                    {notFoundText}
                 </div>
             )}
 
             {value.status === 'unavailable' && (
                 <div className={styles.warnCard}>
-                    TKGM servisi şu an yanıt vermiyor. İlanınız doğrulanmadan yayınlanabilir, daha sonra tekrar
-                    deneyebilirsiniz.
+                    {unavailableText}
+                </div>
+            )}
+
+            {value.status === 'unauthorized' && (
+                <div className={styles.warnCard}>
+                    Parsel doğrulama için giriş yapmanız gerekiyor. Giriş yaptıktan sonra tekrar deneyebilirsiniz.
                 </div>
             )}
         </div>

@@ -86,6 +86,21 @@ export default function Home() {
   });
   const [risk, setRisk] = useState<RiskMeasurement | null>(null);
 
+  // ParcelPicker + RiskSuggestionCard yalnizca masaustunde erisilebilir
+  // (.desktopSidebar mobilde `display:none !important`). CSS'e ragmen bu
+  // ikisi mount edilmeye devam ederse Leaflet haritasi gizli 0x0 bir
+  // konteynerde kurulur ve OSM/TUCBS'e bosuna karo istegi gider. Bu yuzden
+  // mobilde hic MOUNT edilmezler; CSS'in kullandigi esikle ayni esik
+  // (max-width: 768px / desktopSidebar) burada matchMedia ile okunur.
+  const [isDesktopViewport, setIsDesktopViewport] = useState(true);
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 769px)');
+    const update = () => setIsDesktopViewport(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
   // Konum secilince risk olcumu. Konum OPSIYONELDIR; secilmezse sayfa
   // bugunku gibi calisir ve hicbir risk UI'i gosterilmez.
   useEffect(() => {
@@ -104,7 +119,11 @@ export default function Home() {
       }
     })();
     return () => { cancelled = true; };
-  }, [parcelValue]);
+    // parcelValue nesnesi her onChange yamasinda (orn. ParcelPicker'in durum-
+    // sadece guncellemelerinde) yeni referans alir; sadece lat/lng degisiminde
+    // yeniden calismasi gereksiz /api/risk/lookup cagrilarini onler.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parcelValue.lat, parcelValue.lng]);
 
   /**
    * Oneriyi ayrik risk izgarasina uygular. Izgara `riskLevels` state dizisinden
@@ -545,12 +564,18 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <ParcelPicker
-                value={parcelValue}
-                onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
-                hint="Parselin resmi risk verilerini (yakın fay, taşkın) görmek isterseniz haritadan konum seçebilirsiniz — bu adım isteğe bağlıdır."
-              />
-              {risk && <RiskSuggestionCard risk={risk} onApply={applyRiskSuggestion} />}
+              {isDesktopViewport && (
+                <>
+                  <ParcelPicker
+                    value={parcelValue}
+                    onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
+                    hint="Parselin resmi risk verilerini (yakın fay, taşkın) görmek isterseniz haritadan konum seçebilirsiniz — bu adım isteğe bağlıdır."
+                    notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın — yol, dere veya kadastro dışı bir noktaya denk gelmiş olabilir. Doğrulama olmadan da hesaplama yapabilirsiniz."
+                    unavailableText="TKGM servisi şu an yanıt vermiyor. Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz."
+                  />
+                  {risk && <RiskSuggestionCard risk={risk} onApply={applyRiskSuggestion} />}
+                </>
+              )}
             </div>
 
             <div className={styles.settingsGroup}>

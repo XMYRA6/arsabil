@@ -53,4 +53,24 @@ describe('RiskSuggestionCard', () => {
         )
         expect(screen.getByText(/25 km/)).toBeInTheDocument()
     })
+
+    it('onerinin sadece bu olcumun payini kapsadigini, toplam risk olmadigini belirtir', () => {
+        render(<RiskSuggestionCard risk={RISK} onApply={jest.fn()} />)
+        expect(screen.getByText(/toplam riskini temsil etmez/i)).toBeInTheDocument()
+    })
+
+    it('yuzde sifirsa Uygula butonu gosterilmez (kullaniciyi risk payini sifirlamaya yonlendirmez)', () => {
+        render(
+            <RiskSuggestionCard
+                risk={{ faultDistanceM: null, gammaF: 1, floodQ100: false, suggestedR: 1 }}
+                onApply={jest.fn()}
+            />,
+        )
+        expect(screen.queryByRole('button', { name: /uygula/i })).not.toBeInTheDocument()
+    })
+
+    it('yuzde sifirdan buyukse Uygula butonu gosterilir', () => {
+        render(<RiskSuggestionCard risk={RISK} onApply={jest.fn()} />)
+        expect(screen.getByRole('button', { name: /uygula/i })).toBeInTheDocument()
+    })
 })
