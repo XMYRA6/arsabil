@@ -2,16 +2,18 @@
 
 import 'leaflet/dist/leaflet.css';
 import type { Map as LeafletMap } from 'leaflet';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import styles from './MiniMap.module.css';
 
 interface Props {
     lat: number;
     lng: number;
     label?: string;
     listingId?: string;
+    riskLayers?: boolean;
 }
 
-export function MiniMap({ lat, lng, label, listingId }: Props) {
+export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<LeafletMap | null>(null);
 
@@ -87,9 +89,72 @@ export function MiniMap({ lat, lng, label, listingId }: Props) {
         };
     }, [lat, lng]);
 
+    const [showFault, setShowFault] = useState(false);
+    const [showFlood, setShowFlood] = useState(false);
+    const faultRef = useRef<import('leaflet').TileLayer | null>(null);
+    const floodRef = useRef<import('leaflet').TileLayer | null>(null);
+
+    useEffect(() => {
+        if (!riskLayers) return;
+        let cancelled = false;
+
+        void (async () => {
+            const L = (await import('leaflet')).default;
+            const map = mapRef.current;
+            if (cancelled || !map) return;
+
+            const attach = (
+                ref: React.MutableRefObject<import('leaflet').TileLayer | null>,
+                layer: string,
+                show: boolean,
+            ) => {
+                if (show && !ref.current) {
+                    // TUCBS yalnizca EPSG:4326 ilan ediyor; Leaflet varsayilani
+                    // EPSG:3857'dir ve bos tile dondurur.
+                    ref.current = L.tileLayer.wms('/api/risk/tiles', {
+                        layers: layer,
+                        format: 'image/png',
+                        transparent: true,
+                        crs: L.CRS.EPSG4326,
+                    }).addTo(map);
+                } else if (!show && ref.current) {
+                    map.removeLayer(ref.current);
+                    ref.current = null;
+                }
+            };
+
+            attach(faultRef, 'diri_fay', showFault);
+            attach(floodRef, 'taskin_tehlike_haritasi_q100', showFlood);
+        })();
+
+        return () => { cancelled = true; };
+    }, [riskLayers, showFault, showFlood]);
+
     return (
         <div style={{ borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)' }}>
             <div ref={containerRef} style={{ width: '100%', height: 180 }} />
+            {riskLayers && (
+                <div className={styles.layerToggles}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            aria-label="Diri fay katmani"
+                            checked={showFault}
+                            onChange={e => setShowFault(e.target.checked)}
+                        />
+                        Diri fay
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            aria-label="Taskin katmani"
+                            checked={showFlood}
+                            onChange={e => setShowFlood(e.target.checked)}
+                        />
+                        Taşkın (Q100)
+                    </label>
+                </div>
+            )}
             <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '8px 12px', background: 'var(--bg)',

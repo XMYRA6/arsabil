@@ -53,6 +53,8 @@ const MOCK_LISTING = {
     parcelAreaSqm: null as number | null,
     parcelQuality: null as string | null,
     parcelVerifiedAt: null as string | null,
+    faultDistanceM: null as number | null,
+    floodQ100: null as boolean | null,
     user: null as null | { id: string; name: string | null; email: string; isVerified: boolean },
 };
 
@@ -215,6 +217,18 @@ export default function ListingDetailPage() {
                                         </span>
                                     </div>
                                 )}
+                                {listing.faultDistanceM != null && (
+                                    <div className={styles.parcelRow}>
+                                        <span>
+                                            Diri faya yaklaşık{' '}
+                                            {listing.faultDistanceM >= 1000
+                                                ? `${(listing.faultDistanceM / 1000).toFixed(1)} km`
+                                                : `${listing.faultDistanceM} m`}
+                                            {listing.floodQ100 != null &&
+                                                ` · Q100 taşkın bölgesi ${listing.floodQ100 ? 'İÇİNDE' : 'dışında'}`}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className={styles.detailGrid}>
                                     {[
                                         ['Alan (beyan)', areaCells.declared],
@@ -345,6 +359,7 @@ export default function ListingDetailPage() {
                             lng={listing.lng}
                             label={`${listing.district}, ${listing.city}`}
                             listingId={id}
+                            riskLayers
                         />
                     ) : (
                         <div className={styles.noLocationNote}>
