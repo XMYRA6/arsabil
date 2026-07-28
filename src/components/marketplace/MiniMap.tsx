@@ -16,6 +16,8 @@ interface Props {
 export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<LeafletMap | null>(null);
+    const faultRef = useRef<import('leaflet').TileLayer | null>(null);
+    const floodRef = useRef<import('leaflet').TileLayer | null>(null);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
@@ -86,13 +88,17 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
                 mapRef.current.remove();
                 mapRef.current = null;
             }
+            // Harita yok edildiğinde eski katman referansları da onunla birlikte
+            // geçersiz olur; sıfırlanmazsa yeniden kurulan haritada "zaten ekli"
+            // sanılıp bir daha eklenmezler (ya da artık ait olmadıkları haritadan
+            // kaldırılmaya çalışılırlar).
+            faultRef.current = null;
+            floodRef.current = null;
         };
     }, [lat, lng]);
 
     const [showFault, setShowFault] = useState(false);
     const [showFlood, setShowFlood] = useState(false);
-    const faultRef = useRef<import('leaflet').TileLayer | null>(null);
-    const floodRef = useRef<import('leaflet').TileLayer | null>(null);
 
     useEffect(() => {
         if (!riskLayers) return;
