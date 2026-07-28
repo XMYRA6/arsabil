@@ -38,13 +38,22 @@ export function parseTkgmArea(raw: unknown): number | null {
     if (typeof raw !== 'string') return null
 
     const s = raw.trim()
-    if (!/^\d[\d.,]*$/.test(s)) return null
+    // Bozuk girdi sessizce sayıya ZORLANMAZ. Eski desen (`^\d[\d.,]*$`)
+    // tekrarlanan/sondaki ayraçları kabul ediyordu: "8,,00" → 8, "830." → 830.
+    // Kabul edilen biçimler: düz tam sayı, binlik gruplu, en fazla 3 ondalık.
+    if (!/^\d+([.,]\d{1,3})?$|^\d{1,3}([.,]\d{3})+([.,]\d{1,3})?$/.test(s)) return null
 
     const lastSep = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'))
+    // Her iki ayraç da varsa son ayraç KESİN ondalıktır — hane sayısına bakmaya
+    // gerek yok. Bu kontrol olmadan "1,234.567" → 1234567 oluyordu (3 hane
+    // kuralı binlik sanıyordu), yani parser'ın önlemek için var olduğu 1000×
+    // hata ters yönde geri geliyordu.
+    const hasBothSeparators = s.includes(',') && s.includes('.')
+
     let normalized: string
     if (lastSep === -1) {
         normalized = s
-    } else if (s.length - lastSep - 1 === 3) {
+    } else if (!hasBothSeparators && s.length - lastSep - 1 === 3) {
         normalized = s.replace(/[.,]/g, '')
     } else {
         normalized = s.slice(0, lastSep).replace(/[.,]/g, '') + '.' + s.slice(lastSep + 1)
@@ -63,8 +72,12 @@ function toParcelInfo(json: unknown): ParcelInfo | null {
     if (!props) return null
     if (!geometry || geometry.type !== 'Polygon' || !Array.isArray(geometry.coordinates)) return null
 
+    // Makullük sınırı: parse edilmiş alan "TKGM ile doğrulandı" rozetiyle
+    // alıcıya gösteriliyor. Bir ayraç belirsizliği 1000× sapma üretirse
+    // sessizce olgu diye yayınlanmasındansa doğrulanmamış saymak yeğdir.
+    // 1e8 m² = 100.000 hektar; Türkiye'deki en büyük parselin çok üstünde.
     const areaSqm = parseTkgmArea(props.alan)
-    if (areaSqm === null) return null
+    if (areaSqm === null || areaSqm <= 0 || areaSqm > 1e8) return null
 
     return {
         il: String(props.ilAd ?? ''),

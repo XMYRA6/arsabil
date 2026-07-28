@@ -109,3 +109,30 @@ describe('fetchParcelByPoint', () => {
         expect(res).toEqual({ ok: false, reason: 'unavailable' })
     })
 })
+
+describe('parseTkgmArea — ayrac belirsizligi ve bozuk girdi (T0/T1 review bulgusu #6)', () => {
+    it('iki ayrac birlikteyken son ayrac KESIN ondaliktir', () => {
+        // Eskiden "1,234.567" -> 1234567 (3 hane kurali binlik saniyordu).
+        expect(parseTkgmArea('1,234.567')).toBeCloseTo(1234.567, 5)
+        expect(parseTkgmArea('1.234,567')).toBeCloseTo(1234.567, 5)
+    })
+
+    it('uc ondalikli deger 1000x sismez', () => {
+        expect(parseTkgmArea('1.240,505')).toBeCloseTo(1240.505, 5)
+    })
+
+    it('olculmus TKGM formatlari korunur', () => {
+        expect(parseTkgmArea('830.00')).toBe(830)
+        expect(parseTkgmArea('830,00')).toBe(830)
+        expect(parseTkgmArea('1.240,50')).toBeCloseTo(1240.5, 5)
+        expect(parseTkgmArea('1.234.567,89')).toBeCloseTo(1234567.89, 5)
+        expect(parseTkgmArea('1.240')).toBe(1240)
+        expect(parseTkgmArea('1.240.500')).toBe(1240500)
+    })
+
+    it('tekrarlanan veya sondaki ayrac REDDEDILIR (sessizce sayiya zorlanmaz)', () => {
+        expect(parseTkgmArea('8,,00')).toBeNull()
+        expect(parseTkgmArea('830.')).toBeNull()
+        expect(parseTkgmArea('.830')).toBeNull()
+    })
+})
