@@ -224,7 +224,7 @@ export default function ListingDetailPage() {
                                             {listing.faultDistanceM != null
                                                 ? <>Diri faya yaklaşık{' '}
                                                     {listing.faultDistanceM >= 1000
-                                                        ? `${(listing.faultDistanceM / 1000).toFixed(1)} km`
+                                                        ? `${(listing.faultDistanceM / 1000).toFixed(1).replace('.', ',')} km`
                                                         : `${listing.faultDistanceM} m`}
                                                   </>
                                                 : '25 km içinde diri fay bulunamadı'}
@@ -249,6 +249,13 @@ export default function ListingDetailPage() {
                                         </div>
                                     ))}
                                 </div>
+                                {/* imarDurumu / emsal / arsaPayi alanlari Prisma semasinda HIC yok;
+                                    API onlari donduremez, dolayisiyla her ilanda ayni ornek
+                                    degerler gorunur. Veriler toplanana kadar acikca isaretleniyor. */}
+                                <div className={styles.demoNote} role="note">
+                                    <strong>Örnek veri</strong> — İmar durumu, emsal ve arsa payı bilgileri henüz
+                                    toplanmadığı için tanıtım amaçlı örnek değerlerdir; bu ilana ait değildir.
+                                </div>
                                 {areaCells.warning && (
                                     <div className={styles.areaWarning}>⚠️ {areaCells.warning}</div>
                                 )}
@@ -261,6 +268,15 @@ export default function ListingDetailPage() {
                         {activeTab === 'fizibilite' && (
                             <div>
                                 <h3 className={styles.sectionTitle}>Ön Fizibilite Sonuçları</h3>
+                                {/* Bu sekmedeki degerlerin TAMAMI sabit ornek: arsa degeri, net kar,
+                                    daire/m2 ve proje suresi kodda literal; skor ve piyasa
+                                    karsilastirmasi ise semada bulunmayan mock alanlardan geliyor.
+                                    Gercek hesap /hesapla sayfasindaki motorda yapiliyor. */}
+                                <div className={styles.demoNote} role="note">
+                                    <strong>Örnek veri</strong> — Bu sekmedeki değerler tanıtım amaçlıdır ve bu
+                                    ilana ait bir hesap değildir. Gerçek fizibilite için{' '}
+                                    <a href="/hesapla" className={styles.demoNoteLink}>Hesapla</a> sayfasını kullanın.
+                                </div>
                                 <div className={styles.fizGrid}>
                                     {[
                                         ['Tahmini Arsa Değeri', '4.371.200 TL', 'var(--primary)'],

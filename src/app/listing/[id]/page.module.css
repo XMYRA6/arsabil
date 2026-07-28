@@ -672,6 +672,27 @@
     border: 1px solid rgba(var(--orange-rgb), 0.3);
 }
 
+/* Uydurma veri ekranda oldugu surece acikca isaretlenir. */
+.demoNote {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--label-color);
+    background: rgba(var(--orange-rgb), 0.08);
+    border: 1px solid rgba(var(--orange-rgb), 0.3);
+}
+
+.demoNote strong {
+    color: var(--orange);
+}
+
+.demoNoteLink {
+    color: var(--seal-accent);
+    text-decoration: underline;
+}
+
 .noLocationNote {
     padding: 16px;
     border-radius: 12px;

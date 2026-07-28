@@ -64,6 +64,13 @@ function MarketplaceContent() {
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
+    // Ekranda uydurma veri var mi, ve ne kadari?
+    //   'all'         → ilanlarin TAMAMI ornek (API bos dondu veya hata verdi)
+    //   'fizibilite'  → ilanlar gercek, ama skor/arsa payi/imar alanlari ornek
+    // Bu alanlar (fizibiliteSkoru, arsaPayiMin/Max, imarDurumu) Prisma
+    // semasinda HIC yok; API onlari donduremez. Veriler gercekten toplanana
+    // kadar ekranda acikca isaretleniyorlar.
+    const [demoData, setDemoData] = useState<'none' | 'fizibilite' | 'all'>('none');
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('score_desc');
     const [currentPage, setCurrentPage] = useState(1);
@@ -110,8 +117,10 @@ function MarketplaceContent() {
                         ...MOCK_LISTINGS_EXTRA[i],
                     }));
                     setListings(mock);
+                    setDemoData('all');
                 } else {
                     setListings(enriched);
+                    setDemoData('fizibilite');
                 }
                 setLoading(false);
             })
@@ -127,6 +136,7 @@ function MarketplaceContent() {
                     ...MOCK_LISTINGS_EXTRA[i],
                 }));
                 setListings(mock);
+                setDemoData('all');
                 setLoading(false);
             });
     }, []);
@@ -199,6 +209,16 @@ function MarketplaceContent() {
                     <ViewToggle view={view} onChange={handleViewChange} />
                 </div>
             </div>
+
+            {/* ── Örnek veri uyarısı ── */}
+            {!loading && demoData !== 'none' && (
+                <div className={styles.demoBanner} role="status">
+                    <strong>Örnek veri</strong>
+                    {demoData === 'all'
+                        ? ' — Şu anda yayında ilan bulunmadığı için bu listedeki ilanların tamamı tanıtım amaçlı örnektir.'
+                        : ' — İlanlar gerçek, ancak fizibilite skoru, arsa payı aralığı ve imar durumu henüz toplanmadığı için örnek değerlerle gösteriliyor.'}
+                </div>
+            )}
 
             {/* ── Mobil kontroller: görünüm + filtre ── */}
             <div className={styles.mobileControls}>
