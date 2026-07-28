@@ -94,7 +94,11 @@ export default function Home() {
   // (max-width: 768px / desktopSidebar) burada matchMedia ile okunur.
   const [isDesktopViewport, setIsDesktopViewport] = useState(true);
   useEffect(() => {
-    const mql = window.matchMedia('(min-width: 769px)');
+    // `min-width: 769px` DEĞİL: kesirli viewport genişliklerinde (yüksek DPI,
+    // tarayıcı yakınlaştırması) 768 ile 769 arasında ne CSS'in
+    // `max-width: 768px` kuralı ne de `min-width: 769px` eşleşir; sidebar
+    // görünür ama içeriği mount edilmezdi. Bu form CSS'i birebir yansıtır.
+    const mql = window.matchMedia('not all and (max-width: 768px)');
     const update = () => setIsDesktopViewport(mql.matches);
     update();
     mql.addEventListener('change', update);

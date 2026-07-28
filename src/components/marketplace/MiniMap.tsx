@@ -144,7 +144,7 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
                     <label>
                         <input
                             type="checkbox"
-                            aria-label="Diri fay katmani"
+                            aria-label="Diri fay katmanı"
                             checked={showFault}
                             onChange={e => setShowFault(e.target.checked)}
                         />
@@ -153,7 +153,7 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
                     <label>
                         <input
                             type="checkbox"
-                            aria-label="Taskin katmani"
+                            aria-label="Taşkın katmanı"
                             checked={showFlood}
                             onChange={e => setShowFlood(e.target.checked)}
                         />

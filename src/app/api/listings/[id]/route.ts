@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import type { Prisma } from '@prisma/client'
 import { buildParcelSnapshot } from '@/lib/listing/parcelSnapshot'
 import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
 
@@ -73,13 +74,16 @@ export async function PATCH(
         // Paralel çalışır: ikisi de opsiyonel ve bağımsız, ardışık beklemek
         // ilan güncellemesini gereksiz yere uzatırdı (bkz. buildRiskSnapshot
         // içindeki 6 sn'lik toplam bütçe).
-        let parcelFields: Record<string, unknown> = {}
+        // Tip `Record<string, unknown>` DEĞİL: o, snapshot alan adlarının
+        // derleme zamanı kontrolünü siler ve yeniden adlandırılan bir alan
+        // ancak Prisma çalışma zamanı hatasıyla ortaya çıkardı.
+        let snapshotFields: Partial<Prisma.ListingUpdateInput> = {}
         if (coordsChanged) {
             const [parcelSnapshot, riskSnapshot] = await Promise.all([
                 buildParcelSnapshot(latNum, lngNum),
                 buildRiskSnapshot(latNum, lngNum),
             ])
-            parcelFields = { lat: latNum, lng: lngNum, ...parcelSnapshot, ...riskSnapshot }
+            snapshotFields = { lat: latNum, lng: lngNum, ...parcelSnapshot, ...riskSnapshot }
         }
 
         const updated = await prisma.listing.update({
@@ -97,7 +101,7 @@ export async function PATCH(
                 ...(phone !== undefined ? { phone } : {}),
                 ...(photos !== undefined ? { photos } : {}),
                 ...(reportId !== undefined ? { reportId: reportId || null } : {}),
-                ...parcelFields,
+                ...snapshotFields,
                 status: 'PENDING',
                 isActive: false,
             },

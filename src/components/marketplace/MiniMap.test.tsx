@@ -49,18 +49,18 @@ describe('MiniMap risk katmanlari', () => {
 
     it('riskLayers verilmediginde katman kontrolu gosterilmez', () => {
         render(<MiniMap lat={41} lng={29} />)
-        expect(screen.queryByLabelText('Diri fay katmani')).toBeNull()
+        expect(screen.queryByLabelText('Diri fay katmanı')).toBeNull()
     })
 
     it('riskLayers true iken iki katman kontrolu gosterilir', () => {
         render(<MiniMap lat={41} lng={29} riskLayers />)
-        expect(screen.getByLabelText('Diri fay katmani')).toBeInTheDocument()
-        expect(screen.getByLabelText('Taskin katmani')).toBeInTheDocument()
+        expect(screen.getByLabelText('Diri fay katmanı')).toBeInTheDocument()
+        expect(screen.getByLabelText('Taşkın katmanı')).toBeInTheDocument()
     })
 
     it('katman kontrolleri varsayilan olarak kapalidir', () => {
         render(<MiniMap lat={41} lng={29} riskLayers />)
-        expect(screen.getByLabelText('Diri fay katmani')).not.toBeChecked()
+        expect(screen.getByLabelText('Diri fay katmanı')).not.toBeChecked()
     })
 
     // lat/lng degisince ilk effect haritayi yok edip yeniden kurar (`[lat, lng]`
@@ -76,7 +76,7 @@ describe('MiniMap risk katmanlari', () => {
         const firstMap = mockL.map.mock.results[0].value
 
         // Diri fay'i ac: katman ilk haritaya eklenir.
-        fireEvent.click(screen.getByLabelText('Diri fay katmani'))
+        fireEvent.click(screen.getByLabelText('Diri fay katmanı'))
         await waitFor(() => expect(mockL.tileLayer.wms).toHaveBeenCalledTimes(1))
         const firstFaultLayer = mockL.tileLayer.wms.mock.results[0].value
         expect(firstFaultLayer.addTo).toHaveBeenCalledWith(firstMap)
@@ -91,8 +91,8 @@ describe('MiniMap risk katmanlari', () => {
         // ama katman artik yok edilen haritaya bagliydi. Baska bir katmani
         // (Taskin) acmak ayni effect'i tekrar calistirir; bu calisma sirasinda
         // faultRef sifirlanmis olmali ki 'diri_fay' yeni haritaya yeniden eklensin.
-        expect(screen.getByLabelText('Diri fay katmani')).toBeChecked()
-        fireEvent.click(screen.getByLabelText('Taskin katmani'))
+        expect(screen.getByLabelText('Diri fay katmanı')).toBeChecked()
+        fireEvent.click(screen.getByLabelText('Taşkın katmanı'))
         await waitFor(() => expect(mockL.tileLayer.wms).toHaveBeenCalledTimes(3))
 
         const wmsCalls = mockL.tileLayer.wms.mock.calls as [string, { layers?: string }][]
@@ -104,7 +104,7 @@ describe('MiniMap risk katmanlari', () => {
         expect(reattachedFaultLayer.addTo).toHaveBeenCalledWith(secondMap)
 
         // Simdi isareti kaldirmak, eski degil, YENI haritanin katmanini hedeflemeli.
-        expect(() => fireEvent.click(screen.getByLabelText('Diri fay katmani'))).not.toThrow()
+        expect(() => fireEvent.click(screen.getByLabelText('Diri fay katmanı'))).not.toThrow()
         await waitFor(() => expect(secondMap.removeLayer).toHaveBeenCalledTimes(1))
         expect(secondMap.removeLayer).toHaveBeenCalledWith(reattachedFaultLayer)
         expect(firstMap.removeLayer).not.toHaveBeenCalled()

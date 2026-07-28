@@ -52,6 +52,25 @@ describe('nearestOpaquePixelPx', () => {
     })
 })
 
+describe('cift boyutlu goruntude merkez tanimi', () => {
+    // Uretimde fay karolari 256 px (CIFT). nearestOpaquePixelPx kesirli
+    // geometrik merkezi ((w-1)/2 = 127.5), isCenterOpaque ise tam sayi
+    // merkezi (Math.floor -> 127) kullanir. Bu fark KASITLI: mesafe olcumu
+    // alt piksel dogruluk ister, "icinde mi" testi ise tek bir gercek piksel
+    // okumak zorundadir. Asagidaki testler bu davranisi cift boyutta sabitler
+    // ki ileride biri ikisini "tutarli olsun diye" esitlemeye kalkmasin.
+    it('nearestOpaquePixelPx cift boyutta kesirli merkezi kullanir', () => {
+        // 4x4 -> merkez (1.5, 1.5). (1,1) pikseli hypot(0.5,0.5) uzaklikta.
+        expect(nearestOpaquePixelPx(img(4, [[1, 1, 200]]))!).toBeCloseTo(Math.SQRT1_2, 5)
+    })
+
+    it('isCenterOpaque cift boyutta floor edilmis merkez pikseli okur', () => {
+        // 4x4 -> floor((4-1)/2) = 1, yani (1,1).
+        expect(isCenterOpaque(img(4, [[1, 1, 200]]))).toBe(true)
+        expect(isCenterOpaque(img(4, [[2, 2, 200]]))).toBe(false)
+    })
+})
+
 describe('isCenterOpaque', () => {
     it('merkez piksel esigin ustundeyse true', () => {
         expect(isCenterOpaque(img(9, [[4, 4, 200]]))).toBe(true)

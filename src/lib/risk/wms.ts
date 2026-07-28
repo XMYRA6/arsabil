@@ -16,9 +16,14 @@ export const BROWSER_UA =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
 /**
- * TUCBS WMS istekleri için tek zaman aşımı sabiti. `route.ts` (tiles proxy'si)
- * ve `riskSnapshot.ts` (ölçüm bütçesi) da bu sabitten türetilir — 8000 iki
- * dosyada ayrı ayrı tekrarlanmasın diye.
+ * TEK BİR TUCBS isteğinin zaman aşımı. `fetchWmsTile` ve tiles proxy'si
+ * (`api/risk/tiles/route.ts`) bunu paylaşır.
+ *
+ * DİKKAT: `riskSnapshot.ts`'teki `SNAPSHOT_DEADLINE_MS` bundan TÜREMEZ, ayrı
+ * bir sabittir. O, ilan kaydını bloklamamak için ölçümün TAMAMINA konan bir
+ * bütçedir (`measureRisk` en fazla üç ardışık istek yapabilir); buradaki değer
+ * ise tek isteğin üst sınırı. Birini değiştirirken diğerinin otomatik olarak
+ * takip edeceğini varsayma.
  */
 export const TIMEOUT_MS = 8000
 
