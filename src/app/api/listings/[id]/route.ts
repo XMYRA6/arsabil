@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { buildParcelSnapshot } from '@/lib/listing/parcelSnapshot'
+import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
 
 export async function GET(
     _req: Request,
@@ -70,7 +71,7 @@ export async function PATCH(
             (existing.lat !== latNum || existing.lng !== lngNum)
 
         const parcelFields = coordsChanged
-            ? { lat: latNum, lng: lngNum, ...(await buildParcelSnapshot(latNum, lngNum)) }
+            ? { lat: latNum, lng: lngNum, ...(await buildParcelSnapshot(latNum, lngNum)), ...(await buildRiskSnapshot(latNum, lngNum)) }
             : {}
 
         const updated = await prisma.listing.update({

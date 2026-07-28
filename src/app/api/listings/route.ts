@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkPlanLimit } from "@/lib/plan";
 import { buildParcelSnapshot } from "@/lib/listing/parcelSnapshot";
+import { buildRiskSnapshot } from "@/lib/risk/riskSnapshot";
 
 export async function GET(req: Request) {
     try {
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
         const latNum = lat != null && Number.isFinite(Number(lat)) ? Number(lat) : null
         const lngNum = lng != null && Number.isFinite(Number(lng)) ? Number(lng) : null
         const parcelSnapshot = await buildParcelSnapshot(latNum, lngNum)
+        const riskSnapshot = await buildRiskSnapshot(latNum, lngNum)
 
         const listing = await prisma.listing.create({
             data: {
@@ -110,6 +112,7 @@ export async function POST(req: Request) {
                 lat: latNum,
                 lng: lngNum,
                 ...parcelSnapshot,
+                ...riskSnapshot,
                 isActive: false,
                 status: 'PENDING',
             },

@@ -179,6 +179,9 @@ model Listing {
   parcelGeometry      Json?
   parcelVerifiedAt    DateTime?
   parcelLookupStatus  String?
+  faultDistanceM      Int?
+  floodQ100           Boolean?
+  riskSnapshotAt      DateTime?
   createdAt   DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   report      Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
