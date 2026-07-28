@@ -137,6 +137,18 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const LRef = useRef<typeof import('leaflet') | null>(null);
     const roRef = useRef<ResizeObserver | null>(null);
 
+    // Marker effect'i bu bayrak ile haritanin hazir olmasini bekler. Harita
+    // async kuruluyor (dinamik leaflet import'u), dolayisiyla yalnizca
+    // `[listings]`e bagli bir effect ilk calismasinda cluster group'u henuz
+    // bulamaz ve sessizce hicbir sey yapmaz.
+    const [mapReady, setMapReady] = useState(false);
+
+    // onHighlight marker olay isleyicilerinde kullaniliyor. Ref'te tutulursa
+    // marker seti ebeveynin her render'inda yeniden kurulmaz, ama isleyiciler
+    // yine de guncel fonksiyonu cagirir.
+    const onHighlightRef = useRef(onHighlight);
+    useEffect(() => { onHighlightRef.current = onHighlight; }, [onHighlight]);
+
     const [tileKey, setTileKey] = useState<TileKey>(() => {
         if (typeof window !== 'undefined') {
             return (localStorage.getItem('arsabil-map-tile') as TileKey) || 'dark';
@@ -150,10 +162,9 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const [drawMode, setDrawMode] = useState(false);
     const [showBorder, setShowBorder] = useState(false);
 
-    // Konumsuz ilan sayısı RENDER sırasında türetilir, state'te tutulmaz:
-    // marker'ları kuran effect'in bağımlılık dizisi [] (harita bir kez kurulur),
-    // dolayısıyla orada hesaplanan bir sayı ilanlar sonradan geldiğinde
-    // güncellenmezdi.
+    // Konumsuz ilan sayısı RENDER sırasında türetilir, state'te tutulmaz —
+    // böylece `listings` her değiştiğinde kendiliğinden güncel kalır ve bir
+    // effect'in çalışmasına bağlı olmaz.
     const unplacedCount = splitListingsByCoords(listings).unplaced.length;
     const [pinInfo, setPinInfo] = useState<{ lat: number; lng: number; address?: string; loading: boolean } | null>(null);
     const [measureResult, setMeasureResult] = useState<string>('');
@@ -240,77 +251,13 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             clusterGroupRef.current = clusterGroup;
             map.addLayer(clusterGroup);
 
-            // Add markers to cluster
-            // Koordinatı olmayan ilan haritaya KONMAZ. Eskiden burada
-            // `listing.lat ?? ISTANBUL_COORDS[...] + Math.random()` vardı ve
-            // Listing şemasında lat/lng hiç bulunmadığı için harita tamamen
-            // uydurmaydı. Kural artık saf splitListingsByCoords'ta ve testli.
-            const { placed } = splitListingsByCoords(listings);
-
-            placed.forEach((listing) => {
-                const lat = listing.lat;
-                const lng = listing.lng;
-                const score = listing.fizibiliteSkoru ?? 70;
-                const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
-                const rgb = score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
-                const payiMin = listing.arsaPayiMin ?? 28;
-                const payiMax = listing.arsaPayiMax ?? 42;
-                const displayText = listing.type === 'SALE'
-                    ? (listing.price ? (listing.price / 1000000).toFixed(1) + 'M' : '₺')
-                    : `${payiMin}%`;
-
-                const divIcon = L.divIcon({
-                    className: '',
-                    html: `<div style="
-                        position:relative;background:${color};color:white;
-                        padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:900;
-                        white-space:nowrap;box-shadow:0 4px 12px rgba(${rgb},0.33);
-                        border:2px solid white;cursor:pointer;font-family:Inter,sans-serif;
-                        transition:transform 0.15s;
-                    ">
-                        ${displayText}
-                        <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
-                            width:0;height:0;border-left:6px solid transparent;
-                            border-right:6px solid transparent;border-top:7px solid ${color};
-                        "></div>
-                    </div>`,
-                    iconSize: [55, 30],
-                    iconAnchor: [27, 30],
-                    popupAnchor: [0, -35],
-                });
-
-                const marker = L.marker([lat, lng], { icon: divIcon, score } as MarkerOptions & { score?: number });
-                markersRef.current[listing.id] = { marker, lat, lng, score };
-
-                const payStr = listing.type === 'SALE'
-                    ? `${(listing.price ?? 0).toLocaleString('tr-TR')} TL`
-                    : `%${payiMin}–${payiMax}`;
-
-                const popupHtml = `
-                    <div style="font-family:Inter,sans-serif;min-width:220px;">
-                        <div style="font-weight:800;font-size:0.9rem;margin-bottom:4px;color:#0b2443;">
-                            ${listing.title ?? '820 m²'} · ${listing.type === 'KAT_KARSILIGI' ? 'Kat Karşılığı' : 'Satış'}
-                        </div>
-                        <div style="font-size:0.75rem;color:#5a7090;margin-bottom:8px;">
-                            📍 ${listing.district ?? 'Beşiktaş'}, ${listing.city ?? 'İstanbul'}
-                        </div>
-                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                            <span style="background:rgba(${rgb},0.13);color:${color};border:1.5px solid ${color};border-radius:6px;padding:2px 8px;font-size:0.75rem;font-weight:800;">${score}/100</span>
-                            <span style="font-size:0.8rem;font-weight:700;color:#0b2443;">${payStr}</span>
-                        </div>
-                        <div style="display:flex;gap:6px;margin-top:8px;">
-                            <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
-                            <button onclick="window.location.href='/listing/${listing.id}'" style="flex:1;padding:6px 8px;background:rgba(var(--green-rgb),.13);color:var(--green);border:1.5px solid var(--green);border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Teklif Ver</button>
-                        </div>
-                    </div>`;
-
-                marker.bindPopup(L.popup({ maxWidth: 260, autoPan: false }).setContent(popupHtml));
-                marker.on('mouseover', () => { onHighlight(listing.id); marker.openPopup(); });
-                marker.on('mouseout', () => onHighlight(null));
-                marker.on('click', () => { onHighlight(listing.id); marker.openPopup(); });
-
-                clusterGroup.addLayer(marker);
-            });
+            // Marker'lar BURADA kurulmaz. Bu effect'in bagimlilik dizisi []
+            // oldugu icin marker'lar bir kez ve cogu zaman BOS `listings` ile
+            // kurulurdu: marketplace listeyi [] ile mount edip sonra fetch ile
+            // dolduruyor, dolayisiyla harita kalici olarak bos kaliyordu ve
+            // filtre degisiklikleri de hic yansimiyordu. Kurulum artik
+            // `[listings, mapReady]` bagimlilikli ayri bir effect'te.
+            setMapReady(true);
         };
 
         initMap();
@@ -324,9 +271,97 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 mapRef.current = null;
             }
         };
-    // Harita bir kez başlatılır; listings/onHighlight değişikliği ayrı effect ile işlenir
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Harita bir kez başlatılır. Bu effect artık `listings`/`onHighlight`
+    // okumuyor (marker kurulumu aşağıdaki ayrı effect'e taşındı), dolayısıyla
+    // boş bağımlılık dizisi gerçekten doğru — exhaustive-deps istisnası gerekmez.
     }, []);
+
+    /* ─── Marker'lar ─── */
+    // Harita kurulumundan AYRI bir effect: `listings` sonradan geldiginde
+    // (marketplace fetch'i) ve filtre degistiginde marker seti yeniden kurulur.
+    useEffect(() => {
+        const L = LRef.current;
+        const clusterGroup = clusterGroupRef.current;
+        if (!mapReady || !L || !clusterGroup) return;
+
+        // Once eskiyi temizle: aksi halde her calismada marker'lar birikir ve
+        // markersRef'te artik haritada olmayan girdiler kalir (heatmap ve
+        // vurgulama effect'leri bu ref'i okuyor).
+        clusterGroup.clearLayers();
+        markersRef.current = {};
+
+        // Koordinatı olmayan ilan haritaya KONMAZ. Eskiden burada
+        // `listing.lat ?? ISTANBUL_COORDS[...] + Math.random()` vardı ve
+        // Listing şemasında lat/lng hiç bulunmadığı için harita tamamen
+        // uydurmaydı. Kural artık saf splitListingsByCoords'ta ve testli.
+        const { placed } = splitListingsByCoords(listings);
+
+        placed.forEach((listing) => {
+            const lat = listing.lat;
+            const lng = listing.lng;
+            const score = listing.fizibiliteSkoru ?? 70;
+            const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
+            const rgb = score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
+            const payiMin = listing.arsaPayiMin ?? 28;
+            const payiMax = listing.arsaPayiMax ?? 42;
+            const displayText = listing.type === 'SALE'
+                ? (listing.price ? (listing.price / 1000000).toFixed(1) + 'M' : '₺')
+                : `${payiMin}%`;
+
+            const divIcon = L.divIcon({
+                className: '',
+                html: `<div style="
+                    position:relative;background:${color};color:white;
+                    padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:900;
+                    white-space:nowrap;box-shadow:0 4px 12px rgba(${rgb},0.33);
+                    border:2px solid white;cursor:pointer;font-family:Inter,sans-serif;
+                    transition:transform 0.15s;
+                ">
+                    ${displayText}
+                    <div style="position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);
+                        width:0;height:0;border-left:6px solid transparent;
+                        border-right:6px solid transparent;border-top:7px solid ${color};
+                    "></div>
+                </div>`,
+                iconSize: [55, 30],
+                iconAnchor: [27, 30],
+                popupAnchor: [0, -35],
+            });
+
+            const marker = L.marker([lat, lng], { icon: divIcon, score } as MarkerOptions & { score?: number });
+            markersRef.current[listing.id] = { marker, lat, lng, score };
+
+            const payStr = listing.type === 'SALE'
+                ? `${(listing.price ?? 0).toLocaleString('tr-TR')} TL`
+                : `%${payiMin}–${payiMax}`;
+
+            // Baslik/ilce/il gercekten yoksa uydurma degil, notr metin yazilir.
+            const popupHtml = `
+                <div style="font-family:Inter,sans-serif;min-width:220px;">
+                    <div style="font-weight:800;font-size:0.9rem;margin-bottom:4px;color:#0b2443;">
+                        ${listing.title ?? 'Arsa'} · ${listing.type === 'KAT_KARSILIGI' ? 'Kat Karşılığı' : 'Satış'}
+                    </div>
+                    <div style="font-size:0.75rem;color:#5a7090;margin-bottom:8px;">
+                        📍 ${[listing.district, listing.city].filter(Boolean).join(', ') || 'Konum belirtilmemiş'}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                        <span style="background:rgba(${rgb},0.13);color:${color};border:1.5px solid ${color};border-radius:6px;padding:2px 8px;font-size:0.75rem;font-weight:800;">${score}/100</span>
+                        <span style="font-size:0.8rem;font-weight:700;color:#0b2443;">${payStr}</span>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:8px;">
+                        <button onclick="window.location.href='/listing/${listing.id}?tab=scenario'" style="flex:1;padding:6px 8px;background:#1f6feb;color:white;border:none;border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Senaryo Oluştur</button>
+                        <button onclick="window.location.href='/listing/${listing.id}'" style="flex:1;padding:6px 8px;background:rgba(var(--green-rgb),.13);color:var(--green);border:1.5px solid var(--green);border-radius:8px;cursor:pointer;font-size:0.72rem;font-weight:700;">Teklif Ver</button>
+                    </div>
+                </div>`;
+
+            marker.bindPopup(L.popup({ maxWidth: 260, autoPan: false }).setContent(popupHtml));
+            marker.on('mouseover', () => { onHighlightRef.current(listing.id); marker.openPopup(); });
+            marker.on('mouseout', () => onHighlightRef.current(null));
+            marker.on('click', () => { onHighlightRef.current(listing.id); marker.openPopup(); });
+
+            clusterGroup.addLayer(marker);
+        });
+    }, [listings, mapReady]);
 
     /* ─── Tile Switcher ─── */
     useEffect(() => {
