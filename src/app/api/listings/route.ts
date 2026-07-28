@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkPlanLimit } from "@/lib/plan";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildParcelSnapshot } from "@/lib/listing/parcelSnapshot";
 import { buildRiskSnapshot } from "@/lib/risk/riskSnapshot";
 
@@ -50,6 +51,17 @@ export async function POST(req: Request) {
         const session = await getServerSession(authOptions)
         if (!session?.user?.id) {
             return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 })
+        }
+
+        // Bu yol her kayitta TKGM'ye ve (koordinat varsa) uc adede kadar TUCBS
+        // WMS karosuna gidiyor. Plan limiti kotayi sinirlar ama HIZI sinirlamaz;
+        // dis servislere giden trafigin freni burasi.
+        const rl = checkRateLimit(`listing-write:${session.user.id}`, RATE_LIMITS.WRITE)
+        if (!rl.ok) {
+            return NextResponse.json(
+                { message: 'Çok fazla işlem yaptınız. Lütfen biraz bekleyin.' },
+                { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec ?? 60) } },
+            )
         }
 
         const limitCheck = await checkPlanLimit(session.user.id as string, 'listings')

@@ -1,4 +1,5 @@
 import { measureRisk } from './lookup'
+import { isWithinTurkey } from '@/lib/geo/turkeyBounds'
 
 export type RiskSnapshot = {
     faultDistanceM: number | null
@@ -26,7 +27,8 @@ export async function buildRiskSnapshot(
     lat: number | null,
     lng: number | null,
 ): Promise<RiskSnapshot> {
-    if (lat == null || lng == null) return { ...EMPTY }
+    // TR sinirlari disi koordinat TUCBS'e HIC gonderilmez (bkz. parcelSnapshot).
+    if (lat == null || lng == null || !isWithinTurkey(lat, lng)) return { ...EMPTY }
 
     let timer: ReturnType<typeof setTimeout>
     const deadline = new Promise<RiskSnapshot>(resolve => {

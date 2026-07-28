@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import type { Prisma } from '@prisma/client'
 import { buildParcelSnapshot } from '@/lib/listing/parcelSnapshot'
 import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
@@ -42,6 +43,16 @@ export async function PATCH(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const userId = session.user.id as string
+
+    // PATCH koordinat degistiginde TKGM'ye ve uc adede kadar TUCBS WMS
+    // karosuna gidiyor ve plan limitine de tabi degil; freni yoktu.
+    const rl = checkRateLimit(`listing-write:${userId}`, RATE_LIMITS.WRITE)
+    if (!rl.ok) {
+        return NextResponse.json(
+            { message: 'Çok fazla işlem yaptınız. Lütfen biraz bekleyin.' },
+            { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec ?? 60) } },
+        )
+    }
     const { id } = await context.params
 
     try {

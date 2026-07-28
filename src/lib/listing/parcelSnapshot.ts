@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { fetchParcelByPoint } from '@/lib/tkgm/parcel'
+import { isWithinTurkey } from '@/lib/geo/turkeyBounds'
 import type { GeoJSONPolygon } from '@/lib/tkgm/parcel'
 
 export type ParcelSnapshot = {
@@ -33,7 +34,9 @@ export async function buildParcelSnapshot(
     lat: number | null,
     lng: number | null,
 ): Promise<ParcelSnapshot> {
-    if (lat == null || lng == null) return { ...EMPTY }
+    // TR sinirlari disi koordinat TKGM'ye HIC gonderilmez: bu yol
+    // (ilan kaydetme) rate limit'siz oldugu icin tek freni budur.
+    if (lat == null || lng == null || !isWithinTurkey(lat, lng)) return { ...EMPTY }
 
     const result = await fetchParcelByPoint(lat, lng)
     if (!result.ok) {
