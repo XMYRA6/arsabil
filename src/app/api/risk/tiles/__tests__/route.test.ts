@@ -22,6 +22,24 @@ function pngResponse() {
     }
 }
 
+/** Upstream 500/404 gibi ok olmayan bir durum kodu dönerse. */
+function errorStatusResponse(status: number) {
+    return {
+        ok: false, status,
+        headers: { get: (k: string) => (k.toLowerCase() === 'content-type' ? 'text/plain' : null) },
+        arrayBuffer: async () => new Uint8Array([]).buffer,
+    }
+}
+
+/** GeoServer'ın 200 + ServiceExceptionReport XML dönme durumu — resim gibi servis edilmemeli. */
+function xmlErrorResponse() {
+    return {
+        ok: true, status: 200,
+        headers: { get: (k: string) => (k.toLowerCase() === 'content-type' ? 'application/vnd.ogc.se_xml' : null) },
+        arrayBuffer: async () => new TextEncoder().encode('<ServiceExceptionReport/>').buffer,
+    }
+}
+
 describe('GET /api/risk/tiles', () => {
     beforeEach(() => { checkRateLimitMock.mockReset().mockReturnValue({ ok: true }) })
     afterEach(() => { jest.restoreAllMocks() })
@@ -77,5 +95,19 @@ describe('GET /api/risk/tiles', () => {
         jest.spyOn(global, 'fetch' as never).mockRejectedValue(new Error('boom') as never)
         const res = await GET(req(QS))
         expect(res.status).toBe(502)
+    })
+
+    it('upstream ok olmayan durum kodu donerse 502 doner ve govde gecirilmez', async () => {
+        jest.spyOn(global, 'fetch' as never).mockResolvedValue(errorStatusResponse(500) as never)
+        const res = await GET(req(QS))
+        expect(res.status).toBe(502)
+        expect(res.headers.get('content-type')).not.toContain('image/png')
+    })
+
+    it('upstream 200 + PNG olmayan icerik turu donerse 502 doner (XML hata gorsel gibi servis edilmez)', async () => {
+        jest.spyOn(global, 'fetch' as never).mockResolvedValue(xmlErrorResponse() as never)
+        const res = await GET(req(QS))
+        expect(res.status).toBe(502)
+        expect(res.headers.get('content-type')).not.toContain('image/png')
     })
 })

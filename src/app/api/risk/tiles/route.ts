@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit'
-import { BROWSER_UA, WMS_BASE } from '@/lib/risk/wms'
+import { BROWSER_UA, WMS_BASE, buildWmsParams } from '@/lib/risk/wms'
 
 /**
  * Leaflet'in `L.tileLayer.wms`'i standart WMS parametrelerini kendisi üretir:
@@ -40,12 +40,10 @@ export async function GET(req: Request) {
         return NextResponse.json({ message: 'Geçersiz katman isteği.' }, { status: 400 })
     }
 
-    const params = new URLSearchParams({
-        service: 'WMS', version: '1.1.1', request: 'GetMap',
-        layers, styles: '', bbox,
-        width: String(width), height: String(height),
-        srs: 'EPSG:4326', format: 'image/png', transparent: 'true',
-    })
+    // Çıkış WMS parametreleri (service/version/request/styles/format/transparent/srs)
+    // TEK yerde üretilir — bkz. @/lib/risk/wms#buildWmsParams. version pini burada
+    // yinelenmez, o yüzden 1.1.1 taahhüdü iki dosyada senkron kalmak zorunda değil.
+    const params = buildWmsParams(layers, bbox, width, height)
 
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)

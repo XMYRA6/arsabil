@@ -20,22 +20,33 @@ const TIMEOUT_MS = 8000
 export type WmsLayer = 'diri_fay' | 'taskin_tehlike_haritasi_q100'
 export type WmsResult = { ok: true; png: Buffer } | { ok: false; reason: 'unavailable' }
 
-export function buildWmsUrl(layer: string, bbox: BBox, width: number, height: number): string {
-    const params = new URLSearchParams({
+/**
+ * WMS GetMap parametrelerinin TEK üretim noktası. `service`, `version`
+ * (1.1.1 — 1.3.0 KULLANMA, EPSG:4326'da eksen sırasını lat,lon'a çevirir),
+ * `request`, `styles`, `format`, `transparent` ve `srs` burada sabitlenir.
+ * Hem `buildWmsUrl` (BBox nesnesi alır) hem de tiles route'u (Leaflet'ten
+ * gelen, zaten doğrulanmış bbox string'ini alır) bu fonksiyondan geçer —
+ * version pini iki ayrı dosyada tekrarlanmasın diye.
+ */
+export function buildWmsParams(layer: string, bboxStr: string, width: number, height: number): URLSearchParams {
+    return new URLSearchParams({
         service: 'WMS',
-        // 1.3.0 KULLANMA: EPSG:4326'da eksen sırasını lat,lon'a çevirir.
         version: '1.1.1',
         request: 'GetMap',
         layers: layer,
         styles: '',
-        bbox: `${bbox.minLon},${bbox.minLat},${bbox.maxLon},${bbox.maxLat}`,
+        bbox: bboxStr,
         width: String(width),
         height: String(height),
         srs: 'EPSG:4326',
         format: 'image/png',
         transparent: 'true',
     })
-    return `${WMS_BASE}?${params.toString()}`
+}
+
+export function buildWmsUrl(layer: string, bbox: BBox, width: number, height: number): string {
+    const bboxStr = `${bbox.minLon},${bbox.minLat},${bbox.maxLon},${bbox.maxLat}`
+    return `${WMS_BASE}?${buildWmsParams(layer, bboxStr, width, height).toString()}`
 }
 
 /** Asla throw etmez — risk verisi opsiyoneldir. */
