@@ -26,16 +26,9 @@ import { HesapFisi } from './HesapFisi';
 import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
 import type { RiskMeasurement } from '@/lib/risk/types';
+import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers';
 
 interface ProfitLevel {
-  id: string;
-  label: string;
-  value: number;
-  sortOrder: number;
-  isDefault: boolean;
-}
-
-interface RiskLevel {
   id: string;
   label: string;
   value: number;
@@ -115,20 +108,10 @@ export default function Home() {
   /**
    * Oneriyi ayrik risk izgarasina uygular. Izgara `riskLevels` state dizisinden
    * render edildigi icin onerilen yuzde mevcut secenekler arasinda yoksa yeni
-   * bir secenek olarak eklenir.
+   * bir secenek olarak eklenir (bkz. riskSuggestionHelpers.ts).
    */
   const applyRiskSuggestion = (percent: number) => {
-    setRiskLevels(prev =>
-      prev.some(o => o.value === percent)
-        ? prev
-        : [...prev, {
-            id: 'tbdy-suggested',
-            label: 'TBDY önerisi',
-            value: percent,
-            sortOrder: prev.length,
-            isDefault: false,
-          }].sort((a, b) => a.value - b.value),
-    );
+    setRiskLevels(prev => withSuggestedRiskLevel(prev, percent));
     setRiskLevel(percent);
   };
 
@@ -561,7 +544,11 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <ParcelPicker value={parcelValue} onChange={patch => setParcelValue(v => ({ ...v, ...patch }))} />
+              <ParcelPicker
+                value={parcelValue}
+                onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
+                hint="Parselin resmi risk verilerini (yakın fay, taşkın) görmek isterseniz haritadan konum seçebilirsiniz — bu adım isteğe bağlıdır."
+              />
               {risk && <RiskSuggestionCard risk={risk} onApply={applyRiskSuggestion} />}
             </div>
 

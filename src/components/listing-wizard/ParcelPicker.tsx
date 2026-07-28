@@ -18,11 +18,20 @@ export type ParcelPickerValue = {
 interface Props {
     value: ParcelPickerValue
     onChange: (patch: Partial<ParcelPickerValue>) => void
+    /**
+     * Harita üstü yardım metni. Varsayılan, ilan sihirbazındaki (konumun
+     * zorunlu olduğu) metindir; farklı bağlamlarda (ör. konumun opsiyonel
+     * olduğu /hesapla) çağıran taraf kendi metnini geçebilir.
+     */
+    hint?: string
 }
+
+const DEFAULT_HINT =
+    'Arsanızın bulunduğu noktaya haritadan tıklayın. Konum, ilanın haritada doğru görünmesi için zorunludur.'
 
 const TURKEY_CENTER: [number, number] = [39.0, 35.0]
 
-export function ParcelPicker({ value, onChange }: Props) {
+export function ParcelPicker({ value, onChange, hint = DEFAULT_HINT }: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const mapRef = useRef<LeafletMap | null>(null)
     const markerRef = useRef<Marker | null>(null)
@@ -116,9 +125,7 @@ export function ParcelPicker({ value, onChange }: Props) {
         <div className={styles.wrapper}>
             <div ref={containerRef} className={styles.mapBox} data-testid="parcel-map" />
 
-            <p className={styles.hint}>
-                Arsanızın bulunduğu noktaya haritadan tıklayın. Konum, ilanın haritada doğru görünmesi için zorunludur.
-            </p>
+            <p className={styles.hint}>{hint}</p>
 
             <div className={styles.coordRow}>
                 {value.lat != null && value.lng != null && (
