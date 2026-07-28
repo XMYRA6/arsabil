@@ -130,6 +130,11 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
+  /* Blueprint dokusu KASITLI olarak neredeyse görünmez: .statItem'ın var(--panel)
+     zemini opak olduğu için doku yalnızca hücreler arasındaki 1px'lik gap
+     dikişlerinde görünür. Amaç dokuyu göstermek değil, dikiş çizgilerine kadastro
+     ızgarası karakteri vermek. Dokuyu görünür kılmak istersen .statItem'ın
+     background'ını yarı saydam yapman gerekir — bu bilinçli bir tasarım kararı. */
   background:
     repeating-linear-gradient(0deg, rgba(31, 111, 235, 0.05) 0 1px, transparent 1px 24px),
     repeating-linear-gradient(90deg, rgba(31, 111, 235, 0.05) 0 1px, transparent 1px 24px),
@@ -141,21 +146,16 @@
   -webkit-backdrop-filter: blur(16px);
 }
 
+/* Giriş animasyonu framer-motion'ın itemVariants'ına ait (page.tsx:59) — opacity/y
+   inline stille sürülür. Eski IntersectionObserver çağından kalan opacity:0 +
+   transform + transition burada ölüydü ve JS çalışmadığında şeridi kalıcı olarak
+   görünmez bırakıyordu; kaldırıldı. Yetim .statVisible sınıfı da öyle. */
 .statItem {
   background: var(--panel);
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.statVisible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .statVal {
@@ -349,6 +349,17 @@
   text-transform: uppercase;
   opacity: 0.85;
   color: rgb(var(--acc));
+}
+
+/* Dark temada marka mavisi (31,111,235) @0.85, kartın koyu zemini + fotoğraf
+   overlay'i üzerinde ~2.6:1 kontrast veriyordu; 0.72rem uppercase metin için
+   WCAG AA eşiği 4.5:1. Aynı mavinin açık tonu ~6.4:1'e çıkarıyor. Light tema
+   dokunulmadı (orada zemin beyaz, koyu mavi zaten yüksek kontrastlı).
+   NOT: --acc bilerek değiştirilmedi — kart kenarlığı, gölgesi ve CTA dolgusu da
+   onu tüketiyor; burada yalnızca kicker metninin rengi hedeflendi. */
+:global([data-theme='dark']) .bentoTag {
+  color: rgb(124, 168, 255);
+  opacity: 1;
 }
 
 .bentoNum {
@@ -1287,6 +1298,28 @@
   box-shadow: 0 16px 36px rgba(31, 111, 235, 0.12);
 }
 
+/* .howStepImageContainer / .howStepImg page.tsx:449-454'te (3 adım kartında)
+   uygulanıyor ama bugüne kadar hiç CSS'i yoktu: <img>'ler kendi ham genişliğinde
+   render olup yalnızca .howStepCard'ın overflow:hidden'ı ile kırpılıyordu. */
+.howStepImageContainer {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--panel-2);
+}
+
+.howStepImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.howStepCard:hover .howStepImg {
+  transform: scale(1.04);
+}
+
 .stepRealHeader {
   padding: 1.25rem 1.5rem 0.5rem 1.5rem;
   display: flex;
@@ -1435,21 +1468,23 @@
   border-color: rgba(31, 111, 235, 0.45);
 }
 
-.visionHeaderRow {
-  padding: 1.5rem 1.75rem 0.5rem 1.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* .visionImageContainer / .visionImg page.tsx:706-711'de uygulanıyor ama bugüne
+   kadar hiç CSS'i yoktu: <img>'ler kendi ham genişliğinde render olup yalnızca
+   .visionCard'ın overflow:hidden'ı tarafından gelişigüzel kırpılıyordu. */
+.visionImageContainer {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  background: var(--panel-2);
 }
 
-.visionBadgeSub {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--primary);
-  background: rgba(31, 111, 235, 0.1);
-  border: 1px solid rgba(31, 111, 235, 0.22);
-  padding: 4px 10px;
-  border-radius: 100px;
+.visionImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .visionTag {
@@ -1664,7 +1699,12 @@
     repeating-linear-gradient(90deg, rgba(31, 111, 235, 0.03) 0 1px, transparent 1px 20px),
     linear-gradient(165deg, rgba(219, 234, 254, 0.34), rgba(255, 255, 255, 0.24));
   border-color: rgba(31, 111, 235, 0.22);
+  /* Light cam reçetesi .visionCard / .ctaSection ile aynı üç katmanlı yapıda:
+     dış difüz gölge + halka + iç parıltı. Difüz gölgenin değeri onlardan daha
+     düşük (8px/22px/0.06 — orada 12-20px/32-50px/0.08): FAQ satırları küçük ve
+     alt alta 6 kez tekrar ediyor, aynı yoğunluk listeyi ağırlaştırıyordu. */
   box-shadow:
+    0 8px 22px rgba(31, 111, 235, 0.06),
     0 0 0 1px rgba(31, 111, 235, 0.16),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
@@ -1791,7 +1831,12 @@
   font-weight: 800;
   padding: 4px 10px;
   border-radius: 100px;
-  backdrop-filter: blur(8px);
+  /* Rozetin cam hissi blur YARIÇAPINDAN gelir, opaklıktan değil: 0.55 opaklık
+     fotoğraf üzerinde beyaz metni okunaklı tutan şey, düşürülmemeli. .blogCard'ın
+     kendi blur(16px)'i backdrop kökünü kurduğu için buradaki yarıçap kartın
+     fotoğrafını örnekler — 8px sayfadaki en düşük değerdi, 14px'e çıkarıldı. */
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .blogContent { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
