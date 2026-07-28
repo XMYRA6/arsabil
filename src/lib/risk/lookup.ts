@@ -17,7 +17,15 @@ async function faultDistance(lat: number, lng: number): Promise<{ ok: boolean; d
         const tile = await fetchWmsTile('diri_fay', bboxAround(lat, lng, stage.radiusM), stage.sizePx)
         if (!tile.ok) return { ok: false, distanceM: null }
 
-        const px = nearestOpaquePixelPx(decodePng(tile.png))
+        // Bozuk/eksik PNG gövdesi de erişilemezlik olarak ele alınır — asla throw etmez.
+        let img
+        try {
+            img = decodePng(tile.png)
+        } catch {
+            return { ok: false, distanceM: null }
+        }
+
+        const px = nearestOpaquePixelPx(img)
         if (px !== null) {
             return { ok: true, distanceM: px * metersPerPixel(stage.radiusM, stage.sizePx) }
         }
@@ -38,7 +46,15 @@ export async function measureRisk(lat: number, lng: number): Promise<RiskMeasure
     )
     if (!floodTile.ok) return null
 
-    const floodQ100 = isCenterOpaque(decodePng(floodTile.png))
+    // Bozuk/eksik PNG gövdesi de erişilemezlik olarak ele alınır — asla throw etmez.
+    let floodImg
+    try {
+        floodImg = decodePng(floodTile.png)
+    } catch {
+        return null
+    }
+
+    const floodQ100 = isCenterOpaque(floodImg)
     const g = gammaF(fault.distanceM)
 
     return {

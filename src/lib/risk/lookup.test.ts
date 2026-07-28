@@ -74,4 +74,19 @@ describe('measureRisk', () => {
         const r = await measureRisk(41.0, 29.0)
         expect(r).toBeNull()
     })
+
+    it('fay tile decode edilirken throw ederse null doner, reject etmez', async () => {
+        fetchWmsTileMock.mockResolvedValue(OK)
+        decodePngMock.mockImplementationOnce(() => { throw new Error('bad png') })
+        await expect(measureRisk(41.0, 29.0)).resolves.toBeNull()
+    })
+
+    it('taskin tile decode edilirken throw ederse null doner, reject etmez', async () => {
+        fetchWmsTileMock.mockResolvedValue(OK)
+        decodePngMock
+            .mockReturnValueOnce(img(FINE.sizePx, []))
+            .mockReturnValueOnce(img(COARSE.sizePx, []))
+            .mockImplementationOnce(() => { throw new Error('bad png') })
+        await expect(measureRisk(41.0, 29.0)).resolves.toBeNull()
+    })
 })
