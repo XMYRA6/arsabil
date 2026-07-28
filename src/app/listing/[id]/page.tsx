@@ -55,6 +55,7 @@ const MOCK_LISTING = {
     parcelVerifiedAt: null as string | null,
     faultDistanceM: null as number | null,
     floodQ100: null as boolean | null,
+    riskSnapshotAt: null as string | null,
     user: null as null | { id: string; name: string | null; email: string; isVerified: boolean },
 };
 
@@ -217,13 +218,16 @@ export default function ListingDetailPage() {
                                         </span>
                                     </div>
                                 )}
-                                {listing.faultDistanceM != null && (
+                                {listing.riskSnapshotAt != null && (
                                     <div className={styles.parcelRow}>
                                         <span>
-                                            Diri faya yaklaşık{' '}
-                                            {listing.faultDistanceM >= 1000
-                                                ? `${(listing.faultDistanceM / 1000).toFixed(1)} km`
-                                                : `${listing.faultDistanceM} m`}
+                                            {listing.faultDistanceM != null
+                                                ? <>Diri faya yaklaşık{' '}
+                                                    {listing.faultDistanceM >= 1000
+                                                        ? `${(listing.faultDistanceM / 1000).toFixed(1)} km`
+                                                        : `${listing.faultDistanceM} m`}
+                                                  </>
+                                                : '25 km içinde diri fay bulunamadı'}
                                             {listing.floodQ100 != null &&
                                                 ` · Q100 taşkın bölgesi ${listing.floodQ100 ? 'İÇİNDE' : 'dışında'}`}
                                         </span>
