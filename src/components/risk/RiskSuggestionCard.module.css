@@ -1,0 +1,22 @@
+.card {
+    border: 1px solid rgba(var(--seal-accent-rgb), 0.35);
+    border-radius: 12px;
+    padding: 16px;
+    background: rgba(var(--seal-accent-rgb), 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.title { margin: 0; font-size: 1rem; }
+.line { margin: 0; font-size: 0.9rem; line-height: 1.5; }
+.applyBtn {
+    align-self: flex-start;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: var(--seal-accent);
+    color: #fff;
+    font-weight: 600;
+}
+.disclaimer { opacity: 0.75; font-size: 0.75rem; line-height: 1.4; }

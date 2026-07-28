@@ -23,6 +23,9 @@ import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { FormulParamsFields, RiskCostFields, MarketField } from './AdvancedSettingsSections';
 import { HesapOzetiSeridi } from './HesapOzetiSeridi';
 import { HesapFisi } from './HesapFisi';
+import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
+import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
+import type { RiskMeasurement } from '@/lib/risk/types';
 
 interface ProfitLevel {
   id: string;
@@ -84,6 +87,51 @@ export default function Home() {
     { id: 'default-risk-2', label: 'Orta', value: 10, sortOrder: 2, isDefault: false },
     { id: 'default-risk-3', label: 'Yüksek', value: 15, sortOrder: 3, isDefault: false },
   ]);
+
+  const [parcelValue, setParcelValue] = useState<ParcelPickerValue>({
+    lat: null, lng: null, parcel: null, status: 'idle',
+  });
+  const [risk, setRisk] = useState<RiskMeasurement | null>(null);
+
+  // Konum secilince risk olcumu. Konum OPSIYONELDIR; secilmezse sayfa
+  // bugunku gibi calisir ve hicbir risk UI'i gosterilmez.
+  useEffect(() => {
+    const { lat, lng } = parcelValue;
+    if (lat == null || lng == null) { setRisk(null); return; }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/risk/lookup?lat=${lat}&lng=${lng}`);
+        const body = await res.json();
+        if (!cancelled) setRisk(body.status === 'ok' ? body.risk : null);
+      } catch {
+        if (!cancelled) setRisk(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [parcelValue]);
+
+  /**
+   * Oneriyi ayrik risk izgarasina uygular. Izgara `riskLevels` state dizisinden
+   * render edildigi icin onerilen yuzde mevcut secenekler arasinda yoksa yeni
+   * bir secenek olarak eklenir.
+   */
+  const applyRiskSuggestion = (percent: number) => {
+    setRiskLevels(prev =>
+      prev.some(o => o.value === percent)
+        ? prev
+        : [...prev, {
+            id: 'tbdy-suggested',
+            label: 'TBDY önerisi',
+            value: percent,
+            sortOrder: prev.length,
+            isDefault: false,
+          }].sort((a, b) => a.value - b.value),
+    );
+    setRiskLevel(percent);
+  };
+
   const [builderProfit, setBuilderProfit] = useState<number>(1.30);
   const [profitLevels, setProfitLevels] = useState<ProfitLevel[]>([
     { id: 'default-1', label: 'Düşük', value: 1.15, sortOrder: 0, isDefault: false },
@@ -513,6 +561,8 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+              <ParcelPicker value={parcelValue} onChange={patch => setParcelValue(v => ({ ...v, ...patch }))} />
+              {risk && <RiskSuggestionCard risk={risk} onApply={applyRiskSuggestion} />}
             </div>
 
             <div className={styles.settingsGroup}>
