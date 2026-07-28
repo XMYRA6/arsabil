@@ -27,4 +27,26 @@ describe('buildRiskSnapshot', () => {
         expect(s.floodQ100).toBe(true)
         expect(s.riskSnapshotAt).toBeInstanceOf(Date)
     })
+
+    it('measureRisk hic sonuclanmazsa 6 sn icinde bos snapshot doner (ilan kaydi 24 sn beklemez)', async () => {
+        jest.useFakeTimers()
+        try {
+            // measureRisk asla resolve/reject olmayan bir promise dondurur —
+            // gercek dunyada 3 ardisik WMS timeout'unun (~24 sn) simulasyonu.
+            measureRiskMock.mockReturnValue(new Promise(() => {}))
+
+            const promise = buildRiskSnapshot(41, 29)
+            let settled: unknown
+            promise.then(v => { settled = v })
+
+            await jest.advanceTimersByTimeAsync(5999)
+            expect(settled).toBeUndefined()
+
+            await jest.advanceTimersByTimeAsync(1)
+            const s = await promise
+            expect(s).toEqual({ faultDistanceM: null, floodQ100: null, riskSnapshotAt: null })
+        } finally {
+            jest.useRealTimers()
+        }
+    })
 })

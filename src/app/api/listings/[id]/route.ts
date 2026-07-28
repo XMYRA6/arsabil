@@ -70,9 +70,17 @@ export async function PATCH(
             latNum != null && lngNum != null &&
             (existing.lat !== latNum || existing.lng !== lngNum)
 
-        const parcelFields = coordsChanged
-            ? { lat: latNum, lng: lngNum, ...(await buildParcelSnapshot(latNum, lngNum)), ...(await buildRiskSnapshot(latNum, lngNum)) }
-            : {}
+        // Paralel çalışır: ikisi de opsiyonel ve bağımsız, ardışık beklemek
+        // ilan güncellemesini gereksiz yere uzatırdı (bkz. buildRiskSnapshot
+        // içindeki 6 sn'lik toplam bütçe).
+        let parcelFields: Record<string, unknown> = {}
+        if (coordsChanged) {
+            const [parcelSnapshot, riskSnapshot] = await Promise.all([
+                buildParcelSnapshot(latNum, lngNum),
+                buildRiskSnapshot(latNum, lngNum),
+            ])
+            parcelFields = { lat: latNum, lng: lngNum, ...parcelSnapshot, ...riskSnapshot }
+        }
 
         const updated = await prisma.listing.update({
             where: { id },

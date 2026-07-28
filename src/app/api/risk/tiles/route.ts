@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit'
-import { BROWSER_UA, WMS_BASE, buildWmsParams } from '@/lib/risk/wms'
+import { BROWSER_UA, TIMEOUT_MS, WMS_BASE, buildWmsParams } from '@/lib/risk/wms'
 
 /**
  * Leaflet'in `L.tileLayer.wms`'i standart WMS parametrelerini kendisi üretir:
@@ -11,7 +11,6 @@ import { BROWSER_UA, WMS_BASE, buildWmsParams } from '@/lib/risk/wms'
  */
 const ALLOWED_LAYERS = new Set(['diri_fay', 'taskin_tehlike_haritasi_q100'])
 const MAX_SIZE = 512
-const TIMEOUT_MS = 8000
 
 export async function GET(req: Request) {
     const rl = checkRateLimit(`risktiles:${getClientIp(req)}`, RATE_LIMITS.RISK_TILES)

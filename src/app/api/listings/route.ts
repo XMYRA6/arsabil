@@ -90,8 +90,13 @@ export async function POST(req: Request) {
 
         const latNum = lat != null && Number.isFinite(Number(lat)) ? Number(lat) : null
         const lngNum = lng != null && Number.isFinite(Number(lng)) ? Number(lng) : null
-        const parcelSnapshot = await buildParcelSnapshot(latNum, lngNum)
-        const riskSnapshot = await buildRiskSnapshot(latNum, lngNum)
+        // Paralel çalışır: ikisi de opsiyonel ve bağımsız, ardışık beklemek
+        // ilan kaydını gereksiz yere uzatırdı (bkz. buildRiskSnapshot içindeki
+        // 6 sn'lik toplam bütçe).
+        const [parcelSnapshot, riskSnapshot] = await Promise.all([
+            buildParcelSnapshot(latNum, lngNum),
+            buildRiskSnapshot(latNum, lngNum),
+        ])
 
         const listing = await prisma.listing.create({
             data: {

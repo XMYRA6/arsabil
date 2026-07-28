@@ -15,7 +15,12 @@ export const WMS_BASE = 'https://ucbp-app8.tucbs.gov.tr/geoserver/tucbs/wms'
 export const BROWSER_UA =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 
-const TIMEOUT_MS = 8000
+/**
+ * TUCBS WMS istekleri için tek zaman aşımı sabiti. `route.ts` (tiles proxy'si)
+ * ve `riskSnapshot.ts` (ölçüm bütçesi) da bu sabitten türetilir — 8000 iki
+ * dosyada ayrı ayrı tekrarlanmasın diye.
+ */
+export const TIMEOUT_MS = 8000
 
 export type WmsLayer = 'diri_fay' | 'taskin_tehlike_haritasi_q100'
 export type WmsResult = { ok: true; png: Buffer } | { ok: false; reason: 'unavailable' }
