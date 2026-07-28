@@ -11,13 +11,17 @@ interface Props {
     label?: string;
     listingId?: string;
     riskLayers?: boolean;
+    /** TKGM'den gelen gerçek parsel sınırı (GeoJSON Polygon). */
+    parcelGeometry?: { type: string; coordinates: number[][][] } | null;
 }
 
-export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
+export function MiniMap({ lat, lng, label, listingId, riskLayers, parcelGeometry }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<LeafletMap | null>(null);
     const faultRef = useRef<import('leaflet').TileLayer | null>(null);
     const floodRef = useRef<import('leaflet').TileLayer | null>(null);
+    const shapeRef = useRef<import('leaflet').Polygon | import('leaflet').Circle | null>(null);
+    const [mapReady, setMapReady] = useState(false);
 
     useEffect(() => {
         if (!containerRef.current || mapRef.current) return;
@@ -68,17 +72,8 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
             });
             L.marker([lat, lng], { icon: pinIcon }).addTo(map);
 
-            // Accuracy circle
-            L.circle([lat, lng], {
-                radius: 80,
-                color: '#1f6feb',
-                fillColor: '#1f6feb',
-                fillOpacity: 0.1,
-                weight: 1.5,
-                dashArray: '4 3',
-            }).addTo(map);
-
             mapRef.current = map;
+            setMapReady(true);
         };
 
         init();
@@ -94,8 +89,57 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers }: Props) {
             // kaldırılmaya çalışılırlar).
             faultRef.current = null;
             floodRef.current = null;
+            shapeRef.current = null;
+            setMapReady(false);
         };
     }, [lat, lng]);
+
+    /* Parsel sınırı (veya sınır yoksa yaklaşıklık çemberi) */
+    // Kurulum effect'inden AYRI: `parcelGeometry` ilan verisiyle birlikte
+    // geliyor ve kurulum effect'i yalnizca [lat, lng]'ye bagli. Ayni effect'te
+    // birakilsaydi ya geometri gec geldiginde hic cizilmez ya da geometriyi
+    // bagimliliga eklemek TUM haritayi yeniden kurdururdu.
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!mapReady || !map) return;
+        let cancelled = false;
+
+        void (async () => {
+            const L = (await import('leaflet')).default;
+            if (cancelled || !mapRef.current) return;
+
+            if (shapeRef.current) { map.removeLayer(shapeRef.current); shapeRef.current = null; }
+
+            // GeoJSON [lng, lat] → Leaflet [lat, lng]. Gerçek sınır varsa onu
+            // çiz ve haritayı ona sığdır; 80 m'lik "yaklaşıklık" çemberi o
+            // durumda YANILTICI olur (tapudan gelen kesin sınırın yanında
+            // belirsizlik ima eder), bu yüzden yalnızca sınır yokken çizilir.
+            const ring = parcelGeometry?.coordinates?.[0];
+            if (Array.isArray(ring) && ring.length >= 3) {
+                const latlngs = ring.map(([lng2, lat2]) => [lat2, lng2] as [number, number]);
+                const poly = L.polygon(latlngs, {
+                    // Leaflet SVG/canvas render eder; var() BURADA ÇÖZÜLMEZ.
+                    // ParcelPicker'daki aynı yeşil literal kullanılıyor.
+                    color: '#10b981',
+                    weight: 2,
+                    fillOpacity: 0.12,
+                }).addTo(map);
+                shapeRef.current = poly;
+                map.fitBounds(poly.getBounds(), { padding: [16, 16] });
+            } else {
+                shapeRef.current = L.circle([lat, lng], {
+                    radius: 80,
+                    color: '#1f6feb',
+                    fillColor: '#1f6feb',
+                    fillOpacity: 0.1,
+                    weight: 1.5,
+                    dashArray: '4 3',
+                }).addTo(map);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [mapReady, lat, lng, parcelGeometry]);
 
     const [showFault, setShowFault] = useState(false);
     const [showFlood, setShowFlood] = useState(false);

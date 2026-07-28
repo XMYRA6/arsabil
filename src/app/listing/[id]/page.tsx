@@ -56,6 +56,7 @@ const MOCK_LISTING = {
     faultDistanceM: null as number | null,
     floodQ100: null as boolean | null,
     riskSnapshotAt: null as string | null,
+    parcelGeometry: null as { type: string; coordinates: number[][][] } | null,
     user: null as null | { id: string; name: string | null; email: string; isVerified: boolean },
 };
 
@@ -240,8 +241,10 @@ export default function ListingDetailPage() {
                                         ['İmar Durumu', listing.imarDurumu?.replace('_', ' ') ?? 'Konut + Ticaret'],
                                         ['Emsal', listing.emsal?.toString() ?? '2.0'],
                                         ['Arsa Payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
-                                        ['Şehir', listing.city ?? 'İstanbul'],
-                                        ['İlçe', listing.district ?? 'Beşiktaş'],
+                                        // Uydurma sehir/ilce YOK: "820 m2" duzeltmesinin
+                                        // ayni sinifindan kalan kisimdi, veri yoksa "—" basilir.
+                                        ['Şehir', listing.city ?? '—'],
+                                        ['İlçe', listing.district ?? '—'],
                                     ].map(([label, val]) => (
                                         <div key={label} className={styles.detailCell}>
                                             <div className={styles.detailLabel}>{label}</div>
@@ -377,8 +380,9 @@ export default function ListingDetailPage() {
                         <MiniMap
                             lat={listing.lat}
                             lng={listing.lng}
-                            label={`${listing.district}, ${listing.city}`}
+                            label={[listing.district, listing.city].filter(Boolean).join(', ') || undefined}
                             listingId={id}
+                            parcelGeometry={listing.parcelGeometry}
                             riskLayers
                         />
                     ) : (

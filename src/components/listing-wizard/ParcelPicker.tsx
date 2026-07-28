@@ -59,6 +59,10 @@ export function ParcelPicker({
     const markerRef = useRef<Marker | null>(null)
     const polygonRef = useRef<Polygon | null>(null)
     const [verifying, setVerifying] = useState(false)
+    // Harita async kuruluyor (dinamik leaflet import'u). Marker ve poligon
+    // effect'leri ilk calismalarinda mapRef.current'i HENUZ bulamaz; bu bayrak
+    // olmadan sessizce hicbir sey yapip bir daha calismiyorlardi.
+    const [mapReady, setMapReady] = useState(false)
 
     // onChange'i ref'te tut: harita effect'i bir kez çalışsın, her render'da yeniden kurulmasın
     const onChangeRef = useRef(onChange)
@@ -98,32 +102,63 @@ export function ParcelPicker({
             })
 
             mapRef.current = map
+            setMapReady(true)
         })()
 
         return () => {
             cancelled = true
             mapRef.current?.remove()
             mapRef.current = null
+            markerRef.current = null
+            polygonRef.current = null
+            setMapReady(false)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps -- harita yalnızca bir kez kurulur
     }, [])
 
+    /* Disaridan gelen konum icin marker (duzenleme sayfasi, adima geri donus) */
+    // Marker YALNIZCA map.on('click') icinde olusturuluyordu; kayitli bir
+    // konumla mount edilen bilesen (edit sayfasi) dogru noktaya odaklaniyor
+    // ama PIN GOSTERMIYORDU.
+    useEffect(() => {
+        const map = mapRef.current
+        if (!mapReady || !map || value.lat == null || value.lng == null) return
+        let cancelled = false
+        void (async () => {
+            const L = await import('leaflet')
+            if (cancelled || !mapRef.current) return
+            const pinIcon = L.divIcon({
+                className: '',
+                html: '<div style="font-size:1.9rem;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));">📍</div>',
+                iconSize: [30, 40],
+                iconAnchor: [15, 40],
+            })
+            if (markerRef.current) map.removeLayer(markerRef.current)
+            markerRef.current = L.marker([value.lat!, value.lng!], { icon: pinIcon }).addTo(map)
+        })()
+        return () => { cancelled = true }
+    }, [mapReady, value.lat, value.lng])
+
     /* Doğrulanan parselin sınırını çiz */
     useEffect(() => {
         const map = mapRef.current
-        if (!map || !value.parcel) return
+        if (!mapReady || !map || !value.parcel) return
         let cancelled = false
         void (async () => {
             const L = await import('leaflet')
             if (cancelled || !mapRef.current) return
             if (polygonRef.current) map.removeLayer(polygonRef.current)
             // GeoJSON [lng, lat] → Leaflet [lat, lng]
-            const ring = value.parcel!.geometry.coordinates[0].map(([lng, lat]) => [lat, lng] as [number, number])
+            // Bos/bozuk halka: coordinates[0] yoksa .map() burada patlar ve
+            // hata void'lenmis async IIFE icinde sessizce yutulurdu.
+            const rawRing = value.parcel!.geometry.coordinates?.[0]
+            if (!Array.isArray(rawRing) || rawRing.length < 3) return
+            const ring = rawRing.map(([lng, lat]) => [lat, lng] as [number, number])
             polygonRef.current = L.polygon(ring, { color: '#10b981', weight: 2, fillOpacity: 0.12 }).addTo(map)
             map.fitBounds(polygonRef.current.getBounds(), { padding: [24, 24] })
         })()
         return () => { cancelled = true }
-    }, [value.parcel])
+    }, [mapReady, value.parcel])
 
     const handleVerify = async () => {
         if (value.lat == null || value.lng == null) return
