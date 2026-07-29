@@ -33,15 +33,19 @@ export function KarsilastirmaBlogu({
                     type="text"
                     inputMode="numeric"
                     className={`${styles.karsGiris} mNum`}
-                    // KonumBlogu.tsx'teki birimMaliyetGiris ile ayni sebep:
-                    // `value` ile tam kontrollu baglarsak ve ust bilesen
-                    // `piyasaFiyati` prop'unu geri beslemezse (test'te
-                    // oldugu gibi), React her tus vurusundan sonra DOM'u
-                    // degismemis prop'a geri sarar ve yazilan metin
-                    // gorunmez kalir. `defaultValue` ile alan gercekten
-                    // yazilabilir olur; bildirim yine onChange uzerinden
-                    // gider.
-                    defaultValue={piyasaFiyati}
+                    // BILEREK kontrollu (`value`, `defaultValue` DEGIL): bu
+                    // blok ekran boyunca mount'lu kalir ve ilce secimi
+                    // page.tsx'te setManualMarketPrice(...) ile bu alani
+                    // DISARIDAN doldurur. `defaultValue` yalnizca ilk
+                    // mount'ta okunur; ilce degisince alan eski metni
+                    // gostermeye devam eder ve rozet ile giris gorsel
+                    // olarak birbirinden kopar. KonumBlogu'nun
+                    // `birimMaliyetGiris`i `defaultValue` kullanabiliyor
+                    // cunku o input yalnizca duzenleme sirasinda mount'lu
+                    // ve her acilista tekrar mount olup taze prop'u okuyor
+                    // — bu alan hic unmount olmadigi icin ayni cozum
+                    // burada calismaz.
+                    value={piyasaFiyati}
                     placeholder="—"
                     aria-label="Yaklaşık piyasa fiyatı (yalnızca karşılaştırma)"
                     onChange={e => onPiyasaFiyati(e.target.value)}

@@ -1,4 +1,5 @@
 /** @jest-environment jsdom */
+import { useState } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { KarsilastirmaBlogu } from './KarsilastirmaBlogu'
@@ -43,11 +44,35 @@ describe('KarsilastirmaBlogu', () => {
     })
 
     it('girilen deger bildirilir', async () => {
+        // Alan KONTROLLU: yazilan metnin birikmesi icin state geri beslemesi
+        // sart. Duz bir jest.fn() ile React her tus vurusundan sonra DOM
+        // degerini degismeyen prop'tan geri yazar — bu, bilesenin degil
+        // test kosumunun kisitidir.
         const onPiyasaFiyati = jest.fn()
-        render(<KarsilastirmaBlogu {...props({ onPiyasaFiyati })} />)
+        function Sarmalayici() {
+            const [deger, setDeger] = useState('')
+            return (
+                <KarsilastirmaBlogu
+                    {...props({
+                        piyasaFiyati: deger,
+                        onPiyasaFiyati: (v: string) => { onPiyasaFiyati(v); setDeger(v) },
+                    })}
+                />
+            )
+        }
+        render(<Sarmalayici />)
         const alan = screen.getByLabelText(/Yaklaşık piyasa fiyatı/)
-        await userEvent.clear(alan)
         await userEvent.type(alan, '6000000')
+        expect(alan).toHaveValue('6000000')
         expect(onPiyasaFiyati).toHaveBeenLastCalledWith('6000000')
+    })
+
+    it('prop degisimi alana YANSIR (ilce secimi piyasa fiyatini doldurur)', () => {
+        // Ilce secilince page.tsx setManualMarketPrice ile bu alani doldurur.
+        // Kontrolsuz bir alan bu guncellemeyi sessizce yok sayardi.
+        const { rerender } = render(<KarsilastirmaBlogu {...props({ piyasaFiyati: '' })} />)
+        expect(screen.getByLabelText(/Yaklaşık piyasa fiyatı/)).toHaveValue('')
+        rerender(<KarsilastirmaBlogu {...props({ piyasaFiyati: '5.740.000' })} />)
+        expect(screen.getByLabelText(/Yaklaşık piyasa fiyatı/)).toHaveValue('5.740.000')
     })
 })
