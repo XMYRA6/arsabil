@@ -7,8 +7,13 @@ const BASE = {
     minDaireFiyati: 8964000,
     arsaPayiYuzde: 33,
     birimFiyat: 64028,
-    piyasaFarkiYuzde: -14,
+    karsilastirma: {
+        piyasaFiyati: '10.000.000',
+        onPiyasaFiyati: jest.fn(),
+        farkYuzde: -14,
+    },
     onFisAc: jest.fn(),
+    onAnalizAc: jest.fn(),
 }
 
 describe('SonucKarti', () => {
@@ -38,16 +43,18 @@ describe('SonucKarti', () => {
     })
 
     it('piyasadan pahaliysa rozet yon degistirir', () => {
-        render(<SonucKarti {...BASE} piyasaFarkiYuzde={9} />)
+        render(<SonucKarti {...BASE} karsilastirma={{ ...BASE.karsilastirma, farkYuzde: 9 }} />)
         expect(screen.getByText(/%9 PAHALI/)).toBeInTheDocument()
     })
 
     it('piyasa farki yoksa rozet ELEMENTI HIC render edilmez', () => {
         // Metin yoklugu yetmez: bos icerikli bir rozet elementi de metin
         // testini gecerdi. Elementin kendisinin olmadigi dogrulaniyor.
-        const { container } = render(<SonucKarti {...BASE} piyasaFarkiYuzde={null} />)
+        const { container } = render(
+            <SonucKarti {...BASE} karsilastirma={{ ...BASE.karsilastirma, farkYuzde: null }} />
+        )
         expect(screen.queryByText(/UCUZ|PAHALI/)).toBeNull()
-        expect(container.querySelector('[class*="sonucRozet"]')).toBeNull()
+        expect(container.querySelector('[class*="karsRozet"]')).toBeNull()
     })
 
     it('sonuc yoksa rakam yerine tire basar, sifir DEGIL', () => {
@@ -63,5 +70,17 @@ describe('SonucKarti', () => {
         render(<SonucKarti {...BASE} onFisAc={onFisAc} />)
         await userEvent.click(screen.getByRole('button', { name: /Hesap fişi/ }))
         expect(onFisAc).toHaveBeenCalledTimes(1)
+    })
+
+    it('Analiz satiri onAnalizAc i cagirir', async () => {
+        const onAnalizAc = jest.fn()
+        render(<SonucKarti {...BASE} onAnalizAc={onAnalizAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /Analiz/ }))
+        expect(onAnalizAc).toHaveBeenCalledTimes(1)
+    })
+
+    it('karsilastirma blogu kart icinde render edilir', () => {
+        render(<SonucKarti {...BASE} />)
+        expect(screen.getByLabelText(/Yaklaşık piyasa fiyatı/)).toBeInTheDocument()
     })
 })

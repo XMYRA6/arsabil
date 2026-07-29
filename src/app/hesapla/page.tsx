@@ -92,6 +92,9 @@ export default function Home() {
   // Mobil `4a` ekrani acik mi. Gorunum durumu da `page.tsx`te yasar —
   // `HesaplaMobile` hicbir state sahiplenmez (plan mimari karari).
   const [mobilFisAcik, setMobilFisAcik] = useState<boolean>(false);
+  // Analiz derinlestirme yapragi (maliyet dagilimi, hassasiyet, kirilma).
+  // Task 6 tuketecek; burada yalnizca tanimlanir ve onAnalizAc tarafindan yazilir.
+  const [mobilAnalizAcik, setMobilAnalizAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState<boolean>(false);
   const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
@@ -519,8 +522,13 @@ export default function Home() {
             minDaireFiyati: sonucDegeri(result?.FD_total),
             arsaPayiYuzde: Math.round(effectiveLandShareRatio),
             birimFiyat: sonucDegeri(result?.FD_per_m2),
-            piyasaFarkiYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
+            karsilastirma: {
+              piyasaFiyati: manualMarketPrice,
+              onPiyasaFiyati: setManualMarketPrice,
+              farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
+            },
             onFisAc: () => setMobilFisAcik(true),
+            onAnalizAc: () => setMobilAnalizAcik(true),
           }}
           fisAcik={mobilFisAcik}
           fiyatAciklamasi={{
