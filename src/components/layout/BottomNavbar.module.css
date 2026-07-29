@@ -5,7 +5,11 @@
     bottom: 0;
     z-index: var(--z-bottomnav);
     display: flex;
-    height: calc(74px + 22px + var(--safe-bottom));
+    /* Yukseklik `--bottomnav-height` token'indan okunur (globals.css). Bu
+       deger baska bilesenlerin (StickyActionBar.aboveNav, --mobile-nav-pb)
+       cubugun ustune oturmasi icin kullaniliyor; burada satir ici bir sayi
+       yazilirsa ikisi sessizce ayrisir. 2026-07-29'da tam bu oldu. */
+    height: var(--bottomnav-height);
     padding: 9px 0 calc(22px + var(--safe-bottom));
     background: rgba(255, 255, 255, .72);
     border-top: 1px solid rgba(255, 255, 255, .9);

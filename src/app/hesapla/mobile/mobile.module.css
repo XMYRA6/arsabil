@@ -686,6 +686,50 @@
         color: var(--m-body);
     }
 
+
+    /* ═══ Dokunma hedefi genisletme ═════════════════════════════════════
+       Tasarim handoff'u bu kontrolleri gorsel olarak 27-38px veriyor, Apple
+       HIG ise en az 44px istiyor. Ikisini birden saglamak icin GORSEL boyut
+       korunur, TIKLAMA alani seffaf bir ::after ile 44px'e genisletilir.
+       Boylece kart duzeni degismez ama parmak hedefi standarda uyar.
+       (Canli olcumle yakalandi: 7 kontrol 44px'in altindaydi.) */
+    .headerChip::after,
+    .headerIconBtn::after,
+    .fisButonu::after,
+    .stepperAzalt::after,
+    .stepperArtir::after,
+    .anahtar::after,
+    .slider::after,
+    .aciklamaKapat::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: var(--touch-target);
+        transform: translateY(-50%);
+    }
+
+    .headerChip,
+    .headerIconBtn,
+    .fisButonu,
+    .stepperAzalt,
+    .stepperArtir,
+    .anahtar,
+    .slider,
+    .aciklamaKapat {
+        position: relative;
+    }
+
+    /* Slider'in kendi ::after'i olamaz (replaced element); kap araciligiyla
+       cozulur: girdinin kutusu seffaf dikey dolguyla buyutulur, gorsel ray
+       yine 8px kalir cunku ray `background` ile ciziliyor. */
+    .slider {
+        height: var(--touch-target);
+        background-clip: content-box;
+        padding: 18px 0;
+    }
+
     @media (prefers-reduced-motion: reduce) {
 
         .segment,

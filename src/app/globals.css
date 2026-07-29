@@ -31,8 +31,13 @@
   --input-height-mobile: 48px;     /* mobil form input yüksekliği */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  /* BottomNavbar.module.css:12 ile senkron: 83px + safe-area */
-  --bottomnav-height: calc(83px + env(safe-area-inset-bottom, 0px));
+  /* Alt navigasyonun GERCEK yuksekligi — TEK kaynak.
+     `BottomNavbar.module.css` kendi yuksekligini de buradan okur, boylece
+     ikisi ayrisamaz. 2026-07-29'da ayrismislardi: yeni tasarim cubugu
+     74px govde + 22px home indicator = 96px yaptigi halde bu token 83px'te
+     kalmisti; `StickyActionBar.aboveNav` token'i kullandigi icin sabit CTA
+     alt cubugun 13px UZERINE binmisti (canli olcumle yakalandi). */
+  --bottomnav-height: calc(74px + 22px + env(safe-area-inset-bottom, 0px));
   --font-size-title: clamp(1.25rem, 4vw, 1.5rem);
   --font-size-page-title: clamp(1.5rem, 5vw, 2rem);
 
@@ -231,7 +236,10 @@ a {
 
     --m-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    --mobile-nav-pb: calc(85px + env(safe-area-inset-bottom, 0px));
+    /* Sayfa govdesinin alt cubuk icin birakmasi gereken bosluk. Cubugun
+       gercek yuksekliginden TURETILIR; 85px sabiti bayattı (cubuk 96px) ve
+       icerik cubugun 11px altina giriyordu. */
+    --mobile-nav-pb: var(--bottomnav-height);
   }
 
   /* Cam yuzey TEK kaynak. Varyantlar bunu override eder (sheet .84 + blur 34,
