@@ -1455,10 +1455,6 @@ button.compareBtn {
         opacity: 0.55;
     }
 
-    .revealButtonWrap {
-        padding: 4px 12px 0;
-    }
-
     /* Tek kolon dikey akış (carousel kaldırıldı) */
     .layout {
         display: flex !important;
@@ -1480,7 +1476,7 @@ button.compareBtn {
 
     /* .rightGrid, display:contents sayesinde mobilde .layout'un düz akışına
        katılıyor; masaüstüne özel üstteki kopya burada tekrar görünmesin diye
-       (mobil kopya zaten .mobileSidebar içinde, isResultsRevealed ile kontrollü) */
+       (mobil kopya zaten .mobileSidebar içinde, koşulsuz render edilir) */
     .rightGrid>.hesapOzetiSeridi {
         display: none;
     }
@@ -1655,27 +1651,13 @@ button.compareBtn {
         display: none;
     }
 
-    .container[data-revealed="false"] .mainPanelResults {
-        display: none;
-    }
-
-    .container[data-revealed="false"] .summaryPanel {
-        display: none;
-    }
-
-    .container[data-revealed="false"] .mainPanel {
-        display: none;
-    }
-
     .desktopActionsSlot {
         display: none;
     }
 
+    /* İki fazlı görünürlük kaldırıldı (spec 2026-07-28 §2a): sonuç mobilde
+       her zaman görünür ve canlı, aksiyon butonları da koşulsuz görünür. */
     .mobileActionsSlot {
-        display: none;
-    }
-
-    .container[data-revealed="true"] .mobileActionsSlot {
         display: contents;
     }
 }

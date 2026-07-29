@@ -171,7 +171,6 @@ export default function Home() {
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
 
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
-  const [isResultsRevealed, setIsResultsRevealed] = useState(false);
 
   // Sayfa yüklendiğinde Admin'in belirlediği global ayarları çek
   useEffect(() => {
@@ -446,7 +445,7 @@ export default function Home() {
   );
 
   return (
-    <div className={styles.container} data-revealed={isResultsRevealed}>
+    <div className={styles.container}>
       <div className={styles.layout} id="formTop">
         {/* Left Sidebar (Main Form) */}
         <aside className={styles.leftSidebar}>
@@ -699,26 +698,16 @@ export default function Home() {
               </details>
             </div>
 
-            {!isResultsRevealed && (
-              <div className={styles.revealButtonWrap}>
-                <Button variant="primary" className={styles.sealPrimaryBtn} onClick={() => setIsResultsRevealed(true)}>
-                  Sonuçları Göster
-                </Button>
-              </div>
-            )}
-
-            {isResultsRevealed && (
-              <HesapOzetiSeridi
-                fdTotal={result?.FD_total}
-                isApartmentCountEnabled={isApartmentCountEnabled}
-                effectiveLandSharePercent={effectiveLandShareRatio}
-                ownerApartmentShare={ownerApartmentShare}
-                totalApartments={totalApartments}
-                manualMarketPrice={manualMarketPrice}
-                onMarketPriceChange={setManualMarketPrice}
-                marketPriceNum={marketPriceNum}
-              />
-            )}
+            <HesapOzetiSeridi
+              fdTotal={result?.FD_total}
+              isApartmentCountEnabled={isApartmentCountEnabled}
+              effectiveLandSharePercent={effectiveLandShareRatio}
+              ownerApartmentShare={ownerApartmentShare}
+              totalApartments={totalApartments}
+              manualMarketPrice={manualMarketPrice}
+              onMarketPriceChange={setManualMarketPrice}
+              marketPriceNum={marketPriceNum}
+            />
           </div>
 
         </aside>

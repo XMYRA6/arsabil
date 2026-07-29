@@ -92,33 +92,6 @@ describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
   });
 });
 
-describe('mainPanelResults gate kapsamı', () => {
-  it('.mainPanelResults yalnızca data-revealed="false" iken mobilde gizlenmeli', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const match = pageCss.match(/\.container\[data-revealed="false"\]\s+\.mainPanelResults\s*\{[^}]*display:\s*none/);
-    expect(match).not.toBeNull();
-    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
-  });
-});
-
-describe('summaryPanel gate kapsamı', () => {
-  it('.summaryPanel yalnızca data-revealed="false" iken mobilde gizlenmeli', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const match = pageCss.match(/\.container\[data-revealed="false"\]\s+\.summaryPanel\s*\{[^}]*display:\s*none/);
-    expect(match).not.toBeNull();
-    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
-  });
-});
-
-describe('mainPanel gate kapsamı', () => {
-  it('.mainPanel yalnızca data-revealed="false" iken mobilde gizlenmeli', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const match = pageCss.match(/\.container\[data-revealed="false"\]\s+\.mainPanel\s*\{[^}]*display:\s*none/);
-    expect(match).not.toBeNull();
-    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
-  });
-});
-
 describe('aksiyon butonları dual-slot kapsamı', () => {
   it('.desktopActionsSlot mobilde gizlenmeli', () => {
     const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
@@ -127,8 +100,20 @@ describe('aksiyon butonları dual-slot kapsamı', () => {
     expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
   });
 
-  it('.mobileActionsSlot yalnızca data-revealed="true" iken mobilde görünmeli', () => {
-    expect(pageCss).toMatch(/\.container\[data-revealed="true"\]\s+\.mobileActionsSlot\s*\{[^}]*display:\s*contents/);
+  it('.mobileActionsSlot mobilde koşulsuz display: contents olmalı', () => {
+    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
+    const match = pageCss.match(/\.mobileActionsSlot\s*\{[^}]*display:\s*contents/);
+    expect(match).not.toBeNull();
+    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
+  });
+});
+
+describe('data-revealed gate kapsamı', () => {
+  it('data-revealed gate\'i tamamen kaldırılmış olmalı', () => {
+    // İki fazlı görünürlük kaldırıldı (spec 2026-07-28 §2a): sonuç mobilde
+    // her zaman görünür ve canlı. Geriye kalan bir data-revealed kuralı
+    // sonucu sessizce gizlerdi.
+    expect(pageCss).not.toMatch(/data-revealed/);
   });
 });
 
