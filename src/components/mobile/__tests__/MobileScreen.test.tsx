@@ -101,9 +101,16 @@ describe('MobileScreen', () => {
 @media (max-width: 768px) {
     .rule { color: red; }
 }
-.leaked-rule { color: blue; }
+.leaked-rule {
+    color: blue;
+}
 `
         const leakedOutside = getOutsideMobileQuery(leakedFixture)
         expect(leakedOutside).toContain('.leaked-rule')
+
+        // Kanit: eski regex bu fikstürde hata yapabilir.
+        const oldRegexResult = leakedFixture.replace(/@media \(max-width: 768px\)\s*\{[\s\S]*\n\}/, '')
+        expect(oldRegexResult.replace(/\/\*[\s\S]*?\*\//g, '').trim()).toBe('')  // eski regex: yanlis (bos)
+        expect(leakedOutside).not.toBe('')  // yeni scan: dogru (icerik bulur)
     })
 })
