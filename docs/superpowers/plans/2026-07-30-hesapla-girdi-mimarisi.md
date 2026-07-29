@@ -818,6 +818,7 @@ git commit -m "feat(hesapla): karsilastirma blogu - piyasa fiyati sonucun altind
 **Files:**
 - Modify: `src/app/hesapla/mobile/SonucKarti.tsx`
 - Modify: `src/app/hesapla/mobile/SonucKarti.test.tsx`
+- Modify: `src/app/hesapla/page.tsx` (yalnızca `sonuc={{ ... }}` nesnesi — çağrı yeri)
 
 **Interfaces:**
 - Consumes: `KarsilastirmaBlogu` (Task 3)
@@ -891,20 +892,44 @@ Expected: FAIL — `onAnalizAc` yok, `karsilastirma` prop'u tanınmıyor.
             </button>
 ```
 
-- [ ] **Step 4: Doğrula**
+- [ ] **Step 4: Çağrı yerini bu task'ta kapat**
+
+`page.tsx`in mobil dalındaki `sonuc={{ ... }}` nesnesinden `piyasaFarkiYuzde`
+alanını çıkar, yerine `karsilastirma` ve `onAnalizAc` koy:
+
+```tsx
+          sonuc={{
+            minDaireFiyati: sonucDegeri(result?.FD_total),
+            arsaPayiYuzde: Math.round(effectiveLandShareRatio),
+            birimFiyat: sonucDegeri(result?.FD_per_m2),
+            karsilastirma: {
+              piyasaFiyati: manualMarketPrice,
+              onPiyasaFiyati: setManualMarketPrice,
+              farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
+            },
+            onFisAc: () => setMobilFisAcik(true),
+            onAnalizAc: () => setMobilAnalizAcik(true),
+          }}
+```
+
+`const [mobilAnalizAcik, setMobilAnalizAcik] = useState<boolean>(false);` state'ini de
+bu task'ta ekle (Task 6 onu kullanacak; burada yalnızca tanımlanır ve `onAnalizAc`
+tarafından yazılır).
+
+**Bu task `tsc`yi YEŞİL bırakmalı.** Bir sonraki task'a kırık derleme devretme.
+
+- [ ] **Step 5: Doğrula**
 
 ```bash
-npx jest src/app/hesapla/mobile --no-coverage
+npx jest --no-coverage
 npx tsc --noEmit
 ```
-Expected: PASS; tsc 0. (`HesaplaMobile` henüz güncellenmediği için `page.tsx` tsc hatası verebilir — Task 6'da bağlanacak. Bu task'ta yalnızca `SonucKarti` testleri yeşil olmalı; `tsc` hatası varsa Task 6'ya kadar beklenen tek hata `page.tsx`'in eski prop adlarıdır ve o hata Step 5'te commit edilmez, Task 6'da kapanır.)
+Expected: tüm testler PASS; tsc 0.
 
-**Not:** `tsc`'yi tamamen yeşil tutmak için Task 4, 5, 6 tek commit'te birleştirilebilir. Ayrı tutulmalarının nedeni review sınırı; implementer `tsc`yi Task 6 sonunda yeşile getirmekle yükümlüdür.
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/app/hesapla/mobile/SonucKarti.tsx src/app/hesapla/mobile/SonucKarti.test.tsx
+git add src/app/hesapla/mobile/SonucKarti.tsx src/app/hesapla/mobile/SonucKarti.test.tsx src/app/hesapla/page.tsx
 git commit -m "feat(hesapla): sonuc kartina karsilastirma blogu ve analiz satiri"
 ```
 
@@ -916,6 +941,7 @@ git commit -m "feat(hesapla): sonuc kartina karsilastirma blogu ve analiz satiri
 - Modify: `src/app/hesapla/AdvancedSettingsSections.tsx`
 - Modify: `src/app/hesapla/mobile/GelismisAyarlarSheet.tsx`
 - Modify: `src/app/hesapla/mobile/GelismisAyarlarSheet.test.tsx`
+- Modify: `src/app/hesapla/page.tsx` (yalnızca `GelismisAyarlarSheet` çağrısı)
 
 **Interfaces:**
 - Produces: `AdvancedSettingsSections.tsx`ten iki yeni export:
@@ -987,18 +1013,28 @@ export function FormulParamsFields(props: FormulParamsProps) {
 
 Testin `props()` fikstüründen de bu altı alanı çıkar; `role="group"` adı testini `'Arsa alanı'` olarak güncelle.
 
-- [ ] **Step 5: Doğrula**
+- [ ] **Step 5: Çağrı yerini bu task'ta kapat**
+
+`page.tsx`teki `<GelismisAyarlarSheet ... />` çağrısından Task 5'in prop tipinden
+çıkardığı altı alanı **sil**: `isApartmentCountEnabled`, `setIsApartmentCountEnabled`,
+`totalApartments`, `setTotalApartments`, `ownerApartmentShare`, `setOwnerApartmentShare`.
+Masaüstü `FormulParamsFields` çağrısına (`page.tsx:725` civarı) **dokunma** — o hiç
+değişmiyor.
+
+**Bu task `tsc`yi YEŞİL bırakmalı.**
+
+- [ ] **Step 6: Doğrula**
 
 ```bash
-npx jest src/app/hesapla --no-coverage
+npx jest --no-coverage
 npx tsc --noEmit
 ```
 Expected: PASS; tsc 0 (masaüstü çağrısı değişmediği için).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add src/app/hesapla/AdvancedSettingsSections.tsx src/app/hesapla/mobile/GelismisAyarlarSheet.tsx src/app/hesapla/mobile/GelismisAyarlarSheet.test.tsx
+git add src/app/hesapla/AdvancedSettingsSections.tsx src/app/hesapla/mobile/GelismisAyarlarSheet.tsx src/app/hesapla/mobile/GelismisAyarlarSheet.test.tsx src/app/hesapla/page.tsx
 git commit -m "refactor(hesapla): formul parametreleri yapraktan cikti, arsa alani kaldi"
 ```
 
@@ -1040,7 +1076,7 @@ git commit -m "refactor(hesapla): formul parametreleri yapraktan cikti, arsa ala
 
 - [ ] **Step 3: `page.tsx`i bağla**
 
-- Yeni state: `const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'varsayilan' })` ve `const [mobilAnalizAcik, setMobilAnalizAcik] = useState(false)`.
+- Yeni state: `const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'varsayilan' })`. (`mobilAnalizAcik` Task 4'te eklendi.)
 - `mobilSekme` state'ini ve `MobilSekme` importunu **sil**.
 - `handleIlceChange`i Task 1'in yardımcısıyla yeniden yaz:
 
@@ -1068,19 +1104,7 @@ saf yardımcı `toast` bilmez. Bunun yerine Task 10 Step 2'nin davranış turund
 doğrulanır (elle gir → ilçe değiştir → bildirim görünür).
 
 - `handleIlChange` ve `handleClearLocation` içindeki geri-yükleme dallarına `setBirimMaliyetKaynagi(konumTemizlendi(originalUnitPrice).kaynak)` ekle.
-- Mevcut `sonuc={{ ... }}` nesnesinden `piyasaFarkiYuzde` alanını **çıkar** ve yerine
-  `karsilastirma` alt nesnesini koy (Task 4 bunu `SonucKartiProps` **içine** aldı — üst
-  düzey `HesaplaMobile` prop'u DEĞİL):
-
-```tsx
-            karsilastirma: {
-              piyasaFiyati: manualMarketPrice,
-              onPiyasaFiyati: setManualMarketPrice,
-              farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
-            },
-            onAnalizAc: () => setMobilAnalizAcik(true),
-```
-
+- `sonuc={{ ... }}` nesnesi Task 4'te güncellendi; bu task'ta ona dokunma.
 - Mobil dalda `HesaplaMobile`a yeni prop'ları geçir; `konum` nesnesini kur:
 
 ```tsx
@@ -1103,7 +1127,7 @@ doğrulanır (elle gir → ilçe değiştir → bildirim görünür).
           onAnalizKapat={() => setMobilAnalizAcik(false)}
 ```
 
-- `GelismisAyarlarSheet` çağrısından Task 5'te kaldırılan altı prop'u **sil**.
+- `GelismisAyarlarSheet` çağrısı Task 5'te güncellendi; bu task'ta ona dokunma.
 
 - [ ] **Step 4: Doğrula**
 
