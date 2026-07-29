@@ -281,6 +281,105 @@
         color: var(--m-body);
     }
 
+    /* ── Konum blogu (spec K2) ── */
+    .konumBlogu {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        padding: 11px;
+        border-radius: var(--m-r-inner);
+        background: var(--m-fill);
+    }
+
+    .konumSecici {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .konumBosNot {
+        margin: 0;
+        font: 600 11.5px Inter, sans-serif;
+        color: var(--m-body);
+    }
+
+    /* Birim maliyet ilcenin ALTINDA ic ice: nedensellik gorunur olsun. */
+    .birimMaliyetSatiri {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 44px;
+        padding-left: 10px;
+        border-left: 2px solid rgba(43, 124, 255, .28);
+    }
+
+    .birimMaliyetKaynak {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--m-on-glass);
+    }
+
+    .birimMaliyetDegistir {
+        position: relative;
+        flex: none;
+        padding: 0 6px;
+        border: 0;
+        background: none;
+        color: var(--m-link);
+        font: 700 11.5px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .birimMaliyetDegistir::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: var(--touch-target);
+        transform: translateY(-50%);
+    }
+
+    .birimMaliyetGiris {
+        width: 100%;
+        min-height: 44px;
+        padding: 0 12px;
+        border-radius: var(--m-r-input);
+        border: 1px solid var(--m-glass-border);
+        background: #fff;
+        color: var(--m-ink);
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .parselKademe {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 44px;
+        padding: 0 10px;
+        border-radius: var(--m-r-btn);
+        border: 1px dashed rgba(43, 124, 255, .35);
+        background: transparent;
+        color: var(--m-on-glass);
+        font: 600 11.5px Inter, sans-serif;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .parselKademeIkon {
+        display: flex;
+        flex: none;
+        color: #2b7cff;
+    }
+
+    .parselKademe > svg:last-child {
+        margin-left: auto;
+        flex: none;
+    }
+
     /* ── Segment (yapi standardi) ── */
     .segmentKap {
         display: grid;
