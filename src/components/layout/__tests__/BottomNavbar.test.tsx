@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 import { render, screen, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { BottomNavbar } from '../BottomNavbar'
+import { BottomNavbar, BOTTOMNAV_HIDDEN_PATHS } from '../BottomNavbar'
 
 let mockPathname = '/marketplace'
 jest.mock('next/navigation', () => ({ usePathname: () => mockPathname }))
@@ -125,5 +125,55 @@ describe('BottomNavbar', () => {
 
     expect(screen.queryByText('5')).not.toBeInTheDocument()
     expect(screen.queryByText('0')).not.toBeInTheDocument()
+  })
+
+  it('rozet ekran okuyucuya CIPLAK SAYI degil, ne oldugunu soyler', async () => {
+    // Aksi halde "Mesajlar"dan once yalnizca "3" duyurulur.
+    mockStatus = 'authenticated'
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ conversations: [{ unreadCount: 3 }] }),
+    })
+    render(<BottomNavbar />)
+    expect(await screen.findByLabelText('3 okunmamış mesaj')).toBeInTheDocument()
+  })
+
+  // ── Yapisal sozlesme (2026-07-28 "Premium Liquid Glass" yeniden tasarimi) ──
+  // Bu bloklar daha once kardes bir `BottomNavbar.test.tsx` dosyasindaydi;
+  // ayni bilesen icin iki test dosyasi kafa karistirdigi icin buraya tasindi.
+
+  it('bes sekme, tasarimdaki sirayla', () => {
+    render(<BottomNavbar />)
+    const links = screen.getAllByRole('link')
+    expect(links.map(a => a.textContent)).toEqual(
+      ['Pazar', 'Raporlar', 'Ana sayfa', 'Mesajlar', 'Profil'],
+    )
+  })
+
+  it('ortadaki sekme Ana sayfa; FAB kaldirildi', () => {
+    render(<BottomNavbar />)
+    const links = screen.getAllByRole('link')
+    expect(links[2]).toHaveAttribute('href', '/')
+    expect(screen.queryByText('Hesapla')).toBeNull()
+  })
+
+  it('aktif sekme aria-current tasir', () => {
+    render(<BottomNavbar />)
+    expect(screen.getByRole('link', { name: 'Pazar' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('link', { name: 'Profil' })).not.toHaveAttribute('aria-current')
+  })
+
+  it.each(BOTTOMNAV_HIDDEN_PATHS)('%s yolunda hic render edilmez', (path) => {
+    mockPathname = path
+    const { container } = render(<BottomNavbar />)
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('sohbet ve wizard alt yollarinda da gizlenir', () => {
+    for (const p of ['/inbox/abc123', '/listings/new']) {
+      mockPathname = p
+      const { container } = render(<BottomNavbar />)
+      expect(container).toBeEmptyDOMElement()
+    }
   })
 })

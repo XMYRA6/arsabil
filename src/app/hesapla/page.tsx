@@ -40,6 +40,20 @@ interface ProfitLevel {
   isDefault: boolean;
 }
 
+/**
+ * Gelismis ayar varsayilanlari — TEK kaynak.
+ *
+ * Hem `useState` baslangic degerleri hem mobil yapragin "Sifirla" eylemi
+ * buradan okur. Ayri ayri yazildiginda sessizce ayrisiyorlardi: Sifirla
+ * `riskLevel`i 0 yapiyordu ama sayfanin baslangici 10'du.
+ */
+const AYAR_VARSAYILANLARI = {
+  builderProfit: 1.30,
+  riskLevel: 10,
+  iksaMode: 'off' as const,
+  manualMarketPrice: '',
+};
+
 interface ScenarioItem {
   id: string;
   name: string;
@@ -84,7 +98,7 @@ export default function Home() {
   }) * 100;
 
 
-  const [riskLevel, setRiskLevel] = useState<number>(10); // 0, 5, 10, 15
+  const [riskLevel, setRiskLevel] = useState<number>(AYAR_VARSAYILANLARI.riskLevel); // 0, 5, 10, 15
   const [riskLevels, setRiskLevels] = useState<RiskLevel[]>([
     { id: 'default-risk-0', label: 'Risksiz', value: 0, sortOrder: 0, isDefault: true },
     { id: 'default-risk-1', label: 'Düşük', value: 5, sortOrder: 1, isDefault: false },
@@ -156,13 +170,13 @@ export default function Home() {
     setRiskLevel(percent);
   };
 
-  const [builderProfit, setBuilderProfit] = useState<number>(1.30);
+  const [builderProfit, setBuilderProfit] = useState<number>(AYAR_VARSAYILANLARI.builderProfit);
   const [profitLevels, setProfitLevels] = useState<ProfitLevel[]>([
     { id: 'default-1', label: 'Düşük', value: 1.15, sortOrder: 0, isDefault: false },
     { id: 'default-2', label: 'Orta', value: 1.30, sortOrder: 1, isDefault: true },
     { id: 'default-3', label: 'Yüksek', value: 1.50, sortOrder: 2, isDefault: false },
   ]);
-  const [manualMarketPrice, setManualMarketPrice] = useState<string>("");
+  const [manualMarketPrice, setManualMarketPrice] = useState<string>(AYAR_VARSAYILANLARI.manualMarketPrice);
 
   const [result, setResult] = useState<CalculationOutput | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -179,7 +193,7 @@ export default function Home() {
   const [arsaAlani, setArsaAlani] = useState<number>(360);
 
   // İksa modü: 'off' | 'percentage' | 'manual'
-  const [iksaMode, setIksaMode] = useState<'off' | 'percentage' | 'manual'>('off');
+  const [iksaMode, setIksaMode] = useState<'off' | 'percentage' | 'manual'>(AYAR_VARSAYILANLARI.iksaMode);
   const [iksaPercentage, setIksaPercentage] = useState<number>(5); // %
   const [iksaManualTL, setIksaManualTL] = useState<number>(0);
 
@@ -513,6 +527,7 @@ export default function Home() {
             onKarDegistir: () => { setMobilAyarBolumu('kar'); setMobilAyarlarAcik(true); },
           }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
+          onKonumAc={() => { setMobilAyarBolumu('risk'); setMobilAyarlarAcik(true); }}
           aktifSekme={mobilSekme}
           onSekmeDegis={setMobilSekme}
           analiz={{ result, baseInput: chartBaseInput, marketPrice: marketPriceNum }}
@@ -536,10 +551,10 @@ export default function Home() {
           onSifirla={() => {
             // Masaustu cekmecesinin "varsayilana don" karsiligi: yalnizca bu
             // yapraktaki alanlar sifirlanir, girdi karti dokunulmaz.
-            setBuilderProfit(1.30);
-            setRiskLevel(0);
-            setIksaMode('off');
-            setManualMarketPrice('');
+            setBuilderProfit(AYAR_VARSAYILANLARI.builderProfit);
+            setRiskLevel(AYAR_VARSAYILANLARI.riskLevel);
+            setIksaMode(AYAR_VARSAYILANLARI.iksaMode);
+            setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
           }}
           acilisBolumu={mobilAyarBolumu}
           iksaMode={iksaMode} setIksaMode={setIksaMode}
@@ -920,7 +935,11 @@ export default function Home() {
 
             <HesapFisi result={result} />
 
-            <div className={styles.mainPanelResults}>
+            {/* Yapisal gruplama sarmalayicisi. `.mainPanelResults` sinifi
+                KALDIRILDI: tek kurali Task 5'te silinen `data-revealed`
+                kapisiydi, geriye hicbir CSS kurali olmayan bir sinif adi
+                kalmisti. DOM derinligi bilerek korunuyor. */}
+            <div>
             <div className={styles.statsRow}>
               {/* Arsa Fiyatı — sadece Sd açıkken görünür */}
               {isApartmentCountEnabled && (
@@ -984,7 +1003,11 @@ export default function Home() {
               )}
             </div>
 
-            <div className={styles.mainPanelResults}>
+            {/* Yapisal gruplama sarmalayicisi. `.mainPanelResults` sinifi
+                KALDIRILDI: tek kurali Task 5'te silinen `data-revealed`
+                kapisiydi, geriye hicbir CSS kurali olmayan bir sinif adi
+                kalmisti. DOM derinligi bilerek korunuyor. */}
+            <div>
             {districtPrices.length > 0 && (
               <LocationSelector
                 districtPrices={districtPrices}

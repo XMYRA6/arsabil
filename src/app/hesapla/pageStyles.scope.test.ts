@@ -160,9 +160,26 @@ describe('buton reverse — PDF İndir ve Karşılaştır dolgulu stile geçmeli
 
 describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)', () => {
   it('manualMarketPrice varsayılanı boş olmalı (yanlış 7.500.000 sabiti kaldırıldı)', () => {
+    // 2026-07-29: varsayılan artık `useState`'te satır içi değil,
+    // `AYAR_VARSAYILANLARI` sabitinde — mobil yaprağın "Sıfırla" eylemiyle
+    // aynı kaynağı kullansın diye. Guard'ın NİYETİ değişmedi: varsayılan boş
+    // olmalı, yanlış 7.500.000 sabiti geri gelmemeli.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    expect(pageTsx).toMatch(/useState<string>\(""\)/);
+    expect(pageTsx).toMatch(/manualMarketPrice:\s*''/);
+    expect(pageTsx).not.toMatch(/manualMarketPrice:\s*'7\.500\.000'/);
     expect(pageTsx).not.toMatch(/useState<string>\("7\.500\.000"\)/);
+    // Baslangic degeri gercekten sabitten okunuyor mu?
+    expect(pageTsx).toMatch(/useState<string>\(AYAR_VARSAYILANLARI\.manualMarketPrice\)/);
+  });
+
+  it('gelişmiş ayar varsayılanları TEK kaynakta (Sıfırla ile ayrışamaz)', () => {
+    // Sıfırla eylemi riskLevel'i 0 yapıyordu ama sayfanın başlangıcı 10'du;
+    // iki yerde ayrı yazıldıkları için sessizce ayrışmışlardı.
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    for (const alan of ['builderProfit', 'riskLevel', 'iksaMode', 'manualMarketPrice']) {
+      expect(pageTsx).toMatch(new RegExp(`useState<[^>]*>\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
+      expect(pageTsx).toMatch(new RegExp(`set[A-Z]\\w*\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
+    }
   });
 
   it('SensitivityChart ve BreakEvenChart artık P: globalUnitPrice kullanmalı, sabit 10000 değil', () => {

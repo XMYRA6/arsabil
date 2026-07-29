@@ -83,7 +83,14 @@ export function BottomNavbar() {
                         <span className={styles.iconWrap}>
                             <Icon size={21} strokeWidth={active ? 2.4 : 2} />
                             {href === '/inbox' && showBadge && (
-                                <span className={styles.badge}>{unreadLabel}</span>
+                                // Gorsel olarak yalnizca sayi; ekran okuyucuya
+                                // ne oldugu soylenir. `aria-hidden` sayi + ayri
+                                // bir sr-only metin yerine tek `aria-label`
+                                // yeterli: rozet bir img rolu tasimadigi icin
+                                // metni cocuklarin yerine gecer.
+                                <span className={styles.badge} role="status" aria-label={`${unreadTotal} okunmamış mesaj`}>
+                                    {unreadLabel}
+                                </span>
                             )}
                         </span>
                         <span className={styles.label}>{label}</span>

@@ -19,6 +19,8 @@ export type HesaplaMobileProps = {
     fiyatAciklamasi: FiyatAciklamasiProps;
     /** Baslik satirindaki ayarlar butonu `4f` yapragini acar. */
     onAyarlarAc: () => void;
+    /** Konum cipi `4f` yapragini konum/risk bolumunde acar. */
+    onKonumAc: () => void;
     aktifSekme: MobilSekme;
     onSekmeDegis: (sekme: MobilSekme) => void;
     analiz: AnalizSekmesiProps;
@@ -42,6 +44,7 @@ export function HesaplaMobile({
     fisAcik,
     fiyatAciklamasi,
     onAyarlarAc,
+    onKonumAc,
     aktifSekme,
     onSekmeDegis,
     analiz,
@@ -64,7 +67,15 @@ export function HesaplaMobile({
                     </div>
                     <span className={styles.headerTitle}>Hesapla</span>
                     <div className={styles.headerActions}>
-                        <button type="button" className={styles.headerChip}>
+                        {/* Cip, yapragin "Konum ve resmi risk" bolumunu acar —
+                            ParcelPicker orada yasiyor. Onceden hicbir isleve
+                            bagli degildi ama buton olarak duyuruluyordu. */}
+                        <button
+                            type="button"
+                            className={styles.headerChip}
+                            aria-label={`Konum: ${konumEtiketi}. Değiştirmek için dokunun`}
+                            onClick={onKonumAc}
+                        >
                             <span className={styles.headerChipIcon}>
                                 <IconPin size={15} strokeWidth={2.2} />
                             </span>
