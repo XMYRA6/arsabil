@@ -103,7 +103,24 @@ export function HesaplaMobile({
                             <SonucKarti {...sonuc} />
                             {fisAcik
                                 ? <FiyatAciklamasi {...fiyatAciklamasi} />
-                                : <GirdiKarti {...girdi} />}
+                                : (
+                                    <>
+                                        <GirdiKarti {...girdi} />
+                                        {/* Tasarim 2a.html:39 — girdi kartinin ALTINDA birincil
+                                            kesif yolu. Baslikaki disli ikonu tek basina kalsaydi
+                                            kullanici bu ekrani zor bulurdu. */}
+                                        <button
+                                            type="button"
+                                            className={styles.gelismisAyarlarBtn}
+                                            onClick={onAyarlarAc}
+                                        >
+                                            <span className={styles.gelismisAyarlarIkon}>
+                                                <IconSettings size={16} strokeWidth={2.2} />
+                                            </span>
+                                            Gelişmiş ayarlar · risk, iksa, kâr
+                                        </button>
+                                    </>
+                                )}
                         </>
                     )}
             </div>

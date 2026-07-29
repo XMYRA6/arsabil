@@ -233,6 +233,22 @@
         margin: 0 14px;
     }
 
+    /* Paylasilan `SegmentedTabs` pazaryeri icin boyutlanmis ve bu ekranda
+       orantisiz duruyordu. Bilesen DEGISTIRILMEDI (baska sayfalar kullaniyor);
+       yalnizca bu sarmalayicinin altinda oznitelik seciciyle kuculuyor —
+       sinif adlari CSS module hash'i oldugu icin oznitelik secici gerekli. */
+    .sekmeKap [role='tablist'] {
+        padding: 3px;
+        border-radius: 15px;
+    }
+
+    .sekmeKap [role='tab'] {
+        min-height: 38px;
+        padding: 0 10px;
+        border-radius: 12px;
+        font: 700 12.5px Inter, sans-serif;
+    }
+
     /* ═══ Girdi karti (2a alt) ═══════════════════════════════════════════ */
 
     .girdiKarti {
@@ -267,17 +283,23 @@
 
     /* ── Segment (yapi standardi) ── */
     .segmentKap {
-        display: flex;
-        gap: 3px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
         padding: 4px;
         border-radius: 17px;
         background: var(--m-fill);
     }
 
     .segment {
-        flex: 1;
         /* Dokunma hedefi: bu kural mobil media query ICINDE, masaustu etkilenmez. */
         min-height: 44px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 6px 2px;
         border: 0;
         border-radius: 13px;
         background: transparent;
@@ -297,8 +319,10 @@
     .stepperSatir {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         height: 44px;
+        padding: 3px;
+        border-radius: 16px;
+        background: var(--m-fill);
     }
 
     .stepperAzalt,
@@ -320,6 +344,7 @@
     }
 
     .stepperArtir {
+        margin-left: 4px;
         background: var(--m-grad-btn);
         box-shadow: var(--m-sh-grad-btn);
         border-color: transparent;
@@ -327,6 +352,8 @@
     }
 
     .stepperDeger {
+        flex: 1;
+        padding-left: 13px;
         font-size: 19px;
         font-weight: 800;
         color: var(--m-ink);
@@ -345,6 +372,47 @@
         justify-content: space-between;
         gap: 10px;
         min-height: 44px;
+        padding: 8px 12px;
+        border-radius: 15px;
+        background: rgba(43, 124, 255, .09);
+        border: 1px solid rgba(43, 124, 255, .2);
+    }
+
+    .modEtiket {
+        font: 600 11.5px Inter, sans-serif;
+        color: var(--m-on-glass);
+    }
+
+    .modIpucu {
+        color: var(--m-body);
+    }
+
+    /* Gelismis ayarlar butonu (2a.html:39) — girdi kartinin ALTINDA ayri
+       bir cam buton. Onceden yalnizca baslikaki disli ikonuna bagliydi;
+       tasarimda bu birincil kesif yolu. */
+    .gelismisAyarlarBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 44px;
+        margin: 0 14px;
+        width: calc(100% - 28px);
+        border-radius: 17px;
+        border: 1px solid rgba(255, 255, 255, .9);
+        background: rgba(255, 255, 255, .55);
+        backdrop-filter: blur(26px) saturate(180%);
+        -webkit-backdrop-filter: blur(26px) saturate(180%);
+        box-shadow: 0 8px 24px rgba(20, 70, 150, .1), inset 0 1px 0 rgba(255, 255, 255, .95);
+        color: var(--m-on-glass);
+        font: 700 12.5px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .gelismisAyarlarIkon {
+        display: flex;
+        color: #2b7cff;
     }
 
     .anahtar {

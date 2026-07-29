@@ -17,6 +17,17 @@ export type GirdiKartiProps = {
     onOwnerApartmentShare: (v: number) => void;
 };
 
+/**
+ * Segment glifleri. Tasarim (2a.html:24-26) burada DOLU ikonlar kullaniyor;
+ * `@/components/icons` setindeki cizgi ikonlardan bilerek farklilar — o set
+ * navigasyon/aksiyon ikonlari icin.
+ */
+const GLIF: Record<string, string> = {
+    Standart: 'M12 3L2 12h3v8h14v-8h3L12 3zm0 2.84L17.5 12h-11L12 5.84z',
+    Orta: 'M3 21h18v-2H3v2zm6-4h6V5H9v12zm8 0h6v-8h-6v8zm-16 0h6v-6H1v6z',
+    'Lüks': 'M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z',
+};
+
 /** Yapi standardi segmentleri — degerler motorun `L` katsayisidir. */
 const YAPI_STANDARTLARI = [
     { etiket: 'Standart', deger: 1.0 },
@@ -74,6 +85,9 @@ export function GirdiKarti({
                                 className={`${styles.segment} ${secili ? styles.segmentAktif : ''}`}
                                 onClick={() => onLuxLevel(deger)}
                             >
+                                <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d={GLIF[etiket]} />
+                                </svg>
                                 {etiket}
                             </button>
                         );
@@ -85,6 +99,10 @@ export function GirdiKarti({
             <div className={styles.girdiSatir}>
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
+                    <span className={`${styles.stepperDeger} mNum`}>
+                        {apartmentSize}
+                        <span className={styles.stepperBirim}> m²</span>
+                    </span>
                     <button
                         type="button"
                         className={styles.stepperAzalt}
@@ -96,10 +114,6 @@ export function GirdiKarti({
                     >
                         −
                     </button>
-                    <span className={`${styles.stepperDeger} mNum`}>
-                        {apartmentSize}
-                        <span className={styles.stepperBirim}> m²</span>
-                    </span>
                     <button
                         type="button"
                         className={styles.stepperArtir}
@@ -117,7 +131,12 @@ export function GirdiKarti({
             {/* ── Arsa payi modu ── */}
             <div className={styles.girdiSatir}>
                 <div className={styles.modSatir}>
-                    <span className={styles.girdiEtiket}>Toplam daire sayısı üzerinden</span>
+                    <span className={styles.modEtiket}>
+                        Daire sayısıyla gir{' '}
+                        <span className={styles.modIpucu}>
+                            ({totalApartments}&rsquo;de {ownerApartmentShare})
+                        </span>
+                    </span>
                     <button
                         type="button"
                         role="switch"
