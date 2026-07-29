@@ -37,8 +37,12 @@ describe('mobil token katmani', () => {
     it('cam yardimci sinifi mobil blok icinde ve dogru recete', () => {
         const inside = mobileBlock()
         expect(inside).toMatch(/\.mGlass\s*\{/)
-        expect(inside).toMatch(/backdrop-filter:\s*blur\(30px\)\s+saturate\(190%\)/)
-        expect(inside).toMatch(/-webkit-backdrop-filter/)
+        // Cam yuzey TEK kaynak: .mGlass token'a REFERANS verir, degeri
+        // kopyalamaz. Kopyalasaydi token degisiminde sessizce eskirdi.
+        expect(inside).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
+        expect(inside).toMatch(/-webkit-backdrop-filter:\s*var\(--m-glass-blur\)/)
+        // Token'in kendisi tasarim handoff'undaki degeri tasimali.
+        expect(inside).toMatch(/--m-glass-blur:\s*blur\(30px\)\s+saturate\(190%\)/)
     })
 
     it("mevcut --seal-* token'lari SILINMEMIS", () => {

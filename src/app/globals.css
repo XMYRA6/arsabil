@@ -239,8 +239,8 @@ a {
   .mGlass {
     background: var(--m-glass-bg);
     border: 1px solid var(--m-glass-border);
-    backdrop-filter: blur(30px) saturate(190%);
-    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    backdrop-filter: var(--m-glass-blur);
+    -webkit-backdrop-filter: var(--m-glass-blur);
     box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
   }
 
