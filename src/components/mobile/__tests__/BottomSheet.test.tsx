@@ -78,4 +78,21 @@ describe('BottomSheet', () => {
         fireEvent.keyDown(document, { key: 'Escape' })
         expect(trigger).toHaveFocus()
     })
+    it('yaprak govdesi dikey kaydirilabilir kalir (touch-action pan-x DEGIL)', () => {
+        // A1 review bulgusu C1: framer-motion `drag="y"` varsayilan halinde
+        // yaprak kokune `touch-action: pan-x` koyuyordu. Bu, `.content`
+        // `overflow-y: auto` olsa bile ALTINDAKI HER SEYIN dikey kaydirmasini
+        // olduruyor. Uzun icerikli 4f yapraginda (1129px icerik / 652px
+        // gorunur) alt 477px'e — haritaya, risk kartina ve Uygula/Sifirla
+        // butonlarina — parmakla ulasilamiyordu.
+        // Cozum: dragListener={false} + dragControls; surukleme yalnizca
+        // tutamaktan baslar. Bu test o cozumun geri alinmasini engeller.
+        render(
+            <BottomSheet open onClose={jest.fn()} title="Uzun">
+                <p>İçerik</p>
+            </BottomSheet>,
+        )
+        const dialog = screen.getByRole('dialog')
+        expect(dialog.style.touchAction).not.toBe('pan-x')
+    })
 })

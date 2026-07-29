@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'framer-motion';
 import styles from './BottomSheet.module.css';
 
 interface BottomSheetProps {
@@ -44,6 +44,7 @@ function useIsMounted() {
  */
 export function BottomSheet({ open, onClose, title, children }: BottomSheetProps) {
     const reduceMotion = useReducedMotion();
+    const dragControls = useDragControls();
     const mounted = useIsMounted();
     const sheetRef = useRef<HTMLDivElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -103,13 +104,29 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                         exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}
                         transition={{ type: 'spring', damping: 32, stiffness: 320 }}
                         drag={reduceMotion ? false : 'y'}
+                        /* KRITIK: `dragListener={false}` + `dragControls`.
+                           Varsayilan halinde framer-motion `drag="y"` icin
+                           yaprak kokune `touch-action: pan-x` koyuyor ve
+                           ALTINDAKI HER SEYIN dikey kaydirmasini olduruyor —
+                           `.content { overflow-y: auto }` olsa bile. Uzun
+                           icerikli yapraklarda (4f: 1129px icerik / 652px
+                           gorunur) alt 477px'e, yani haritaya, risk kartina
+                           ve Uygula/Sifirla butonlarina parmakla ulasilamiyordu.
+                           Suruklemeyi yalnizca tutamak baslatir; govde normal
+                           kaydirilir. */
+                        dragListener={false}
+                        dragControls={dragControls}
                         dragConstraints={{ top: 0 }}
                         dragElastic={{ top: 0, bottom: 0.4 }}
                         onDragEnd={(_, info) => {
                             if (info.offset.y > 120 || info.velocity.y > 800) onClose();
                         }}
                     >
-                        <div className={styles.grabber} aria-hidden="true" />
+                        <div
+                            className={styles.grabber}
+                            aria-hidden="true"
+                            onPointerDown={e => { if (!reduceMotion) dragControls.start(e); }}
+                        />
                         {title && <div className={styles.title}>{title}</div>}
                         <div className={styles.content}>{children}</div>
                     </motion.div>
