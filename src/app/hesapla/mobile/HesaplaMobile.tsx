@@ -1,13 +1,21 @@
 "use client";
 
 import { MobileScreen } from '@/components/mobile/MobileScreen';
+import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { IconPin, IconSettings } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
+import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import styles from './mobile.module.css';
 
-export type HesaplaMobileProps = SonucKartiProps & {
+export type HesaplaMobileProps = {
     /** Baslik satirindaki konum ipucu (secili ilce/il, yoksa varsayilan metin). */
     konumEtiketi: string;
+    sonuc: SonucKartiProps;
+    girdi: GirdiKartiProps;
+    /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
+    ctaMetni: string;
+    ctaDevreDisi: boolean;
+    onCta: () => void;
 };
 
 /**
@@ -16,17 +24,23 @@ export type HesaplaMobileProps = SonucKartiProps & {
  * State SAHIPLENMEZ — tum girdi/sonuc state'i `page.tsx`'te yasar, buraya
  * prop olarak gelir (bkz. plan mimari karari: masaustu JSX'e hic dokunmadan
  * mobil ekran kendi agacinda kurulur).
- *
- * Bu turda yalnizca baslik satiri + degrade `SonucKarti` render edilir;
- * girdi karti Task 7'de, "Bu fiyat nereden geliyor" Task 8'de eklenecek.
  */
-export function HesaplaMobile({ konumEtiketi, ...sonucKarti }: HesaplaMobileProps) {
+export function HesaplaMobile({
+    konumEtiketi,
+    sonuc,
+    girdi,
+    ctaMetni,
+    ctaDevreDisi,
+    onCta,
+}: HesaplaMobileProps) {
     return (
-        // `hasBottomNav={false}` BILEREK: bu sayfanin alt cubuk dolgusunu
-        // `SiteChrome.tsx:20` zaten `--mobile-nav-pb` ile <main>'e veriyor.
-        // Varsayilan `true` birakilsaydi dolgu IKI KEZ uygulanip ~180px olu
-        // kaydirma alani olusurdu. Dolgunun sahibi bu sayfa icin SiteChrome'dur.
-        <MobileScreen hasBottomNav={false}>
+        <>
+        {/* `hasBottomNav={false}` BILEREK: bu sayfanin alt cubuk dolgusunu
+            `SiteChrome.tsx:20` zaten `--mobile-nav-pb` ile <main>'e veriyor.
+            Varsayilan `true` birakilsaydi dolgu IKI KEZ uygulanip ~180px olu
+            kaydirma alani olusurdu. Dolgunun sahibi bu sayfa icin SiteChrome'dur.
+            `hasStickyCta` ise asagidaki sabit CTA'nin yuksekligini ekler. */}
+        <MobileScreen hasBottomNav={false} hasStickyCta>
             <div className={styles.hesaplaMobilKok}>
                 <header className={styles.headerRow}>
                     <div className={styles.logoBox} aria-hidden="true">
@@ -46,8 +60,26 @@ export function HesaplaMobile({ konumEtiketi, ...sonucKarti }: HesaplaMobileProp
                     </div>
                 </header>
 
-                <SonucKarti {...sonucKarti} />
+                <SonucKarti {...sonuc} />
+                <GirdiKarti {...girdi} />
             </div>
         </MobileScreen>
+
+        {/* CTA cubugu `MobileScreen`in DISINDA: `.screen > *` kurali her
+            dogrudan cocuga `position: relative` veriyor ve StickyActionBar
+            `position: fixed` — ikisi ayni specificity'de (0,1,0) oldugu icin
+            kazanan CSS modul sirasina kalirdi. Kardes olarak birakilinca
+            catisma hic dogmuyor. */}
+        <StickyActionBar aboveBottomNav>
+            <button
+                type="button"
+                className={styles.mobilCta}
+                onClick={onCta}
+                disabled={ctaDevreDisi}
+            >
+                {ctaMetni}
+            </button>
+        </StickyActionBar>
+        </>
     );
 }

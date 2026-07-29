@@ -462,14 +462,38 @@ export default function Home() {
   // Mobil dal: yeni "Premium Liquid Glass" ekranina devreder (spec 2026-07-28).
   if (!isDesktopViewport) {
     return (
-      <HesaplaMobile
-        konumEtiketi={selectedIlce || selectedIl || 'Konum seç'}
-        minDaireFiyati={sonucDegeri(result?.FD_total)}
-        arsaPayiYuzde={Math.round(effectiveLandShareRatio)}
-        birimFiyat={sonucDegeri(result?.FD_per_m2)}
-        piyasaFarkiYuzde={piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum)}
-        onFisAc={() => {} /* TODO(Task 8): "Bu fiyat nereden geliyor" (4a) ekranini acar */}
-      />
+      <>
+        <HesaplaMobile
+          konumEtiketi={selectedIlce || selectedIl || 'Konum seç'}
+          sonuc={{
+            minDaireFiyati: sonucDegeri(result?.FD_total),
+            arsaPayiYuzde: Math.round(effectiveLandShareRatio),
+            birimFiyat: sonucDegeri(result?.FD_per_m2),
+            piyasaFarkiYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
+            onFisAc: () => {} /* TODO(Task 8): "Bu fiyat nereden geliyor" (4a) */,
+          }}
+          girdi={{
+            luxLevel, onLuxLevel: setLuxLevel,
+            apartmentSize, onApartmentSize: setApartmentSize,
+            landShareRatio, onLandShareRatio: setLandShareRatio,
+            isApartmentCountEnabled, onApartmentCountEnabled: setIsApartmentCountEnabled,
+            totalApartments, onTotalApartments: setTotalApartments,
+            ownerApartmentShare, onOwnerApartmentShare: setOwnerApartmentShare,
+          }}
+          ctaMetni={isSaving ? 'Kaydediliyor...' : 'Özet Rapor Oluştur'}
+          ctaDevreDisi={isSaving}
+          onCta={handleSaveReport}
+        />
+
+        {/* Erken donus asagidaki masaustu agacini atladigi icin auth modali
+            burada ayrica render edilmeli — aksi halde mobilde giris istemi
+            hic acilmaz ve rapor kaydetme sessizce calismaz. */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
+        />
+      </>
     );
   }
 
