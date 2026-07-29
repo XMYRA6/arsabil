@@ -22,7 +22,11 @@ export type HesaplaMobileProps = SonucKartiProps & {
  */
 export function HesaplaMobile({ konumEtiketi, ...sonucKarti }: HesaplaMobileProps) {
     return (
-        <MobileScreen>
+        // `hasBottomNav={false}` BILEREK: bu sayfanin alt cubuk dolgusunu
+        // `SiteChrome.tsx:20` zaten `--mobile-nav-pb` ile <main>'e veriyor.
+        // Varsayilan `true` birakilsaydi dolgu IKI KEZ uygulanip ~180px olu
+        // kaydirma alani olusurdu. Dolgunun sahibi bu sayfa icin SiteChrome'dur.
+        <MobileScreen hasBottomNav={false}>
             <div className={styles.hesaplaMobilKok}>
                 <header className={styles.headerRow}>
                     <div className={styles.logoBox} aria-hidden="true">

@@ -28,6 +28,7 @@ import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
 import type { RiskMeasurement } from '@/lib/risk/types';
 import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
+import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 
 interface ProfitLevel {
   id: string;
@@ -93,7 +94,13 @@ export default function Home() {
   // konteynerde kurulur ve OSM/TUCBS'e bosuna karo istegi gider. Bu yuzden
   // mobilde hic MOUNT edilmezler; CSS'in kullandigi esikle ayni esik
   // (max-width: 768px / desktopSidebar) burada matchMedia ile okunur.
-  const [isDesktopViewport, setIsDesktopViewport] = useState(true);
+  // `null` = HENUZ OLCULMEDI. Baslangic `true` DEGIL: oyle olsaydi SSR ve ilk
+  // client render'i gercek bir telefonda da masaustu agacini basar, mount
+  // sonrasi mobil ekrana gecerdi — her mobil acilista gorunur bir "flas".
+  // Uc durumlu bayrakla olculene kadar notr bir iskelet gosterilir (insan
+  // karari 2026-07-29); masaustunde de ilk boyada iskelet gorunmesi kabul
+  // edildi, bu sayfa SEO kritik degil (giris gerektiren bir hesaplayici).
+  const [isDesktopViewport, setIsDesktopViewport] = useState<boolean | null>(null);
   useEffect(() => {
     // `min-width: 769px` DEĞİL: kesirli viewport genişliklerinde (yüksek DPI,
     // tarayıcı yakınlaştırması) 768 ile 769 arasında ne CSS'in
@@ -445,28 +452,22 @@ export default function Home() {
     </>
   );
 
-  // Mobil dal: yeni "Premium Liquid Glass" ekranina devreder (spec 2026-07-28).
-  // `isDesktopViewport` varsayilan olarak `true`dur (bkz. yukaridaki tanim) —
-  // SSR ve ilk client render'i AYNI degeri kullanir (ikisi de `true`), bu yuzden
-  // hydration uyusmazligi olusmaz. Gercek bir telefonda ilk kare kisaca eski
-  // agaci (asagidaki masaustu JSX, mobil genislikte CSS ile zaten "eski mobil"
-  // gorunumune donusen ayni agac) gosterir; `useEffect` mount sonrasi calisip
-  // `matchMedia` ile gercek genisligi olcunce ayni tick icinde `HesaplaMobile`'a
-  // gecer. Bu, `ParcelPicker`/`RiskSuggestionCard` icin zaten kabul edilmis olan
-  // ayni desenin devamidir — yeni bir tehlike sinifi eklemez.
-  if (!isDesktopViewport) {
-    const piyasaFarkiYuzde = marketPriceNum > 0 && result
-      ? Math.round(((result.FD_total - marketPriceNum) / marketPriceNum) * 100)
-      : null;
+  // Viewport henuz olculmedi: SSR ve ilk client render'i BURAYA duser, ikisi de
+  // ayni ciktiyi urettigi icin hydration uyusmazligi olusmaz. Yanlis arayuzu
+  // basip sonra degistirmek yerine notr bir iskelet gosterilir.
+  if (isDesktopViewport === null) {
+    return <div className={styles.viewportIskelet} aria-busy="true" aria-live="polite" />;
+  }
 
+  // Mobil dal: yeni "Premium Liquid Glass" ekranina devreder (spec 2026-07-28).
+  if (!isDesktopViewport) {
     return (
       <HesaplaMobile
         konumEtiketi={selectedIlce || selectedIl || 'Konum seç'}
-        minDaireFiyati={result?.FD_total ?? null}
+        minDaireFiyati={sonucDegeri(result?.FD_total)}
         arsaPayiYuzde={Math.round(effectiveLandShareRatio)}
-        birimFiyat={result?.FD_per_m2 ?? null}
-        skor={null /* TODO: canli skor kaynagi henuz yok, bkz. rapor */}
-        piyasaFarkiYuzde={piyasaFarkiYuzde}
+        birimFiyat={sonucDegeri(result?.FD_per_m2)}
+        piyasaFarkiYuzde={piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum)}
         onFisAc={() => {} /* TODO(Task 8): "Bu fiyat nereden geliyor" (4a) ekranini acar */}
       />
     );
@@ -595,8 +596,10 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              {isDesktopViewport && (
-                <>
+              {/* `isDesktopViewport &&` kosulu kaldirildi: bu noktaya yalnizca
+                  masaustu dalinda gelinir (mobil ve olculmemis durumlar
+                  yukarida erken donuyor), kosul her zaman true idi. */}
+              <>
                   <ParcelPicker
                     value={parcelValue}
                     onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
@@ -605,8 +608,7 @@ export default function Home() {
                     unavailableText="TKGM servisi şu an yanıt vermiyor. Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz."
                   />
                   {risk && <RiskSuggestionCard risk={risk} onApply={applyRiskSuggestion} />}
-                </>
-              )}
+              </>
             </div>
 
             <div className={styles.settingsGroup}>

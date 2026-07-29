@@ -2,6 +2,13 @@
    ARSABIL — CALCULATOR PAGE (Referans Uyumlu, Theme-Aware)
    ========================================================================= */
 
+/* Viewport olculene kadar gosterilen notr iskelet. Bilerek BOS ve saydam:
+   amaci yer tutmak, yanlis bir arayuzu bir kare boyunca basmamak. Hem SSR hem
+   ilk client render'i bunu urettigi icin hydration uyusmazligi olusmaz. */
+.viewportIskelet {
+    min-height: 100dvh;
+}
+
 /* Shell Container (Glassmorphism wrapper) */
 .container {
     max-width: 1280px;

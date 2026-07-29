@@ -207,29 +207,8 @@
         opacity: .75;
     }
 
-    .metrikKutuSkor {
-        flex: none;
-        width: 62px;
-        padding: 9px 8px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, .94);
-        box-shadow: 0 4px 14px rgba(6, 44, 99, .16);
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        align-items: center;
-    }
-
-    .metrikKutuSkor .metrikEtiket {
-        color: var(--m-body);
-        text-align: center;
-    }
-
-    .metrikDegerSkor {
-        font-size: 15px;
-        font-weight: 800;
-        color: var(--m-success-text);
-    }
+    /* `.metrikKutuSkor` / `.metrikDegerSkor` kaldirildi: skor kutusunun veri
+       kaynagi yok (insan karari 2026-07-29). Geri gerekirse `5bc784a`de. */
 
     .fisButonu {
         position: relative;

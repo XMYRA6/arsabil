@@ -7,12 +7,15 @@ export type SonucKartiProps = {
     minDaireFiyati: number | null;
     arsaPayiYuzde: number;
     birimFiyat: number | null;
-    skor: number | null;
     piyasaFarkiYuzde: number | null; // null -> rozet RENDER EDILMEZ
     onFisAc: () => void;
 };
 
-const trFormat = new Intl.NumberFormat('tr-TR');
+// `maximumFractionDigits: 0` SART: Intl varsayilani 3'tur ve motor ciktisi
+// (FD_total = M * K) neredeyse hicbir zaman tam sayi degildir — varsayilanla
+// kart "8.964.000,371" yazar. Bicimleme kuralinin cagri yerlerine dagilmamasi
+// icin tek kaynak burasi.
+const trFormat = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 
 /** null -> em-dash. Sonuc yoksa "0" DEGIL "—" gosterilir (0, bos ile ayni sey degil). */
 function fmt(n: number | null): string {
@@ -32,10 +35,11 @@ export function SonucKarti({
     minDaireFiyati,
     arsaPayiYuzde,
     birimFiyat,
-    skor,
     piyasaFarkiYuzde,
     onFisAc,
 }: SonucKartiProps) {
+    // `piyasaFarkiYuzdesi()` beraberligi zaten `null`a cevirdigi icin burada
+    // 0 gelmez; rozet ya UCUZ ya PAHALI'dir, "%0" hicbir zaman basilmaz.
     const ucuz = piyasaFarkiYuzde !== null && piyasaFarkiYuzde < 0;
 
     return (
@@ -72,10 +76,10 @@ export function SonucKarti({
                         {birimFiyat !== null && <span className={styles.metrikBirimKucuk}>/m²</span>}
                     </span>
                 </div>
-                <div className={styles.metrikKutuSkor}>
-                    <span className={styles.metrikEtiket}>Skor</span>
-                    <span className={`${styles.metrikDegerSkor} mNum`}>{fmt(skor)}</span>
-                </div>
+                {/* Tasarimdaki ucuncu kutu ("Skor") KALDIRILDI (insan karari
+                    2026-07-29): engine_v2'nin ciktisinda skor alani yok ve
+                    /hesapla hic skor hesaplamiyor — kutu kalici olarak "—"
+                    gosterecekti. Kaynak eklenirse geri getirilir (bkz. 5bc784a). */}
             </div>
 
             <button type="button" className={styles.fisButonu} onClick={onFisAc}>
