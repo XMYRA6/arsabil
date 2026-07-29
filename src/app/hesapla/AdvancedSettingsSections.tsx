@@ -105,7 +105,16 @@ export function ArsaAlaniFields({
 
 export interface FormulParamsProps extends DaireSayisiProps, ArsaAlaniProps {}
 
-/** Drawer "Formül Parametreleri" kartının içeriği (kart sarmalayıcısı hariç). */
+/**
+ * Drawer "Formül Parametreleri" kartının içeriği (kart sarmalayıcısı hariç).
+ *
+ * SADELESTIRMEYIN. Bu sarmalayici, mobil yaprak yalnizca arsa alani kismini
+ * kullanabilsin diye bilesen ikiye ayrildiginda korundu (A1 I4). Masaustu
+ * cekmecesi bunu cagirmaya devam ediyor ve ciktisinin bugunkuyle AYNI kalmasi
+ * bir kisittir: `DaireSayisiFields` sonra `ArsaAlaniFields`, bu SIRAYLA.
+ * Inline etmek ya da sirayi degistirmek masaustu duzenini sessizce bozar ve
+ * bunu yakalayan bir test YOK.
+ */
 export function FormulParamsFields(props: FormulParamsProps) {
   return (
     <>

@@ -176,16 +176,39 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     // Sıfırla eylemi riskLevel'i 0 yapıyordu ama sayfanın başlangıcı 10'du;
     // iki yerde ayrı yazıldıkları için sessizce ayrışmışlardı.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    // Yaprakta duzenlenebilen HER alan listede olmali: eksik biri, "Ayarlari
-    // sifirla" butonunun sessizce yarim is yapmasi demek (A1 I3).
-    const alanlar = [
+    // TUM 11 alan useState baslangic degeri olarak AYAR_VARSAYILANLARI'ndan
+    // okunmali — bu, "TEK kaynak" iddiasinin useState yarisi.
+    const tumAlanlar = [
       'builderProfit', 'riskLevel', 'iksaMode', 'iksaPercentage', 'iksaManualTL',
       'manualMarketPrice', 'isApartmentCountEnabled', 'totalApartments',
       'ownerApartmentShare', 'isAaEnabled', 'arsaAlani',
     ];
-    for (const alan of alanlar) {
+    for (const alan of tumAlanlar) {
       expect(pageTsx).toMatch(new RegExp(`useState<[^>]*>\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
+    }
+    // Sifirla'nin kapsami ise TUM 11 degil, yalnizca yapragin GOSTERDIGI 8
+    // alan (Task 5, A1 I4): daire-sayisi/arsa-payi ucu yapraktan cikip
+    // girdi kartina tasindi, bu yuzden Sifirla'nin disinda BILEREK. Yaprak
+    // ileride yeni bir alan gosterirse bu liste de guncellenmeli — aksi
+    // halde "Ayarlari sifirla" o alani sessizce atlar (A1 I3'un ayni
+    // kusurunun bir varyasyonu).
+    const sifirlananAlanlar = [
+      'builderProfit', 'riskLevel', 'iksaMode', 'iksaPercentage', 'iksaManualTL',
+      'manualMarketPrice', 'isAaEnabled', 'arsaAlani',
+    ];
+    for (const alan of sifirlananAlanlar) {
       expect(pageTsx).toMatch(new RegExp(`set[A-Z]\\w*\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
+    }
+  });
+
+  it('daire-sayisi/arsa-payi Sıfırla eyleminde ARTIK okunmuyor (Task 5, A1 I4)', () => {
+    // Bu ucu yaprak artik render etmiyor (Task 5); Sifirla onlari hala
+    // sifirlarsa, yaprakta gorunmeyen girdi kartini sessizce yeniden yazar
+    // — tam da bu task'in kapattigi kusurun kendisi, bu kez reset yolunda.
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    const yaprakOlmayanAlanlar = ['isApartmentCountEnabled', 'totalApartments', 'ownerApartmentShare'];
+    for (const alan of yaprakOlmayanAlanlar) {
+      expect(pageTsx).not.toMatch(new RegExp(`set[A-Z]\\w*\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
     }
   });
 

@@ -43,9 +43,13 @@ interface ProfitLevel {
 /**
  * Gelismis ayar varsayilanlari — TEK kaynak.
  *
- * Hem `useState` baslangic degerleri hem mobil yapragin "Sifirla" eylemi
- * buradan okur. Ayri ayri yazildiginda sessizce ayrisiyorlardi: Sifirla
- * `riskLevel`i 0 yapiyordu ama sayfanin baslangici 10'du.
+ * Tum 11 alan `useState` baslangic degeri olarak buradan okunur. Mobil
+ * yapragin "Sifirla" eylemi de buradan okur, ama yalnizca yapragin
+ * GOSTERDIGI 8 alan icin (bkz. `GelismisAyarlarSheet` cagrisindaki
+ * `onSifirla`) — daire-sayisi/arsa-payi (Task 5, A1 I4) yapraktan cikip
+ * girdi kartina tasindigi icin BILEREK Sifirla'nin disinda. Ayri ayri
+ * yazildiginda sessizce ayrisiyorlardi: Sifirla `riskLevel`i 0 yapiyordu
+ * ama sayfanin baslangici 10'du.
  */
 const AYAR_VARSAYILANLARI = {
   builderProfit: 1.30,
@@ -564,18 +568,19 @@ export default function Home() {
           onClose={() => setMobilAyarlarAcik(false)}
           onUygula={() => setMobilAyarlarAcik(false)}
           onSifirla={() => {
-            // Yapragin GOSTERDIGI her alan sifirlanir. Onceden 9 alandan
-            // yalnizca 4'u sifirlaniyordu (A1 I3): "Ayarlari sifirla" diyen
-            // bir buton, yapragin tamamini kastettigini ima eder.
+            // Yapragin GOSTERDIGI her alan sifirlanir — ne fazlasi ne eksigi.
+            // A1 I4 (Task 5): daire-sayisi/arsa-payi kontrolleri (Toplam
+            // Daire Sayisi, Arsa Sahibine Dusen Daire) yapraktan cikarilip
+            // yalnizca girdi kartina tasindi; bu yuzden BILEREK burada
+            // sifirlanmiyorlar — sifirlanirsa "Ayarlari sifirla" yaprakta
+            // gorunmeyen bir ekrani (girdi kartini) sessizce yeniden yazar,
+            // tam da bu task'in kapattigi kusur.
             setBuilderProfit(AYAR_VARSAYILANLARI.builderProfit);
             setRiskLevel(AYAR_VARSAYILANLARI.riskLevel);
             setIksaMode(AYAR_VARSAYILANLARI.iksaMode);
             setIksaPercentage(AYAR_VARSAYILANLARI.iksaPercentage);
             setIksaManualTL(AYAR_VARSAYILANLARI.iksaManualTL);
             setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
-            setIsApartmentCountEnabled(AYAR_VARSAYILANLARI.isApartmentCountEnabled);
-            setTotalApartments(AYAR_VARSAYILANLARI.totalApartments);
-            setOwnerApartmentShare(AYAR_VARSAYILANLARI.ownerApartmentShare);
             setIsAaEnabled(AYAR_VARSAYILANLARI.isAaEnabled);
             setArsaAlani(AYAR_VARSAYILANLARI.arsaAlani);
           }}
