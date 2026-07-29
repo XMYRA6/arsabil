@@ -43,4 +43,14 @@ describe('ikon seti', () => {
         const { container } = render(<Icons.IconHome className="x" />)
         expect(container.querySelector('svg')!.getAttribute('class')).toBe('x')
     })
+
+    it('IconHeartFilled path\'i fill="currentColor" taşir, IconHeart taşımaz', () => {
+        const { container: containerFilled } = render(<Icons.IconHeartFilled />)
+        const pathFilled = containerFilled.querySelector('svg path')!
+        expect(pathFilled.getAttribute('fill')).toBe('currentColor')
+
+        const { container: containerHeart } = render(<Icons.IconHeart />)
+        const pathHeart = containerHeart.querySelector('svg path')!
+        expect(pathHeart.getAttribute('fill')).toBeNull()
+    })
 })
