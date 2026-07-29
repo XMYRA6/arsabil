@@ -597,6 +597,56 @@
         color: var(--m-on-glass);
     }
 
+    /* ═══ 4f — Gelismis ayarlar yapragi ═════════════════════════════════ */
+
+    .ayarlarGovde {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding-bottom: 8px;
+    }
+
+    .ayarBolum {
+        padding: 11px;
+        border-radius: var(--m-r-inner);
+        background: var(--m-fill);
+        scroll-margin-top: 12px;
+    }
+
+    /* Yaprak belirli bir bolume odaklanarak acildiginda o bolum vurgulanir. */
+    .ayarBolum[data-acilis='true'] {
+        background: rgba(43, 124, 255, .08);
+        box-shadow: inset 0 0 0 1px rgba(43, 124, 255, .28);
+    }
+
+    .ayarlarAyak {
+        display: flex;
+        gap: 9px;
+        padding-top: 11px;
+        border-top: 1px solid var(--m-divider);
+    }
+
+    .ayarlarSifirla,
+    .ayarlarUygula {
+        flex: 1;
+        min-height: 48px;
+        border: 0;
+        border-radius: var(--m-r-btn);
+        font: 800 13.5px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .ayarlarSifirla {
+        background: var(--m-fill);
+        color: var(--m-on-glass);
+    }
+
+    .ayarlarUygula {
+        background: var(--m-grad-btn);
+        box-shadow: var(--m-sh-grad-btn);
+        color: #fff;
+    }
+
     @media (prefers-reduced-motion: reduce) {
 
         .segment,

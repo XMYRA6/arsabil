@@ -29,6 +29,7 @@ import type { RiskMeasurement } from '@/lib/risk/types';
 import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
+import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
 
 interface ProfitLevel {
   id: string;
@@ -69,6 +70,9 @@ export default function Home() {
   // Mobil `4a` ekrani acik mi. Gorunum durumu da `page.tsx`te yasar —
   // `HesaplaMobile` hicbir state sahiplenmez (plan mimari karari).
   const [mobilFisAcik, setMobilFisAcik] = useState<boolean>(false);
+  // `4f` yapragi ve acilirken odaklanacagi bolum.
+  const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState<boolean>(false);
+  const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
 
   const effectiveLandShareRatio = computeEffectiveLandShareX({
     isApartmentCountEnabled,
@@ -484,8 +488,9 @@ export default function Home() {
             profitLabel: profitLevels.find(p => p.value === builderProfit)?.label ?? 'Özel',
             profitMultiplier: builderProfit,
             onKapat: () => setMobilFisAcik(false),
-            onKarDegistir: () => {} /* TODO(Task 9): 4f yapragini kar bolumunde acar */,
+            onKarDegistir: () => { setMobilAyarBolumu('kar'); setMobilAyarlarAcik(true); },
           }}
+          onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
           girdi={{
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: setApartmentSize,
@@ -497,6 +502,38 @@ export default function Home() {
           ctaMetni={isSaving ? 'Kaydediliyor...' : 'Özet Rapor Oluştur'}
           ctaDevreDisi={isSaving}
           onCta={handleSaveReport}
+        />
+
+        <GelismisAyarlarSheet
+          open={mobilAyarlarAcik}
+          onClose={() => setMobilAyarlarAcik(false)}
+          onUygula={() => setMobilAyarlarAcik(false)}
+          onSifirla={() => {
+            // Masaustu cekmecesinin "varsayilana don" karsiligi: yalnizca bu
+            // yapraktaki alanlar sifirlanir, girdi karti dokunulmaz.
+            setBuilderProfit(1.30);
+            setRiskLevel(0);
+            setIksaMode('off');
+            setManualMarketPrice('');
+          }}
+          acilisBolumu={mobilAyarBolumu}
+          iksaMode={iksaMode} setIksaMode={setIksaMode}
+          iksaPercentage={iksaPercentage} setIksaPercentage={setIksaPercentage}
+          iksaManualTL={iksaManualTL} setIksaManualTL={setIksaManualTL}
+          riskLevel={riskLevel} setRiskLevel={setRiskLevel} riskLevels={riskLevels}
+          builderProfit={builderProfit} setBuilderProfit={setBuilderProfit}
+          profitLevels={profitLevels}
+          manualMarketPrice={manualMarketPrice} setManualMarketPrice={setManualMarketPrice}
+          isApartmentCountEnabled={isApartmentCountEnabled}
+          setIsApartmentCountEnabled={setIsApartmentCountEnabled}
+          totalApartments={totalApartments} setTotalApartments={setTotalApartments}
+          ownerApartmentShare={ownerApartmentShare} setOwnerApartmentShare={setOwnerApartmentShare}
+          isAaEnabled={isAaEnabled} setIsAaEnabled={setIsAaEnabled}
+          arsaAlani={arsaAlani} setArsaAlani={setArsaAlani}
+          parcelValue={parcelValue}
+          onParcelChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
+          risk={risk}
+          onRiskUygula={applyRiskSuggestion}
         />
 
         {/* Erken donus asagidaki masaustu agacini atladigi icin auth modali

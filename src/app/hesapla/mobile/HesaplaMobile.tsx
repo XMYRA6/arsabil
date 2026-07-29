@@ -16,6 +16,8 @@ export type HesaplaMobileProps = {
     /** `4a` acik mi. Durum `page.tsx`te yasar; bu bilesen state tutmaz. */
     fisAcik: boolean;
     fiyatAciklamasi: FiyatAciklamasiProps;
+    /** Baslik satirindaki ayarlar butonu `4f` yapragini acar. */
+    onAyarlarAc: () => void;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
     ctaDevreDisi: boolean;
@@ -35,6 +37,7 @@ export function HesaplaMobile({
     girdi,
     fisAcik,
     fiyatAciklamasi,
+    onAyarlarAc,
     ctaMetni,
     ctaDevreDisi,
     onCta,
@@ -60,7 +63,12 @@ export function HesaplaMobile({
                             </span>
                             {konumEtiketi}
                         </button>
-                        <button type="button" className={styles.headerIconBtn} aria-label="Ayarlar">
+                        <button
+                            type="button"
+                            className={styles.headerIconBtn}
+                            aria-label="Gelişmiş ayarlar"
+                            onClick={onAyarlarAc}
+                        >
                             <IconSettings size={17} />
                         </button>
                     </div>
