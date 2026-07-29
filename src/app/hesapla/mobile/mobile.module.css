@@ -824,13 +824,17 @@
 
     /* ═══ 4n — Analiz sekmesi ═══════════════════════════════════════════ */
 
-    /* `AnalizSekmesi`nin ustundeki "Kapat" satiri — `.fiyatAciklamasi`nin
-       kendi kenar boslugunu tasidigi gibi, bu satir da `.hesaplaMobilKok`in
-       duz sutununda kendi yatay kenar boslugunu kendisi tasir. */
+    /* `AnalizSekmesi`nin ustundeki baslik + "Kapat" satiri —
+       `.fiyatAciklamasi`nin kendi `.aciklamaBaslik`iyla AYNI desen (baslik +
+       kapat, ikon degil), ama bu satir `.hesaplaMobilKok`in duz sutununda
+       dogrudan durdugu icin `.aciklamaBaslik`in aksine kendi yatay kenar
+       boslugunu kendisi tasir. */
     .analizKapatSatiri {
         margin: 0 14px;
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
     }
 
     .analizGovde {

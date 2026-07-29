@@ -216,6 +216,17 @@ export default function Home() {
   // Birim maliyetin KAYNAGI (varsayilan/ilce/elle) — spec 1: ekranda
   // gosterilir, oncelik kurali `unitPriceSource.ts`te tek yerde yasar.
   const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'varsayilan' });
+  // Ilce secimi IKI degeri birden doldurur: birim maliyet VE piyasa fiyati.
+  // Piyasa fiyatinin kendi bir BirimMaliyetKaynagi tipi yok (o tip yalnizca
+  // birim maliyet icin var), bu yuzden minimum bir provenance bayragi:
+  // kullanici elle mi yazdi. Ilce secimi bu degeri de eziyor ve
+  // kullaniciya soylenmeden ezmek, birim maliyette engellenen hatanin
+  // aynisidir (bkz. `handleIlceChange`).
+  const [piyasaFiyatiElle, setPiyasaFiyatiElle] = useState<boolean>(false);
+  // `originalUnitPrice` geri-yuklenirken KAYNAGI da geri gelmeli, yoksa
+  // elle girilmis bir deger ilce degistirilip temizlenince "Varsayilan"
+  // etiketiyle yalan soyler (bkz. `handleIlChange`/`handleClearLocation`).
+  const [originalUnitPriceKaynagi, setOriginalUnitPriceKaynagi] = useState<BirimMaliyetKaynagi | null>(null);
 
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
 
@@ -403,9 +414,12 @@ export default function Home() {
     setSelectedIl(il);
     setSelectedIlce('');
     if (originalUnitPrice !== null) {
-      setGlobalUnitPrice(originalUnitPrice);
-      setBirimMaliyetKaynagi(konumTemizlendi(originalUnitPrice).kaynak);
+      setGlobalUnitPrice(konumTemizlendi(originalUnitPrice).birimMaliyet);
+      // Kaydedilmis kaynak varsa ONU geri getir (ornegin elle girilmisti);
+      // yoksa `konumTemizlendi`nin varsayilanina dus.
+      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? konumTemizlendi(originalUnitPrice).kaynak);
       setOriginalUnitPrice(null);
+      setOriginalUnitPriceKaynagi(null);
     }
   };
 
@@ -413,15 +427,20 @@ export default function Home() {
     setSelectedIlce(ilce);
     const entry = districtPrices.find(d => d.il === selectedIl && d.ilce === ilce);
     if (!entry) return;
-    if (originalUnitPrice === null) setOriginalUnitPrice(globalUnitPrice);
+    if (originalUnitPrice === null) {
+      setOriginalUnitPrice(globalUnitPrice);
+      setOriginalUnitPriceKaynagi(birimMaliyetKaynagi);
+    }
     const sonuc = ilceSecildi(entry, apartmentSize);
     setGlobalUnitPrice(sonuc.birimMaliyet);
     setManualMarketPrice(sonuc.piyasaFiyati);
-    // Spec 4: elle girilmis bir deger EZILDIYSE kullaniciya soylenir.
-    // Sessizce degistirmek, kullanicinin "neden degisti" diye sormasina yol
-    // acar. `react-hot-toast` bu dosyada zaten import edili.
-    if (birimMaliyetKaynagi.tur === 'elle') {
-      toast(`${entry.ilce} ortalamasına güncellendi`);
+    // Piyasa fiyati da ilceden geldi, artik elle girilmis degil.
+    setPiyasaFiyatiElle(false);
+    // Spec 4: elle girilmis bir deger EZILDIYSE kullaniciya soylenir — birim
+    // maliyet VEYA piyasa fiyati, ilce ikisini birden doldurur. Sessizce
+    // degistirmek, kullanicinin "neden degisti" diye sormasina yol acar.
+    if (birimMaliyetKaynagi.tur === 'elle' || piyasaFiyatiElle) {
+      toast(`${entry.ilce} ortalamasına güncellendi`, { position: 'top-right' });
     }
     setBirimMaliyetKaynagi(sonuc.kaynak);
   };
@@ -430,9 +449,10 @@ export default function Home() {
     setSelectedIl('');
     setSelectedIlce('');
     if (originalUnitPrice !== null) {
-      setGlobalUnitPrice(originalUnitPrice);
-      setBirimMaliyetKaynagi(konumTemizlendi(originalUnitPrice).kaynak);
+      setGlobalUnitPrice(konumTemizlendi(originalUnitPrice).birimMaliyet);
+      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? konumTemizlendi(originalUnitPrice).kaynak);
       setOriginalUnitPrice(null);
+      setOriginalUnitPriceKaynagi(null);
     }
   };
 
@@ -538,7 +558,7 @@ export default function Home() {
             birimFiyat: sonucDegeri(result?.FD_per_m2),
             karsilastirma: {
               piyasaFiyati: manualMarketPrice,
-              onPiyasaFiyati: setManualMarketPrice,
+              onPiyasaFiyati: (v: string) => { setManualMarketPrice(v); setPiyasaFiyatiElle(true); },
               farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
             },
             onFisAc: () => setMobilFisAcik(true),
@@ -557,7 +577,6 @@ export default function Home() {
           }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
           analizAcik={mobilAnalizAcik}
-          onAnalizAc={() => setMobilAnalizAcik(true)}
           onAnalizKapat={() => setMobilAnalizAcik(false)}
           analiz={{ result, baseInput: chartBaseInput, marketPrice: marketPriceNum }}
           girdi={{
