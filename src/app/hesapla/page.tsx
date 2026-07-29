@@ -27,6 +27,7 @@ import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizar
 import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
 import type { RiskMeasurement } from '@/lib/risk/types';
 import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers';
+import { HesaplaMobile } from './mobile/HesaplaMobile';
 
 interface ProfitLevel {
   id: string;
@@ -443,6 +444,33 @@ export default function Home() {
       )}
     </>
   );
+
+  // Mobil dal: yeni "Premium Liquid Glass" ekranina devreder (spec 2026-07-28).
+  // `isDesktopViewport` varsayilan olarak `true`dur (bkz. yukaridaki tanim) —
+  // SSR ve ilk client render'i AYNI degeri kullanir (ikisi de `true`), bu yuzden
+  // hydration uyusmazligi olusmaz. Gercek bir telefonda ilk kare kisaca eski
+  // agaci (asagidaki masaustu JSX, mobil genislikte CSS ile zaten "eski mobil"
+  // gorunumune donusen ayni agac) gosterir; `useEffect` mount sonrasi calisip
+  // `matchMedia` ile gercek genisligi olcunce ayni tick icinde `HesaplaMobile`'a
+  // gecer. Bu, `ParcelPicker`/`RiskSuggestionCard` icin zaten kabul edilmis olan
+  // ayni desenin devamidir — yeni bir tehlike sinifi eklemez.
+  if (!isDesktopViewport) {
+    const piyasaFarkiYuzde = marketPriceNum > 0 && result
+      ? Math.round(((result.FD_total - marketPriceNum) / marketPriceNum) * 100)
+      : null;
+
+    return (
+      <HesaplaMobile
+        konumEtiketi={selectedIlce || selectedIl || 'Konum seç'}
+        minDaireFiyati={result?.FD_total ?? null}
+        arsaPayiYuzde={Math.round(effectiveLandShareRatio)}
+        birimFiyat={result?.FD_per_m2 ?? null}
+        skor={null /* TODO: canli skor kaynagi henuz yok, bkz. rapor */}
+        piyasaFarkiYuzde={piyasaFarkiYuzde}
+        onFisAc={() => {} /* TODO(Task 8): "Bu fiyat nereden geliyor" (4a) ekranini acar */}
+      />
+    );
+  }
 
   return (
     <div className={styles.container}>

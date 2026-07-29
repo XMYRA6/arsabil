@@ -1,0 +1,250 @@
+/* Mobil Hesapla ekrani (Premium Liquid Glass, 2026-07-28).
+   Tasarim kaynagi: docs/tasarim/mobil-2026-07-28/kartlar/2a.html
+   TUM kurallar mobil media query icinde kalmali; masaustu (>=769px)
+   duzeni bu dosyadan hic etkilenmez. */
+@media (max-width: 768px) {
+    /* HesaplaMobile'in TEK kok elemani: MobileScreen'in `.screen > *` kurali
+       icerigi mesh'in ustune tasir (bkz. MobileScreen.module.css); bu kok
+       tek dogrudan cocuk olarak kaldigi surece kural burada da gecerlidir. */
+    .hesaplaMobilKok {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* ── Baslik satiri ── */
+    .headerRow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 2px 16px 8px;
+    }
+
+    .logoBox {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #2b7cff, #22d3ee);
+        box-shadow: 0 6px 16px rgba(43, 124, 255, .4), inset 0 1px 0 rgba(255, 255, 255, .5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+    }
+
+    .logoDot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .75);
+    }
+
+    .headerTitle {
+        font: 800 17px Inter, sans-serif;
+        color: var(--m-ink);
+        letter-spacing: -.2px;
+    }
+
+    .headerActions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .headerChip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: var(--m-r-btn);
+        border: 1px solid rgba(255, 255, 255, .85);
+        background: rgba(255, 255, 255, .55);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        box-shadow: 0 4px 14px rgba(31, 111, 235, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
+        color: var(--m-ink);
+        font: 700 12px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .headerChipIcon {
+        color: #2b7cff;
+        display: flex;
+    }
+
+    .headerIconBtn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--m-r-btn);
+        border: 1px solid rgba(255, 255, 255, .85);
+        background: rgba(255, 255, 255, .55);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        box-shadow: 0 4px 14px rgba(31, 111, 235, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
+        color: #42536b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* ── Sonuc karti: canli degrade blok ── */
+    .sonucKarti {
+        position: relative;
+        margin: 0 14px;
+        padding: 13px 14px 11px;
+        border-radius: var(--m-r-card);
+        background: var(--m-grad-accent);
+        box-shadow: var(--m-sh-grad-card), inset 0 1px 0 rgba(255, 255, 255, .45);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sonucIsik {
+        position: absolute;
+        top: -60px;
+        right: -30px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, .34), transparent 66%);
+        pointer-events: none;
+    }
+
+    .sonucUst {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .sonucFiyatWrap {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .sonucEtiket {
+        font: 700 10.5px Inter, sans-serif;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .82);
+    }
+
+    .sonucFiyat {
+        font-size: 31px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -.8px;
+        text-shadow: 0 2px 10px rgba(9, 50, 110, .28);
+    }
+
+    .sonucBirim {
+        font-size: 15px;
+        opacity: .8;
+    }
+
+    .sonucRozet {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .92);
+        box-shadow: 0 4px 14px rgba(6, 44, 99, .18);
+        font: 800 10.5px Inter, sans-serif;
+        white-space: nowrap;
+    }
+
+    .sonucRozetUcuz {
+        color: var(--m-success-text);
+    }
+
+    .sonucRozetPahali {
+        color: var(--m-danger);
+    }
+
+    .sonucMetrikler {
+        position: relative;
+        display: flex;
+        gap: 8px;
+    }
+
+    .metrikKutu {
+        flex: 1;
+        padding: 9px 11px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, .2);
+        border: 1px solid rgba(255, 255, 255, .38);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .metrikEtiket {
+        font: 700 9.5px Inter, sans-serif;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .78);
+    }
+
+    .metrikDeger {
+        font-size: 15px;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .metrikBirimKucuk {
+        font-size: 9.5px;
+        opacity: .75;
+    }
+
+    .metrikKutuSkor {
+        flex: none;
+        width: 62px;
+        padding: 9px 8px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, .94);
+        box-shadow: 0 4px 14px rgba(6, 44, 99, .16);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-items: center;
+    }
+
+    .metrikKutuSkor .metrikEtiket {
+        color: var(--m-body);
+        text-align: center;
+    }
+
+    .metrikDegerSkor {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--m-success-text);
+    }
+
+    .fisButonu {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 13px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, .4);
+        background: rgba(255, 255, 255, .16);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #fff;
+        font: 700 11.5px Inter, sans-serif;
+        cursor: pointer;
+    }
+}
