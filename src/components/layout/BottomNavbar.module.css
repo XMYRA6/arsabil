@@ -1,216 +1,86 @@
-/* ==========================================================================
-   BOTTOM NAVBAR — Apple iOS Tab Bar Quality
-   ========================================================================== */
-
 .bottomNav {
-    display: none;
     position: fixed;
-    bottom: 0;
     left: 0;
     right: 0;
-    width: 100%;
-    height: calc(83px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-
-    /* Dark mode: deep iOS frosted glass */
-    background: var(--topbar-bg);
-    border-top: 0.5px solid rgba(255, 255, 255, 0.13);
-    box-shadow:
-        0 -0.5px 0 rgba(255, 255, 255, 0.06),
-        0 -16px 48px rgba(0, 0, 0, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-    backdrop-filter: saturate(200%) blur(32px);
-    -webkit-backdrop-filter: saturate(200%) blur(32px);
-    z-index: var(--z-bottomnav, 999);
-
-    /* GPU layer — buttery smooth */
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    will-change: transform;
+    bottom: 0;
+    z-index: var(--z-bottomnav);
+    display: flex;
+    height: calc(74px + 22px + var(--safe-bottom));
+    padding: 9px 0 calc(22px + var(--safe-bottom));
+    background: rgba(255, 255, 255, .72);
+    border-top: 1px solid rgba(255, 255, 255, .9);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    box-shadow: var(--m-sh-bottombar);
 }
-
-/* Light theme overrides */
-:global([data-theme="light"]) .bottomNav {
-    background: rgba(248, 246, 255, 0.85);
-    border-top: 0.5px solid rgba(0, 0, 0, 0.10);
-    box-shadow:
-        0 -0.5px 0 rgba(0, 0, 0, 0.05),
-        0 -12px 36px rgba(0, 0, 0, 0.07),
-        inset 0 1px 0 rgba(255, 255, 255, 0.80);
-}
-
-@media (max-width: 768px) {
-    .bottomNav {
-        display: flex !important;
-        justify-content: space-around;
-        align-items: flex-start;
-        padding-top: 9px;
-    }
-}
-
-/* ---- NAV ITEMS ---- */
 
 .navItem {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     gap: 4px;
-    color: var(--muted);
-    font-size: 0.595rem;
-    font-weight: 600;
-    letter-spacing: 0.15px;
-    flex: 1;
-    min-height: 50px; /* Apple HIG 44pt minimum touch target */
-    padding: 0 4px;
-    cursor: pointer;
     text-decoration: none;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
-    transition: color 0.22s ease;
-    user-select: none;
-    -webkit-user-select: none;
+    color: var(--m-body);
 }
-
-.active {
-    color: var(--primary);
-}
-
-/* ---- ICON PILL HIGHLIGHT ---- */
 
 .iconWrap {
-    width: 48px;
-    height: 30px;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    position: relative;
-    background: transparent;
-    transition:
-        background 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    width: 46px;
+    height: 28px;
+    border-radius: var(--m-r-chip);
+    transition: background .22s cubic-bezier(.34, 1.56, .64, 1);
 }
 
 .active .iconWrap {
-    background: rgba(var(--primary-rgb), 0.14);
+    background: linear-gradient(135deg, rgba(59, 139, 255, .18), rgba(34, 211, 238, .22));
 }
 
-/* SVG icons */
-.navItem svg {
-    transition:
-        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-        stroke-width 0.18s ease,
-        color 0.22s ease;
-    will-change: transform;
+.active {
+    color: #1f6feb;
 }
-
-.active svg {
-    stroke-width: 2.5;
-    transform: scale(1.08);
-}
-
-/* Press haptic — instant compress, spring back */
-.navItem:active .iconWrap {
-    transform: scale(0.84);
-    transition: transform 0.08s ease;
-    background: rgba(var(--primary-rgb), 0.18);
-}
-
-.navItem:active svg {
-    transform: scale(0.84) !important;
-    transition: transform 0.08s ease;
-}
-
-/* ---- LABEL ---- */
 
 .label {
-    font-size: 0.595rem;
+    font-size: 9.8px;
     font-weight: 600;
-    letter-spacing: 0.15px;
-    line-height: 1;
-    transition: color 0.22s ease;
+    letter-spacing: -.1px;
 }
 
-/* ---- CENTER FAB BUTTON ---- */
-
-.fabContainer {
-    position: relative;
-    top: -20px;
-    justify-content: flex-start;
-    padding-top: 0;
-    gap: 3px;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.fabItem {
-    background: var(--brand-gradient);
-    width: 54px;
-    height: 54px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-
-    /* Apple-quality layered shadow */
-    box-shadow:
-        0 8px 24px var(--primary-glow),
-        inset 0 1px 0 rgba(255, 255, 255, .25),
-        0 0 0 3.5px var(--bg),
-        0 2px 4px rgba(0, 0, 0, 0.12);
-
-    transition:
-        transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
-        box-shadow 0.22s ease;
-    will-change: transform;
-}
-
-.fabActive {
-    box-shadow:
-        0 8px 24px var(--primary-glow),
-        inset 0 1px 0 rgba(255, 255, 255, .25),
-        0 0 0 3.5px var(--bg),
-        0 2px 6px rgba(0, 0, 0, 0.16);
-    transform: scale(1.07);
-}
-
-.fabContainer:active .fabItem {
-    transform: scale(0.88) !important;
-    transition: transform 0.08s ease !important;
-    box-shadow:
-        0 4px 10px var(--primary-glow),
-        inset 0 1px 0 rgba(255, 255, 255, .25),
-        0 0 0 3.5px var(--bg);
-}
-
-.fabText {
-    position: absolute;
-    bottom: -20px;
-    font-size: 0.595rem;
-    font-weight: 600;
-    white-space: nowrap;
-    letter-spacing: 0.15px;
-    line-height: 1;
-    transition: color 0.22s ease;
+.active .label {
+    font-weight: 800;
 }
 
 .badge {
     position: absolute;
-    top: -2px;
-    right: -6px;
+    top: -3px;
+    right: 4px;
     min-width: 16px;
     height: 16px;
+    padding: 0 3px;
     border-radius: 8px;
-    padding: 0 4px;
-    background: var(--red);
-    border: 2px solid var(--bg);
-    color: white;
-    font-size: 0.6rem;
-    font-weight: 900;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 2px solid #fff;
+    background: linear-gradient(135deg, #ff6b6f, #ff2d55);
+    color: #fff;
+    font-family: var(--m-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 12px;
+    text-align: center;
+}
+
+/* Alt cubuk yalnizca mobilde. Masaustunde global Navbar kullanilir. */
+@media (min-width: 769px) {
+    .bottomNav {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iconWrap {
+        transition: none;
+    }
 }

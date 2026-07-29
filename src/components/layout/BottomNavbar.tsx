@@ -4,11 +4,26 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { IconBox, IconFile, IconHome, IconMessage, IconUser, type IconProps } from '@/components/icons';
 import styles from './BottomNavbar.module.css';
 
 interface Conversation {
     unreadCount: number;
 }
+
+/** Alt cubugun HIC gosterilmedigi yollar (tam eslesme). */
+export const BOTTOMNAV_HIDDEN_PATHS = ['/login', '/register'] as const;
+
+/** Alt cubugun gizlendigi yol onekleri: sohbet, wizard, ilan detay. */
+const HIDDEN_PREFIXES = ['/inbox/', '/listings/new', '/listing/'] as const;
+
+const TABS: { href: string; label: string; Icon: React.ComponentType<IconProps> }[] = [
+    { href: '/marketplace', label: 'Pazar', Icon: IconBox },
+    { href: '/dashboard/reports', label: 'Raporlar', Icon: IconFile },
+    { href: '/', label: 'Ana sayfa', Icon: IconHome },
+    { href: '/inbox', label: 'Mesajlar', Icon: IconMessage },
+    { href: '/dashboard/profile', label: 'Profil', Icon: IconUser },
+];
 
 export function BottomNavbar() {
     const pathname = usePathname();
@@ -46,51 +61,35 @@ export function BottomNavbar() {
         return () => { cancelled = true; };
     }, [status, pathname]);
 
-    if (pathname === '/login' || pathname === '/register') return null;
+    const hidden =
+        (BOTTOMNAV_HIDDEN_PATHS as readonly string[]).includes(pathname ?? '') ||
+        HIDDEN_PREFIXES.some(p => (pathname ?? '').startsWith(p));
+    if (hidden) return null;
 
     const showBadge = status === 'authenticated' && unreadTotal > 0;
     const unreadLabel = unreadTotal > 9 ? '9+' : String(unreadTotal);
 
     return (
         <nav className={styles.bottomNav}>
-            <Link href="/marketplace" className={`${styles.navItem} ${pathname === '/marketplace' ? styles.active : ''}`}>
-                <div className={styles.iconWrap}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                </div>
-                <span>Pazar</span>
-            </Link>
-
-            <Link href="/dashboard/reports" className={`${styles.navItem} ${pathname === '/dashboard/reports' ? styles.active : ''}`}>
-                <div className={styles.iconWrap}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
-                <span>Raporlar</span>
-            </Link>
-
-            {/* iOS Center Floating Action Button Style */}
-            <Link href="/hesapla" className={`${styles.navItem} ${styles.fabContainer}`}>
-                <div className={`${styles.fabItem} ${pathname === '/hesapla' ? styles.fabActive : ''}`}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                </div>
-                <span className={styles.fabText} style={{ fontWeight: pathname === '/hesapla' ? 800 : 700, color: pathname === '/hesapla' ? 'var(--primary)' : 'var(--muted)' }}>Hesapla</span>
-            </Link>
-            
-            <Link href="/inbox" className={`${styles.navItem} ${pathname === '/inbox' ? styles.active : ''}`}>
-                <div className={styles.iconWrap}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                    {showBadge && (
-                        <span className={styles.badge}>{unreadLabel}</span>
-                    )}
-                </div>
-                <span>Mesajlar</span>
-            </Link>
-
-            <Link href="/dashboard/profile" className={`${styles.navItem} ${pathname === '/dashboard/profile' ? styles.active : ''}`}>
-                <div className={styles.iconWrap}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-                <span>Profil</span>
-            </Link>
+            {TABS.map(({ href, label, Icon }) => {
+                const active = pathname === href;
+                return (
+                    <Link
+                        key={href}
+                        href={href}
+                        className={`${styles.navItem} ${active ? styles.active : ''}`}
+                        aria-current={active ? 'page' : undefined}
+                    >
+                        <span className={styles.iconWrap}>
+                            <Icon size={21} strokeWidth={active ? 2.4 : 2} />
+                            {href === '/inbox' && showBadge && (
+                                <span className={styles.badge}>{unreadLabel}</span>
+                            )}
+                        </span>
+                        <span className={styles.label}>{label}</span>
+                    </Link>
+                );
+            })}
         </nav>
     );
 }
