@@ -45,51 +45,6 @@
         letter-spacing: -.2px;
     }
 
-    .headerActions {
-        margin-left: auto;
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-
-    .headerChip {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        height: 36px;
-        padding: 0 12px;
-        border-radius: var(--m-r-btn);
-        border: 1px solid rgba(255, 255, 255, .85);
-        background: rgba(255, 255, 255, .55);
-        backdrop-filter: blur(24px) saturate(180%);
-        -webkit-backdrop-filter: blur(24px) saturate(180%);
-        box-shadow: 0 4px 14px rgba(31, 111, 235, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
-        color: var(--m-ink);
-        font: 700 12px Inter, sans-serif;
-        cursor: pointer;
-    }
-
-    .headerChipIcon {
-        color: #2b7cff;
-        display: flex;
-    }
-
-    .headerIconBtn {
-        width: 36px;
-        height: 36px;
-        border-radius: var(--m-r-btn);
-        border: 1px solid rgba(255, 255, 255, .85);
-        background: rgba(255, 255, 255, .55);
-        backdrop-filter: blur(24px) saturate(180%);
-        -webkit-backdrop-filter: blur(24px) saturate(180%);
-        box-shadow: 0 4px 14px rgba(31, 111, 235, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
-        color: #42536b;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-
     /* ── Sonuc karti: canli degrade blok ── */
     .sonucKarti {
         position: relative;
@@ -119,7 +74,6 @@
         position: relative;
         display: flex;
         align-items: flex-start;
-        justify-content: space-between;
         gap: 10px;
     }
 
@@ -147,27 +101,6 @@
     .sonucBirim {
         font-size: 15px;
         opacity: .8;
-    }
-
-    .sonucRozet {
-        flex: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, .92);
-        box-shadow: 0 4px 14px rgba(6, 44, 99, .18);
-        font: 800 10.5px Inter, sans-serif;
-        white-space: nowrap;
-    }
-
-    .sonucRozetUcuz {
-        color: var(--m-success-text);
-    }
-
-    .sonucRozetPahali {
-        color: var(--m-danger);
     }
 
     .sonucMetrikler {
@@ -225,28 +158,6 @@
         color: #fff;
         font: 700 11.5px Inter, sans-serif;
         cursor: pointer;
-    }
-
-    /* Paylasilan `SegmentedTabs` bilesenine dokunmadan ayni kenar boslugunu
-       vermek icin sarmalayici. */
-    .sekmeKap {
-        margin: 0 14px;
-    }
-
-    /* Paylasilan `SegmentedTabs` pazaryeri icin boyutlanmis ve bu ekranda
-       orantisiz duruyordu. Bilesen DEGISTIRILMEDI (baska sayfalar kullaniyor);
-       yalnizca bu sarmalayicinin altinda oznitelik seciciyle kuculuyor —
-       sinif adlari CSS module hash'i oldugu icin oznitelik secici gerekli. */
-    .sekmeKap [role='tablist'] {
-        padding: 3px;
-        border-radius: 15px;
-    }
-
-    .sekmeKap [role='tab'] {
-        min-height: 38px;
-        padding: 0 10px;
-        border-radius: 12px;
-        font: 700 12.5px Inter, sans-serif;
     }
 
     /* ═══ Girdi karti (2a alt) ═══════════════════════════════════════════ */
@@ -913,6 +824,15 @@
 
     /* ═══ 4n — Analiz sekmesi ═══════════════════════════════════════════ */
 
+    /* `AnalizSekmesi`nin ustundeki "Kapat" satiri — `.fiyatAciklamasi`nin
+       kendi kenar boslugunu tasidigi gibi, bu satir da `.hesaplaMobilKok`in
+       duz sutununda kendi yatay kenar boslugunu kendisi tasir. */
+    .analizKapatSatiri {
+        margin: 0 14px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
     .analizGovde {
         margin: 0 14px;
         display: flex;
@@ -959,8 +879,6 @@
        korunur, TIKLAMA alani seffaf bir ::after ile 44px'e genisletilir.
        Boylece kart duzeni degismez ama parmak hedefi standarda uyar.
        (Canli olcumle yakalandi: 7 kontrol 44px'in altindaydi.) */
-    .headerChip::after,
-    .headerIconBtn::after,
     .fisButonu::after,
     .stepperAzalt::after,
     .stepperArtir::after,
@@ -976,8 +894,6 @@
         transform: translateY(-50%);
     }
 
-    .headerChip,
-    .headerIconBtn,
     .fisButonu,
     .stepperAzalt,
     .stepperArtir,

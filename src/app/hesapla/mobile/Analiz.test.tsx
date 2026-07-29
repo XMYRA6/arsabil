@@ -2,7 +2,6 @@
 import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { AnalizSekmesi } from './AnalizSekmesi'
 
 // Chart.js jsdom'da canvas gerektirir; sekmenin SOZLESMESI test ediliyor,
@@ -68,19 +67,5 @@ describe('AnalizSekmesi', () => {
     })
 })
 
-describe('HesaplaMobile sekme gecisi', () => {
-    it('Hesap ve Analiz sekmeleri arasinda gecis yapilir', async () => {
-        const onSekme = jest.fn()
-        const { SekmeSecici } = await import('./AnalizSekmesi')
-        render(<SekmeSecici aktif="hesap" onDegis={onSekme} />)
-        await userEvent.click(screen.getByRole('tab', { name: 'Analiz' }))
-        expect(onSekme).toHaveBeenCalledWith('analiz')
-    })
-
-    it('aktif sekme isaretlenir', async () => {
-        const { SekmeSecici } = await import('./AnalizSekmesi')
-        render(<SekmeSecici aktif="analiz" onDegis={jest.fn()} />)
-        expect(screen.getByRole('tab', { name: 'Analiz' })).toHaveAttribute('aria-selected', 'true')
-        expect(screen.getByRole('tab', { name: 'Hesap' })).toHaveAttribute('aria-selected', 'false')
-    })
-})
+// Sekme secici bileseninin testleri Task 6'da kaldirildi: bilesenin kendisi
+// de AnalizSekmesi.tsx'ten kaldirildi (sekme seridi kalkti, spec K4/K5).

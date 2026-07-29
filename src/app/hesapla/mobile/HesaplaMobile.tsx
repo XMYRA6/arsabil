@@ -2,27 +2,26 @@
 
 import { MobileScreen } from '@/components/mobile/MobileScreen';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { IconPin, IconSettings } from '@/components/icons';
+import { IconSettings } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
-import { AnalizSekmesi, SekmeSecici, type AnalizSekmesiProps, type MobilSekme } from './AnalizSekmesi';
+import { AnalizSekmesi, type AnalizSekmesiProps } from './AnalizSekmesi';
 import styles from './mobile.module.css';
 
 export type HesaplaMobileProps = {
-    /** Baslik satirindaki konum ipucu (secili ilce/il, yoksa varsayilan metin). */
-    konumEtiketi: string;
     sonuc: SonucKartiProps;
     girdi: GirdiKartiProps;
     /** `4a` acik mi. Durum `page.tsx`te yasar; bu bilesen state tutmaz. */
     fisAcik: boolean;
     fiyatAciklamasi: FiyatAciklamasiProps;
-    /** Baslik satirindaki ayarlar butonu `4f` yapragini acar. */
+    /** Girdi kartinin altindaki etiketli buton `4f` yapragini acar — gelismis
+        ayarlara TEK kapi (spec K4/K5: basliktaki disli ve konum cipi kalkti). */
     onAyarlarAc: () => void;
-    /** Konum cipi `4f` yapragini konum/risk bolumunde acar. */
-    onKonumAc: () => void;
-    aktifSekme: MobilSekme;
-    onSekmeDegis: (sekme: MobilSekme) => void;
+    /** Analiz derinlestirme yapragi acik mi. Durum `page.tsx`te yasar. */
+    analizAcik: boolean;
+    onAnalizAc: () => void;
+    onAnalizKapat: () => void;
     analiz: AnalizSekmesiProps;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
@@ -38,15 +37,13 @@ export type HesaplaMobileProps = {
  * mobil ekran kendi agacinda kurulur).
  */
 export function HesaplaMobile({
-    konumEtiketi,
     sonuc,
     girdi,
     fisAcik,
     fiyatAciklamasi,
     onAyarlarAc,
-    onKonumAc,
-    aktifSekme,
-    onSekmeDegis,
+    analizAcik,
+    onAnalizKapat,
     analiz,
     ctaMetni,
     ctaDevreDisi,
@@ -61,43 +58,34 @@ export function HesaplaMobile({
             `hasStickyCta` ise asagidaki sabit CTA'nin yuksekligini ekler. */}
         <MobileScreen hasBottomNav={false} hasStickyCta>
             <div className={styles.hesaplaMobilKok}>
+                {/* Baslikta artik yalnizca logo + ad var: konum cipi girdi
+                    kartina (`KonumBlogu`), disli ise etiketli "Gelismis
+                    ayarlar" butonuna tasindi — gelismis ayarlara TEK kapi
+                    (spec K4/K5). */}
                 <header className={styles.headerRow}>
                     <div className={styles.logoBox} aria-hidden="true">
                         <div className={styles.logoDot} />
                     </div>
                     <span className={styles.headerTitle}>Hesapla</span>
-                    <div className={styles.headerActions}>
-                        {/* Cip, yapragin "Konum ve resmi risk" bolumunu acar —
-                            ParcelPicker orada yasiyor. Onceden hicbir isleve
-                            bagli degildi ama buton olarak duyuruluyordu. */}
-                        <button
-                            type="button"
-                            className={styles.headerChip}
-                            aria-label={`Konum: ${konumEtiketi}. Değiştirmek için dokunun`}
-                            onClick={onKonumAc}
-                        >
-                            <span className={styles.headerChipIcon}>
-                                <IconPin size={15} strokeWidth={2.2} />
-                            </span>
-                            {konumEtiketi}
-                        </button>
-                        <button
-                            type="button"
-                            className={styles.headerIconBtn}
-                            aria-label="Gelişmiş ayarlar"
-                            onClick={onAyarlarAc}
-                        >
-                            <IconSettings size={17} />
-                        </button>
-                    </div>
                 </header>
 
-                <div className={styles.sekmeKap}>
-                    <SekmeSecici aktif={aktifSekme} onDegis={onSekmeDegis} />
-                </div>
-
-                {aktifSekme === 'analiz'
-                    ? <AnalizSekmesi {...analiz} />
+                {analizAcik
+                    ? (
+                        <>
+                            {/* `FiyatAciklamasi`nin kapat deseniyle ayni: etiketli
+                                bir "Kapat" satiri, ikon degil. */}
+                            <div className={styles.analizKapatSatiri}>
+                                <button
+                                    type="button"
+                                    className={styles.aciklamaKapat}
+                                    onClick={onAnalizKapat}
+                                >
+                                    Kapat
+                                </button>
+                            </div>
+                            <AnalizSekmesi {...analiz} />
+                        </>
+                    )
                     : (
                         <>
                             <SonucKarti {...sonuc} />

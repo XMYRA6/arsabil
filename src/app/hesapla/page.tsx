@@ -30,7 +30,7 @@ import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers'
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
-import type { MobilSekme } from './mobile/AnalizSekmesi';
+import { ilceSecildi, konumTemizlendi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -102,7 +102,6 @@ export default function Home() {
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState<boolean>(false);
   const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
-  const [mobilSekme, setMobilSekme] = useState<MobilSekme>('hesap');
 
   const effectiveLandShareRatio = computeEffectiveLandShareX({
     isApartmentCountEnabled,
@@ -214,6 +213,9 @@ export default function Home() {
   const [, setGlobalExcavationLow] = useState<number>(0.01);
   const [, setGlobalExcavationMedium] = useState<number>(0.02);
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
+  // Birim maliyetin KAYNAGI (varsayilan/ilce/elle) — spec 1: ekranda
+  // gosterilir, oncelik kurali `unitPriceSource.ts`te tek yerde yasar.
+  const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'varsayilan' });
 
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
 
@@ -402,6 +404,7 @@ export default function Home() {
     setSelectedIlce('');
     if (originalUnitPrice !== null) {
       setGlobalUnitPrice(originalUnitPrice);
+      setBirimMaliyetKaynagi(konumTemizlendi(originalUnitPrice).kaynak);
       setOriginalUnitPrice(null);
     }
   };
@@ -411,9 +414,16 @@ export default function Home() {
     const entry = districtPrices.find(d => d.il === selectedIl && d.ilce === ilce);
     if (!entry) return;
     if (originalUnitPrice === null) setOriginalUnitPrice(globalUnitPrice);
-    setGlobalUnitPrice(entry.avgUnitConstructionPrice);
-    const market = Math.round(entry.avgSalesPricePerM2 * apartmentSize);
-    setManualMarketPrice(market.toLocaleString('tr-TR', { maximumFractionDigits: 0 }));
+    const sonuc = ilceSecildi(entry, apartmentSize);
+    setGlobalUnitPrice(sonuc.birimMaliyet);
+    setManualMarketPrice(sonuc.piyasaFiyati);
+    // Spec 4: elle girilmis bir deger EZILDIYSE kullaniciya soylenir.
+    // Sessizce degistirmek, kullanicinin "neden degisti" diye sormasina yol
+    // acar. `react-hot-toast` bu dosyada zaten import edili.
+    if (birimMaliyetKaynagi.tur === 'elle') {
+      toast(`${entry.ilce} ortalamasına güncellendi`);
+    }
+    setBirimMaliyetKaynagi(sonuc.kaynak);
   };
 
   const handleClearLocation = () => {
@@ -421,6 +431,7 @@ export default function Home() {
     setSelectedIlce('');
     if (originalUnitPrice !== null) {
       setGlobalUnitPrice(originalUnitPrice);
+      setBirimMaliyetKaynagi(konumTemizlendi(originalUnitPrice).kaynak);
       setOriginalUnitPrice(null);
     }
   };
@@ -521,7 +532,6 @@ export default function Home() {
     return (
       <>
         <HesaplaMobile
-          konumEtiketi={selectedIlce || selectedIl || 'Konum seç'}
           sonuc={{
             minDaireFiyati: sonucDegeri(result?.FD_total),
             arsaPayiYuzde: Math.round(effectiveLandShareRatio),
@@ -546,11 +556,25 @@ export default function Home() {
             onKarDegistir: () => { setMobilAyarBolumu('kar'); setMobilAyarlarAcik(true); },
           }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
-          onKonumAc={() => { setMobilAyarBolumu('risk'); setMobilAyarlarAcik(true); }}
-          aktifSekme={mobilSekme}
-          onSekmeDegis={setMobilSekme}
+          analizAcik={mobilAnalizAcik}
+          onAnalizAc={() => setMobilAnalizAcik(true)}
+          onAnalizKapat={() => setMobilAnalizAcik(false)}
           analiz={{ result, baseInput: chartBaseInput, marketPrice: marketPriceNum }}
           girdi={{
+            konum: {
+              districtPrices, selectedIl, selectedIlce,
+              onIlChange: handleIlChange,
+              onIlceChange: handleIlceChange,
+              onClear: handleClearLocation,
+              birimMaliyet: globalUnitPrice,
+              birimMaliyetKaynagi,
+              onBirimMaliyet: (v: number) => {
+                setGlobalUnitPrice(v);
+                setBirimMaliyetKaynagi({ tur: 'elle' });
+              },
+              parselIsaretli: parcelValue.lat !== null && parcelValue.lng !== null,
+              onParselAc: () => { setMobilAyarBolumu('risk'); setMobilAyarlarAcik(true); },
+            },
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: setApartmentSize,
             landShareRatio, onLandShareRatio: setLandShareRatio,

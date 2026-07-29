@@ -3,8 +3,22 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GirdiKarti } from './GirdiKarti'
 
+const FIYATLAR = [
+    { id: '1', il: 'İstanbul', ilce: 'Kadıköy', avgSalesPricePerM2: 41000, avgUnitConstructionPrice: 12000 },
+    { id: '2', il: 'İstanbul', ilce: 'Beşiktaş', avgSalesPricePerM2: 62000, avgUnitConstructionPrice: 14000 },
+]
+
 function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
     return {
+        konum: {
+            districtPrices: FIYATLAR,
+            selectedIl: 'İstanbul', selectedIlce: 'Kadıköy',
+            onIlChange: jest.fn(), onIlceChange: jest.fn(), onClear: jest.fn(),
+            birimMaliyet: 12000,
+            birimMaliyetKaynagi: { tur: 'ilce' as const, ilce: 'Kadıköy' },
+            onBirimMaliyet: jest.fn(),
+            parselIsaretli: false, onParselAc: jest.fn(),
+        },
         luxLevel: 1.2, onLuxLevel: jest.fn(),
         apartmentSize: 140, onApartmentSize: jest.fn(),
         landShareRatio: 33, onLandShareRatio: jest.fn(),
@@ -16,6 +30,12 @@ function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
 }
 
 describe('GirdiKarti', () => {
+    it('konum blogu kartin EN USTUNDE', () => {
+        const { container } = render(<GirdiKarti {...props()} />)
+        const ilk = container.querySelector('section')!.firstElementChild!
+        expect(ilk.className).toMatch(/konumBlogu/)
+    })
+
     it('yapi standardi uc segment sunar ve secili olani isaretler', () => {
         render(<GirdiKarti {...props()} />)
         const tabs = screen.getAllByRole('tab')

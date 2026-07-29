@@ -1,36 +1,15 @@
 "use client";
 
-import { SegmentedTabs } from '@/components/mobile/SegmentedTabs';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
 import { BreakEvenChart } from '@/components/charts/BreakEvenChart';
 import type { CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
 import styles from './mobile.module.css';
 
-export type MobilSekme = 'hesap' | 'analiz';
-
-const SEKMELER = [
-    { value: 'hesap', label: 'Hesap' },
-    { value: 'analiz', label: 'Analiz' },
-];
-
-/** `HesaplaMobile` basligi altindaki Hesap/Analiz secici. */
-export function SekmeSecici({
-    aktif,
-    onDegis,
-}: {
-    aktif: MobilSekme;
-    onDegis: (sekme: MobilSekme) => void;
-}) {
-    return (
-        <SegmentedTabs
-            ariaLabel="Görünüm"
-            options={SEKMELER}
-            value={aktif}
-            onChange={v => onDegis(v as MobilSekme)}
-        />
-    );
-}
+// Hesap/Analiz sekme seridi ve onun tip/bileseni Task 6'da kaldirildi:
+// analiz artik `HesaplaMobile`de etiketli bir "Kapat" satiriyla acilip
+// kapanan bir derinlestirme yapragi, sekme degil (spec K4/K5 — tek kapi).
+// Gecmisi icin bkz. bu commit'ten onceki hal.
 
 export type AnalizSekmesiProps = {
     result: CalculationOutput | null;

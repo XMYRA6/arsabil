@@ -1,9 +1,12 @@
 "use client";
 
 import { computeEffectiveLandShareX } from '../calculatorUiHelpers';
+import { KonumBlogu, type KonumBloguProps } from './KonumBlogu';
 import styles from './mobile.module.css';
 
 export type GirdiKartiProps = {
+    /** Konum artik basliktaki cipte degil, girdi kartinin EN USTUNDE (spec K2). */
+    konum: KonumBloguProps;
     luxLevel: number;
     onLuxLevel: (v: number) => void;
     apartmentSize: number;
@@ -58,6 +61,7 @@ const M2_MAX = 400;
  * olsaydi sessizce ayrisirlardi.
  */
 export function GirdiKarti({
+    konum,
     luxLevel,
     onLuxLevel,
     apartmentSize,
@@ -83,6 +87,8 @@ export function GirdiKarti({
 
     return (
         <section className={styles.girdiKarti} aria-label="Proje girdileri">
+            <KonumBlogu {...konum} />
+
             {/* ── Yapi standardi ── */}
             <div className={styles.girdiSatir}>
                 <span className={styles.girdiEtiket}>Yapı standardı</span>
