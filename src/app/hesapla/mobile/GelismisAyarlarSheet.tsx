@@ -5,10 +5,10 @@ import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizar
 import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
 import type { RiskMeasurement } from '@/lib/risk/types';
 import {
-    FormulParamsFields,
+    ArsaAlaniFields,
     MarketField,
     RiskCostFields,
-    type FormulParamsProps,
+    type ArsaAlaniProps,
     type MarketFieldProps,
     type RiskCostProps,
 } from '../AdvancedSettingsSections';
@@ -20,7 +20,7 @@ export type AyarBolumu = 'kar' | 'risk' | 'iksa' | 'piyasa';
 export type GelismisAyarlarSheetProps =
     & RiskCostProps
     & MarketFieldProps
-    & FormulParamsProps
+    & ArsaAlaniProps
     & {
         open: boolean;
         onClose: () => void;
@@ -38,7 +38,7 @@ export type GelismisAyarlarSheetProps =
  * docs/tasarim/mobil-2026-07-28/kartlar/4f.html).
  *
  * Alan icerikleri mevcut `RiskCostFields` / `MarketField` /
- * `FormulParamsFields` bilesenlerinden gelir — mantik KOPYALANMAZ. Bu,
+ * `ArsaAlaniFields` bilesenlerinden gelir — mantik KOPYALANMAZ. Bu,
  * masaustu cekmecesiyle davranis paritesini garanti eder: ayni state,
  * ayni dogrulama, ayni kenar durumlari.
  *
@@ -48,6 +48,12 @@ export type GelismisAyarlarSheetProps =
  *
  * T2'nin acik kalemi burada kapaniyor: `ParcelPicker` ve
  * `RiskSuggestionCard` masaustu-only idi, artik mobilde de erisilebilir.
+ *
+ * A1 I4: daire-sayisi kontrolleri (Toplam Daire Sayisi, Arsa Sahibine Dusen
+ * Daire) yapraktan cikarildi — bunlar yalnizca girdi kartina ait; ayni ucu
+ * hem kartta hem yaprakta gostermek, birini degistirince digerini sessizce
+ * yeniden yaziyordu. `FormulParamsFields` masaustu cekmecesinde degismeden
+ * kaliyor (bkz. `AdvancedSettingsSections.tsx`).
  */
 export function GelismisAyarlarSheet({
     open,
@@ -106,16 +112,10 @@ export function GelismisAyarlarSheet({
                 <section
                     className={styles.ayarBolum}
                     role="group"
-                    aria-label="Formül parametreleri"
+                    aria-label="Arsa alanı"
                     data-acilis="false"
                 >
-                    <FormulParamsFields
-                        isApartmentCountEnabled={alanlar.isApartmentCountEnabled}
-                        setIsApartmentCountEnabled={alanlar.setIsApartmentCountEnabled}
-                        totalApartments={alanlar.totalApartments}
-                        setTotalApartments={alanlar.setTotalApartments}
-                        ownerApartmentShare={alanlar.ownerApartmentShare}
-                        setOwnerApartmentShare={alanlar.setOwnerApartmentShare}
+                    <ArsaAlaniFields
                         isAaEnabled={alanlar.isAaEnabled}
                         setIsAaEnabled={alanlar.setIsAaEnabled}
                         arsaAlani={alanlar.arsaAlani}

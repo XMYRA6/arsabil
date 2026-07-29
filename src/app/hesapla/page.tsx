@@ -587,10 +587,6 @@ export default function Home() {
           builderProfit={builderProfit} setBuilderProfit={setBuilderProfit}
           profitLevels={profitLevels}
           manualMarketPrice={manualMarketPrice} setManualMarketPrice={setManualMarketPrice}
-          isApartmentCountEnabled={isApartmentCountEnabled}
-          setIsApartmentCountEnabled={setIsApartmentCountEnabled}
-          totalApartments={totalApartments} setTotalApartments={setTotalApartments}
-          ownerApartmentShare={ownerApartmentShare} setOwnerApartmentShare={setOwnerApartmentShare}
           isAaEnabled={isAaEnabled} setIsAaEnabled={setIsAaEnabled}
           arsaAlani={arsaAlani} setArsaAlani={setArsaAlani}
           parcelValue={parcelValue}

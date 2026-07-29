@@ -21,77 +21,108 @@ interface RiskLevel {
   isDefault: boolean;
 }
 
-export interface FormulParamsProps {
+export interface DaireSayisiProps {
   isApartmentCountEnabled: boolean;
   setIsApartmentCountEnabled: (v: boolean) => void;
   totalApartments: number;
   setTotalApartments: React.Dispatch<React.SetStateAction<number>>;
   ownerApartmentShare: number;
   setOwnerApartmentShare: React.Dispatch<React.SetStateAction<number>>;
+}
+
+/** "Toplam Daire Sayısı" ve "Arsa Sahibine Düşen Daire" kontrolleri — yalnızca girdi kartına ait (A1 I4). */
+export function DaireSayisiFields({
+  isApartmentCountEnabled, setIsApartmentCountEnabled,
+  totalApartments, setTotalApartments,
+  ownerApartmentShare, setOwnerApartmentShare,
+}: DaireSayisiProps) {
+  return (
+    <div className={`${styles.drawerRow} ${styles.column}`}>
+      <div className={styles.drawerRowHead}>
+        <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Toplam Daire Sayısı</div>
+        <div className={styles.drawerToggleWrap}>
+          <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
+        </div>
+      </div>
+      {isApartmentCountEnabled && (
+        <>
+          <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
+            <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
+            <div className={styles.stepperRight}>
+              <span>daire</span>
+              <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
+              <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
+            </div>
+          </div>
+          <RangeSlider
+            label="Arsa Sahibine Düşen Daire"
+            min={0}
+            max={totalApartments}
+            step={1}
+            value={ownerApartmentShare}
+            unit="daire"
+            onChange={(e) => setOwnerApartmentShare(Number(e.target.value))}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+export interface ArsaAlaniProps {
   isAaEnabled: boolean;
   setIsAaEnabled: (v: boolean) => void;
   arsaAlani: number;
   setArsaAlani: React.Dispatch<React.SetStateAction<number>>;
 }
 
-/** Drawer "Formül Parametreleri" kartının içeriği (kart sarmalayıcısı hariç). */
-export function FormulParamsFields({
-  isApartmentCountEnabled, setIsApartmentCountEnabled,
-  totalApartments, setTotalApartments,
-  ownerApartmentShare, setOwnerApartmentShare,
+/** "Arsa Alanı (m²)" kontrolü — hem girdi kartı hem drawer/yaprak paylaşır. */
+export function ArsaAlaniFields({
   isAaEnabled, setIsAaEnabled,
   arsaAlani, setArsaAlani,
-}: FormulParamsProps) {
+}: ArsaAlaniProps) {
+  return (
+    <div className={`${styles.drawerRow} ${styles.column}`}>
+      <div className={styles.drawerRowHead}>
+        <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Arsa Alanı (m²)</div>
+        <div className={styles.drawerToggleWrap}>
+          <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
+        </div>
+      </div>
+      {isAaEnabled && (
+        <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
+          <input type="number" value={arsaAlani} onChange={(e) => setArsaAlani(Number(e.target.value))} />
+          <div className={styles.stepperRight}>
+            <span>m²</span>
+            <button onClick={() => setArsaAlani(p => Math.max(10, p - 10))}>−</button>
+            <button onClick={() => setArsaAlani(p => p + 10)}>+</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export interface FormulParamsProps extends DaireSayisiProps, ArsaAlaniProps {}
+
+/** Drawer "Formül Parametreleri" kartının içeriği (kart sarmalayıcısı hariç). */
+export function FormulParamsFields(props: FormulParamsProps) {
   return (
     <>
-      <div className={`${styles.drawerRow} ${styles.column}`}>
-        <div className={styles.drawerRowHead}>
-          <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Toplam Daire Sayısı</div>
-          <div className={styles.drawerToggleWrap}>
-            <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
-          </div>
-        </div>
-        {isApartmentCountEnabled && (
-          <>
-            <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
-              <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
-              <div className={styles.stepperRight}>
-                <span>daire</span>
-                <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
-                <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
-              </div>
-            </div>
-            <RangeSlider
-              label="Arsa Sahibine Düşen Daire"
-              min={0}
-              max={totalApartments}
-              step={1}
-              value={ownerApartmentShare}
-              unit="daire"
-              onChange={(e) => setOwnerApartmentShare(Number(e.target.value))}
-            />
-          </>
-        )}
-      </div>
-
-      <div className={`${styles.drawerRow} ${styles.column}`}>
-        <div className={styles.drawerRowHead}>
-          <div className={`${styles.drawerRowLabel} ${styles.drawerRowLabelNowrap}`}>Arsa Alanı (m²)</div>
-          <div className={styles.drawerToggleWrap}>
-            <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
-          </div>
-        </div>
-        {isAaEnabled && (
-          <div className={`${styles.stepperInput} ${styles.stepperFull}`}>
-            <input type="number" value={arsaAlani} onChange={(e) => setArsaAlani(Number(e.target.value))} />
-            <div className={styles.stepperRight}>
-              <span>m²</span>
-              <button onClick={() => setArsaAlani(p => Math.max(10, p - 10))}>−</button>
-              <button onClick={() => setArsaAlani(p => p + 10)}>+</button>
-            </div>
-          </div>
-        )}
-      </div>
+      <DaireSayisiFields
+        isApartmentCountEnabled={props.isApartmentCountEnabled}
+        setIsApartmentCountEnabled={props.setIsApartmentCountEnabled}
+        totalApartments={props.totalApartments}
+        setTotalApartments={props.setTotalApartments}
+        ownerApartmentShare={props.ownerApartmentShare}
+        setOwnerApartmentShare={props.setOwnerApartmentShare}
+      />
+      <ArsaAlaniFields
+        isAaEnabled={props.isAaEnabled}
+        setIsAaEnabled={props.setIsAaEnabled}
+        arsaAlani={props.arsaAlani}
+        setArsaAlani={props.setArsaAlani}
+      />
     </>
   );
 }

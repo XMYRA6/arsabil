@@ -35,9 +35,6 @@ function props(patch = {}) {
 
         manualMarketPrice: '', setManualMarketPrice: jest.fn(),
 
-        isApartmentCountEnabled: false, setIsApartmentCountEnabled: jest.fn(),
-        totalApartments: 20, setTotalApartments: jest.fn(),
-        ownerApartmentShare: 6, setOwnerApartmentShare: jest.fn(),
         isAaEnabled: false, setIsAaEnabled: jest.fn(),
         arsaAlani: 500, setArsaAlani: jest.fn(),
 
@@ -60,13 +57,13 @@ describe('GelismisAyarlarSheet', () => {
         expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true')
         expect(screen.getByRole('group', { name: 'Maliyet ve riskler' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Piyasa fiyatı' })).toBeInTheDocument()
-        expect(screen.getByRole('group', { name: 'Formül parametreleri' })).toBeInTheDocument()
+        expect(screen.getByRole('group', { name: 'Arsa alanı' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Konum ve resmi risk' })).toBeInTheDocument()
     })
 
     it('mevcut alan bilesenleri yeniden kullaniliyor (kopyalanmiyor)', () => {
         render(<GelismisAyarlarSheet {...props()} />)
-        // RiskCostFields / MarketField / FormulParamsFields'in kendi etiketleri.
+        // RiskCostFields / MarketField / ArsaAlaniFields'in kendi etiketleri.
         expect(screen.getByText('İksa Masrafı')).toBeInTheDocument()
         expect(screen.getByText('Yaklaşık Piyasa Fiyatı')).toBeInTheDocument()
     })
@@ -124,5 +121,18 @@ describe('GelismisAyarlarSheet', () => {
         render(<GelismisAyarlarSheet {...props({ risk })} />)
         expect(screen.getByRole('button', { name: 'Uygula' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Ayarları uygula ve kapat' })).toBeInTheDocument()
+    })
+
+    it('daire sayisi kontrolleri yaprakta ARTIK YOK (girdi kartina ait)', () => {
+        // A1 I4: ayni uc kontrol girdi kartinda ve yaprakta iki kez, farkli
+        // etiketlerle duruyordu. Kullanici birini degistirince digeri sessizce
+        // yeniden yaziliyordu.
+        render(<GelismisAyarlarSheet {...props()} />)
+        expect(screen.queryByText('Toplam Daire Sayısı')).toBeNull()
+    })
+
+    it('arsa alani yaprakta KALIR', () => {
+        render(<GelismisAyarlarSheet {...props()} />)
+        expect(screen.getByText(/Arsa Alanı/)).toBeInTheDocument()
     })
 })
