@@ -6,6 +6,7 @@ import { IconPin, IconSettings } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
+import { AnalizSekmesi, SekmeSecici, type AnalizSekmesiProps, type MobilSekme } from './AnalizSekmesi';
 import styles from './mobile.module.css';
 
 export type HesaplaMobileProps = {
@@ -18,6 +19,9 @@ export type HesaplaMobileProps = {
     fiyatAciklamasi: FiyatAciklamasiProps;
     /** Baslik satirindaki ayarlar butonu `4f` yapragini acar. */
     onAyarlarAc: () => void;
+    aktifSekme: MobilSekme;
+    onSekmeDegis: (sekme: MobilSekme) => void;
+    analiz: AnalizSekmesiProps;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
     ctaDevreDisi: boolean;
@@ -38,6 +42,9 @@ export function HesaplaMobile({
     fisAcik,
     fiyatAciklamasi,
     onAyarlarAc,
+    aktifSekme,
+    onSekmeDegis,
+    analiz,
     ctaMetni,
     ctaDevreDisi,
     onCta,
@@ -74,10 +81,18 @@ export function HesaplaMobile({
                     </div>
                 </header>
 
-                <SonucKarti {...sonuc} />
-                {fisAcik
-                    ? <FiyatAciklamasi {...fiyatAciklamasi} />
-                    : <GirdiKarti {...girdi} />}
+                <SekmeSecici aktif={aktifSekme} onDegis={onSekmeDegis} />
+
+                {aktifSekme === 'analiz'
+                    ? <AnalizSekmesi {...analiz} />
+                    : (
+                        <>
+                            <SonucKarti {...sonuc} />
+                            {fisAcik
+                                ? <FiyatAciklamasi {...fiyatAciklamasi} />
+                                : <GirdiKarti {...girdi} />}
+                        </>
+                    )}
             </div>
         </MobileScreen>
 

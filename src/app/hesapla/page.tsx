@@ -30,6 +30,7 @@ import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers'
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
+import type { MobilSekme } from './mobile/AnalizSekmesi';
 
 interface ProfitLevel {
   id: string;
@@ -73,6 +74,7 @@ export default function Home() {
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState<boolean>(false);
   const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
+  const [mobilSekme, setMobilSekme] = useState<MobilSekme>('hesap');
 
   const effectiveLandShareRatio = computeEffectiveLandShareX({
     isApartmentCountEnabled,
@@ -459,6 +461,26 @@ export default function Home() {
     </>
   );
 
+  // Grafiklerin ortak girdisi TEK yerde. Onceden bu nesne masaustu JSX'inde
+  // iki kez satir ici yaziliydi; mobil analiz sekmesi ucuncu bir kopya
+  // olusturacakti. Kopyalar zamanla ayrisir — 2026-07-24'te grafiklerin
+  // sabit `P: 10000` kullanmasi tam olarak bu sinifin hatasiydi.
+  const chartBaseInput: CalculationInput = {
+    x: effectiveLandShareRatio / 100,
+    L: luxLevel,
+    Ad: apartmentSize,
+    P: globalUnitPrice,
+    K: builderProfit,
+    Sd: isApartmentCountEnabled ? totalApartments : undefined,
+    Aa: isAaEnabled ? arsaAlani : undefined,
+    isRiskEnabled: riskLevel > 0,
+    R: riskLevel > 0 ? 1 + (riskLevel / 100) : 1,
+    isExcavationEnabled: iksaMode !== 'off',
+    excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
+    Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
+    MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
+  };
+
   // Viewport henuz olculmedi: SSR ve ilk client render'i BURAYA duser, ikisi de
   // ayni ciktiyi urettigi icin hydration uyusmazligi olusmaz. Yanlis arayuzu
   // basip sonra degistirmek yerine notr bir iskelet gosterilir.
@@ -491,6 +513,9 @@ export default function Home() {
             onKarDegistir: () => { setMobilAyarBolumu('kar'); setMobilAyarlarAcik(true); },
           }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
+          aktifSekme={mobilSekme}
+          onSekmeDegis={setMobilSekme}
+          analiz={{ result, baseInput: chartBaseInput, marketPrice: marketPriceNum }}
           girdi={{
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: setApartmentSize,
@@ -1012,39 +1037,11 @@ export default function Home() {
                 {/* Page 1: Hassasiyet + Kırılma Noktası */}
                 <div className={styles.pagerPage}>
                   <div className={styles.chartBlock}>
-                    <SensitivityChart baseInput={{
-                      x: effectiveLandShareRatio / 100,
-                      L: luxLevel,
-                      Ad: apartmentSize,
-                      P: globalUnitPrice,
-                      K: builderProfit,
-                      Sd: isApartmentCountEnabled ? totalApartments : undefined,
-                      Aa: isAaEnabled ? arsaAlani : undefined,
-                      isRiskEnabled: riskLevel > 0,
-                      R: riskLevel > 0 ? 1 + (riskLevel / 100) : 1,
-                      isExcavationEnabled: iksaMode !== 'off',
-                      excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
-                      Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
-                      MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
-                    }} />
+                    <SensitivityChart baseInput={chartBaseInput} />
                   </div>
                   <div className={styles.chartDivider}>
                     <BreakEvenChart
-                      baseInput={{
-                        x: effectiveLandShareRatio / 100,
-                        L: luxLevel,
-                        Ad: apartmentSize,
-                        P: globalUnitPrice,
-                        K: builderProfit,
-                        Sd: isApartmentCountEnabled ? totalApartments : undefined,
-                        Aa: isAaEnabled ? arsaAlani : undefined,
-                        isRiskEnabled: riskLevel > 0,
-                        R: riskLevel > 0 ? 1 + (riskLevel / 100) : 1,
-                        isExcavationEnabled: iksaMode !== 'off',
-                        excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
-                        Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
-                        MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
-                      }}
+                      baseInput={chartBaseInput}
                       marketPrice={marketPriceNum}
                     />
                   </div>

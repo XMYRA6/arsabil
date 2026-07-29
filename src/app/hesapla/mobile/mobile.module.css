@@ -647,6 +647,45 @@
         color: #fff;
     }
 
+    /* ═══ 4n — Analiz sekmesi ═══════════════════════════════════════════ */
+
+    .analizGovde {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+    }
+
+    .analizKart {
+        padding: 13px;
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+    }
+
+    .analizBaslik {
+        margin: 0 0 9px;
+        font: 800 12.5px Inter, sans-serif;
+        letter-spacing: .3px;
+        color: var(--m-ink);
+    }
+
+    .analizBos {
+        padding: 22px 15px;
+        border-radius: var(--m-r-card);
+        background: var(--m-fill);
+        text-align: center;
+    }
+
+    .analizBosMetin {
+        margin: 0;
+        font: 600 12.5px Inter, sans-serif;
+        line-height: 1.5;
+        color: var(--m-body);
+    }
+
     @media (prefers-reduced-motion: reduce) {
 
         .segment,
