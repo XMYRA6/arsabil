@@ -84,7 +84,11 @@ export function KonumBlogu({
                     />
                 ) : (
                     <>
-                        <span className={`${styles.birimMaliyetKaynak} mNum`}>
+                        {/* mNum BILEREK yok: bu satir ic ice bir etiket
+                            cumlesi (ilce adi + tutar), hizalanacagi bir
+                            rakam sutunu yok. Mono, burada yalnizca eski
+                            daktilo hissi verir (D1). */}
+                        <span className={styles.birimMaliyetKaynak}>
                             {kaynakEtiketi(birimMaliyetKaynagi, birimMaliyet)}
                         </span>
                         <button
