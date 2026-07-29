@@ -5,7 +5,12 @@
         min-height: 100dvh;
         background: var(--m-bg);
         color: var(--m-ink);
-        padding-top: var(--safe-top);
+        /* `max()` SART: `--safe-top` yalnizca centikli cihazlarda dolu
+           (env(safe-area-inset-top)); tarayici cihaz emulatorunde ve masaustu
+           mobil goruntulemede 0 doner ve ekran viewport'un tepesine yapisirdi.
+           Centikli cihazda guvenli alan (~59px) kazanir, digerlerinde 12px
+           nefes payi kalir. */
+        padding-top: max(var(--safe-top), 12px);
     }
 
     .screen[data-mesh='true']::before {

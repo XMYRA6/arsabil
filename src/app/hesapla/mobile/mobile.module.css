@@ -227,9 +227,19 @@
         cursor: pointer;
     }
 
+    /* Paylasilan `SegmentedTabs` bilesenine dokunmadan ayni kenar boslugunu
+       vermek icin sarmalayici. */
+    .sekmeKap {
+        margin: 0 14px;
+    }
+
     /* ═══ Girdi karti (2a alt) ═══════════════════════════════════════════ */
 
     .girdiKarti {
+        /* Tasarim 2a.html:21 -> `margin: 12px 14px 0`. Dikey bosluk
+           `.hesaplaMobilKok`in `gap: 12px`inden geliyor, burada YALNIZCA
+           yatay kenar boslugu veriliyor; ikisi birden yazilsa 24px olurdu. */
+        margin: 0 14px;
         display: flex;
         flex-direction: column;
         gap: 9px;
@@ -453,6 +463,7 @@
     /* ═══ 4a — "Bu fiyat nereden geliyor?" ══════════════════════════════ */
 
     .fiyatAciklamasi {
+        margin: 0 14px;
         display: flex;
         flex-direction: column;
         gap: 11px;
@@ -650,6 +661,7 @@
     /* ═══ 4n — Analiz sekmesi ═══════════════════════════════════════════ */
 
     .analizGovde {
+        margin: 0 14px;
         display: flex;
         flex-direction: column;
         gap: 11px;
@@ -673,6 +685,7 @@
     }
 
     .analizBos {
+        margin: 0 14px;
         padding: 22px 15px;
         border-radius: var(--m-r-card);
         background: var(--m-fill);

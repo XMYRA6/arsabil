@@ -92,7 +92,9 @@ export function HesaplaMobile({
                     </div>
                 </header>
 
-                <SekmeSecici aktif={aktifSekme} onDegis={onSekmeDegis} />
+                <div className={styles.sekmeKap}>
+                    <SekmeSecici aktif={aktifSekme} onDegis={onSekmeDegis} />
+                </div>
 
                 {aktifSekme === 'analiz'
                     ? <AnalizSekmesi {...analiz} />
