@@ -44,7 +44,8 @@ iki kez gösteriyor.
 | K3 | Piyasa fiyatı **sonuç kartının altında karşılaştırma bloğu** | Soru nerede doğuyorsa cevap orada: kullanıcı sonucu görür, hemen altında "piyasaya göre nasıl" |
 | K4 | Gelişmiş ayarlara **tek kapı**: etiketli buton kalır, ⚙ dişlisi kalkar | Etiketli buton ne olduğunu söylüyor, ikon söylemiyor. Başlık sadeleşir |
 | K5 | Hesap/Analiz **sekme şeridi kalkar**, Analiz etiketli bir satır olur | Ekranda tek etkileşim modeli: ana görünüm + etiketli satırlarla açılan derinlikler |
-| K6 | PDF indirme **rapor oluşturulduktan sonra bağlamsal** çıkar | PDF, var olan bir raporun çıktısı; sabit çubuk tek birincil eylemle kalır |
+| K6 | PDF indirme mobil `/hesapla`'da **yer almaz**; rapor oluşturulduktan sonra **Raporlarım**'dan indirilir | PDF, var olan bir raporun çıktısı — kalıcı yeri raporun kendisidir, onu üreten ekran değil. Sabit çubuk tek birincil eylemle kalır |
+| K7 | Piyasa fiyatının çekmeceden çıkması **hem mobil hem masaüstü** için geçerlidir | Aynı sorun iki platformda da var; bu bir yerleşim değil görünürlük kararı |
 
 ## 3. Ekran mimarisi (mobil)
 
@@ -70,7 +71,7 @@ Girdi kartı   KONUM
               [ Gelişmiş ayarlar · risk, iksa, kâr ]
 
 Sabit CTA     Özet Rapor Oluştur
-              (rapor oluştuktan sonra: PDF indir)
+              (PDF: Raporlarım'dan indirilir, bu ekranda değil)
 ```
 
 **Birim maliyet ilçenin altında iç içedir.** Yan yana iki bağımsız alan olsalardı
@@ -109,14 +110,14 @@ değişmediğini anlayamaz. Öngörülebilirlik akıllılığa tercih edildi.
 |---|---|---|
 | İl/ilçe seçici | Masaüstü sidebar; **mobilde YOK** | Girdi kartı, Konum bloğu (her iki platform) |
 | Birim inşaat maliyeti | Hiçbir yerde görünmüyor | Konum bloğu altında, kaynak etiketiyle, ezilebilir |
-| Piyasa fiyatı | ⚙ çekmecesi | Sonuç kartı altında karşılaştırma bloğu |
+| Piyasa fiyatı | ⚙ çekmecesi (her iki platformda) | Sonuç kartı altında karşılaştırma bloğu — **mobil ve masaüstü** |
 | Parsel pini + risk kartı | Mobil yaprak / masaüstü sidebar | Konum bloğunun ikinci kademesi |
 | Daire sayısı / arsa payı | **Girdi kartı VE yaprak (iki kez)** | Yalnızca girdi kartı |
 | Kâr, risk, iksa | Yaprak (`RiskCostFields`) | Yaprak (değişmez) |
 | Arsa alanı (`isAaEnabled`/`arsaAlani`) | Yaprak, `FormulParamsFields` içinde | Yaprakta kalır — ama `FormulParamsFields` **bütün olarak kullanılmaz**; yalnızca arsa alanı kısmı. Daire sayısı/arsa payı kontrolleri girdi kartına ait (yukarıdaki satır) |
 | Finansal panel | Masaüstü özet sayfalayıcı; mobilde YOK | Analiz görünümüne katılır |
-| PDF indir | Masaüstü aksiyon; mobilde YOK | Rapor oluştuktan sonra bağlamsal |
-| Senaryo karşılaştırma | Masaüstü; mobilde YOK | **Faz 5'e ertelenmiş kalır** — ledger'a açıkça yazılır |
+| PDF indir | Masaüstü `/hesapla`'da buton; mobilde YOK; **Raporlarım'da YOK** | Mobil `/hesapla`'ya eklenmez. **Raporlarım'a eklenir** (bugün orada hiç yok — yeni iş). Masaüstü `/hesapla`'daki mevcut buton bu spec'te değişmez |
+| Senaryo karşılaştırma | Masaüstü; mobilde YOK | **Ertelenir ve kendi UX/UI çalışmasını bekler** — masaüstü sürümünün mobile portu DEĞİL. Ayrı bir tasarım kalemi (bkz. §6) |
 
 ## 6. Kapsam dışı
 
@@ -127,7 +128,12 @@ değişmediğini anlayamaz. Öngörülebilirlik akıllılığa tercih edildi.
 - **Aramalı parsel sorgu ekranı** (Parça 1): il/ilçe/mahalle/ada/parsel ile arama,
   haritanın oraya uçması. Konum bloğunun ikinci kademesi bugünkü `ParcelPicker`'ı
   olduğu gibi kullanır.
-- Senaryo karşılaştırmanın mobil karşılığı (Faz 5, `4o`).
+- **Senaryo karşılaştırmanın tasarımı (Parça 4).** İnsan kararı 2026-07-29: bu,
+  masaüstü sürümünün mobile taşınması değil; **her iki platform için de** yeni bir
+  UX/UI çalışması gerektiriyor. Kendi spec'ini bekler. Bu arada mobilde yok
+  olmaya devam eder ve bu durum ledger'da açıkça kayıtlıdır.
+- **Masaüstü `/hesapla`'daki mevcut "PDF İndir" butonu.** Bu spec onu kaldırmaz ya da
+  taşımaz; yalnızca Raporlarım'a kalıcı bir indirme yolu ekler.
 
 ## 7. Bağımlılık
 
