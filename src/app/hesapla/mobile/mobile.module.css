@@ -462,7 +462,12 @@
         width: 100%;
         height: 8px;
         border-radius: 6px;
-        background: linear-gradient(90deg, #1f6feb, #22d3ee) no-repeat;
+        /* Dolgu DEGERI yansitmali. Onceden degrade tum ray boyunca
+           cizilliyordu; slider %33'te bile %100 dolu gorunuyordu (A1 I1).
+           `--progress` deseni depoda zaten var (RangeSlider.tsx:46). */
+        background:
+            linear-gradient(90deg, #1f6feb, #22d3ee) 0 / var(--progress, 0%) 100% no-repeat,
+            rgba(11, 32, 54, .08);
         appearance: none;
         -webkit-appearance: none;
         cursor: pointer;
@@ -489,10 +494,12 @@
         cursor: pointer;
     }
 
+    /* Firefox: ray `background`i zaten yukarida cizildigi icin burada
+       saydam birakilir; aksi halde dolgunun ustunu kapatiyordu. */
     .slider::-moz-range-track {
         height: 8px;
         border-radius: 6px;
-        background: rgba(11, 32, 54, .08);
+        background: transparent;
     }
 
     .turetilmisNot {
@@ -625,7 +632,11 @@
     }
 
     .aciklamaDegistir {
-        min-height: 44px;
+        /* `min-height: 44px` YOK: bu, 11px govde metninin icinde satir ici
+           duran bir baglanti; yukseklik vermek kar satirini 38px'ten 76px'e
+           cikariyor ve kartin ritmini bozuyordu (A1 I2). Dokunma hedefi
+           asagidaki seffaf ::after ile saglanir. */
+        position: relative;
         padding: 0 4px;
         border: 0;
         background: none;
@@ -780,8 +791,8 @@
     .stepperAzalt::after,
     .stepperArtir::after,
     .anahtar::after,
-    .slider::after,
-    .aciklamaKapat::after {
+    .aciklamaKapat::after,
+    .aciklamaDegistir::after {
         content: '';
         position: absolute;
         left: 0;
@@ -797,7 +808,6 @@
     .stepperAzalt,
     .stepperArtir,
     .anahtar,
-    .slider,
     .aciklamaKapat {
         position: relative;
     }

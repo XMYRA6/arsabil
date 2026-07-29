@@ -35,6 +35,13 @@ const YAPI_STANDARTLARI = [
     { etiket: 'Lüks', deger: 1.4 },
 ] as const;
 
+/** Slider dolgusunun yuzdesi. CSS `--progress` olarak okur (RangeSlider deseni). */
+function ilerleme(deger: number, min: number, max: number): React.CSSProperties {
+    const aralik = max - min;
+    const yuzde = aralik > 0 ? ((deger - min) / aralik) * 100 : 0;
+    return { '--progress': `${Math.min(Math.max(yuzde, 0), 100)}%` } as React.CSSProperties;
+}
+
 const M2_ADIM = 5;
 const M2_MIN = 50;
 const M2_MAX = 400;
@@ -162,6 +169,7 @@ export function GirdiKarti({
                             max={80}
                             step={1}
                             value={totalApartments}
+                            style={ilerleme(totalApartments, 1, 80)}
                             aria-label="Toplam daire sayısı"
                             onChange={e => onTotalApartments(Number(e.target.value))}
                         />
@@ -177,6 +185,7 @@ export function GirdiKarti({
                             max={totalApartments}
                             step={1}
                             value={ownerApartmentShare}
+                            style={ilerleme(ownerApartmentShare, 0, totalApartments)}
                             aria-label="Arsa sahibinin daire sayısı"
                             onChange={e => onOwnerApartmentShare(Number(e.target.value))}
                         />
@@ -200,6 +209,7 @@ export function GirdiKarti({
                             max={100}
                             step={1}
                             value={landShareRatio}
+                            style={ilerleme(landShareRatio, 0, 100)}
                             aria-label="Arsa payı yüzdesi"
                             onChange={e => onLandShareRatio(Number(e.target.value))}
                         />

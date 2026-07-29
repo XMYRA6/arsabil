@@ -435,9 +435,13 @@
     margin: 0 16px;
     padding: 16px;
     border-radius: 20px;
-    background: var(--seal-surface);
-    border: 1px solid var(--seal-border-soft);
-    color: var(--seal-text);
+    /* Yedekler SART: `--seal-*` `.container`a scope'lu ve mobil agac
+       `.container`i hic render etmiyor. Yedeksiz birakildiginda
+       `background`/`border` gecersiz kalip `unset`e dusuyor ve kartin
+       ZEMINI ile TUM satir ayraclari gorunmez oluyordu (A1 I5). */
+    background: var(--seal-surface, var(--m-glass-bg, rgba(255, 255, 255, .66)));
+    border: 1px solid var(--seal-border-soft, var(--m-glass-border, rgba(255, 255, 255, .92)));
+    color: var(--seal-text, var(--m-ink, #0b2036));
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
 }
@@ -449,7 +453,7 @@
     font-size: 0.9rem;
     font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-variant-numeric: tabular-nums;
-    border-bottom: 1px solid var(--seal-border-soft);
+    border-bottom: 1px solid var(--seal-border-soft, var(--m-divider, rgba(11, 32, 54, .07)));
 }
 
 .hesapFisiRow:last-child {
@@ -457,14 +461,14 @@
 }
 
 .hesapFisiRowLabel {
-    color: var(--seal-text-muted);
+    color: var(--seal-text-muted, var(--m-body, #5c6b82));
     font-family: inherit;
 }
 
 .hesapFisiRowTotal {
     font-weight: 900;
     font-size: 1.05rem;
-    border-top: 1px solid var(--seal-border);
+    border-top: 1px solid var(--seal-border, var(--m-divider, rgba(11, 32, 54, .07)));
     margin-top: 4px;
     padding-top: 10px;
 }
