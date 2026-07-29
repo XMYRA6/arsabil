@@ -66,6 +66,9 @@ export default function Home() {
   const [totalApartments, setTotalApartments] = useState<number>(24);
   const [ownerApartmentShare, setOwnerApartmentShare] = useState<number>(0);
   const [landShareRatio, setLandShareRatio] = useState<number>(33); // %
+  // Mobil `4a` ekrani acik mi. Gorunum durumu da `page.tsx`te yasar —
+  // `HesaplaMobile` hicbir state sahiplenmez (plan mimari karari).
+  const [mobilFisAcik, setMobilFisAcik] = useState<boolean>(false);
 
   const effectiveLandShareRatio = computeEffectiveLandShareX({
     isApartmentCountEnabled,
@@ -470,7 +473,18 @@ export default function Home() {
             arsaPayiYuzde: Math.round(effectiveLandShareRatio),
             birimFiyat: sonucDegeri(result?.FD_per_m2),
             piyasaFarkiYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
-            onFisAc: () => {} /* TODO(Task 8): "Bu fiyat nereden geliyor" (4a) */,
+            onFisAc: () => setMobilFisAcik(true),
+          }}
+          fisAcik={mobilFisAcik}
+          fiyatAciklamasi={{
+            result,
+            apartmentSize,
+            unitPrice: globalUnitPrice,
+            landSharePercent: Math.round(effectiveLandShareRatio),
+            profitLabel: profitLevels.find(p => p.value === builderProfit)?.label ?? 'Özel',
+            profitMultiplier: builderProfit,
+            onKapat: () => setMobilFisAcik(false),
+            onKarDegistir: () => {} /* TODO(Task 9): 4f yapragini kar bolumunde acar */,
           }}
           girdi={{
             luxLevel, onLuxLevel: setLuxLevel,

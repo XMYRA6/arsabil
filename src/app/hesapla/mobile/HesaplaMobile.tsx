@@ -5,6 +5,7 @@ import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { IconPin, IconSettings } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
+import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
 import styles from './mobile.module.css';
 
 export type HesaplaMobileProps = {
@@ -12,6 +13,9 @@ export type HesaplaMobileProps = {
     konumEtiketi: string;
     sonuc: SonucKartiProps;
     girdi: GirdiKartiProps;
+    /** `4a` acik mi. Durum `page.tsx`te yasar; bu bilesen state tutmaz. */
+    fisAcik: boolean;
+    fiyatAciklamasi: FiyatAciklamasiProps;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
     ctaDevreDisi: boolean;
@@ -29,6 +33,8 @@ export function HesaplaMobile({
     konumEtiketi,
     sonuc,
     girdi,
+    fisAcik,
+    fiyatAciklamasi,
     ctaMetni,
     ctaDevreDisi,
     onCta,
@@ -61,7 +67,9 @@ export function HesaplaMobile({
                 </header>
 
                 <SonucKarti {...sonuc} />
-                <GirdiKarti {...girdi} />
+                {fisAcik
+                    ? <FiyatAciklamasi {...fiyatAciklamasi} />
+                    : <GirdiKarti {...girdi} />}
             </div>
         </MobileScreen>
 

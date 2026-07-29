@@ -450,6 +450,153 @@
         cursor: default;
     }
 
+    /* ═══ 4a — "Bu fiyat nereden geliyor?" ══════════════════════════════ */
+
+    .fiyatAciklamasi {
+        display: flex;
+        flex-direction: column;
+        gap: 11px;
+        padding: 14px 13px;
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+    }
+
+    .aciklamaBaslik {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .aciklamaBaslikMetin {
+        margin: 0;
+        font: 800 15px Inter, sans-serif;
+        color: var(--m-ink);
+    }
+
+    .aciklamaKapat {
+        min-height: 44px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: var(--m-r-btn);
+        background: var(--m-fill);
+        color: var(--m-on-glass);
+        font: 700 12.5px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .aciklamaSatirlar {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .aciklamaSatir {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .aciklamaIkon {
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        color: #fff;
+    }
+
+    .aciklamaIkonMavi {
+        background: linear-gradient(135deg, #3b8bff, #1f6feb);
+    }
+
+    .aciklamaIkonCamgobegi {
+        background: linear-gradient(135deg, #22d3ee, #1f6feb);
+    }
+
+    .aciklamaIkonYesil {
+        background: linear-gradient(135deg, #10b981, #0a8a63);
+    }
+
+    .aciklamaMetin {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .aciklamaAd {
+        font: 800 13px Inter, sans-serif;
+        color: var(--m-ink);
+    }
+
+    .aciklamaAlt {
+        font: 600 11px Inter, sans-serif;
+        color: var(--m-body);
+    }
+
+    .aciklamaDegistir {
+        min-height: 44px;
+        padding: 0 4px;
+        border: 0;
+        background: none;
+        color: var(--m-link);
+        font: 700 11px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .aciklamaTutar {
+        flex: none;
+        font-size: 13.5px;
+        font-weight: 800;
+        color: var(--m-ink);
+    }
+
+    .aciklamaToplam {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--m-divider);
+    }
+
+    .aciklamaToplamAd {
+        font: 800 12.5px Inter, sans-serif;
+        color: var(--m-body);
+    }
+
+    .aciklamaToplamTutar {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--m-ink);
+    }
+
+    .muhendisSatir {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 44px;
+        padding-top: 4px;
+        border-top: 1px solid var(--m-divider);
+    }
+
+    .muhendisEtiket {
+        font: 700 12px Inter, sans-serif;
+        color: var(--m-on-glass);
+    }
+
     @media (prefers-reduced-motion: reduce) {
 
         .segment,
