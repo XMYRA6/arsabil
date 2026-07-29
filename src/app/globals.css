@@ -1,7 +1,7 @@
 /* =========================================================================
    ARSABIL — DUAL THEME SYSTEM (Dark / Light) — orijinal mavi/lacivert kimlik
    ========================================================================= */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&display=swap');
 
 /* ===== MARKA ÇEKİRDEĞİ (tema bağımsız) ===== */
 :root {
@@ -184,8 +184,70 @@ a {
 }
 
 @media (max-width: 768px) {
+  /* ── Mobil tasarim dili: "Premium Liquid Glass" (2026-07-28) ──
+     TUM --m-* tanimlari BU BLOGUN ICINDE kalmali; disari kacan bir tanim
+     masaustu duzenini de degistirir. globalsMobile.scope.test.ts bunu
+     dogruluyor. Mevcut --seal-* token'lari silinmez, mobilde kullanilmaz. */
   :root {
+    --m-bg: #f7faff;
+    --m-mesh:
+      radial-gradient(680px 420px at 12% -6%, rgba(43,124,255,.42), transparent 62%),
+      radial-gradient(560px 420px at 96% 8%,  rgba(34,211,238,.38), transparent 60%),
+      radial-gradient(620px 520px at 78% 96%, rgba(124,58,237,.24), transparent 62%),
+      radial-gradient(520px 380px at 4% 86%,  rgba(16,185,129,.22), transparent 60%);
+
+    --m-grad-accent: linear-gradient(135deg, #3b8bff 0%, #1f6feb 46%, #22d3ee 118%);
+    --m-grad-btn: linear-gradient(135deg, #3b8bff, #1f6feb 60%, #22d3ee);
+
+    --m-ink: #0b2036;
+    --m-body: #5c6b82;
+    --m-on-glass: #173b63;
+    --m-link: #1560d0;
+
+    --m-glass-bg: rgba(255,255,255,.66);
+    --m-glass-border: rgba(255,255,255,.92);
+    --m-glass-blur: blur(30px) saturate(190%);
+    --m-fill: rgba(11,32,54,.05);
+    --m-divider: rgba(11,32,54,.07);
+
+    --m-success: #10b981;
+    --m-success-text: #0a8a63;
+    --m-warn: #f59e0b;
+    --m-danger: #ff2d55;
+
+    --m-r-chip: 11px;
+    --m-r-btn: 13px;
+    --m-r-input: 16px;
+    --m-r-inner: 20px;
+    --m-r-card: 26px;
+    --m-r-sheet: 30px;
+
+    --m-sh-card: 0 14px 36px rgba(20,70,150,.12);
+    --m-sh-card-sm: 0 6px 18px rgba(20,70,150,.10);
+    --m-sh-grad-card: 0 18px 40px rgba(43,124,255,.34);
+    --m-sh-grad-btn: 0 12px 28px rgba(43,124,255,.38);
+    --m-sh-sheet: 0 -18px 50px rgba(11,32,54,.22);
+    --m-sh-bottombar: 0 -8px 30px rgba(20,70,150,.08);
+
+    --m-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
     --mobile-nav-pb: calc(85px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Cam yuzey TEK kaynak. Varyantlar bunu override eder (sheet .84 + blur 34,
+     kucuk buton .55 + blur 24, alt cubuk .72). */
+  .mGlass {
+    background: var(--m-glass-bg);
+    border: 1px solid var(--m-glass-border);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+  }
+
+  /* Tum rakamlar mono + tabular. Sayilarin siralar arasi kaymamasi icin. */
+  .mNum {
+    font-family: var(--m-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   .page-container {
