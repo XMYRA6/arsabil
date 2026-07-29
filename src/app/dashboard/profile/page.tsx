@@ -92,7 +92,12 @@ export default function ProfilePage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
         setMounted(true)
-        const saved = (localStorage.getItem('arsabil-theme') as Theme) || 'light'
+        // ThemeToggle ile AYNI dogrulama: kaldirilmis `sky`/`mint`/`sand`
+        // degerleri hala kullanicilarin tarayicisinda duruyor. Burada `!`
+        // olmadigi icin cokmuyor ama dogrulanmamis deger yine de temaya
+        // gecirilmemeli (A1 minor).
+        const ham = localStorage.getItem('arsabil-theme')
+        const saved: Theme = ham === 'dark' || ham === 'light' ? ham : 'light'
         setTheme(saved)
     }, [])
 

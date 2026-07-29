@@ -1,5 +1,6 @@
 "use client";
 
+import { computeEffectiveLandShareX } from '../calculatorUiHelpers';
 import styles from './mobile.module.css';
 
 export type GirdiKartiProps = {
@@ -71,9 +72,14 @@ export function GirdiKarti({
     onOwnerApartmentShare,
 }: GirdiKartiProps) {
     // Sd acikken gosterilen yuzde TURETILMISTIR, ayri bir state degildir.
-    const turetilmisYuzde = totalApartments > 0
-        ? Math.round((ownerApartmentShare / totalApartments) * 100)
-        : 0;
+    // Formul KOPYALANMAZ: motora giden deger de ayni yardimcidan gelir
+    // (page.tsx), satir ici bir kopya zamanla ayrisirdi (A1 minor).
+    const turetilmisYuzde = Math.round(computeEffectiveLandShareX({
+        isApartmentCountEnabled: true,
+        ownerApartmentShare,
+        totalApartments,
+        landShareRatio,
+    }) * 100);
 
     return (
         <section className={styles.girdiKarti} aria-label="Proje girdileri">
