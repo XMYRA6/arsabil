@@ -1,0 +1,39 @@
+/* Bu kap YALNIZCA mobilde is yapar; masaustunde saydam bir sarmalayicidir. */
+@media (max-width: 768px) {
+    .screen {
+        position: relative;
+        min-height: 100dvh;
+        background: var(--m-bg);
+        color: var(--m-ink);
+        padding-top: var(--safe-top);
+    }
+
+    .screen[data-mesh='true']::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: var(--m-mesh);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Icerik mesh'in ustunde kalmali. */
+    .screen > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* 74px cubuk + 22px home indicator + guvenli alan. */
+    .screen[data-bottomnav='true'] {
+        padding-bottom: calc(74px + 22px + var(--safe-bottom));
+    }
+
+    /* Sabit CTA varsa onun yuksekligi de eklenir. */
+    .screen[data-bottomnav='true'][data-cta='true'] {
+        padding-bottom: calc(74px + 22px + 72px + var(--safe-bottom));
+    }
+
+    .screen[data-bottomnav='false'][data-cta='true'] {
+        padding-bottom: calc(72px + var(--safe-bottom));
+    }
+}
