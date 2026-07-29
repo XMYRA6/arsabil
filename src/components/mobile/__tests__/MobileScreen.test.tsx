@@ -4,23 +4,26 @@ import { join } from 'path'
 import { render, screen } from '@testing-library/react'
 import { MobileScreen } from '../MobileScreen'
 
-/** `@media (max-width: 768px)` bloğunun gövdesini döndürür. */
-function mobileBlockBody(): string {
-    const css = readFileSync(
-        join(process.cwd(), 'src/components/mobile/MobileScreen.module.css'), 'utf8',
-    )
+/** Brace-depth scan ile CSS içinde @media (max-width: 768px) bloğunun dışındaki içeriği döndürür. */
+function getOutsideMobileQuery(css: string): string {
     const start = css.indexOf('@media (max-width: 768px)')
     expect(start).toBeGreaterThan(-1)
     const open = css.indexOf('{', start)
     let depth = 0
+    let closePos = open
     for (let i = open; i < css.length; i++) {
         if (css[i] === '{') depth++
         else if (css[i] === '}') {
             depth--
-            if (depth === 0) return css.slice(open + 1, i)
+            if (depth === 0) {
+                closePos = i
+                break
+            }
         }
     }
-    throw new Error('mobil media query blogu kapanmamis')
+    const before = css.slice(0, start)
+    const after = css.slice(closePos + 1)
+    return (before + after).replace(/\/\*[\s\S]*?\*\//g, '').trim()
 }
 
 describe('MobileScreen', () => {
@@ -73,25 +76,34 @@ describe('MobileScreen', () => {
         const css = readFileSync(
             join(process.cwd(), 'src/components/mobile/MobileScreen.module.css'), 'utf8',
         )
-        // Brace-depth scan: media query'nin gerçek kapanma braketini bulur.
-        // Böylelikle greedy regex tuzağından kaçınılır.
-        const start = css.indexOf('@media (max-width: 768px)')
-        const open = css.indexOf('{', start)
-        let depth = 0
-        let closePos = open
-        for (let i = open; i < css.length; i++) {
-            if (css[i] === '{') depth++
-            else if (css[i] === '}') {
-                depth--
-                if (depth === 0) {
-                    closePos = i
-                    break
-                }
-            }
-        }
-        const before = css.slice(0, start)
-        const after = css.slice(closePos + 1)
-        const outside = (before + after).replace(/\/\*[\s\S]*?\*\//g, '').trim()
+        const outside = getOutsideMobileQuery(css)
         expect(outside).toBe('')
+    })
+
+    it('kapsam guard eski greedy-regex tuzagina karsi direncli (regressions karsi)', () => {
+        // Eski /@media...{[\s\S]*\n\}/ regexin greedy karakteri ortaklar;
+        // medya sorgusu kapandiktan SONRA cikan kurallar hala yassinabilirdi.
+        // Bu test sonradan yapilmis kurallari yakalamak icin sabit (fixture)
+        // csslerle brace-depth taramasi dogrular.
+
+        // Fikstür 1: Temiz - medya sorgusu sonrasinda hicbir sey yok.
+        const cleanFixture = `/* Baslik */
+@media (max-width: 768px) {
+    .rule { color: red; }
+}
+`
+        const cleanOutside = getOutsideMobileQuery(cleanFixture)
+        expect(cleanOutside).toBe('')
+
+        // Fikstür 2: Sizbilir - medya sorgusundan sonra bir kural kaçti.
+        // Sonu kendi braketinde yapılır (greedy regexin tuzağını tetiklemek için).
+        const leakedFixture = `/* Baslik */
+@media (max-width: 768px) {
+    .rule { color: red; }
+}
+.leaked-rule { color: blue; }
+`
+        const leakedOutside = getOutsideMobileQuery(leakedFixture)
+        expect(leakedOutside).toContain('.leaked-rule')
     })
 })
