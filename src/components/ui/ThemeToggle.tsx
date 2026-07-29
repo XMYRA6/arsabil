@@ -81,7 +81,8 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ forceDarkSurface = fal
     const surfaceDark = forceDarkSurface || isDark;
     // `!` KULLANILMAZ: state her zaman gecerli olsa bile, non-null iddiasi
     // tam da bu hatayi gizleyen seydi. Bulunamazsa varsayilana dusulur.
-    const current = PALETTES.find(p => p.id === theme) ?? PALETTES[1];
+    const current = PALETTES.find(p => p.id === theme)
+        ?? PALETTES.find(p => p.id === VARSAYILAN_TEMA)!;
 
     return (
         <div ref={ref} style={{ position: 'relative' }}>

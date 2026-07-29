@@ -51,7 +51,14 @@ const AYAR_VARSAYILANLARI = {
   builderProfit: 1.30,
   riskLevel: 10,
   iksaMode: 'off' as const,
+  iksaPercentage: 5,
+  iksaManualTL: 0,
   manualMarketPrice: '',
+  isApartmentCountEnabled: false,
+  totalApartments: 24,
+  ownerApartmentShare: 0,
+  isAaEnabled: false,
+  arsaAlani: 360,
 };
 
 interface ScenarioItem {
@@ -78,9 +85,9 @@ export default function Home() {
   // State: Kullanım Girdileri
   const [luxLevel, setLuxLevel] = useState<number>(1.4); // Standart (1.0), Orta (1.2), Lüks (1.4)
   const [apartmentSize, setApartmentSize] = useState<number>(140);
-  const [isApartmentCountEnabled, setIsApartmentCountEnabled] = useState<boolean>(false);
-  const [totalApartments, setTotalApartments] = useState<number>(24);
-  const [ownerApartmentShare, setOwnerApartmentShare] = useState<number>(0);
+  const [isApartmentCountEnabled, setIsApartmentCountEnabled] = useState<boolean>(AYAR_VARSAYILANLARI.isApartmentCountEnabled);
+  const [totalApartments, setTotalApartments] = useState<number>(AYAR_VARSAYILANLARI.totalApartments);
+  const [ownerApartmentShare, setOwnerApartmentShare] = useState<number>(AYAR_VARSAYILANLARI.ownerApartmentShare);
   const [landShareRatio, setLandShareRatio] = useState<number>(33); // %
   // Mobil `4a` ekrani acik mi. Gorunum durumu da `page.tsx`te yasar —
   // `HesaplaMobile` hicbir state sahiplenmez (plan mimari karari).
@@ -189,13 +196,13 @@ export default function Home() {
   const [originalUnitPrice, setOriginalUnitPrice] = useState<number | null>(null);
 
   // Arsa Alanı (Aa) toggle
-  const [isAaEnabled, setIsAaEnabled] = useState<boolean>(false);
-  const [arsaAlani, setArsaAlani] = useState<number>(360);
+  const [isAaEnabled, setIsAaEnabled] = useState<boolean>(AYAR_VARSAYILANLARI.isAaEnabled);
+  const [arsaAlani, setArsaAlani] = useState<number>(AYAR_VARSAYILANLARI.arsaAlani);
 
   // İksa modü: 'off' | 'percentage' | 'manual'
   const [iksaMode, setIksaMode] = useState<'off' | 'percentage' | 'manual'>(AYAR_VARSAYILANLARI.iksaMode);
-  const [iksaPercentage, setIksaPercentage] = useState<number>(5); // %
-  const [iksaManualTL, setIksaManualTL] = useState<number>(0);
+  const [iksaPercentage, setIksaPercentage] = useState<number>(AYAR_VARSAYILANLARI.iksaPercentage); // %
+  const [iksaManualTL, setIksaManualTL] = useState<number>(AYAR_VARSAYILANLARI.iksaManualTL);
 
   const [, setGlobalExcavationLow] = useState<number>(0.01);
   const [, setGlobalExcavationMedium] = useState<number>(0.02);
@@ -549,12 +556,20 @@ export default function Home() {
           onClose={() => setMobilAyarlarAcik(false)}
           onUygula={() => setMobilAyarlarAcik(false)}
           onSifirla={() => {
-            // Masaustu cekmecesinin "varsayilana don" karsiligi: yalnizca bu
-            // yapraktaki alanlar sifirlanir, girdi karti dokunulmaz.
+            // Yapragin GOSTERDIGI her alan sifirlanir. Onceden 9 alandan
+            // yalnizca 4'u sifirlaniyordu (A1 I3): "Ayarlari sifirla" diyen
+            // bir buton, yapragin tamamini kastettigini ima eder.
             setBuilderProfit(AYAR_VARSAYILANLARI.builderProfit);
             setRiskLevel(AYAR_VARSAYILANLARI.riskLevel);
             setIksaMode(AYAR_VARSAYILANLARI.iksaMode);
+            setIksaPercentage(AYAR_VARSAYILANLARI.iksaPercentage);
+            setIksaManualTL(AYAR_VARSAYILANLARI.iksaManualTL);
             setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
+            setIsApartmentCountEnabled(AYAR_VARSAYILANLARI.isApartmentCountEnabled);
+            setTotalApartments(AYAR_VARSAYILANLARI.totalApartments);
+            setOwnerApartmentShare(AYAR_VARSAYILANLARI.ownerApartmentShare);
+            setIsAaEnabled(AYAR_VARSAYILANLARI.isAaEnabled);
+            setArsaAlani(AYAR_VARSAYILANLARI.arsaAlani);
           }}
           acilisBolumu={mobilAyarBolumu}
           iksaMode={iksaMode} setIksaMode={setIksaMode}

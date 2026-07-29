@@ -395,9 +395,9 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        width: 100%;
         min-height: 44px;
         margin: 0 14px;
+        /* 14px'lik yan margin'ler genislikten dusulur. */
         width: calc(100% - 28px);
         border-radius: 17px;
         border: 1px solid rgba(255, 255, 255, .9);
@@ -460,7 +460,12 @@
 
     .slider {
         width: 100%;
-        height: 8px;
+        /* Gorsel ray 8px, kutu `--touch-target`: `background-clip:
+           content-box` + seffaf dikey dolgu sayesinde ray ince kalirken
+           parmak hedefi 44px olur. Ikisi TEK yerde tanimli. */
+        height: var(--touch-target);
+        padding: 18px 0;
+        background-clip: content-box;
         border-radius: 6px;
         /* Dolgu DEGERI yansitmali. Onceden degrade tum ray boyunca
            cizilliyordu; slider %33'te bile %100 dolu gorunuyordu (A1 I1).
@@ -815,12 +820,6 @@
     /* Slider'in kendi ::after'i olamaz (replaced element); kap araciligiyla
        cozulur: girdinin kutusu seffaf dikey dolguyla buyutulur, gorsel ray
        yine 8px kalir cunku ray `background` ile ciziliyor. */
-    .slider {
-        height: var(--touch-target);
-        background-clip: content-box;
-        padding: 18px 0;
-    }
-
     @media (prefers-reduced-motion: reduce) {
 
         .segment,

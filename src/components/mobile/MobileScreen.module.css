@@ -28,14 +28,15 @@
         z-index: 1;
     }
 
-    /* 74px cubuk + 22px home indicator + guvenli alan. */
+    /* Cubuk yuksekligi `--bottomnav-height` token'indan okunur; satir ici
+       sayi yazilirsa cubukla ayrisir (A1 minor). */
     .screen[data-bottomnav='true'] {
-        padding-bottom: calc(74px + 22px + var(--safe-bottom));
+        padding-bottom: var(--bottomnav-height);
     }
 
     /* Sabit CTA varsa onun yuksekligi de eklenir. */
     .screen[data-bottomnav='true'][data-cta='true'] {
-        padding-bottom: calc(74px + 22px + 72px + var(--safe-bottom));
+        padding-bottom: calc(var(--bottomnav-height) + 72px);
     }
 
     .screen[data-bottomnav='false'][data-cta='true'] {

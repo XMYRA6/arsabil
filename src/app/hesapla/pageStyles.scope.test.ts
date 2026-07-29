@@ -176,7 +176,14 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     // Sıfırla eylemi riskLevel'i 0 yapıyordu ama sayfanın başlangıcı 10'du;
     // iki yerde ayrı yazıldıkları için sessizce ayrışmışlardı.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    for (const alan of ['builderProfit', 'riskLevel', 'iksaMode', 'manualMarketPrice']) {
+    // Yaprakta duzenlenebilen HER alan listede olmali: eksik biri, "Ayarlari
+    // sifirla" butonunun sessizce yarim is yapmasi demek (A1 I3).
+    const alanlar = [
+      'builderProfit', 'riskLevel', 'iksaMode', 'iksaPercentage', 'iksaManualTL',
+      'manualMarketPrice', 'isApartmentCountEnabled', 'totalApartments',
+      'ownerApartmentShare', 'isAaEnabled', 'arsaAlani',
+    ];
+    for (const alan of alanlar) {
       expect(pageTsx).toMatch(new RegExp(`useState<[^>]*>\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
       expect(pageTsx).toMatch(new RegExp(`set[A-Z]\\w*\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
     }
@@ -191,8 +198,15 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
   });
 
   it('Sd modu (Toplam Daire Sayısı) sayfa açılışında varsayılan kapalı olmalı', () => {
+    // 2026-07-29: başlangıç değeri artık `useState`te satır içi değil,
+    // `AYAR_VARSAYILANLARI` sabitinde (mobil yaprağın "Sıfırla"sıyla aynı
+    // kaynağı kullansın diye). Guard'ın NİYETİ değişmedi: Sd modu açılışta
+    // KAPALI olmalı — açık gelirse arsa payı sessizce N/M'ye kilitlenir.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    expect(pageTsx).toMatch(/\[isApartmentCountEnabled, setIsApartmentCountEnabled\] = useState<boolean>\(false\)/);
+    expect(pageTsx).toMatch(
+      /\[isApartmentCountEnabled, setIsApartmentCountEnabled\] = useState<boolean>\(AYAR_VARSAYILANLARI\.isApartmentCountEnabled\)/
+    );
+    expect(pageTsx).toMatch(/isApartmentCountEnabled:\s*false/);
   });
 
   it('ownerApartmentCount ölü state\'i tamamen kaldırılmış olmalı', () => {

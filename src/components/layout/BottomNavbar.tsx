@@ -84,11 +84,10 @@ export function BottomNavbar() {
                             <Icon size={21} strokeWidth={active ? 2.4 : 2} />
                             {href === '/inbox' && showBadge && (
                                 // Gorsel olarak yalnizca sayi; ekran okuyucuya
-                                // ne oldugu soylenir. `aria-hidden` sayi + ayri
-                                // bir sr-only metin yerine tek `aria-label`
-                                // yeterli: rozet bir img rolu tasimadigi icin
-                                // metni cocuklarin yerine gecer.
-                                <span className={styles.badge} role="status" aria-label={`${unreadTotal} okunmamış mesaj`}>
+                                // ne oldugu soylenir. `role="status"` KULLANILMAZ:
+                                // canli bolge her sayac degisiminde yeniden
+                                // duyurur, `aria-label` tek basina yeterli.
+                                <span className={styles.badge} aria-label={`${unreadTotal} okunmamış mesaj`}>
                                     {unreadLabel}
                                 </span>
                             )}
