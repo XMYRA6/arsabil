@@ -9,6 +9,22 @@ const PALETTES: { id: Mode; label: string; color: string; isLight: boolean }[] =
     { id: 'light', label: 'Gündüz', color: '#e0e8f4', isLight: true },
 ];
 
+const VARSAYILAN_TEMA: Mode = 'light';
+
+/**
+ * localStorage'daki degeri DOGRULAR.
+ *
+ * Uygulama eskiden `sky` / `mint` / `sand` temalarini da sunuyordu. Paletler
+ * kaldirildi ama o temayi secmis kullanicilarin tarayicisinda deger KALDI.
+ * Once burada dogrulama yoktu: string dogrudan `Mode`a cast ediliyor,
+ * `PALETTES.find(...)` `undefined` donuyor ve `current.isLight` TypeError
+ * firlatiyordu. Bilesen RootLayout > SiteChrome > Navbar zincirinde oldugu
+ * icin bu, o kullanicilar icin TUM sayfalari coken bir hataydi.
+ */
+function gecerliTema(ham: string | null): Mode {
+    return PALETTES.some(p => p.id === ham) ? (ham as Mode) : VARSAYILAN_TEMA;
+}
+
 interface ThemeToggleProps {
     /** AdminTopBar gibi sabit-koyu bir yüzeye oturduğunda butonun KENDİ
      * çerçeve stilini (border/background/icon rengi) zorla koyu-yüzey
@@ -31,9 +47,16 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ forceDarkSurface = fal
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
         setMounted(true);
-        const saved = (localStorage.getItem('arsabil-theme') as Mode) || 'light';
+        const ham = localStorage.getItem('arsabil-theme');
+        const saved = gecerliTema(ham);
         setTheme(saved);
         document.documentElement.setAttribute('data-theme', saved);
+        // Bozuk degeri TEMIZLE: aksi halde bu degeri yazan baska bir kod yolu
+        // olmadigi icin kullanici her acilista ayni bozuk degeri okumaya
+        // devam eder ve duzeltme yalnizca oturum boyunca gizler.
+        if (ham !== null && ham !== saved) {
+            localStorage.setItem('arsabil-theme', saved);
+        }
     }, []);
 
     // Close on outside click
@@ -56,7 +79,9 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ forceDarkSurface = fal
 
     const isDark = theme === 'dark';
     const surfaceDark = forceDarkSurface || isDark;
-    const current = PALETTES.find(p => p.id === theme)!;
+    // `!` KULLANILMAZ: state her zaman gecerli olsa bile, non-null iddiasi
+    // tam da bu hatayi gizleyen seydi. Bulunamazsa varsayilana dusulur.
+    const current = PALETTES.find(p => p.id === theme) ?? PALETTES[1];
 
     return (
         <div ref={ref} style={{ position: 'relative' }}>
