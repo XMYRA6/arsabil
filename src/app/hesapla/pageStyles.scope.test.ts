@@ -237,3 +237,20 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     expect(pageTsx).not.toMatch(/ownerApartmentCount/);
   });
 });
+
+describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', () => {
+  it('masaustunde piyasa fiyati artik cekmece ICINDE DEGIL', () => {
+    // K7: ayni sorun iki platformda da vardi; deger dislinin arkasinda
+    // kalmamali.
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    const cekmeceBas = pageTsx.indexOf('isSettingsSidebarOpen &&');
+    const marketField = pageTsx.indexOf('<MarketField');
+    expect(marketField).toBeGreaterThan(-1);
+    expect(cekmeceBas === -1 || marketField < cekmeceBas).toBe(true);
+  });
+
+  it('masaustunde birim maliyet kaynagi ekranda gosterilir', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
+  });
+});

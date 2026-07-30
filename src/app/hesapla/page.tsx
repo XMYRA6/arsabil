@@ -30,7 +30,7 @@ import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers'
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
-import { ilceSecildi, konumTemizlendi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
+import { ilceSecildi, konumTemizlendi, kaynakEtiketi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -667,6 +667,36 @@ export default function Home() {
           <div className={styles.desktopSidebar}>
             <div className={styles.sidebarTitle}>Proje Bilgileri <span className={styles.settingsGear} onClick={() => setIsSettingsSidebarOpen(true)}>⚙</span></div>
 
+            {/* K7: birim maliyet ve piyasa fiyati hesabi suren asil degerler
+                — dislinin arkasinda gizlenmemeli, en ustte gorunur (spec
+                2026-07-29). Yerlesim yeniden tasarlanmadi, yalnizca bu iki
+                deger cekmeceden cikip her zaman gorunur hale geldi. */}
+            <div className={styles.settingsGroup}>
+              <div className={styles.drawerCardHeader}>Piyasa Analizi</div>
+              <div className={styles.drawerRow}>
+                <span className={styles.drawerRowLabel}>Birim inşaat maliyeti</span>
+                <span>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={100}
+                  value={globalUnitPrice}
+                  aria-label="Birim inşaat maliyeti (TL/m²)"
+                  onChange={e => {
+                    const v = Number(e.target.value);
+                    if (Number.isFinite(v) && v > 0) {
+                      setGlobalUnitPrice(v);
+                      setBirimMaliyetKaynagi({ tur: 'elle' });
+                    }
+                  }}
+                />
+              </div>
+              <MarketField
+                manualMarketPrice={manualMarketPrice}
+                setManualMarketPrice={setManualMarketPrice}
+              />
+            </div>
+
             <div className={styles.settingsGroup}>
               <h4>Daire Standardı</h4>
               <div className={styles.luxGrid}>
@@ -969,14 +999,6 @@ export default function Home() {
                   builderProfit={builderProfit}
                   setBuilderProfit={setBuilderProfit}
                   profitLevels={profitLevels}
-                />
-              </div>
-
-              <div className={styles.drawerCard}>
-                <div className={styles.drawerCardHeader}>Piyasa Analizi</div>
-                <MarketField
-                  manualMarketPrice={manualMarketPrice}
-                  setManualMarketPrice={setManualMarketPrice}
                 />
               </div>
 
