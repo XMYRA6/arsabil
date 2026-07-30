@@ -48,9 +48,23 @@ export function ilceSecildi(
     }
 }
 
-/** Konum temizlenince yonetici varsayilanina donulur. */
+/**
+ * Konum temizlenince yonetici varsayilanina donulur.
+ *
+ * `orijinalPiyasaFiyati` ikinci parametre: ilce secimi birim maliyet VE
+ * piyasa fiyatini birlikte doldurduguna gore (spec 4, bkz. `ilceSecildi`),
+ * temizleme de ikisini birden geri almali — yoksa ekran, temizlenmis bir
+ * konum icin ESKI ilcenin piyasa fiyatini gostermeye devam eder (canli
+ * dogrulamada bulundu, Task 10). Verilmezse bos dizeye doner: konum hic
+ * secilmeden temizlenirse geri donulecek bir "orijinal" deger yoktur.
+ */
 export function konumTemizlendi(
     varsayilanBirimMaliyet: number,
-): { birimMaliyet: number; kaynak: BirimMaliyetKaynagi } {
-    return { birimMaliyet: varsayilanBirimMaliyet, kaynak: { tur: 'varsayilan' } }
+    orijinalPiyasaFiyati: string = '',
+): { birimMaliyet: number; piyasaFiyati: string; kaynak: BirimMaliyetKaynagi } {
+    return {
+        birimMaliyet: varsayilanBirimMaliyet,
+        piyasaFiyati: orijinalPiyasaFiyati,
+        kaynak: { tur: 'varsayilan' },
+    }
 }

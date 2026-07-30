@@ -17,6 +17,22 @@ const DEFAULT_ARIA_LABEL = 'Alt panel';
 const noopSubscribe = () => () => {};
 
 /**
+ * Yaprak acilis/kapanis gecisi. `initial`/`animate` reduced motion'da
+ * eksen (y) yerine yalnizca opacity'e duser ama bu TEK BASINA yetmez:
+ * `transition` ayri bir prop ve spring olarak sabit kalirsa opacity
+ * fade'i yine sureli calisir — canli olcumle yakalandi (Task 10):
+ * `prefers-reduced-motion: reduce` altinda bile `getAnimations()` acilistan
+ * 100ms sonra playState:'running', duration:400 donduruyordu. Plan kisiti
+ * "tum hareket kapali" sure icin de gecerli, bu yuzden reduced motion'da
+ * sifir sureli (aninda) gecis donuyor.
+ */
+export function sheetTransition(reduceMotion: boolean) {
+    return reduceMotion
+        ? { duration: 0 }
+        : { type: 'spring' as const, damping: 32, stiffness: 320 };
+}
+
+/**
  * SSR'de `false`, client'ta ilk render sonrası `true` döner. Portal hedefi
  * `document.body` sadece client'ta var olduğundan gerekli — effect içinde
  * setState yapmak yerine `useSyncExternalStore` ile senkronize edilir.
@@ -89,6 +105,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        transition={sheetTransition(reduceMotion ?? false)}
                         onClick={onClose}
                         aria-hidden="true"
                     />
@@ -102,7 +119,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                         initial={reduceMotion ? { opacity: 0 } : { y: '100%' }}
                         animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
                         exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}
-                        transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+                        transition={sheetTransition(reduceMotion ?? false)}
                         drag={reduceMotion ? false : 'y'}
                         /* KRITIK: `dragListener={false}` + `dragControls`.
                            Varsayilan halinde framer-motion `drag="y"` icin

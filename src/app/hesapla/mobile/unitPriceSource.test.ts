@@ -43,4 +43,18 @@ describe('konumTemizlendi', () => {
         expect(r.birimMaliyet).toBe(11000)
         expect(r.kaynak).toEqual({ tur: 'varsayilan' })
     })
+
+    // Canli dogrulamada bulundu (Task 10): "Konumu temizle" birim maliyeti
+    // geri getiriyordu ama piyasa fiyatini eski ilcenin degerinde birakiyordu
+    // — ilce ikisini birden doldurduguna gore (spec 4), temizleme de ikisini
+    // birden geri almali.
+    it('piyasa fiyatini da verilen orijinal degere geri getirir', () => {
+        const r = konumTemizlendi(11000, '5.740.000')
+        expect(r.piyasaFiyati).toBe('5.740.000')
+    })
+
+    it('orijinal piyasa fiyati verilmezse bos doner (varsayilan hic girilmemisti)', () => {
+        const r = konumTemizlendi(11000)
+        expect(r.piyasaFiyati).toBe('')
+    })
 })

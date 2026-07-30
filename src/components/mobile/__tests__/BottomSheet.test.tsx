@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { BottomSheet } from '../BottomSheet'
+import { BottomSheet, sheetTransition } from '../BottomSheet'
 
 describe('BottomSheet', () => {
     it('open=false iken dialog render etmez', () => {
@@ -94,5 +94,21 @@ describe('BottomSheet', () => {
         )
         const dialog = screen.getByRole('dialog')
         expect(dialog.style.touchAction).not.toBe('pan-x')
+    })
+
+    describe('sheetTransition', () => {
+        // Canli dogrulamada bulundu (Task 10, 390x844 + emulateMedia
+        // reducedMotion:'reduce'): `initial`/`animate` reduced motion'da
+        // yalnizca opacity'e dusuyordu ama `transition` HER ZAMAN spring
+        // kaliyordu — getAnimations() acilistan 100ms sonra bile
+        // playState:'running', duration:400 donduruyordu. "Tum hareket
+        // kapali" kisitini yalnizca eksen/kaydirma degil, SURE de kapsar.
+        it('reduced motion acikken sifir sureli gecis doner', () => {
+            expect(sheetTransition(true)).toEqual({ duration: 0 })
+        })
+
+        it('reduced motion kapaliyken spring gecisi doner', () => {
+            expect(sheetTransition(false)).toEqual({ type: 'spring', damping: 32, stiffness: 320 })
+        })
     })
 })

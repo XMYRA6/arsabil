@@ -104,6 +104,46 @@ describe('GelismisAyarlarSheet', () => {
             .toHaveAttribute('data-acilis', 'false')
     })
 
+    describe('acilisBolumu parsel (Task 10, canli dogrulamada bulundu)', () => {
+        // Onceden `onParselAc` de 'risk' degerini kullaniyordu ve 'risk'
+        // zaten "Maliyet ve riskler" bolumunun (kar/risk/iksa) bir uyesiydi
+        // — parsel butonuna basinca IKI bolum birden isaretleniyordu.
+        it('yalnizca Konum ve resmi risk bolumu isaretlenir, Maliyet ve riskler DEGIL', () => {
+            render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'parsel' })} />)
+            expect(screen.getByRole('group', { name: 'Konum ve resmi risk' }))
+                .toHaveAttribute('data-acilis', 'true')
+            expect(screen.getByRole('group', { name: 'Maliyet ve riskler' }))
+                .toHaveAttribute('data-acilis', 'false')
+        })
+
+        it('hedef bolume kaydirilir (scrollIntoView cagrilir)', () => {
+            const scrollIntoView = jest.fn()
+            Element.prototype.scrollIntoView = scrollIntoView
+            render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'parsel' })} />)
+            expect(scrollIntoView).toHaveBeenCalledWith(
+                expect.objectContaining({ block: 'start' })
+            )
+        })
+
+        it('prefers-reduced-motion acikken aninda (behavior: auto) kaydirir', () => {
+            const scrollIntoView = jest.fn()
+            Element.prototype.scrollIntoView = scrollIntoView
+            Object.defineProperty(window, 'matchMedia', {
+                writable: true,
+                value: jest.fn().mockImplementation((query: string) => ({
+                    matches: true, media: query, onchange: null,
+                    addListener: jest.fn(), removeListener: jest.fn(),
+                    addEventListener: jest.fn(), removeEventListener: jest.fn(),
+                    dispatchEvent: jest.fn(),
+                })),
+            })
+            render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'parsel' })} />)
+            expect(scrollIntoView).toHaveBeenCalledWith(
+                expect.objectContaining({ behavior: 'auto' })
+            )
+        })
+    })
+
     it('Uygula ve Sifirla butonlari calisir', async () => {
         const onUygula = jest.fn(); const onSifirla = jest.fn()
         render(<GelismisAyarlarSheet {...props({ onUygula, onSifirla })} />)

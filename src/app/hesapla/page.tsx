@@ -227,6 +227,13 @@ export default function Home() {
   // elle girilmis bir deger ilce degistirilip temizlenince "Varsayilan"
   // etiketiyle yalan soyler (bkz. `handleIlChange`/`handleClearLocation`).
   const [originalUnitPriceKaynagi, setOriginalUnitPriceKaynagi] = useState<BirimMaliyetKaynagi | null>(null);
+  // Ayni orijinal-deger korumasi piyasa fiyati icin de gerekli — ilce
+  // secimi onu da ezdigine gore (bkz. `ilceSecildi`), temizleme de onu geri
+  // getirmeli. Onceden bu iz tutulmuyordu ve "Konumu temizle" piyasa
+  // fiyatini eski ilcenin degerinde birakiyordu (canli dogrulamada
+  // bulundu, Task 10 — bkz. `unitPriceSource.ts:konumTemizlendi`).
+  const [originalMarketPrice, setOriginalMarketPrice] = useState<string | null>(null);
+  const [originalPiyasaFiyatiElle, setOriginalPiyasaFiyatiElle] = useState<boolean>(false);
 
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
 
@@ -414,12 +421,17 @@ export default function Home() {
     setSelectedIl(il);
     setSelectedIlce('');
     if (originalUnitPrice !== null) {
-      setGlobalUnitPrice(konumTemizlendi(originalUnitPrice).birimMaliyet);
+      const geri = konumTemizlendi(originalUnitPrice, originalMarketPrice ?? '');
+      setGlobalUnitPrice(geri.birimMaliyet);
       // Kaydedilmis kaynak varsa ONU geri getir (ornegin elle girilmisti);
       // yoksa `konumTemizlendi`nin varsayilanina dus.
-      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? konumTemizlendi(originalUnitPrice).kaynak);
+      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? geri.kaynak);
+      setManualMarketPrice(geri.piyasaFiyati);
+      setPiyasaFiyatiElle(originalPiyasaFiyatiElle);
       setOriginalUnitPrice(null);
       setOriginalUnitPriceKaynagi(null);
+      setOriginalMarketPrice(null);
+      setOriginalPiyasaFiyatiElle(false);
     }
   };
 
@@ -430,6 +442,8 @@ export default function Home() {
     if (originalUnitPrice === null) {
       setOriginalUnitPrice(globalUnitPrice);
       setOriginalUnitPriceKaynagi(birimMaliyetKaynagi);
+      setOriginalMarketPrice(manualMarketPrice);
+      setOriginalPiyasaFiyatiElle(piyasaFiyatiElle);
     }
     const sonuc = ilceSecildi(entry, apartmentSize);
     setGlobalUnitPrice(sonuc.birimMaliyet);
@@ -449,10 +463,15 @@ export default function Home() {
     setSelectedIl('');
     setSelectedIlce('');
     if (originalUnitPrice !== null) {
-      setGlobalUnitPrice(konumTemizlendi(originalUnitPrice).birimMaliyet);
-      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? konumTemizlendi(originalUnitPrice).kaynak);
+      const geri = konumTemizlendi(originalUnitPrice, originalMarketPrice ?? '');
+      setGlobalUnitPrice(geri.birimMaliyet);
+      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? geri.kaynak);
+      setManualMarketPrice(geri.piyasaFiyati);
+      setPiyasaFiyatiElle(originalPiyasaFiyatiElle);
       setOriginalUnitPrice(null);
       setOriginalUnitPriceKaynagi(null);
+      setOriginalMarketPrice(null);
+      setOriginalPiyasaFiyatiElle(false);
     }
   };
 
@@ -594,7 +613,7 @@ export default function Home() {
                 setBirimMaliyetKaynagi({ tur: 'elle' });
               },
               parselIsaretli: parcelValue.lat !== null && parcelValue.lng !== null,
-              onParselAc: () => { setMobilAyarBolumu('risk'); setMobilAyarlarAcik(true); },
+              onParselAc: () => { setMobilAyarBolumu('parsel'); setMobilAyarlarAcik(true); },
             },
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: setApartmentSize,
