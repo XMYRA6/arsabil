@@ -58,7 +58,7 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
         onAyarlarAc: jest.fn(),
         analizAcik: false,
         onAnalizKapat: jest.fn(),
-        analiz: { result: null, baseInput: BASE_INPUT, marketPrice: 0 },
+        analiz: { result: null, baseInput: BASE_INPUT, marketPrice: 0, onKapat: jest.fn() },
         ctaMetni: 'Özet Rapor Oluştur',
         ctaDevreDisi: false,
         onCta: jest.fn(),

@@ -2,18 +2,23 @@
 import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AnalizSekmesi } from './AnalizSekmesi'
 
 // Chart.js jsdom'da canvas gerektirir; sekmenin SOZLESMESI test ediliyor,
 // grafiklerin kendi cizimi degil (onlarin kendi testleri var).
+const costProps: Record<string, unknown>[] = []
 jest.mock('@/components/charts/CostBreakdownChart', () => ({
-    CostBreakdownChart: () => <div data-testid="cost-breakdown" />,
+    CostBreakdownChart: (p: Record<string, unknown>) => { costProps.push(p); return <div data-testid="cost-breakdown" /> },
 }))
 jest.mock('@/components/charts/SensitivityChart', () => ({
     SensitivityChart: () => <div data-testid="sensitivity" />,
 }))
 jest.mock('@/components/charts/BreakEvenChart', () => ({
     BreakEvenChart: () => <div data-testid="break-even" />,
+}))
+jest.mock('@/components/FinancialDashboard', () => ({
+    FinancialDashboard: () => <div data-testid="financial" />,
 }))
 
 const BASE_INPUT = {
@@ -45,14 +50,14 @@ describe('analiz grafikleri', () => {
 
 describe('AnalizSekmesi', () => {
     it('uc grafigi de cam kart icinde render eder', () => {
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
         expect(screen.getByTestId('cost-breakdown')).toBeInTheDocument()
         expect(screen.getByTestId('sensitivity')).toBeInTheDocument()
         expect(screen.getByTestId('break-even')).toBeInTheDocument()
     })
 
     it('her grafik erisilebilir bir basliga sahip', () => {
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
         expect(screen.getByRole('group', { name: 'Maliyet dağılımı' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Hassasiyet' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Kırılma noktası' })).toBeInTheDocument()
@@ -61,9 +66,32 @@ describe('AnalizSekmesi', () => {
     it('sonuc yoksa grafik yerine aciklama gosterir', () => {
         // Bos grafik cizmek yerine nedenini soyle: sifirlarla dolu bir
         // maliyet dagilimi kullaniciya yanlis bilgi verirdi.
-        render(<AnalizSekmesi result={null} baseInput={BASE_INPUT} marketPrice={10000000} />)
+        render(<AnalizSekmesi result={null} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
         expect(screen.queryByTestId('cost-breakdown')).toBeNull()
         expect(screen.getByText(/Hesap sonucu oluşunca/)).toBeInTheDocument()
+    })
+
+    it('finansal ozet de gosterilir', () => {
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
+        expect(screen.getByRole('group', { name: 'Finansal özet' })).toBeInTheDocument()
+    })
+
+    it('kapat butonu onKapat i cagirir', async () => {
+        const onKapat = jest.fn()
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={onKapat} />)
+        await userEvent.click(screen.getByRole('button', { name: /Kapat/ }))
+        expect(onKapat).toHaveBeenCalledTimes(1)
+    })
+
+    it('maliyet dagilimi proplari motor alanlarindan dogru turetilir', () => {
+        costProps.length = 0
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={0} onKapat={jest.fn()} />)
+        expect(costProps[0]).toEqual({
+            constructionCost: RESULT.Mi_base + RESULT.Mz,
+            landValue: RESULT.Ma,
+            profit: RESULT.FD_total - RESULT.M,
+            risk: RESULT.Mi - RESULT.Mi_base - RESULT.Mz,
+        })
     })
 })
 
