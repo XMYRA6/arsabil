@@ -8,8 +8,12 @@ import type { CalculationInput, CalculationOutput } from '@/lib/calculator/engin
 import styles from './mobile.module.css';
 
 // Hesap/Analiz sekme seridi ve onun tip/bileseni Task 6'da kaldirildi:
-// analiz artik `HesaplaMobile`de etiketli bir "Kapat" satiriyla acilip
-// kapanan bir derinlestirme yapragi, sekme degil (spec K4/K5 — tek kapi).
+// analiz artik kendi etiketli "Kapat" satirini tasiyan bir derinlestirme
+// yapragi, sekme degil (spec K4/K5 — tek kapi). Kapatma affordance'i bu
+// bilesenin kendisinde yasar (bkz. `onKapat`, `FiyatAciklamasi` ile ayni
+// desen) — `HesaplaMobile` yalnizca `analizAcik` durumuna gore bu bileseni
+// render eder, kendi ayri bir kapat satiri TASIMAZ (Task 7 duzeltmesi:
+// Task 6'nin `HesaplaMobile`de biraktigi yinelenen satir kaldirildi).
 // Gecmisi icin bkz. bu commit'ten onceki hal.
 
 export type AnalizSekmesiProps = {

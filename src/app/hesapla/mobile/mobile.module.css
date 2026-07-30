@@ -824,7 +824,8 @@
 
     /* ═══ 4n — Analiz sekmesi ═══════════════════════════════════════════ */
 
-    /* `AnalizSekmesi`nin ustundeki baslik + "Kapat" satiri —
+    /* `AnalizSekmesi`nin KENDI render ettigi baslik + "Kapat" satiri (bilesen
+       kapatma affordance'ini kendisi tasir, `FiyatAciklamasi` gibi) —
        `.fiyatAciklamasi`nin kendi `.aciklamaBaslik`iyla AYNI desen (baslik +
        kapat, ikon degil), ama bu satir `.hesaplaMobilKok`in duz sutununda
        dogrudan durdugu icin `.aciklamaBaslik`in aksine kendi yatay kenar

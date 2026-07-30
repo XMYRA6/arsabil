@@ -577,7 +577,6 @@ export default function Home() {
           }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
           analizAcik={mobilAnalizAcik}
-          onAnalizKapat={() => setMobilAnalizAcik(false)}
           analiz={{
             result, baseInput: chartBaseInput, marketPrice: marketPriceNum,
             onKapat: () => setMobilAnalizAcik(false),

@@ -20,7 +20,7 @@ export type HesaplaMobileProps = {
     onAyarlarAc: () => void;
     /** Analiz derinlestirme yapragi acik mi. Durum `page.tsx`te yasar. */
     analizAcik: boolean;
-    onAnalizKapat: () => void;
+    /** Kapatma affordance'i `AnalizSekmesi.onKapat` icinde yasar — bkz. o dosya. */
     analiz: AnalizSekmesiProps;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
@@ -42,7 +42,6 @@ export function HesaplaMobile({
     fiyatAciklamasi,
     onAyarlarAc,
     analizAcik,
-    onAnalizKapat,
     analiz,
     ctaMetni,
     ctaDevreDisi,
@@ -69,23 +68,7 @@ export function HesaplaMobile({
                 </header>
 
                 {analizAcik
-                    ? (
-                        <>
-                            {/* `FiyatAciklamasi`nin basligiyla ayni desen: baslik +
-                                etiketli "Kapat" satiri, ikon degil. */}
-                            <div className={styles.analizKapatSatiri}>
-                                <h2 className={styles.aciklamaBaslikMetin}>Analiz</h2>
-                                <button
-                                    type="button"
-                                    className={styles.aciklamaKapat}
-                                    onClick={onAnalizKapat}
-                                >
-                                    Kapat
-                                </button>
-                            </div>
-                            <AnalizSekmesi {...analiz} />
-                        </>
-                    )
+                    ? <AnalizSekmesi {...analiz} />
                     : (
                         <>
                             <SonucKarti {...sonuc} />

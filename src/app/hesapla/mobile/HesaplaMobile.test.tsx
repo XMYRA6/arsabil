@@ -1,13 +1,18 @@
 /** @jest-environment jsdom */
+import type { ReactElement } from 'react'
 import { render, screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { HesaplaMobile, type HesaplaMobileProps } from './HesaplaMobile'
+import type { AnalizSekmesiProps } from './AnalizSekmesi'
 
 // AnalizSekmesi grafik bilesenlerini (canvas gerektirir) tasir; bu dosyanin
 // SOZLESMESI "tek kapi" (spec K4/K5), grafiklerin kendi cizimi degil —
-// AnalizSekmesi'nin kendi testleri Analiz.test.tsx'te.
+// AnalizSekmesi'nin kendi testleri Analiz.test.tsx'te. Mock bir jest.fn'e
+// sarilir ki tek bir testte (asagida) gercek bilesene gecici olarak
+// gecilebilsin — Task 6'nin HesaplaMobile'da biraktigi yinelenen "Kapat"
+// satirinin geri donmedigini stub'un kendisi YUTMADAN dogrulamak icin.
+const mockAnalizSekmesi = jest.fn<ReactElement, [AnalizSekmesiProps]>(() => <div data-testid="analiz-sekmesi" />)
 jest.mock('./AnalizSekmesi', () => ({
-    AnalizSekmesi: () => <div data-testid="analiz-sekmesi" />,
+    AnalizSekmesi: (props: AnalizSekmesiProps) => mockAnalizSekmesi(props),
 }))
 
 const BASE_INPUT = {
@@ -57,7 +62,6 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
         },
         onAyarlarAc: jest.fn(),
         analizAcik: false,
-        onAnalizKapat: jest.fn(),
         analiz: { result: null, baseInput: BASE_INPUT, marketPrice: 0, onKapat: jest.fn() },
         ctaMetni: 'Özet Rapor Oluştur',
         ctaDevreDisi: false,
@@ -88,10 +92,21 @@ describe('HesaplaMobile — tek kapi', () => {
         expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
     })
 
-    it('analiz Kapat butonu onAnalizKapat i cagirir', async () => {
-        const onAnalizKapat = jest.fn()
-        render(<HesaplaMobile {...props({ analizAcik: true, onAnalizKapat })} />)
-        await userEvent.click(screen.getByRole('button', { name: 'Kapat' }))
-        expect(onAnalizKapat).toHaveBeenCalledTimes(1)
+    it('analiz yapraginda TEK "Analiz" basligi ve TEK "Kapat" butonu doner (yinelenen satir donmez)', () => {
+        // Bu test SADECE burada gercek `AnalizSekmesi`yi render eder: dosyanin
+        // geri kalani onu stub'lar (canvas gerektiren grafikler yuzunden).
+        // Stub kullanilsaydi Task 6'nin `HesaplaMobile`de biraktigi yinelenen
+        // "Analiz"/"Kapat" satiri geri donse bile testler yesil kalirdi —
+        // tam da bu kor noktayi kapatmak icin gercek bilesen kullanilir.
+        const { AnalizSekmesi: GercekAnalizSekmesi } = jest.requireActual('./AnalizSekmesi') as typeof import('./AnalizSekmesi')
+        mockAnalizSekmesi.mockImplementation(GercekAnalizSekmesi)
+
+        try {
+            render(<HesaplaMobile {...props({ analizAcik: true })} />)
+            expect(screen.getAllByRole('heading', { name: 'Analiz' })).toHaveLength(1)
+            expect(screen.getAllByRole('button', { name: 'Kapat' })).toHaveLength(1)
+        } finally {
+            mockAnalizSekmesi.mockImplementation(() => <div data-testid="analiz-sekmesi" />)
+        }
     })
 })
