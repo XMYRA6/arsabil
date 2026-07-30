@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 
-/** `generatePdfReport`in ilk parametresinin tipi — kaynaktan TURETILIR,
-    elle yazilmaz. `as never` gibi bir kacis KULLANILMAZ. */
+/** `generateSavedReportPdf`in ilk parametresinin tipi — kaynaktan TURETILIR,
+    elle yazilmaz. `as never` gibi bir kacis KULLANILMAZ.
+
+    NOT: Hesaplama ekranindaki `generatePdfReport` (motorun tam ciktisini
+    basan uretec) DEGIL, kayitli-rapor uretecinden turetiliyor: Report DB
+    kaydi motor ciktilarinin (risk, iksa, marketPrice, CalculationOutput)
+    cogunu hic saklamiyor, bu yuzden bu buton indirgenmis ozet uretecini
+    kullaniyor (bkz. SavedReportDocument.tsx, task-9-report.md). */
 type Rapor = Parameters<
-    typeof import('@/lib/pdf/report_generator').generatePdfReport
+    typeof import('@/lib/pdf/saved_report_generator').generateSavedReportPdf
 >[0];
 
 /**
@@ -20,8 +26,8 @@ export function RaporPdfButonu({ rapor }: { rapor: Rapor }) {
     const indir = async () => {
         setUretiliyor(true);
         try {
-            const { generatePdfReport } = await import('@/lib/pdf/report_generator');
-            await generatePdfReport(rapor);
+            const { generateSavedReportPdf } = await import('@/lib/pdf/saved_report_generator');
+            await generateSavedReportPdf(rapor);
         } catch {
             // Sessiz yutma YOK: kullaniciya butonu geri veriyoruz, tekrar
             // denenebilir. Hata detayi Sentry'ye zaten global olarak gidiyor.

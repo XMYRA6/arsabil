@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import styles from '../dashboard.module.css';
+import { RaporPdfButonu } from './RaporPdfButonu';
 
 interface Report {
     id: string;
@@ -62,6 +63,9 @@ export default function ReportsPage() {
                                 <div><strong>Daire Fiyatı:</strong> <span className={styles.metaValue}>₺{report.minApartmentPrice.toLocaleString("tr-TR")}</span></div>
                                 <div><strong>Arsa Değeri:</strong> <span className={styles.metaValue}>₺{report.landCost.toLocaleString("tr-TR")}</span></div>
                                 <div><strong>Tarih:</strong> {formatDate(report.createdAt)}</div>
+                            </div>
+                            <div className={styles.reportPdfAction}>
+                                <RaporPdfButonu rapor={report} />
                             </div>
                             {report.listing && (
                                 <div className={styles.listingBadge}>

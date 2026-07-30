@@ -4,37 +4,21 @@ import userEvent from '@testing-library/user-event'
 import { RaporPdfButonu } from '../RaporPdfButonu'
 
 const uret = jest.fn()
-jest.mock('@/lib/pdf/report_generator', () => ({ generatePdfReport: (...a: unknown[]) => uret(...a) }))
+jest.mock('@/lib/pdf/saved_report_generator', () => ({ generateSavedReportPdf: (...a: unknown[]) => uret(...a) }))
 
-// NOT: `RAPOR`, `RaporPdfButonu`nun `rapor` prop'unun turu olan `Rapor`
-// (== generatePdfReport'un ilk parametresi, yani ReportInput) ile UYUMLU
-// olmak zorunda. Brief'teki orijinal duz fikstur ({ id, name, fdTotal })
-// bu tipi karsilamiyordu (luxLevel/apartmentSize/.../result gibi zorunlu
-// alanlar eksikti) — bu yuzden tip gevsetilmedi, fikstur tamamlandi.
+// `RAPOR`, `RaporPdfButonu`nun `rapor` prop'unun turu olan `Rapor`
+// (== generateSavedReportPdf'in ilk parametresi, yani SavedReportInput) ile
+// uyumlu, GERCEK bir kayitli-rapor sekli: Report DB kaydinin sakladigi 7
+// alanin disinda hicbir sey yok (motor ciktilari — risk, iksa, marketPrice,
+// CalculationOutput — bu kayitta hic persist edilmiyor, bkz. task-9-report.md).
 const RAPOR = {
-    id: 'r1',
-    name: 'Kadıköy Fizibilite',
-    luxLevel: 1.2,
-    apartmentSize: 120,
-    landShareRatio: 35,
+    title: 'Kadıköy Fizibilite',
     totalApartments: 12,
-    riskLevel: 5,
-    builderProfit: 1.2,
-    iksaMode: 'off',
-    marketPrice: 0,
-    result: {
-        Mi_base: 5_000_000,
-        Mz: 0,
-        Z: 0,
-        Mi: 5_000_000,
-        Ma: 3_000_000,
-        M: 8_000_000,
-        FD_total: 8_964_000,
-        FD_per_m2: 74_700,
-        Sdx: null,
-        FA: null,
-        FAbirim: null,
-    },
+    apartmentSizeSqm: 120,
+    luxLevelModifier: 1.2,
+    landShareRatio: 0.35,
+    minApartmentPrice: 8_964_000,
+    landCost: 3_000_000,
 }
 
 describe('RaporPdfButonu', () => {
@@ -44,7 +28,7 @@ describe('RaporPdfButonu', () => {
         render(<RaporPdfButonu rapor={RAPOR} />)
         await userEvent.click(screen.getByRole('button', { name: /PDF indir/ }))
         expect(uret).toHaveBeenCalledTimes(1)
-        expect(uret.mock.calls[0][0]).toMatchObject({ name: 'Kadıköy Fizibilite' })
+        expect(uret.mock.calls[0][0]).toMatchObject({ title: 'Kadıköy Fizibilite' })
     })
 
     it('uretim sirasinda buton devre disi ve durum bildiriliyor', async () => {

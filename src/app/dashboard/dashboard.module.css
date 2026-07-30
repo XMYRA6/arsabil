@@ -256,6 +256,32 @@
     color: var(--label-color);
 }
 
+.reportPdfAction {
+    margin-bottom: 0.75rem;
+}
+
+.reportPdfAction button {
+    width: 100%;
+    padding: 0.5rem 0.9rem;
+    background: rgba(var(--primary-rgb), 0.08);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.reportPdfAction button:hover:not(:disabled) {
+    background: rgba(var(--primary-rgb), 0.16);
+}
+
+.reportPdfAction button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Listing Card */
 .listingCard {
     background: var(--stat-bg);
@@ -521,5 +547,9 @@
   .metaValue {
     font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-variant-numeric: tabular-nums;
+  }
+
+  .reportPdfAction button {
+    min-height: var(--touch-target);
   }
 }
