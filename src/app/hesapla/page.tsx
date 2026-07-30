@@ -20,7 +20,7 @@ type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfRepo
 import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { FormulParamsFields, RiskCostFields, MarketField } from './AdvancedSettingsSections';
+import { FormulParamsFields, RiskCostFields, MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
 import { HesapOzetiSeridi } from './HesapOzetiSeridi';
 import { HesapFisi } from './HesapFisi';
 import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
@@ -30,7 +30,7 @@ import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers'
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
-import { ilceSecildi, konumTemizlendi, kaynakEtiketi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
+import { ilceSecildi, konumTemizlendi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -672,25 +672,15 @@ export default function Home() {
                 2026-07-29). Yerlesim yeniden tasarlanmadi, yalnizca bu iki
                 deger cekmeceden cikip her zaman gorunur hale geldi. */}
             <div className={styles.settingsGroup}>
-              <div className={styles.drawerCardHeader}>Piyasa Analizi</div>
-              <div className={styles.drawerRow}>
-                <span className={styles.drawerRowLabel}>Birim inşaat maliyeti</span>
-                <span>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={100}
-                  value={globalUnitPrice}
-                  aria-label="Birim inşaat maliyeti (TL/m²)"
-                  onChange={e => {
-                    const v = Number(e.target.value);
-                    if (Number.isFinite(v) && v > 0) {
-                      setGlobalUnitPrice(v);
-                      setBirimMaliyetKaynagi({ tur: 'elle' });
-                    }
-                  }}
-                />
-              </div>
+              <h4>Piyasa Analizi</h4>
+              <BirimMaliyetField
+                globalUnitPrice={globalUnitPrice}
+                birimMaliyetKaynagi={birimMaliyetKaynagi}
+                onBirimMaliyet={v => {
+                  setGlobalUnitPrice(v);
+                  setBirimMaliyetKaynagi({ tur: 'elle' });
+                }}
+              />
               <MarketField
                 manualMarketPrice={manualMarketPrice}
                 setManualMarketPrice={setManualMarketPrice}

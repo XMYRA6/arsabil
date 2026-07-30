@@ -242,15 +242,50 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
   it('masaustunde piyasa fiyati artik cekmece ICINDE DEGIL', () => {
     // K7: ayni sorun iki platformda da vardi; deger dislinin arkasinda
     // kalmamali.
+    //
+    // NOT (review bulgusu): onceki surum 'isSettingsSidebarOpen &&' literal
+    // string'ini ariyordu — bu desen page.tsx'te HIC yok (kod
+    // `${isSettingsSidebarOpen ? styles.open : ''}` ternary'sini kullaniyor,
+    // '&&' degil). Bu yuzden cekmeceBas her zaman -1 donuyordu ve
+    // `cekmeceBas === -1 || ...` kisa devresi assertion'i kosulsuz true
+    // yapiyordu — MarketField cekmecenin ICINDE kalsa bile test GECERDI.
+    // Gercekten var olan bir sinir isaretine (`styles.settingsDrawerOverlay`,
+    // cekmecenin DOM'daki ilk satiri) gore duzeltildi ki test gercekten
+    // basarisiz OLABILSIN.
+    //
+    // NOT 2: yalnizca ILK gorulen `<MarketField` konumunu kontrol etmek de
+    // yetersizdi — mobil yedek agacinda (.mobileSidebar, satir ~912) zaten
+    // cekmeceden ONCE gelen ayri, mesru bir `<MarketField>` var. O erken
+    // occurrence varligi tek basina yeterliymis gibi gorunse de, cekmecenin
+    // ICINDE baska bir `<MarketField>` KALSA bile ilk-occurrence testi yine
+    // GECERDI. Bu yuzden assertion, cekmece baslangicindan SONRAKI TUM
+    // occurrence'lari kontrol ediyor — hicbiri olmamali.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    const cekmeceBas = pageTsx.indexOf('isSettingsSidebarOpen &&');
-    const marketField = pageTsx.indexOf('<MarketField');
-    expect(marketField).toBeGreaterThan(-1);
-    expect(cekmeceBas === -1 || marketField < cekmeceBas).toBe(true);
+    const cekmeceBas = pageTsx.indexOf('styles.settingsDrawerOverlay');
+    const marketFieldMatches = [...pageTsx.matchAll(/<MarketField/g)];
+    expect(cekmeceBas).toBeGreaterThan(-1);
+    expect(marketFieldMatches.length).toBeGreaterThan(0);
+    const cekmeceIcindeKalanlar = marketFieldMatches.filter(m => m.index! > cekmeceBas);
+    expect(cekmeceIcindeKalanlar.length).toBe(0);
   });
 
   it('masaustunde birim maliyet kaynagi ekranda gosterilir', () => {
+    // `kaynakEtiketi` cagrisi Finding 2 duzeltmesiyle `BirimMaliyetField`
+    // bilesenine tasindi (AdvancedSettingsSections.tsx): Next.js `page.tsx`
+    // yalnizca `default` export'a izin verir (baska bir named export tip
+    // hatasi verir — `.next/dev/types` kontrolu), bu yuzden yerel arabellek
+    // state'i (bkz. Finding 2) tasiyan bilesen ayri bir dosyada olmak
+    // zorunda. Bu test artik IKI seyi birlikte dogruluyor: (1) page.tsx
+    // dogru degerleri gercekten `BirimMaliyetField`e prop olarak geciriyor
+    // mu, (2) `BirimMaliyetField` gercekten `kaynakEtiketi`yi bu iki deger
+    // ile cagiriyor mu — ikisi birlikte, onceki tek-dosyalik assertion'la
+    // ayni garantiyi veriyor.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    expect(pageTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
+    expect(pageTsx).toMatch(/<BirimMaliyetField/);
+    expect(pageTsx).toMatch(/globalUnitPrice=\{globalUnitPrice\}/);
+    expect(pageTsx).toMatch(/birimMaliyetKaynagi=\{birimMaliyetKaynagi\}/);
+
+    const sectionsTsx = fs.readFileSync(path.join(__dirname, 'AdvancedSettingsSections.tsx'), 'utf8');
+    expect(sectionsTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
   });
 });

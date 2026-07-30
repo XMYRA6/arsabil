@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './page.module.css';
 import { Toggle } from '@/components/ui/Toggle';
 import { RangeSlider } from '@/components/ui/RangeSlider';
+import { kaynakEtiketi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -213,6 +214,71 @@ export function RiskCostFields({
         </div>
       </div>
     </>
+  );
+}
+
+export interface BirimMaliyetFieldProps {
+  globalUnitPrice: number;
+  birimMaliyetKaynagi: BirimMaliyetKaynagi;
+  onBirimMaliyet: (v: number) => void;
+}
+
+/**
+ * Masaustu "Piyasa Analizi" grubunun birim maliyet satiri (spec K1/K7,
+ * 2026-07-30 masaustu gorunurluk gorevi).
+ *
+ * `globalUnitPrice` her zaman gecerli (>0) bir sayi tutar; ama kullanici
+ * alani silip yeniden yazarken GECICI olarak bos/yarim bir metin gormeli.
+ * Input dogrudan `globalUnitPrice`e baglansaydi (controlled), `Number('')
+ * === 0` guard'ina takilir, deger hic degismez ve alan her silme/tus
+ * vurusunda eski haline sessizce geri "sicrardi" (review Finding 2,
+ * 2026-07-30 — brief'in orijinal kodu tam bu hatayi icериyordu). Yerel
+ * `girdi` state'i bu sicramayi onler: ham metin HER ZAMAN gosterilir,
+ * yalnizca gecerli (>0) bir sayi girildiginde ust bilesene commit edilir.
+ *
+ * Ayri bir bilesen olarak burada (page.tsx yerine) tanimlandi ki: (1) Next.js
+ * `page.tsx` yalnizca `default` export'a izin verir (baska bir named export
+ * tip hatasi verir), (2) bu arabellek mantigi `Home`in agir
+ * bagimliliklarindan (fetch/useSession/matchMedia/Leaflet) BAGIMSIZ, izole
+ * olarak test edilebilsin.
+ */
+export function BirimMaliyetField({ globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet }: BirimMaliyetFieldProps) {
+  const [girdi, setGirdi] = useState<string>(String(globalUnitPrice));
+  // Dis kaynakli degisiklikleri (ilce secimi, "elle" commit sonrasi geri
+  // akan prop) render SIRASINDA yakalar — `useEffect` icinde setState
+  // cagirmak ekstra bir commit dongusune yol acardi (eslint
+  // `react-hooks/set-state-in-effect`); bu, React'in kendi onerdigi "prop
+  // degisince state'i ayarla" deseni (bkz. react.dev "You Might Not Need
+  // an Effect").
+  const [oncekiFiyat, setOncekiFiyat] = useState(globalUnitPrice);
+  if (globalUnitPrice !== oncekiFiyat) {
+    setOncekiFiyat(globalUnitPrice);
+    setGirdi(String(globalUnitPrice));
+  }
+
+  return (
+    <div className={styles.drawerRow}>
+      <span className={styles.drawerRowLabel}>Birim inşaat maliyeti</span>
+      <span>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
+      <input
+        type="number"
+        min={0}
+        step={100}
+        value={girdi}
+        aria-label="Birim inşaat maliyeti (TL/m²)"
+        onChange={e => {
+          const raw = e.target.value;
+          // Ham metin HER ZAMAN gosterilir — bos/yarim yazim burada
+          // engellenmez, yalnizca gecerli (>0) sayilar ust bilesene
+          // commit edilir (bkz. yukaridaki not).
+          setGirdi(raw);
+          const v = Number(raw);
+          if (Number.isFinite(v) && v > 0) {
+            onBirimMaliyet(v);
+          }
+        }}
+      />
+    </div>
   );
 }
 
