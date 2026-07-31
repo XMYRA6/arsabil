@@ -23,7 +23,7 @@ gitignored — `git clean -fdx` onu siler, worktree silinirse gider. Bu dosya ha
 | 7 — Analiz drill-down + finansal özet | ✅ complete (1 fix turu) | `892ab70`..`b77aa66` |
 | 8 — Masaüstü görünürlük (K7) | ✅ complete (1 fix turu) | `b77aa66`..`dd122d8` |
 | 9 — Raporlarım'a PDF | ✅ complete | `dd122d8`..`25608ff` |
-| 10 — Final doğrulama | ⏳ fix turu uçuşta kaldı | `25608ff`..`08a39bb`+ |
+| 10 — Final doğrulama | ✅ complete (dokunma hedefi kalemi ölçümle triyaja alındı) | `25608ff`..`08a39bb` |
 
 **Doğrulama (HEAD `08a39bb`):** `npx tsc --noEmit` **0** · `npx jest --no-coverage`
 **716/716** · `npx eslint src` **12** (2 hata/10 uyarı — baseline'ın aynısı) ·
@@ -35,10 +35,18 @@ gitignored — `git clean -fdx` onu siler, worktree silinirse gider. Bu dosya ha
    `08a39bb` sonrasındaki tek commit `4c6de9a` ve o da yalnızca bu dokümanı değiştiriyor.
    Yeniden dispatch EDİLMEDİ — çünkü ölçüm, kararın dayandığı kök-neden modelini çürüttü
    (bkz. aşağıdaki bölüm). Task 10 `complete`. Plan 10/10.
-2. **Whole-branch review** — planın son adımı. `superpowers:requesting-code-review`in
-   `code-reviewer.md`'si, **en yetenekli modelle**, aralık `c65e26c..HEAD`
-   (`scripts/review-package <plan> c65e26c HEAD`). Review'a defterdeki **deferred minor ve
-   parked** satırlarını da göster ki merge öncesi hangileri kapanmalı diye ayıklasın.
+2. ~~**Whole-branch review**~~ **YAPILDI (2026-07-31, `c65e26c..de8103a`, opus).**
+   Verdict **With fixes** — Critical yok, 5 Important, 8 Minor. Reviewer masaüstü kısıtını
+   `git diff` ile bizzat doğruladı ve üç insan override'ını bağımsız türetip haklı buldu.
+   **I1 + I2 + I4 ve M4 + M5 kapatıldı (`de1a766`; jest 728/728, tsc 0, eslint 12 baseline).**
+   Ayrıntı ve tam triyaj: `.superpowers/sdd/2026-07-30-hesapla-girdi-mimarisi/progress.md`
+   sonundaki "WHOLE-BRANCH REVIEW" bölümü.
+
+   **Sonraki branch'e devreden:** I3 (`.mobileSidebar` + `.mobileActionsSlot` — ~115 satır JSX
+   iki yönde de ölü, silinirse `pageStyles.scope.test.ts` sadeleşir), I5 (`page.tsx`i render
+   eden hiçbir davranış testi yok — I1/I2'nin gözden kaçmasının yapısal nedeni), M1/M2/M3/M6/
+   M7/M8. Ayrıca **insan kararı bekleyen** Recommendation 4: masaüstünde piyasa fiyatı alanı
+   artık iki kez görünüyor (aynı state'e bağlı, bug değil ama spec §5 tek alan tarif ediyor).
 3. Sonra `superpowers:finishing-a-development-branch`.
 
 ### Task 10'un dokunma hedefi kalemi — ÖLÇÜMLE KAPANDI, KOD YAZILMADI
