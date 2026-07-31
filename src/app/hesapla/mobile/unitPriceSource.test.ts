@@ -1,4 +1,4 @@
-import { ilceSecildi, kaynakEtiketi, konumTemizlendi } from './unitPriceSource'
+import { ilceSecildi, kaynakEtiketi, konumTemizlendi, metrekareDegisti } from './unitPriceSource'
 
 const KADIKOY = { ilce: 'Kadıköy', avgUnitConstructionPrice: 12000, avgSalesPricePerM2: 41000 }
 
@@ -56,5 +56,33 @@ describe('konumTemizlendi', () => {
     it('orijinal piyasa fiyati verilmezse bos doner (varsayilan hic girilmemisti)', () => {
         const r = konumTemizlendi(11000)
         expect(r.piyasaFiyati).toBe('')
+    })
+})
+
+// Whole-branch review I2: `page.tsx`teki effect, ilce seciliyken `apartmentSize`
+// degisince piyasa fiyatini KOSULSUZ yeniden hesapliyordu — elle yazilmis bir
+// toplami sessizce eziyordu. Ilce secimi (`ilceSecildi`) ezmeye DEVAM eder ve
+// bunu toast'la soyler; metrekare degisimi bir konum eylemi degildir, o yuzden
+// elle girilmis degeri korur.
+describe('metrekareDegisti', () => {
+    it('ilce degeri geceliyken yeni metrekareye gore piyasa fiyatini yeniden hesaplar', () => {
+        expect(metrekareDegisti(KADIKOY, 140, false)).toBe('5.740.000') // 41000 * 140
+    })
+
+    it('metrekare degisince sonuc gercekten degisir', () => {
+        expect(metrekareDegisti(KADIKOY, 100, false)).toBe('4.100.000')
+    })
+
+    it('elle girilmis piyasa fiyatini EZMEZ', () => {
+        expect(metrekareDegisti(KADIKOY, 140, true)).toBeNull()
+    })
+
+    it('ilce girdisi yoksa hicbir sey yapmaz', () => {
+        expect(metrekareDegisti(undefined, 140, false)).toBeNull()
+    })
+
+    it('Turkce bicimde ve tam sayi doner', () => {
+        expect(metrekareDegisti({ ...KADIKOY, avgSalesPricePerM2: 41333.4 }, 140, false))
+            .toBe('5.786.676')
     })
 })

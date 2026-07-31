@@ -30,7 +30,7 @@ import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers'
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
-import { ilceSecildi, konumTemizlendi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
+import { ilceSecildi, konumTemizlendi, metrekareDegisti, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -325,11 +325,14 @@ export default function Home() {
     const entry = districtPrices.find(
       d => d.il === selectedIl && d.ilce === selectedIlce
     );
-    if (!entry) return;
-    const market = Math.round(entry.avgSalesPricePerM2 * apartmentSize);
+    // Elle yazilmis bir toplam varsa DOKUNULMAZ (whole-branch review I2):
+    // metrekare degisimi bir konum eylemi degil. Ilce SECIMI ezmeye devam
+    // eder ve bunu toast'la soyler — bkz. `handleIlceChange`.
+    const yeni = metrekareDegisti(entry, apartmentSize, piyasaFiyatiElle);
+    if (yeni === null) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- ilçe fiyat verisi değiştiğinde piyasa fiyatı hesaplanıyor
-    setManualMarketPrice(market.toLocaleString('tr-TR', { maximumFractionDigits: 0 }));
-  }, [apartmentSize, selectedIl, selectedIlce, districtPrices]);
+    setManualMarketPrice(yeni);
+  }, [apartmentSize, selectedIl, selectedIlce, districtPrices, piyasaFiyatiElle]);
 
   const handleSaveReport = async () => {
     if (!result) return;
@@ -433,6 +436,21 @@ export default function Home() {
       setOriginalMarketPrice(null);
       setOriginalPiyasaFiyatiElle(false);
     }
+  };
+
+  /**
+   * Piyasa fiyatinin KULLANICI tarafindan yazildigi TEK giris noktasi.
+   *
+   * Ham `setManualMarketPrice`i bir kontrole prop olarak gecirmeyin: provenance
+   * bayragi (`piyasaFiyatiElle`) o zaman kurulmaz ve spec 4'un "elle girilmis
+   * degeri ezdim" uyarisi ile `metrekareDegisti`nin koruma kurali sessizce olu
+   * kalir — whole-branch review I1 tam olarak buydu (bayrak yalnizca mobil
+   * dalda kuruluyordu, masaustunde hicbir zaman `true` olmuyordu).
+   * `pageStyles.scope.test.ts` bunu bekliyor.
+   */
+  const piyasaFiyatiGirildi = (v: string) => {
+    setManualMarketPrice(v);
+    setPiyasaFiyatiElle(true);
   };
 
   const handleIlceChange = (ilce: string) => {
@@ -577,7 +595,7 @@ export default function Home() {
             birimFiyat: sonucDegeri(result?.FD_per_m2),
             karsilastirma: {
               piyasaFiyati: manualMarketPrice,
-              onPiyasaFiyati: (v: string) => { setManualMarketPrice(v); setPiyasaFiyatiElle(true); },
+              onPiyasaFiyati: piyasaFiyatiGirildi,
               farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
             },
             onFisAc: () => setMobilFisAcik(true),
@@ -645,6 +663,9 @@ export default function Home() {
             setIksaPercentage(AYAR_VARSAYILANLARI.iksaPercentage);
             setIksaManualTL(AYAR_VARSAYILANLARI.iksaManualTL);
             setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
+            // Provenance de sifirlanmali: bayrak `true` kalirsa sonraki ilce
+            // secimi "elle girilmis degeri ezdim" toast'ini haksiz yere basar.
+            setPiyasaFiyatiElle(false);
             setIsAaEnabled(AYAR_VARSAYILANLARI.isAaEnabled);
             setArsaAlani(AYAR_VARSAYILANLARI.arsaAlani);
           }}
@@ -655,7 +676,7 @@ export default function Home() {
           riskLevel={riskLevel} setRiskLevel={setRiskLevel} riskLevels={riskLevels}
           builderProfit={builderProfit} setBuilderProfit={setBuilderProfit}
           profitLevels={profitLevels}
-          manualMarketPrice={manualMarketPrice} setManualMarketPrice={setManualMarketPrice}
+          manualMarketPrice={manualMarketPrice} setManualMarketPrice={piyasaFiyatiGirildi}
           isAaEnabled={isAaEnabled} setIsAaEnabled={setIsAaEnabled}
           arsaAlani={arsaAlani} setArsaAlani={setArsaAlani}
           parcelValue={parcelValue}
@@ -702,7 +723,7 @@ export default function Home() {
               />
               <MarketField
                 manualMarketPrice={manualMarketPrice}
-                setManualMarketPrice={setManualMarketPrice}
+                setManualMarketPrice={piyasaFiyatiGirildi}
               />
             </div>
 
@@ -945,7 +966,7 @@ export default function Home() {
                 <div className={styles.accordionBody}>
                   <MarketField
                     manualMarketPrice={manualMarketPrice}
-                    setManualMarketPrice={setManualMarketPrice}
+                    setManualMarketPrice={piyasaFiyatiGirildi}
                   />
                 </div>
               </details>
@@ -958,7 +979,7 @@ export default function Home() {
               ownerApartmentShare={ownerApartmentShare}
               totalApartments={totalApartments}
               manualMarketPrice={manualMarketPrice}
-              onMarketPriceChange={setManualMarketPrice}
+              onMarketPriceChange={piyasaFiyatiGirildi}
               marketPriceNum={marketPriceNum}
             />
           </div>
@@ -1025,7 +1046,7 @@ export default function Home() {
             ownerApartmentShare={ownerApartmentShare}
             totalApartments={totalApartments}
             manualMarketPrice={manualMarketPrice}
-            onMarketPriceChange={setManualMarketPrice}
+            onMarketPriceChange={piyasaFiyatiGirildi}
             marketPriceNum={marketPriceNum}
           />
 

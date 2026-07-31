@@ -27,8 +27,16 @@ export function kaynakEtiketi(kaynak: BirimMaliyetKaynagi, deger: number): strin
             return `${kaynak.ilce} ortalaması ${bicimli}`
         case 'elle':
             return `Elle girildi · ${bicimli}`
-        default:
+        case 'varsayilan':
             return `Varsayılan ${bicimli}`
+        default: {
+            // Tuketilmislik kontrolu (whole-branch review M4): onceki surumde
+            // `varsayilan` `default`la karsilaniyordu, yani dorduncu bir `tur`
+            // eklense SESSIZCE "Varsayılan" basardi. Artik tsc derlemede
+            // yakalar.
+            const _tuketilmedi: never = kaynak
+            return _tuketilmedi
+        }
     }
 }
 
@@ -46,6 +54,26 @@ export function ilceSecildi(
         piyasaFiyati: trFormat.format(Math.round(entry.avgSalesPricePerM2 * apartmentSize)),
         kaynak: { tur: 'ilce', ilce: entry.ilce },
     }
+}
+
+/**
+ * Metrekare degistiginde ilce piyasa fiyatinin yeniden hesaplanip
+ * hesaplanmayacagina karar verir. `null` = DOKUNMA.
+ *
+ * Whole-branch review I2: `page.tsx`teki effect bunu kosulsuz yapiyordu, yani
+ * elle yazilmis bir toplami sessizce eziyordu. Ilce SECIMI ezmeye devam eder
+ * (bkz. `ilceSecildi` — ongorulebilirlik tercihi) ve bunu toast'la soyler;
+ * metrekare degisimi ise bir konum eylemi degil, o yuzden elle girilmis deger
+ * korunur. Sessizce ezmek ile sessizce korumak arasindaki fark: ilki
+ * kullanicinin verisini yok eder, ikincisi etmez.
+ */
+export function metrekareDegisti(
+    entry: IlceFiyatGirdisi | undefined,
+    apartmentSize: number,
+    piyasaFiyatiElle: boolean,
+): string | null {
+    if (!entry || piyasaFiyatiElle) return null
+    return trFormat.format(Math.round(entry.avgSalesPricePerM2 * apartmentSize))
 }
 
 /**

@@ -269,6 +269,44 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
     expect(cekmeceIcindeKalanlar.length).toBe(0);
   });
 
+  // Whole-branch review I1: `piyasaFiyatiElle` bayragini YALNIZCA mobil dal
+  // kuruyordu (page.tsx:580); masaustundeki yazicilar ham `setManualMarketPrice`
+  // geciyordu. Sonuc: bayrak masaustunde hic `true` olmuyor, spec 4'un "elle
+  // girilmis deger EZILDIYSE soyle" uyarisi masaustunde olu kod.
+  //
+  // Bu test kaynak metni okur (page.tsx render testi henuz yok — review I5).
+  // Kirilabilirligi kanitlandi: herhangi bir cagri yerini ham setter'a geri
+  // cevirince kirmiziya doner.
+  it('piyasa fiyatini KULLANICIDAN alan hicbir kontrol ham setter almaz', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    const hamSetter = [...pageTsx.matchAll(
+      /(?:setManualMarketPrice|onMarketPriceChange|onPiyasaFiyati)\s*[=:]\s*\{?\s*setManualMarketPrice\s*\}?/g
+    )];
+    expect(hamSetter.map(m => m[0])).toEqual([]);
+  });
+
+  it('provenance tasiyan handler tanimli ve tum girdi noktalarinda kullanilmis', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).toMatch(/const piyasaFiyatiGirildi\s*=/);
+    // Bayragi kuran TEK yer bu handler olmali.
+    const bayragiKuranlar = [...pageTsx.matchAll(/setPiyasaFiyatiElle\(true\)/g)];
+    expect(bayragiKuranlar.length).toBe(1);
+    // 6 girdi noktasi: mobil ekran, mobil gelismis ayarlar yapragi, masaustu
+    // "Piyasa Analizi" grubu, mobil yedek agac, iki `HesapOzetiSeridi` kopyasi.
+    const kullanimlar = [...pageTsx.matchAll(/piyasaFiyatiGirildi/g)];
+    expect(kullanimlar.length).toBeGreaterThanOrEqual(7); // tanim + 6 kullanim
+  });
+
+  it('"Ayarlari sifirla" provenance bayragini da sifirlar', () => {
+    // Bayrak `true` kalirsa, sifirlamadan SONRA secilen bir ilce "elle
+    // girilmis degeri ezdim" toast'ini haksiz yere basar.
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    const sifirlamaBas = pageTsx.indexOf('setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice)');
+    expect(sifirlamaBas).toBeGreaterThan(-1);
+    const kalan = pageTsx.slice(sifirlamaBas, sifirlamaBas + 400);
+    expect(kalan).toMatch(/setPiyasaFiyatiElle\(false\)/);
+  });
+
   it('masaustunde birim maliyet kaynagi ekranda gosterilir', () => {
     // `kaynakEtiketi` cagrisi Finding 2 duzeltmesiyle `BirimMaliyetField`
     // bilesenine tasindi (AdvancedSettingsSections.tsx): Next.js `page.tsx`

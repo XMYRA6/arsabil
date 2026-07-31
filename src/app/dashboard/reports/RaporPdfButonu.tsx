@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 /** `generateSavedReportPdf`in ilk parametresinin tipi — kaynaktan TURETILIR,
     elle yazilmaz. `as never` gibi bir kacis KULLANILMAZ.
@@ -28,9 +29,15 @@ export function RaporPdfButonu({ rapor }: { rapor: Rapor }) {
         try {
             const { generateSavedReportPdf } = await import('@/lib/pdf/saved_report_generator');
             await generateSavedReportPdf(rapor);
-        } catch {
-            // Sessiz yutma YOK: kullaniciya butonu geri veriyoruz, tekrar
-            // denenebilir. Hata detayi Sentry'ye zaten global olarak gidiyor.
+        } catch (e) {
+            // YAKALANMIS bir rejection `unhandledrejection`a ULASMAZ — onceki
+            // surumun "Sentry global olarak alir" yorumu yanlisti ve hata
+            // hicbir yere gitmiyordu (whole-branch review I4). Bu gercek bir
+            // senaryo: `SavedReportDocument` fontlari fonts.gstatic.com'dan
+            // cekiyor, cevrimdisi/CSP'li istemcide uretim patlar. Kullanici
+            // yalnizca butonun titreyip geri geldigini goruyordu.
+            console.error('Kayitli rapor PDF uretimi basarisiz', e);
+            toast.error('PDF oluşturulamadı. Bağlantınızı kontrol edip tekrar deneyin.');
         } finally {
             setUretiliyor(false);
         }

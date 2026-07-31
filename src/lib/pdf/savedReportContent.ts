@@ -28,6 +28,11 @@ export interface SavedReportRow {
 }
 
 const nf = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
+
+/** Kalite katsayisi tam sayi DEGIL (1,2 / 1,4). tr-TR belgede nokta ondalik
+    ayraciyla `x1.2` basiliyordu — `nf` bunu 0 basamaga yuvarlardi, o yuzden
+    ayri bicimleyici (whole-branch review M5). */
+const nfKatsayi = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 });
 const fmt   = (n: number) => nf.format(n);
 const fmtTL = (n: number) => `${fmt(n)} TL`;
 
@@ -59,6 +64,6 @@ export function buildSavedReportRows(input: SavedReportInput): SavedReportRow[] 
     { label: 'Daire Sayısı', value: `${fmt(input.totalApartments)} daire` },
     { label: 'Daire Alanı', value: `${fmt(input.apartmentSizeSqm)} m²` },
     { label: 'Arsa Payı', value: `%${(input.landShareRatio * 100).toFixed(0)}` },
-    { label: 'Kalite Katsayısı', value: `x${input.luxLevelModifier}` },
+    { label: 'Kalite Katsayısı', value: `x${nfKatsayi.format(input.luxLevelModifier)}` },
   ];
 }

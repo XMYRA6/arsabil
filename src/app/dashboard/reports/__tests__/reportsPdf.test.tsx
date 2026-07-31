@@ -6,6 +6,9 @@ import { RaporPdfButonu } from '../RaporPdfButonu'
 const uret = jest.fn()
 jest.mock('@/lib/pdf/saved_report_generator', () => ({ generateSavedReportPdf: (...a: unknown[]) => uret(...a) }))
 
+const toastError = jest.fn()
+jest.mock('react-hot-toast', () => ({ toast: { error: (...a: unknown[]) => toastError(...a) } }))
+
 // `RAPOR`, `RaporPdfButonu`nun `rapor` prop'unun turu olan `Rapor`
 // (== generateSavedReportPdf'in ilk parametresi, yani SavedReportInput) ile
 // uyumlu, GERCEK bir kayitli-rapor sekli: Report DB kaydinin sakladigi 7
@@ -22,7 +25,7 @@ const RAPOR = {
 }
 
 describe('RaporPdfButonu', () => {
-    beforeEach(() => uret.mockReset())
+    beforeEach(() => { uret.mockReset(); toastError.mockReset() })
 
     it('tiklaninca PDF uretecini rapor verisiyle cagirir', async () => {
         render(<RaporPdfButonu rapor={RAPOR} />)
@@ -46,5 +49,26 @@ describe('RaporPdfButonu', () => {
         render(<RaporPdfButonu rapor={RAPOR} />)
         await userEvent.click(screen.getByRole('button', { name: /PDF indir/ }))
         expect(await screen.findByRole('button', { name: /PDF indir/ })).toBeEnabled()
+    })
+
+    // Whole-branch review I4: catch blogu bostu ve yorumu "hata Sentry'ye
+    // zaten global olarak gidiyor" diyordu — YANLIS. Yakalanmis bir rejection
+    // `unhandledrejection`a hic ulasmaz, yani hicbir yere gitmiyordu.
+    // `SavedReportDocument` fontlari fonts.gstatic.com'dan cektigi icin
+    // cevrimdisi/CSP'li istemcide bu gercek bir senaryo: kullanici butonun
+    // titreyip geri gelmesinden baska bir sey gormuyordu.
+    it('hata durumunda kullaniciya SOYLENIR', async () => {
+        uret.mockRejectedValue(new Error('patladi'))
+        render(<RaporPdfButonu rapor={RAPOR} />)
+        await userEvent.click(screen.getByRole('button', { name: /PDF indir/ }))
+        await screen.findByRole('button', { name: /PDF indir/ })
+        expect(toastError).toHaveBeenCalledTimes(1)
+        expect(String(toastError.mock.calls[0][0])).toMatch(/PDF/i)
+    })
+
+    it('basarili uretimde hata bildirimi CIKMAZ', async () => {
+        render(<RaporPdfButonu rapor={RAPOR} />)
+        await userEvent.click(screen.getByRole('button', { name: /PDF indir/ }))
+        expect(toastError).not.toHaveBeenCalled()
     })
 })
