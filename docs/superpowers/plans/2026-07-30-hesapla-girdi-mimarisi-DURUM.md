@@ -98,8 +98,9 @@ geçmiyordu ama ihlal ediyorlar.** Kusur sınıfı aynı, kapsanan eleman kimli�
 **İnsan kararı (2026-07-31): kod yazılmayacak.** Bulgu whole-branch review'a "ölçülmüş, bilinen"
 triyaj kalemi olarak gösterilecek ve **ayrı mobil yerleşim spec'ine aday** olarak yazılacak.
 
-Ölçüm scripti tekrar koşulabilir (gitignored, dev server açıkken):
-`SCROLLS=0,40,100,150,219 node .superpowers/touch-target-measure.mjs`
+Ölçüm scripti tekrar koşulabilir (dev server açıkken, repo kökünden):
+`SCROLLS=0,40,100,150,219 node docs/superpowers/ledgers/2026-07-30-hesapla-girdi-mimarisi/touch-target-measure.mjs`
+— `playwright`i worktree/kök `node_modules`'undan çözebilmesi için repo içinden çalıştırılmalı.
 
 ## Bu oturumda (2026-07-31) çıkan kalıcı dersler
 
