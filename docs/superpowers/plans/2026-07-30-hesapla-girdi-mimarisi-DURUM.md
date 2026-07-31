@@ -31,34 +31,55 @@ gitignored — `git clean -fdx` onu siler, worktree silinirse gider. Bu dosya ha
 
 ## YARIN İLK İŞ
 
-1. **Task 10'un fix turu bitti mi?** Oturum kapanırken arka planda çalışıyordu.
-   `git log --oneline -3` ve `.superpowers/sdd/.../task-10-report.md`in sonuna bak.
-   - Bitmişse: scoped re-review koş (`re-review-prompt.md`, `scripts/review-package <plan> 08a39bb HEAD`),
-     sonra defterde `Task 10: complete` satırını yaz.
-   - Bitmemişse: aynı düzeltmeyi yeniden dispatch et (aşağıda tarif var).
+1. ~~**Task 10'un fix turu bitti mi?**~~ **KAPANDI (2026-07-31).** Fix turu hiç düşmemiş:
+   `08a39bb` sonrasındaki tek commit `4c6de9a` ve o da yalnızca bu dokümanı değiştiriyor.
+   Yeniden dispatch EDİLMEDİ — çünkü ölçüm, kararın dayandığı kök-neden modelini çürüttü
+   (bkz. aşağıdaki bölüm). Task 10 `complete`. Plan 10/10.
 2. **Whole-branch review** — planın son adımı. `superpowers:requesting-code-review`in
    `code-reviewer.md`'si, **en yetenekli modelle**, aralık `c65e26c..HEAD`
    (`scripts/review-package <plan> c65e26c HEAD`). Review'a defterdeki **deferred minor ve
    parked** satırlarını da göster ki merge öncesi hangileri kapanmalı diye ayıklasın.
 3. Sonra `superpowers:finishing-a-development-branch`.
 
-### Task 10'un yarım kalan fix'i (bitmediyse)
+### Task 10'un dokunma hedefi kalemi — ÖLÇÜMLE KAPANDI, KOD YAZILMADI
 
-**Kusur (canlı ölçüldü):** 390×844'te scroll=0 iken "Metrekareyi azalt/artır" ve "Toplam daire
-sayısı üzerinden hesapla" toggle'ının **gerçek vuruş alanı** (`document.elementFromPoint`)
-`StickyActionBar`/`BottomNavbar`'a ait — görsel konuma dokunuş YANLIŞ elemana gidiyor.
-Sırasıyla 40px ve 100px kaydırınca temizleniyor (`maxScroll=263px`).
+**Kusur:** 390×844'te dinlenme halinde bazı girdi kontrollerinin **gerçek vuruş alanı**
+(`document.elementFromPoint`) `StickyActionBar`/`BottomNavbar`'a ait — görsel konuma dokunuş
+YANLIŞ elemana gidiyor.
 
-**Kök neden:** Task 5'in `KonumBlogu`'yu girdi kartının en üstüne alması (kart ~130-150px uzadı)
-— yani bu planın kendi ayak izi, önceden var olan bir yoğunluk sorunu değil.
+**Önceki controller kararı (ARTIK GEÇERSİZ):** "minimal `padding-bottom` ile düzelt".
+Bu karar, kaydırma konteynerinin alt dolgusunun EKSİK olduğu varsayımına dayanıyordu.
 
-**Controller kararı:** düzeltilecek, `task-11-acik-kalemler.md`ye ertelenmeyecek. Brief Step 6
-"bulgular varsa düzelt" diyor, carve-out yok. **Minimal düzeltme** istendi: kaydırma
-konteynerine alt sabit çubukları temizleyecek kadar alt boşluk (`padding-bottom` /
-`scroll-padding-bottom`), yeniden tasarım DEĞİL. Kural **`@media (max-width: 768px)` içinde**
-kalmalı, `env(safe-area-inset-bottom)` hesaba katılmalı. Doğrulama: scroll=0'da tüm etkileşimli
-elemanlar için `elementFromPoint` → `matchesSelf: true` (dev-only `NEXTJS-PORTAL` sayılmaz),
-1440×900'de masaüstü değişmemiş.
+**2026-07-31 canlı ölçümü bu varsayımı çürüttü** (Playwright, 390×844, her etkileşimli eleman
+için `elementFromPoint`):
+
+```
+viewport 844 · scrollHeight 1063 · maxScroll 219
+main padding-bottom 96px (--mobile-nav-pb) + MobileScreen padding-bottom 72px = 168px
+sabit çubuklar: StickyActionBar ~64px + BottomNavbar 96px = ~164px
+scrollTop=0 → 2 ihlal · 40 → 3 · 100 → 2 · 150 → 1 · 219 (maxScroll) → 0 ihlal
+```
+
+**Alt dolgu zaten yeterli (168 > 164)** ve `maxScroll`'da her kontrol erişilebilir. Daha fazla
+padding yalnızca `maxScroll`'u büyütür; `scrollTop=0`'daki isabet testini **matematiksel olarak
+değiştiremez**, sadece ölü kaydırma alanı yaratır. Yani prescribed fix etkisiz olurdu.
+
+**Gerçek kök neden:** içerik 1063px, kullanılabilir viewport 844 − 164 = **680px**. İçerik
+kullanılabilir alanı 215px aşıyor, dolayısıyla dinlenme halinde son ~164px yarı saydam camın
+altında kalıyor. Bu bir CSS dolgu bugu değil, **içerik yüksekliği** meselesi; minimal
+dokunuşla kapanmaz. Kapatmak ~215px içerik kısaltmak (ör. arsa payı / daire sayısı satırlarını
+gelişmiş ayarlar yaprağına almak) yani yeniden tasarım demek.
+
+**Ölçüm notu:** bu turda "Metrekareyi azalt/artır" ihlal ETMİYOR (merkez 673, çubuk üstü ~680);
+`task-10-report.md`'nin listesi `DistrictPrice` seed satırları yüzünden birkaç piksel kaymış.
+Buna karşılık **`"Arsa payı yüzdesi"` input'u ve `"Gelişmiş ayarlar"` butonu raporda hiç
+geçmiyordu ama ihlal ediyorlar.** Kusur sınıfı aynı, kapsanan eleman kimliği farklı.
+
+**İnsan kararı (2026-07-31): kod yazılmayacak.** Bulgu whole-branch review'a "ölçülmüş, bilinen"
+triyaj kalemi olarak gösterilecek ve **ayrı mobil yerleşim spec'ine aday** olarak yazılacak.
+
+Ölçüm scripti tekrar koşulabilir (gitignored, dev server açıkken):
+`SCROLLS=0,40,100,150,219 node .superpowers/touch-target-measure.mjs`
 
 ## Bu oturumda (2026-07-31) çıkan kalıcı dersler
 
