@@ -45,8 +45,20 @@ gitignored — `git clean -fdx` onu siler, worktree silinirse gider. Bu dosya ha
    **Sonraki branch'e devreden:** I3 (`.mobileSidebar` + `.mobileActionsSlot` — ~115 satır JSX
    iki yönde de ölü, silinirse `pageStyles.scope.test.ts` sadeleşir), I5 (`page.tsx`i render
    eden hiçbir davranış testi yok — I1/I2'nin gözden kaçmasının yapısal nedeni), M1/M2/M3/M6/
-   M7/M8. Ayrıca **insan kararı bekleyen** Recommendation 4: masaüstünde piyasa fiyatı alanı
-   artık iki kez görünüyor (aynı state'e bağlı, bug değil ama spec §5 tek alan tarif ediyor).
+   M7/M8.
+
+   **Recommendation 4 — İNSAN KARARI VERİLDİ (2026-07-31): dokunulmuyor, Parça 3'e devrediliyor.**
+   Masaüstünde piyasa fiyatı alanı artık iki yerde görünüyor: Task 8'in eklediği "Piyasa Analizi"
+   grubu (`page.tsx` sol sütun) ve `HesapOzetiSeridi`'nin kendi input'u (`:976` ve `:1043`, iki
+   kopya). İkisi aynı state'e bağlı ve senkron kalıyor — **bug değil**, ama spec §5 alanı tek
+   yerde tarif ediyor. Hangisinin sahip kalacağı bir yerleşim kararı, o yüzden **ayrı spec
+   bekleyen "Parça 3 — masaüstü `/hesapla` yerleşimi + `HesapFişi` sunumu"** işinin kapsamında
+   çözülecek. Bu branch'te değiştirilmedi.
+
+   **Dokunma hedefi takip kalemine eklenecek not (reviewer'dan):** yanlış dokunuş no-op DEĞİL —
+   `StickyActionBar`'a giden dokunuş `handleSaveReport`'u tetikliyor (`HesaplaMobile.tsx:105-114`
+   → `page.tsx`), yani rapor kaydeder ya da auth modalını açar. Düşük olasılık, önemsiz olmayan
+   sonuç; takip spec'inde "kozmetik" diye yeniden triyaj edilmesin.
 3. Sonra `superpowers:finishing-a-development-branch`.
 
 ### Task 10'un dokunma hedefi kalemi — ÖLÇÜMLE KAPANDI, KOD YAZILMADI
