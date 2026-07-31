@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- **Masaüstü değişmez.** `src/components/LocationSelector.tsx`, `src/app/hesapla/page.module.css`in masaüstü (media query DIŞI) kuralları ve masaüstü JSX yerleşimi **hiç değiştirilmez**. `page.tsx` yalnızca Task 3'teki atomik seçim refactor'ü için değişir.
+- **Masaüstü değişmez.** `src/components/LocationSelector.tsx`, `src/app/hesapla/page.module.css`in masaüstü (media query DIŞI) kuralları ve **masaüstü JSX yerleşimi** hiç değiştirilmez. `page.tsx` bu planda iki kez değişir ve ikisi de masaüstü çıktısını etkilemez: Task 3 (atomik seçim refactor'ü — `handleIlceChange` aynı davranışı delege ederek korur) ve Task 6 (yalnızca **mobil dalın** `girdi.konum` prop bloğu). Masaüstü render çıktısı ikisinde de birebir aynı kalmalı.
 - **Dokunma hedefi:** yeni eklenen her etkileşimli eleman **≥44px** (`--touch-target`). Görsel olarak daha kısa olması gereken kontrollerde mevcut `::after` deseni kullanılır (bkz. `mobile.module.css` `.birimMaliyetDegistir::after`).
 - **Tüm yeni mobil CSS**, `src/app/hesapla/mobile/mobile.module.css` içindeki mevcut `@media (max-width: 768px)` bloğunun İÇİNDE kalır.
 - **Renk/ölçü token'ları:** `var(--m-fill)`, `var(--m-glass-border)`, `var(--m-on-glass)`, `var(--m-ink)`, `var(--m-link)`, `var(--m-body)`, `var(--m-r-btn)`, `var(--m-r-input)`, `var(--m-r-inner)`. Aksan `#2b7cff`. Yeni token icat edilmez.
