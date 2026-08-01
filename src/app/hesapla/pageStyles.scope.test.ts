@@ -326,4 +326,17 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
     const sectionsTsx = fs.readFileSync(path.join(__dirname, 'AdvancedSettingsSections.tsx'), 'utf8');
     expect(sectionsTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
   });
+
+  // Whole-branch review I5: page.tsx'i render eden davranis testi yok, bu
+  // yuzden buradaki garanti kaynak metinden okunuyor. Kirilabilirligi
+  // kanitlanacak: delegasyonu geri alinca test kirmiziya donmeli.
+  it('handleIlceChange artik selectedIl state\'ini KENDI okumaz, handleKonumSec\'e delege eder', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).toMatch(/const handleKonumSec\s*=\s*\(il: string, ilce: string\)/);
+    expect(pageTsx).toMatch(/const handleIlceChange\s*=\s*\(ilce: string\)\s*=>\s*handleKonumSec\(selectedIl, ilce\)/);
+    // Eski, state'ten okuyan arama tamamen kalkmis olmali (yalnizca
+    // handleIlceChange'in eski govdesi hedeflenir; :326'daki apartmentSize
+    // effect'i bu task'in kapsami disinda, DOKUNULMAZ).
+    expect(pageTsx).not.toMatch(/d\.il === selectedIl && d\.ilce === ilce/);
+  });
 });

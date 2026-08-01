@@ -41,6 +41,24 @@ export function kaynakEtiketi(kaynak: BirimMaliyetKaynagi, deger: number): strin
 }
 
 /**
+ * Il + ilce ciftinden kaydi bulur.
+ *
+ * Ikisini de PARAMETRE olarak alir; cagiranin state'inden okumaz. Mobil
+ * secici il ve ilceyi ayni anda veriyor ve React setState senkron olmadigi
+ * icin, `setSelectedIl(il)` sonrasi ayni handler icinde `selectedIl` hala
+ * ESKI degeri tasir. Arama o eski il ile yapilirsa eslesme bulunamaz ve
+ * fiyatlar sessizce guncellenmez (whole-branch review sonrasi tasarim
+ * karari, bkz. 2026-08-01 spec).
+ */
+export function ilceKaydiBul<T extends { il: string; ilce: string }>(
+    kayitlar: T[],
+    il: string,
+    ilce: string,
+): T | undefined {
+    return kayitlar.find(k => k.il === il && k.ilce === ilce)
+}
+
+/**
  * Ilce secildiginde IKI deger birden dolar. Elle girilmis bir deger varsa
  * KORUNMAZ: ongorulebilirlik akilliliga tercih edildi (spec 4) — aksi halde
  * kullanici ilceyi degistirip fiyatin neden degismedigini anlayamaz.

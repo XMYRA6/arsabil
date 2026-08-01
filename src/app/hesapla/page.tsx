@@ -30,7 +30,7 @@ import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers'
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
-import { ilceSecildi, konumTemizlendi, metrekareDegisti, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
+import { ilceSecildi, ilceKaydiBul, konumTemizlendi, metrekareDegisti, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -453,9 +453,14 @@ export default function Home() {
     setPiyasaFiyatiElle(true);
   };
 
-  const handleIlceChange = (ilce: string) => {
+  /**
+   * Konum secimi — il ve ilce BIRLIKTE. Mobil secici ikisini ayni anda
+   * verir; masaustu `handleIlceChange` uzerinden delege eder.
+   */
+  const handleKonumSec = (il: string, ilce: string) => {
+    setSelectedIl(il);
     setSelectedIlce(ilce);
-    const entry = districtPrices.find(d => d.il === selectedIl && d.ilce === ilce);
+    const entry = ilceKaydiBul(districtPrices, il, ilce);
     if (!entry) return;
     if (originalUnitPrice === null) {
       setOriginalUnitPrice(globalUnitPrice);
@@ -476,6 +481,8 @@ export default function Home() {
     }
     setBirimMaliyetKaynagi(sonuc.kaynak);
   };
+
+  const handleIlceChange = (ilce: string) => handleKonumSec(selectedIl, ilce);
 
   const handleClearLocation = () => {
     setSelectedIl('');

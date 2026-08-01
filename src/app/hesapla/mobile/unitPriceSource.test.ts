@@ -1,4 +1,4 @@
-import { ilceSecildi, kaynakEtiketi, konumTemizlendi, metrekareDegisti } from './unitPriceSource'
+import { ilceSecildi, kaynakEtiketi, konumTemizlendi, metrekareDegisti, ilceKaydiBul } from './unitPriceSource'
 
 const KADIKOY = { ilce: 'Kadıköy', avgUnitConstructionPrice: 12000, avgSalesPricePerM2: 41000 }
 
@@ -84,5 +84,29 @@ describe('metrekareDegisti', () => {
     it('Turkce bicimde ve tam sayi doner', () => {
         expect(metrekareDegisti({ ...KADIKOY, avgSalesPricePerM2: 41333.4 }, 140, false))
             .toBe('5.786.676')
+    })
+})
+
+describe('ilceKaydiBul', () => {
+    const KAYITLAR = [
+        { il: 'İstanbul', ilce: 'Kadıköy', avgUnitConstructionPrice: 24500, avgSalesPricePerM2: 118000 },
+        { il: 'Ankara', ilce: 'Çankaya', avgUnitConstructionPrice: 19500, avgSalesPricePerM2: 62000 },
+        { il: 'Şanlıurfa', ilce: 'Merkez', avgUnitConstructionPrice: 11000, avgSalesPricePerM2: 21000 },
+        { il: 'Iğdır', ilce: 'Merkez', avgUnitConstructionPrice: 10000, avgSalesPricePerM2: 18000 },
+    ]
+
+    it('il ve ilceyi BIRLIKTE verilen degerlerle esler', () => {
+        expect(ilceKaydiBul(KAYITLAR, 'Ankara', 'Çankaya')?.avgSalesPricePerM2).toBe(62000)
+    })
+
+    // Asil koruma: ayni ilce adi birden cok ilde var. Yanlis il ile
+    // eslesirse kullanici bambaska bir sehrin fiyatiyla hesap yapar.
+    it('tekrar eden ilce adinda DOGRU ili secer', () => {
+        expect(ilceKaydiBul(KAYITLAR, 'Iğdır', 'Merkez')?.avgSalesPricePerM2).toBe(18000)
+        expect(ilceKaydiBul(KAYITLAR, 'Şanlıurfa', 'Merkez')?.avgSalesPricePerM2).toBe(21000)
+    })
+
+    it('eslesme yoksa undefined doner', () => {
+        expect(ilceKaydiBul(KAYITLAR, 'İzmir', 'Kadıköy')).toBeUndefined()
     })
 })
