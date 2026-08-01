@@ -12,7 +12,7 @@ function props(patch: Partial<React.ComponentProps<typeof KonumBlogu>> = {}) {
     return {
         districtPrices: FIYATLAR,
         selectedIl: 'İstanbul', selectedIlce: 'Kadıköy',
-        onIlChange: jest.fn(), onIlceChange: jest.fn(), onClear: jest.fn(),
+        onSecim: jest.fn(), onClear: jest.fn(),
         birimMaliyet: 12000,
         birimMaliyetKaynagi: { tur: 'ilce' as const, ilce: 'Kadıköy' },
         onBirimMaliyet: jest.fn(),
@@ -79,5 +79,26 @@ describe('KonumBlogu', () => {
         // Secici bos bir dropdown olarak durmamali.
         render(<KonumBlogu {...props({ districtPrices: [], selectedIl: '', selectedIlce: '' })} />)
         expect(screen.getByText(/İlçe fiyat verisi henüz yok/)).toBeInTheDocument()
+    })
+
+    it('masaustu LocationSelector\'i ARTIK render etmez', () => {
+        render(<KonumBlogu {...props()} />)
+        // Masaustu bileseni native <select> kullaniyordu; mobilde artik
+        // BottomSheet'li KonumSecici var.
+        expect(document.querySelectorAll('select')).toHaveLength(0)
+    })
+
+    it('secim yokken acma butonunu gosterir', () => {
+        render(<KonumBlogu {...props({ selectedIl: '', selectedIlce: '' })} />)
+        // NOT: JS regex /i bayragi Turkce noktali buyuk İ (U+0130) harfini
+        // 'i'ye katlamiyor, o yuzden literal İ kullanildi (Task 4/5'te
+        // dogrulandi) — brief'teki `/il .../i` hicbir zaman eslesmezdi.
+        expect(screen.getByRole('button', { name: /İl \/ ilçe seçin/i })).toBeInTheDocument()
+    })
+
+    it('veri bosken bilgi notunu gosterir', () => {
+        render(<KonumBlogu {...props({ districtPrices: [] })} />)
+        expect(screen.getByText(/İlçe fiyat verisi henüz yok/)).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /İl \/ ilçe seçin/i })).not.toBeInTheDocument()
     })
 })

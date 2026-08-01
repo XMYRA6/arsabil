@@ -628,8 +628,7 @@ export default function Home() {
           girdi={{
             konum: {
               districtPrices, selectedIl, selectedIlce,
-              onIlChange: handleIlChange,
-              onIlceChange: handleIlceChange,
+              onSecim: handleKonumSec,
               onClear: handleClearLocation,
               birimMaliyet: globalUnitPrice,
               birimMaliyetKaynagi,

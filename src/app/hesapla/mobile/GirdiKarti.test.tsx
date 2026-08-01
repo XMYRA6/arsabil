@@ -13,7 +13,7 @@ function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
         konum: {
             districtPrices: FIYATLAR,
             selectedIl: 'İstanbul', selectedIlce: 'Kadıköy',
-            onIlChange: jest.fn(), onIlceChange: jest.fn(), onClear: jest.fn(),
+            onSecim: jest.fn(), onClear: jest.fn(),
             birimMaliyet: 12000,
             birimMaliyetKaynagi: { tur: 'ilce' as const, ilce: 'Kadıköy' },
             onBirimMaliyet: jest.fn(),

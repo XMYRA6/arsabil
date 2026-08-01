@@ -36,7 +36,7 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             konum: {
                 districtPrices: [],
                 selectedIl: '', selectedIlce: '',
-                onIlChange: jest.fn(), onIlceChange: jest.fn(), onClear: jest.fn(),
+                onSecim: jest.fn(), onClear: jest.fn(),
                 birimMaliyet: 12000,
                 birimMaliyetKaynagi: { tur: 'varsayilan' },
                 onBirimMaliyet: jest.fn(),

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { LocationSelector, type DistrictPriceEntry } from '@/components/LocationSelector';
+import type { DistrictPriceEntry } from '@/components/LocationSelector';
+import { KonumSecici } from './KonumSecici';
 import { IconPin, IconChevronRight, IconCheckCircle } from '@/components/icons';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './unitPriceSource';
 import styles from './mobile.module.css';
@@ -10,8 +11,9 @@ export type KonumBloguProps = {
     districtPrices: DistrictPriceEntry[];
     selectedIl: string;
     selectedIlce: string;
-    onIlChange: (il: string) => void;
-    onIlceChange: (ilce: string) => void;
+    /** Il ve ilce BIRLIKTE — React setState senkron olmadigi icin ikisi
+        ayri ayri gonderilemez (bkz. `handleKonumSec`). */
+    onSecim: (il: string, ilce: string) => void;
     onClear: () => void;
     birimMaliyet: number;
     birimMaliyetKaynagi: BirimMaliyetKaynagi;
@@ -33,8 +35,7 @@ export function KonumBlogu({
     districtPrices,
     selectedIl,
     selectedIlce,
-    onIlChange,
-    onIlceChange,
+    onSecim,
     onClear,
     birimMaliyet,
     birimMaliyetKaynagi,
@@ -50,12 +51,11 @@ export function KonumBlogu({
 
             {districtPrices.length > 0 ? (
                 <div className={styles.konumSecici}>
-                    <LocationSelector
+                    <KonumSecici
                         districtPrices={districtPrices}
                         selectedIl={selectedIl}
                         selectedIlce={selectedIlce}
-                        onIlChange={onIlChange}
-                        onIlceChange={onIlceChange}
+                        onSecim={onSecim}
                         onClear={onClear}
                     />
                 </div>
