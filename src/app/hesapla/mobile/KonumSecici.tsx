@@ -10,6 +10,36 @@ import styles from './mobile.module.css';
 
 const nf = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 
+/**
+ * Sonuc/ilce listelerindeki tek satir. Iki cagiran (duz arama sonuclari ve
+ * il drill-down'i) ayni markup + fiyat alt satirini paylasir; tek fark
+ * baslik metni (`"İl / İlçe"` vs yalniz `"İlçe"`) — bu yuzden parametrize.
+ */
+function KonumSatiri({
+    kayit,
+    baslik,
+    onSec,
+}: {
+    kayit: DistrictPriceEntry;
+    baslik: string;
+    onSec: () => void;
+}) {
+    return (
+        <li>
+            <button
+                type="button"
+                className={styles.konumListeSatir}
+                onClick={onSec}
+            >
+                <span className={styles.konumSeciciBaslik}>{baslik}</span>
+                <span className={styles.konumSeciciAlt}>
+                    {`Piyasa ${nf.format(kayit.avgSalesPricePerM2)} · Birim ${nf.format(kayit.avgUnitConstructionPrice)} TL/m²`}
+                </span>
+            </button>
+        </li>
+    );
+}
+
 export type KonumSeciciProps = {
     districtPrices: DistrictPriceEntry[];
     selectedIl: string;
@@ -104,18 +134,12 @@ export function KonumSecici({
                         <>
                             <ul className={styles.konumListe}>
                                 {sonuclar.map(k => (
-                                    <li key={`${k.il}-${k.ilce}`}>
-                                        <button
-                                            type="button"
-                                            className={styles.konumListeSatir}
-                                            onClick={() => sec(k.il, k.ilce)}
-                                        >
-                                            <span className={styles.konumSeciciBaslik}>{`${k.il} / ${k.ilce}`}</span>
-                                            <span className={styles.konumSeciciAlt}>
-                                                {`Piyasa ${nf.format(k.avgSalesPricePerM2)} · Birim ${nf.format(k.avgUnitConstructionPrice)} TL/m²`}
-                                            </span>
-                                        </button>
-                                    </li>
+                                    <KonumSatiri
+                                        key={k.id}
+                                        kayit={k}
+                                        baslik={`${k.il} / ${k.ilce}`}
+                                        onSec={() => sec(k.il, k.ilce)}
+                                    />
                                 ))}
                             </ul>
                             {kesildi && (
@@ -136,18 +160,12 @@ export function KonumSecici({
                         </button>
                         <ul className={styles.konumListe}>
                             {ilceler.map(k => (
-                                <li key={`${k.il}-${k.ilce}`}>
-                                    <button
-                                        type="button"
-                                        className={styles.konumListeSatir}
-                                        onClick={() => sec(k.il, k.ilce)}
-                                    >
-                                        <span className={styles.konumSeciciBaslik}>{k.ilce}</span>
-                                        <span className={styles.konumSeciciAlt}>
-                                            {`Piyasa ${nf.format(k.avgSalesPricePerM2)} · Birim ${nf.format(k.avgUnitConstructionPrice)} TL/m²`}
-                                        </span>
-                                    </button>
-                                </li>
+                                <KonumSatiri
+                                    key={k.id}
+                                    kayit={k}
+                                    baslik={k.ilce}
+                                    onSec={() => sec(k.il, k.ilce)}
+                                />
                             ))}
                         </ul>
                     </>
