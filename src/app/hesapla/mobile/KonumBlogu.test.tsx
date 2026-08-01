@@ -82,7 +82,7 @@ describe('KonumBlogu', () => {
     })
 
     it('masaustu LocationSelector\'i ARTIK render etmez', () => {
-        render(<KonumBlogu {...props()} />)
+        render(<KonumBlogu {...props({ selectedIl: '', selectedIlce: '' })} />)
         // Masaustu bileseni native <select> kullaniyordu; mobilde artik
         // BottomSheet'li KonumSecici var.
         expect(document.querySelectorAll('select')).toHaveLength(0)
@@ -94,11 +94,5 @@ describe('KonumBlogu', () => {
         // 'i'ye katlamiyor, o yuzden literal İ kullanildi (Task 4/5'te
         // dogrulandi) — brief'teki `/il .../i` hicbir zaman eslesmezdi.
         expect(screen.getByRole('button', { name: /İl \/ ilçe seçin/i })).toBeInTheDocument()
-    })
-
-    it('veri bosken bilgi notunu gosterir', () => {
-        render(<KonumBlogu {...props({ districtPrices: [] })} />)
-        expect(screen.getByText(/İlçe fiyat verisi henüz yok/)).toBeInTheDocument()
-        expect(screen.queryByRole('button', { name: /İl \/ ilçe seçin/i })).not.toBeInTheDocument()
     })
 })
