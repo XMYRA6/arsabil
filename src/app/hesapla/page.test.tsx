@@ -1,0 +1,101 @@
+/** @jest-environment jsdom */
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import HesaplaPage from './page'
+
+// `page.tsx`i render eden ILK davranis testi. Onceki whole-branch review'in
+// I5 bulgusu tam da buydu: iki gercek kusur (I1/I2) yalnizca bu seviyede
+// gorulebilecekken, birim testler onlari gormeden yesil kaliyordu.
+//
+// Bu dosyanin ozel gorevi PLATFORM DALLARI: `page.tsx` mobilde erken donup
+// masaustu agacini tamamen atliyor. Bir overlay yalnizca masaustu dalina
+// konursa mobilde SESSIZCE olur — buton state'i set eder, hicbir sey render
+// edilmez. `AuthModal` bu tuzagi bir kez yasadi ve kod icinde uyari yorumu
+// birakildi; `ParcelModal` ayni tuzaga yeniden dustu.
+
+jest.mock('next-auth/react', () => ({
+    useSession: () => ({ data: null, status: 'unauthenticated' }),
+}))
+
+// `AuthModal` app router'i istiyor; jsdom'da mount edilmis bir router yok.
+jest.mock('next/navigation', () => ({
+    useRouter: () => ({ push: jest.fn(), replace: jest.fn(), refresh: jest.fn() }),
+}))
+
+// `ScenarioCompare` modul seviyesinde `jspdf` cekiyor, o da jsdom'da olmayan
+// `TextEncoder`i istiyor. Bu testin konusu degil; masaustu dalinda yer tutuyor.
+jest.mock('@/components/ScenarioCompare', () => ({
+    ScenarioCompare: () => <div data-testid="scenario-compare" />,
+}))
+
+// chart.js jsdom'da canvas bulamayip `getContext` uzerinden cokuyor.
+// Grafikler bu testin konusu degil.
+jest.mock('@/components/charts/PriceEvaluationChart', () => ({ PriceEvaluationChart: () => <div /> }))
+jest.mock('@/components/charts/CostBreakdownChart', () => ({ CostBreakdownChart: () => <div /> }))
+jest.mock('@/components/charts/SensitivityChart', () => ({ SensitivityChart: () => <div /> }))
+jest.mock('@/components/charts/BreakEvenChart', () => ({ BreakEvenChart: () => <div /> }))
+jest.mock('@/components/FinancialDashboard', () => ({ FinancialDashboard: () => <div /> }))
+
+jest.mock('@/components/listing-wizard/ParcelPicker', () => ({
+    // Leaflet jsdom'da mount edilemez; burada haritanin kendisi degil
+    // modalin VARLIGI test ediliyor.
+    ParcelPicker: () => <div data-testid="parcel-picker" />,
+}))
+
+/** `matchMedia`yi verilen platforma gore sabitler. */
+function viewportKur(masaustu: boolean) {
+    Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: (query: string) => ({
+            // Sayfa `not all and (max-width: 768px)` sorguluyor: masaustunde true.
+            matches: query.includes('max-width: 768px') ? masaustu : false,
+            media: query,
+            onchange: null,
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            dispatchEvent: jest.fn(),
+        }),
+    })
+}
+
+beforeEach(() => {
+    global.fetch = jest.fn(() =>
+        Promise.resolve({ ok: true, json: () => Promise.resolve({}) }),
+    ) as unknown as typeof fetch
+})
+
+afterEach(() => {
+    jest.clearAllMocks()
+})
+
+describe('/hesapla — parsel modali her iki platformda da mount edilir', () => {
+    it('MOBILDE "Haritadan parsel sec" modali acar', async () => {
+        viewportKur(false)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+
+        // Kapali halde modal DOM'da olmamali (regresyon testinin kirilabilir
+        // olmasi icin sart: modal hep acik olsaydi test hicbir sey kanitlamaz).
+        expect(screen.queryByText('Haritadan Parsel Doğrula')).toBeNull()
+
+        await user.click(await screen.findByRole('button', { name: /Haritadan parsel seç/i }))
+
+        expect(screen.getByText('Haritadan Parsel Doğrula')).toBeInTheDocument()
+        expect(screen.getByTestId('parcel-picker')).toBeInTheDocument()
+    })
+
+    it('MASAUSTUNDE "Haritadan parsel sec" modali acar', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+
+        expect(screen.queryByText('Haritadan Parsel Doğrula')).toBeNull()
+
+        await user.click(await screen.findByRole('button', { name: /Haritadan parsel seç/i }))
+
+        expect(screen.getByText('Haritadan Parsel Doğrula')).toBeInTheDocument()
+        expect(screen.getByTestId('parcel-picker')).toBeInTheDocument()
+    })
+})

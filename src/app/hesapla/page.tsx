@@ -100,7 +100,10 @@ export default function Home() {
   const [mobilAnalizAcik, setMobilAnalizAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState(false);
-  const [mobilAyarBolumu, setMobilAyarBolumu] = useState<'kar' | 'parsel' | undefined>(undefined);
+  // `parsel` bolumu artik burada degil: parsel secimi `ParcelModal`a tasindi,
+  // `AyarBolumu` birlesiminde de yok. Tip artik yaprakla ayni kaynaktan geliyor,
+  // boylece yaprak yeni bir bolum kazanirsa/kaybederse burasi derlemede patlar.
+  const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
 
   const [isParcelModalOpen, setIsParcelModalOpen] = useState(false);
   const [parcelContext, setParcelContext] = useState<ParcelPickerValue | null>(null);
@@ -427,6 +430,34 @@ export default function Home() {
     MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
   };
 
+  /**
+   * PLATFORMDAN BAGIMSIZ OVERLAY'LER — tek tanim, iki dalda da render edilir.
+   *
+   * Bu sayfa mobilde erken donup asagidaki masaustu agacini TAMAMEN atliyor.
+   * Bir overlay yalnizca masaustu dalina konursa mobilde sessizce olur: buton
+   * state'i set eder, o state'i okuyan hicbir JSX render edilmez, hata da
+   * verilmez. `AuthModal` bu tuzagi bir kez yasadi; `ParcelModal` ayni tuzaga
+   * yeniden dustu (mobilde "Haritadan parsel sec" hicbir sey yapmiyordu).
+   *
+   * Yeni bir modal/overlay eklenecekse YERI BURASI. Iki dala ayri ayri
+   * eklenmemeli — bu blok tam olarak o hatayi imkansiz kilmak icin var.
+   * Bekcisi: `page.test.tsx` her iki viewport'ta da modali aciyor.
+   */
+  const ortakKatmanlar = (
+    <>
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
+      />
+      <ParcelModal
+        isOpen={isParcelModalOpen}
+        onClose={() => setIsParcelModalOpen(false)}
+        onConfirm={handleParcelConfirm}
+      />
+    </>
+  );
+
   // Viewport henuz olculmedi: SSR ve ilk client render'i BURAYA duser, ikisi de
   // ayni ciktiyi urettigi icin hydration uyusmazligi olusmaz. Yanlis arayuzu
   // basip sonra degistirmek yerine notr bir iskelet gosterilir.
@@ -526,14 +557,7 @@ export default function Home() {
           arsaAlani={arsaAlani} setArsaAlani={setArsaAlani}
         />
 
-        {/* Erken donus asagidaki masaustu agacini atladigi icin auth modali
-            burada ayrica render edilmeli — aksi halde mobilde giris istemi
-            hic acilmaz ve rapor kaydetme sessizce calismaz. */}
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-          message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
-        />
+        {ortakKatmanlar}
       </>
     );
   }
@@ -850,13 +874,6 @@ export default function Home() {
         </div>
 
 
-        {/* Modals & Overlays */}
-        <ParcelModal 
-          isOpen={isParcelModalOpen} 
-          onClose={() => setIsParcelModalOpen(false)} 
-          onConfirm={handleParcelConfirm} 
-        />
-
         {/* Right Grid: Hesap Sonuçları + Hesap Özeti */}
         <section className={styles.rightGrid}>
 
@@ -1025,11 +1042,7 @@ export default function Home() {
         </button>
       </StickyActionBar>
 
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
-      />
+      {ortakKatmanlar}
     </div >
   );
 }
