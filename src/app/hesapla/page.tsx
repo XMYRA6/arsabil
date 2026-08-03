@@ -18,19 +18,18 @@ import { toast } from 'react-hot-toast';
 // Dynamically imported to avoid SSR issues with @react-pdf/renderer
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare } from '@/components/ScenarioCompare';
-import { LocationSelector, DistrictPriceEntry } from '@/components/LocationSelector';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { FormulParamsFields, RiskCostFields, MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
-import { HesapOzetiSeridi } from './HesapOzetiSeridi';
+
 import { HesapFisi } from './HesapFisi';
-import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
-import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
-import type { RiskMeasurement } from '@/lib/risk/types';
-import { withSuggestedRiskLevel, type RiskLevel } from './riskSuggestionHelpers';
+import type { RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
+import { ParcelModal } from './ParcelModal';
+import { SmartContextCard } from './SmartContextCard';
+import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
-import { ilceSecildi, ilceKaydiBul, konumTemizlendi, metrekareDegisti, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
+import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 interface ProfitLevel {
   id: string;
@@ -100,8 +99,11 @@ export default function Home() {
   // Task 6 tuketecek; burada yalnizca tanimlanir ve onAnalizAc tarafindan yazilir.
   const [mobilAnalizAcik, setMobilAnalizAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
-  const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState<boolean>(false);
-  const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
+  const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState(false);
+  const [mobilAyarBolumu, setMobilAyarBolumu] = useState<'kar' | 'parsel' | undefined>(undefined);
+
+  const [isParcelModalOpen, setIsParcelModalOpen] = useState(false);
+  const [parcelContext, setParcelContext] = useState<ParcelPickerValue | null>(null);
 
   const effectiveLandShareRatio = computeEffectiveLandShareX({
     isApartmentCountEnabled,
@@ -119,29 +121,8 @@ export default function Home() {
     { id: 'default-risk-3', label: 'Yüksek', value: 15, sortOrder: 3, isDefault: false },
   ]);
 
-  const [parcelValue, setParcelValue] = useState<ParcelPickerValue>({
-    lat: null, lng: null, parcel: null, status: 'idle',
-  });
-  const [risk, setRisk] = useState<RiskMeasurement | null>(null);
-
-  // ParcelPicker + RiskSuggestionCard yalnizca masaustunde erisilebilir
-  // (.desktopSidebar mobilde `display:none !important`). CSS'e ragmen bu
-  // ikisi mount edilmeye devam ederse Leaflet haritasi gizli 0x0 bir
-  // konteynerde kurulur ve OSM/TUCBS'e bosuna karo istegi gider. Bu yuzden
-  // mobilde hic MOUNT edilmezler; CSS'in kullandigi esikle ayni esik
-  // (max-width: 768px / desktopSidebar) burada matchMedia ile okunur.
-  // `null` = HENUZ OLCULMEDI. Baslangic `true` DEGIL: oyle olsaydi SSR ve ilk
-  // client render'i gercek bir telefonda da masaustu agacini basar, mount
-  // sonrasi mobil ekrana gecerdi — her mobil acilista gorunur bir "flas".
-  // Uc durumlu bayrakla olculene kadar notr bir iskelet gosterilir (insan
-  // karari 2026-07-29); masaustunde de ilk boyada iskelet gorunmesi kabul
-  // edildi, bu sayfa SEO kritik degil (giris gerektiren bir hesaplayici).
   const [isDesktopViewport, setIsDesktopViewport] = useState<boolean | null>(null);
   useEffect(() => {
-    // `min-width: 769px` DEĞİL: kesirli viewport genişliklerinde (yüksek DPI,
-    // tarayıcı yakınlaştırması) 768 ile 769 arasında ne CSS'in
-    // `max-width: 768px` kuralı ne de `min-width: 769px` eşleşir; sidebar
-    // görünür ama içeriği mount edilmezdi. Bu form CSS'i birebir yansıtır.
     const mql = window.matchMedia('not all and (max-width: 768px)');
     const update = () => setIsDesktopViewport(mql.matches);
     update();
@@ -149,37 +130,8 @@ export default function Home() {
     return () => mql.removeEventListener('change', update);
   }, []);
 
-  // Konum secilince risk olcumu. Konum OPSIYONELDIR; secilmezse sayfa
-  // bugunku gibi calisir ve hicbir risk UI'i gosterilmez.
-  useEffect(() => {
-    const { lat, lng } = parcelValue;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- konum kaldırıldığında (veya seçilmediğinde) önceki riski hemen temizler
-    if (lat == null || lng == null) { setRisk(null); return; }
-
-    let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch(`/api/risk/lookup?lat=${lat}&lng=${lng}`);
-        const body = await res.json();
-        if (!cancelled) setRisk(body.status === 'ok' ? body.risk : null);
-      } catch {
-        if (!cancelled) setRisk(null);
-      }
-    })();
-    return () => { cancelled = true; };
-    // parcelValue nesnesi her onChange yamasinda (orn. ParcelPicker'in durum-
-    // sadece guncellemelerinde) yeni referans alir; sadece lat/lng degisiminde
-    // yeniden calismasi gereksiz /api/risk/lookup cagrilarini onler.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parcelValue.lat, parcelValue.lng]);
-
-  /**
-   * Oneriyi ayrik risk izgarasina uygular. Izgara `riskLevels` state dizisinden
-   * render edildigi icin onerilen yuzde mevcut secenekler arasinda yoksa yeni
-   * bir secenek olarak eklenir (bkz. riskSuggestionHelpers.ts).
-   */
+  // Oneriyi ayrik risk izgarasina uygular
   const applyRiskSuggestion = (percent: number) => {
-    setRiskLevels(prev => withSuggestedRiskLevel(prev, percent));
     setRiskLevel(percent);
   };
 
@@ -196,10 +148,6 @@ export default function Home() {
   const [summaryPage, setSummaryPage] = useState(0); // 0: Dağılım, 1: Analiz, 2: Finans
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [savedScenarios, setSavedScenarios] = useState<ScenarioItem[]>([]);
-  const [selectedIl, setSelectedIl] = useState<string>('');
-  const [selectedIlce, setSelectedIlce] = useState<string>('');
-  const [districtPrices, setDistrictPrices] = useState<DistrictPriceEntry[]>([]);
-  const [originalUnitPrice, setOriginalUnitPrice] = useState<number | null>(null);
 
   // Arsa Alanı (Aa) toggle
   const [isAaEnabled, setIsAaEnabled] = useState<boolean>(AYAR_VARSAYILANLARI.isAaEnabled);
@@ -213,27 +161,8 @@ export default function Home() {
   const [, setGlobalExcavationLow] = useState<number>(0.01);
   const [, setGlobalExcavationMedium] = useState<number>(0.02);
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
-  // Birim maliyetin KAYNAGI (varsayilan/ilce/elle) — spec 1: ekranda
-  // gosterilir, oncelik kurali `unitPriceSource.ts`te tek yerde yasar.
-  const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'varsayilan' });
-  // Ilce secimi IKI degeri birden doldurur: birim maliyet VE piyasa fiyati.
-  // Piyasa fiyatinin kendi bir BirimMaliyetKaynagi tipi yok (o tip yalnizca
-  // birim maliyet icin var), bu yuzden minimum bir provenance bayragi:
-  // kullanici elle mi yazdi. Ilce secimi bu degeri de eziyor ve
-  // kullaniciya soylenmeden ezmek, birim maliyette engellenen hatanin
-  // aynisidir (bkz. `handleIlceChange`).
-  const [piyasaFiyatiElle, setPiyasaFiyatiElle] = useState<boolean>(false);
-  // `originalUnitPrice` geri-yuklenirken KAYNAGI da geri gelmeli, yoksa
-  // elle girilmis bir deger ilce degistirilip temizlenince "Varsayilan"
-  // etiketiyle yalan soyler (bkz. `handleIlChange`/`handleClearLocation`).
-  const [originalUnitPriceKaynagi, setOriginalUnitPriceKaynagi] = useState<BirimMaliyetKaynagi | null>(null);
-  // Ayni orijinal-deger korumasi piyasa fiyati icin de gerekli — ilce
-  // secimi onu da ezdigine gore (bkz. `ilceSecildi`), temizleme de onu geri
-  // getirmeli. Onceden bu iz tutulmuyordu ve "Konumu temizle" piyasa
-  // fiyatini eski ilcenin degerinde birakiyordu (canli dogrulamada
-  // bulundu, Task 10 — bkz. `unitPriceSource.ts:konumTemizlendi`).
-  const [originalMarketPrice, setOriginalMarketPrice] = useState<string | null>(null);
-  const [originalPiyasaFiyatiElle, setOriginalPiyasaFiyatiElle] = useState<boolean>(false);
+  // Birim maliyetin KAYNAGI
+  const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'elle' });
 
   const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
 
@@ -272,12 +201,6 @@ export default function Home() {
       })
       .catch(console.error);
 
-    fetch('/api/district-prices')
-      .then(res => res.json())
-      .then((data: DistrictPriceEntry[]) => {
-        if (Array.isArray(data)) setDistrictPrices(data);
-      })
-      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -320,19 +243,17 @@ export default function Home() {
     setResult(res);
   }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
 
-  useEffect(() => {
-    if (!selectedIlce) return;
-    const entry = districtPrices.find(
-      d => d.il === selectedIl && d.ilce === selectedIlce
-    );
-    // Elle yazilmis bir toplam varsa DOKUNULMAZ (whole-branch review I2):
-    // metrekare degisimi bir konum eylemi degil. Ilce SECIMI ezmeye devam
-    // eder ve bunu toast'la soyler — bkz. `handleIlceChange`.
-    const yeni = metrekareDegisti(entry, apartmentSize, piyasaFiyatiElle);
-    if (yeni === null) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- ilçe fiyat verisi değiştiğinde piyasa fiyatı hesaplanıyor
-    setManualMarketPrice(yeni);
-  }, [apartmentSize, selectedIl, selectedIlce, districtPrices, piyasaFiyatiElle]);
+
+  const handleParcelConfirm = (payload: { parcelValue: any, risk: any, suggestedRiskPercent: number | null }) => {
+    setParcelContext(payload.parcelValue);
+    if (payload.parcelValue.parcel?.areaSqm) {
+      setIsAaEnabled(true);
+      setArsaAlani(payload.parcelValue.parcel.areaSqm);
+    }
+    if (payload.suggestedRiskPercent !== null) {
+      setRiskLevel(payload.suggestedRiskPercent);
+    }
+  };
 
   const handleSaveReport = async () => {
     if (!result) return;
@@ -420,85 +341,7 @@ export default function Home() {
     setSavedScenarios(prev => prev.filter(s => s.id !== id));
   };
 
-  const handleIlChange = (il: string) => {
-    setSelectedIl(il);
-    setSelectedIlce('');
-    if (originalUnitPrice !== null) {
-      const geri = konumTemizlendi(originalUnitPrice, originalMarketPrice ?? '');
-      setGlobalUnitPrice(geri.birimMaliyet);
-      // Kaydedilmis kaynak varsa ONU geri getir (ornegin elle girilmisti);
-      // yoksa `konumTemizlendi`nin varsayilanina dus.
-      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? geri.kaynak);
-      setManualMarketPrice(geri.piyasaFiyati);
-      setPiyasaFiyatiElle(originalPiyasaFiyatiElle);
-      setOriginalUnitPrice(null);
-      setOriginalUnitPriceKaynagi(null);
-      setOriginalMarketPrice(null);
-      setOriginalPiyasaFiyatiElle(false);
-    }
-  };
 
-  /**
-   * Piyasa fiyatinin KULLANICI tarafindan yazildigi TEK giris noktasi.
-   *
-   * Ham `setManualMarketPrice`i bir kontrole prop olarak gecirmeyin: provenance
-   * bayragi (`piyasaFiyatiElle`) o zaman kurulmaz ve spec 4'un "elle girilmis
-   * degeri ezdim" uyarisi ile `metrekareDegisti`nin koruma kurali sessizce olu
-   * kalir — whole-branch review I1 tam olarak buydu (bayrak yalnizca mobil
-   * dalda kuruluyordu, masaustunde hicbir zaman `true` olmuyordu).
-   * `pageStyles.scope.test.ts` bunu bekliyor.
-   */
-  const piyasaFiyatiGirildi = (v: string) => {
-    setManualMarketPrice(v);
-    setPiyasaFiyatiElle(true);
-  };
-
-  /**
-   * Konum secimi — il ve ilce BIRLIKTE. Mobil secici ikisini ayni anda
-   * verir; masaustu `handleIlceChange` uzerinden delege eder.
-   */
-  const handleKonumSec = (il: string, ilce: string) => {
-    setSelectedIl(il);
-    setSelectedIlce(ilce);
-    const entry = ilceKaydiBul(districtPrices, il, ilce);
-    if (!entry) return;
-    if (originalUnitPrice === null) {
-      setOriginalUnitPrice(globalUnitPrice);
-      setOriginalUnitPriceKaynagi(birimMaliyetKaynagi);
-      setOriginalMarketPrice(manualMarketPrice);
-      setOriginalPiyasaFiyatiElle(piyasaFiyatiElle);
-    }
-    const sonuc = ilceSecildi(entry, apartmentSize);
-    setGlobalUnitPrice(sonuc.birimMaliyet);
-    setManualMarketPrice(sonuc.piyasaFiyati);
-    // Piyasa fiyati da ilceden geldi, artik elle girilmis degil.
-    setPiyasaFiyatiElle(false);
-    // Spec 4: elle girilmis bir deger EZILDIYSE kullaniciya soylenir — birim
-    // maliyet VEYA piyasa fiyati, ilce ikisini birden doldurur. Sessizce
-    // degistirmek, kullanicinin "neden degisti" diye sormasina yol acar.
-    if (birimMaliyetKaynagi.tur === 'elle' || piyasaFiyatiElle) {
-      toast(`${entry.ilce} ortalamasına güncellendi`, { position: 'top-right' });
-    }
-    setBirimMaliyetKaynagi(sonuc.kaynak);
-  };
-
-  const handleIlceChange = (ilce: string) => handleKonumSec(selectedIl, ilce);
-
-  const handleClearLocation = () => {
-    setSelectedIl('');
-    setSelectedIlce('');
-    if (originalUnitPrice !== null) {
-      const geri = konumTemizlendi(originalUnitPrice, originalMarketPrice ?? '');
-      setGlobalUnitPrice(geri.birimMaliyet);
-      setBirimMaliyetKaynagi(originalUnitPriceKaynagi ?? geri.kaynak);
-      setManualMarketPrice(geri.piyasaFiyati);
-      setPiyasaFiyatiElle(originalPiyasaFiyatiElle);
-      setOriginalUnitPrice(null);
-      setOriginalUnitPriceKaynagi(null);
-      setOriginalMarketPrice(null);
-      setOriginalPiyasaFiyatiElle(false);
-    }
-  };
 
   const marketPriceNum = parseMarketPrice(manualMarketPrice);
 
@@ -602,7 +445,7 @@ export default function Home() {
             birimFiyat: sonucDegeri(result?.FD_per_m2),
             karsilastirma: {
               piyasaFiyati: manualMarketPrice,
-              onPiyasaFiyati: piyasaFiyatiGirildi,
+              onPiyasaFiyati: setManualMarketPrice,
               farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
             },
             onFisAc: () => setMobilFisAcik(true),
@@ -625,20 +468,13 @@ export default function Home() {
             result, baseInput: chartBaseInput, marketPrice: marketPriceNum,
             onKapat: () => setMobilAnalizAcik(false),
           }}
+          onParselDogrulaAc={() => setIsParcelModalOpen(true)}
           girdi={{
-            konum: {
-              districtPrices, selectedIl, selectedIlce,
-              onSecim: handleKonumSec,
-              onClear: handleClearLocation,
-              birimMaliyet: globalUnitPrice,
-              birimMaliyetKaynagi,
-              onBirimMaliyet: (v: number) => {
-                setGlobalUnitPrice(v);
-                setBirimMaliyetKaynagi({ tur: 'elle' });
-              },
-              parselIsaretli: parcelValue.lat !== null && parcelValue.lng !== null,
-              onParselAc: () => { setMobilAyarBolumu('parsel'); setMobilAyarlarAcik(true); },
-            },
+            parcelContext,
+            arsaAlani, onArsaAlani: setArsaAlani,
+            isAaEnabled,
+            riskLevel,
+            onParselDogrulaAc: () => setIsParcelModalOpen(true),
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: setApartmentSize,
             landShareRatio, onLandShareRatio: setLandShareRatio,
@@ -669,26 +505,25 @@ export default function Home() {
             setIksaPercentage(AYAR_VARSAYILANLARI.iksaPercentage);
             setIksaManualTL(AYAR_VARSAYILANLARI.iksaManualTL);
             setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
-            // Provenance de sifirlanmali: bayrak `true` kalirsa sonraki ilce
-            // secimi "elle girilmis degeri ezdim" toast'ini haksiz yere basar.
-            setPiyasaFiyatiElle(false);
             setIsAaEnabled(AYAR_VARSAYILANLARI.isAaEnabled);
             setArsaAlani(AYAR_VARSAYILANLARI.arsaAlani);
           }}
           acilisBolumu={mobilAyarBolumu}
+          globalUnitPrice={globalUnitPrice}
+          birimMaliyetKaynagi={birimMaliyetKaynagi}
+          onBirimMaliyet={(v: number) => {
+            setGlobalUnitPrice(v);
+            setBirimMaliyetKaynagi({ tur: 'elle' });
+          }}
           iksaMode={iksaMode} setIksaMode={setIksaMode}
           iksaPercentage={iksaPercentage} setIksaPercentage={setIksaPercentage}
           iksaManualTL={iksaManualTL} setIksaManualTL={setIksaManualTL}
           riskLevel={riskLevel} setRiskLevel={setRiskLevel} riskLevels={riskLevels}
           builderProfit={builderProfit} setBuilderProfit={setBuilderProfit}
           profitLevels={profitLevels}
-          manualMarketPrice={manualMarketPrice} setManualMarketPrice={piyasaFiyatiGirildi}
+          manualMarketPrice={manualMarketPrice} setManualMarketPrice={setManualMarketPrice}
           isAaEnabled={isAaEnabled} setIsAaEnabled={setIsAaEnabled}
           arsaAlani={arsaAlani} setArsaAlani={setArsaAlani}
-          parcelValue={parcelValue}
-          onParcelChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
-          risk={risk}
-          onRiskUygula={applyRiskSuggestion}
         />
 
         {/* Erken donus asagidaki masaustu agacini atladigi icin auth modali
@@ -712,26 +547,6 @@ export default function Home() {
           {/* ===== DESKTOP SIDEBAR: Original full form (visible on web only) ===== */}
           <div className={styles.desktopSidebar}>
             <div className={styles.sidebarTitle}>Proje Bilgileri <span className={styles.settingsGear} onClick={() => setIsSettingsSidebarOpen(true)}>⚙</span></div>
-
-            {/* K7: birim maliyet ve piyasa fiyati hesabi suren asil degerler
-                — dislinin arkasinda gizlenmemeli, en ustte gorunur (spec
-                2026-07-29). Yerlesim yeniden tasarlanmadi, yalnizca bu iki
-                deger cekmeceden cikip her zaman gorunur hale geldi. */}
-            <div className={styles.settingsGroup}>
-              <h4>Piyasa Analizi</h4>
-              <BirimMaliyetField
-                globalUnitPrice={globalUnitPrice}
-                birimMaliyetKaynagi={birimMaliyetKaynagi}
-                onBirimMaliyet={v => {
-                  setGlobalUnitPrice(v);
-                  setBirimMaliyetKaynagi({ tur: 'elle' });
-                }}
-              />
-              <MarketField
-                manualMarketPrice={manualMarketPrice}
-                setManualMarketPrice={piyasaFiyatiGirildi}
-              />
-            </div>
 
             <div className={styles.settingsGroup}>
               <h4>Daire Standardı</h4>
@@ -794,16 +609,52 @@ export default function Home() {
                 <h4>Arsa Alanı (m²)</h4>
                 <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
               </div>
-              {isAaEnabled && (
-                <div className={styles.stepperInput}>
-                  <input type="number" value={arsaAlani} onChange={(e) => setArsaAlani(Number(e.target.value))} />
-                  <div className={styles.stepperRight}>
-                    <span>m²</span>
-                    <button onClick={() => setArsaAlani(p => Math.max(10, p - 10))}>−</button>
-                    <button onClick={() => setArsaAlani(p => p + 10)}>+</button>
+              <SmartContextCard
+                parcelContext={parcelContext}
+                onOpenMap={() => setIsParcelModalOpen(true)}
+                arsaAlani={arsaAlani}
+                onArsaAlani={setArsaAlani}
+                riskLevel={riskLevel}
+                isAaEnabled={isAaEnabled}
+              />
+            </div>
+
+            <div className={styles.settingsGroup}>
+              <h4>Piyasa Analizi</h4>
+              <BirimMaliyetField
+                globalUnitPrice={globalUnitPrice}
+                birimMaliyetKaynagi={birimMaliyetKaynagi}
+                onBirimMaliyet={v => {
+                  setGlobalUnitPrice(v);
+                  setBirimMaliyetKaynagi({ tur: 'elle' });
+                }}
+              />
+              <MarketField
+                manualMarketPrice={manualMarketPrice}
+                setManualMarketPrice={setManualMarketPrice}
+              />
+            </div>
+
+            <div className={styles.settingsGroup}>
+              <h4>Müteahhit Kazancı</h4>
+              <div className={styles.luxGrid}>
+                {profitLevels.map(opt => (
+                  <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
+                    <span>{opt.label}</span>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.settingsGroup}>
+              <h4>Risk Payı</h4>
+              <div className={`${styles.luxGrid} ${styles.luxGridDynamic}`} style={{ '--lux-cols': riskLevels.length } as React.CSSProperties}>
+                {riskLevels.map(opt => (
+                  <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
+                    <span>{opt.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className={styles.settingsGroup}>
@@ -835,41 +686,6 @@ export default function Home() {
                   </div>
                 </div>
               )}
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Risk Payı</h4>
-              <div className={`${styles.luxGrid} ${styles.luxGridDynamic}`} style={{ '--lux-cols': riskLevels.length } as React.CSSProperties}>
-                {riskLevels.map(opt => (
-                  <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
-                    <span>{opt.label}</span>
-                  </div>
-                ))}
-              </div>
-              {/* `isDesktopViewport &&` kosulu kaldirildi: bu noktaya yalnizca
-                  masaustu dalinda gelinir (mobil ve olculmemis durumlar
-                  yukarida erken donuyor), kosul her zaman true idi. */}
-              <>
-                  <ParcelPicker
-                    value={parcelValue}
-                    onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
-                    hint="Parselin resmi risk verilerini (yakın fay, taşkın) görmek isterseniz haritadan konum seçebilirsiniz — bu adım isteğe bağlıdır."
-                    notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın — yol, dere veya kadastro dışı bir noktaya denk gelmiş olabilir. Doğrulama olmadan da hesaplama yapabilirsiniz."
-                    unavailableText="TKGM servisi şu an yanıt vermiyor. Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz."
-                  />
-                  {risk && <RiskSuggestionCard risk={risk} onApply={applyRiskSuggestion} />}
-              </>
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Müteahhit Kazancı</h4>
-              <div className={styles.luxGrid}>
-                {profitLevels.map(opt => (
-                  <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-                    <span>{opt.label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 
@@ -972,22 +788,13 @@ export default function Home() {
                 <div className={styles.accordionBody}>
                   <MarketField
                     manualMarketPrice={manualMarketPrice}
-                    setManualMarketPrice={piyasaFiyatiGirildi}
+                    setManualMarketPrice={setManualMarketPrice}
                   />
                 </div>
               </details>
             </div>
 
-            <HesapOzetiSeridi
-              fdTotal={result?.FD_total}
-              isApartmentCountEnabled={isApartmentCountEnabled}
-              effectiveLandSharePercent={effectiveLandShareRatio}
-              ownerApartmentShare={ownerApartmentShare}
-              totalApartments={totalApartments}
-              manualMarketPrice={manualMarketPrice}
-              onMarketPriceChange={piyasaFiyatiGirildi}
-              marketPriceNum={marketPriceNum}
-            />
+
           </div>
 
         </aside>
@@ -1043,18 +850,16 @@ export default function Home() {
         </div>
 
 
+        {/* Modals & Overlays */}
+        <ParcelModal 
+          isOpen={isParcelModalOpen} 
+          onClose={() => setIsParcelModalOpen(false)} 
+          onConfirm={handleParcelConfirm} 
+        />
+
         {/* Right Grid: Hesap Sonuçları + Hesap Özeti */}
         <section className={styles.rightGrid}>
-          <HesapOzetiSeridi
-            fdTotal={result?.FD_total}
-            isApartmentCountEnabled={isApartmentCountEnabled}
-            effectiveLandSharePercent={effectiveLandShareRatio}
-            ownerApartmentShare={ownerApartmentShare}
-            totalApartments={totalApartments}
-            manualMarketPrice={manualMarketPrice}
-            onMarketPriceChange={piyasaFiyatiGirildi}
-            marketPriceNum={marketPriceNum}
-          />
+
 
           {/* Main Panel */}
           <main id="resultsPanel" className={`${styles.mainPanel} ${styles.swipeCard}`}>
@@ -1130,22 +935,7 @@ export default function Home() {
               )}
             </div>
 
-            {/* Yapisal gruplama sarmalayicisi. `.mainPanelResults` sinifi
-                KALDIRILDI: tek kurali Task 5'te silinen `data-revealed`
-                kapisiydi, geriye hicbir CSS kurali olmayan bir sinif adi
-                kalmisti. DOM derinligi bilerek korunuyor. */}
-            <div>
-            {districtPrices.length > 0 && (
-              <LocationSelector
-                districtPrices={districtPrices}
-                selectedIl={selectedIl}
-                selectedIlce={selectedIlce}
-                onIlChange={handleIlChange}
-                onIlceChange={handleIlceChange}
-                onClear={handleClearLocation}
-              />
-            )}
-            </div>
+
             <div className={styles.desktopActionsSlot}>
               {actionsSection}
             </div>

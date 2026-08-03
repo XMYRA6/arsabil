@@ -64,6 +64,7 @@ export const RATE_LIMITS = {
     WRITE:    { limit: 30, windowMs: 60_000 },     // kullanıcı başına 30/dk (mesaj+teklif)
     PASSWORD_RESET: { limit: 3, windowMs: 3_600_000 }, // IP başına 3/saat (REGISTER ile aynı eşik)
     PARCEL_LOOKUP: { limit: 20, windowMs: 60_000 }, // kullanıcı başına 20/dk (TKGM'yi yormamak için)
+    PARCEL_LOOKUP_ANON: { limit: 5, windowMs: 60_000 }, // IP başına 5/dk (anonim botları engellemek için)
     RISK_LOOKUP: { limit: 20, windowMs: 60_000 },   // kullanıcı başına 20/dk (PARCEL_LOOKUP ile aynı eşik)
     RISK_TILES: { limit: 300, windowMs: 60_000 },   // IP başına 300/dk — tek harita görünümü onlarca tile ister
 } as const

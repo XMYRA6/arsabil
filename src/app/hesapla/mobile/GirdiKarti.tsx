@@ -1,12 +1,18 @@
 "use client";
 
 import { computeEffectiveLandShareX } from '../calculatorUiHelpers';
-import { KonumBlogu, type KonumBloguProps } from './KonumBlogu';
+import { SmartContextCard } from '../SmartContextCard';
+import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import styles from './mobile.module.css';
 
 export type GirdiKartiProps = {
-    /** Konum artik basliktaki cipte degil, girdi kartinin EN USTUNDE (spec K2). */
-    konum: KonumBloguProps;
+    parcelContext: ParcelPickerValue | null;
+    arsaAlani: number;
+    onArsaAlani: (v: number) => void;
+    riskLevel: number;
+    isAaEnabled: boolean;
+    /** Parsel doğrulama modalını açar */
+    onParselDogrulaAc: () => void;
     luxLevel: number;
     onLuxLevel: (v: number) => void;
     apartmentSize: number;
@@ -61,7 +67,11 @@ const M2_MAX = 400;
  * olsaydi sessizce ayrisirlardi.
  */
 export function GirdiKarti({
-    konum,
+    parcelContext,
+    arsaAlani,
+    onArsaAlani,
+    riskLevel,
+    isAaEnabled,
     luxLevel,
     onLuxLevel,
     apartmentSize,
@@ -74,6 +84,7 @@ export function GirdiKarti({
     onTotalApartments,
     ownerApartmentShare,
     onOwnerApartmentShare,
+    onParselDogrulaAc,
 }: GirdiKartiProps) {
     // Sd acikken gosterilen yuzde TURETILMISTIR, ayri bir state degildir.
     // Formul KOPYALANMAZ: motora giden deger de ayni yardimcidan gelir
@@ -87,9 +98,15 @@ export function GirdiKarti({
 
     return (
         <section className={styles.girdiKarti} aria-label="Proje girdileri">
-            <KonumBlogu {...konum} />
+            <SmartContextCard
+                parcelContext={parcelContext}
+                onOpenMap={onParselDogrulaAc}
+                arsaAlani={arsaAlani}
+                onArsaAlani={onArsaAlani}
+                riskLevel={riskLevel}
+                isAaEnabled={isAaEnabled}
+            />
 
-            {/* ── Yapi standardi ── */}
             <div className={styles.girdiSatir}>
                 <span className={styles.girdiEtiket}>Yapı standardı</span>
                 <div className={styles.segmentKap} role="tablist" aria-label="Yapı standardı">

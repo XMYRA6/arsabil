@@ -43,13 +43,13 @@ export function HesapOzetiSeridi({
         )}
       </div>
       <div className={styles.hesapOzetiPiyasa}>
-        <label htmlFor="hesapOzetiPiyasaInput">Piyasa Fiyatı:</label>
+        <label htmlFor="hesapOzetiPiyasaInput">Piyasa:</label>
         <input
           id="hesapOzetiPiyasaInput"
           type="text"
           value={manualMarketPrice}
           onChange={(e) => onMarketPriceChange(e.target.value)}
-          placeholder="gir (opsiyonel)"
+          placeholder="opsiyonel"
           className={styles.hesapOzetiPiyasaInput}
         />
       </div>

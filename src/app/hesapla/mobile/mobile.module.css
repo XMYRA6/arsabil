@@ -162,6 +162,28 @@
 
     /* ═══ Girdi karti (2a alt) ═══════════════════════════════════════════ */
 
+    .openParcelBtnMobile {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: calc(100% - 28px);
+        margin: 0 14px 16px 14px;
+        padding: 12px;
+        background-color: rgba(var(--brand-blue-rgb, 31, 111, 235), 0.08);
+        border: 1px solid rgba(var(--brand-blue-rgb, 31, 111, 235), 0.3);
+        color: var(--brand-blue, #1f6feb);
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .openParcelBtnMobile:active {
+        background-color: rgba(var(--brand-blue-rgb, 31, 111, 235), 0.15);
+    }
+
     .girdiKarti {
         /* Tasarim 2a.html:21 -> `margin: 12px 14px 0`. Dikey bosluk
            `.hesaplaMobilKok`in `gap: 12px`inden geliyor, burada YALNIZCA

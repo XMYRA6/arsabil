@@ -325,6 +325,29 @@
     margin: 0;
 }
 
+.openParcelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--brand-blue, #1f6feb);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.openParcelBtn:hover {
+  background-color: var(--brand-blue, #1f6feb);
+  color: #fff;
+}
+
 .toggleRow label {
     width: auto;
 }
@@ -688,31 +711,41 @@
 .hesapOzetiSeridi {
     grid-column: 1 / -1;
     position: sticky;
-    top: 80px;
+    top: 70px;
     z-index: 5;
+    align-self: start;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
-    padding: 12px 16px;
-    border-radius: 16px;
+    padding: 8px 16px;
+    border-radius: 30px; /* Pill shape */
     background: var(--seal-surface);
     border: 1px solid var(--seal-border);
     color: var(--seal-text);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    margin-bottom: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow-x: auto; /* Prevent overflow breaking layout on smaller screens */
+    scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+
+.hesapOzetiSeridi::-webkit-scrollbar {
+    display: none;
 }
 
 .hesapOzetiFiyatWrap {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .hesapOzetiFiyatLabel {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -720,15 +753,16 @@
 }
 
 .hesapOzetiFiyat {
-    font-size: 1.4rem;
+    font-size: 1.15rem;
     font-weight: 900;
     font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-variant-numeric: tabular-nums;
 }
 
 .hesapOzetiArsaPayi {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--seal-text-muted);
+    white-space: nowrap;
 }
 
 .hesapOzetiArsaPayiDetay {
@@ -739,18 +773,27 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--seal-text-muted);
+    white-space: nowrap;
 }
 
 .hesapOzetiPiyasaInput {
-    width: 130px;
-    padding: 6px 10px;
-    border-radius: 8px;
+    width: 100px;
+    padding: 4px 8px;
+    border-radius: 12px;
     border: 1px solid var(--seal-border-soft);
-    background: transparent;
+    background: rgba(255, 255, 255, 0.05);
     color: var(--seal-text);
     font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.hesapOzetiPiyasaInput:focus {
+    width: 120px;
+    border-color: var(--primary);
+    outline: none;
+    background: var(--input-bg);
 }
 
 /* =========================================================================
@@ -759,6 +802,7 @@
 .rightGrid {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+    grid-template-rows: max-content 1fr;
     gap: 14px;
     align-items: stretch;
 }
@@ -1671,4 +1715,14 @@ button.compareBtn {
     .mobileActionsSlot {
         display: contents;
     }
+}
+
+/* Hide number input spinners for all stepper inputs */
+.stepperInput input[type="number"]::-webkit-inner-spin-button,
+.stepperInput input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.stepperInput input[type="number"] {
+    -moz-appearance: textfield;
 }

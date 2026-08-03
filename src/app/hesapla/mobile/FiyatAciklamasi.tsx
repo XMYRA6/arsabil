@@ -89,7 +89,7 @@ export function FiyatAciklamasi({
                             {apartmentSize} m² × {trFormat.format(unitPrice)} TL/m²
                         </span>
                     </span>
-                    <span className={`${styles.aciklamaTutar} mNum`}>{fmt(result?.Mi ?? null)}</span>
+                    <span className={`${styles.aciklamaTutar}`}>{fmt(result?.Mi ?? null)}</span>
                 </li>
 
                 <li className={styles.aciklamaSatir}>
@@ -102,7 +102,7 @@ export function FiyatAciklamasi({
                             Anlaşılan arsa payı %{landSharePercent}
                         </span>
                     </span>
-                    <span className={`${styles.aciklamaTutar} mNum`}>{fmt(result?.Ma ?? null)}</span>
+                    <span className={`${styles.aciklamaTutar}`}>{fmt(result?.Ma ?? null)}</span>
                 </li>
 
                 <li className={styles.aciklamaSatir}>
@@ -122,13 +122,13 @@ export function FiyatAciklamasi({
                             </button>
                         </span>
                     </span>
-                    <span className={`${styles.aciklamaTutar} mNum`}>{fmt(muteahhitKazanci)}</span>
+                    <span className={`${styles.aciklamaTutar}`}>{fmt(muteahhitKazanci)}</span>
                 </li>
             </ol>
 
             <div className={styles.aciklamaToplam}>
                 <span className={styles.aciklamaToplamAd}>Toplam · satış fiyatı</span>
-                <span className={`${styles.aciklamaToplamTutar} mNum`}>{fmt(result?.FD_total ?? null)}</span>
+                <span className={`${styles.aciklamaToplamTutar}`}>{fmt(result?.FD_total ?? null)}</span>
             </div>
 
             <div className={styles.muhendisSatir}>

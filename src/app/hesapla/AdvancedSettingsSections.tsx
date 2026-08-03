@@ -162,6 +162,28 @@ export function RiskCostFields({
   return (
     <>
       <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
+        <div className={styles.luxGrid}>
+          {profitLevels.map(opt => (
+            <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowLabel}>Risk Payı</div>
+        <div className={`${styles.luxGrid} ${styles.drawerRiskGrid}`}>
+          {riskLevels.map(opt => (
+            <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={`${styles.drawerRow} ${styles.column}`}>
         <div className={styles.drawerRowLabel}>İksa Masrafı</div>
         <div className={styles.luxGrid}>
           {[
@@ -190,28 +212,6 @@ export function RiskCostFields({
             </div>
           </div>
         )}
-      </div>
-
-      <div className={`${styles.drawerRow} ${styles.column}`}>
-        <div className={styles.drawerRowLabel}>Risk Payı</div>
-        <div className={`${styles.luxGrid} ${styles.drawerRiskGrid}`}>
-          {riskLevels.map(opt => (
-            <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
-              <span>{opt.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={`${styles.drawerRow} ${styles.column}`}>
-        <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
-        <div className={styles.luxGrid}>
-          {profitLevels.map(opt => (
-            <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-              <span>{opt.label}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </>
   );
@@ -257,27 +257,31 @@ export function BirimMaliyetField({ globalUnitPrice, birimMaliyetKaynagi, onBiri
   }
 
   return (
-    <div className={styles.drawerRow}>
-      <span className={styles.drawerRowLabel}>Birim inşaat maliyeti</span>
-      <span>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
-      <input
-        type="number"
-        min={0}
-        step={100}
-        value={girdi}
-        aria-label="Birim inşaat maliyeti (TL/m²)"
-        onChange={e => {
-          const raw = e.target.value;
-          // Ham metin HER ZAMAN gosterilir — bos/yarim yazim burada
-          // engellenmez, yalnizca gecerli (>0) sayilar ust bilesene
-          // commit edilir (bkz. yukaridaki not).
-          setGirdi(raw);
-          const v = Number(raw);
-          if (Number.isFinite(v) && v > 0) {
-            onBirimMaliyet(v);
-          }
-        }}
-      />
+    <div className={`${styles.drawerRow} ${styles.column}`}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--label-color)' }}>Birim inşaat maliyeti</span>
+        <span style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 600 }}>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
+      </div>
+      <div className={styles.stepperInput}>
+        <input
+          type="number"
+          min={0}
+          step={100}
+          value={girdi}
+          aria-label="Birim inşaat maliyeti (TL/m²)"
+          onChange={e => {
+            const raw = e.target.value;
+            setGirdi(raw);
+            const v = Number(raw);
+            if (Number.isFinite(v) && v > 0) {
+              onBirimMaliyet(v);
+            }
+          }}
+        />
+        <div className={styles.stepperRight}>
+          <span>TL/m²</span>
+        </div>
+      </div>
     </div>
   );
 }

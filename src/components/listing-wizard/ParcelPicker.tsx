@@ -32,6 +32,8 @@ interface Props {
      */
     notFoundText?: string
     unavailableText?: string
+    className?: string
+    mapClassName?: string
 }
 
 const DEFAULT_HINT =
@@ -53,6 +55,8 @@ export function ParcelPicker({
     hint = DEFAULT_HINT,
     notFoundText = DEFAULT_NOT_FOUND_TEXT,
     unavailableText = DEFAULT_UNAVAILABLE_TEXT,
+    className,
+    mapClassName,
 }: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const mapRef = useRef<LeafletMap | null>(null)
@@ -186,8 +190,12 @@ export function ParcelPicker({
     }
 
     return (
-        <div className={styles.wrapper}>
-            <div ref={containerRef} className={styles.mapBox} data-testid="parcel-map" />
+        <div className={`${styles.wrapper} ${className || ''}`}>
+            <div
+                ref={containerRef}
+                className={`${styles.mapBox} ${mapClassName || ''}`}
+                style={{ cursor: verifying ? 'wait' : 'crosshair' }}
+            />
 
             <p className={styles.hint}>{hint}</p>
 

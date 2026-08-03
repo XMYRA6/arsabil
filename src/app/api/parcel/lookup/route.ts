@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit'
 import { isWithinTurkey } from '@/lib/geo/turkeyBounds'
 import { fetchParcelByPoint } from '@/lib/tkgm/parcel'
 
@@ -9,11 +9,20 @@ import { fetchParcelByPoint } from '@/lib/tkgm/parcel'
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions)
     const userId = session?.user?.id as string | undefined
-    if (!userId) {
-        return NextResponse.json({ message: 'Giriş yapmanız gerekiyor.' }, { status: 401 })
+
+    let rlKey: string
+    let rlOpts: any
+
+    if (userId) {
+        rlKey = `parcel:${userId}`
+        rlOpts = RATE_LIMITS.PARCEL_LOOKUP
+    } else {
+        const ip = getClientIp(req)
+        rlKey = `parcel:ip:${ip}`
+        rlOpts = RATE_LIMITS.PARCEL_LOOKUP_ANON
     }
 
-    const rl = checkRateLimit(`parcel:${userId}`, RATE_LIMITS.PARCEL_LOOKUP)
+    const rl = checkRateLimit(rlKey, rlOpts)
     if (!rl.ok) {
         return NextResponse.json(
             { message: 'Çok fazla parsel sorgusu yaptınız. Lütfen biraz bekleyin.' },

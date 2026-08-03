@@ -12,6 +12,8 @@ import styles from './mobile.module.css';
 export type HesaplaMobileProps = {
     sonuc: SonucKartiProps;
     girdi: GirdiKartiProps;
+    /** Parsel doğrulama modalını açar */
+    onParselDogrulaAc: () => void;
     /** `4a` acik mi. Durum `page.tsx`te yasar; bu bilesen state tutmaz. */
     fisAcik: boolean;
     fiyatAciklamasi: FiyatAciklamasiProps;
@@ -40,6 +42,7 @@ export function HesaplaMobile({
     girdi,
     fisAcik,
     fiyatAciklamasi,
+    onParselDogrulaAc,
     onAyarlarAc,
     analizAcik,
     analiz,
@@ -76,7 +79,7 @@ export function HesaplaMobile({
                                 ? <FiyatAciklamasi {...fiyatAciklamasi} />
                                 : (
                                     <>
-                                        <GirdiKarti {...girdi} />
+                                        <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} />
                                         {/* Tasarim 2a.html:39 — girdi kartinin ALTINDA birincil
                                             kesif yolu. Baslikaki disli ikonu tek basina kalsaydi
                                             kullanici bu ekrani zor bulurdu. */}

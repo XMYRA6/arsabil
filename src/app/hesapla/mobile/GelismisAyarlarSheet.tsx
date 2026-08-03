@@ -2,44 +2,34 @@
 
 import { useEffect, useRef } from 'react';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
-import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
-import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard';
-import type { RiskMeasurement } from '@/lib/risk/types';
 import {
     ArsaAlaniFields,
     MarketField,
     RiskCostFields,
+    BirimMaliyetField,
     type ArsaAlaniProps,
     type MarketFieldProps,
     type RiskCostProps,
+    type BirimMaliyetFieldProps,
 } from '../AdvancedSettingsSections';
 import styles from './mobile.module.css';
 
 /**
  * Yaprak acilirken odaklanilacak bolum.
- *
- * `parsel` ayri bir deger (Task 10, canli dogrulamada bulundu): onceden
- * `onParselAc` de `risk`i kullaniyordu, ama `risk` zaten "Maliyet ve
- * riskler" bolumunun (kar/risk/iksa) bir uyesiydi — parsel butonuna
- * basinca IKI bolum birden isaretleniyor ve hicbiri gorunur alana
- * kaymiyordu (yaprak 1129px icerik / 652px gorunur, parsel EN ALTTA).
  */
-export type AyarBolumu = 'kar' | 'risk' | 'iksa' | 'piyasa' | 'parsel';
+export type AyarBolumu = 'kar' | 'risk' | 'iksa' | 'piyasa';
 
 export type GelismisAyarlarSheetProps =
     & RiskCostProps
     & MarketFieldProps
     & ArsaAlaniProps
+    & BirimMaliyetFieldProps
     & {
         open: boolean;
         onClose: () => void;
         onUygula: () => void;
         onSifirla: () => void;
         acilisBolumu?: AyarBolumu;
-        parcelValue: ParcelPickerValue;
-        onParcelChange: (patch: Partial<ParcelPickerValue>) => void;
-        risk: RiskMeasurement | null;
-        onRiskUygula: (percent: number) => void;
     };
 
 /**
@@ -70,30 +60,21 @@ export function GelismisAyarlarSheet({
     onUygula,
     onSifirla,
     acilisBolumu,
-    parcelValue,
-    onParcelChange,
-    risk,
-    onRiskUygula,
     ...alanlar
 }: GelismisAyarlarSheetProps) {
     const bolum = (...adaylar: AyarBolumu[]) =>
         String(acilisBolumu !== undefined && adaylar.includes(acilisBolumu));
 
     // Her bolum kendi DOM elemanina bir ref tutar; acilista hedef bolume
-    // kaydirilir. `.ayarBolum`in `scroll-margin-top`u zaten bunun icin
-    // vardi ama hic cagrilmiyordu (Task 10, canli dogrulamada bulundu):
-    // parsel EN ALTTAKI bolum ve yaprak 1129px icerik / 652px gorunur —
-    // kaydirmadan hedef ekran disinda kaliyordu.
+    // kaydirilir.
     const maliyetRef = useRef<HTMLElement | null>(null);
     const piyasaRef = useRef<HTMLElement | null>(null);
     const arsaRef = useRef<HTMLElement | null>(null);
-    const parselRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         if (!open || acilisBolumu === undefined) return;
         const hedefRef =
             acilisBolumu === 'piyasa' ? piyasaRef :
-            acilisBolumu === 'parsel' ? parselRef :
             maliyetRef; // 'kar' | 'risk' | 'iksa' ayni bolume dusuyor
         const azaltilmisHareket = typeof window !== 'undefined'
             && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -106,6 +87,39 @@ export function GelismisAyarlarSheet({
     return (
         <BottomSheet open={open} onClose={onClose} title="Gelişmiş ayarlar">
             <div className={styles.ayarlarGovde}>
+                <section
+                    ref={arsaRef}
+                    className={styles.ayarBolum}
+                    role="group"
+                    aria-label="Arsa alanı"
+                    data-acilis="false"
+                >
+                    <ArsaAlaniFields
+                        isAaEnabled={alanlar.isAaEnabled}
+                        setIsAaEnabled={alanlar.setIsAaEnabled}
+                        arsaAlani={alanlar.arsaAlani}
+                        setArsaAlani={alanlar.setArsaAlani}
+                    />
+                </section>
+
+                <section
+                    ref={piyasaRef}
+                    className={styles.ayarBolum}
+                    role="group"
+                    aria-label="Piyasa fiyatı"
+                    data-acilis={bolum('piyasa')}
+                >
+                    <BirimMaliyetField
+                        globalUnitPrice={alanlar.globalUnitPrice}
+                        birimMaliyetKaynagi={alanlar.birimMaliyetKaynagi}
+                        onBirimMaliyet={alanlar.onBirimMaliyet}
+                    />
+                    <MarketField
+                        manualMarketPrice={alanlar.manualMarketPrice}
+                        setManualMarketPrice={alanlar.setManualMarketPrice}
+                    />
+                </section>
+
                 {/* Kar, risk ve iksa tek bir mevcut bilesende yasiyor; ucu de
                     bu bolume dusuyor. */}
                 <section
@@ -131,50 +145,7 @@ export function GelismisAyarlarSheet({
                     />
                 </section>
 
-                <section
-                    ref={piyasaRef}
-                    className={styles.ayarBolum}
-                    role="group"
-                    aria-label="Piyasa fiyatı"
-                    data-acilis={bolum('piyasa')}
-                >
-                    <MarketField
-                        manualMarketPrice={alanlar.manualMarketPrice}
-                        setManualMarketPrice={alanlar.setManualMarketPrice}
-                    />
-                </section>
 
-                <section
-                    ref={arsaRef}
-                    className={styles.ayarBolum}
-                    role="group"
-                    aria-label="Arsa alanı"
-                    data-acilis="false"
-                >
-                    <ArsaAlaniFields
-                        isAaEnabled={alanlar.isAaEnabled}
-                        setIsAaEnabled={alanlar.setIsAaEnabled}
-                        arsaAlani={alanlar.arsaAlani}
-                        setArsaAlani={alanlar.setArsaAlani}
-                    />
-                </section>
-
-                <section
-                    ref={parselRef}
-                    className={styles.ayarBolum}
-                    role="group"
-                    aria-label="Konum ve resmi risk"
-                    data-acilis={bolum('parsel')}
-                >
-                    <ParcelPicker
-                        value={parcelValue}
-                        onChange={onParcelChange}
-                        hint="Parselin resmi risk verilerini (yakın fay, taşkın) görmek isterseniz haritadan konum seçebilirsiniz — bu adım isteğe bağlıdır."
-                        notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın — yol, dere veya kadastro dışı bir noktaya denk gelmiş olabilir. Doğrulama olmadan da hesaplama yapabilirsiniz."
-                        unavailableText="TKGM servisi şu an yanıt vermiyor. Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz."
-                    />
-                    {risk && <RiskSuggestionCard risk={risk} onApply={onRiskUygula} />}
-                </section>
             </div>
 
             <footer className={styles.ayarlarAyak}>
