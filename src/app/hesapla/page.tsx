@@ -19,7 +19,7 @@ import { toast } from 'react-hot-toast';
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare } from '@/components/ScenarioCompare';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { FormulParamsFields, RiskCostFields, MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
+import { MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
 
 import { HesapFisi } from './HesapFisi';
 import type { RiskLevel } from './riskSuggestionHelpers';
@@ -707,114 +707,6 @@ export default function Home() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* ===== MOBILE SIDEBAR: Simplified card layout (visible on mobile only) ===== */}
-          <div className={styles.mobileSidebar}>
-            <div className={`${styles.swipeCard} ${styles.swipeCardPadded}`}>
-
-            <div className={styles.unifiedGlassPanel}>
-              <div className={styles.settingsGroup}>
-                <h4>Yapı Standardı</h4>
-                <div className={styles.luxGrid}>
-                  {[
-                    { label: 'Standart', value: 1.0, icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.84L17.5 12h-11L12 5.84z" /></svg> },
-                    { label: 'Orta', value: 1.2, icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zm6-4h6V5H9v12zm8 0h6v-8h-6v8zm-16 0h6v-6H1v6z" /></svg> },
-                    { label: 'Lüks', value: 1.4, icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z" /><circle cx="17.5" cy="5.5" r="3.5" fill="#4ade80" /><path d="M16 6l1 1 2-2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg> }
-                  ].map(opt => (
-                    <div key={opt.label} className={`${styles.luxBox} ${luxLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setLuxLevel(opt.value)}>
-                      {opt.icon}
-                      <span>{opt.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.settingsGroup}>
-                <h4>Daire Metrekaresi</h4>
-                <div className={styles.stepperInput}>
-                  <input type="number" value={apartmentSize} onChange={(e) => setApartmentSize(Number(e.target.value))} />
-                  <div className={styles.stepperRight}>
-                    <span>m²</span>
-                    <button onClick={() => setApartmentSize(p => Math.max(50, p - 5))}>−</button>
-                    <button onClick={() => setApartmentSize(p => p + 5)}>+</button>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.settingsGroup}>
-                <div className={`${styles.toggleRow} ${styles.toggleRowFlat}`}>
-                  <h4>Arsa Payı</h4>
-                  <span className={styles.sharePct}>
-                    %{Math.round(effectiveLandShareRatio)}
-                    {isApartmentCountEnabled && ` (${ownerApartmentShare}/${totalApartments} daire)`}
-                  </span>
-                </div>
-                {!isApartmentCountEnabled && (
-                  <RangeSlider
-                    min={1}
-                    max={100}
-                    step={1}
-                    value={landShareRatio}
-                    onChange={(e) => setLandShareRatio(Number(e.target.value))}
-                    className={styles.sealRangeSlider}
-                  />
-                )}
-              </div>
-            </div>
-
-            </div>
-
-            {/* ── Gelişmiş ayarlar: mobilde accordion (drawer ile aynı bileşenler) ── */}
-            <div className={styles.mobileAccordions}>
-              <details className={styles.accordion}>
-                <summary className={styles.accordionSummary}>Formül Parametreleri</summary>
-                <div className={styles.accordionBody}>
-                  <FormulParamsFields
-                    isApartmentCountEnabled={isApartmentCountEnabled}
-                    setIsApartmentCountEnabled={setIsApartmentCountEnabled}
-                    totalApartments={totalApartments}
-                    setTotalApartments={setTotalApartments}
-                    ownerApartmentShare={ownerApartmentShare}
-                    setOwnerApartmentShare={setOwnerApartmentShare}
-                    isAaEnabled={isAaEnabled}
-                    setIsAaEnabled={setIsAaEnabled}
-                    arsaAlani={arsaAlani}
-                    setArsaAlani={setArsaAlani}
-                  />
-                </div>
-              </details>
-              <details className={styles.accordion}>
-                <summary className={styles.accordionSummary}>Proje Maliyet ve Riskleri</summary>
-                <div className={styles.accordionBody}>
-                  <RiskCostFields
-                    iksaMode={iksaMode}
-                    setIksaMode={setIksaMode}
-                    iksaPercentage={iksaPercentage}
-                    setIksaPercentage={setIksaPercentage}
-                    iksaManualTL={iksaManualTL}
-                    setIksaManualTL={setIksaManualTL}
-                    riskLevel={riskLevel}
-                    setRiskLevel={setRiskLevel}
-                    riskLevels={riskLevels}
-                    builderProfit={builderProfit}
-                    setBuilderProfit={setBuilderProfit}
-                    profitLevels={profitLevels}
-                  />
-                </div>
-              </details>
-              <details className={styles.accordion}>
-                <summary className={styles.accordionSummary}>Piyasa Analizi</summary>
-                <div className={styles.accordionBody}>
-                  <MarketField
-                    manualMarketPrice={manualMarketPrice}
-                    setManualMarketPrice={setManualMarketPrice}
-                  />
-                </div>
-              </details>
-            </div>
-
-
           </div>
 
         </aside>

@@ -52,16 +52,11 @@ describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
   });
 });
 
-describe('kat dilimi şeridi kapsamı', () => {
-  it('.mobileAccordions .drawerRow::before selektörü tanımlı olmalı', () => {
-    expect(pageCss).toMatch(/\.mobileAccordions\s+\.drawerRow::before/);
-  });
-
-  it('çıplak .drawerRow::before (mobileAccordions olmadan) TANIMLI OLMAMALI', () => {
-    // .mobileAccordions .drawerRow::before dışında hiçbir yerde bare .drawerRow::before olmamalı
-    const bareRulePattern = /(?<!\.mobileAccordions\s)\.drawerRow::before/g;
-    const matches = pageCss.match(bareRulePattern) ?? [];
-    expect(matches.length).toBe(0);
+describe('erisilemez mobil ölü kod kapsami', () => {
+  it('.mobileSidebar/.mobileAccordions artik page.tsx JSX\'inde yok (isDesktopViewport===false erken donuyor, hic render edilmiyordu)', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).not.toMatch(/styles\.mobileSidebar/);
+    expect(pageTsx).not.toMatch(/styles\.mobileAccordions/);
   });
 });
 
@@ -118,16 +113,14 @@ describe('data-revealed gate kapsamı', () => {
 });
 
 describe('kart yüzeyi migrasyonu — seal-ink/seal-ink-2 doğrudan kullanılmamalı', () => {
-  it('topResultCard, statCard, accordion artık --seal-surface kullanmalı (eski --seal-ink-2 gradienti değil)', () => {
+  it('topResultCard, statCard artık --seal-surface kullanmalı (eski --seal-ink-2 gradienti değil; accordion Task 8\'de ölü kod olarak kaldırıldı)', () => {
     expect(pageCss).toMatch(/\.topResultCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
     expect(pageCss).toMatch(/\.statCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
-    expect(pageCss).toMatch(/\.accordion\s*\{[^}]*background:\s*var\(--seal-surface\)/);
   });
 
-  it('bu üç kart artık backdrop-filter blur uygulamalı (light temada camsı yüzey için gerekli)', () => {
+  it('bu kartlar artık backdrop-filter blur uygulamalı (light temada camsı yüzey için gerekli)', () => {
     expect(pageCss).toMatch(/\.topResultCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
     expect(pageCss).toMatch(/\.statCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
-    expect(pageCss).toMatch(/\.accordion\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
   });
 
   it('topResultLabel/statCard h5 artık --seal-text-muted kullanmalı', () => {
