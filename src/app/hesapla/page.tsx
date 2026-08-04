@@ -31,6 +31,7 @@ import type { RiskMeasurement } from '@/lib/risk/types';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
 import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
+import { type RiskKaynagi } from './mobile/riskSource';
 
 interface ProfitLevel {
   id: string;
@@ -124,6 +125,7 @@ export default function Home() {
     { id: 'default-risk-2', label: 'Orta', value: 10, sortOrder: 2, isDefault: false },
     { id: 'default-risk-3', label: 'Yüksek', value: 15, sortOrder: 3, isDefault: false },
   ]);
+  const [riskKaynagi, setRiskKaynagi] = useState<RiskKaynagi>({ tur: 'varsayilan' });
 
   const [isDesktopViewport, setIsDesktopViewport] = useState<boolean | null>(null);
   useEffect(() => {
@@ -251,7 +253,13 @@ export default function Home() {
     }
     if (payload.suggestedRiskPercent !== null) {
       setRiskLevel(payload.suggestedRiskPercent);
+      setRiskKaynagi({ tur: 'tkgm' });
     }
+  };
+
+  const handleRiskLevel = (v: number) => {
+    setRiskLevel(v);
+    setRiskKaynagi({ tur: 'elle' });
   };
 
   const handleSaveReport = async () => {
@@ -502,6 +510,9 @@ export default function Home() {
             arsaAlani, onArsaAlani: setArsaAlani,
             isAaEnabled,
             riskLevel,
+            riskLevels,
+            onRiskLevel: handleRiskLevel,
+            riskKaynagi,
             onParselDogrulaAc: () => setIsParcelModalOpen(true),
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: setApartmentSize,
@@ -529,6 +540,7 @@ export default function Home() {
             // tam da bu task'in kapattigi kusur.
             setBuilderProfit(AYAR_VARSAYILANLARI.builderProfit);
             setRiskLevel(AYAR_VARSAYILANLARI.riskLevel);
+            setRiskKaynagi({ tur: 'varsayilan' });
             setIksaMode(AYAR_VARSAYILANLARI.iksaMode);
             setIksaPercentage(AYAR_VARSAYILANLARI.iksaPercentage);
             setIksaManualTL(AYAR_VARSAYILANLARI.iksaManualTL);
@@ -546,12 +558,9 @@ export default function Home() {
           iksaMode={iksaMode} setIksaMode={setIksaMode}
           iksaPercentage={iksaPercentage} setIksaPercentage={setIksaPercentage}
           iksaManualTL={iksaManualTL} setIksaManualTL={setIksaManualTL}
-          riskLevel={riskLevel} setRiskLevel={setRiskLevel} riskLevels={riskLevels}
           builderProfit={builderProfit} setBuilderProfit={setBuilderProfit}
           profitLevels={profitLevels}
           manualMarketPrice={manualMarketPrice} setManualMarketPrice={setManualMarketPrice}
-          isAaEnabled={isAaEnabled} setIsAaEnabled={setIsAaEnabled}
-          arsaAlani={arsaAlani} setArsaAlani={setArsaAlani}
         />
 
         {ortakKatmanlar}
@@ -636,6 +645,9 @@ export default function Home() {
                 arsaAlani={arsaAlani}
                 onArsaAlani={setArsaAlani}
                 riskLevel={riskLevel}
+                riskLevels={riskLevels}
+                onRiskLevel={handleRiskLevel}
+                riskKaynagi={riskKaynagi}
                 isAaEnabled={isAaEnabled}
               />
             </div>
