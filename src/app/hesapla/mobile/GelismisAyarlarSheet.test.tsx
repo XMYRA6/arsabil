@@ -3,12 +3,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GelismisAyarlarSheet } from './GelismisAyarlarSheet'
 
-jest.mock('@/components/listing-wizard/ParcelPicker', () => ({
-    // Leaflet jsdom'da mount edilemez; yaprak sozlesmesi test edildigi icin
-    // haritanin kendisi degil, YERINDE OLUP OLMADIGI onemli.
-    ParcelPicker: () => <div data-testid="parcel-picker" />,
-}))
-
 function props(patch = {}) {
     return {
         open: true,
@@ -35,13 +29,11 @@ function props(patch = {}) {
 
         manualMarketPrice: '', setManualMarketPrice: jest.fn(),
 
+        globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
+
         isAaEnabled: false, setIsAaEnabled: jest.fn(),
         arsaAlani: 500, setArsaAlani: jest.fn(),
 
-        parcelValue: { lat: null, lng: null, parcel: null, status: 'idle' as const },
-        onParcelChange: jest.fn(),
-        risk: null,
-        onRiskUygula: jest.fn(),
         ...patch,
     }
 }
@@ -52,13 +44,12 @@ describe('GelismisAyarlarSheet', () => {
         expect(screen.queryByRole('dialog')).toBeNull()
     })
 
-    it('acikken modal diyalog ve dort bolum gosterir', () => {
+    it('acikken modal diyalog ve uc bolum gosterir', () => {
         render(<GelismisAyarlarSheet {...props()} />)
         expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true')
         expect(screen.getByRole('group', { name: 'Maliyet ve riskler' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Piyasa fiyatı' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Arsa alanı' })).toBeInTheDocument()
-        expect(screen.getByRole('group', { name: 'Konum ve resmi risk' })).toBeInTheDocument()
     })
 
     it('mevcut alan bilesenleri yeniden kullaniliyor (kopyalanmiyor)', () => {
@@ -66,22 +57,6 @@ describe('GelismisAyarlarSheet', () => {
         // RiskCostFields / MarketField / ArsaAlaniFields'in kendi etiketleri.
         expect(screen.getByText('İksa Masrafı')).toBeInTheDocument()
         expect(screen.getByText('Yaklaşık Piyasa Fiyatı')).toBeInTheDocument()
-    })
-
-    it('T2 kalemi kapandi: ParcelPicker mobilde de yaprakta yer aliyor', () => {
-        render(<GelismisAyarlarSheet {...props()} />)
-        expect(screen.getByTestId('parcel-picker')).toBeInTheDocument()
-    })
-
-    it('risk olcumu varsa oneri karti gosterilir', () => {
-        const risk = { faultDistanceM: 8000, gammaF: 1.2, floodQ100: false, suggestedR: 1.1 }
-        render(<GelismisAyarlarSheet {...props({ risk })} />)
-        expect(screen.getByText('Yakın fay etkisi')).toBeInTheDocument()
-    })
-
-    it('risk olcumu yoksa oneri karti render EDILMEZ', () => {
-        render(<GelismisAyarlarSheet {...props()} />)
-        expect(screen.queryByText('Yakın fay etkisi')).toBeNull()
     })
 
     it('acilisBolumu kar ise maliyet bolumu isaretlenir', () => {
@@ -104,46 +79,6 @@ describe('GelismisAyarlarSheet', () => {
             .toHaveAttribute('data-acilis', 'false')
     })
 
-    describe('acilisBolumu parsel (Task 10, canli dogrulamada bulundu)', () => {
-        // Onceden `onParselAc` de 'risk' degerini kullaniyordu ve 'risk'
-        // zaten "Maliyet ve riskler" bolumunun (kar/risk/iksa) bir uyesiydi
-        // — parsel butonuna basinca IKI bolum birden isaretleniyordu.
-        it('yalnizca Konum ve resmi risk bolumu isaretlenir, Maliyet ve riskler DEGIL', () => {
-            render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'parsel' })} />)
-            expect(screen.getByRole('group', { name: 'Konum ve resmi risk' }))
-                .toHaveAttribute('data-acilis', 'true')
-            expect(screen.getByRole('group', { name: 'Maliyet ve riskler' }))
-                .toHaveAttribute('data-acilis', 'false')
-        })
-
-        it('hedef bolume kaydirilir (scrollIntoView cagrilir)', () => {
-            const scrollIntoView = jest.fn()
-            Element.prototype.scrollIntoView = scrollIntoView
-            render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'parsel' })} />)
-            expect(scrollIntoView).toHaveBeenCalledWith(
-                expect.objectContaining({ block: 'start' })
-            )
-        })
-
-        it('prefers-reduced-motion acikken aninda (behavior: auto) kaydirir', () => {
-            const scrollIntoView = jest.fn()
-            Element.prototype.scrollIntoView = scrollIntoView
-            Object.defineProperty(window, 'matchMedia', {
-                writable: true,
-                value: jest.fn().mockImplementation((query: string) => ({
-                    matches: true, media: query, onchange: null,
-                    addListener: jest.fn(), removeListener: jest.fn(),
-                    addEventListener: jest.fn(), removeEventListener: jest.fn(),
-                    dispatchEvent: jest.fn(),
-                })),
-            })
-            render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'parsel' })} />)
-            expect(scrollIntoView).toHaveBeenCalledWith(
-                expect.objectContaining({ behavior: 'auto' })
-            )
-        })
-    })
-
     it('Uygula ve Sifirla butonlari calisir', async () => {
         const onUygula = jest.fn(); const onSifirla = jest.fn()
         render(<GelismisAyarlarSheet {...props({ onUygula, onSifirla })} />)
@@ -151,16 +86,6 @@ describe('GelismisAyarlarSheet', () => {
         expect(onSifirla).toHaveBeenCalledTimes(1)
         await userEvent.click(screen.getByRole('button', { name: 'Ayarları uygula ve kapat' }))
         expect(onUygula).toHaveBeenCalledTimes(1)
-    })
-
-    it('yaprak eylemleri risk kartinin "Uygula" butonuyla KARISMAZ', () => {
-        // RiskSuggestionCard da "Uygula" adli bir buton render ediyor. Ayni
-        // diyalogda ayni erisilebilir ada sahip iki buton, ekran okuyucuda
-        // ayirt edilemezdi; yaprak eylemlerine ayirt edici ad verildi.
-        const risk = { faultDistanceM: 8000, gammaF: 1.2, floodQ100: false, suggestedR: 1.1 }
-        render(<GelismisAyarlarSheet {...props({ risk })} />)
-        expect(screen.getByRole('button', { name: 'Uygula' })).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: 'Ayarları uygula ve kapat' })).toBeInTheDocument()
     })
 
     it('daire sayisi kontrolleri yaprakta ARTIK YOK (girdi kartina ait)', () => {

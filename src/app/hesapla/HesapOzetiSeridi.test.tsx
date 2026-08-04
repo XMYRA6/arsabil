@@ -99,7 +99,7 @@ describe('HesapOzetiSeridi', () => {
         marketPriceNum={0}
       />
     );
-    fireEvent.change(screen.getByPlaceholderText('gir (opsiyonel)'), { target: { value: '25000000' } });
+    fireEvent.change(screen.getByPlaceholderText('opsiyonel'), { target: { value: '25000000' } });
     expect(handleChange).toHaveBeenCalledWith('25000000');
   });
 });

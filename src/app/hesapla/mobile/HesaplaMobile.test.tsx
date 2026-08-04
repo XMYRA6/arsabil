@@ -33,15 +33,11 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             onAnalizAc: jest.fn(),
         },
         girdi: {
-            konum: {
-                districtPrices: [],
-                selectedIl: '', selectedIlce: '',
-                onSecim: jest.fn(), onClear: jest.fn(),
-                birimMaliyet: 12000,
-                birimMaliyetKaynagi: { tur: 'varsayilan' },
-                onBirimMaliyet: jest.fn(),
-                parselIsaretli: false, onParselAc: jest.fn(),
-            },
+            parcelContext: null,
+            arsaAlani: 500, onArsaAlani: jest.fn(),
+            riskLevel: 10,
+            isAaEnabled: false,
+            onParselDogrulaAc: jest.fn(),
             luxLevel: 1.2, onLuxLevel: jest.fn(),
             apartmentSize: 140, onApartmentSize: jest.fn(),
             landShareRatio: 33, onLandShareRatio: jest.fn(),
@@ -49,6 +45,7 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             totalApartments: 20, onTotalApartments: jest.fn(),
             ownerApartmentShare: 6, onOwnerApartmentShare: jest.fn(),
         },
+        onParselDogrulaAc: jest.fn(),
         fisAcik: false,
         fiyatAciklamasi: {
             result: null,

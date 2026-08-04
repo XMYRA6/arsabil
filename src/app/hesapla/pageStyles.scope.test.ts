@@ -269,43 +269,13 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
     expect(cekmeceIcindeKalanlar.length).toBe(0);
   });
 
-  // Whole-branch review I1: `piyasaFiyatiElle` bayragini YALNIZCA mobil dal
-  // kuruyordu (page.tsx:580); masaustundeki yazicilar ham `setManualMarketPrice`
-  // geciyordu. Sonuc: bayrak masaustunde hic `true` olmuyor, spec 4'un "elle
-  // girilmis deger EZILDIYSE soyle" uyarisi masaustunde olu kod.
-  //
-  // Bu test kaynak metni okur (page.tsx render testi henuz yok — review I5).
-  // Kirilabilirligi kanitlandi: herhangi bir cagri yerini ham setter'a geri
-  // cevirince kirmiziya doner.
-  it('piyasa fiyatini KULLANICIDAN alan hicbir kontrol ham setter almaz', () => {
-    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    const hamSetter = [...pageTsx.matchAll(
-      /(?:setManualMarketPrice|onMarketPriceChange|onPiyasaFiyati)\s*[=:]\s*\{?\s*setManualMarketPrice\s*\}?/g
-    )];
-    expect(hamSetter.map(m => m[0])).toEqual([]);
-  });
-
-  it('provenance tasiyan handler tanimli ve tum girdi noktalarinda kullanilmis', () => {
-    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    expect(pageTsx).toMatch(/const piyasaFiyatiGirildi\s*=/);
-    // Bayragi kuran TEK yer bu handler olmali.
-    const bayragiKuranlar = [...pageTsx.matchAll(/setPiyasaFiyatiElle\(true\)/g)];
-    expect(bayragiKuranlar.length).toBe(1);
-    // 6 girdi noktasi: mobil ekran, mobil gelismis ayarlar yapragi, masaustu
-    // "Piyasa Analizi" grubu, mobil yedek agac, iki `HesapOzetiSeridi` kopyasi.
-    const kullanimlar = [...pageTsx.matchAll(/piyasaFiyatiGirildi/g)];
-    expect(kullanimlar.length).toBeGreaterThanOrEqual(7); // tanim + 6 kullanim
-  });
-
-  it('"Ayarlari sifirla" provenance bayragini da sifirlar', () => {
-    // Bayrak `true` kalirsa, sifirlamadan SONRA secilen bir ilce "elle
-    // girilmis degeri ezdim" toast'ini haksiz yere basar.
-    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    const sifirlamaBas = pageTsx.indexOf('setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice)');
-    expect(sifirlamaBas).toBeGreaterThan(-1);
-    const kalan = pageTsx.slice(sifirlamaBas, sifirlamaBas + 400);
-    expect(kalan).toMatch(/setPiyasaFiyatiElle\(false\)/);
-  });
+  // `piyasaFiyatiElle`/`piyasaFiyatiGirildi` provenance bayragi, elle
+  // girilmis piyasa fiyatinin bir ilce secimiyle SESSIZCE ezilmesini
+  // uyarmak icin vardi. Masaustu parsel redesign otomatik-ezme kaynaginin
+  // KENDISINI (il/ilce secici) kaldirdi — artik manualMarketPrice'i
+  // kullanicinin kendi girisi disinda hicbir yer yazmiyor, yani uyarilacak
+  // bir "sessiz ezme" senaryosu kalmadi. Bayrak page.tsx'ten bilerek
+  // kaldirildi (grep: sifir sonuc), bu yuzden guardrail'ler de kaldirildi.
 
   it('masaustunde birim maliyet kaynagi ekranda gosterilir', () => {
     // `kaynakEtiketi` cagrisi Finding 2 duzeltmesiyle `BirimMaliyetField`
@@ -327,16 +297,8 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
     expect(sectionsTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
   });
 
-  // Whole-branch review I5: page.tsx'i render eden davranis testi yok, bu
-  // yuzden buradaki garanti kaynak metinden okunuyor. Kirilabilirligi
-  // kanitlanacak: delegasyonu geri alinca test kirmiziya donmeli.
-  it('handleIlceChange artik selectedIl state\'ini KENDI okumaz, handleKonumSec\'e delege eder', () => {
-    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    expect(pageTsx).toMatch(/const handleKonumSec\s*=\s*\(il: string, ilce: string\)/);
-    expect(pageTsx).toMatch(/const handleIlceChange\s*=\s*\(ilce: string\)\s*=>\s*handleKonumSec\(selectedIl, ilce\)/);
-    // Eski, state'ten okuyan arama tamamen kalkmis olmali (yalnizca
-    // handleIlceChange'in eski govdesi hedeflenir; :326'daki apartmentSize
-    // effect'i bu task'in kapsami disinda, DOKUNULMAZ).
-    expect(pageTsx).not.toMatch(/d\.il === selectedIl && d\.ilce === ilce/);
-  });
+  // il/ilce -> ortalama ilce fiyati secici (handleKonumSec/handleIlceChange)
+  // masaustu parsel redesign'de tamamen kaldirildi, yerini gercek TKGM
+  // parsel sorgusu (SmartContextCard/ParcelModal) aldi. Bu guardrail artik
+  // konusuz; page.tsx'te ne handleKonumSec ne selectedIl var.
 });
