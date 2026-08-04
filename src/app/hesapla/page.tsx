@@ -165,8 +165,6 @@ export default function Home() {
   // Birim maliyetin KAYNAGI
   const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'elle' });
 
-  const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
-
   // Sayfa yüklendiğinde Admin'in belirlediği global ayarları çek
   useEffect(() => {
     fetch('/api/settings')
@@ -576,7 +574,7 @@ export default function Home() {
 
           {/* ===== DESKTOP SIDEBAR: Original full form (visible on web only) ===== */}
           <div className={styles.desktopSidebar}>
-            <div className={styles.sidebarTitle}>Proje Bilgileri <span className={styles.settingsGear} onClick={() => setIsSettingsSidebarOpen(true)}>⚙</span></div>
+            <div className={styles.sidebarTitle}>Proje Bilgileri</div>
 
             <div className={styles.settingsGroup}>
               <h4>Daire Standardı</h4>
@@ -673,17 +671,6 @@ export default function Home() {
               <div className={styles.luxGrid}>
                 {profitLevels.map(opt => (
                   <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-                    <span>{opt.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Risk Payı</h4>
-              <div className={`${styles.luxGrid} ${styles.luxGridDynamic}`} style={{ '--lux-cols': riskLevels.length } as React.CSSProperties}>
-                {riskLevels.map(opt => (
-                  <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
                     <span>{opt.label}</span>
                   </div>
                 ))}
@@ -831,57 +818,6 @@ export default function Home() {
           </div>
 
         </aside>
-
-        {/* Drawer Overlay for Advanced Settings */}
-        <div className={`${styles.settingsDrawerOverlay} ${isSettingsSidebarOpen ? styles.open : ''}`} onClick={() => setIsSettingsSidebarOpen(false)}>
-          <div className={`${styles.settingsDrawer} ${isSettingsSidebarOpen ? styles.open : ''}`} onClick={e => e.stopPropagation()}>
-            <div className={styles.drawerHeader}>
-              <h3>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                Gelişmiş Ayarlar
-              </h3>
-              <button className={styles.closeDrawerBtn} onClick={() => setIsSettingsSidebarOpen(false)}>×</button>
-            </div>
-            <div className={styles.drawerContent}>
-
-              <div className={styles.drawerCard}>
-                <div className={styles.drawerCardHeader}>Formül Parametreleri</div>
-                <FormulParamsFields
-                  isApartmentCountEnabled={isApartmentCountEnabled}
-                  setIsApartmentCountEnabled={setIsApartmentCountEnabled}
-                  totalApartments={totalApartments}
-                  setTotalApartments={setTotalApartments}
-                  ownerApartmentShare={ownerApartmentShare}
-                  setOwnerApartmentShare={setOwnerApartmentShare}
-                  isAaEnabled={isAaEnabled}
-                  setIsAaEnabled={setIsAaEnabled}
-                  arsaAlani={arsaAlani}
-                  setArsaAlani={setArsaAlani}
-                />
-              </div>
-
-              <div className={styles.drawerCard}>
-                <div className={styles.drawerCardHeader}>Proje Maliyet ve Riskleri</div>
-                <RiskCostFields
-                  iksaMode={iksaMode}
-                  setIksaMode={setIksaMode}
-                  iksaPercentage={iksaPercentage}
-                  setIksaPercentage={setIksaPercentage}
-                  iksaManualTL={iksaManualTL}
-                  setIksaManualTL={setIksaManualTL}
-                  riskLevel={riskLevel}
-                  setRiskLevel={setRiskLevel}
-                  riskLevels={riskLevels}
-                  builderProfit={builderProfit}
-                  setBuilderProfit={setBuilderProfit}
-                  profitLevels={profitLevels}
-                />
-              </div>
-
-            </div>
-          </div>
-        </div>
-
 
         {/* Right Grid: Hesap Sonuçları + Hesap Özeti */}
         <section className={styles.rightGrid}>

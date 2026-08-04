@@ -239,34 +239,16 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
 });
 
 describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', () => {
-  it('masaustunde piyasa fiyati artik cekmece ICINDE DEGIL', () => {
-    // K7: ayni sorun iki platformda da vardi; deger dislinin arkasinda
-    // kalmamali.
-    //
-    // NOT (review bulgusu): onceki surum 'isSettingsSidebarOpen &&' literal
-    // string'ini ariyordu — bu desen page.tsx'te HIC yok (kod
-    // `${isSettingsSidebarOpen ? styles.open : ''}` ternary'sini kullaniyor,
-    // '&&' degil). Bu yuzden cekmeceBas her zaman -1 donuyordu ve
-    // `cekmeceBas === -1 || ...` kisa devresi assertion'i kosulsuz true
-    // yapiyordu — MarketField cekmecenin ICINDE kalsa bile test GECERDI.
-    // Gercekten var olan bir sinir isaretine (`styles.settingsDrawerOverlay`,
-    // cekmecenin DOM'daki ilk satiri) gore duzeltildi ki test gercekten
-    // basarisiz OLABILSIN.
-    //
-    // NOT 2: yalnizca ILK gorulen `<MarketField` konumunu kontrol etmek de
-    // yetersizdi — mobil yedek agacinda (.mobileSidebar, satir ~912) zaten
-    // cekmeceden ONCE gelen ayri, mesru bir `<MarketField>` var. O erken
-    // occurrence varligi tek basina yeterliymis gibi gorunse de, cekmecenin
-    // ICINDE baska bir `<MarketField>` KALSA bile ilk-occurrence testi yine
-    // GECERDI. Bu yuzden assertion, cekmece baslangicindan SONRAKI TUM
-    // occurrence'lari kontrol ediyor — hicbiri olmamali.
+  it('masaustu cekmece (settingsDrawer) artik kodda yok', () => {
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    const cekmeceBas = pageTsx.indexOf('styles.settingsDrawerOverlay');
-    const marketFieldMatches = [...pageTsx.matchAll(/<MarketField/g)];
-    expect(cekmeceBas).toBeGreaterThan(-1);
-    expect(marketFieldMatches.length).toBeGreaterThan(0);
-    const cekmeceIcindeKalanlar = marketFieldMatches.filter(m => m.index! > cekmeceBas);
-    expect(cekmeceIcindeKalanlar.length).toBe(0);
+    expect(pageTsx).not.toMatch(/settingsDrawerOverlay/);
+    expect(pageTsx).not.toMatch(/isSettingsSidebarOpen/);
+    expect(pageTsx).not.toMatch(/settingsGear/);
+  });
+
+  it('bagimsiz "Risk Payi" grubu artik kodda yok — risk SmartContextCard icinde', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).not.toMatch(/<h4>Risk Payı<\/h4>/);
   });
 
   // `piyasaFiyatiElle`/`piyasaFiyatiGirildi` provenance bayragi, elle
