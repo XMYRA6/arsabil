@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
-import { checkRateLimit, RATE_LIMITS, getClientIp } from '@/lib/rate-limit'
+import { checkRateLimit, RATE_LIMITS, RateLimitOptions, getClientIp } from '@/lib/rate-limit'
 import { isWithinTurkey } from '@/lib/geo/turkeyBounds'
 import { fetchParcelByPoint } from '@/lib/tkgm/parcel'
 
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     const userId = session?.user?.id as string | undefined
 
     let rlKey: string
-    let rlOpts: any
+    let rlOpts: RateLimitOptions
 
     if (userId) {
         rlKey = `parcel:${userId}`

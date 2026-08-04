@@ -11,7 +11,11 @@ jest.mock('@/lib/tkgm/parcel', () => ({
 }))
 jest.mock('@/lib/rate-limit', () => ({
     checkRateLimit: (...args: unknown[]) => checkRateLimitMock(...args),
-    RATE_LIMITS: { PARCEL_LOOKUP: { limit: 20, windowMs: 60000 } },
+    getClientIp: () => '203.0.113.7',
+    RATE_LIMITS: {
+        PARCEL_LOOKUP: { limit: 20, windowMs: 60000 },
+        PARCEL_LOOKUP_ANON: { limit: 5, windowMs: 60000 },
+    },
 }))
 
 import { GET } from '../route'
@@ -33,10 +37,19 @@ describe('GET /api/parcel/lookup', () => {
         checkRateLimitMock.mockReset().mockReturnValue({ ok: true })
     })
 
-    it('oturum yoksa 401 döner ve TKGM hiç çağrılmaz', async () => {
+    it('oturum yoksa anonim IP anahtarıyla devam eder (401 değil)', async () => {
         getServerSessionMock.mockResolvedValue(null)
+        const res = await GET(req('lat=41.167877&lng=27.583458'))
+        expect(res.status).toBe(200)
+        expect(checkRateLimitMock.mock.calls[0][0]).toBe('parcel:ip:203.0.113.7')
+        expect(fetchParcelMock).toHaveBeenCalled()
+    })
+
+    it('oturum yoksa rate limit aşılırsa 429 döner ve TKGM hiç çağrılmaz', async () => {
+        getServerSessionMock.mockResolvedValue(null)
+        checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 42 })
         const res = await GET(req('lat=41.16&lng=27.58'))
-        expect(res.status).toBe(401)
+        expect(res.status).toBe(429)
         expect(fetchParcelMock).not.toHaveBeenCalled()
     })
 

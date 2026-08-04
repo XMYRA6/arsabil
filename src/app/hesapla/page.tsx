@@ -27,6 +27,7 @@ import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { ParcelModal } from './ParcelModal';
 import { SmartContextCard } from './SmartContextCard';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
+import type { RiskMeasurement } from '@/lib/risk/types';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
 import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
@@ -132,11 +133,6 @@ export default function Home() {
     mql.addEventListener('change', update);
     return () => mql.removeEventListener('change', update);
   }, []);
-
-  // Oneriyi ayrik risk izgarasina uygular
-  const applyRiskSuggestion = (percent: number) => {
-    setRiskLevel(percent);
-  };
 
   const [builderProfit, setBuilderProfit] = useState<number>(AYAR_VARSAYILANLARI.builderProfit);
   const [profitLevels, setProfitLevels] = useState<ProfitLevel[]>([
@@ -247,7 +243,7 @@ export default function Home() {
   }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
 
 
-  const handleParcelConfirm = (payload: { parcelValue: any, risk: any, suggestedRiskPercent: number | null }) => {
+  const handleParcelConfirm = (payload: { parcelValue: ParcelPickerValue, risk: RiskMeasurement | null, suggestedRiskPercent: number | null }) => {
     setParcelContext(payload.parcelValue);
     if (payload.parcelValue.parcel?.areaSqm) {
       setIsAaEnabled(true);
@@ -451,6 +447,7 @@ export default function Home() {
         message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
       />
       <ParcelModal
+        key={isParcelModalOpen ? 'open' : 'closed'}
         isOpen={isParcelModalOpen}
         onClose={() => setIsParcelModalOpen(false)}
         onConfirm={handleParcelConfirm}

@@ -29,14 +29,11 @@ export function ParcelModal({ isOpen, onClose, onConfirm }: ParcelModalProps) {
     const [suggestedRiskPercent, setSuggestedRiskPercent] = useState<number | null>(null)
     const [isFetchingRisk, setIsFetchingRisk] = useState(false)
 
-    // Reset state when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            setParcelValue({ lat: null, lng: null, parcel: null, status: 'idle' })
-            setRisk(null)
-            setSuggestedRiskPercent(null)
-        }
-    }, [isOpen])
+    // Sifirlama artik effect'te degil: cagiran taraf (page.tsx) her acilista
+    // bilesene yeni bir `key` veriyor, bu da tam remount'la state'i dogal
+    // olarak sifirliyor (React'in onerdigi desen, bkz. "resetting state when
+    // a prop changes" — react-hooks/set-state-in-effect'in isaret ettigi
+    // kademeli render sorununu da ortadan kaldirir).
 
     // Fetch risk when parcel changes
     useEffect(() => {
