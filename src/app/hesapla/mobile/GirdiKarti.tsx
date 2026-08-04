@@ -3,6 +3,8 @@
 import { computeEffectiveLandShareX } from '../calculatorUiHelpers';
 import { SmartContextCard } from '../SmartContextCard';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
+import type { RiskLevel } from '../riskSuggestionHelpers';
+import type { RiskKaynagi } from './riskSource';
 import styles from './mobile.module.css';
 
 export type GirdiKartiProps = {
@@ -10,6 +12,9 @@ export type GirdiKartiProps = {
     arsaAlani: number;
     onArsaAlani: (v: number) => void;
     riskLevel: number;
+    riskLevels: RiskLevel[];
+    onRiskLevel: (v: number) => void;
+    riskKaynagi: RiskKaynagi;
     isAaEnabled: boolean;
     /** Parsel doğrulama modalını açar */
     onParselDogrulaAc: () => void;
@@ -71,6 +76,9 @@ export function GirdiKarti({
     arsaAlani,
     onArsaAlani,
     riskLevel,
+    riskLevels,
+    onRiskLevel,
+    riskKaynagi,
     isAaEnabled,
     luxLevel,
     onLuxLevel,
@@ -104,6 +112,9 @@ export function GirdiKarti({
                 arsaAlani={arsaAlani}
                 onArsaAlani={onArsaAlani}
                 riskLevel={riskLevel}
+                riskLevels={riskLevels}
+                onRiskLevel={onRiskLevel}
+                riskKaynagi={riskKaynagi}
                 isAaEnabled={isAaEnabled}
             />
 
