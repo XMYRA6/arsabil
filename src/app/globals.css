@@ -194,42 +194,42 @@ a {
      masaustu duzenini de degistirir. globalsMobile.scope.test.ts bunu
      dogruluyor. Mevcut --seal-* token'lari silinmez, mobilde kullanilmaz. */
   :root {
-    --m-bg: #f7faff;
+    --m-bg: #f2f7ff;
     --m-mesh:
-      radial-gradient(680px 420px at 12% -6%, rgba(43,124,255,.42), transparent 62%),
-      radial-gradient(560px 420px at 96% 8%,  rgba(34,211,238,.38), transparent 60%),
-      radial-gradient(620px 520px at 78% 96%, rgba(124,58,237,.24), transparent 62%),
-      radial-gradient(520px 380px at 4% 86%,  rgba(16,185,129,.22), transparent 60%);
+      radial-gradient(680px 420px at 12% -6%, rgba(43,124,255,.55), transparent 62%),
+      radial-gradient(560px 420px at 96% 8%,  rgba(34,211,238,.5), transparent 60%),
+      radial-gradient(620px 520px at 78% 96%, rgba(124,58,237,.34), transparent 62%),
+      radial-gradient(520px 380px at 4% 86%,  rgba(16,185,129,.16), transparent 60%);
 
-    --m-grad-accent: linear-gradient(135deg, #3b8bff 0%, #1f6feb 46%, #22d3ee 118%);
-    --m-grad-btn: linear-gradient(135deg, #3b8bff, #1f6feb 60%, #22d3ee);
+    --m-grad-accent: linear-gradient(135deg, #4f9bff 0%, #1f6feb 46%, #22d3ee 118%);
+    --m-grad-btn: linear-gradient(135deg, #4f9bff, #1f6feb 60%, #22d3ee);
 
-    --m-ink: #0b2036;
-    --m-body: #5c6b82;
-    --m-on-glass: #173b63;
+    --m-ink: #081729;
+    --m-body: #4c5d78;
+    --m-on-glass: #12325a;
     --m-link: #1560d0;
 
-    --m-glass-bg: rgba(255,255,255,.66);
-    --m-glass-border: rgba(255,255,255,.92);
-    --m-glass-blur: blur(30px) saturate(190%);
+    --m-glass-bg: rgba(238,246,255,.58);
+    --m-glass-border: rgba(255,255,255,.85);
+    --m-glass-blur: blur(42px) saturate(220%);
     --m-fill: rgba(11,32,54,.05);
     --m-divider: rgba(11,32,54,.07);
 
     --m-success: #10b981;
-    --m-success-text: #0a8a63;
+    --m-success-text: #067a56;
     --m-warn: #f59e0b;
     --m-danger: #ff2d55;
 
-    --m-r-chip: 11px;
-    --m-r-btn: 13px;
-    --m-r-input: 16px;
+    --m-r-chip: 12px;
+    --m-r-btn: 15px;
+    --m-r-input: 17px;
     --m-r-inner: 20px;
-    --m-r-card: 26px;
+    --m-r-card: 30px;
     --m-r-sheet: 30px;
 
-    --m-sh-card: 0 14px 36px rgba(20,70,150,.12);
+    --m-sh-card: 0 22px 52px rgba(20,70,150,.20);
     --m-sh-card-sm: 0 6px 18px rgba(20,70,150,.10);
-    --m-sh-grad-card: 0 18px 40px rgba(43,124,255,.34);
+    --m-sh-grad-card: 0 26px 64px rgba(31,111,235,.46);
     --m-sh-grad-btn: 0 12px 28px rgba(43,124,255,.38);
     --m-sh-sheet: 0 -18px 50px rgba(11,32,54,.22);
     --m-sh-bottombar: 0 -8px 30px rgba(20,70,150,.08);

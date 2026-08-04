@@ -41,8 +41,9 @@ describe('mobil token katmani', () => {
         // kopyalamaz. Kopyalasaydi token degisiminde sessizce eskirdi.
         expect(inside).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
         expect(inside).toMatch(/-webkit-backdrop-filter:\s*var\(--m-glass-blur\)/)
-        // Token'in kendisi tasarim handoff'undaki degeri tasimali.
-        expect(inside).toMatch(/--m-glass-blur:\s*blur\(30px\)\s+saturate\(190%\)/)
+        // Token'in kendisi tasarim handoff'undaki degeri tasimali (2026-08-04
+        // "Derin Cam" B varyanti — lead onayi).
+        expect(inside).toMatch(/--m-glass-blur:\s*blur\(42px\)\s+saturate\(220%\)/)
     })
 
     it("mevcut --seal-* token'lari SILINMEMIS", () => {
@@ -59,5 +60,22 @@ describe('mobil token katmani', () => {
         const inside = mobileBlock()
         expect(inside).toMatch(/--m-mono:[^;]*JetBrains Mono/)
         expect(inside).toMatch(/font-variant-numeric:\s*tabular-nums/)
+    })
+
+    it("B varyanti (2026-08-04): radius ve golge olcegi buyudu", () => {
+        const inside = mobileBlock()
+        expect(inside).toMatch(/--m-r-card:\s*30px/)
+        expect(inside).toMatch(/--m-r-btn:\s*15px/)
+        expect(inside).toMatch(/--m-r-input:\s*17px/)
+        expect(inside).toMatch(/--m-r-chip:\s*12px/)
+        expect(inside).toMatch(/--m-sh-card:\s*0 22px 52px rgba\(20,70,150,\.20\)/)
+        expect(inside).toMatch(/--m-ink:\s*#081729/)
+        expect(inside).toMatch(/--m-success-text:\s*#067a56/)
+    })
+
+    it("B varyanti: r-inner ve bottombar golgesi BILEREK degismedi (spec kapsami disinda)", () => {
+        const inside = mobileBlock()
+        expect(inside).toMatch(/--m-r-inner:\s*20px/)
+        expect(inside).toMatch(/--m-sh-bottombar:\s*0 -8px 30px rgba\(20,70,150,\.08\)/)
     })
 })
