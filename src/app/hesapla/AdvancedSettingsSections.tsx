@@ -14,14 +14,6 @@ interface ProfitLevel {
   isDefault: boolean;
 }
 
-interface RiskLevel {
-  id: string;
-  label: string;
-  value: number;
-  sortOrder: number;
-  isDefault: boolean;
-}
-
 export interface DaireSayisiProps {
   isApartmentCountEnabled: boolean;
   setIsApartmentCountEnabled: (v: boolean) => void;
@@ -144,9 +136,6 @@ export interface RiskCostProps {
   setIksaPercentage: (v: number) => void;
   iksaManualTL: number;
   setIksaManualTL: (v: number) => void;
-  riskLevel: number;
-  setRiskLevel: (v: number) => void;
-  riskLevels: RiskLevel[];
   builderProfit: number;
   setBuilderProfit: (v: number) => void;
   profitLevels: ProfitLevel[];
@@ -156,7 +145,6 @@ export interface RiskCostProps {
 export function RiskCostFields({
   iksaMode, setIksaMode, iksaPercentage, setIksaPercentage,
   iksaManualTL, setIksaManualTL,
-  riskLevel, setRiskLevel, riskLevels,
   builderProfit, setBuilderProfit, profitLevels,
 }: RiskCostProps) {
   return (
@@ -166,17 +154,6 @@ export function RiskCostFields({
         <div className={styles.luxGrid}>
           {profitLevels.map(opt => (
             <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-              <span>{opt.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={`${styles.drawerRow} ${styles.column}`}>
-        <div className={styles.drawerRowLabel}>Risk Payı</div>
-        <div className={`${styles.luxGrid} ${styles.drawerRiskGrid}`}>
-          {riskLevels.map(opt => (
-            <div key={opt.id} className={`${styles.luxBox} ${riskLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setRiskLevel(opt.value)}>
               <span>{opt.label}</span>
             </div>
           ))}
