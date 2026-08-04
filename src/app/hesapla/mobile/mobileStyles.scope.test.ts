@@ -66,3 +66,17 @@ describe('mobile.module.css kapsam guard', () => {
         expect(mediaSorgusuDisi(temiz)).toBe('')
     })
 })
+
+describe('Derin Cam (B) — tokenize edilmemis sapmalar duzeltildi (2026-08-04)', () => {
+    it('.stepperAzalt artik var(--m-glass-blur) kullaniyor, ham deger yok', () => {
+        expect(css).not.toMatch(/blur\(24px\)\s*saturate\(190%\)/)
+    })
+
+    it('.gelismisAyarlarBtn artik var(--m-glass-blur) ve var(--m-r-input) kullaniyor, ham deger yok', () => {
+        expect(css).not.toMatch(/blur\(26px\)\s*saturate\(180%\)/)
+    })
+
+    it('.metrikKutu / .fisButonu BILEREK degismedi — bunlar --m-grad-accent zemini uzerindeki ayri, hafif cam katmani', () => {
+        expect(css).toMatch(/blur\(10px\)/)
+    })
+})

@@ -548,8 +548,8 @@
 
     .stepperAzalt {
         background: rgba(255, 255, 255, .55);
-        backdrop-filter: blur(24px) saturate(190%);
-        -webkit-backdrop-filter: blur(24px) saturate(190%);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
         color: var(--m-on-glass);
     }
 
@@ -609,11 +609,11 @@
         margin: 0 14px;
         /* 14px'lik yan margin'ler genislikten dusulur. */
         width: calc(100% - 28px);
-        border-radius: 17px;
+        border-radius: var(--m-r-input);
         border: 1px solid rgba(255, 255, 255, .9);
         background: rgba(255, 255, 255, .55);
-        backdrop-filter: blur(26px) saturate(180%);
-        -webkit-backdrop-filter: blur(26px) saturate(180%);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: 0 8px 24px rgba(20, 70, 150, .1), inset 0 1px 0 rgba(255, 255, 255, .95);
         color: var(--m-on-glass);
         font: 700 12.5px Inter, sans-serif;
