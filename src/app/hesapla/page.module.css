@@ -961,121 +961,6 @@
     box-shadow: 0 4px 10px rgba(var(--green-rgb), 0.3);
 }
 
-/* Settings Drawer (Sidebar) */
-.settingsDrawerOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100dvh;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 10000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.settingsDrawerOverlay.open {
-    opacity: 1;
-    visibility: visible;
-}
-
-.settingsDrawer {
-    position: fixed;
-    top: 0;
-    left: -360px;
-    width: min(360px, 100vw);
-    max-width: 85vw;
-    height: 100dvh;
-    background: var(--panel);
-    z-index: 10001;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 20px 0 40px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border-right: 1px solid var(--border);
-}
-
-.settingsDrawer.open {
-    transform: translateX(360px);
-}
-
-.drawerHeader {
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    background: var(--panel-2);
-}
-
-.drawerHeader h3 {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--card-title);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.closeDrawerBtn {
-    background: var(--border);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--text);
-    transition: all 0.2s;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.closeDrawerBtn:hover {
-    background: var(--primary);
-    color: white;
-}
-
-.drawerContent {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.drawerCard {
-    background: var(--shell-bg);
-    border: 1px solid var(--shell-border);
-    border-radius: 20px;
-    padding: 0 16px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-}
-
-[data-theme="dark"] .drawerCard {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-.drawerCardHeader {
-    padding: 16px 0 6px;
-    font-size: 0.85rem;
-    font-weight: 900;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    opacity: 1;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
-}
-
 .drawerRow {
     display: flex;
     justify-content: space-between;
@@ -1108,10 +993,6 @@
 /* =========================================================================
    FAZ 1 TASK 6 — inline stil migrasyonu class'ları
    ========================================================================= */
-
-.settingsGear {
-    cursor: pointer;
-}
 
 .stepperFixed {
     height: 48px;
