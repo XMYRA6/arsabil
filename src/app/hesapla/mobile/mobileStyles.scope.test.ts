@@ -79,4 +79,10 @@ describe('Derin Cam (B) — tokenize edilmemis sapmalar duzeltildi (2026-08-04)'
     it('.metrikKutu / .fisButonu BILEREK degismedi — bunlar --m-grad-accent zemini uzerindeki ayri, hafif cam katmani', () => {
         expect(css).toMatch(/blur\(10px\)/)
     })
+
+    it('.mobilCta isik gecisi aldi (::after overlay)', () => {
+        expect(css).toMatch(/\.mobilCta::after\s*\{/)
+        expect(css).toMatch(/\.mobilCta\s*\{[^}]*position:\s*relative/)
+        expect(css).toMatch(/\.mobilCta\s*\{[^}]*overflow:\s*hidden/)
+    })
 })

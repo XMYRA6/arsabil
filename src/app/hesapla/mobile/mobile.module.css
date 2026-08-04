@@ -730,6 +730,8 @@
 
     /* ── Sabit CTA (Raporu kaydet) ── */
     .mobilCta {
+        position: relative;
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -743,6 +745,18 @@
         color: #fff;
         font: 800 14px Inter, sans-serif;
         cursor: pointer;
+    }
+
+    /* Derin Cam (B) — statik cam-isik gecisi (2026-08-04, lead onayli mockup).
+       Hareketsiz: prefers-reduced-motion sorunu yok, cunku zaten animasyon
+       yok — yalnizca sabit bir gradyan overlay, cam yuzeyin isigi yansittigi
+       hissini veriyor. */
+    .mobilCta::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.35) 35%, transparent 50%);
+        pointer-events: none;
     }
 
     .mobilCta:disabled {
