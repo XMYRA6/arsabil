@@ -3,11 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
 import {
-    ArsaAlaniFields,
     MarketField,
     RiskCostFields,
     BirimMaliyetField,
-    type ArsaAlaniProps,
     type MarketFieldProps,
     type RiskCostProps,
     type BirimMaliyetFieldProps,
@@ -17,12 +15,11 @@ import styles from './mobile.module.css';
 /**
  * Yaprak acilirken odaklanilacak bolum.
  */
-export type AyarBolumu = 'kar' | 'risk' | 'iksa' | 'piyasa';
+export type AyarBolumu = 'kar' | 'iksa' | 'piyasa';
 
 export type GelismisAyarlarSheetProps =
     & RiskCostProps
     & MarketFieldProps
-    & ArsaAlaniProps
     & BirimMaliyetFieldProps
     & {
         open: boolean;
@@ -69,13 +66,12 @@ export function GelismisAyarlarSheet({
     // kaydirilir.
     const maliyetRef = useRef<HTMLElement | null>(null);
     const piyasaRef = useRef<HTMLElement | null>(null);
-    const arsaRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         if (!open || acilisBolumu === undefined) return;
         const hedefRef =
             acilisBolumu === 'piyasa' ? piyasaRef :
-            maliyetRef; // 'kar' | 'risk' | 'iksa' ayni bolume dusuyor
+            maliyetRef; // 'kar' | 'iksa' ayni bolume dusuyor
         const azaltilmisHareket = typeof window !== 'undefined'
             && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         hedefRef.current?.scrollIntoView({
@@ -87,21 +83,6 @@ export function GelismisAyarlarSheet({
     return (
         <BottomSheet open={open} onClose={onClose} title="Gelişmiş ayarlar">
             <div className={styles.ayarlarGovde}>
-                <section
-                    ref={arsaRef}
-                    className={styles.ayarBolum}
-                    role="group"
-                    aria-label="Arsa alanı"
-                    data-acilis="false"
-                >
-                    <ArsaAlaniFields
-                        isAaEnabled={alanlar.isAaEnabled}
-                        setIsAaEnabled={alanlar.setIsAaEnabled}
-                        arsaAlani={alanlar.arsaAlani}
-                        setArsaAlani={alanlar.setArsaAlani}
-                    />
-                </section>
-
                 <section
                     ref={piyasaRef}
                     className={styles.ayarBolum}
@@ -120,14 +101,12 @@ export function GelismisAyarlarSheet({
                     />
                 </section>
 
-                {/* Kar, risk ve iksa tek bir mevcut bilesende yasiyor; ucu de
-                    bu bolume dusuyor. */}
                 <section
                     ref={maliyetRef}
                     className={styles.ayarBolum}
                     role="group"
                     aria-label="Maliyet ve riskler"
-                    data-acilis={bolum('kar', 'risk', 'iksa')}
+                    data-acilis={bolum('kar', 'iksa')}
                 >
                     <RiskCostFields
                         iksaMode={alanlar.iksaMode}
@@ -136,9 +115,6 @@ export function GelismisAyarlarSheet({
                         setIksaPercentage={alanlar.setIksaPercentage}
                         iksaManualTL={alanlar.iksaManualTL}
                         setIksaManualTL={alanlar.setIksaManualTL}
-                        riskLevel={alanlar.riskLevel}
-                        setRiskLevel={alanlar.setRiskLevel}
-                        riskLevels={alanlar.riskLevels}
                         builderProfit={alanlar.builderProfit}
                         setBuilderProfit={alanlar.setBuilderProfit}
                         profitLevels={alanlar.profitLevels}

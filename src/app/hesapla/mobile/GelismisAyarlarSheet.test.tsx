@@ -16,13 +16,6 @@ function props(patch = {}) {
             { id: '2', label: 'Orta', value: 1.30, sortOrder: 1, isDefault: true },
             { id: '3', label: 'Yüksek', value: 1.50, sortOrder: 2, isDefault: false },
         ],
-        riskLevel: 10, setRiskLevel: jest.fn(),
-        riskLevels: [
-            { id: 'r0', label: 'Yok', value: 0, sortOrder: 0, isDefault: false },
-            { id: 'r1', label: 'Düşük', value: 5, sortOrder: 1, isDefault: false },
-            { id: 'r2', label: 'Orta', value: 10, sortOrder: 2, isDefault: true },
-            { id: 'r3', label: 'Yüksek', value: 15, sortOrder: 3, isDefault: false },
-        ],
         iksaMode: 'off' as const, setIksaMode: jest.fn(),
         iksaPercentage: 5, setIksaPercentage: jest.fn(),
         iksaManualTL: 0, setIksaManualTL: jest.fn(),
@@ -30,9 +23,6 @@ function props(patch = {}) {
         manualMarketPrice: '', setManualMarketPrice: jest.fn(),
 
         globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
-
-        isAaEnabled: false, setIsAaEnabled: jest.fn(),
-        arsaAlani: 500, setArsaAlani: jest.fn(),
 
         ...patch,
     }
@@ -44,12 +34,12 @@ describe('GelismisAyarlarSheet', () => {
         expect(screen.queryByRole('dialog')).toBeNull()
     })
 
-    it('acikken modal diyalog ve uc bolum gosterir', () => {
+    it('acikken modal diyalog ve iki bolum gosterir', () => {
         render(<GelismisAyarlarSheet {...props()} />)
         expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true')
         expect(screen.getByRole('group', { name: 'Maliyet ve riskler' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Piyasa fiyatı' })).toBeInTheDocument()
-        expect(screen.getByRole('group', { name: 'Arsa alanı' })).toBeInTheDocument()
+        expect(screen.queryByRole('group', { name: 'Arsa alanı' })).toBeNull()
     })
 
     it('mevcut alan bilesenleri yeniden kullaniliyor (kopyalanmiyor)', () => {
@@ -96,8 +86,13 @@ describe('GelismisAyarlarSheet', () => {
         expect(screen.queryByText('Toplam Daire Sayısı')).toBeNull()
     })
 
-    it('arsa alani yaprakta KALIR', () => {
+    it('arsa alani yapraktan KALKTI (SmartContextCard tek kaynak)', () => {
         render(<GelismisAyarlarSheet {...props()} />)
-        expect(screen.getByText(/Arsa Alanı/)).toBeInTheDocument()
+        expect(screen.queryByText(/Arsa Alanı/)).toBeNull()
+    })
+
+    it('risk secimi yapraktan KALKTI (SmartContextCard tek kaynak)', () => {
+        render(<GelismisAyarlarSheet {...props()} />)
+        expect(screen.queryByText('Risk Payı')).toBeNull()
     })
 })
