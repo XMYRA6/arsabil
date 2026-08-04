@@ -1,5 +1,7 @@
 import React from 'react';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
+import type { RiskLevel } from './riskSuggestionHelpers';
+import { riskKaynakEtiketi, type RiskKaynagi } from './mobile/riskSource';
 import styles from './SmartContextCard.module.css';
 
 export type SmartContextCardProps = {
@@ -8,14 +10,17 @@ export type SmartContextCardProps = {
     arsaAlani: number;
     onArsaAlani: (v: number) => void;
     riskLevel: number;
+    riskLevels: RiskLevel[];
+    onRiskLevel: (v: number) => void;
+    riskKaynagi: RiskKaynagi;
     isAaEnabled: boolean;
 };
 
-function formatRisk(level: number) {
-    if (level >= 15) return { label: 'Yüksek Deprem Riski', cls: styles.riskHigh, note: '+%15 iksa maliyeti eklendi' };
-    if (level >= 10) return { label: 'Orta-Yüksek Risk', cls: styles.riskMedium, note: '+%10 iksa maliyeti eklendi' };
-    if (level >= 5) return { label: 'Orta Deprem Riski', cls: styles.riskMedium, note: '+%5 iksa maliyeti eklendi' };
-    return { label: 'Düşük Deprem Riski', cls: styles.riskLow, note: 'Ek iksa maliyeti yok' };
+function riskNotu(level: number): string {
+    if (level >= 15) return '+%15 iksa maliyeti eklendi';
+    if (level >= 10) return '+%10 iksa maliyeti eklendi';
+    if (level >= 5) return '+%5 iksa maliyeti eklendi';
+    return 'Ek iksa maliyeti yok';
 }
 
 export function SmartContextCard({
@@ -24,36 +29,54 @@ export function SmartContextCard({
     arsaAlani,
     onArsaAlani,
     riskLevel,
+    riskLevels,
+    onRiskLevel,
+    riskKaynagi,
     isAaEnabled,
 }: SmartContextCardProps) {
-    if (!parcelContext) {
-        return (
-            <button type="button" className={styles.unselectedBtn} onClick={onOpenMap}>
-                📍 Haritadan parsel seç
-            </button>
-        );
-    }
-
-    const isAreaVerified = parcelContext.status === 'verified' && parcelContext.parcel?.areaSqm;
-    const address = parcelContext.parcel?.mahalle 
+    const isAreaVerified = parcelContext?.status === 'verified' && !!parcelContext.parcel?.areaSqm;
+    const address = parcelContext?.parcel?.mahalle
         ? `${parcelContext.parcel.ilce}, ${parcelContext.parcel.mahalle}`
-        : 'Haritadan seçilen nokta';
-
-    const risk = formatRisk(riskLevel);
+        : parcelContext
+            ? 'Haritadan seçilen nokta'
+            : null;
 
     return (
         <div className={styles.container}>
             <div className={styles.header}>
-                <div className={styles.address}>
-                    📍 {address}
-                </div>
-                <button type="button" className={styles.editBtn} onClick={onOpenMap}>
-                    Değiştir
-                </button>
+                {address ? (
+                    <div className={styles.address}>📍 {address}</div>
+                ) : (
+                    <button type="button" className={styles.unselectedBtn} onClick={onOpenMap}>
+                        📍 Haritadan parsel seç
+                    </button>
+                )}
+                {address && (
+                    <button type="button" className={styles.editBtn} onClick={onOpenMap}>
+                        Değiştir
+                    </button>
+                )}
             </div>
-            
-            <div className={`${styles.riskBadge} ${risk.cls}`}>
-                ⚠️ {risk.label} <span className={styles.riskNote}>({risk.note})</span>
+
+            <div className={styles.riskSection}>
+                <div className={styles.riskHeader}>
+                    <span>Deprem Riski</span>
+                    <span className={styles.riskKaynakEtiket}>{riskKaynakEtiketi(riskKaynagi)}</span>
+                </div>
+                <div className={styles.riskPills}>
+                    {riskLevels.map(opt => (
+                        <button
+                            key={opt.id}
+                            type="button"
+                            aria-pressed={riskLevel === opt.value}
+                            className={`${styles.riskPill} ${riskLevel === opt.value ? styles.riskPillActive : ''}`}
+                            onClick={() => onRiskLevel(opt.value)}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+                <p className={styles.riskNote}>{riskNotu(riskLevel)}</p>
             </div>
 
             {isAaEnabled && (
