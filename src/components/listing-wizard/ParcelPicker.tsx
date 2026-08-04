@@ -60,6 +60,7 @@ export function ParcelPicker({
 }: Props) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const mapRef = useRef<LeafletMap | null>(null)
+    const resizeObserverRef = useRef<ResizeObserver | null>(null)
     const markerRef = useRef<Marker | null>(null)
     const polygonRef = useRef<Polygon | null>(null)
     const [verifying, setVerifying] = useState(false)
@@ -107,10 +108,26 @@ export function ParcelPicker({
 
             mapRef.current = map
             setMapReady(true)
+
+            // Leaflet tile izgarasini KURULUM ANINDAKI konteyner olcusune gore
+            // uretir. Bu bilesen artik acilirken mount edilen bir modalin
+            // (`/hesapla` ParcelModal) icinde de kullaniliyor: konteyner o an
+            // ya 0 boyutlu ya da acilis animasyonunun ortasinda. Olculmus
+            // sonuc — kopuk tile sutunlari, aralarinda bos alanlar ve kayan
+            // tiklama koordinatlari. Bir kez hemen, sonra her olcu degisiminde
+            // yeniden olctur.
+            map.invalidateSize()
+            if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+                const gozlemci = new ResizeObserver(() => mapRef.current?.invalidateSize())
+                gozlemci.observe(containerRef.current)
+                resizeObserverRef.current = gozlemci
+            }
         })()
 
         return () => {
             cancelled = true
+            resizeObserverRef.current?.disconnect()
+            resizeObserverRef.current = null
             mapRef.current?.remove()
             mapRef.current = null
             markerRef.current = null
