@@ -141,6 +141,15 @@
     gap: 8px;
 }
 
+/* Bu anahtar (isAaEnabled) daha once yalnizca masaustunde render ediliyordu;
+   simdi kart uzerinden mobilde de tiklanabilir oldugu icin projenin kendi
+   `--touch-target: 44px` tabanina uymasi gerekiyor — paylasilan `Toggle`in
+   gorsel yuksekligi (30px) degismeden, tiklama alani genisletiliyor
+   (globals.css'teki diger Toggle kullanimlarini etkilemez, sadece burasi). */
+.aaToggle {
+    min-height: var(--touch-target);
+}
+
 .areaStatus {
     font-size: 0.75rem;
     color: #f59e0b;

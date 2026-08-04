@@ -104,6 +104,7 @@ export function SmartContextCard({
                             </span>
                         )}
                         <Toggle
+                            className={styles.aaToggle}
                             checked={isAaEnabled}
                             aria-label="Arsa alanını hesaba kat"
                             onChange={(e) => onIsAaEnabled(e.target.checked)}
