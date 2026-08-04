@@ -18,6 +18,42 @@
     color: var(--label-color);
 }
 
+.entryRow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.entryBtn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.entryBtn:hover:not(:disabled) {
+    background: var(--panel);
+}
+
+.entryBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.manualNote {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    background: var(--input-bg);
+    font-size: 0.78rem;
+    color: var(--label-color);
+}
+
 .coordRow {
     display: flex;
     align-items: center;
@@ -81,5 +117,10 @@
     .verifyBtn {
         min-height: 44px;
         width: 100%;
+    }
+
+    .entryBtn {
+        min-height: 44px;
+        flex: 1;
     }
 }

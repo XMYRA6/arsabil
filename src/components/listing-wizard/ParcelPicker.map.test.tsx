@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ParcelPicker, type ParcelPickerValue } from './ParcelPicker'
 
@@ -93,5 +93,98 @@ describe('ParcelPicker — harita olculeri', () => {
         // Sokulmus bilesenin gozlemcisi hala haritayi olcmeye calisirsa
         // kaldirilmis bir Leaflet ornegine dokunur.
         expect(harita.remove).toHaveBeenCalled()
+    })
+})
+
+/** Harita kurulumu tamamlanana kadar bekler (placePinRef bu noktada zaten atanmis olur). */
+async function haritaHazirOlanaKadarBekle() {
+    await waitFor(() => expect(harita.invalidateSize).toHaveBeenCalled())
+}
+
+describe('ParcelPicker — Konumumu Bul (geolocation)', () => {
+    afterEach(() => {
+        // navigator.geolocation testler arasi sizmasin.
+        Object.defineProperty(global.navigator, 'geolocation', { value: undefined, configurable: true })
+    })
+
+    it('konum izni verilince harita o noktaya gider ve onChange cagirilir', async () => {
+        const getCurrentPosition = jest.fn((success: PositionCallback) => {
+            success({ coords: { latitude: 41.1, longitude: 27.5 } } as GeolocationPosition)
+        })
+        Object.defineProperty(global.navigator, 'geolocation', {
+            value: { getCurrentPosition },
+            configurable: true,
+        })
+
+        const onChange = jest.fn()
+        render(<ParcelPicker value={BOS} onChange={onChange} />)
+        await haritaHazirOlanaKadarBekle()
+
+        fireEvent.click(screen.getByRole('button', { name: /Konumumu Bul/i }))
+
+        await waitFor(() => {
+            expect(onChange).toHaveBeenCalledWith({ lat: 41.1, lng: 27.5, parcel: null, status: 'idle' })
+        })
+        expect(harita.setView).toHaveBeenCalledWith([41.1, 27.5], 17)
+    })
+
+    it('konum izni reddedilince uyari gosterilir, onChange cagirilmaz', async () => {
+        const getCurrentPosition = jest.fn((_success: PositionCallback, error: PositionErrorCallback) => {
+            error({ code: 1, message: 'denied' } as GeolocationPositionError)
+        })
+        Object.defineProperty(global.navigator, 'geolocation', {
+            value: { getCurrentPosition },
+            configurable: true,
+        })
+
+        const onChange = jest.fn()
+        render(<ParcelPicker value={BOS} onChange={onChange} />)
+        await haritaHazirOlanaKadarBekle()
+
+        fireEvent.click(screen.getByRole('button', { name: /Konumumu Bul/i }))
+
+        await waitFor(() => {
+            expect(screen.getByText(/Konum izni alınamadı/i)).toBeInTheDocument()
+        })
+        expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('tarayici geolocation desteklemiyorsa uyari gosterir', async () => {
+        Object.defineProperty(global.navigator, 'geolocation', { value: undefined, configurable: true })
+
+        render(<ParcelPicker value={BOS} onChange={jest.fn()} />)
+        await haritaHazirOlanaKadarBekle()
+
+        fireEvent.click(screen.getByRole('button', { name: /Konumumu Bul/i }))
+
+        expect(screen.getByText(/Tarayıcınız konum tespitini desteklemiyor/i)).toBeInTheDocument()
+    })
+})
+
+describe('ParcelPicker — Elle Gir (manuel TKGM referansi)', () => {
+    afterEach(() => { jest.restoreAllMocks() })
+
+    it('elle giris modalinda bulunan konuma harita gider, kullanici beyani notu gosterilir', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            json: async () => [{ lat: '41.167877', lon: '27.583458' }],
+        }) as unknown as typeof fetch
+
+        const onChange = jest.fn()
+        render(<ParcelPicker value={BOS} onChange={onChange} />)
+        await haritaHazirOlanaKadarBekle()
+
+        fireEvent.click(screen.getByRole('button', { name: /Elle Gir/i }))
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'Tekirdağ' } })
+        fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Muratlı' } })
+        fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '0' } })
+        fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '1871' } })
+        fireEvent.click(screen.getByRole('button', { name: /Haritada Göster/i }))
+
+        await waitFor(() => {
+            expect(onChange).toHaveBeenCalledWith({ lat: 41.167877, lng: 27.583458, parcel: null, status: 'idle' })
+        })
+        expect(harita.setView).toHaveBeenCalledWith([41.167877, 27.583458], 17)
+        expect(screen.getByText(/Kullanıcı beyanı:.*Ada 0.*Parsel 1871/)).toBeInTheDocument()
     })
 })
