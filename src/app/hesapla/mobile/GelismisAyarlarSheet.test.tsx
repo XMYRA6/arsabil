@@ -44,7 +44,7 @@ describe('GelismisAyarlarSheet', () => {
 
     it('mevcut alan bilesenleri yeniden kullaniliyor (kopyalanmiyor)', () => {
         render(<GelismisAyarlarSheet {...props()} />)
-        // RiskCostFields / MarketField / ArsaAlaniFields'in kendi etiketleri.
+        // RiskCostFields / MarketField'in kendi etiketleri.
         expect(screen.getByText('İksa Masrafı')).toBeInTheDocument()
         expect(screen.getByText('Yaklaşık Piyasa Fiyatı')).toBeInTheDocument()
     })

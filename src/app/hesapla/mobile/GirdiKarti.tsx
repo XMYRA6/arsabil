@@ -16,6 +16,7 @@ export type GirdiKartiProps = {
     onRiskLevel: (v: number) => void;
     riskKaynagi: RiskKaynagi;
     isAaEnabled: boolean;
+    onIsAaEnabled: (v: boolean) => void;
     /** Parsel doğrulama modalını açar */
     onParselDogrulaAc: () => void;
     luxLevel: number;
@@ -80,6 +81,7 @@ export function GirdiKarti({
     onRiskLevel,
     riskKaynagi,
     isAaEnabled,
+    onIsAaEnabled,
     luxLevel,
     onLuxLevel,
     apartmentSize,
@@ -116,6 +118,7 @@ export function GirdiKarti({
                 onRiskLevel={onRiskLevel}
                 riskKaynagi={riskKaynagi}
                 isAaEnabled={isAaEnabled}
+                onIsAaEnabled={onIsAaEnabled}
             />
 
             <div className={styles.girdiSatir}>

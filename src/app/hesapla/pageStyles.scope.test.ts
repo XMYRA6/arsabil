@@ -66,9 +66,6 @@ describe('paylaşılan bileşen override\'larının özgünlük deseni', () => {
     expect(pageCss).toMatch(/button\.sealOutlineBtn/);
   });
 
-  it('mobil RangeSlider brass override\'ı input\\[type="range"\\] elementine scope\'lanmalı', () => {
-    expect(pageCss).toMatch(/\.sealRangeSlider input\[type="range"\]/);
-  });
 });
 
 describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
@@ -179,27 +176,32 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     for (const alan of tumAlanlar) {
       expect(pageTsx).toMatch(new RegExp(`useState<[^>]*>\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
     }
-    // Sifirla'nin kapsami ise TUM 11 degil, yalnizca yapragin GOSTERDIGI 8
-    // alan (Task 5, A1 I4): daire-sayisi/arsa-payi ucu yapraktan cikip
-    // girdi kartina tasindi, bu yuzden Sifirla'nin disinda BILEREK. Yaprak
+    // Sifirla'nin kapsami ise TUM 11 degil, yalnizca yapragin GOSTERDIGI
+    // alanlar (Task 5, A1 I4): daire-sayisi/arsa-payi ucu yapraktan cikip
+    // girdi kartina tasindi, bu yuzden Sifirla'nin disinda BILEREK. Ayni
+    // gerekce 2026-08-04 TKGM konsolidasyonunda `isAaEnabled`/`arsaAlani`
+    // icin de gecerli oldu — onlar da artik `SmartContextCard`ta. Yaprak
     // ileride yeni bir alan gosterirse bu liste de guncellenmeli — aksi
     // halde "Ayarlari sifirla" o alani sessizce atlar (A1 I3'un ayni
     // kusurunun bir varyasyonu).
     const sifirlananAlanlar = [
       'builderProfit', 'riskLevel', 'iksaMode', 'iksaPercentage', 'iksaManualTL',
-      'manualMarketPrice', 'isAaEnabled', 'arsaAlani',
+      'manualMarketPrice',
     ];
     for (const alan of sifirlananAlanlar) {
       expect(pageTsx).toMatch(new RegExp(`set[A-Z]\\w*\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
     }
   });
 
-  it('daire-sayisi/arsa-payi Sıfırla eyleminde ARTIK okunmuyor (Task 5, A1 I4)', () => {
-    // Bu ucu yaprak artik render etmiyor (Task 5); Sifirla onlari hala
+  it('daire-sayisi/arsa-payi/arsa-alani Sıfırla eyleminde ARTIK okunmuyor (Task 5 A1 I4 + 2026-08-04 TKGM konsolidasyonu)', () => {
+    // Bu alanlari yaprak artik render etmiyor; Sifirla onlari hala
     // sifirlarsa, yaprakta gorunmeyen girdi kartini sessizce yeniden yazar
     // — tam da bu task'in kapattigi kusurun kendisi, bu kez reset yolunda.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    const yaprakOlmayanAlanlar = ['isApartmentCountEnabled', 'totalApartments', 'ownerApartmentShare'];
+    const yaprakOlmayanAlanlar = [
+      'isApartmentCountEnabled', 'totalApartments', 'ownerApartmentShare',
+      'isAaEnabled', 'arsaAlani',
+    ];
     for (const alan of yaprakOlmayanAlanlar) {
       expect(pageTsx).not.toMatch(new RegExp(`set[A-Z]\\w*\\(AYAR_VARSAYILANLARI\\.${alan}\\)`));
     }

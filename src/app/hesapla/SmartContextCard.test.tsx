@@ -21,6 +21,7 @@ function props(patch: Partial<React.ComponentProps<typeof SmartContextCard>> = {
         onRiskLevel: jest.fn(),
         riskKaynagi: { tur: 'varsayilan' as const },
         isAaEnabled: true,
+        onIsAaEnabled: jest.fn(),
         ...patch,
     }
 }
@@ -68,5 +69,31 @@ describe('SmartContextCard', () => {
     it('risk kaynak etiketi gosterilir', () => {
         render(<SmartContextCard {...props({ riskKaynagi: { tur: 'tkgm' } })} />)
         expect(screen.getByText('TKGM Onaylı')).toBeInTheDocument()
+    })
+
+    // Kritik regresyon: `isAaEnabled`i cevirebilen tek kontrol masaustu JSX
+    // agacindaydi, yani mobilde arsa alanini acmanin TEK yolu areaSqm donen
+    // bir TKGM parselini onaylamakti. Anahtar artik kartin icinde, iki
+    // platform da ayni bileseni render ettigi icin ikisinde de var.
+    it('parsel YOKKEN ve alan KAPALIYKEN alani acan anahtar var ve calisir', async () => {
+        const onIsAaEnabled = jest.fn()
+        render(<SmartContextCard {...props({ parcelContext: null, isAaEnabled: false, onIsAaEnabled })} />)
+        const anahtar = screen.getByRole('checkbox', { name: 'Arsa alanını hesaba kat' })
+        expect(anahtar).not.toBeChecked()
+        await userEvent.click(anahtar)
+        expect(onIsAaEnabled).toHaveBeenCalledWith(true)
+    })
+
+    it('alan ACIKKEN anahtar kapatilabilir', async () => {
+        const onIsAaEnabled = jest.fn()
+        render(<SmartContextCard {...props({ isAaEnabled: true, onIsAaEnabled })} />)
+        await userEvent.click(screen.getByRole('checkbox', { name: 'Arsa alanını hesaba kat' }))
+        expect(onIsAaEnabled).toHaveBeenCalledWith(false)
+    })
+
+    it('risk notu iksa degil RISK PAYI der (motor ikisini ayri girdi olarak isler)', () => {
+        render(<SmartContextCard {...props({ riskLevel: 15 })} />)
+        expect(screen.getByText('+%15 risk payı maliyete eklendi')).toBeInTheDocument()
+        expect(screen.queryByText(/iksa maliyeti/)).toBeNull()
     })
 })

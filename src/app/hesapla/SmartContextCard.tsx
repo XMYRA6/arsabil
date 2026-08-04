@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
+import { Toggle } from '@/components/ui/Toggle';
 import type { RiskLevel } from './riskSuggestionHelpers';
 import { riskKaynakEtiketi, type RiskKaynagi } from './mobile/riskSource';
 import styles from './SmartContextCard.module.css';
@@ -14,13 +15,21 @@ export type SmartContextCardProps = {
     onRiskLevel: (v: number) => void;
     riskKaynagi: RiskKaynagi;
     isAaEnabled: boolean;
+    onIsAaEnabled: (v: boolean) => void;
 };
 
+/**
+ * Risk yuzdesinin maliyete etkisi. Motor risk payini (`isRiskEnabled`/`R`)
+ * ve iksa masrafini (`isExcavationEnabled`/`Z`/`MzOriginal`) BAGIMSIZ girdiler
+ * olarak isler; iksanin kendi ayri kontrolu var. Bu yuzden metin "iksa
+ * maliyeti" degil "risk payi" der — aksi halde iki farkli maliyet kalemi ayni
+ * isimle anilip kullaniciyi (ve kodu okuyani) yaniltiyordu.
+ */
 function riskNotu(level: number): string {
-    if (level >= 15) return '+%15 iksa maliyeti eklendi';
-    if (level >= 10) return '+%10 iksa maliyeti eklendi';
-    if (level >= 5) return '+%5 iksa maliyeti eklendi';
-    return 'Ek iksa maliyeti yok';
+    if (level >= 15) return '+%15 risk payı maliyete eklendi';
+    if (level >= 10) return '+%10 risk payı maliyete eklendi';
+    if (level >= 5) return '+%5 risk payı maliyete eklendi';
+    return 'Ek risk payı yok';
 }
 
 export function SmartContextCard({
@@ -33,6 +42,7 @@ export function SmartContextCard({
     onRiskLevel,
     riskKaynagi,
     isAaEnabled,
+    onIsAaEnabled,
 }: SmartContextCardProps) {
     const isAreaVerified = parcelContext?.status === 'verified' && !!parcelContext.parcel?.areaSqm;
     const address = parcelContext?.parcel?.mahalle
@@ -79,14 +89,28 @@ export function SmartContextCard({
                 <p className={styles.riskNote}>{riskNotu(riskLevel)}</p>
             </div>
 
-            {isAaEnabled && (
-                <div className={styles.areaSection}>
-                    <div className={styles.areaHeader}>
-                        <span>Arsa Alanı</span>
-                        <span className={isAreaVerified ? styles.areaStatusOk : styles.areaStatus}>
-                            {isAreaVerified ? '✓ TKGM Onaylı' : 'Elle girilmesi gerekiyor'}
-                        </span>
-                    </div>
+            {/* Alani ACMA anahtari kartin ICINDE: `isAaEnabled`i cevirebilen
+                tek kontrol masaustu JSX agacindaydi, mobilde parsel
+                onaylamadan arsa alani HIC girilemiyordu. Kart iki platformda
+                da render edildigi icin anahtar burada olunca ikisi de kazanir
+                (spec: risk ve alan parselden BAGIMSIZ kullanilabilmeli). */}
+            <div className={styles.areaSection}>
+                <div className={styles.areaHeader}>
+                    <span>Arsa Alanı</span>
+                    <span className={styles.areaHeaderRight}>
+                        {isAaEnabled && (
+                            <span className={isAreaVerified ? styles.areaStatusOk : styles.areaStatus}>
+                                {isAreaVerified ? '✓ TKGM Onaylı' : 'Elle girilmesi gerekiyor'}
+                            </span>
+                        )}
+                        <Toggle
+                            checked={isAaEnabled}
+                            aria-label="Arsa alanını hesaba kat"
+                            onChange={(e) => onIsAaEnabled(e.target.checked)}
+                        />
+                    </span>
+                </div>
+                {isAaEnabled && (
                     <div className={styles.areaInputRow}>
                         <input
                             type="number"
@@ -96,8 +120,8 @@ export function SmartContextCard({
                         />
                         <span>m²</span>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 }

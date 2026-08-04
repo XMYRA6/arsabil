@@ -17,6 +17,7 @@ function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
         onRiskLevel: jest.fn(),
         riskKaynagi: { tur: 'varsayilan' as const },
         isAaEnabled: false,
+        onIsAaEnabled: jest.fn(),
         onParselDogrulaAc: jest.fn(),
         luxLevel: 1.2, onLuxLevel: jest.fn(),
         apartmentSize: 140, onApartmentSize: jest.fn(),
@@ -32,6 +33,17 @@ describe('GirdiKarti', () => {
     it('SmartContextCard kartin EN USTUNDE', () => {
         render(<GirdiKarti {...props()} />)
         expect(screen.getByRole('button', { name: /Haritadan parsel seç/ })).toBeInTheDocument()
+    })
+
+    it('MOBILDE parsel olmadan arsa alani acilabilir (anahtar karta tasindi)', async () => {
+        // Regresyon: `isAaEnabled`i cevirebilen tek kontrol masaustu JSX
+        // agacindaydi; mobil kullanici alani ancak areaSqm donen bir TKGM
+        // parselini onaylayarak acabiliyordu. Spec ise risk ve alanin parsel
+        // SECILMEDEN de kullanilabilir kalmasini sart kosuyor.
+        const onIsAaEnabled = jest.fn()
+        render(<GirdiKarti {...props({ parcelContext: null, isAaEnabled: false, onIsAaEnabled })} />)
+        await userEvent.click(screen.getByRole('checkbox', { name: 'Arsa alanını hesaba kat' }))
+        expect(onIsAaEnabled).toHaveBeenCalledWith(true)
     })
 
     it('yapi standardi uc segment sunar ve secili olani isaretler', () => {

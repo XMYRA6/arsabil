@@ -45,6 +45,7 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             onRiskLevel: jest.fn(),
             riskKaynagi: { tur: 'varsayilan' as const },
             isAaEnabled: false,
+            onIsAaEnabled: jest.fn(),
             onParselDogrulaAc: jest.fn(),
             luxLevel: 1.2, onLuxLevel: jest.fn(),
             apartmentSize: 140, onApartmentSize: jest.fn(),

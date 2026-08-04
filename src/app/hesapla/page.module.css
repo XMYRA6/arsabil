@@ -998,10 +998,6 @@
     height: 48px;
 }
 
-.stepperFull {
-    width: 100%;
-}
-
 .stepperUnitCenter {
     min-width: 48px;
     justify-content: center;
@@ -1010,43 +1006,6 @@
 .stepperUnitWide {
     min-width: 56px;
     justify-content: center;
-}
-
-.luxGridDynamic {
-    grid-template-columns: repeat(var(--lux-cols, 3), 1fr);
-}
-
-.toggleRowFlat {
-    margin: 0;
-    padding: 0;
-    border: none;
-    background: transparent;
-}
-
-.sharePct {
-    font-weight: 800;
-    color: var(--primary);
-    font-size: 1.2rem;
-}
-
-.drawerRowHead {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.drawerRowLabelNowrap {
-    white-space: nowrap;
-}
-
-.drawerToggleWrap {
-    margin-left: auto;
-    display: flex;
-}
-
-.drawerRiskGrid {
-    grid-template-columns: repeat(4, 1fr);
 }
 
 .pillSmall {
@@ -1273,7 +1232,7 @@ button.compareBtn {
         border-color: rgba(var(--red-rgb), 0.4);
     }
 
-    /* Mobilde: desktop sidebar gizli, mobil form + accordion görünür */
+    /* Mobilde: desktop sidebar gizli, HesaplaMobile kendi agacini gosterir */
     .desktopSidebar {
         display: none !important;
     }
@@ -1299,7 +1258,8 @@ button.compareBtn {
 
     /* .rightGrid, display:contents sayesinde mobilde .layout'un düz akışına
        katılıyor; masaüstüne özel üstteki kopya burada tekrar görünmesin diye
-       (mobil kopya zaten .mobileSidebar içinde, koşulsuz render edilir) */
+       (mobilde özet HesaplaMobile'ın kendi SonucKarti'sinden gelir, bu ayrı
+       bir bileşen — .hesapOzetiSeridi'nin mobil bir kopyası değil) */
     .rightGrid>.hesapOzetiSeridi {
         display: none;
     }
@@ -1445,18 +1405,6 @@ button.compareBtn {
     .stickyCta {
         background: var(--brand-gradient);
         color: white;
-    }
-
-    .sealRangeSlider input[type="range"] {
-        background: linear-gradient(to right, var(--aurora-violet) 0%, var(--seal-accent) var(--progress), rgba(255, 255, 255, 0.12) var(--progress));
-    }
-
-    .sealRangeSlider input[type="range"]::-webkit-slider-thumb {
-        border-color: var(--seal-accent);
-    }
-
-    .sealRangeSlider input[type="range"]::-moz-range-thumb {
-        border-color: var(--seal-accent);
     }
 
     .sliderArea {

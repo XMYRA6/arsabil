@@ -24,7 +24,13 @@ export interface RiskCostProps {
   profitLevels: ProfitLevel[];
 }
 
-/** Drawer "Proje Maliyet ve Riskleri" kartının içeriği. */
+/**
+ * Muteahhit kazanci + iksa masrafi kontrolleri. Risk seviyesi burada DEGIL —
+ * `SmartContextCard`a tasindi (2026-08-04 TKGM konsolidasyonu); isim
+ * (`RiskCostFields`) ve cagiran taraflardaki "Maliyet ve riskler" etiketi
+ * tarihsel, testlerin baglandigi degismez bir sozlesme oldugu icin
+ * degistirilmedi.
+ */
 export function RiskCostFields({
   iksaMode, setIksaMode, iksaPercentage, setIksaPercentage,
   iksaManualTL, setIksaManualTL,

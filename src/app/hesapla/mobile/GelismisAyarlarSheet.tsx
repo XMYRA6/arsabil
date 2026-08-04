@@ -34,22 +34,17 @@ export type GelismisAyarlarSheetProps =
  * docs/tasarim/mobil-2026-07-28/kartlar/4f.html).
  *
  * Alan icerikleri mevcut `RiskCostFields` / `MarketField` /
- * `ArsaAlaniFields` bilesenlerinden gelir — mantik KOPYALANMAZ. Bu,
- * masaustu cekmecesiyle davranis paritesini garanti eder: ayni state,
- * ayni dogrulama, ayni kenar durumlari.
+ * `BirimMaliyetField` bilesenlerinden gelir — mantik KOPYALANMAZ, ayni state,
+ * ayni dogrulama, ayni kenar durumlari korunur.
  *
- * NOT (Task 11): tasarimin segment kontrollu gorunumu heniz uygulanmadi;
- * su an masaustu cekmece isaretlemesi yapragin icinde yeniden kullaniliyor.
- * Gorsel uyum final dogrulamada ele alinacak (bkz. task-11-acik-kalemler.md).
- *
- * T2'nin acik kalemi burada kapaniyor: `ParcelPicker` ve
- * `RiskSuggestionCard` masaustu-only idi, artik mobilde de erisilebilir.
- *
- * A1 I4: daire-sayisi kontrolleri (Toplam Daire Sayisi, Arsa Sahibine Dusen
- * Daire) yapraktan cikarildi — bunlar yalnizca girdi kartina ait; ayni ucu
- * hem kartta hem yaprakta gostermek, birini degistirince digerini sessizce
- * yeniden yaziyordu. `FormulParamsFields` masaustu cekmecesinde degismeden
- * kaliyor (bkz. `AdvancedSettingsSections.tsx`).
+ * Yaprak sadece Muteahhit Kazanci + Iksa Masrafi (`RiskCostFields`), Piyasa
+ * Fiyati (`MarketField`) ve Birim Maliyet (`BirimMaliyetField`) icerir.
+ * Risk seviyesi ve arsa alani BURADA DEGIL — ikisi de `SmartContextCard`a
+ * tasindi (2026-08-04 TKGM konsolidasyonu), cunku `GirdiKarti` her zaman
+ * gorunur ve parsel secilmeden de kullanilabilir olmalari gerekiyordu; ayni
+ * ucu hem kartta hem yaprakta gostermek onceki bir sessiz-ezilme kusuruna
+ * yol acmisti (A1 I4, daire-sayisi kontrolleri icin de ayni gerekceyle
+ * yapraktan cikarilmisti).
  */
 export function GelismisAyarlarSheet({
     open,

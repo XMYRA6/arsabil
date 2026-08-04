@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
 import { RangeSlider } from '@/components/ui/RangeSlider';
@@ -126,6 +126,14 @@ export default function Home() {
     { id: 'default-risk-3', label: 'Yüksek', value: 15, sortOrder: 3, isDefault: false },
   ]);
   const [riskKaynagi, setRiskKaynagi] = useState<RiskKaynagi>({ tur: 'varsayilan' });
+  // Asenkron varsayilan-risk getirisi mount'tan SONRA cozuluyor; risk pilleri o
+  // sirada zaten tiklanabilir. Guncel kaynagi bir ref'te tutmak, getiri
+  // gecikirse kullanicinin (veya TKGM'nin) sectigi degeri ezmesini onler —
+  // ezilseydi rozet "Elle girildi" derken deger kullanicinin secmedigi
+  // varsayilan olurdu. Ref, bos bagimlilikli mount effect'inin bayat closure
+  // degeri okumasini engellemek icin gerekli.
+  const riskKaynagiRef = useRef<RiskKaynagi>(riskKaynagi);
+  useEffect(() => { riskKaynagiRef.current = riskKaynagi; }, [riskKaynagi]);
 
   const [isDesktopViewport, setIsDesktopViewport] = useState<boolean | null>(null);
   useEffect(() => {
@@ -194,8 +202,12 @@ export default function Home() {
       .then((data: RiskLevel[]) => {
         if (Array.isArray(data) && data.length > 0) {
           setRiskLevels(data);
+          // Secenek listesi her zaman guncellenir; ama VARSAYILAN deger
+          // yalnizca kullanici/TKGM henuz bir secim yapmadiysa uygulanir.
           const defaultLevel = data.find(l => l.isDefault);
-          if (defaultLevel) setRiskLevel(defaultLevel.value);
+          if (defaultLevel && riskKaynagiRef.current.tur === 'varsayilan') {
+            setRiskLevel(defaultLevel.value);
+          }
         }
       })
       .catch(console.error);
@@ -507,6 +519,7 @@ export default function Home() {
             parcelContext,
             arsaAlani, onArsaAlani: setArsaAlani,
             isAaEnabled,
+            onIsAaEnabled: setIsAaEnabled,
             riskLevel,
             riskLevels,
             onRiskLevel: handleRiskLevel,
@@ -536,6 +549,11 @@ export default function Home() {
             // sifirlanmiyorlar — sifirlanirsa "Ayarlari sifirla" yaprakta
             // gorunmeyen bir ekrani (girdi kartini) sessizce yeniden yazar,
             // tam da bu task'in kapattigi kusur.
+            //
+            // TKGM konsolidasyonu (2026-08-04) ayni durumu arsa alani ucun de
+            // yaratti: `isAaEnabled`/`arsaAlani` da yapraktan cikip
+            // `SmartContextCard`a tasindi, dolayisiyla onlar da BILEREK burada
+            // sifirlanmiyor.
             setBuilderProfit(AYAR_VARSAYILANLARI.builderProfit);
             setRiskLevel(AYAR_VARSAYILANLARI.riskLevel);
             setRiskKaynagi({ tur: 'varsayilan' });
@@ -543,8 +561,6 @@ export default function Home() {
             setIksaPercentage(AYAR_VARSAYILANLARI.iksaPercentage);
             setIksaManualTL(AYAR_VARSAYILANLARI.iksaManualTL);
             setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
-            setIsAaEnabled(AYAR_VARSAYILANLARI.isAaEnabled);
-            setArsaAlani(AYAR_VARSAYILANLARI.arsaAlani);
           }}
           acilisBolumu={mobilAyarBolumu}
           globalUnitPrice={globalUnitPrice}
@@ -632,11 +648,11 @@ export default function Home() {
               )}
             </div>
 
+            {/* Arsa alanini acan anahtar artik `SmartContextCard`in kendi
+                alan basliginda — disarida durdugunda mobil dala hic
+                gelmiyordu ve "Arsa Alanı" basligi risk bolumunu de kapsayan
+                yaniltici bir sarmalayici olusturuyordu. */}
             <div className={styles.settingsGroup}>
-              <div className={styles.toggleRow}>
-                <h4>Arsa Alanı (m²)</h4>
-                <Toggle checked={isAaEnabled} onChange={(e) => setIsAaEnabled(e.target.checked)} />
-              </div>
               <SmartContextCard
                 parcelContext={parcelContext}
                 onOpenMap={() => setIsParcelModalOpen(true)}
@@ -647,6 +663,7 @@ export default function Home() {
                 onRiskLevel={handleRiskLevel}
                 riskKaynagi={riskKaynagi}
                 isAaEnabled={isAaEnabled}
+                onIsAaEnabled={setIsAaEnabled}
               />
             </div>
 
