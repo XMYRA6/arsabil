@@ -22,7 +22,10 @@ function toIdariYapiItem(feature: GeoJSONFeature): IdariYapiItem | null {
     if (!props) return null
     const id = Number(props.id)
     const text = String(props.text ?? '')
-    if (!Number.isFinite(id) || text === '') return null
+    // Number.isInteger + id > 0: sadece "sonlu" degil, gecerli bir TKGM kimligi
+    // olmasi gerekir — rotalar zaten `id <= 0` reddediyor, kutuphane de ayni
+    // kurala uysun (0/negatif/ondalikli bir id iki katmanda tutarsiz davranmasin).
+    if (!Number.isInteger(id) || id <= 0 || text === '') return null
     return { id, text }
 }
 
@@ -79,13 +82,14 @@ export async function fetchIlListesi(): Promise<IdariYapiItem[]> {
     return features.map(toIdariYapiItem).filter((x): x is IdariYapiItem => x !== null)
 }
 
-export async function fetchIlceListesi(ilId: number): Promise<IdariYapiItem[]> {
-    const features = await fetchFeatureCollection(`${TKGM_BASE}/idariYapi/ilceListe/${ilId}`)
-    return features.map(toIdariYapiItem).filter((x): x is IdariYapiItem => x !== null)
-}
-
-export async function fetchMahalleListesi(ilceId: number): Promise<MahalleItem[]> {
-    const features = await fetchFeatureCollection(`${TKGM_BASE}/idariYapi/mahalleListe/${ilceId}`)
+/**
+ * Feature listesini {id,text} + centroid'e cevirir. fetchIlceListesi VE
+ * fetchMahalleListesi tarafindan paylasilir — ikisi de ayni sekle (MahalleItem)
+ * ihtiyac duyar: ilce centroid'i, mahallenin centroid'i null oldugu durumlar
+ * icin fallback konum olarak kullanilir (bkz. ManualParcelEntryForm.handleSearch).
+ */
+async function fetchAdminUnitsWithCentroid(url: string): Promise<MahalleItem[]> {
+    const features = await fetchFeatureCollection(url)
     const result: MahalleItem[] = []
     for (const feature of features) {
         const item = toIdariYapiItem(feature)
@@ -93,4 +97,12 @@ export async function fetchMahalleListesi(ilceId: number): Promise<MahalleItem[]
         result.push({ ...item, centroid: computeCentroid(feature.geometry) })
     }
     return result
+}
+
+export async function fetchIlceListesi(ilId: number): Promise<MahalleItem[]> {
+    return fetchAdminUnitsWithCentroid(`${TKGM_BASE}/idariYapi/ilceListe/${ilId}`)
+}
+
+export async function fetchMahalleListesi(ilceId: number): Promise<MahalleItem[]> {
+    return fetchAdminUnitsWithCentroid(`${TKGM_BASE}/idariYapi/mahalleListe/${ilceId}`)
 }

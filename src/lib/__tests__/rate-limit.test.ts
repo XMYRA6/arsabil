@@ -90,6 +90,6 @@ describe('RATE_LIMITS', () => {
     })
     it('TKGM idari yapi esikleri', () => {
         expect(RATE_LIMITS.TKGM_IDARI_YAPI).toEqual({ limit: 30, windowMs: 60_000 })
-        expect(RATE_LIMITS.TKGM_IDARI_YAPI_ANON).toEqual({ limit: 10, windowMs: 60_000 })
+        expect(RATE_LIMITS.TKGM_IDARI_YAPI_ANON).toEqual({ limit: 50, windowMs: 60_000 })
     })
 })

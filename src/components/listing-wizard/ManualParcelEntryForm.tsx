@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './ManualParcelEntryForm.module.css'
 import { TkgmAutocompleteField, type IdariYapiItem } from './TkgmAutocompleteField'
+import type { MahalleItem } from '@/lib/tkgm/idariYapi'
 
 export type ManualParcelReference = {
     il: string
@@ -12,31 +13,76 @@ export type ManualParcelReference = {
     parsel: string
 }
 
-type MahalleItem = IdariYapiItem & { centroid: { lat: number; lng: number } | null }
-
 interface Props {
     onLocationFound: (lat: number, lng: number, reference: ManualParcelReference) => void
+}
+
+/** TKGM idari-yapi fetch'lerinde 429 (rate limit) durumunu ayirt etmek icin. */
+class TkgmTooManyRequestsError extends Error {
+    constructor() { super('TKGM_TOO_MANY_REQUESTS') }
+}
+
+async function fetchIdariYapiJson(url: string): Promise<unknown> {
+    const res = await fetch(url)
+    if (res.status === 429) throw new TkgmTooManyRequestsError()
+    return res.json()
+}
+
+type FetchErrorKind = 'generic' | 'rateLimit' | null
+
+const RATE_LIMIT_MESSAGE = 'Çok fazla istek yapıldı, birkaç saniye sonra tekrar deneyin.'
+
+function errorNoteText(kind: FetchErrorKind, generic: string): string {
+    return kind === 'rateLimit' ? RATE_LIMIT_MESSAGE : generic
+}
+
+// İl listesi pratikte hiç değişmiyor; bu bileşen "Haritadan"/"Elle gir" modu
+// arasında geçişte defalarca mount/unmount olabiliyor (bkz. ParcelVerificationSheet).
+// Modül seviyesinde TEK bir paylaşılan promise ile, aynı sayfa oturumu içindeki
+// tekrar mount'lar il listesini yeniden çekmez.
+let cachedIlListPromise: Promise<IdariYapiItem[]> | null = null
+
+function loadIlListOnce(): Promise<IdariYapiItem[]> {
+    if (!cachedIlListPromise) {
+        cachedIlListPromise = fetchIdariYapiJson('/api/tkgm/il')
+            .then(data => {
+                const iller = (data as { iller?: unknown }).iller
+                if (!Array.isArray(iller)) return Promise.reject(new Error('beklenmeyen yanit sekli'))
+                return iller as IdariYapiItem[]
+            })
+            .catch(err => {
+                // basarisiz denemeyi onbellekte tutma — "Tekrar dene" gercekten yeniden ceksin
+                cachedIlListPromise = null
+                throw err
+            })
+    }
+    return cachedIlListPromise
+}
+
+/** Yalnizca testler icin: modul-seviyesi il listesi onbellegini sifirlar. */
+export function __resetIlListCacheForTests(): void {
+    cachedIlListPromise = null
 }
 
 export function ManualParcelEntryForm({ onLocationFound }: Props) {
     const [ilText, setIlText] = useState('')
     const [il, setIl] = useState<IdariYapiItem | null>(null)
     const [ilceText, setIlceText] = useState('')
-    const [ilce, setIlce] = useState<IdariYapiItem | null>(null)
+    const [ilce, setIlce] = useState<MahalleItem | null>(null)
     const [mahalleText, setMahalleText] = useState('')
     const [mahalle, setMahalle] = useState<MahalleItem | null>(null)
     const [ada, setAda] = useState('')
     const [parsel, setParsel] = useState('')
 
     const [iller, setIller] = useState<IdariYapiItem[]>([])
-    const [ilceler, setIlceler] = useState<IdariYapiItem[]>([])
+    const [ilceler, setIlceler] = useState<MahalleItem[]>([])
     const [mahalleler, setMahalleler] = useState<MahalleItem[]>([])
     const [ilceLoading, setIlceLoading] = useState(false)
     const [mahalleLoading, setMahalleLoading] = useState(false)
 
-    const [ilFetchError, setIlFetchError] = useState(false)
-    const [ilceFetchError, setIlceFetchError] = useState(false)
-    const [mahalleFetchError, setMahalleFetchError] = useState(false)
+    const [ilFetchError, setIlFetchError] = useState<FetchErrorKind>(null)
+    const [ilceFetchError, setIlceFetchError] = useState<FetchErrorKind>(null)
+    const [mahalleFetchError, setMahalleFetchError] = useState<FetchErrorKind>(null)
 
     const [searching, setSearching] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -47,44 +93,36 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
     const mahalleRequestIdRef = useRef(0)
 
     const loadIller = useCallback(() => {
-        setIlFetchError(false)
-        void (async () => {
-            try {
-                const res = await fetch('/api/tkgm/il')
-                const data = await res.json()
-                if (Array.isArray(data.iller)) {
-                    setIller(data.iller)
-                } else {
-                    setIlFetchError(true)
-                }
-            } catch {
-                setIlFetchError(true)
-            }
-        })()
+        setIlFetchError(null)
+        void loadIlListOnce()
+            .then(list => setIller(list))
+            .catch(err => {
+                setIlFetchError(err instanceof TkgmTooManyRequestsError ? 'rateLimit' : 'generic')
+            })
     }, [])
 
     useEffect(() => { loadIller() }, [loadIller])
 
     const loadIlceler = useCallback((ilId: number) => {
         const myRequestId = ++ilceRequestIdRef.current
-        setIlceFetchError(false)
+        setIlceFetchError(null)
         setIlceLoading(true)
         void (async () => {
             try {
-                const res = await fetch(`/api/tkgm/ilce?ilId=${ilId}`)
-                const data = await res.json()
+                const data = await fetchIdariYapiJson(`/api/tkgm/ilce?ilId=${ilId}`)
                 if (myRequestId !== ilceRequestIdRef.current) return
-                if (Array.isArray(data.ilceler)) {
-                    setIlceler(data.ilceler)
+                const list = (data as { ilceler?: unknown }).ilceler
+                if (Array.isArray(list)) {
+                    setIlceler(list as MahalleItem[])
                 } else {
                     setIlceler([])
-                    setIlceFetchError(true)
+                    setIlceFetchError('generic')
                 }
                 setIlceLoading(false)
-            } catch {
+            } catch (err) {
                 if (myRequestId !== ilceRequestIdRef.current) return
                 setIlceler([])
-                setIlceFetchError(true)
+                setIlceFetchError(err instanceof TkgmTooManyRequestsError ? 'rateLimit' : 'generic')
                 setIlceLoading(false)
             }
         })()
@@ -92,24 +130,24 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
 
     const loadMahalleler = useCallback((ilceId: number) => {
         const myRequestId = ++mahalleRequestIdRef.current
-        setMahalleFetchError(false)
+        setMahalleFetchError(null)
         setMahalleLoading(true)
         void (async () => {
             try {
-                const res = await fetch(`/api/tkgm/mahalle?ilceId=${ilceId}`)
-                const data = await res.json()
+                const data = await fetchIdariYapiJson(`/api/tkgm/mahalle?ilceId=${ilceId}`)
                 if (myRequestId !== mahalleRequestIdRef.current) return
-                if (Array.isArray(data.mahalleler)) {
-                    setMahalleler(data.mahalleler)
+                const list = (data as { mahalleler?: unknown }).mahalleler
+                if (Array.isArray(list)) {
+                    setMahalleler(list as MahalleItem[])
                 } else {
                     setMahalleler([])
-                    setMahalleFetchError(true)
+                    setMahalleFetchError('generic')
                 }
                 setMahalleLoading(false)
-            } catch {
+            } catch (err) {
                 if (myRequestId !== mahalleRequestIdRef.current) return
                 setMahalleler([])
-                setMahalleFetchError(true)
+                setMahalleFetchError(err instanceof TkgmTooManyRequestsError ? 'rateLimit' : 'generic')
                 setMahalleLoading(false)
             }
         })()
@@ -128,8 +166,9 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
     }
 
     const handleIlceSelect = (item: IdariYapiItem) => {
-        setIlce(item)
-        setIlceText(item.text)
+        const found = ilceler.find(x => x.id === item.id) ?? { ...item, centroid: null }
+        setIlce(found)
+        setIlceText(found.text)
         setMahalleText('')
         setMahalle(null)
         setMahalleler([])
@@ -142,6 +181,43 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
         setMahalleText(found.text)
     }
 
+    // Kullanici bir secim yaptiktan SONRA metni degistirip yeni bir esleme
+    // olusturmazsa (ornegin "Ankar" yazip birakirsa), o seviyenin secili-oge
+    // state'i eski (artik gecersiz) degeri tutmaya devam etmemeli — aksi halde
+    // ekranda gorunen metin ile Sorgula'nin kullandigi deger birbirinden sapar.
+    // Programatik secimler (handle*Select) onInputChange'i degil dogrudan
+    // setText'i cagirdigi icin bu kontrol yalnizca GERCEK kullanici yazimini
+    // yakalar.
+    const handleIlTextChange = (text: string) => {
+        setIlText(text)
+        if (il && text !== il.text) {
+            setIl(null)
+            setIlce(null)
+            setIlceText('')
+            setMahalle(null)
+            setMahalleText('')
+            setIlceler([])
+            setMahalleler([])
+        }
+    }
+
+    const handleIlceTextChange = (text: string) => {
+        setIlceText(text)
+        if (ilce && text !== ilce.text) {
+            setIlce(null)
+            setMahalle(null)
+            setMahalleText('')
+            setMahalleler([])
+        }
+    }
+
+    const handleMahalleTextChange = (text: string) => {
+        setMahalleText(text)
+        if (mahalle && text !== mahalle.text) {
+            setMahalle(null)
+        }
+    }
+
     const canSearch = il !== null && ilce !== null && !searching
 
     const handleSearch = async () => {
@@ -150,7 +226,10 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
         setError(null)
         try {
             const reference: ManualParcelReference = {
-                il: il.text, ilce: ilce.text, mahalle: mahalle?.text ?? mahalleText, ada, parsel,
+                // mahalle SADECE TKGM listesinden gercekten secildiyse dolu olur —
+                // asla dogrulanmamis serbest metin (mahalleText) sizmaz (bkz. final
+                // review bulgusu: yazim hatasi/eski secim referansa/Nominatim'e ulasiyordu).
+                il: il.text, ilce: ilce.text, mahalle: mahalle?.text ?? '', ada, parsel,
             }
 
             if (mahalle?.centroid) {
@@ -158,10 +237,18 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                 return
             }
 
-            // Mahalle secilmedi (veya centroid hesaplanamadi) — mevcut yaklasik-konum
-            // yolu: Nominatim adres aramasi. il/ilce artik TKGM'nin resmi yazimi
-            // oldugu icin (kullanici serbest yazmadi) bu sorgu bugunkunden daha
-            // guvenilir.
+            if (ilce.centroid) {
+                // Mahalle secilmedi/centroidsiz — TKGM verisinde mahallelerin ~%27'si
+                // poligonsuz. Ilce (idari yapi) seviyesinde geometri pratikte hep var;
+                // Nominatim'e (ve onun eski yazim/typo riskine) dusmeden ONCE bu
+                // resmi, TKGM kaynakli fallback denenir.
+                onLocationFound(ilce.centroid.lat, ilce.centroid.lng, reference)
+                return
+            }
+
+            // Ne mahalle ne ilce centroidi var — bugunku yaklasik-konum yolu:
+            // Nominatim adres aramasi. il/ilce artik TKGM'nin resmi yazimi oldugu
+            // icin (kullanici serbest yazmadi) bu sorgu bugunkunden daha guvenilir.
             const query = [reference.mahalle, reference.ilce, reference.il, 'Türkiye'].filter(Boolean).join(', ')
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tr&q=${encodeURIComponent(query)}`,
@@ -193,7 +280,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                     required
                     items={iller}
                     value={ilText}
-                    onInputChange={setIlText}
+                    onInputChange={handleIlTextChange}
                     onSelect={handleIlSelect}
                     placeholder="Örn. Tekirdağ"
                 />
@@ -203,7 +290,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                     required
                     items={ilceler}
                     value={ilceText}
-                    onInputChange={setIlceText}
+                    onInputChange={handleIlceTextChange}
                     onSelect={handleIlceSelect}
                     disabled={!il || ilceLoading}
                     placeholder={ilceLoading ? 'Yükleniyor…' : 'Örn. Muratlı'}
@@ -212,12 +299,12 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
 
             {ilFetchError && (
                 <div className={styles.errorNote}>
-                    İl listesi yüklenemedi. <button type="button" onClick={loadIller}>Tekrar dene</button>
+                    {errorNoteText(ilFetchError, 'İl listesi yüklenemedi.')} <button type="button" onClick={loadIller}>Tekrar dene</button>
                 </div>
             )}
             {ilceFetchError && (
                 <div className={styles.errorNote}>
-                    İlçe listesi yüklenemedi. <button type="button" onClick={() => il && loadIlceler(il.id)}>Tekrar dene</button>
+                    {errorNoteText(ilceFetchError, 'İlçe listesi yüklenemedi.')} <button type="button" onClick={() => il && loadIlceler(il.id)}>Tekrar dene</button>
                 </div>
             )}
 
@@ -226,7 +313,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                 label="Mahalle"
                 items={mahalleler}
                 value={mahalleText}
-                onInputChange={setMahalleText}
+                onInputChange={handleMahalleTextChange}
                 onSelect={handleMahalleSelect}
                 disabled={!ilce || mahalleLoading}
                 placeholder={mahalleLoading ? 'Yükleniyor…' : 'Örn. Kırkkepenekli'}
@@ -234,7 +321,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
 
             {mahalleFetchError && (
                 <div className={styles.errorNote}>
-                    Mahalle listesi yüklenemedi. <button type="button" onClick={() => ilce && loadMahalleler(ilce.id)}>Tekrar dene</button>
+                    {errorNoteText(mahalleFetchError, 'Mahalle listesi yüklenemedi.')} <button type="button" onClick={() => ilce && loadMahalleler(ilce.id)}>Tekrar dene</button>
                 </div>
             )}
 

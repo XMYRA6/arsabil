@@ -34,6 +34,19 @@ describe('fetchIlListesi', () => {
         expect(result).toEqual([{ id: 23, text: 'Adana' }])
     })
 
+    it('id tam sayi degilse (ondalikli) veya <= 0 ise ogeyi atlar', async () => {
+        mockFetchOnce(200, {
+            features: [
+                { properties: { id: 23, text: 'Gecerli' } },
+                { properties: { id: 23.5, text: 'Ondalikli' } },
+                { properties: { id: 0, text: 'Sifir' } },
+                { properties: { id: -5, text: 'Negatif' } },
+            ],
+        })
+        const result = await fetchIlListesi()
+        expect(result).toEqual([{ id: 23, text: 'Gecerli' }])
+    })
+
     it('TKGM hata donerse bos dizi doner', async () => {
         mockFetchOnce(500, {})
         expect(await fetchIlListesi()).toEqual([])
@@ -62,9 +75,20 @@ describe('fetchIlceListesi', () => {
         expect(calledUrl).toBe('https://cbsapi.tkgm.gov.tr/megsiswebapi.v3.1/api/idariYapi/ilceListe/23')
     })
 
-    it('ilce listesini dondurur', async () => {
+    it('ilce listesini centroid alaniyla birlikte dondurur (geometri yoksa null)', async () => {
         mockFetchOnce(200, { features: [{ properties: { id: 104, text: 'Aladağ' } }] })
-        expect(await fetchIlceListesi(23)).toEqual([{ id: 104, text: 'Aladağ' }])
+        expect(await fetchIlceListesi(23)).toEqual([{ id: 104, text: 'Aladağ', centroid: null }])
+    })
+
+    it('ilce Polygon geometrisinden centroid hesaplar — mahalle centroidsiz kaldiginda fallback icin kullanilir', async () => {
+        mockFetchOnce(200, {
+            features: [{
+                properties: { id: 104, text: 'Aladağ' },
+                geometry: { type: 'Polygon', coordinates: [[[35.0, 37.0], [35.2, 37.0], [35.2, 37.2], [35.0, 37.2]]] },
+            }],
+        })
+        const result = await fetchIlceListesi(23)
+        expect(result).toEqual([{ id: 104, text: 'Aladağ', centroid: { lat: 37.1, lng: 35.1 } }])
     })
 })
 

@@ -27,14 +27,14 @@ function req(qs: string) {
 describe('GET /api/tkgm/ilce', () => {
     beforeEach(() => {
         getServerSessionMock.mockReset().mockResolvedValue({ user: { id: 'u1' } })
-        fetchIlceListesiMock.mockReset().mockResolvedValue([{ id: 104, text: 'Aladağ' }])
+        fetchIlceListesiMock.mockReset().mockResolvedValue([{ id: 104, text: 'Aladağ', centroid: { lat: 37.1, lng: 35.1 } }])
         checkRateLimitMock.mockReset().mockReturnValue({ ok: true })
     })
 
-    it('ilce listesini doner', async () => {
+    it('ilce listesini centroid alaniyla birlikte doner', async () => {
         const res = await GET(req('ilId=23'))
         expect(res.status).toBe(200)
-        expect((await res.json()).ilceler).toEqual([{ id: 104, text: 'Aladağ' }])
+        expect((await res.json()).ilceler).toEqual([{ id: 104, text: 'Aladağ', centroid: { lat: 37.1, lng: 35.1 } }])
         expect(fetchIlceListesiMock).toHaveBeenCalledWith(23)
     })
 
