@@ -9,6 +9,8 @@ interface BottomSheetProps {
     open: boolean;
     onClose: () => void;
     title?: string;
+    /** Ek CSS sinifi — `.sheet` elemanina eklenir. Varsayilan davranis degismez. */
+    className?: string;
     children: React.ReactNode;
 }
 
@@ -58,7 +60,7 @@ function useIsMounted() {
  * </BottomSheet>
  * ```
  */
-export function BottomSheet({ open, onClose, title, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, title, className, children }: BottomSheetProps) {
     const reduceMotion = useReducedMotion();
     const dragControls = useDragControls();
     const mounted = useIsMounted();
@@ -115,7 +117,7 @@ export function BottomSheet({ open, onClose, title, children }: BottomSheetProps
                         role="dialog"
                         aria-modal="true"
                         aria-label={title || DEFAULT_ARIA_LABEL}
-                        className={styles.sheet}
+                        className={`${styles.sheet} ${className || ''}`}
                         initial={reduceMotion ? { opacity: 0 } : { y: '100%' }}
                         animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
                         exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}

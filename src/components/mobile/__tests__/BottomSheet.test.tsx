@@ -111,4 +111,20 @@ describe('BottomSheet', () => {
             expect(sheetTransition(false)).toEqual({ type: 'spring', damping: 32, stiffness: 320 })
         })
     })
+
+    it('className verilirse .sheet elemanina eklenir, verilmezse davranis degismez', () => {
+        const { rerender, getByRole } = render(
+            <BottomSheet open onClose={jest.fn()} title="Test">
+                <p>icerik</p>
+            </BottomSheet>,
+        )
+        expect(getByRole('dialog').className).not.toMatch(/custom-glass/)
+
+        rerender(
+            <BottomSheet open onClose={jest.fn()} title="Test" className="custom-glass">
+                <p>icerik</p>
+            </BottomSheet>,
+        )
+        expect(getByRole('dialog').className).toMatch(/custom-glass/)
+    })
 })
