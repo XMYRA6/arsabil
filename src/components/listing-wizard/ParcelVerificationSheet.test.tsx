@@ -156,9 +156,20 @@ describe('ParcelVerificationSheet', () => {
     })
 
     it('Elle gir ile konum bulununca harita moduna doner ve parcelValue pin konumunu tasir', async () => {
-        global.fetch = jest.fn().mockResolvedValue({
-            ok: true,
-            json: async () => ([{ lat: '41.0', lon: '29.0' }]),
+        // ManualParcelEntryForm artik TKGM otomatik-tamamlama kullaniyor: il/ilce
+        // serbest metinle degil, /api/tkgm/il -> /api/tkgm/ilce sirasiyla cekilen
+        // listeden SECILEREK doldurulur. Bu yuzden fetch mock'u sirali yaniti
+        // taklit etmeli: il listesi, ilce listesi, ardindan Nominatim.
+        let call = 0
+        const responses: unknown[] = [
+            { iller: [{ id: 34, text: 'İstanbul' }] },
+            { ilceler: [{ id: 539, text: 'Kadıköy' }] },
+            [{ lat: '41.0', lon: '29.0' }],
+        ]
+        global.fetch = jest.fn().mockImplementation(() => {
+            const body = responses[Math.min(call, responses.length - 1)]
+            call++
+            return Promise.resolve({ ok: true, json: async () => body })
         }) as unknown as typeof fetch
 
         render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
@@ -168,7 +179,12 @@ describe('ParcelVerificationSheet', () => {
         expect(screen.getByLabelText('İl *')).toBeInTheDocument()
 
         fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'İstanbul' } })
+        fireEvent.click(await screen.findByText('İstanbul'))
+
+        await waitFor(() => expect(screen.getByLabelText('İlçe *')).not.toBeDisabled())
         fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Kadıköy' } })
+        fireEvent.click(await screen.findByText('Kadıköy'))
+
         fireEvent.click(screen.getByRole('button', { name: 'Sorgula' }))
 
         // Manuel form kaybolup ParcelPicker geri gelmeli — "map" moduna donus.
