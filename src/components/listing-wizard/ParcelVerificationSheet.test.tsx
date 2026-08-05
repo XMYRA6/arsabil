@@ -1,0 +1,155 @@
+/** @jest-environment jsdom */
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import { ParcelVerificationSheet } from './ParcelVerificationSheet'
+
+const VERIFIED_PARCEL = {
+    il: 'Tekirdağ', ilce: 'Muratlı', mahalle: 'Kırkkepenekli',
+    adaNo: '0', parselNo: '1871', areaSqm: 830, quality: 'Arsa',
+    geometry: { type: 'Polygon' as const, coordinates: [] },
+}
+
+jest.mock('./ParcelPicker', () => ({
+    // Leaflet jsdom'da mount edilemez — burada haritanin kendisi degil sheet'in
+    // ParcelPicker'i DOGRU MODDA render ettigi ve onChange'i dogru isledigi
+    // test ediliyor. "simulate-verify" butonu, gercek ParcelPicker'in
+    // "Parseli Dogrula" basarili donusunu taklit eder — boylece risk-fetch
+    // effect'ini (parcelValue.lat/lng + parcelValue.parcel'a bagli) testler
+    // GERCEKTEN tetikleyebilir; onChange hic cagrilmazsa risk state'i asla
+    // null'dan cikmaz ve hideApply testleri sessizce yanlis-pozitif verir.
+    ParcelPicker: ({ onChange }: { onChange: (patch: Record<string, unknown>) => void }) => (
+        <div data-testid="parcel-picker">
+            <button onClick={() => onChange({ lat: 41.16, lng: 27.58, parcel: VERIFIED_PARCEL, status: 'verified' })}>
+                simulate-verify
+            </button>
+        </div>
+    ),
+}))
+
+function viewportKur(masaustu: boolean) {
+    Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: (query: string) => ({
+            matches: query.includes('max-width: 768px') ? masaustu : false,
+            media: query,
+            onchange: null,
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            dispatchEvent: jest.fn(),
+        }),
+    })
+}
+
+beforeEach(() => {
+    viewportKur(true) // varsayilan: masaustu
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'ok', risk: null }) }) as unknown as typeof fetch
+})
+afterEach(() => { jest.restoreAllMocks() })
+
+describe('ParcelVerificationSheet', () => {
+    it('isOpen false iken hicbir sey render etmez', () => {
+        render(<ParcelVerificationSheet isOpen={false} onClose={jest.fn()} onConfirm={jest.fn()} />)
+        expect(screen.queryByText('Haritadan Parsel Doğrula')).not.toBeInTheDocument()
+    })
+
+    it('varsayilan mod Haritadan — ParcelPicker render edilir, form edilmez', async () => {
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+        expect(screen.queryByLabelText('İl *')).not.toBeInTheDocument()
+    })
+
+    it('Elle gir tiklaninca form gorunur, ParcelPicker kalkar', async () => {
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+        fireEvent.click(screen.getByRole('button', { name: 'Elle gir' }))
+
+        expect(screen.getByLabelText('İl *')).toBeInTheDocument()
+        expect(screen.queryByTestId('parcel-picker')).not.toBeInTheDocument()
+    })
+
+    it('Vazgec/kapat onClose cagirir', async () => {
+        const onClose = jest.fn()
+        render(<ParcelVerificationSheet isOpen onClose={onClose} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+        fireEvent.click(screen.getByRole('button', { name: 'Vazgeç' }))
+        expect(onClose).toHaveBeenCalled()
+    })
+
+    it('parcel status verified degilken Aktar butonu devre disi', async () => {
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+        expect(screen.getByRole('button', { name: /Hesaplamaya Aktar/i })).toBeDisabled()
+    })
+
+    it('parcel dogrulanip risk verisi gelince hideApply=false (varsayilan) Uygula gosterir', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ status: 'ok', risk: { faultDistanceM: 500, gammaF: 1.2, floodQ100: false, suggestedR: 1.1 } }),
+        }) as unknown as typeof fetch
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+        fireEvent.click(screen.getByText('simulate-verify'))
+
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: /uygula/i })).toBeInTheDocument()
+        })
+    })
+
+    it('hideApply true iken ayni senaryoda Uygula gostermez', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({ status: 'ok', risk: { faultDistanceM: 500, gammaF: 1.2, floodQ100: false, suggestedR: 1.1 } }),
+        }) as unknown as typeof fetch
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} hideApply />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+        fireEvent.click(screen.getByText('simulate-verify'))
+
+        // Risk kartinin KENDISI (fay mesafesi gibi bilgi metni) hala gorunur olmali —
+        // yalnizca Uygula butonu gizlenir, kart tamamen kaybolmaz.
+        await waitFor(() => {
+            expect(screen.getByText(/500 m/)).toBeInTheDocument()
+        })
+        expect(screen.queryByRole('button', { name: /uygula/i })).not.toBeInTheDocument()
+    })
+
+    it('Aktar tiklaninca onConfirm dogrulanan parcelValue ile cagirilir ve sheet kapanir', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true, json: async () => ({ status: 'ok', risk: null }),
+        }) as unknown as typeof fetch
+        const onConfirm = jest.fn()
+        const onClose = jest.fn()
+        render(<ParcelVerificationSheet isOpen onClose={onClose} onConfirm={onConfirm} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+        fireEvent.click(screen.getByText('simulate-verify'))
+        await waitFor(() => expect(screen.getByRole('button', { name: /Hesaplamaya Aktar/i })).toBeEnabled())
+
+        fireEvent.click(screen.getByRole('button', { name: /Hesaplamaya Aktar/i }))
+
+        expect(onConfirm).toHaveBeenCalledWith(
+            expect.objectContaining({
+                parcelValue: expect.objectContaining({ lat: 41.16, lng: 27.58, status: 'verified' }),
+            }),
+        )
+        expect(onClose).toHaveBeenCalled()
+    })
+
+    it('masaustunde ortalanmis modal kabugu render edilir (BottomSheet degil)', async () => {
+        viewportKur(true)
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument() // BottomSheet role="dialog" kullanir
+    })
+
+    it('mobilde BottomSheet (role=dialog) render edilir', async () => {
+        viewportKur(false)
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+        expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+})

@@ -75,6 +75,29 @@
     color: var(--label-color);
 }
 
+.toggleRow {
+    display: flex;
+    gap: 8px;
+}
+
+.modeBtn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.modeBtnOn {
+    background: var(--brand-gradient);
+    color: #fff;
+    border-color: transparent;
+}
+
 .largeMap {
     height: 450px !important;
 }
@@ -99,6 +122,15 @@
     display: flex;
     align-items: center;
     gap: 6px;
+}
+
+.manualNote {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    background: var(--input-bg);
+    font-size: 0.78rem;
+    color: var(--label-color);
 }
 
 .footer {
@@ -145,19 +177,10 @@
     opacity: 0.9;
 }
 
-@media (max-width: 768px) {
-    .overlay {
-        padding: 0;
-        align-items: flex-end;
-    }
-    
-    .modal {
-        max-height: 95vh;
-        border-radius: 20px 20px 0 0;
-        border-bottom: none;
-    }
-    
-    .largeMap {
-        height: 350px !important;
-    }
+.mobileFooter {
+    padding-top: 12px;
+}
+
+.mobileFooter .applyBtn {
+    width: 100%;
 }
