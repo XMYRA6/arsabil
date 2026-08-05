@@ -184,3 +184,45 @@
 .mobileFooter .applyBtn {
     width: 100%;
 }
+
+@media (max-width: 768px) {
+    [data-theme="dark"] .sheet {
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
+        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+        --seal-border: rgba(43, 124, 255, 0.25);
+    }
+
+    [data-theme="light"] .sheet {
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
+        --seal-surface: var(--shell-bg);
+        --seal-border: var(--shell-border);
+    }
+
+    .sheet {
+        background: var(--seal-surface) !important;
+        border-top-color: var(--seal-border) !important;
+    }
+
+    .modeBtn {
+        background: rgba(var(--seal-accent-rgb), 0.08);
+        border-color: var(--seal-border);
+        color: var(--seal-accent);
+    }
+
+    .modeBtnOn {
+        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    .mobileFooter .applyBtn {
+        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
+    }
+
+    .manualNote {
+        background: rgba(var(--seal-accent-rgb), 0.05);
+        border-color: var(--seal-border);
+    }
+}
