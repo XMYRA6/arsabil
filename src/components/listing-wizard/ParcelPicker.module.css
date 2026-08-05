@@ -18,31 +18,48 @@
     color: var(--label-color);
 }
 
-.entryRow {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+.mapWrapper {
+    position: relative;
 }
 
-.entryBtn {
-    padding: 8px 14px;
-    border-radius: 10px;
+.locateBtn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     border: 1px solid var(--border);
-    background: var(--input-bg);
+    background: var(--card-bg);
     color: var(--text);
-    font-weight: 700;
-    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 400;
 }
 
-.entryBtn:hover:not(:disabled) {
+.locateBtn:hover:not(:disabled) {
     background: var(--panel);
 }
 
-.entryBtn:disabled {
+.locateBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.locateSpinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: parcelPickerSpin 0.7s linear infinite;
+}
+
+@keyframes parcelPickerSpin {
+    to { transform: rotate(360deg); }
 }
 
 .manualNote {
@@ -117,10 +134,5 @@
     .verifyBtn {
         min-height: 44px;
         width: 100%;
-    }
-
-    .entryBtn {
-        min-height: 44px;
-        flex: 1;
     }
 }

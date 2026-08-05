@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import type { Map as LeafletMap, Marker, Polygon } from 'leaflet'
 import type { ParcelInfo } from '@/lib/tkgm/parcel'
 import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
-import { ManualParcelEntryModal, type ManualParcelReference } from './ManualParcelEntryModal'
 import styles from './ParcelPicker.module.css'
 
 export type ParcelPickerStatus = 'idle' | 'verified' | 'not_found' | 'unavailable' | 'unauthorized'
+
+export interface ParcelPickerHandle {
+    placePin: (lat: number, lng: number) => void
+}
 
 export type ParcelPickerValue = {
     lat: number | null
@@ -50,7 +53,7 @@ const DEFAULT_UNAVAILABLE_TEXT =
 
 const TURKEY_CENTER: [number, number] = [39.0, 35.0]
 
-export function ParcelPicker({
+export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function ParcelPicker({
     value,
     onChange,
     hint = DEFAULT_HINT,
@@ -58,7 +61,7 @@ export function ParcelPicker({
     unavailableText = DEFAULT_UNAVAILABLE_TEXT,
     className,
     mapClassName,
-}: Props) {
+}, ref) {
     const containerRef = useRef<HTMLDivElement | null>(null)
     const mapRef = useRef<LeafletMap | null>(null)
     const resizeObserverRef = useRef<ResizeObserver | null>(null)
@@ -68,11 +71,12 @@ export function ParcelPicker({
     // butonu, elle giris modali) cagirilabilen pin-koyma fonksiyonu. Effect
     // sadece bir kez calistigi icin `map` closure'ini burada disari tasiyoruz.
     const placePinRef = useRef<((lat: number, lng: number) => void) | null>(null)
+    useImperativeHandle(ref, () => ({
+        placePin: (lat: number, lng: number) => placePinRef.current?.(lat, lng),
+    }), [])
     const [verifying, setVerifying] = useState(false)
     const [locating, setLocating] = useState(false)
     const [geoError, setGeoError] = useState<string | null>(null)
-    const [manualModalOpen, setManualModalOpen] = useState(false)
-    const [manualRef, setManualRef] = useState<ManualParcelReference | null>(null)
     // Harita async kuruluyor (dinamik leaflet import'u). Marker ve poligon
     // effect'leri ilk calismalarinda mapRef.current'i HENUZ bulamaz; bu bayrak
     // olmadan sessizce hicbir sey yapip bir daha calismiyorlardi.
@@ -219,11 +223,6 @@ export function ParcelPicker({
         )
     }
 
-    const handleManualLocationFound = (lat: number, lng: number, reference: ManualParcelReference) => {
-        setManualRef(reference)
-        placePinRef.current?.(lat, lng)
-    }
-
     const handleVerify = async () => {
         if (value.lat == null || value.lng == null) return
         setVerifying(true)
@@ -251,27 +250,27 @@ export function ParcelPicker({
 
     return (
         <div className={`${styles.wrapper} ${className || ''}`}>
-            <div
-                ref={containerRef}
-                className={`${styles.mapBox} ${mapClassName || ''}`}
-                style={{ cursor: verifying ? 'wait' : 'crosshair' }}
-            />
-
-            <div className={styles.entryRow}>
+            <div className={styles.mapWrapper}>
+                <div
+                    ref={containerRef}
+                    className={`${styles.mapBox} ${mapClassName || ''}`}
+                    style={{ cursor: verifying ? 'wait' : 'crosshair' }}
+                />
                 <button
                     type="button"
-                    className={styles.entryBtn}
+                    className={styles.locateBtn}
                     onClick={handleUseMyLocation}
                     disabled={locating}
+                    aria-label={locating ? 'Konum bulunuyor' : 'Konumumu bul'}
                 >
-                    {locating ? 'Konum bulunuyor…' : '📍 Konumumu Bul'}
-                </button>
-                <button
-                    type="button"
-                    className={styles.entryBtn}
-                    onClick={() => setManualModalOpen(true)}
-                >
-                    ✍️ Elle Gir
+                    {locating ? (
+                        <span className={styles.locateSpinner} aria-hidden="true" />
+                    ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                        </svg>
+                    )}
                 </button>
             </div>
 
@@ -327,21 +326,6 @@ export function ParcelPicker({
                 </div>
             )}
 
-            {manualRef && (
-                <div className={styles.manualNote}>
-                    Kullanıcı beyanı: {[
-                        manualRef.mahalle && `${manualRef.mahalle} Mah.`,
-                        manualRef.ada && `Ada ${manualRef.ada}`,
-                        manualRef.parsel && `Parsel ${manualRef.parsel}`,
-                    ].filter(Boolean).join(', ') || `${manualRef.ilce}, ${manualRef.il}`} — TKGM sonucuyla karşılaştırın.
-                </div>
-            )}
-
-            <ManualParcelEntryModal
-                isOpen={manualModalOpen}
-                onClose={() => setManualModalOpen(false)}
-                onLocationFound={handleManualLocationFound}
-            />
         </div>
     )
-}
+})

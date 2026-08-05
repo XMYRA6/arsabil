@@ -161,30 +161,7 @@ describe('ParcelPicker — Konumumu Bul (geolocation)', () => {
     })
 })
 
-describe('ParcelPicker — Elle Gir (manuel TKGM referansi)', () => {
-    afterEach(() => { jest.restoreAllMocks() })
-
-    it('elle giris modalinda bulunan konuma harita gider, kullanici beyani notu gosterilir', async () => {
-        global.fetch = jest.fn().mockResolvedValue({
-            ok: true,
-            json: async () => [{ lat: '41.167877', lon: '27.583458' }],
-        }) as unknown as typeof fetch
-
-        const onChange = jest.fn()
-        render(<ParcelPicker value={BOS} onChange={onChange} />)
-        await haritaHazirOlanaKadarBekle()
-
-        fireEvent.click(screen.getByRole('button', { name: /Elle Gir/i }))
-        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'Tekirdağ' } })
-        fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Muratlı' } })
-        fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '0' } })
-        fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '1871' } })
-        fireEvent.click(screen.getByRole('button', { name: /Haritada Göster/i }))
-
-        await waitFor(() => {
-            expect(onChange).toHaveBeenCalledWith({ lat: 41.167877, lng: 27.583458, parcel: null, status: 'idle' })
-        })
-        expect(harita.setView).toHaveBeenCalledWith([41.167877, 27.583458], 17)
-        expect(screen.getByText(/Kullanıcı beyanı:.*Ada 0.*Parsel 1871/)).toBeInTheDocument()
-    })
-})
+// "Elle Gir" akisi (manuel TKGM referansi) artik ParcelPicker'in sorumlulugunda
+// degil — Task 3 ile bu bilesenden sokuldu, form artik disaridan (sheet
+// seviyesinde, Task 5) suruluyor. Eski test burada silindi; ManualParcelEntryForm
+// kendi test dosyasinda (Task 2) ayrica kapsanmis durumda.
