@@ -1,0 +1,56 @@
+.field {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--label-color);
+}
+
+.input {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.listbox {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin: 4px 0 0 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.option {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.optionActive {
+    background: var(--input-bg);
+}
