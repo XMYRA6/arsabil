@@ -17,8 +17,10 @@ jest.mock('./ParcelPicker', () => ({
     // effect'ini (parcelValue.lat/lng + parcelValue.parcel'a bagli) testler
     // GERCEKTEN tetikleyebilir; onChange hic cagrilmazsa risk state'i asla
     // null'dan cikmaz ve hideApply testleri sessizce yanlis-pozitif verir.
-    ParcelPicker: ({ onChange }: { onChange: (patch: Record<string, unknown>) => void }) => (
+    ParcelPicker: ({ value, onChange }: { value: { lat: number | null; lng: number | null }; onChange: (patch: Record<string, unknown>) => void }) => (
         <div data-testid="parcel-picker">
+            <span data-testid="parcel-lat">{value.lat ?? ''}</span>
+            <span data-testid="parcel-lng">{value.lng ?? ''}</span>
             <button onClick={() => onChange({ lat: 41.16, lng: 27.58, parcel: VERIFIED_PARCEL, status: 'verified' })}>
                 simulate-verify
             </button>
@@ -151,5 +153,35 @@ describe('ParcelVerificationSheet', () => {
         render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
         await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
         expect(screen.getByRole('dialog')).toBeInTheDocument()
+    })
+
+    it('Elle gir ile konum bulununca harita moduna doner ve parcelValue pin konumunu tasir', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ([{ lat: '41.0', lon: '29.0' }]),
+        }) as unknown as typeof fetch
+
+        render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+        fireEvent.click(screen.getByRole('button', { name: 'Elle gir' }))
+        expect(screen.getByLabelText('İl *')).toBeInTheDocument()
+
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'İstanbul' } })
+        fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Kadıköy' } })
+        fireEvent.click(screen.getByRole('button', { name: 'Sorgula' }))
+
+        // Manuel form kaybolup ParcelPicker geri gelmeli — "map" moduna donus.
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+        expect(screen.queryByLabelText('İl *')).not.toBeInTheDocument()
+
+        // parcelValue.lat/lng, ParcelPicker'in ref'i uzerinden DEGIL, ust bilesenin
+        // state'i uzerinden akmis olmali — bu yuzden ParcelPicker'a prop olarak
+        // gecen `value.lat`/`value.lng` (mock'ta gorunur kilinan) bulunan konumu
+        // yansitmali.
+        await waitFor(() => {
+            expect(screen.getByTestId('parcel-lat')).toHaveTextContent('41')
+            expect(screen.getByTestId('parcel-lng')).toHaveTextContent('29')
+        })
     })
 })

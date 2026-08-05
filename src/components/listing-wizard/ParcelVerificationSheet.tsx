@@ -72,8 +72,19 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
     if (!isOpen || isDesktopViewport === null) return null
 
     const handleManualFound = (lat: number, lng: number, reference: ManualParcelReference) => {
+        // `pickerRef.current?.placePin(...)` calisirken ParcelPicker zaten
+        // unmount edilmis olur (mode === 'manual' oldugu icin JSX onun
+        // yerine ManualParcelEntryForm render ediyordu) — ref o an null,
+        // cagri sessizce no-op olurdu ve mode 'map'e donunce ParcelPicker
+        // hala bos parcelValue ile yeniden mount olurdu. Bunun yerine
+        // parcelValue'yu (ParcelPicker'in DEGIL, bu bilesenin state'i)
+        // dogrudan guncelliyoruz; ParcelPicker'in kendi
+        // "[mapReady, value.lat, value.lng]"e bagli marker effect'i
+        // (duzenleme sayfasindan gelen kayitli konum icin zaten var olan
+        // mekanizma) remount sonrasi bu degeri props'tan okuyup pini dogru
+        // koyar.
         setManualRef(reference)
-        pickerRef.current?.placePin(lat, lng)
+        setParcelValue(v => ({ ...v, lat, lng, status: 'idle', parcel: null }))
         setMode('map')
     }
 
