@@ -24,7 +24,7 @@ import { MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
 import { HesapFisi } from './HesapFisi';
 import type { RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
-import { ParcelModal } from './ParcelModal';
+import { ParcelVerificationSheet } from '@/components/listing-wizard/ParcelVerificationSheet';
 import { SmartContextCard } from './SmartContextCard';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import type { RiskMeasurement } from '@/lib/risk/types';
@@ -464,7 +464,7 @@ export default function Home() {
         onClose={() => setShowAuthModal(false)}
         message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
       />
-      <ParcelModal
+      <ParcelVerificationSheet
         key={isParcelModalOpen ? 'open' : 'closed'}
         isOpen={isParcelModalOpen}
         onClose={() => setIsParcelModalOpen(false)}

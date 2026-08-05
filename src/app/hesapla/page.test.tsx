@@ -1,4 +1,5 @@
 /** @jest-environment jsdom */
+import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import HesaplaPage from './page'
@@ -38,8 +39,9 @@ jest.mock('@/components/FinancialDashboard', () => ({ FinancialDashboard: () => 
 
 jest.mock('@/components/listing-wizard/ParcelPicker', () => ({
     // Leaflet jsdom'da mount edilemez; burada haritanin kendisi degil
-    // modalin VARLIGI test ediliyor.
-    ParcelPicker: () => <div data-testid="parcel-picker" />,
+    // ParcelVerificationSheet'in VARLIGI test ediliyor. forwardRef ile
+    // sarmalanmis: ParcelVerificationSheet artik ParcelPicker'a ref geciyor.
+    ParcelPicker: React.forwardRef((_props: unknown, _ref: unknown) => <div data-testid="parcel-picker" />),
 }))
 
 /** `matchMedia`yi verilen platforma gore sabitler. */
