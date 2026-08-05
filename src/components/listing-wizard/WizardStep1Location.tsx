@@ -16,6 +16,7 @@ interface Props {
 export function WizardStep1Location({ data, onChange }: Props) {
   const [sheetOpen, setSheetOpen] = useState(false)
   const isVerified = data.parcelStatus === 'verified' && data.parcel
+  const hasUnverifiedLocation = !isVerified && data.lat != null && data.lng != null
 
   return (
     <div className={styles.stepContainer}>
@@ -62,6 +63,15 @@ export function WizardStep1Location({ data, onChange }: Props) {
               Değiştir
             </button>
           </div>
+        ) : hasUnverifiedLocation ? (
+          <div className={styles.parcelSummary}>
+            <div className={styles.parcelSummaryText}>
+              <span>Konum işaretlendi, TKGM doğrulaması yapılmadı.</span>
+            </div>
+            <button type="button" className={styles.parcelChangeBtn} onClick={() => setSheetOpen(true)}>
+              Değiştir
+            </button>
+          </div>
         ) : (
           <button type="button" className={styles.parcelTriggerBtn} onClick={() => setSheetOpen(true)}>
             📍 Konumu Haritadan Seç
@@ -74,6 +84,7 @@ export function WizardStep1Location({ data, onChange }: Props) {
         isOpen={sheetOpen}
         onClose={() => setSheetOpen(false)}
         hideApply
+        initialValue={{ lat: data.lat, lng: data.lng, parcel: data.parcel, status: data.parcelStatus }}
         onConfirm={({ parcelValue }) => {
           onChange({
             lat: parcelValue.lat,

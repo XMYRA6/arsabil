@@ -184,4 +184,21 @@ describe('ParcelVerificationSheet', () => {
             expect(screen.getByTestId('parcel-lng')).toHaveTextContent('29')
         })
     })
+
+    it('initialValue verildiginde ParcelPicker acilista o degerle dolu render edilir', async () => {
+        render(
+            <ParcelVerificationSheet
+                isOpen
+                onClose={jest.fn()}
+                onConfirm={jest.fn()}
+                initialValue={{ lat: 41.0, lng: 29.0, parcel: VERIFIED_PARCEL, status: 'verified' }}
+            />,
+        )
+        await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+        // simulate-verify'a hic tiklamadan, ParcelPicker'a gecen ilk deger
+        // dogrudan initialValue'dan gelmis olmali.
+        expect(screen.getByTestId('parcel-lat')).toHaveTextContent('41')
+        expect(screen.getByTestId('parcel-lng')).toHaveTextContent('29')
+    })
 })

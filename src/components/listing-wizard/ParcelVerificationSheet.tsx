@@ -18,18 +18,18 @@ export type ParcelVerificationSheetProps = {
     }) => void
     /** True ise RiskSuggestionCard'in Uygula butonu gizlenir (bkz. RiskSuggestionCard). */
     hideApply?: boolean
+    /** Sheet acilirken haritayi mevcut bir secimle onceden doldurmak icin (ornegin ilan
+     * duzenleme akisinda). Verilmezse bos baslar (mevcut /hesapla davranisi degismez). */
+    initialValue?: ParcelPickerValue
 }
 
 type Mode = 'map' | 'manual'
 
-export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply = false }: ParcelVerificationSheetProps) {
+export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply = false, initialValue }: ParcelVerificationSheetProps) {
     const [mode, setMode] = useState<Mode>('map')
-    const [parcelValue, setParcelValue] = useState<ParcelPickerValue>({
-        lat: null,
-        lng: null,
-        parcel: null,
-        status: 'idle',
-    })
+    const [parcelValue, setParcelValue] = useState<ParcelPickerValue>(
+        initialValue ?? { lat: null, lng: null, parcel: null, status: 'idle' },
+    )
     const [risk, setRisk] = useState<RiskMeasurement | null>(null)
     const [suggestedRiskPercent, setSuggestedRiskPercent] = useState<number | null>(null)
     const [isFetchingRisk, setIsFetchingRisk] = useState(false)

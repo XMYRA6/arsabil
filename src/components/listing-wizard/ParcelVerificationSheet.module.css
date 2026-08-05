@@ -225,4 +225,8 @@
         background: rgba(var(--seal-accent-rgb), 0.05);
         border-color: var(--seal-border);
     }
+
+    .largeMap {
+        height: 350px !important;
+    }
 }

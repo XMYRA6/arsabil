@@ -30,7 +30,7 @@
     height: 36px;
     border-radius: 50%;
     border: 1px solid var(--border);
-    background: var(--card-bg);
+    background: var(--panel);
     color: var(--text);
     display: flex;
     align-items: center;
