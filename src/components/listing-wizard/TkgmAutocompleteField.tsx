@@ -80,7 +80,8 @@ export function TkgmAutocompleteField({
                 placeholder={placeholder}
                 autoComplete="off"
                 role="combobox"
-                aria-expanded={open}
+                aria-expanded={open && matches.length > 0}
+                aria-activedescendant={activeIndex >= 0 && matches[activeIndex] ? `${id}-option-${matches[activeIndex].id}` : undefined}
                 aria-controls={`${id}-listbox`}
                 onChange={e => {
                     onInputChange(e.target.value)
@@ -96,6 +97,7 @@ export function TkgmAutocompleteField({
                     {matches.map((item, idx) => (
                         <li
                             key={item.id}
+                            id={`${id}-option-${item.id}`}
                             role="option"
                             aria-selected={idx === activeIndex}
                             className={idx === activeIndex ? `${styles.option} ${styles.optionActive}` : styles.option}
