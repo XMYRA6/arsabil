@@ -37,12 +37,16 @@ jest.mock('@/components/charts/SensitivityChart', () => ({ SensitivityChart: () 
 jest.mock('@/components/charts/BreakEvenChart', () => ({ BreakEvenChart: () => <div /> }))
 jest.mock('@/components/FinancialDashboard', () => ({ FinancialDashboard: () => <div /> }))
 
-jest.mock('@/components/listing-wizard/ParcelPicker', () => ({
-    // Leaflet jsdom'da mount edilemez; burada haritanin kendisi degil
-    // ParcelVerificationSheet'in VARLIGI test ediliyor. forwardRef ile
-    // sarmalanmis: ParcelVerificationSheet artik ParcelPicker'a ref geciyor.
-    ParcelPicker: React.forwardRef((_props: unknown, _ref: unknown) => <div data-testid="parcel-picker" />),
-}))
+jest.mock('@/components/listing-wizard/ParcelPicker', () => {
+    const MockParcelPicker = React.forwardRef((_props: unknown, _ref: unknown) => <div data-testid="parcel-picker" />)
+    MockParcelPicker.displayName = 'MockParcelPicker'
+    return {
+        // Leaflet jsdom'da mount edilemez; burada haritanin kendisi degil
+        // ParcelVerificationSheet'in VARLIGI test ediliyor. forwardRef ile
+        // sarmalanmis: ParcelVerificationSheet artik ParcelPicker'a ref geciyor.
+        ParcelPicker: MockParcelPicker,
+    }
+})
 
 /** `matchMedia`yi verilen platforma gore sabitler. */
 function viewportKur(masaustu: boolean) {
