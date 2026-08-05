@@ -73,4 +73,14 @@ describe('RiskSuggestionCard', () => {
         render(<RiskSuggestionCard risk={RISK} onApply={jest.fn()} />)
         expect(screen.getByRole('button', { name: /uygula/i })).toBeInTheDocument()
     })
+
+    it('hideApply true iken Uygula butonu hic render edilmez (wizard baglaminda uygulanacak yer yok)', () => {
+        render(<RiskSuggestionCard risk={RISK} onApply={jest.fn()} hideApply />)
+        expect(screen.queryByRole('button', { name: /uygula/i })).not.toBeInTheDocument()
+    })
+
+    it('hideApply verilmezse (varsayilan false) mevcut davranis korunur', () => {
+        render(<RiskSuggestionCard risk={RISK} onApply={jest.fn()} />)
+        expect(screen.getByRole('button', { name: /uygula/i })).toBeInTheDocument()
+    })
 })

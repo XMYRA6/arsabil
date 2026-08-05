@@ -7,6 +7,8 @@ interface Props {
     risk: RiskMeasurement
     /** Yüzde cinsinden risk seviyesi — /hesapla `riskLevel` state'i bu birimde. */
     onApply: (riskLevelPercent: number) => void
+    /** True iken Uygula butonu render edilmez (wizard baglaminda uygulanacak riskLevel yok). */
+    hideApply?: boolean
 }
 
 function formatDistance(m: number | null): string {
@@ -14,7 +16,7 @@ function formatDistance(m: number | null): string {
     return m >= 1000 ? `${(m / 1000).toFixed(1).replace('.', ',')} km` : `${m} m`
 }
 
-export function RiskSuggestionCard({ risk, onApply }: Props) {
+export function RiskSuggestionCard({ risk, onApply, hideApply = false }: Props) {
     const percent = Math.round((risk.suggestedR - 1) * 100)
 
     return (
@@ -41,7 +43,7 @@ export function RiskSuggestionCard({ risk, onApply }: Props) {
                 diğer bilinmezliklerini içeren toplam riskini temsil etmez.
             </p>
 
-            {percent > 0 && (
+            {percent > 0 && !hideApply && (
                 <button type="button" className={styles.applyBtn} onClick={() => onApply(percent)}>
                     Uygula
                 </button>
