@@ -71,16 +71,16 @@ describe('wizard mobil mühür kimliği (Faz 2.5)', () => {
     expect(mobile).toMatch(/\.card\s*\{[^}]*background:\s*var\(--seal-surface\)/);
   });
 
-  it('.stickyNextBtn seal aksan dolgusu, .stickyBackBtn outline almalı', () => {
+  it('.stickyNextBtn seal aksan dolgusu (koyultulmuş ton — whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, AA altında), .stickyBackBtn outline almalı', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.stickyNextBtn\s*\{[^}]*background:\s*var\(--seal-accent\)/);
+    expect(mobile).toMatch(/\.stickyNextBtn\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
     expect(mobile).toMatch(/\.stickyBackBtn\s*\{[^}]*border:\s*1px solid var\(--seal-border\)/);
   });
 
-  it('WizardProgress aktif/tamamlanmış durumları mobilde seal aksanı tüketmeli', () => {
+  it('WizardProgress aktif/tamamlanmış durumları mobilde seal aksanı tüketmeli (daire arkaplanı koyultulmuş ton — beyaz rakam metni için kontrast)', () => {
     const mobile = progressCss.slice(progressCss.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.circleActive\s*\{[^}]*background:\s*var\(--seal-accent\)/);
-    expect(mobile).toMatch(/\.circleDone\s*\{[^}]*background:\s*var\(--seal-accent\)/);
+    expect(mobile).toMatch(/\.circleActive\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+    expect(mobile).toMatch(/\.circleDone\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
     expect(mobile).toMatch(/\.connectorDone\s*\{[^}]*background:\s*var\(--seal-accent\)/);
     expect(mobile).toMatch(/\.connectorActive\s*\{[^}]*background:\s*var\(--seal-accent\)/);
   });

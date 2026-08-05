@@ -135,7 +135,7 @@
   }
 
   .stickyNextBtn {
-    background: var(--seal-accent);
+    background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
     color: #fff;
   }
 }

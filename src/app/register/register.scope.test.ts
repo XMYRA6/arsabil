@@ -43,6 +43,10 @@ describe('register mobil mühür kimliği (Faz 2.5)', () => {
     expect(css).toMatch(/button\.sealSubmit\s*\{/);
   });
 
+  it('button.sealSubmit arkaplanı koyultulmuş ton olmalı — whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, WCAG AA 4.5:1 altında', () => {
+    expect(css).toMatch(/button\.sealSubmit\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+  });
+
   it('page.tsx override sınıflarını gerçekten geçiriyor olmalı', () => {
     expect(tsx).toMatch(/styles\.sealCard/);
     expect(tsx).toMatch(/styles\.sealInput/);
