@@ -67,4 +67,6 @@ export const RATE_LIMITS = {
     PARCEL_LOOKUP_ANON: { limit: 5, windowMs: 60_000 }, // IP başına 5/dk (anonim botları engellemek için)
     RISK_LOOKUP: { limit: 20, windowMs: 60_000 },   // kullanıcı başına 20/dk (PARCEL_LOOKUP ile aynı eşik)
     RISK_TILES: { limit: 300, windowMs: 60_000 },   // IP başına 300/dk — tek harita görünümü onlarca tile ister
+    TKGM_IDARI_YAPI: { limit: 30, windowMs: 60_000 },      // kullanici basina 30/dk (il/ilce/mahalle otomatik tamamlama)
+    TKGM_IDARI_YAPI_ANON: { limit: 10, windowMs: 60_000 }, // IP basina 10/dk
 } as const
