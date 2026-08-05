@@ -226,7 +226,49 @@
         border-color: var(--seal-border);
     }
 
-    .largeMap {
-        height: 350px !important;
+    /* BottomSheet'in kendi .content'i (16px) zaten dis bosluk sagliyor — bu
+       dosyanin masaustu icin tasarlanmis 24px+20px-gap degerleri mobilde
+       BottomSheet'in ustune binip cift bosluk yaratiyordu. Canli olcum:
+       390x844 + 34px iOS safe-area'da bu tek basina "Hesaplamaya Aktar"
+       butonunu ekranin ~yarisi kadar disina itiyordu. */
+    .content {
+        padding: 0;
+        gap: 14px;
+    }
+
+    .verifiedSummary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(var(--green-rgb), 0.35);
+        background: rgba(var(--green-rgb), 0.06);
+    }
+
+    .verifiedSummaryText {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 0.85rem;
+        color: var(--label-color);
+    }
+
+    .verifiedSummaryText strong {
+        color: var(--card-title);
+        font-size: 0.9rem;
+    }
+
+    .changeBtn {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--seal-border);
+        background: var(--panel);
+        color: var(--seal-accent);
+        font-weight: 700;
+        font-size: 0.78rem;
+        cursor: pointer;
+        white-space: nowrap;
     }
 }

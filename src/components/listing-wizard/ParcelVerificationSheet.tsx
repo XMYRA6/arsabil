@@ -5,8 +5,15 @@ import { ParcelPicker, type ParcelPickerValue, type ParcelPickerHandle } from '.
 import { ManualParcelEntryForm, type ManualParcelReference } from './ManualParcelEntryForm'
 import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard'
 import { BottomSheet } from '@/components/mobile/BottomSheet'
+import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import type { RiskMeasurement } from '@/lib/risk/types'
 import styles from './ParcelVerificationSheet.module.css'
+
+const LONG_HINT =
+    'Arsanızın konumunu harita üzerinden işaretleyin. Sistem, Tapu ve Kadastro Genel Müdürlüğü ' +
+    '(TKGM) kayıtlarından gerçek alan (m²) ve nitelik bilgisini, ayrıca deprem ve fay hattı risk ' +
+    'durumunu otomatik sorgulayacaktır.'
+const SHORT_HINT = 'Arsanızın bulunduğu noktaya haritadan tıklayın.'
 
 export type ParcelVerificationSheetProps = {
     isOpen: boolean
@@ -93,51 +100,85 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
         onClose()
     }
 
+    // Mobilde parsel dogrulaninca harita + toggle + uzun aciklama kaldirilip
+    // yerine kompakt bir ozet konur (mockup'in "dogrulandi" ekraniyle ayni
+    // fikir) — gercek bir iOS PWA'da (env(safe-area-inset-bottom) > 0)
+    // harita + toggle + uzun metin + sonuc kartlari ust uste bindiginde
+    // "Hesaplamaya Aktar" butonu ekranin tamamen disina tasiyordu (canli
+    // olculdu: 390x844 + 34px safe-area'da buton 99-164px gorunmez alanda
+    // kaliyordu). Masaustunde bu sikistirma YAPILMAZ — orada zaten yer var
+    // ve harita her zaman gorunur kalmasi beklenen davranistir.
+    const isVerifiedCompact = !isDesktopViewport && parcelValue.status === 'verified' && parcelValue.parcel
+
     const body = (
         <div className={styles.content}>
-            <p className={styles.instructions}>
-                Arsanızın konumunu harita üzerinden işaretleyin. Sistem, Tapu ve Kadastro
-                Genel Müdürlüğü (TKGM) kayıtlarından gerçek alan (m²) ve nitelik bilgisini,
-                ayrıca deprem ve fay hattı risk durumunu otomatik sorgulayacaktır.
-            </p>
-
-            <div className={styles.toggleRow}>
-                <button
-                    type="button"
-                    className={`${styles.modeBtn} ${mode === 'map' ? styles.modeBtnOn : ''}`}
-                    onClick={() => setMode('map')}
-                >
-                    Haritadan
-                </button>
-                <button
-                    type="button"
-                    className={`${styles.modeBtn} ${mode === 'manual' ? styles.modeBtnOn : ''}`}
-                    onClick={() => setMode('manual')}
-                >
-                    Elle gir
-                </button>
-            </div>
-
-            {mode === 'map' ? (
-                <ParcelPicker
-                    ref={pickerRef}
-                    value={parcelValue}
-                    onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
-                    mapClassName={styles.largeMap}
-                    hint="Arsanızın bulunduğu noktaya haritadan tıklayın."
-                />
-            ) : (
-                <ManualParcelEntryForm onLocationFound={handleManualFound} />
-            )}
-
-            {manualRef && (
-                <div className={styles.manualNote}>
-                    Kullanıcı beyanı: {[
-                        manualRef.mahalle && `${manualRef.mahalle} Mah.`,
-                        manualRef.ada && `Ada ${manualRef.ada}`,
-                        manualRef.parsel && `Parsel ${manualRef.parsel}`,
-                    ].filter(Boolean).join(', ') || `${manualRef.ilce}, ${manualRef.il}`} — TKGM sonucuyla karşılaştırın.
+            {isVerifiedCompact ? (
+                <div className={styles.verifiedSummary}>
+                    <div className={styles.verifiedSummaryText}>
+                        <strong>
+                            {formatParcelIdentity({
+                                adaNo: parcelValue.parcel!.adaNo,
+                                parselNo: parcelValue.parcel!.parselNo,
+                                neighborhood: null,
+                            })}
+                        </strong>
+                        <span>
+                            {parcelValue.parcel!.mahalle} · {parcelValue.parcel!.quality} · {parcelValue.parcel!.areaSqm.toLocaleString('tr-TR')} m²
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        className={styles.changeBtn}
+                        onClick={() => setParcelValue(v => ({ ...v, status: 'idle', parcel: null }))}
+                    >
+                        Değiştir
+                    </button>
                 </div>
+            ) : (
+                <>
+                    <p className={styles.instructions}>
+                        {isDesktopViewport ? LONG_HINT : SHORT_HINT}
+                    </p>
+
+                    <div className={styles.toggleRow}>
+                        <button
+                            type="button"
+                            className={`${styles.modeBtn} ${mode === 'map' ? styles.modeBtnOn : ''}`}
+                            onClick={() => setMode('map')}
+                        >
+                            Haritadan
+                        </button>
+                        <button
+                            type="button"
+                            className={`${styles.modeBtn} ${mode === 'manual' ? styles.modeBtnOn : ''}`}
+                            onClick={() => setMode('manual')}
+                        >
+                            Elle gir
+                        </button>
+                    </div>
+
+                    {mode === 'map' ? (
+                        <ParcelPicker
+                            ref={pickerRef}
+                            value={parcelValue}
+                            onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
+                            mapClassName={isDesktopViewport ? styles.largeMap : undefined}
+                            hint={SHORT_HINT}
+                        />
+                    ) : (
+                        <ManualParcelEntryForm onLocationFound={handleManualFound} />
+                    )}
+
+                    {manualRef && (
+                        <div className={styles.manualNote}>
+                            Kullanıcı beyanı: {[
+                                manualRef.mahalle && `${manualRef.mahalle} Mah.`,
+                                manualRef.ada && `Ada ${manualRef.ada}`,
+                                manualRef.parsel && `Parsel ${manualRef.parsel}`,
+                            ].filter(Boolean).join(', ') || `${manualRef.ilce}, ${manualRef.il}`} — TKGM sonucuyla karşılaştırın.
+                        </div>
+                    )}
+                </>
             )}
 
             {isFetchingRisk && (

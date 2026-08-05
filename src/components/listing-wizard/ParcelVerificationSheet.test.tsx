@@ -185,7 +185,8 @@ describe('ParcelVerificationSheet', () => {
         })
     })
 
-    it('initialValue verildiginde ParcelPicker acilista o degerle dolu render edilir', async () => {
+    it('initialValue verildiginde ParcelPicker acilista o degerle dolu render edilir (masaustu)', async () => {
+        viewportKur(true) // masaustu — dogrulanmis olsa da harita HER ZAMAN gorunur
         render(
             <ParcelVerificationSheet
                 isOpen
@@ -200,5 +201,74 @@ describe('ParcelVerificationSheet', () => {
         // dogrudan initialValue'dan gelmis olmali.
         expect(screen.getByTestId('parcel-lat')).toHaveTextContent('41')
         expect(screen.getByTestId('parcel-lng')).toHaveTextContent('29')
+    })
+
+    describe('mobil — dogrulandiktan sonra harita gizlenir (iOS safe-area tasma duzeltmesi)', () => {
+        it('mobilde parsel dogrulaninca harita/toggle kalkar, kompakt ozet gorunur', async () => {
+            viewportKur(false) // mobil
+            render(
+                <ParcelVerificationSheet
+                    isOpen
+                    onClose={jest.fn()}
+                    onConfirm={jest.fn()}
+                    initialValue={{ lat: 41.0, lng: 29.0, parcel: VERIFIED_PARCEL, status: 'verified' }}
+                />,
+            )
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('parcel-picker')).not.toBeInTheDocument()
+                expect(screen.queryByRole('button', { name: 'Haritadan' })).not.toBeInTheDocument()
+                expect(screen.queryByRole('button', { name: 'Elle gir' })).not.toBeInTheDocument()
+            })
+            expect(screen.getByText(/Kırkkepenekli/)).toBeInTheDocument()
+            expect(screen.getByText(/830 m²/)).toBeInTheDocument()
+        })
+
+        it('masaustunde parsel dogrulanmis olsa da harita/toggle gizlenmez (masaustu davranisi degismedi)', async () => {
+            viewportKur(true) // masaustu
+            render(
+                <ParcelVerificationSheet
+                    isOpen
+                    onClose={jest.fn()}
+                    onConfirm={jest.fn()}
+                    initialValue={{ lat: 41.0, lng: 29.0, parcel: VERIFIED_PARCEL, status: 'verified' }}
+                />,
+            )
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+            expect(screen.getByRole('button', { name: 'Haritadan' })).toBeInTheDocument()
+        })
+
+        it('mobil kompakt ozette Degistir tiklaninca harita/toggle geri doner', async () => {
+            viewportKur(false)
+            render(
+                <ParcelVerificationSheet
+                    isOpen
+                    onClose={jest.fn()}
+                    onConfirm={jest.fn()}
+                    initialValue={{ lat: 41.0, lng: 29.0, parcel: VERIFIED_PARCEL, status: 'verified' }}
+                />,
+            )
+            await waitFor(() => expect(screen.queryByTestId('parcel-picker')).not.toBeInTheDocument())
+
+            fireEvent.click(screen.getByRole('button', { name: 'Değiştir' }))
+
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+            expect(screen.queryByText(/Kırkkepenekli/)).not.toBeInTheDocument()
+        })
+
+        it('mobilde ipucu metni mockup ile ayni kisa cumle olmali, masaustunde eski uzun metin kalir', async () => {
+            viewportKur(false)
+            render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+            expect(screen.getByText('Arsanızın bulunduğu noktaya haritadan tıklayın.')).toBeInTheDocument()
+            expect(screen.queryByText(/Tapu ve Kadastro Genel Müdürlüğü/)).not.toBeInTheDocument()
+        })
+
+        it('masaustunde eski uzun ipucu metni korunur', async () => {
+            viewportKur(true)
+            render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+            expect(screen.getByText(/Tapu ve Kadastro Genel Müdürlüğü/)).toBeInTheDocument()
+        })
     })
 })
