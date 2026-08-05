@@ -1,0 +1,75 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.instructions {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--label-color);
+}
+
+.row {
+    display: flex;
+    gap: 12px;
+}
+
+.field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--label-color);
+}
+
+.input {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.errorNote {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--orange-rgb), 0.35);
+    background: rgba(var(--orange-rgb), 0.07);
+    font-size: 0.82rem;
+    color: var(--label-color);
+}
+
+.searchBtn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    background: var(--brand-gradient);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.searchBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .searchBtn {
+        min-height: 44px;
+    }
+}
