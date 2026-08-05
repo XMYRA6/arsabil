@@ -22,7 +22,7 @@ describe('inbox mobil mühür kimliği (Faz 2.5) — kabuk', () => {
   });
 
   it('kabuk yüzeyleri seal-surface tüketmeli', () => {
-    expect(mobile()).toMatch(/\.sidebar\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+    expect(mobile()).toMatch(/\[data-theme="dark"\]\s*\.sidebar,\s*\[data-theme="light"\]\s*\.sidebar\s*\{[^}]*background:\s*var\(--seal-surface\)/);
     expect(mobile()).toMatch(/\.chatHeader\s*\{[^}]*background:\s*var\(--seal-surface\)/);
     expect(mobile()).toMatch(/\.inputArea\s*\{[^}]*background:\s*var\(--seal-surface\)/);
   });
@@ -42,10 +42,11 @@ describe('inbox mobil mühür kimliği (Faz 2.5) — kabuk', () => {
     expect(newRules![1]).not.toMatch(/border-color:[^;]*!important/);
   });
 
-  it('.sidebar arkaplanı !important taşımalı — canlı doğrulama, mobil slide-panel .sidebar kuralının (satır ~506) !important background\'ının aksi halde kazandığını kanıtladı', () => {
-    const sealSidebarRule = mobile().match(/\n\s*\.sidebar\s*\{\s*background:\s*var\(--seal-surface\)[^}]*\}/);
+  it('.sidebar arkaplanı tema-scoped seçici + !important taşımalı — düz `.sidebar` + !important, mevcut mobil .sidebar !important kuralıyla (satır ~506) aynı specificity\'de kalıp yalnızca kaynak sırasına güvenirdi (plan kısıtı: "kuralı sona koymaya güvenme"); tema-scoped seçici (0,2,0) sıralamadan bağımsız kazanır', () => {
+    const sealSidebarRule = mobile().match(/\[data-theme="dark"\]\s*\.sidebar,\s*\[data-theme="light"\]\s*\.sidebar\s*\{([^}]*)\}/);
     expect(sealSidebarRule).not.toBeNull();
-    expect(sealSidebarRule![0]).toMatch(/background:\s*var\(--seal-surface\)\s*!important/);
+    expect(sealSidebarRule![1]).toMatch(/background:\s*var\(--seal-surface\)\s*!important/);
+    expect(mobile()).not.toMatch(/\n\s*\.sidebar\s*\{\s*background:\s*var\(--seal-surface\)/);
   });
 
   it('.unreadBadge semantik rengi kimliğe alınmamalı', () => {

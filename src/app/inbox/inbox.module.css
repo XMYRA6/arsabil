@@ -562,8 +562,12 @@
         --seal-border: var(--shell-border);
     }
 
-    .sidebar {
+    [data-theme="dark"] .sidebar,
+    [data-theme="light"] .sidebar {
         background: var(--seal-surface) !important;
+    }
+
+    .sidebar {
         border-right-color: var(--seal-border);
     }
 
