@@ -13,6 +13,13 @@
     background: var(--input-bg);
 }
 
+/* ParcelVerificationSheet'in tam-ekran mobil moduna ozel: sabit piksel
+   yukseklik yerine .mapWrapper'in (flex:1 ile) kendisine ayrilan kalan
+   dikey alani doldurur. */
+.mapGrow {
+    height: 100% !important;
+}
+
 .hint {
     font-size: 0.8rem;
     color: var(--label-color);
@@ -20,6 +27,11 @@
 
 .mapWrapper {
     position: relative;
+    /* Ayni gerekce: ust flex zincirinde gercek "artik" alan yoksa no-op'tur —
+       yalnizca ParcelVerificationSheet'in tam-ekran modunda (.pickerGrow +
+       .mapGrow ikilisi) map'in kendisi kalan dikey alani doldurur. */
+    flex: 1;
+    min-height: 0;
 }
 
 .locateBtn {

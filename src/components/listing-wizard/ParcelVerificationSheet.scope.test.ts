@@ -37,4 +37,8 @@ describe('ParcelVerificationSheet mobil mühür kimliği', () => {
         const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'))
         expect(desktop).not.toMatch(/--seal-/)
     })
+
+    it('.sheet mobilde tam ekran yuksekligine cikabilmeli (mockup: sayfayi dolduran sheet, BottomSheet.module.css\'in varsayilan 85dvh "peek" kapagi degil) — !important, ayni cakisma gerekcesiyle', () => {
+        expect(mobile()).toMatch(/\.sheet\s*\{[^}]*max-height:\s*calc\(100dvh\s*-\s*var\(--safe-top,\s*0px\)\)\s*!important/)
+    })
 })

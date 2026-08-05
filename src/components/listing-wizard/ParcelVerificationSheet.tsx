@@ -8,6 +8,7 @@ import { BottomSheet } from '@/components/mobile/BottomSheet'
 import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import type { RiskMeasurement } from '@/lib/risk/types'
 import styles from './ParcelVerificationSheet.module.css'
+import pickerStyles from './ParcelPicker.module.css'
 
 const LONG_HINT =
     'Arsanızın konumunu harita üzerinden işaretleyin. Sistem, Tapu ve Kadastro Genel Müdürlüğü ' +
@@ -110,6 +111,15 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
     // ve harita her zaman gorunur kalmasi beklenen davranistir.
     const isVerifiedCompact = !isDesktopViewport && parcelValue.status === 'verified' && parcelValue.parcel
 
+    // Mockup bu akisi TAM EKRAN sunuyordu — BottomSheet'in varsayilan 85dvh
+    // "peek" kapagi (sayfanin bir kismini arkada gorunur birakan, hafif
+    // panellere uygun bir tasarim) burada kullanicinin kendi gozlemiyle
+    // eslesmiyordu: "mockup'ta tam sayfa, biz hala yarim sayfa yapiyoruz".
+    // Yalnizca dogrulanmamisken (harita/elle-giris) uygulanir — dogrulama
+    // sonrasi kompakt ozet kendi dogal boyunda kalir, altinda bos alan
+    // birakmaz.
+    const isPickingFullHeight = !isDesktopViewport && !isVerifiedCompact
+
     const body = (
         <div className={styles.content}>
             {isVerifiedCompact ? (
@@ -162,7 +172,8 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
                             ref={pickerRef}
                             value={parcelValue}
                             onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
-                            mapClassName={isDesktopViewport ? styles.largeMap : undefined}
+                            className={isPickingFullHeight ? styles.pickerGrow : undefined}
+                            mapClassName={isDesktopViewport ? styles.largeMap : (isPickingFullHeight ? pickerStyles.mapGrow : undefined)}
                             hint={SHORT_HINT}
                         />
                     ) : (
@@ -214,7 +225,12 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
 
     if (!isDesktopViewport) {
         return (
-            <BottomSheet open onClose={onClose} title="Haritadan Parsel Doğrula" className={styles.sheet}>
+            <BottomSheet
+                open
+                onClose={onClose}
+                title="Haritadan Parsel Doğrula"
+                className={isPickingFullHeight ? `${styles.sheet} ${styles.sheetPicking}` : styles.sheet}
+            >
                 {body}
                 <div className={styles.mobileFooter}>{applyBtn}</div>
             </BottomSheet>

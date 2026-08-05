@@ -203,6 +203,30 @@
     .sheet {
         background: var(--seal-surface) !important;
         border-top-color: var(--seal-border) !important;
+        /* Mockup bu akisi tam ekran sunuyor — BottomSheet.module.css'in
+           varsayilan 85dvh "peek" kapagi (arkada sayfanin bir kismini
+           gorunur birakan, GelismisAyarlarSheet gibi hafif panellere uygun
+           tasarim) burada mockup'la eslesmiyordu. --safe-top cikarilir ki
+           yuvarlatilmis ust koseler gercek bir centikli/Dynamic Island'li
+           cihazda donanimin altina girmesin. */
+        max-height: calc(100dvh - var(--safe-top, 0px)) !important;
+    }
+
+    /* Parsel henuz dogrulanmamisken (harita/elle-giris modu) sheet'i sadece
+       85dvh'e KADAR buyuyebilir degil, GERCEKTEN o yuksekliğe zorlanir —
+       icerik artik kompakt oldugu icin (bkz. onceki duzeltme) max-height tek
+       basina yetmiyordu, sheet kendi icerigine gore kuculuyordu. Dogrulama
+       sonrasi (.isVerifiedCompact) bu sinif UYGULANMAZ — kisa ozet + risk
+       karti kendi dogal boyunda kalir, altinda bos alan birakmaz. */
+    .sheetPicking {
+        height: calc(100dvh - var(--safe-top, 0px)) !important;
+    }
+
+    /* ParcelPicker'in .wrapper'ina eklenir — haritanin kendisi kalan dikey
+       alani doldursun diye (bkz. ParcelPicker.module.css .mapWrapper/.mapGrow). */
+    .pickerGrow {
+        flex: 1;
+        min-height: 0;
     }
 
     .modeBtn {
@@ -234,6 +258,11 @@
     .content {
         padding: 0;
         gap: 14px;
+        /* Aradaki halka: BottomSheet'in .content'i (flex:1) ile ParcelPicker'in
+           .mapWrapper'i (flex:1) arasinda — bu esnemezse disaridan zorlanan
+           yukseklik (.sheetPicking) haritaya kadar ulasmaz. */
+        flex: 1;
+        min-height: 0;
     }
 
     .verifiedSummary {
