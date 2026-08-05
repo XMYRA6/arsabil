@@ -599,4 +599,8 @@
         background: rgba(var(--seal-accent-rgb), 0.12) !important;
         border-color: rgba(var(--seal-accent-rgb), 0.28);
     }
+
+    .bubbleMine {
+        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
+    }
 }

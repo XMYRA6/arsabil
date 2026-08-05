@@ -57,10 +57,34 @@ describe('inbox mobil mühür kimliği (Faz 2.5) — kabuk', () => {
     expect(mobile()).not.toMatch(/--seal-text:/);
   });
 
-  it('bubble sınıfları (Task 5 kapsamı) dokunulmamış olmalı', () => {
-    expect(mobile()).not.toMatch(/\.bubble\s*\{[^}]*--seal/);
-    expect(mobile()).not.toMatch(/\.bubbleMine\s*\{[^}]*--seal/);
+  it('.bubbleTheirs ve .messagesArea kimliğe alınmamış olmalı (Task 5 sonrası da geçerli: bubbleTheirs okunabilirlik kararıyla, messagesArea hiç dahil değil)', () => {
     expect(mobile()).not.toMatch(/\.bubbleTheirs\s*\{[^}]*--seal/);
     expect(mobile()).not.toMatch(/\.messagesArea\s*\{[^}]*--seal/);
+  });
+});
+
+describe('inbox mobil mühür kimliği (Faz 2.5) — sohbet balonları', () => {
+  it('.bubbleMine mobilde seal aksanına geçmeli — koyultulmuş ton (kontrast ölçümü: düz --seal-accent üzerinde beyaz metin 3.868:1, WCAG AA 4.5:1 eşiğinin altında; color-mix ile #0F2A43\'e 18% karıştırılmış hal canlı ölçümde 4.87:1 veriyor)', () => {
+    expect(mobile()).toMatch(/\.bubbleMine\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+  });
+
+  it('.bubbleMine masaüstünde brand-gradient olarak KALMALI', () => {
+    const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
+    expect(desktop).toMatch(/\.bubbleMine\s*\{[^}]*background:\s*var\(--brand-gradient\)/);
+  });
+
+  it('.bubbleTheirs kimliğe alınmamalı (okunabilirlik kararı)', () => {
+    expect(mobile()).not.toMatch(/\.bubbleTheirs\s*\{[^}]*--seal|\.bubbleTheirs\s*\{[^}]*seal-accent/);
+  });
+
+  it('kaydırılan mesaj listesine backdrop-filter eklenmemeli (performans kararı)', () => {
+    expect(mobile()).not.toMatch(/\.messagesArea\s*\{[^}]*backdrop-filter/);
+    expect(mobile()).not.toMatch(/\.bubble\s*\{[^}]*backdrop-filter/);
+    expect(mobile()).not.toMatch(/\.bubbleMine\s*\{[^}]*backdrop-filter/);
+  });
+
+  it('.bubbleMine köşe yarıçapı korunmalı (kuyruk yönü değişmesin)', () => {
+    const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
+    expect(desktop).toMatch(/\.bubbleMine\s*\{[^}]*border-radius:\s*22px 22px 4px 22px/);
   });
 });
