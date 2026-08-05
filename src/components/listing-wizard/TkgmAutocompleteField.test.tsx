@@ -10,7 +10,9 @@ const ITEMS: IdariYapiItem[] = [
     { id: 3, text: 'İzmir' },
 ]
 
-function Wrapper({ items = ITEMS, disabled = false }: { items?: IdariYapiItem[]; disabled?: boolean }) {
+function Wrapper({
+    items = ITEMS, disabled = false, onSelectSpy,
+}: { items?: IdariYapiItem[]; disabled?: boolean; onSelectSpy?: (item: IdariYapiItem) => void }) {
     const [value, setValue] = useState('')
     const [selected, setSelected] = useState<IdariYapiItem | null>(null)
     return (
@@ -22,7 +24,7 @@ function Wrapper({ items = ITEMS, disabled = false }: { items?: IdariYapiItem[];
                 items={items}
                 value={value}
                 onInputChange={setValue}
-                onSelect={item => { setSelected(item); setValue(item.text) }}
+                onSelect={item => { setSelected(item); setValue(item.text); onSelectSpy?.(item) }}
                 disabled={disabled}
             />
             {selected && <span data-testid="selected">{selected.text}-{selected.id}</span>}
@@ -78,5 +80,51 @@ describe('TkgmAutocompleteField', () => {
     it('disabled iken input devre disidir', () => {
         render(<Wrapper disabled />)
         expect(screen.getByLabelText('İl *')).toBeDisabled()
+    })
+
+    // Canli Playwright ile yakalanan gercek bug: zaten secili (commit edilmis)
+    // bir alandan, deger DEGISTIRILMEDEN blur olununca (ornegin kullanici
+    // sadece bir SONRAKI alana tiklar/Tab basar) onSelect gereksiz yere
+    // TEKRAR tetikleniyordu. Tuketici tarafinda (ManualParcelEntryForm) her
+    // onSelect cagrisi "yeni bir secim" sayildigindan bu, asagi akan
+    // ilce/mahalle state'ini sessizce sifirliyor ve gereksiz bir fetch'i
+    // tekrarliyordu — kullanici sadece bir sonraki alana gecmeye
+    // calisirken form kendi kendini resetliyordu.
+    it('zaten secili alan deger degismeden tekrar blur olursa onSelect TEKRAR tetiklenmez', () => {
+        const onSelectSpy = jest.fn()
+        render(<Wrapper onSelectSpy={onSelectSpy} />)
+        const input = screen.getByLabelText('İl *')
+
+        fireEvent.change(input, { target: { value: 'İzmir' } })
+        fireEvent.click(screen.getByText('İzmir'))
+        expect(onSelectSpy).toHaveBeenCalledTimes(1)
+
+        // odak baska bir yere gidip (ornekte dogrudan blur), deger HIC
+        // degismeden geri gelmis gibi ikinci bir blur — gercek kullanicinin
+        // "sonraki alana tiklamasi" senaryosu.
+        fireEvent.blur(input)
+        expect(onSelectSpy).toHaveBeenCalledTimes(1)
+
+        fireEvent.focus(input)
+        fireEvent.blur(input)
+        expect(onSelectSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('secim sonrasi metin degistirilip AYNI degere geri donulurse onSelect yeniden tetiklenir', () => {
+        const onSelectSpy = jest.fn()
+        render(<Wrapper onSelectSpy={onSelectSpy} />)
+        const input = screen.getByLabelText('İl *')
+
+        fireEvent.change(input, { target: { value: 'İzmir' } })
+        fireEvent.click(screen.getByText('İzmir'))
+        expect(onSelectSpy).toHaveBeenCalledTimes(1)
+
+        // kullanici gercekten baska bir seye yazip sonra AYNI degere geri
+        // donerse (ornegin ebeveyn secimi araya girip sifirlamissa), bu
+        // gercek bir yeniden-secim sayilmali — onSelect tekrar tetiklenmeli.
+        fireEvent.change(input, { target: { value: 'İzmi' } })
+        fireEvent.change(input, { target: { value: 'İzmir' } })
+        fireEvent.blur(input)
+        expect(onSelectSpy).toHaveBeenCalledTimes(2)
     })
 })

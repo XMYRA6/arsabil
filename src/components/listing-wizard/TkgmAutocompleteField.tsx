@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import styles from './TkgmAutocompleteField.module.css'
 
@@ -27,12 +27,22 @@ export function TkgmAutocompleteField({
 }: Props) {
     const [open, setOpen] = useState(false)
     const [activeIndex, setActiveIndex] = useState(-1)
+    // Son commit edilen ogenin id'si. `handleBlur` her blur'da (yalnizca
+    // deger degistiginde degil) tetiklenir — bu ref olmadan, kullanici zaten
+    // secili bir alandan sadece bir SONRAKI alana TAB/tiklama ile gecince
+    // bile ayni oge yeniden "secilircesine" onSelect'i tetikliyordu; ebeveyn
+    // bunu YENI bir secim saniyor, asagi akan (ilce/mahalle) state'i sessizce
+    // sifirliyor ve gereksiz bir fetch'i tekrarliyordu (canli Playwright ile
+    // yakalandi — jsdom testleri bu "zaten secili alani terk etme" akisini
+    // hic zincirlemedigi icin gormemisti).
+    const lastCommittedIdRef = useRef<number | null>(null)
 
     const matches = value.trim() === ''
         ? items.slice(0, 8)
         : items.filter(item => turkishIncludes(item.text, value)).slice(0, 8)
 
     const commit = (item: IdariYapiItem) => {
+        lastCommittedIdRef.current = item.id
         onSelect(item)
         setOpen(false)
         setActiveIndex(-1)
@@ -40,10 +50,13 @@ export function TkgmAutocompleteField({
 
     const handleBlur = () => {
         // Tam metin eslesmesi varsa otomatik sec — serbest metin asla
-        // TKGM'ye ulasmadan disariya sizmaz (spec ilkesi).
+        // TKGM'ye ulasmadan disariya sizmaz (spec ilkesi). Ama eslesen oge
+        // zaten en son commit edilen oge ise (kullanici hicbir sey
+        // degistirmeden alani terk etti) yeniden commit ETMEYIZ — bkz.
+        // yukaridaki lastCommittedIdRef yorumu.
         const trimmed = value.trim().toLocaleLowerCase('tr')
         const exact = items.find(item => item.text.toLocaleLowerCase('tr') === trimmed)
-        if (exact) commit(exact)
+        if (exact && exact.id !== lastCommittedIdRef.current) commit(exact)
         setOpen(false)
     }
 
@@ -84,6 +97,11 @@ export function TkgmAutocompleteField({
                 aria-activedescendant={activeIndex >= 0 && matches[activeIndex] ? `${id}-option-${matches[activeIndex].id}` : undefined}
                 aria-controls={`${id}-listbox`}
                 onChange={e => {
+                    // Kullanici gercekten yazdiginda "son commit" gecersiz
+                    // sayilir — aksi halde silip AYNI metni yeniden yazmak
+                    // (ornegin ebeveyn araya girip secimi sifirlamissa) bir
+                    // daha asla commit tetiklemezdi.
+                    lastCommittedIdRef.current = null
                     onInputChange(e.target.value)
                     setOpen(true)
                     setActiveIndex(-1)
