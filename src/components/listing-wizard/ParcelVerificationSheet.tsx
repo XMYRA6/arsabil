@@ -230,6 +230,7 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
                 onClose={onClose}
                 title="Haritadan Parsel Doğrula"
                 className={isPickingFullHeight ? `${styles.sheet} ${styles.sheetPicking}` : styles.sheet}
+                showCloseButton
             >
                 {body}
                 <div className={styles.mobileFooter}>{applyBtn}</div>

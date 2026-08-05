@@ -127,4 +127,42 @@ describe('BottomSheet', () => {
         )
         expect(getByRole('dialog').className).toMatch(/custom-glass/)
     })
+
+    describe('showCloseButton', () => {
+        // Mockup bazi sheet'lerde (ornegin ParcelVerificationSheet) sadece
+        // ustte bir X kapatma butonu gosteriyor, surukleme tutamaci (grabber)
+        // yok. Varsayilan (showCloseButton verilmezse) mevcut grabber +
+        // surukle-kapat davranisi AYNEN korunur — bu yalnizca opt-in bir
+        // varyant.
+        it('verilmezse grabber gorunur, kapatma butonu yoktur', () => {
+            render(
+                <BottomSheet open onClose={jest.fn()} title="Filtreler"><p>İçerik</p></BottomSheet>,
+            )
+            expect(document.querySelector('[class*="grabber"]')).toBeInTheDocument()
+            expect(screen.queryByRole('button', { name: 'Kapat' })).not.toBeInTheDocument()
+        })
+
+        it('true iken grabber gizlenir, X butonu gorunur ve tiklaninca onClose cagirir', () => {
+            const onClose = jest.fn()
+            render(
+                <BottomSheet open onClose={onClose} title="Haritadan Parsel Doğrula" showCloseButton>
+                    <p>İçerik</p>
+                </BottomSheet>,
+            )
+            expect(document.querySelector('[class*="grabber"]')).not.toBeInTheDocument()
+            const closeBtn = screen.getByRole('button', { name: 'Kapat' })
+            expect(closeBtn).toBeInTheDocument()
+            fireEvent.click(closeBtn)
+            expect(onClose).toHaveBeenCalledTimes(1)
+        })
+
+        it('true iken baslik metni yine gorunur kalir', () => {
+            render(
+                <BottomSheet open onClose={jest.fn()} title="Haritadan Parsel Doğrula" showCloseButton>
+                    <p>İçerik</p>
+                </BottomSheet>,
+            )
+            expect(screen.getByText('Haritadan Parsel Doğrula')).toBeInTheDocument()
+        })
+    })
 })
