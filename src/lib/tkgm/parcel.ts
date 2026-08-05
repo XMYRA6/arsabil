@@ -4,7 +4,7 @@
  * (CORS, kullanıcı IP'sinin devlet servisine açılmaması, rate limit kontrolü).
  */
 
-const TKGM_BASE = 'https://cbsapi.tkgm.gov.tr/megsiswebapi.v3.1/api'
+export const TKGM_BASE = 'https://cbsapi.tkgm.gov.tr/megsiswebapi.v3.1/api'
 const TIMEOUT_MS = 8000
 
 export type GeoJSONPolygon = { type: 'Polygon'; coordinates: number[][][] }
