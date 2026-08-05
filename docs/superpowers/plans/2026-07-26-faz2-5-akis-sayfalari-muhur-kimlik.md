@@ -12,7 +12,8 @@
 
 ## Global Constraints
 
-- **Yalnızca mobil.** Her yeni kural `@media (max-width: 768px)` bloğunun İÇİNDE olacak. Masaüstü çıktısı değişmeyecek.
+- **Yalnızca mobil.** Her yeni **görsel/token** kuralı `@media (max-width: 768px)` bloğunun İÇİNDE olacak. Masaüstünün rengi, yüzeyi ve kenarlığı değişmeyecek.
+  - **Tek istisna — Task 6'nın damga animasyonu** (spec §5, kullanıcı onaylı): animasyon bir token/renk değişimi değildir ve masaüstünde de oynar. Bu, yukarıdaki kuralın ihlali DEĞİLDİR; Task 6 dışındaki hiçbir task bu istisnayı kullanamaz.
 - **Kanonik aksan:** `--seal-accent: var(--aurora-cyan)` ve `--seal-accent-rgb: 43, 124, 255`. Literal hex yazılmayacak (`#4C8DFF` YANLIŞ değerdir).
 - **Light dalında yeni rgba icat edilmeyecek:** `--seal-surface: var(--shell-bg)`, `--seal-border: var(--shell-border)`, `--seal-text: var(--card-title)`.
 - **`globals.css` değiştirilmeyecek.** Her task'ta sızma guard'ı var.
@@ -48,7 +49,8 @@
 - Test: `src/app/login/login.scope.test.ts` (mevcut dosyanın sonuna yeni `describe`)
 
 **Interfaces:**
-- Produces: bu dosyada tanımlanan `--seal-*` token isimleri, sonraki task'ların birebir aynısını kullanacağı sözleşmedir: `--seal-accent`, `--seal-accent-rgb`, `--seal-surface`, `--seal-border`, `--seal-border-soft`, `--seal-text`.
+- Produces: bu dosyada tanımlanan `--seal-*` token isimleri, sonraki task'ların birebir aynısını kullanacağı sözleşmedir: `--seal-accent`, `--seal-accent-rgb`, `--seal-surface`, `--seal-border`, `--seal-text`.
+  (`--seal-border-soft` Task 1 review'unda DUSURULDU: hicbir sayfa tuketmiyordu ve planin "kullanilmayan token tanimlama" kisitini ihlal ediyordu — insan partner kararı, 2026-07-26.)
 - Consumes: yok (ilk task).
 
 **Mevcut mobil blok (dosyanın sonu, dokunmadan önce birebir bu):**
@@ -142,7 +144,7 @@ describe('login mobil mühür kimliği (Faz 2.5)', () => {
 });
 ```
 
-> `css` ve `fs`/`path` mevcut dosyanın başında zaten tanımlı; yeniden import etme. Değişken adı farklıysa (`loginCss` gibi) o adı kullan — dosyayı açıp ilk 6 satıra bak.
+> Doğrulandı (2026-07-26): `login.scope.test.ts:1-5` zaten `fs`, `path`, `const css` (login.module.css) ve `const tsx` (page.tsx) tanımlıyor. Bunları yeniden import/tanımlama; yukarıdaki testte `css` ve `globalsCss` kullanılıyor, `globalsCss` yeni eklenecek tek satırdır.
 
 - [ ] **Step 2: Test'i çalıştır, başarısız olduğunu gör**
 
@@ -160,7 +162,6 @@ Expected: FAIL — `--seal-accent` bulunamadı.
         --seal-accent-rgb: 43, 124, 255;
         --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
         --seal-border: rgba(43, 124, 255, 0.25);
-        --seal-border-soft: rgba(43, 124, 255, 0.18);
         --seal-text: #F4F0E6;
     }
 
@@ -169,7 +170,6 @@ Expected: FAIL — `--seal-accent` bulunamadı.
         --seal-accent-rgb: 43, 124, 255;
         --seal-surface: var(--shell-bg);
         --seal-border: var(--shell-border);
-        --seal-border-soft: var(--shell-border);
         --seal-text: var(--card-title);
     }
 
@@ -305,7 +305,7 @@ describe('register mobil mühür kimliği (Faz 2.5)', () => {
 });
 ```
 
-> Mevcut dosyada CSS ve TSX değişkenlerinin adına bak (`css`/`tsx` değilse o adları kullan).
+> Doğrulandı (2026-07-26): `register.scope.test.ts:1-5` zaten `fs`, `path`, `const css` (register.module.css) ve `const tsx` (page.tsx) tanımlıyor. Yeniden tanımlama.
 
 - [ ] **Step 2: Test'i çalıştır, başarısız olduğunu gör**
 

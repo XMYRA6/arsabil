@@ -45,3 +45,55 @@ describe('WizardShell mobil CSS kapsam guard', () => {
     expect(mobileBlock).toMatch(/\.container\s*\{[^}]*calc\(var\(--bottomnav-height\)\s*\+\s*76px\)/)
   })
 })
+
+describe('wizard mobil mühür kimliği (Faz 2.5)', () => {
+  const progressCss = fs.readFileSync(path.join(__dirname, 'WizardProgress.module.css'), 'utf8');
+  const wizardCss = fs.readFileSync(path.join(__dirname, 'wizard.module.css'), 'utf8');
+
+  it('token tanımı YALNIZCA WizardShell.module.css\'te olmalı (tek kaynak)', () => {
+    expect(css).toMatch(/--seal-surface:/);
+    expect(progressCss).not.toMatch(/--seal-[a-z-]*:/);
+    expect(wizardCss).not.toMatch(/--seal-[a-z-]*:/);
+  });
+
+  it('--seal-accent kanonik Aurora cyan olmalı', () => {
+    expect(css).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
+    expect(css).not.toMatch(/#4C8DFF/i);
+  });
+
+  it('token tanımları mobil media query İÇİNDE olmalı', () => {
+    const mediaIndex = css.indexOf('@media (max-width: 768px)');
+    expect(css.indexOf('--seal-surface:')).toBeGreaterThan(mediaIndex);
+  });
+
+  it('.card mobilde seal cam yüzeyine geçmeli', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.card\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+  });
+
+  it('.stickyNextBtn seal aksan dolgusu (koyultulmuş ton — whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, AA altında), .stickyBackBtn outline almalı', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.stickyNextBtn\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+    expect(mobile).toMatch(/\.stickyBackBtn\s*\{[^}]*border:\s*1px solid var\(--seal-border\)/);
+  });
+
+  it('WizardProgress aktif/tamamlanmış durumları mobilde seal aksanı tüketmeli (daire arkaplanı koyultulmuş ton — beyaz rakam metni için kontrast)', () => {
+    const mobile = progressCss.slice(progressCss.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.circleActive\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+    expect(mobile).toMatch(/\.circleDone\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+    expect(mobile).toMatch(/\.connectorDone\s*\{[^}]*background:\s*var\(--seal-accent\)/);
+    expect(mobile).toMatch(/\.connectorActive\s*\{[^}]*background:\s*var\(--seal-accent\)/);
+  });
+
+  it('masaüstü dalları korunmalı: .nav/.pageTitle/.stepTitle mobilde hâlâ gizli', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.pageTitle\s*\{[^}]*display:\s*none/);
+    expect(mobile).toMatch(/\.stepTitle\s*\{[^}]*display:\s*none/);
+    expect(mobile).toMatch(/\.nav\s*\{[^}]*display:\s*none/);
+  });
+
+  it('masaüstü .nextBtn hâlâ brand-gradient kullanmalı (değişmedi)', () => {
+    const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
+    expect(desktop).toMatch(/\.nextBtn\s*\{[^}]*background:\s*var\(--brand-gradient\)/);
+  });
+});

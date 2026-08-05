@@ -257,9 +257,28 @@
 }
 
 @media (max-width: 768px) {
+    [data-theme="dark"] .panel {
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
+        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
+        --seal-border: rgba(43, 124, 255, 0.25);
+        --seal-text: #F4F0E6;
+    }
+
+    [data-theme="light"] .panel {
+        --seal-accent: var(--aurora-cyan);
+        --seal-accent-rgb: 43, 124, 255;
+        --seal-surface: var(--shell-bg);
+        --seal-border: var(--shell-border);
+        --seal-text: var(--card-title);
+    }
+
     .panel {
         grid-template-columns: 1fr;
         max-width: 500px;
+        border: 1px solid var(--seal-border);
+        border-radius: 24px;
+        overflow: hidden;
     }
 
     .brandSide {
@@ -268,15 +287,34 @@
 
     .formSide {
         padding: 2.5rem 2rem;
+        background: var(--seal-surface);
+        color: var(--seal-text);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
     }
 
     .input {
         height: var(--input-height-mobile);
         font-size: 16px; /* iOS zoom tetiklenmesin */
         box-sizing: border-box;
+        background: transparent;
+        border: 1px solid var(--seal-border);
+        color: var(--seal-text);
+    }
+
+    .input:focus {
+        border-color: var(--seal-accent);
+        box-shadow: 0 0 0 3px rgba(var(--seal-accent-rgb), 0.18);
     }
 
     .submitBtn {
         min-height: var(--touch-target);
+        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
+        border: none;
+        color: #fff;
+    }
+
+    .forgotLink {
+        color: var(--seal-accent);
     }
 }

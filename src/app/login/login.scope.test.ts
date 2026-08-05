@@ -40,3 +40,64 @@ describe('login sayfası mobil CSS kapsam guard', () => {
     expect(tsx).not.toMatch(/style=\{\{/)
   })
 })
+
+describe('login mobil mühür kimliği (Faz 2.5)', () => {
+  const globalsCss = fs.readFileSync(path.join(__dirname, '../globals.css'), 'utf8');
+
+  it('seal token\'ları globals.css içine sızmamış olmalı', () => {
+    expect(globalsCss).not.toMatch(/--seal-(accent|surface|border|text)/);
+  });
+
+  it('--seal-accent kanonik Aurora cyan olmalı (literal hex değil)', () => {
+    expect(css).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
+    expect(css).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
+    expect(css).not.toMatch(/#4C8DFF/i);
+  });
+
+  it('token tanımları mobil media query İÇİNDE olmalı', () => {
+    const mediaIndex = css.indexOf('@media (max-width: 768px)');
+    expect(mediaIndex).toBeGreaterThan(-1);
+    expect(css.indexOf('--seal-surface:')).toBeGreaterThan(mediaIndex);
+  });
+
+  it('--seal-surface hem dark hem light tema dalında tanımlı olmalı', () => {
+    expect(css).toMatch(/\[data-theme="dark"\]\s*\.panel\s*\{[^}]*--seal-surface:/);
+    expect(css).toMatch(/\[data-theme="light"\]\s*\.panel\s*\{[^}]*--seal-surface:/);
+  });
+
+  it('light dalı mevcut global cam token\'larını yeniden kullanmalı', () => {
+    const lightBlockMatch = css.match(/\[data-theme="light"\]\s*\.panel\s*\{([^}]*)\}/);
+    expect(lightBlockMatch).not.toBeNull();
+    const lightBlock = lightBlockMatch![1];
+    expect(lightBlock).toMatch(/--seal-surface:\s*var\(--shell-bg\)/);
+    expect(lightBlock).toMatch(/--seal-border:\s*var\(--shell-border\)/);
+    expect(lightBlock).toMatch(/--seal-text:\s*var\(--card-title\)/);
+  });
+
+  it('.formSide ve .input mobilde seal yüzeyine geçmeli', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.formSide\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+    expect(mobile).toMatch(/\.input\s*\{[^}]*border:\s*1px solid var\(--seal-border\)/);
+  });
+
+  it('.submitBtn mobilde seal aksanına geçmeli — koyultulmuş ton (whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, WCAG AA 4.5:1 altında — Task 5\'in .bubbleMine için ölçüp onayladığı color-mix ile aynı deger)', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.submitBtn\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+  });
+
+  it('.input mobilde iOS zoom korumasını KORUMALI (regresyon)', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.input\s*\{[^}]*font-size:\s*16px/);
+    expect(mobile).toMatch(/\.input\s*\{[^}]*height:\s*var\(--input-height-mobile\)/);
+  });
+
+  it('.brandSide kimliğe girmemeli (kendi marka yüzeyi korunuyor)', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).not.toMatch(/\.brandSide\s*\{[^}]*--seal/);
+  });
+
+  it('masaüstü dalı değişmemeli: .panel masaüstünde hâlâ 2 kolon', () => {
+    const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
+    expect(desktop).toMatch(/\.panel\s*\{[^}]*grid-template-columns:\s*[^;]*1fr[^;]*1fr/);
+  });
+});
