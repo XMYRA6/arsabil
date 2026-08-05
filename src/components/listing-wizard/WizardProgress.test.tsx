@@ -28,3 +28,23 @@ describe('WizardProgress', () => {
     expect(screen.queryByText('✓')).not.toBeInTheDocument()
   })
 })
+
+describe('WizardProgress — adım tamamlama mührü (Faz 2.5)', () => {
+  it('tamamlanan adımın dairesi damga animasyonu için motion değerlerini taşımalı', () => {
+    const { container } = render(<WizardProgress currentStep={3} />)
+    const circles = container.querySelectorAll('[data-seal-state]')
+    expect(circles.length).toBe(5)
+    expect(circles[0].getAttribute('data-seal-state')).toBe('done')
+    expect(circles[1].getAttribute('data-seal-state')).toBe('done')
+    expect(circles[2].getAttribute('data-seal-state')).toBe('active')
+    expect(circles[3].getAttribute('data-seal-state')).toBe('idle')
+  })
+
+  it('ilk adımda hiçbir daire done durumunda olmamalı', () => {
+    const { container } = render(<WizardProgress currentStep={1} />)
+    const states = Array.from(container.querySelectorAll('[data-seal-state]'))
+      .map((el) => el.getAttribute('data-seal-state'))
+    expect(states).not.toContain('done')
+    expect(states[0]).toBe('active')
+  })
+})
