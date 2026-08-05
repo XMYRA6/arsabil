@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './ManualParcelEntryForm.module.css'
 import { TkgmAutocompleteField, type IdariYapiItem } from './TkgmAutocompleteField'
 
@@ -34,22 +34,85 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
     const [ilceLoading, setIlceLoading] = useState(false)
     const [mahalleLoading, setMahalleLoading] = useState(false)
 
+    const [ilFetchError, setIlFetchError] = useState(false)
+    const [ilceFetchError, setIlceFetchError] = useState(false)
+    const [mahalleFetchError, setMahalleFetchError] = useState(false)
+
     const [searching, setSearching] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        let cancelled = false
+    // Kaskad seviyeleri icin istek nesli sayaci — gec gelen (eski) bir
+    // cevabin daha yeni bir secimin sonucunu ezmesini engeller.
+    const ilceRequestIdRef = useRef(0)
+    const mahalleRequestIdRef = useRef(0)
+
+    const loadIller = useCallback(() => {
+        setIlFetchError(false)
         void (async () => {
             try {
                 const res = await fetch('/api/tkgm/il')
                 const data = await res.json()
-                if (!cancelled && Array.isArray(data.iller)) setIller(data.iller)
+                if (Array.isArray(data.iller)) {
+                    setIller(data.iller)
+                } else {
+                    setIlFetchError(true)
+                }
             } catch {
-                // Sessizce bos kalir — otomatik-tamamlama oneri sunamaz ama
-                // form kullanilamaz hale gelmez.
+                setIlFetchError(true)
             }
         })()
-        return () => { cancelled = true }
+    }, [])
+
+    useEffect(() => { loadIller() }, [loadIller])
+
+    const loadIlceler = useCallback((ilId: number) => {
+        const myRequestId = ++ilceRequestIdRef.current
+        setIlceFetchError(false)
+        setIlceLoading(true)
+        void (async () => {
+            try {
+                const res = await fetch(`/api/tkgm/ilce?ilId=${ilId}`)
+                const data = await res.json()
+                if (myRequestId !== ilceRequestIdRef.current) return
+                if (Array.isArray(data.ilceler)) {
+                    setIlceler(data.ilceler)
+                } else {
+                    setIlceler([])
+                    setIlceFetchError(true)
+                }
+                setIlceLoading(false)
+            } catch {
+                if (myRequestId !== ilceRequestIdRef.current) return
+                setIlceler([])
+                setIlceFetchError(true)
+                setIlceLoading(false)
+            }
+        })()
+    }, [])
+
+    const loadMahalleler = useCallback((ilceId: number) => {
+        const myRequestId = ++mahalleRequestIdRef.current
+        setMahalleFetchError(false)
+        setMahalleLoading(true)
+        void (async () => {
+            try {
+                const res = await fetch(`/api/tkgm/mahalle?ilceId=${ilceId}`)
+                const data = await res.json()
+                if (myRequestId !== mahalleRequestIdRef.current) return
+                if (Array.isArray(data.mahalleler)) {
+                    setMahalleler(data.mahalleler)
+                } else {
+                    setMahalleler([])
+                    setMahalleFetchError(true)
+                }
+                setMahalleLoading(false)
+            } catch {
+                if (myRequestId !== mahalleRequestIdRef.current) return
+                setMahalleler([])
+                setMahalleFetchError(true)
+                setMahalleLoading(false)
+            }
+        })()
     }, [])
 
     const handleIlSelect = (item: IdariYapiItem) => {
@@ -61,18 +124,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
         setMahalle(null)
         setIlceler([])
         setMahalleler([])
-        setIlceLoading(true)
-        void (async () => {
-            try {
-                const res = await fetch(`/api/tkgm/ilce?ilId=${item.id}`)
-                const data = await res.json()
-                setIlceler(Array.isArray(data.ilceler) ? data.ilceler : [])
-            } catch {
-                setIlceler([])
-            } finally {
-                setIlceLoading(false)
-            }
-        })()
+        loadIlceler(item.id)
     }
 
     const handleIlceSelect = (item: IdariYapiItem) => {
@@ -81,18 +133,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
         setMahalleText('')
         setMahalle(null)
         setMahalleler([])
-        setMahalleLoading(true)
-        void (async () => {
-            try {
-                const res = await fetch(`/api/tkgm/mahalle?ilceId=${item.id}`)
-                const data = await res.json()
-                setMahalleler(Array.isArray(data.mahalleler) ? data.mahalleler : [])
-            } catch {
-                setMahalleler([])
-            } finally {
-                setMahalleLoading(false)
-            }
-        })()
+        loadMahalleler(item.id)
     }
 
     const handleMahalleSelect = (item: IdariYapiItem) => {
@@ -169,6 +210,17 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                 />
             </div>
 
+            {ilFetchError && (
+                <div className={styles.errorNote}>
+                    İl listesi yüklenemedi. <button type="button" onClick={loadIller}>Tekrar dene</button>
+                </div>
+            )}
+            {ilceFetchError && (
+                <div className={styles.errorNote}>
+                    İlçe listesi yüklenemedi. <button type="button" onClick={() => il && loadIlceler(il.id)}>Tekrar dene</button>
+                </div>
+            )}
+
             <TkgmAutocompleteField
                 id="manual-mahalle"
                 label="Mahalle"
@@ -179,6 +231,12 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                 disabled={!ilce || mahalleLoading}
                 placeholder={mahalleLoading ? 'Yükleniyor…' : 'Örn. Kırkkepenekli'}
             />
+
+            {mahalleFetchError && (
+                <div className={styles.errorNote}>
+                    Mahalle listesi yüklenemedi. <button type="button" onClick={() => ilce && loadMahalleler(ilce.id)}>Tekrar dene</button>
+                </div>
+            )}
 
             <div className={styles.row}>
                 <div className={styles.field}>
