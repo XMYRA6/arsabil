@@ -718,6 +718,12 @@ describe('GET /api/tkgm/mahalle', () => {
         expect(fetchMahalleListesiMock).not.toHaveBeenCalled()
     })
 
+    it('ilceId verilmezse 400 doner (Number(null) === 0 tuzagi — Task 4 review bulgusu)', async () => {
+        const res = await GET(req(''))
+        expect(res.status).toBe(400)
+        expect(fetchMahalleListesiMock).not.toHaveBeenCalled()
+    })
+
     it('rate limit asilirsa 429 doner ve TKGM hic cagrilmaz', async () => {
         checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 10 })
         const res = await GET(req('ilceId=104'))
@@ -769,7 +775,11 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url)
     const ilceId = Number(searchParams.get('ilceId'))
-    if (!Number.isFinite(ilceId)) {
+    // `searchParams.get('ilceId')` parametre verilmediginde `null` doner ve
+    // `Number(null) === 0` — `Number.isFinite(0)` `true` oldugu icin bu
+    // kontrol TEK BASINA eksik `ilceId`yi sessizce 0 olarak kabul ederdi
+    // (Task 4'un ayni `ilId` deseninde review'da yakalanan gercek bug).
+    if (!Number.isFinite(ilceId) || ilceId <= 0) {
         return NextResponse.json({ message: 'Geçersiz ilçe.' }, { status: 400 })
     }
 
