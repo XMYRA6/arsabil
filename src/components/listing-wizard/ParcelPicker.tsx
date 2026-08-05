@@ -2,6 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import type { Map as LeafletMap, Marker, Polygon } from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 import type { ParcelInfo } from '@/lib/tkgm/parcel'
 import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import styles from './ParcelPicker.module.css'
