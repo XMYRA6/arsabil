@@ -439,53 +439,14 @@ git commit -m "feat(hesapla): FiyatAciklamasi null metrekare/birim fiyati tire i
 
 **Files:**
 - Modify: `src/app/hesapla/page.tsx`
-- Test: `src/app/hesapla/page.test.tsx`
 
 **Interfaces:**
 - Consumes: `ornekProjeIleDeneDoldur`, `ORNEK_APARTMENT_SIZE`, `ORNEK_GLOBAL_UNIT_PRICE` (Task 1); nullable `BirimMaliyetFieldProps`/`GirdiKartiProps`/`FiyatAciklamasiProps` (Tasks 2–4).
 - Produces (new `page.tsx` internals consumed by Tasks 6–8): `hasEnoughDataForResult: boolean`, `isDemoData: boolean`, `handleApartmentSizeChange(v: number | null): void`, `handleGlobalUnitPriceChange(v: number): void`, `handleOrnekProjeIleDene(): void`.
 
-This task does **not** touch JSX beyond what's required to keep the app compiling with the new nullable types (the empty-state visuals are Tasks 6–8). It is the biggest task; work through the steps in order, and run `tsc` after each sub-step group, not just at the end — nullable-state propagation errors are easiest to fix one at a time.
+This task does **not** touch JSX beyond what's required to keep the app compiling with the new nullable types, and does **not** add new tests of its own — the pure gate/demo-fill logic was already covered in Task 1, and the *observable* behavior this task wires up (empty state, demo button, badge) has no way to render until Task 6's JSX lands, so its tests belong there (written together with the JSX they exercise, so the suite stays green at the end of every task — see Task 6 Step 1). It is still the biggest task; work through the steps in order, and run `tsc` after each sub-step group, not just at the end — nullable-state propagation errors are easiest to fix one at a time.
 
-- [ ] **Step 1: Add the failing/guiding test in `page.test.tsx`**
-
-`page.test.tsx` already mocks every chart and heavy dependency (`next-auth`, `next/navigation`, `ScenarioCompare`, all 4 chart components). Add a new `describe` block using the same `viewportKur`/`beforeEach` fixtures already in the file:
-
-```tsx
-describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
-    it('sayfa ilk açıldığında hiçbir TL değeri göstermez, boş durum metni görünür', async () => {
-        viewportKur(true)
-        render(<HesaplaPage />)
-        expect(await screen.findByText(/Sonuçları görmek için/)).toBeInTheDocument()
-        expect(screen.queryByText(/Min\. Daire Fiyatı \(FD\)/)).not.toBeInTheDocument()
-    })
-
-    it('Örnek Proje ile Dene tıklanınca sonuç belirir ve buton kaybolur', async () => {
-        viewportKur(true)
-        const user = userEvent.setup()
-        render(<HesaplaPage />)
-        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        expect(await screen.findByText(/Min\. Daire Fiyatı \(FD\)/)).toBeInTheDocument()
-        expect(screen.queryByRole('button', { name: /Örnek Proje ile Dene/i })).not.toBeInTheDocument()
-    })
-
-    it('Rapor Kaydet boş durumda devre dışıdır', async () => {
-        viewportKur(true)
-        render(<HesaplaPage />)
-        const butonlar = await screen.findAllByRole('button', { name: /Rapor Kaydet/i })
-        butonlar.forEach(b => expect(b).toBeDisabled())
-    })
-})
-```
-
-(These reference JSX that doesn't exist until Tasks 6/8 land — that's expected; this step's job is to lock in the *behavioral contract* before you build the plumbing. If subagent-driven execution runs Task 5 standalone before Task 6, these three tests will fail for "text not found" reasons; that's fine, they'll go green once Task 6 lands. Do not skip writing them now — write them, watch them fail for the *expected* reason, and move on; Task 6's own steps will re-run this exact file.)
-
-- [ ] **Step 2: Run to confirm the new tests fail for the expected reason**
-
-Run: `npx jest src/app/hesapla/page.test.tsx --no-coverage`
-Expected: FAIL on the 3 new tests — "Unable to find an element with the text: /Sonuçları görmek için/" (or similar). Pre-existing tests in the file must still PASS.
-
-- [ ] **Step 3: Add the import and demo/gate state**
+- [ ] **Step 1: Add the import and demo/gate state**
 
 In `src/app/hesapla/page.tsx`, update the import line that currently reads:
 
@@ -526,7 +487,7 @@ Add a new state right after `globalUnitPrice`'s declaration:
   const [isDemoData, setIsDemoData] = useState<boolean>(false);
 ```
 
-- [ ] **Step 4: Add the gate constant and the three handlers**
+- [ ] **Step 2: Add the gate constant and the three handlers**
 
 Directly below the `isDemoData` state (or anywhere before the JSX return — grouping with the other handlers around `handleParcelConfirm` is fine), add:
 
@@ -555,7 +516,7 @@ Directly below the `isDemoData` state (or anywhere before the JSX return — gro
   };
 ```
 
-- [ ] **Step 5: Gate the calculation `useEffect`**
+- [ ] **Step 3: Gate the calculation `useEffect`**
 
 Find the effect (currently starting at line 217):
 
@@ -631,7 +592,7 @@ Insert the gate check immediately after the `isApartmentCountEnabled` block, bef
 
 `apartmentSize`/`globalUnitPrice` are narrowed to `number` by the early-return guard for the rest of this closure, so `Ad: apartmentSize, P: globalUnitPrice` type-checks with no cast.
 
-- [ ] **Step 6: Fix the three `!result`-guarded handlers that read `apartmentSize` as a bare `number`**
+- [ ] **Step 4: Fix the three `!result`-guarded handlers that read `apartmentSize` as a bare `number`**
 
 `handleSaveReport`, `handlePdfDownload`, and `handleAddScenario` all start with `if (!result) return;`. `result` is only ever non-null when `hasEnoughDataForResult` was true at the last effect run (Step 5's gate), so `apartmentSize`/`globalUnitPrice` are runtime-guaranteed non-null inside these functions — but TypeScript can't infer that across unrelated variables, so each read needs a narrow, commented cast.
 
@@ -665,7 +626,7 @@ In `handleAddScenario` (currently `apartmentSize,` inside the pushed `ScenarioIt
         ...
 ```
 
-- [ ] **Step 7: Fix `chartBaseInput`**
+- [ ] **Step 5: Fix `chartBaseInput`**
 
 This object feeds `SensitivityChart`/`BreakEvenChart` unconditionally (not gated behind `result`), so it needs a real fallback, not a cast — `0` matches the pattern the file already used for `result ? x : 0` elsewhere:
 
@@ -687,7 +648,7 @@ This object feeds `SensitivityChart`/`BreakEvenChart` unconditionally (not gated
   };
 ```
 
-- [ ] **Step 8: Wire the handlers into every call site that sets `apartmentSize`/`globalUnitPrice`**
+- [ ] **Step 6: Wire the handlers into every call site that sets `apartmentSize`/`globalUnitPrice`**
 
 Desktop stepper input (currently lines ~611-621, "Ortalama Daire Metrekaresi"):
 
@@ -731,7 +692,7 @@ Mobile `girdi` prop object passed to `<HesaplaMobile>` (currently `apartmentSize
             apartmentSize, onApartmentSize: handleApartmentSizeChange,
 ```
 
-- [ ] **Step 9: Fix the "Rapor Kaydet" disabled bug (spec's found-and-scoped-in defect)**
+- [ ] **Step 7: Fix the "Rapor Kaydet" disabled bug (spec's found-and-scoped-in defect)**
 
 Three call sites all wire `handleSaveReport`, all currently disabled only by `isSaving`. Fix all three for consistency with the `!result` pattern `PDF İndir`/`+ Karşılaştır` already use:
 
@@ -750,18 +711,18 @@ Mobile CTA — currently `ctaDevreDisi={isSaving}` in the `<HesaplaMobile>` call
           ctaDevreDisi={!result || isSaving}
 ```
 
-- [ ] **Step 10: Run typecheck and full test suite**
+- [ ] **Step 8: Run typecheck and full test suite**
 
 Run: `npx tsc --noEmit`
-Expected: PASS (0 errors). If errors remain, they'll point at exactly one of Steps 6–9's call sites — fix in place, don't add a blanket cast anywhere not listed above.
+Expected: PASS (0 errors). If errors remain, they'll point at exactly one of Steps 4–7's call sites — fix in place, don't add a blanket cast anywhere not listed above.
 
 Run: `npx jest --no-coverage`
-Expected: The 3 new tests from Step 1 still fail (expected — Task 6 hasn't landed the JSX yet). Every other test file (including `GirdiKarti.test.tsx`, `AdvancedSettingsSections.test.tsx`, `FiyatAciklamasi.test.tsx`, `unitPriceSource.test.ts`, `calculatorUiHelpers.test.ts` from Tasks 1–4, and `HesapFisi.test.tsx`/`SonucKarti.test.tsx` untouched) must PASS.
+Expected: Full PASS — this task adds no new tests of its own, so every existing test file (including `GirdiKarti.test.tsx`, `AdvancedSettingsSections.test.tsx`, `FiyatAciklamasi.test.tsx`, `unitPriceSource.test.ts`, `calculatorUiHelpers.test.ts` from Tasks 1–4, and `page.test.tsx`/`HesapFisi.test.tsx`/`SonucKarti.test.tsx` untouched by this task) must stay green.
 
-- [ ] **Step 11: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add src/app/hesapla/page.tsx src/app/hesapla/page.test.tsx
+git add src/app/hesapla/page.tsx
 git commit -m "feat(hesapla): apartmentSize/globalUnitPrice null baslangicli, sonuc gecidi ve Rapor Kaydet duzeltmesi"
 ```
 
@@ -772,17 +733,48 @@ git commit -m "feat(hesapla): apartmentSize/globalUnitPrice null baslangicli, so
 **Files:**
 - Modify: `src/app/hesapla/page.tsx`
 - Modify: `src/app/hesapla/page.module.css`
-- Test: `src/app/hesapla/page.test.tsx` (the 3 tests from Task 5 Step 1 go green here)
+- Test: `src/app/hesapla/page.test.tsx`
 
 **Interfaces:**
 - Consumes: `hasEnoughDataForResult`, `isDemoData`, `handleOrnekProjeIleDene` (Task 5).
 
-- [ ] **Step 1: Confirm the guiding tests from Task 5 are still red**
+- [ ] **Step 1: Write the failing tests**
+
+`page.test.tsx` already mocks every chart and heavy dependency (`next-auth`, `next/navigation`, `ScenarioCompare`, all 4 chart components). Add a new `describe` block using the same `viewportKur`/`beforeEach` fixtures already in the file:
+
+```tsx
+describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
+    it('sayfa ilk açıldığında hiçbir TL değeri göstermez, boş durum metni görünür', async () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        expect(await screen.findByText(/Sonuçları görmek için/)).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. Daire Fiyatı \(FD\)/)).not.toBeInTheDocument()
+    })
+
+    it('Örnek Proje ile Dene tıklanınca sonuç belirir ve buton kaybolur', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        expect(await screen.findByText(/Min\. Daire Fiyatı \(FD\)/)).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /Örnek Proje ile Dene/i })).not.toBeInTheDocument()
+    })
+
+    it('Rapor Kaydet boş durumda devre dışıdır', async () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        const butonlar = await screen.findAllByRole('button', { name: /Rapor Kaydet/i })
+        butonlar.forEach(b => expect(b).toBeDisabled())
+    })
+})
+```
+
+- [ ] **Step 2: Run tests to verify they fail**
 
 Run: `npx jest src/app/hesapla/page.test.tsx --no-coverage`
-Expected: The 3 tests added in Task 5 Step 1 FAIL (JSX not built yet); all other tests in the file PASS.
+Expected: FAIL on the 3 new tests — "Unable to find an element with the text: /Sonuçları görmek için/" (or similar — the JSX these assert against doesn't exist until Step 4 lands). Pre-existing tests in the file must still PASS.
 
-- [ ] **Step 2: Add the title badge**
+- [ ] **Step 3: Add the title badge**
 
 Find the panel title (currently):
 
@@ -799,7 +791,7 @@ Change to:
             </h2>
 ```
 
-- [ ] **Step 3: Replace `HesapFisi` + the stats row with a boş-durum / real-content switch**
+- [ ] **Step 4: Replace `HesapFisi` + the stats row with a boş-durum / real-content switch**
 
 Find this block (currently right after the title, `<HesapFisi result={result} />` through the closing of the `.statsRow` wrapper — roughly the "Yapisal gruplama sarmalayicisi" comment through its closing `</div>`):
 
@@ -888,7 +880,7 @@ Wrap the whole thing in the gate, keeping the exact JSX above as the "real conte
 
 (`Button` is already imported at the top of `page.tsx`.)
 
-- [ ] **Step 4: Add the CSS**
+- [ ] **Step 5: Add the CSS**
 
 Append to `src/app/hesapla/page.module.css` (near `.hesapFisi`, e.g. right after its rule block):
 
@@ -925,15 +917,15 @@ Append to `src/app/hesapla/page.module.css` (near `.hesapFisi`, e.g. right after
 }
 ```
 
-- [ ] **Step 5: Run tests**
+- [ ] **Step 6: Run tests**
 
 Run: `npx jest src/app/hesapla/page.test.tsx --no-coverage`
-Expected: PASS — including the 3 tests from Task 5 Step 1 now going green.
+Expected: PASS — including the 3 tests from Step 1 now going green.
 
 Run: `npx tsc --noEmit`
 Expected: PASS (0 errors).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add src/app/hesapla/page.tsx src/app/hesapla/page.module.css src/app/hesapla/page.test.tsx
@@ -944,7 +936,7 @@ git commit -m "feat(hesapla): masaüstü Hesap Sonuçları paneli boş durum + �
 
 ### Task 7: Desktop "Hassasiyet & Kırılma" pager page — empty guard
 
-**Why this task exists:** before this feature, `apartmentSize`/`globalUnitPrice` could never be `0`/`null`, so `chartBaseInput` (Task 5 Step 7) always carried real numbers into `SensitivityChart`/`BreakEvenChart`. Now, during the empty state, `chartBaseInput.Ad`/`.P` fall back to `0`, and neither chart component has its own zero-guard (confirmed by reading both — unlike `CostBreakdownChart`, which already has one). Without this task, opening the "Hassasiyet & Kırılma" pager page while empty silently shows degenerate zero-value charts instead of the friendly message the mobile equivalent (`AnalizSekmesi`) already shows for the identical scenario. This closes that gap for consistency between the two platforms.
+**Why this task exists:** before this feature, `apartmentSize`/`globalUnitPrice` could never be `0`/`null`, so `chartBaseInput` (Task 5 Step 5) always carried real numbers into `SensitivityChart`/`BreakEvenChart`. Now, during the empty state, `chartBaseInput.Ad`/`.P` fall back to `0`, and neither chart component has its own zero-guard (confirmed by reading both — unlike `CostBreakdownChart`, which already has one). Without this task, opening the "Hassasiyet & Kırılma" pager page while empty silently shows degenerate zero-value charts instead of the friendly message the mobile equivalent (`AnalizSekmesi`) already shows for the identical scenario. This closes that gap for consistency between the two platforms.
 
 **Files:**
 - Modify: `src/app/hesapla/page.tsx`
@@ -1361,6 +1353,6 @@ Summarize pass/fail for each step above. If any step fails, that's a real regres
 ## Self-Review Notes
 
 - **Spec coverage:** every UI requirement in the approved spec (`docs/superpowers/specs/2026-08-06-hesapla-bos-durum-ornek-proje-design.md`) maps to a task — nullable state model (Task 5), gate condition (Task 5 Step 5), `isDemoData` behavior (Task 5 Step 4 + Tasks 6/8), desktop UI (Task 6), mobile UI (Task 8), Rapor Kaydet fix (Task 5 Step 9), edge cases — stepper null jump/no-op (Tasks 3, 5 Step 8), parcel selection not opening the gate (unchanged by construction, verified in Task 9 Step 5).
-- **Beyond the literal spec text, found by reading the code, included because leaving them out would be an inconsistent half-fix:** `kaynakEtiketi`/`BirimMaliyetField` nullability (Task 2), `GirdiKarti` mobile stepper nullability (Task 3), `FiyatAciklamasi` nullability (Task 4), the 3rd Rapor Kaydet site (mobile `ctaDevreDisi`, Task 5 Step 9), and the desktop Page 1 chart guard (Task 7). Each of these has its "why" documented inline in its task.
+- **Beyond the literal spec text, found by reading the code, included because leaving them out would be an inconsistent half-fix:** `kaynakEtiketi`/`BirimMaliyetField` nullability (Task 2), `GirdiKarti` mobile stepper nullability (Task 3), `FiyatAciklamasi` nullability (Task 4), the 3rd Rapor Kaydet site (mobile `ctaDevreDisi`, Task 5 Step 7), and the desktop Page 1 chart guard (Task 7). Each of these has its "why" documented inline in its task.
 - **Confirmed already safe, no task needed:** `HesapFisi`, `CostBreakdownChart`, `AnalizSekmesi`, `FinancialDashboard`'s conditional render — all read directly, all already null-tolerant.
 - **No "load saved scenario into the form" feature exists in the codebase** (`grep` confirmed `savedScenarios` is only used for `handleAddScenario`/`handleRemoveScenario`/comparison — there's no reverse "load scenario back into inputs" flow), so the spec's note about that interaction is currently moot; no task added for it.
