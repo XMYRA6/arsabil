@@ -20,6 +20,11 @@ describe('kaynakEtiketi', () => {
     it('rakamlari ondalik basmaz', () => {
         expect(kaynakEtiketi({ tur: 'elle' }, 14500.7)).toBe('Elle girildi · 14.501 TL/m²')
     })
+
+    it('deger null iken kaynak turunden bagimsiz tire doner', () => {
+        expect(kaynakEtiketi({ tur: 'varsayilan' }, null)).toBe('—')
+        expect(kaynakEtiketi({ tur: 'elle' }, null)).toBe('—')
+    })
 })
 
 describe('ilceSecildi', () => {

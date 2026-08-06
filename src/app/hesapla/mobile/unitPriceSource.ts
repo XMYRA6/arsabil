@@ -20,7 +20,8 @@ export type IlceFiyatGirdisi = {
 }
 
 /** Ekranda birim maliyetin altinda gosterilen kaynak metni. */
-export function kaynakEtiketi(kaynak: BirimMaliyetKaynagi, deger: number): string {
+export function kaynakEtiketi(kaynak: BirimMaliyetKaynagi, deger: number | null): string {
+    if (deger === null) return '—'
     const bicimli = `${trFormat.format(deger)} TL/m²`
     switch (kaynak.tur) {
         case 'ilce':

@@ -12,8 +12,8 @@ import type { BirimMaliyetKaynagi } from './mobile/unitPriceSource';
  * akar — tam olarak controlled-input dongusu, review Finding 2'nin
  * kirdigi/dogru kodun korumasi gereken davranis.
  */
-function Sarmalayici({ baslangic = 12000 }: { baslangic?: number }) {
-  const [fiyat, setFiyat] = React.useState(baslangic);
+function Sarmalayici({ baslangic = 12000 }: { baslangic?: number | null }) {
+  const [fiyat, setFiyat] = React.useState<number | null>(baslangic);
   const [kaynak, setKaynak] = React.useState<BirimMaliyetKaynagi>({ tur: 'varsayilan' });
   const onBirimMaliyet: BirimMaliyetFieldProps['onBirimMaliyet'] = v => {
     setFiyat(v);
@@ -72,5 +72,12 @@ describe('BirimMaliyetField (review Finding 2, 2026-07-30)', () => {
     expect(input.value).toBe('0');
     // Kaynak hala 'Varsayilan' — '0' guard'i gecemedigi icin commit edilmedi.
     expect(screen.getByText(/Varsayılan/)).toBeInTheDocument();
+  });
+
+  it('baslangicta null iken alan bos gorunur ve kaynak etiketi tire gosterir', () => {
+    render(<Sarmalayici baslangic={null} />);
+    const input = screen.getByLabelText('Birim inşaat maliyeti (TL/m²)') as HTMLInputElement;
+    expect(input.value).toBe('');
+    expect(screen.getByText('—')).toBeInTheDocument();
   });
 });

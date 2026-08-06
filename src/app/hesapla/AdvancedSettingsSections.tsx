@@ -84,7 +84,7 @@ export function RiskCostFields({
 }
 
 export interface BirimMaliyetFieldProps {
-  globalUnitPrice: number;
+  globalUnitPrice: number | null;
   birimMaliyetKaynagi: BirimMaliyetKaynagi;
   onBirimMaliyet: (v: number) => void;
 }
@@ -109,17 +109,17 @@ export interface BirimMaliyetFieldProps {
  * olarak test edilebilsin.
  */
 export function BirimMaliyetField({ globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet }: BirimMaliyetFieldProps) {
-  const [girdi, setGirdi] = useState<string>(String(globalUnitPrice));
+  const [girdi, setGirdi] = useState<string>(globalUnitPrice === null ? '' : String(globalUnitPrice));
   // Dis kaynakli degisiklikleri (ilce secimi, "elle" commit sonrasi geri
   // akan prop) render SIRASINDA yakalar — `useEffect` icinde setState
   // cagirmak ekstra bir commit dongusune yol acardi (eslint
   // `react-hooks/set-state-in-effect`); bu, React'in kendi onerdigi "prop
   // degisince state'i ayarla" deseni (bkz. react.dev "You Might Not Need
   // an Effect").
-  const [oncekiFiyat, setOncekiFiyat] = useState(globalUnitPrice);
+  const [oncekiFiyat, setOncekiFiyat] = useState<number | null>(globalUnitPrice);
   if (globalUnitPrice !== oncekiFiyat) {
     setOncekiFiyat(globalUnitPrice);
-    setGirdi(String(globalUnitPrice));
+    setGirdi(globalUnitPrice === null ? '' : String(globalUnitPrice));
   }
 
   return (
