@@ -134,4 +134,18 @@
         color: var(--m-ink);
         text-align: center;
     }
+
+    .homeRoot {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 0 14px 16px;
+    }
+
+    .loading, .error {
+        padding: 40px 14px;
+        text-align: center;
+        font: 600 13px Inter, sans-serif;
+        color: var(--m-body);
+    }
 }
