@@ -65,7 +65,7 @@ export function SonucKarti({
                 ) : (
                     <div className={styles.sonucBosWrap}>
                         <p className={styles.sonucBosMetin}>
-                            Sonuçları görmek için parsel seçin ya da daire m² ve birim maliyeti girin
+                            Sonuçları görmek için daire m² ve birim maliyeti girin.
                         </p>
                         <button type="button" className={styles.ornekProjeBtnMobil} onClick={onOrnekProjeIleDene}>
                             Örnek Proje ile Dene
@@ -77,6 +77,10 @@ export function SonucKarti({
             {hasEnoughDataForResult && (
                 <>
                     <div className={styles.sonucMetrikler}>
+                        {/* Tasarimdaki ucuncu kutu ("Skor") KALDIRILDI (insan karari
+                            2026-07-29): engine_v2'nin ciktisinda skor alani yok ve
+                            /hesapla hic skor hesaplamiyor — kutu kalici olarak "—"
+                            gosterecekti. Kaynak eklenirse geri getirilir (bkz. 5bc784a). */}
                         <div className={styles.metrikKutu}>
                             <span className={styles.metrikEtiket}>Arsa payı</span>
                             <span className={`${styles.metrikDeger} mNum`}>%{trFormat.format(arsaPayiYuzde)}</span>

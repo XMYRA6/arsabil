@@ -7,7 +7,7 @@ import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE } from './calculatorUiHelpers';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
@@ -184,7 +184,7 @@ export default function Home() {
       .then(data => {
         if (data.excavationLowPercent) setGlobalExcavationLow(data.excavationLowPercent);
         if (data.excavationMediumPercent) setGlobalExcavationMedium(data.excavationMediumPercent);
-        if (data.defaultUnitPrice) setGlobalUnitPrice(data.defaultUnitPrice);
+        if (data.defaultUnitPrice) setGlobalUnitPrice(prev => prev ?? data.defaultUnitPrice);
       })
       .catch(console.error);
 
@@ -653,7 +653,7 @@ export default function Home() {
                 <div className={styles.stepperRight}>
                   <span>m²</span>
                   <button onClick={() => { if (apartmentSize !== null) handleApartmentSizeChange(Math.max(50, apartmentSize - 5)); }}>−</button>
-                  <button onClick={() => handleApartmentSizeChange(apartmentSize === null ? 140 : apartmentSize + 5)}>+</button>
+                  <button onClick={() => handleApartmentSizeChange(apartmentSize === null ? ORNEK_APARTMENT_SIZE : apartmentSize + 5)}>+</button>
                 </div>
               </div>
             </div>
@@ -820,7 +820,7 @@ export default function Home() {
             ) : (
               <div className={styles.resultsEmptyState}>
                 <p className={styles.resultsEmptyText}>
-                  Sonuçları görmek için parsel seçin ya da daire m² ve birim maliyeti girin.
+                  Sonuçları görmek için daire m² ve birim maliyeti girin.
                 </p>
                 <Button variant="outline" onClick={handleOrnekProjeIleDene}>
                   Örnek Proje ile Dene
@@ -919,11 +919,17 @@ export default function Home() {
 
                 {/* Page 2: Finansal Modelleme */}
                 <div className={styles.pagerPage}>
-                  {result && (
-                    <FinancialDashboard
-                      totalInvestment={result.M}
-                      totalRevenue={result.FD_total}
-                    />
+                  {hasEnoughDataForResult ? (
+                    result && (
+                      <FinancialDashboard
+                        totalInvestment={result.M}
+                        totalRevenue={result.FD_total}
+                      />
+                    )
+                  ) : (
+                    <p className={styles.pagerEmptyText}>
+                      Hesap sonucu oluşunca grafikler burada görünecek. Girdileri tamamlayıp sonucun hesaplanmasını bekleyin.
+                    </p>
                   )}
                 </div>
 

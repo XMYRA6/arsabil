@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import HesaplaPage from './page'
 
@@ -128,5 +128,38 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
         render(<HesaplaPage />)
         const butonlar = await screen.findAllByRole('button', { name: /Rapor Kaydet/i })
         butonlar.forEach(b => expect(b).toBeDisabled())
+    })
+
+    it('geç gelen /api/settings defaultUnitPrice, Örnek Proje ile Dene ile girilmiş değeri ezmez', async () => {
+        // Regresyon: `globalUnitPrice`e tek raw yazim yolu bu mount efekti idi
+        // (bkz. handleGlobalUnitPriceChange disinda). Admin varsayilani mount'tan
+        // SONRA gelirse eskiden number->number yazip demo/kullanici degerini
+        // sessizce eziyordu. Fix: `setGlobalUnitPrice(prev => prev ?? veri)`.
+        viewportKur(true)
+        let resolveSettings: () => void = () => {}
+        const settingsGecikmesi = new Promise<void>(resolve => { resolveSettings = resolve })
+        global.fetch = jest.fn((url: string) => {
+            if (url === '/api/settings') {
+                return settingsGecikmesi.then(() => ({
+                    ok: true,
+                    json: () => Promise.resolve({ defaultUnitPrice: 99999 }),
+                }))
+            }
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+        }) as unknown as typeof fetch
+
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        expect(await screen.findByText('Örnek Veri')).toBeInTheDocument()
+
+        // Kullanici etkilesiminden SONRA gec gelen /api/settings cevabini serbest birak.
+        await act(async () => {
+            resolveSettings()
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
+
+        expect(screen.getByText('Örnek Veri')).toBeInTheDocument()
     })
 })
