@@ -45,9 +45,14 @@ export function Navbar() {
     const isProfile = pathname.startsWith("/dashboard/profile");
     const isListingDetail = pathname.startsWith("/listing/");
     const isListingWizard = pathname.startsWith("/listings/");
+    // Giris yapmis + mobil: `/` artik `HomeMobile`'i render ediyor (kendi
+    // AppBar'i var), bu yuzden global Navbar orada da gizlenmeli. Anonim
+    // ziyaretci icin `/` degismedi, Navbar orada GORUNMEYE devam eder —
+    // bu yuzden `status` kontrolu sart, salt pathname yetmez.
+    const isAuthenticatedHome = pathname === "/" && status === "authenticated";
 
     // Pages where the top navbar should be HIDDEN on mobile
-    const isHiddenOnMobile = isInbox || isProfile || isListingDetail || isListingWizard;
+    const isHiddenOnMobile = isInbox || isProfile || isListingDetail || isListingWizard || isAuthenticatedHome;
     // Pages where the top navbar should be COMPACT on mobile
     const isCompactOnMobile = pathname === "/hesapla";
 
