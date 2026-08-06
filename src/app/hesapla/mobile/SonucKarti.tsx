@@ -9,6 +9,9 @@ export type SonucKartiProps = {
     arsaPayiYuzde: number;
     birimFiyat: number | null;
     karsilastirma: KarsilastirmaBloguProps; // rozet artik burada (KarsilastirmaBlogu)
+    hasEnoughDataForResult: boolean;
+    isDemoData: boolean;
+    onOrnekProjeIleDene: () => void;
     onFisAc: () => void;
     onAnalizAc: () => void;
 };
@@ -37,6 +40,9 @@ export function SonucKarti({
     arsaPayiYuzde,
     birimFiyat,
     karsilastirma,
+    hasEnoughDataForResult,
+    isDemoData,
+    onOrnekProjeIleDene,
     onFisAc,
     onAnalizAc,
 }: SonucKartiProps) {
@@ -45,34 +51,48 @@ export function SonucKarti({
             <div className={styles.sonucIsik} aria-hidden="true" />
 
             <div className={styles.sonucUst}>
-                <div className={styles.sonucFiyatWrap}>
-                    <span className={styles.sonucEtiket}>Min. daire fiyatı</span>
-                    <span className={`${styles.sonucFiyat} mNum`}>
-                        {fmt(minDaireFiyati)}
-                        {minDaireFiyati !== null && <span className={styles.sonucBirim}> TL</span>}
-                    </span>
-                </div>
+                {hasEnoughDataForResult ? (
+                    <div className={styles.sonucFiyatWrap}>
+                        <span className={styles.sonucEtiket}>
+                            Min. daire fiyatı
+                            {isDemoData && <span className={styles.ornekVeriRozeti}>Örnek Veri</span>}
+                        </span>
+                        <span className={`${styles.sonucFiyat} mNum`}>
+                            {fmt(minDaireFiyati)}
+                            {minDaireFiyati !== null && <span className={styles.sonucBirim}> TL</span>}
+                        </span>
+                    </div>
+                ) : (
+                    <div className={styles.sonucBosWrap}>
+                        <p className={styles.sonucBosMetin}>
+                            Sonuçları görmek için parsel seçin ya da daire m² ve birim maliyeti girin
+                        </p>
+                        <button type="button" className={styles.ornekProjeBtnMobil} onClick={onOrnekProjeIleDene}>
+                            Örnek Proje ile Dene
+                        </button>
+                    </div>
+                )}
             </div>
 
-            <div className={styles.sonucMetrikler}>
-                <div className={styles.metrikKutu}>
-                    <span className={styles.metrikEtiket}>Arsa payı</span>
-                    <span className={`${styles.metrikDeger} mNum`}>%{trFormat.format(arsaPayiYuzde)}</span>
-                </div>
-                <div className={styles.metrikKutu}>
-                    <span className={styles.metrikEtiket}>Birim</span>
-                    <span className={`${styles.metrikDeger} mNum`}>
-                        {fmt(birimFiyat)}
-                        {birimFiyat !== null && <span className={styles.metrikBirimKucuk}>/m²</span>}
-                    </span>
-                </div>
-                {/* Tasarimdaki ucuncu kutu ("Skor") KALDIRILDI (insan karari
-                    2026-07-29): engine_v2'nin ciktisinda skor alani yok ve
-                    /hesapla hic skor hesaplamiyor — kutu kalici olarak "—"
-                    gosterecekti. Kaynak eklenirse geri getirilir (bkz. 5bc784a). */}
-            </div>
+            {hasEnoughDataForResult && (
+                <>
+                    <div className={styles.sonucMetrikler}>
+                        <div className={styles.metrikKutu}>
+                            <span className={styles.metrikEtiket}>Arsa payı</span>
+                            <span className={`${styles.metrikDeger} mNum`}>%{trFormat.format(arsaPayiYuzde)}</span>
+                        </div>
+                        <div className={styles.metrikKutu}>
+                            <span className={styles.metrikEtiket}>Birim</span>
+                            <span className={`${styles.metrikDeger} mNum`}>
+                                {fmt(birimFiyat)}
+                                {birimFiyat !== null && <span className={styles.metrikBirimKucuk}>/m²</span>}
+                            </span>
+                        </div>
+                    </div>
 
-            <KarsilastirmaBlogu {...karsilastirma} />
+                    <KarsilastirmaBlogu {...karsilastirma} />
+                </>
+            )}
 
             <button type="button" className={styles.fisButonu} onClick={onFisAc}>
                 Hesap fişi · Mi → Ma → M → ×K → FD

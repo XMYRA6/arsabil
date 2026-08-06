@@ -12,6 +12,9 @@ const BASE = {
         onPiyasaFiyati: jest.fn(),
         farkYuzde: -14,
     },
+    hasEnoughDataForResult: true,
+    isDemoData: false,
+    onOrnekProjeIleDene: jest.fn(),
     onFisAc: jest.fn(),
     onAnalizAc: jest.fn(),
 }
@@ -82,5 +85,41 @@ describe('SonucKarti', () => {
     it('karsilastirma blogu kart icinde render edilir', () => {
         render(<SonucKarti {...BASE} />)
         expect(screen.getByLabelText(/Yaklaşık piyasa fiyatı/)).toBeInTheDocument()
+    })
+
+    it('hasEnoughDataForResult false iken fiyat yerine davet metni ve buton gosterir', () => {
+        render(<SonucKarti {...BASE} hasEnoughDataForResult={false} minDaireFiyati={null} birimFiyat={null} />)
+        expect(screen.getByText(/Sonuçları görmek için/)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Örnek Proje ile Dene/ })).toBeInTheDocument()
+        expect(screen.queryByText('Min. daire fiyatı')).not.toBeInTheDocument()
+    })
+
+    it('hasEnoughDataForResult false iken metrikler ve karsilastirma blogu gizlenir', () => {
+        render(<SonucKarti {...BASE} hasEnoughDataForResult={false} minDaireFiyati={null} birimFiyat={null} />)
+        expect(screen.queryByText('Arsa payı')).not.toBeInTheDocument()
+        expect(screen.queryByLabelText(/Yaklaşık piyasa fiyatı/)).not.toBeInTheDocument()
+    })
+
+    it('Örnek Proje ile Dene tiklaninca onOrnekProjeIleDene cagirilir', async () => {
+        const onOrnekProjeIleDene = jest.fn()
+        render(<SonucKarti {...BASE} hasEnoughDataForResult={false} minDaireFiyati={null} birimFiyat={null} onOrnekProjeIleDene={onOrnekProjeIleDene} />)
+        await userEvent.click(screen.getByRole('button', { name: /Örnek Proje ile Dene/ }))
+        expect(onOrnekProjeIleDene).toHaveBeenCalledTimes(1)
+    })
+
+    it('hasEnoughDataForResult true iken buton ve davet metni gorunmez', () => {
+        render(<SonucKarti {...BASE} />)
+        expect(screen.queryByRole('button', { name: /Örnek Proje ile Dene/ })).toBeNull()
+        expect(screen.queryByText(/Sonuçları görmek için/)).toBeNull()
+    })
+
+    it('isDemoData true iken Örnek Veri rozeti gorunur', () => {
+        render(<SonucKarti {...BASE} isDemoData={true} />)
+        expect(screen.getByText('Örnek Veri')).toBeInTheDocument()
+    })
+
+    it('isDemoData false iken Örnek Veri rozeti gorunmez', () => {
+        render(<SonucKarti {...BASE} isDemoData={false} />)
+        expect(screen.queryByText('Örnek Veri')).toBeNull()
     })
 })

@@ -103,6 +103,46 @@
         opacity: .8;
     }
 
+    .sonucBosWrap {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .sonucBosMetin {
+        margin: 0;
+        font: 600 13px Inter, sans-serif;
+        color: rgba(255, 255, 255, .92);
+        line-height: 1.4;
+    }
+
+    .ornekProjeBtnMobil {
+        align-self: flex-start;
+        padding: 9px 16px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, .4);
+        background: rgba(255, 255, 255, .16);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: #fff;
+        font: 700 12px Inter, sans-serif;
+        cursor: pointer;
+    }
+
+    .ornekVeriRozeti {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .92);
+        color: var(--m-ink);
+        font: 800 9px Inter, sans-serif;
+        letter-spacing: .3px;
+        text-transform: none;
+        vertical-align: middle;
+    }
+
     .sonucMetrikler {
         position: relative;
         display: flex;

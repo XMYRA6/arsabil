@@ -528,6 +528,9 @@ export default function Home() {
               onPiyasaFiyati: setManualMarketPrice,
               farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
             },
+            hasEnoughDataForResult,
+            isDemoData,
+            onOrnekProjeIleDene: handleOrnekProjeIleDene,
             onFisAc: () => setMobilFisAcik(true),
             onAnalizAc: () => setMobilAnalizAcik(true),
           }}
