@@ -848,13 +848,17 @@ export default function HomePage() {
     return () => mql.removeEventListener('change', update);
   }, []);
 
-  // Viewport henuz olculmedi VEYA oturum durumu hala cozulmedi: SSR ve ilk
-  // client render'i BURAYA duser (ikisi de ayni ciktiyi urettigi icin
-  // hydration uyusmazligi olusmaz), sonra dogru dala gecilir. `/hesapla`
-  // sadece viewport icin ayni deseni kullanir; burada oturum durumu da
-  // ayni gerekceyle beklenir — aksi halde giris yapmis bir mobil kullanici
-  // once pazarlama sayfasini gorup sonra HomeMobile'a "sicrardi".
-  if (isDesktopViewport === null || status === 'loading') {
+  // Viewport henuz olculmedi: SSR ve ilk client render'i BURAYA duser (bkz.
+  // /hesapla/page.tsx ayni deseni). Auth durumu (`status`) BILEREK burada
+  // beklenmiyor -- next-auth `useSession` anonim ziyaretciler dahil HERKES
+  // icin 'loading' ile basliyor; onu da beklemek `/`nin SSR ciktisini (site
+  // sitemap'inde priority:1 olan sayfa) her istekte bos bir iskelete
+  // indirirdi. Bunun yerine viewport belli olur olmaz varsayilan olarak
+  // MarketingHomePage gosterilir; giris yapmis + mobil kullanici icin
+  // session 'authenticated' cozulunce HomeMobile'a GECILIR (kisa bir
+  // "flash" olabilir, ama bu yalnizca bu ekranin hedefledigi YENI
+  // kullanici grubunu etkiler, anonim/masaustu SSR'ini bozmaz).
+  if (isDesktopViewport === null) {
     return <div className={styles.viewportIskelet} aria-busy="true" aria-live="polite" />;
   }
 

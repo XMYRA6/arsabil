@@ -70,4 +70,12 @@ describe('/ — auth x viewport dallanmasi', () => {
         expect(await screen.findByTestId('home-mobile')).toBeInTheDocument()
         expect(screen.queryByText(/Arsanızın Gerçek Değerini/)).toBeNull()
     })
+
+    it('giris durumu hala "loading" iken (viewport zaten belli), pazarlama sayfasi hemen gorunur', async () => {
+        (useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
+        viewportKur(false)
+        render(<HomePage />)
+        expect(await screen.findByText(/Arsanızın Gerçek Değerini/)).toBeInTheDocument()
+        expect(screen.queryByTestId('home-mobile')).toBeNull()
+    })
 })
