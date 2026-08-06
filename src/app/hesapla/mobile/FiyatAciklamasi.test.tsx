@@ -85,4 +85,9 @@ describe('FiyatAciklamasi', () => {
         render(<FiyatAciklamasi {...props({ result: null })} />)
         expect(screen.getAllByText('—').length).toBeGreaterThan(0)
     })
+
+    it('apartmentSize/unitPrice null iken insaat satirinda tire gosterir, "null" yazmaz', () => {
+        render(<FiyatAciklamasi {...props({ apartmentSize: null, unitPrice: null, result: null })} />)
+        expect(screen.getByText(/— m² × — TL\/m²/)).toBeInTheDocument()
+    })
 })

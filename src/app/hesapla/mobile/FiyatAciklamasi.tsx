@@ -8,8 +8,8 @@ import styles from './mobile.module.css';
 
 export type FiyatAciklamasiProps = {
     result: CalculationOutput | null;
-    apartmentSize: number;
-    unitPrice: number;
+    apartmentSize: number | null;
+    unitPrice: number | null;
     landSharePercent: number;
     /** Kazanc seviyesi etiketi, orn. "Orta". */
     profitLabel: string;
@@ -86,7 +86,7 @@ export function FiyatAciklamasi({
                     <span className={styles.aciklamaMetin}>
                         <span className={styles.aciklamaAd}>Daireyi inşa etmek</span>
                         <span className={styles.aciklamaAlt}>
-                            {apartmentSize} m² × {trFormat.format(unitPrice)} TL/m²
+                            {fmt(apartmentSize)} m² × {fmt(unitPrice)} TL/m²
                         </span>
                     </span>
                     <span className={`${styles.aciklamaTutar}`}>{fmt(result?.Mi ?? null)}</span>
