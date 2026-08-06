@@ -40,16 +40,22 @@ Dene"** deniyor.
 
 ## Veri modeli / geçit mantığı
 
-**Nullable state'ler:** `apartmentSize`, `globalUnitPrice`, `arsaAlani` → `number | null`, başlangıç değeri
-`null` (şu anki sabit varsayılanların yerine). İlgili `<input type="number">` alanları mevcut deseni koruyor:
+**Nullable state'ler:** `apartmentSize`, `globalUnitPrice` → `number | null`, başlangıç değeri `null` (şu anki
+sabit varsayılanların yerine). İlgili `<input type="number">` alanları mevcut deseni koruyor:
 `value={apartmentSize ?? ''}`, `onChange`'de boş string → `null`. Stepper (`+`/`-`) butonları `null`'dan
 tıklanırsa mantıklı bir başlangıç değerine (140, 12000) atlar.
 
-**Geçit koşulu:**
+**Geçit koşulu (DÜZELTME — implementasyon planı öncesi kod incelemesiyle netleşti):**
 ```ts
-const hasEnoughDataForResult = Boolean(parcelContext) ||
-  (apartmentSize !== null && globalUnitPrice !== null);
+const hasEnoughDataForResult = apartmentSize !== null && globalUnitPrice !== null;
 ```
+İlk taslakta "parsel seçmek VEYA iki alanı doldurmak" deniyordu, ama `handleParcelConfirm`
+(`page.tsx:258-267`) yalnızca `arsaAlani`/`riskLevel` dolduruyor — `apartmentSize`/`globalUnitPrice`'a hiç
+dokunmuyor. Motor (`CalculatorEngineV2.calculate`) bu ikisi olmadan hiçbir zaman anlamlı bir sonuç
+üretemiyor, yani parsel seçimi TEK BAŞINA yeterli değil — sadece arsa alanı/risk doğruluğunu artıran ayrı bir
+katman. Kullanıcı onayıyla eşik sadeleştirildi: **her zaman** iki sayısal alan gerekli, parsel seçimi
+gerekliliği değiştirmiyor.
+
 `page.tsx:217-255`'teki hesaplama `useEffect`'i aynı kalıyor, ama başında bu koşul `false` ise
 `setResult(null)` ile erken çıkıyor — motor `null`/eksik değerlerle çağrılmıyor.
 
@@ -59,11 +65,14 @@ bir değer girmişse o alana dokunmaz — ve bayrağı `true` yapar. Kullanıcı
 değiştirdiğinde (`onChange` içinde) bayrak otomatik `false` olur; ayrı bir "vazgeç/temizle" kontrolü yok
 (YAGNI).
 
-**Kaydedilmiş senaryo yükleme / parsel seçme:** İkisi de zaten ilgili state'leri gerçek değerle dolduruyor,
-dolayısıyla geçit otomatik açılır; bu yollar `isDemoData`'yı hiç tetiklemez (zaten `false` kalır). **Netlik
-için:** eğer kullanıcı önce "Örnek Proje ile Dene"yi tıklayıp (`isDemoData=true`) sonra hiç sayısal alana
-dokunmadan bir parsel seçerse, parsel seçimi de `isDemoData`'yı `false`'a çeker — parsel seçimi tek başına
-yeterince güçlü bir "gerçek veri" sinyali.
+**Kaydedilmiş senaryo yükleme:** `apartmentSize`/`globalUnitPrice` dahil ilgili state'leri gerçek değerle
+dolduruyor, dolayısıyla geçit otomatik açılır ve `isDemoData` hiç tetiklenmez (zaten `false` kalır).
+
+**Parsel seçme:** Yukarıdaki düzeltme gereği artık geçidi TEK BAŞINA açmıyor (`apartmentSize`/`globalUnitPrice`
+hâlâ `null` kalabilir). Eğer kullanıcı önce "Örnek Proje ile Dene"yi tıklamışsa (`isDemoData=true`) ve sonra
+bir parsel seçerse, `isDemoData` bilinçli olarak `false`'a ÇEKİLMEZ — çünkü m²/birim maliyet hâlâ demo
+değerleri, parsel seçimi bunları gerçek yapmıyor. Rozet yalnızca kullanıcı bu iki alandan birini kendi eliyle
+değiştirdiğinde kalkar (yukarıdaki genel kural, ek bir istisna yok).
 
 **Arsa Alanı (`arsaAlani`/`isAaEnabled`) notu:** Geçit koşuluna dahil değil — mevcut davranışta zaten opsiyonel
 bir alt-ayar (toggle kapalıyken `Aa: undefined` gönderiliyor, motor bunsuz da çalışıyor). Bu spec'in kapsamı
@@ -93,9 +102,10 @@ aktif veri doldurma eylemi).
 ## Bulunan ve bu işin kapsamına alınan mevcut hata
 
 "Rapor Kaydet" butonu (`page.tsx:372`, mobil sticky CTA `:889`, ikisi de `handleSaveReport`'u çağırıyor) şu an
-**sadece** `disabled={isSaving}` — `result`'a bağlı değil. Yani boş durumda bile tıklanabilir kalıyor ve
-`handleSaveReport` `result` olmadan çalışmaya çalışıyor. Bu spec kapsamında `disabled={!result || isSaving}`
-olarak düzeltilecek (PDF İndir ve Karşılaştır butonları zaten doğru şekilde `!result`'a bağlı).
+**sadece** `disabled={isSaving}` — `result`'a bağlı değil. `handleSaveReport`'un kendisi `if (!result) return;`
+ile zaten korunuyor (veri bozulması/çökme riski yok), ama buton boş durumda bile tıklanabilir görünüyor ve
+tıklanınca sessizce hiçbir şey yapmıyor — PDF İndir/Karşılaştır'ın doğru `!result` davranışıyla tutarsız, kafa
+karıştırıcı bir UX detayı. Bu spec kapsamında `disabled={!result || isSaving}` olarak düzeltilecek.
 
 ## Kenar durumlar
 
@@ -104,12 +114,17 @@ olarak düzeltilecek (PDF İndir ve Karşılaştır butonları zaten doğru şek
   değil.
 - SSR/hydration: `null` başlangıç değeri deterministik, server/client arasında uyuşmazlık riski yok.
 
-## Test etkisi (dürüst kapsam)
+## Test etkisi (dürüst kapsam — koda bakılarak doğrulandı)
 
-Bu değişiklik, `page.tsx`'in mevcut varsayılan render çıktısını (140, 12000, hesaplanmış TL değerleri)
-doğrulayan bazı testleri kıracak. İlk taramada aday görünen dosyalar: `AdvancedSettingsSections.test.tsx`,
-`HesapFisi.test.tsx` — implementasyon planı sırasında tam liste çıkarılıp güncellenecek. Bu beklenen bir
-maliyet.
+İlk tahminin aksine, mevcut testlerin çoğu ZATEN `result`/`globalUnitPrice` için `null`/farklı-değer
+senaryolarını izole test ediyor (bu kod tabanının genel alışkanlığı — bkz. `HesapFisi.test.tsx`'te
+`result={null}` testi, `AdvancedSettingsSections.test.tsx`'te `BirimMaliyetField`'i kendi yerel state'iyle
+saran bir `Sarmalayici`), yani KIRILMALARI beklenmiyor; sadece nullable durum için yeni test case'leri
+eklenecek. `page.tsx`'in kendi test dosyası (`page.test.tsx`) yalnızca parsel modalinin iki platformda da
+mount olduğunu doğruluyor, sayısal varsayılanlara hiç dokunmuyor — etkilenmiyor. `SonucKarti.test.tsx`
+zaten `minDaireFiyati={null}` durumunu test ediyor ("—" render). Gerçek yeni test ihtiyacı: `GirdiKarti.tsx`
+için nullable `apartmentSize` durumu (`GirdiKarti.test.tsx`'e yeni case), ve her iki dosyaya da "Örnek Proje
+ile Dene" butonu + "Örnek Veri" rozeti için yeni test case'leri.
 
 ## Doğrulama
 
