@@ -7,7 +7,7 @@ import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur } from './calculatorUiHelpers';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
@@ -89,7 +89,7 @@ export default function Home() {
 
   // State: Kullanım Girdileri
   const [luxLevel, setLuxLevel] = useState<number>(1.4); // Standart (1.0), Orta (1.2), Lüks (1.4)
-  const [apartmentSize, setApartmentSize] = useState<number>(140);
+  const [apartmentSize, setApartmentSize] = useState<number | null>(null);
   const [isApartmentCountEnabled, setIsApartmentCountEnabled] = useState<boolean>(AYAR_VARSAYILANLARI.isApartmentCountEnabled);
   const [totalApartments, setTotalApartments] = useState<number>(AYAR_VARSAYILANLARI.totalApartments);
   const [ownerApartmentShare, setOwnerApartmentShare] = useState<number>(AYAR_VARSAYILANLARI.ownerApartmentShare);
@@ -169,7 +169,11 @@ export default function Home() {
 
   const [, setGlobalExcavationLow] = useState<number>(0.01);
   const [, setGlobalExcavationMedium] = useState<number>(0.02);
-  const [globalUnitPrice, setGlobalUnitPrice] = useState<number>(12000);
+  const [globalUnitPrice, setGlobalUnitPrice] = useState<number | null>(null);
+  // "Örnek Proje ile Dene" ile doldurulmus veri mi gosteriliyor. Kullanici
+  // apartmentSize/globalUnitPrice alanlarindan birini eliyle degistirdiginde
+  // otomatik false olur (bkz. handleApartmentSizeChange/handleGlobalUnitPriceChange).
+  const [isDemoData, setIsDemoData] = useState<boolean>(false);
   // Birim maliyetin KAYNAGI
   const [birimMaliyetKaynagi, setBirimMaliyetKaynagi] = useState<BirimMaliyetKaynagi>({ tur: 'elle' });
 
@@ -224,6 +228,11 @@ export default function Home() {
       }
     }
 
+    if (apartmentSize === null || globalUnitPrice === null) {
+      setResult(null);
+      return;
+    }
+
     const activeLandShare = computeEffectiveLandShareX({
       isApartmentCountEnabled,
       ownerApartmentShare,
@@ -254,6 +263,29 @@ export default function Home() {
     setResult(res);
   }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
 
+
+  const hasEnoughDataForResult = apartmentSize !== null && globalUnitPrice !== null;
+
+  const handleApartmentSizeChange = (v: number | null) => {
+    setApartmentSize(v);
+    setIsDemoData(false);
+  };
+
+  const handleGlobalUnitPriceChange = (v: number) => {
+    setGlobalUnitPrice(v);
+    setBirimMaliyetKaynagi({ tur: 'elle' });
+    setIsDemoData(false);
+  };
+
+  const handleOrnekProjeIleDene = () => {
+    const dolu = ornekProjeIleDeneDoldur({ apartmentSize, globalUnitPrice });
+    if (apartmentSize === null) setApartmentSize(dolu.apartmentSize);
+    if (globalUnitPrice === null) {
+      setGlobalUnitPrice(dolu.globalUnitPrice);
+      setBirimMaliyetKaynagi({ tur: 'varsayilan' });
+    }
+    setIsDemoData(true);
+  };
 
   const handleParcelConfirm = (payload: { parcelValue: ParcelPickerValue, risk: RiskMeasurement | null, suggestedRiskPercent: number | null }) => {
     setParcelContext(payload.parcelValue);
@@ -288,7 +320,9 @@ export default function Home() {
         body: JSON.stringify({
           title: 'Söğütlü Arsa Analizi - ' + new Date().toLocaleDateString('tr-TR'),
           totalApartments: isApartmentCountEnabled ? totalApartments : 12,
-          apartmentSizeSqm: apartmentSize,
+          // result dolu ise apartmentSize de doludur (hasEnoughDataForResult
+          // geçidi ikisini birlikte garanti eder — bkz. useEffect).
+          apartmentSizeSqm: apartmentSize as number,
           luxLevelModifier: luxLevel,
           landShareRatio: effectiveLandShareRatio / 100,
           minApartmentPrice: result.FD_total,
@@ -316,7 +350,7 @@ export default function Home() {
     const { generatePdfReport } = await import('@/lib/pdf/report_generator') as { generatePdfReport: GeneratePdfFn };
     await generatePdfReport({
       luxLevel,
-      apartmentSize,
+      apartmentSize: apartmentSize as number, // result dolu ise apartmentSize de doludur
       landShareRatio: effectiveLandShareRatio,
       totalApartments: isApartmentCountEnabled ? totalApartments : undefined,
       arsaAlani: isAaEnabled ? arsaAlani : undefined,
@@ -338,7 +372,7 @@ export default function Home() {
         id: Date.now().toString(),
         name: `Senaryo ${prev.length + 1}`,
         luxLevel,
-        apartmentSize,
+        apartmentSize: apartmentSize as number, // result dolu ise apartmentSize de doludur
         landShareRatio: effectiveLandShareRatio / 100,
         totalApartments: isApartmentCountEnabled ? totalApartments : undefined,
         riskLevel: riskLevel > 0 ? 1 + riskLevel / 100 : 1,
@@ -369,7 +403,7 @@ export default function Home() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
           PDF İndir
         </Button>
-        <Button variant="primary" onClick={handleSaveReport} disabled={isSaving} className={styles.sealPrimaryBtn}>
+        <Button variant="primary" onClick={handleSaveReport} disabled={!result || isSaving} className={styles.sealPrimaryBtn}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           {isSaving ? 'Kaydediliyor...' : 'Rapor Kaydet'}
         </Button>
@@ -431,8 +465,8 @@ export default function Home() {
   const chartBaseInput: CalculationInput = {
     x: effectiveLandShareRatio / 100,
     L: luxLevel,
-    Ad: apartmentSize,
-    P: globalUnitPrice,
+    Ad: apartmentSize ?? 0,
+    P: globalUnitPrice ?? 0,
     K: builderProfit,
     Sd: isApartmentCountEnabled ? totalApartments : undefined,
     Aa: isAaEnabled ? arsaAlani : undefined,
@@ -526,14 +560,14 @@ export default function Home() {
             riskKaynagi,
             onParselDogrulaAc: () => setIsParcelModalOpen(true),
             luxLevel, onLuxLevel: setLuxLevel,
-            apartmentSize, onApartmentSize: setApartmentSize,
+            apartmentSize, onApartmentSize: handleApartmentSizeChange,
             landShareRatio, onLandShareRatio: setLandShareRatio,
             isApartmentCountEnabled, onApartmentCountEnabled: setIsApartmentCountEnabled,
             totalApartments, onTotalApartments: setTotalApartments,
             ownerApartmentShare, onOwnerApartmentShare: setOwnerApartmentShare,
           }}
           ctaMetni={isSaving ? 'Kaydediliyor...' : 'Özet Rapor Oluştur'}
-          ctaDevreDisi={isSaving}
+          ctaDevreDisi={!result || isSaving}
           onCta={handleSaveReport}
         />
 
@@ -565,10 +599,7 @@ export default function Home() {
           acilisBolumu={mobilAyarBolumu}
           globalUnitPrice={globalUnitPrice}
           birimMaliyetKaynagi={birimMaliyetKaynagi}
-          onBirimMaliyet={(v: number) => {
-            setGlobalUnitPrice(v);
-            setBirimMaliyetKaynagi({ tur: 'elle' });
-          }}
+          onBirimMaliyet={handleGlobalUnitPriceChange}
           iksaMode={iksaMode} setIksaMode={setIksaMode}
           iksaPercentage={iksaPercentage} setIksaPercentage={setIksaPercentage}
           iksaManualTL={iksaManualTL} setIksaManualTL={setIksaManualTL}
@@ -611,11 +642,15 @@ export default function Home() {
             <div className={styles.settingsGroup}>
               <h4>Ortalama Daire Metrekaresi</h4>
               <div className={styles.stepperInput}>
-                <input type="number" value={apartmentSize} onChange={(e) => setApartmentSize(Number(e.target.value))} />
+                <input
+                  type="number"
+                  value={apartmentSize ?? ''}
+                  onChange={(e) => handleApartmentSizeChange(e.target.value === '' ? null : Number(e.target.value))}
+                />
                 <div className={styles.stepperRight}>
                   <span>m²</span>
-                  <button onClick={() => setApartmentSize(p => Math.max(50, p - 5))}>−</button>
-                  <button onClick={() => setApartmentSize(p => p + 5)}>+</button>
+                  <button onClick={() => { if (apartmentSize !== null) handleApartmentSizeChange(Math.max(50, apartmentSize - 5)); }}>−</button>
+                  <button onClick={() => handleApartmentSizeChange(apartmentSize === null ? 140 : apartmentSize + 5)}>+</button>
                 </div>
               </div>
             </div>
@@ -672,10 +707,7 @@ export default function Home() {
               <BirimMaliyetField
                 globalUnitPrice={globalUnitPrice}
                 birimMaliyetKaynagi={birimMaliyetKaynagi}
-                onBirimMaliyet={v => {
-                  setGlobalUnitPrice(v);
-                  setBirimMaliyetKaynagi({ tur: 'elle' });
-                }}
+                onBirimMaliyet={handleGlobalUnitPriceChange}
               />
               <MarketField
                 manualMarketPrice={manualMarketPrice}
@@ -886,7 +918,7 @@ export default function Home() {
       </div >
 
       <StickyActionBar aboveBottomNav>
-        <button className={styles.stickyCta} onClick={handleSaveReport} disabled={isSaving}>
+        <button className={styles.stickyCta} onClick={handleSaveReport} disabled={!result || isSaving}>
           {!isSaving && (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />

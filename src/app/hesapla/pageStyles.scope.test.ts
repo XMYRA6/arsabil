@@ -211,7 +211,10 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
     const hardcodedMatches = pageTsx.match(/P:\s*10000,/g) ?? [];
     expect(hardcodedMatches.length).toBe(0);
-    const dynamicMatches = pageTsx.match(/P:\s*globalUnitPrice,/g) ?? [];
+    // `?? 0`'lı hal, chartBaseInput'un (Task 5) result'a bagli olmadan
+    // her zaman render edilmesi icin gereken null-guvenli varsayilan —
+    // hala sabit 10000 degil, hala dinamik globalUnitPrice'tan turuyor.
+    const dynamicMatches = pageTsx.match(/P:\s*globalUnitPrice(?:\s*\?\?\s*0)?,/g) ?? [];
     expect(dynamicMatches.length).toBeGreaterThanOrEqual(2);
   });
 
