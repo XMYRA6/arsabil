@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion, type Variants } from 'framer-motion';
 import styles from './page.module.css';
+import { useSession } from 'next-auth/react';
+import { HomeMobile } from './mobile/HomeMobile';
 
 /* ── Animated counter hook ── */
 function useCounter(end: number, duration = 1600, active = false) {
@@ -618,7 +620,7 @@ function FaqAccordion() {
 /* ══════════════════════════════════════════
    MAIN PAGE
 ═══════════════════════════════════════════ */
-export default function HomePage() {
+function MarketingHomePage() {
   return (
     <div className={styles.container}>
 
@@ -832,4 +834,33 @@ export default function HomePage() {
 
     </div>
   );
+}
+
+export default function HomePage() {
+  const { status } = useSession();
+  const [isDesktopViewport, setIsDesktopViewport] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mql = window.matchMedia('not all and (max-width: 768px)');
+    const update = () => setIsDesktopViewport(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
+  // Viewport henuz olculmedi VEYA oturum durumu hala cozulmedi: SSR ve ilk
+  // client render'i BURAYA duser (ikisi de ayni ciktiyi urettigi icin
+  // hydration uyusmazligi olusmaz), sonra dogru dala gecilir. `/hesapla`
+  // sadece viewport icin ayni deseni kullanir; burada oturum durumu da
+  // ayni gerekceyle beklenir — aksi halde giris yapmis bir mobil kullanici
+  // once pazarlama sayfasini gorup sonra HomeMobile'a "sicrardi".
+  if (isDesktopViewport === null || status === 'loading') {
+    return <div className={styles.viewportIskelet} aria-busy="true" aria-live="polite" />;
+  }
+
+  if (status === 'authenticated' && !isDesktopViewport) {
+    return <HomeMobile />;
+  }
+
+  return <MarketingHomePage />;
 }
