@@ -48,6 +48,26 @@
   --z-bottomnav: 999;
   --z-sheet-backdrop: 1100;
   --z-sheet: 1101;
+
+  /* Motion easing tokens — shared, replaces hand-typed cubic-beziers */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* ===== TYPOGRAPHY TRACKING SCALE (Faz 4 — typography/cohesion audit) =====
+     Tracking (letter-spacing) is size-specific — never one value for all
+     sizes (Apple HIG). Large display text wants negative tracking; small
+     text wants slightly positive tracking. These values were chosen to
+     exactly match the tightest existing clusters of letter-spacing values
+     already in use across hesapla/page.module.css and
+     hesapla/mobile/mobile.module.css — this is a consolidation of the
+     current (mostly-correct) pattern, not a redesign. A handful of sites
+     use values that don't cleanly fit this scale (drifted independently);
+     those are intentionally left as literals rather than forced in — see
+     plans/007-typography-tracking-tokens.md. */
+  --tracking-display: -0.5px;  /* large headings/hero numeric values, ~1.35rem/21.6px+ */
+  --tracking-body: 0;          /* body text — no adjustment */
+  --tracking-label: 0.5px;     /* small uppercase labels, ~9.5px-12px (0.6-0.75rem) */
+  --tracking-caps: 1.5px;      /* small uppercase badge/emphasis text, e.g. hero-card callout labels */
 }
 
 /* ===== DARK THEME (Varsayılan) — derin lacivert ===== */

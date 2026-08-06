@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { sealTransition } from '@/lib/motion'
 import styles from './WizardProgress.module.css'
 
 const STEP_LABELS = ['Konum', 'Detay', 'Fotoğraf', 'Fizibilite', 'Yayınla']
@@ -30,9 +31,9 @@ export function WizardProgress({ currentStep }: Props) {
                 variants={{
                   idle: { scale: 1 },
                   active: { scale: 1 },
-                  done: reduceMotion ? { scale: 1 } : { scale: [1.35, 0.94, 1] },
+                  done: reduceMotion ? { scale: 1 } : { scale: 1.12 },
                 }}
-                transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+                transition={sealTransition}
               >
                 {done ? '✓' : step}
               </motion.div>

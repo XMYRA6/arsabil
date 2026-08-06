@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import styles from "./AuthModal.module.css";
 
 export function AuthModal({ isOpen, onClose, message }: { isOpen: boolean; onClose: () => void; message: string }) {
     const router = useRouter();
@@ -17,38 +18,13 @@ export function AuthModal({ isOpen, onClose, message }: { isOpen: boolean; onClo
 
     return createPortal(
         <>
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .ios-sheet {
-                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    width: 90%; max-width: 420px; background: var(--panel);
-                    border-radius: 30px; padding: 36px; z-index: 999999;
-                    box-shadow: 0 30px 60px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
-                    display: flex; flex-direction: column; align-items: center; text-align: center;
-                    animation: fadeSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-                }
-                @media (max-width: 768px) {
-                    .ios-sheet {
-                        top: auto; left: 0; bottom: 0; transform: none; width: 100%; max-width: 100%;
-                        border-bottom-left-radius: 0; border-bottom-right-radius: 0;
-                        padding-bottom: calc(36px + env(safe-area-inset-bottom, 20px));
-                        animation: slideUpBottomSheet 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-                    }
-                }
-                @keyframes slideUpBottomSheet { 
-                    from { transform: translateY(100%); opacity: 0; } 
-                    to { transform: translateY(0); opacity: 1; } 
-                }
-            `}} />
             {/* Backdrop */}
             <div
-                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', zIndex: 999998, transition: 'all 0.4s ease' }}
+                className={styles.backdrop}
                 onClick={onClose}
             />
             {/* Modal / Bottom Sheet */}
-            <div className="ios-sheet">
+            <div className={styles.sheet}>
                 {/* iOS Drag Handle */}
                 <div style={{ width: 44, height: 5, background: 'rgba(255,255,255,0.15)', borderRadius: 4, position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)' }} />
                 
@@ -71,7 +47,7 @@ export function AuthModal({ isOpen, onClose, message }: { isOpen: boolean; onClo
                 <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
                     <button
                         onClick={onClose}
-                        style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text)', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.2,0.8,0.2,1)' }}
+                        style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: 'var(--text)', border: '1px solid rgba(255,255,255,0.1)', fontWeight: 700, cursor: 'pointer', transition: 'transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s var(--ease-out)' }}
                         onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
                         onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -80,7 +56,7 @@ export function AuthModal({ isOpen, onClose, message }: { isOpen: boolean; onClo
                     </button>
                     <button
                         onClick={() => { onClose(); router.push('/login'); }}
-                        style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-2))', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.2,0.8,0.2,1)', boxShadow: '0 8px 20px var(--primary-glow)' }}
+                        style={{ flex: 1, padding: '16px', borderRadius: '16px', background: 'linear-gradient(135deg, var(--primary), var(--primary-2))', color: 'white', border: 'none', fontWeight: 800, cursor: 'pointer', transition: 'transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out), background-color 0.2s var(--ease-out)', boxShadow: '0 8px 20px var(--primary-glow)' }}
                         onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
                         onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
                         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}

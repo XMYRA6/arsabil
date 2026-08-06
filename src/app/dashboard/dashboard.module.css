@@ -86,7 +86,7 @@
     font-size: 0.95rem;
     color: var(--text);
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
 .navItem:hover {
@@ -228,7 +228,7 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1.25rem;
-    transition: all 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .reportCard:hover {

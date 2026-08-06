@@ -51,7 +51,7 @@
     bottom: 0;
     background: var(--shell-bg, rgba(255,255,255,0.1));
     border: 1px solid var(--shell-border, rgba(255,255,255,0.2));
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: background 0.3s var(--ease-out), border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
     border-radius: 30px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -66,7 +66,7 @@
     left: 2px;
     bottom: 2px;
     background-color: white;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.3s var(--ease-out);
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0,0,0,0.1);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { sealTransition } from '@/lib/motion';
 import { FizibiliteScoreBadge } from '@/components/marketplace/FizibiliteScoreBadge';
 
 interface Props {
@@ -17,7 +18,7 @@ export function ScoreRevealBadge({ score, size, showLabel }: Props) {
     <motion.div
       initial={shouldReduceMotion ? false : { scale: 1.4, rotate: -6, opacity: 0 }}
       animate={{ scale: 1, rotate: 0, opacity: 1 }}
-      transition={{ type: 'spring', duration: 0.18 }}
+      transition={sealTransition}
     >
       <FizibiliteScoreBadge score={score} size={size} showLabel={showLabel} />
     </motion.div>

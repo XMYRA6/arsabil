@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { sealTransition } from '@/lib/motion';
 import styles from './page.module.css';
 
 export interface SealBadgeProps {
@@ -23,7 +24,7 @@ export function SealBadge({ show, percentage, variant }: SealBadgeProps) {
           className={badgeClassName}
           initial={shouldReduceMotion ? false : { scale: 1.4, rotate: -6, opacity: 0 }}
           animate={{ scale: 1, rotate: 0, opacity: 1 }}
-          transition={{ type: 'spring', duration: 0.18 }}
+          transition={sealTransition}
         >
           {variant === 'cheaper' ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

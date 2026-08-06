@@ -36,7 +36,7 @@
     width: 46px;
     height: 28px;
     border-radius: var(--m-r-chip);
-    transition: background .22s cubic-bezier(.34, 1.56, .64, 1);
+    transition: background-color .22s var(--ease-out);
 }
 
 .active .iconWrap {
