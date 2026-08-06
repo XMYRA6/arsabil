@@ -848,21 +848,16 @@ export default function HomePage() {
     return () => mql.removeEventListener('change', update);
   }, []);
 
-  // Viewport henuz olculmedi: SSR ve ilk client render'i BURAYA duser (bkz.
-  // /hesapla/page.tsx ayni deseni). Auth durumu (`status`) BILEREK burada
-  // beklenmiyor -- next-auth `useSession` anonim ziyaretciler dahil HERKES
-  // icin 'loading' ile basliyor; onu da beklemek `/`nin SSR ciktisini (site
-  // sitemap'inde priority:1 olan sayfa) her istekte bos bir iskelete
-  // indirirdi. Bunun yerine viewport belli olur olmaz varsayilan olarak
-  // MarketingHomePage gosterilir; giris yapmis + mobil kullanici icin
-  // session 'authenticated' cozulunce HomeMobile'a GECILIR (kisa bir
-  // "flash" olabilir, ama bu yalnizca bu ekranin hedefledigi YENI
-  // kullanici grubunu etkiler, anonim/masaustu SSR'ini bozmaz).
-  if (isDesktopViewport === null) {
-    return <div className={styles.viewportIskelet} aria-busy="true" aria-live="polite" />;
-  }
-
-  if (status === 'authenticated' && !isDesktopViewport) {
+  // SSR ve ilk client render'de MarketingHomePage VARSAYILAN olarak gosterilir
+  // -- /hesapla'nin "hicbir sey belli olana kadar iskelet goster" deseni
+  // BILEREK KULLANILMIYOR: `/` SEO'ya kritik bir sayfa ve pazarlama sayfasi
+  // zaten GUVENLI bir varsayilan (mevcut/eski davranisin ta kendisi).
+  // Yalnizca viewport VE oturum ikisi de gercekten "giris yapmis + mobil"
+  // oldugunu DOGRULADIGINDA HomeMobile'a GECILIR -- bu kisa bir client-side
+  // flash olabilir ama yalnizca bu ekranin hedefledigi yeni kullanici
+  // grubunu etkiler; SSR/ilk paint HER ZAMAN pazarlama sayfasidir, hic
+  // regresyon yok.
+  if (isDesktopViewport === false && status === 'authenticated') {
     return <HomeMobile />;
   }
 
