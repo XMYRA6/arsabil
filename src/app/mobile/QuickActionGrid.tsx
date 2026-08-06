@@ -32,19 +32,19 @@ export function QuickActionGrid({ stats }: QuickActionGridProps) {
 
             <div className={styles.actionGrid}>
                 <Link href="/hesapla" className={styles.actionTile}>
-                    <span className={`${styles.actionIcon} ${styles.actionIconPrimary}`}>＋</span>
+                    <span className={`${styles.actionIcon} ${styles.actionIconPrimary}`} aria-hidden="true">＋</span>
                     <span className={styles.actionLabel}>Hesapla</span>
                 </Link>
                 <Link href="/listings/new" className={styles.actionTile}>
-                    <span className={styles.actionIcon}>🏢</span>
+                    <span className={styles.actionIcon} aria-hidden="true">🏢</span>
                     <span className={styles.actionLabel}>İlan Ver</span>
                 </Link>
                 <Link href="/inbox" className={styles.actionTile}>
-                    <span className={styles.actionIcon}>💬</span>
+                    <span className={styles.actionIcon} aria-hidden="true">💬</span>
                     <span className={styles.actionLabel}>Mesajlar</span>
                 </Link>
                 <Link href="/marketplace" className={styles.actionTile}>
-                    <span className={styles.actionIcon}>🏪</span>
+                    <span className={styles.actionIcon} aria-hidden="true">🏪</span>
                     <span className={styles.actionLabel}>Pazar Yeri</span>
                 </Link>
             </div>

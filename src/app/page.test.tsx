@@ -1,6 +1,7 @@
 /** @jest-environment jsdom */
 import React from 'react'
 import { render, screen } from '@testing-library/react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import HomePage from './page'
 
 // `useSession` her testte farkli deger dondurebilsin diye jest.fn() olarak
@@ -77,5 +78,10 @@ describe('/ — auth x viewport dallanmasi', () => {
         render(<HomePage />)
         expect(await screen.findByText(/Arsanızın Gerçek Değerini/)).toBeInTheDocument()
         expect(screen.queryByTestId('home-mobile')).toBeNull()
+    })
+
+    it('SSR ilk render pazarlama sayfasini basar (viewport/oturum cozulmeden)', () => {
+        (useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
+        expect(renderToStaticMarkup(<HomePage />)).toContain('Arsanızın Gerçek Değerini')
     })
 })

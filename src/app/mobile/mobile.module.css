@@ -1,4 +1,9 @@
 @media (max-width: 768px) {
+    .homeMobileKok {
+        display: flex;
+        flex-direction: column;
+    }
+
     .section {
         display: flex;
         flex-direction: column;
@@ -29,6 +34,7 @@
         border: 1px solid var(--m-glass-border);
         backdrop-filter: var(--m-glass-blur);
         -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
         text-decoration: none;
         color: inherit;
     }
@@ -79,6 +85,7 @@
         border: 1px solid var(--m-glass-border);
         backdrop-filter: var(--m-glass-blur);
         -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
     .statTile {
@@ -91,7 +98,7 @@
     }
 
     .statLabel {
-        font: 700 8px Inter, sans-serif;
+        font: 700 9px Inter, sans-serif;
         letter-spacing: .4px;
         text-transform: uppercase;
         color: var(--m-body);

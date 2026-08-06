@@ -34,19 +34,21 @@ export function HomeMobile() {
 
     return (
         <MobileScreen hasBottomNav={false}>
-            <AppBar title="Ana Sayfa" />
-            <div className={styles.homeRoot}>
-                {error ? (
-                    <p className={styles.error}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</p>
-                ) : !data ? (
-                    <p className={styles.loading}>Yükleniyor...</p>
-                ) : (
-                    <>
-                        <QuickActionGrid stats={data.stats} />
-                        <RecentReportsList reports={data.recentReports} />
-                        <RecentActivityRows messages={data.recentMessages} offers={data.recentOffers} />
-                    </>
-                )}
+            <div className={styles.homeMobileKok}>
+                <AppBar title="Ana Sayfa" />
+                <div className={styles.homeRoot}>
+                    {error ? (
+                        <p className={styles.error}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</p>
+                    ) : !data ? (
+                        <p className={styles.loading}>Yükleniyor...</p>
+                    ) : (
+                        <>
+                            <QuickActionGrid stats={data.stats} />
+                            <RecentReportsList reports={data.recentReports} />
+                            <RecentActivityRows messages={data.recentMessages} offers={data.recentOffers} />
+                        </>
+                    )}
+                </div>
             </div>
         </MobileScreen>
     );

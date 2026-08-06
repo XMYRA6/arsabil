@@ -86,7 +86,7 @@ ile aynı desen):
   `/listings/new`, **Mesajlar** → `/inbox`, **Pazar Yeri** → `/marketplace`.
 - **`RecentReportsList.tsx`** — son hesaplamalarım, her satır `/hesapla?reportId=X`'e link.
 - **`RecentActivityRows.tsx`** — son mesaj (varsa) + son teklif (varsa), kompakt birer satır,
-  `/inbox` ve `/dashboard/projects`'e link.
+  `/inbox` ve `/listing/{id}`'e link.
 
 ## Veri akışı
 
