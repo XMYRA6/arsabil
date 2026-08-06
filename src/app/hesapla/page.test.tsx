@@ -105,3 +105,28 @@ describe('/hesapla — parsel modali her iki platformda da mount edilir', () => 
         expect(screen.getByTestId('parcel-picker')).toBeInTheDocument()
     })
 })
+
+describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
+    it('sayfa ilk açıldığında hiçbir TL değeri göstermez, boş durum metni görünür', async () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        expect(await screen.findByText(/Sonuçları görmek için/)).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. Daire Fiyatı \(FD\)/)).not.toBeInTheDocument()
+    })
+
+    it('Örnek Proje ile Dene tıklanınca sonuç belirir ve buton kaybolur', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        expect(await screen.findByText(/Min\. Daire Fiyatı \(FD\)/)).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /Örnek Proje ile Dene/i })).not.toBeInTheDocument()
+    })
+
+    it('Rapor Kaydet boş durumda devre dışıdır', async () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        const butonlar = await screen.findAllByRole('button', { name: /Rapor Kaydet/i })
+        butonlar.forEach(b => expect(b).toBeDisabled())
+    })
+})

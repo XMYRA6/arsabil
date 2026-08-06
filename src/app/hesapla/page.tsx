@@ -766,48 +766,64 @@ export default function Home() {
 
           {/* Main Panel */}
           <main id="resultsPanel" className={`${styles.mainPanel} ${styles.swipeCard}`}>
-            <h2 className={styles.mainPanelTitle}>Hesap Sonuçları <span className={`${styles.pill} ${styles.pillSmall}`}>Engine v2</span></h2>
+            <h2 className={styles.mainPanelTitle}>
+              Hesap Sonuçları <span className={`${styles.pill} ${styles.pillSmall}`}>Engine v2</span>
+              {isDemoData && <span className={styles.demoBadge}>Örnek Veri</span>}
+            </h2>
 
-            <HesapFisi result={result} />
+            {hasEnoughDataForResult ? (
+              <>
+                <HesapFisi result={result} />
 
-            {/* Yapisal gruplama sarmalayicisi. `.mainPanelResults` sinifi
-                KALDIRILDI: tek kurali Task 5'te silinen `data-revealed`
-                kapisiydi, geriye hicbir CSS kurali olmayan bir sinif adi
-                kalmisti. DOM derinligi bilerek korunuyor. */}
-            <div>
-            <div className={styles.statsRow}>
-              {/* Arsa Fiyatı — sadece Sd açıkken görünür */}
-              {isApartmentCountEnabled && (
-                <div className={styles.statCard}>
-                  <h5>Arsa Fiyatı (Arsa Sahibine)</h5>
-                  <div className={styles.statCardValue}>
-                    {result?.FA ? result.FA.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '—'}
-                    <span>TL</span>
-                  </div>
-                  <div className={styles.statCardSub}>
-                    <span>Daire Payı:</span>
-                    <span><strong>{result?.Sdx != null ? Number(result.Sdx).toFixed(1) : '—'}</strong> daire</span>
-                  </div>
-                  {isAaEnabled && result?.FAbirim != null && (
-                    <div className={`${styles.statCardSub} ${styles.statCardSubSpaced}`}>
-                      <span>Arsa Birim:</span>
-                      <span><strong>{result.FAbirim.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong> TL/m²</span>
+                {/* Yapisal gruplama sarmalayicisi. `.mainPanelResults` sinifi
+                    KALDIRILDI: tek kurali Task 5'te silinen `data-revealed`
+                    kapisiydi, geriye hicbir CSS kurali olmayan bir sinif adi
+                    kalmisti. DOM derinligi bilerek korunuyor. */}
+                <div>
+                <div className={styles.statsRow}>
+                  {/* Arsa Fiyatı — sadece Sd açıkken görünür */}
+                  {isApartmentCountEnabled && (
+                    <div className={styles.statCard}>
+                      <h5>Arsa Fiyatı (Arsa Sahibine)</h5>
+                      <div className={styles.statCardValue}>
+                        {result?.FA ? result.FA.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '—'}
+                        <span>TL</span>
+                      </div>
+                      <div className={styles.statCardSub}>
+                        <span>Daire Payı:</span>
+                        <span><strong>{result?.Sdx != null ? Number(result.Sdx).toFixed(1) : '—'}</strong> daire</span>
+                      </div>
+                      {isAaEnabled && result?.FAbirim != null && (
+                        <div className={`${styles.statCardSub} ${styles.statCardSubSpaced}`}>
+                          <span>Arsa Birim:</span>
+                          <span><strong>{result.FAbirim.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong> TL/m²</span>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
 
-              <div className={styles.statCard}>
-                <h5>Piyasa Değerine Göre</h5>
-                <div className={styles.chartCenter}>
-                  <PriceEvaluationChart
-                    minPrice={result ? result.FD_total : 0}
-                    marketPrice={marketPriceNum}
-                  />
+                  <div className={styles.statCard}>
+                    <h5>Piyasa Değerine Göre</h5>
+                    <div className={styles.chartCenter}>
+                      <PriceEvaluationChart
+                        minPrice={result ? result.FD_total : 0}
+                        marketPrice={marketPriceNum}
+                      />
+                    </div>
+                  </div>
                 </div>
+                </div>
+              </>
+            ) : (
+              <div className={styles.resultsEmptyState}>
+                <p className={styles.resultsEmptyText}>
+                  Sonuçları görmek için parsel seçin ya da daire m² ve birim maliyeti girin.
+                </p>
+                <Button variant="outline" onClick={handleOrnekProjeIleDene}>
+                  Örnek Proje ile Dene
+                </Button>
               </div>
-            </div>
-            </div>
+            )}
 
             <div className={styles.sliderArea}>
               <h4 className={styles.sliderHeader}>Arsa Payı</h4>

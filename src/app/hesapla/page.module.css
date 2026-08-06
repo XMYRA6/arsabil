@@ -465,6 +465,37 @@
     -webkit-backdrop-filter: blur(24px);
 }
 
+.resultsEmptyState {
+    margin: 0 16px 16px;
+    padding: 24px 16px;
+    border-radius: 20px;
+    background: var(--seal-surface, var(--m-glass-bg, rgba(255, 255, 255, .66)));
+    border: 1px solid var(--seal-border-soft, var(--m-glass-border, rgba(255, 255, 255, .92)));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+}
+
+.resultsEmptyText {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    max-width: 40ch;
+}
+
+.demoBadge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(var(--seal-accent-rgb, 43, 124, 255), 0.14);
+    color: var(--seal-accent, var(--brand-blue, #1f6feb));
+    letter-spacing: .2px;
+    vertical-align: middle;
+}
+
 .hesapFisiRow {
     display: flex;
     justify-content: space-between;
