@@ -1462,3 +1462,10 @@ button.compareBtn {
 .stepperInput input[type="number"] {
     -moz-appearance: textfield;
 }
+
+.pagerEmptyText {
+    margin: 24px 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-align: center;
+}

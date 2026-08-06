@@ -895,15 +895,23 @@ export default function Home() {
 
                 {/* Page 1: Hassasiyet + Kırılma Noktası */}
                 <div className={styles.pagerPage}>
-                  <div className={styles.chartBlock}>
-                    <SensitivityChart baseInput={chartBaseInput} />
-                  </div>
-                  <div className={styles.chartDivider}>
-                    <BreakEvenChart
-                      baseInput={chartBaseInput}
-                      marketPrice={marketPriceNum}
-                    />
-                  </div>
+                  {hasEnoughDataForResult ? (
+                    <>
+                      <div className={styles.chartBlock}>
+                        <SensitivityChart baseInput={chartBaseInput} />
+                      </div>
+                      <div className={styles.chartDivider}>
+                        <BreakEvenChart
+                          baseInput={chartBaseInput}
+                          marketPrice={marketPriceNum}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <p className={styles.pagerEmptyText}>
+                      Hesap sonucu oluşunca grafikler burada görünecek. Girdileri tamamlayıp sonucun hesaplanmasını bekleyin.
+                    </p>
+                  )}
                 </div>
 
                 {/* Page 2: Finansal Modelleme */}
