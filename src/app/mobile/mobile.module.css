@@ -56,4 +56,16 @@
         color: var(--m-link);
         font-weight: 700;
     }
+
+    .activityEmptyRow {
+        padding: 10px 14px;
+        border-radius: var(--m-r-inner);
+        background: var(--m-fill);
+        font: 600 11.5px Inter, sans-serif;
+        color: var(--m-body);
+    }
+
+    .statusPending { color: var(--m-body); }
+    .statusAccepted { color: var(--m-success-text); }
+    .statusRejected { color: var(--m-danger); }
 }
