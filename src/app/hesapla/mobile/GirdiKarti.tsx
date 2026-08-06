@@ -1,6 +1,6 @@
 "use client";
 
-import { computeEffectiveLandShareX } from '../calculatorUiHelpers';
+import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE } from '../calculatorUiHelpers';
 import { SmartContextCard } from '../SmartContextCard';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import type { RiskLevel } from '../riskSuggestionHelpers';
@@ -21,7 +21,7 @@ export type GirdiKartiProps = {
     onParselDogrulaAc: () => void;
     luxLevel: number;
     onLuxLevel: (v: number) => void;
-    apartmentSize: number;
+    apartmentSize: number | null;
     onApartmentSize: (v: number) => void;
     landShareRatio: number;
     onLandShareRatio: (v: number) => void;
@@ -150,7 +150,7 @@ export function GirdiKarti({
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
                     <span className={`${styles.stepperDeger} mNum`}>
-                        {apartmentSize}
+                        {apartmentSize ?? '—'}
                         <span className={styles.stepperBirim}> m²</span>
                     </span>
                     <button
@@ -158,6 +158,7 @@ export function GirdiKarti({
                         className={styles.stepperAzalt}
                         aria-label="Metrekareyi azalt"
                         onClick={() => {
+                            if (apartmentSize === null) return;
                             const yeni = apartmentSize - M2_ADIM;
                             if (yeni >= M2_MIN) onApartmentSize(yeni);
                         }}
@@ -169,6 +170,7 @@ export function GirdiKarti({
                         className={styles.stepperArtir}
                         aria-label="Metrekareyi artır"
                         onClick={() => {
+                            if (apartmentSize === null) { onApartmentSize(ORNEK_APARTMENT_SIZE); return; }
                             const yeni = apartmentSize + M2_ADIM;
                             if (yeni <= M2_MAX) onApartmentSize(yeni);
                         }}

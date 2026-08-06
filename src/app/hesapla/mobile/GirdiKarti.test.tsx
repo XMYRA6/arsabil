@@ -121,4 +121,23 @@ describe('GirdiKarti', () => {
         await userEvent.click(screen.getByRole('switch', { name: /Toplam daire sayısı/ }))
         expect(onApartmentCountEnabled).toHaveBeenCalledWith(true)
     })
+
+    it('apartmentSize null iken deger yerine tire gosterir', () => {
+        render(<GirdiKarti {...props({ apartmentSize: null })} />)
+        expect(screen.getByText('—')).toBeInTheDocument()
+    })
+
+    it('apartmentSize null iken azalt hicbir sey yapmaz', async () => {
+        const onApartmentSize = jest.fn()
+        render(<GirdiKarti {...props({ apartmentSize: null, onApartmentSize })} />)
+        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi azalt' }))
+        expect(onApartmentSize).not.toHaveBeenCalled()
+    })
+
+    it('apartmentSize null iken artir varsayilan degere atlar', async () => {
+        const onApartmentSize = jest.fn()
+        render(<GirdiKarti {...props({ apartmentSize: null, onApartmentSize })} />)
+        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi artır' }))
+        expect(onApartmentSize).toHaveBeenCalledWith(140)
+    })
 })
