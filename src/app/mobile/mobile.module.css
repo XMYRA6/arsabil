@@ -68,4 +68,70 @@
     .statusPending { color: var(--m-body); }
     .statusAccepted { color: var(--m-success-text); }
     .statusRejected { color: var(--m-danger); }
+
+    .statGrid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        padding: 10px 8px;
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+    }
+
+    .statTile {
+        text-align: center;
+    }
+
+    .statValue {
+        font: 800 16px Inter, sans-serif;
+        color: var(--m-ink);
+    }
+
+    .statLabel {
+        font: 700 8px Inter, sans-serif;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        color: var(--m-body);
+        margin-top: 2px;
+    }
+
+    .actionGrid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    .actionTile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 4px;
+        text-decoration: none;
+    }
+
+    .actionIcon {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        background: var(--m-fill);
+    }
+
+    .actionIconPrimary {
+        background: var(--m-grad-btn);
+        color: #fff;
+    }
+
+    .actionLabel {
+        font: 700 9.5px Inter, sans-serif;
+        color: var(--m-ink);
+        text-align: center;
+    }
 }
