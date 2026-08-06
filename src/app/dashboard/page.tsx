@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import styles from './page.module.css'
 
-interface DashboardData {
+export interface DashboardData {
   stats: {
     reportCount: number
     activeListingCount: number
