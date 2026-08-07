@@ -21,12 +21,10 @@ describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
     expect(pageCss).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
   });
 
-  it('--seal-accent tanımı artık sayfa geneli (masaüstü dahil) olmalı — mobil media query\'nin İÇİNDE OLMAMALI (2026-07-24 hesapla redesign kararı)', () => {
-    const firstMobileMediaIndex = pageCss.indexOf('@media (max-width: 768px)');
+  it('--seal-accent tanımı artık sayfa geneli (masaüstü dahil) olmalı — mobil media query artık dosyada hiç yok, önceki "media query İÇİNDE OLMAMALI" kısıtı yapısal olarak garanti oldu (2026-08-07 ölü kod temizliği)', () => {
+    expect(pageCss).not.toMatch(/@media \(max-width: 768px\)/);
     const sealAccentIndex = pageCss.indexOf('--seal-accent:');
-    expect(firstMobileMediaIndex).toBeGreaterThan(-1);
     expect(sealAccentIndex).toBeGreaterThan(-1);
-    expect(sealAccentIndex).toBeLessThan(firstMobileMediaIndex);
   });
 
   it('--seal-surface hem dark hem light tema bloğunda tanımlı olmalı', () => {
@@ -61,11 +59,12 @@ describe('erisilemez mobil ölü kod kapsami', () => {
 });
 
 describe('paylaşılan bileşen override\'larının özgünlük deseni', () => {
-  it('Rapor Kaydet/PDF İndir butonları element+class selektörüyle override edilmeli (bkz. compareBtn hata geçmişi)', () => {
-    expect(pageCss).toMatch(/button\.sealPrimaryBtn/);
-    expect(pageCss).toMatch(/button\.sealOutlineBtn/);
+  it('button.sealPrimaryBtn/button.sealOutlineBtn override kuralları artık CSS\'te yok (2026-08-07 ölü kod temizliği): bu kurallar yalnızca silinen @media (max-width: 768px) bloğunun içindeydi — masaüstü JSX ağacı o genişlikte hiç render olmadığından (isDesktopViewport gate, page.tsx:518) zaten hiçbir zaman uygulanmıyorlardı. sealOutlineBtn ayrıca page.tsx\'te hiçbir yerde kullanılmıyor; sealPrimaryBtn kullanılıyor ama artık page.module.css\'te karşılığı yok — Rapor Kaydet/PDF İndir butonları masaüstünde salt Button bileşeninin kendi variant stilini alıyor (bu task\'ın kapsamı dışında, ölü bloktan önce de gerçekte hiç uygulanmamış önceden var olan bir durum).', () => {
+    expect(pageCss).not.toMatch(/button\.sealPrimaryBtn/);
+    expect(pageCss).not.toMatch(/button\.sealOutlineBtn/);
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).not.toMatch(/styles\.sealOutlineBtn/);
   });
-
 });
 
 describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
@@ -76,27 +75,19 @@ describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
     expect(pageTsx).toMatch(/<HesapFisi result={result} \/>/);
   });
 
-  it('.sliderArea mobilde gizlenmeli, kural mobil media query içinde olmalı', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const sliderAreaHideMatch = pageCss.match(/\.sliderArea\s*\{[^}]*display:\s*none/);
-    expect(sliderAreaHideMatch).not.toBeNull();
-    expect(sliderAreaHideMatch!.index).toBeGreaterThan(lastMobileMediaIndex);
+  it('.sliderArea artık masaüstünde koşulsuz görünür — mobil viewport bu dosyanın JSX ağacını hiç render etmiyor, mobile-only gizleme kuralına gerek yok (2026-08-07 ölü kod temizliği)', () => {
+    expect(pageCss).not.toMatch(/\.sliderArea\s*\{\s*display:\s*none/);
   });
 });
 
-describe('aksiyon butonları dual-slot kapsamı', () => {
-  it('.desktopActionsSlot mobilde gizlenmeli', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const match = pageCss.match(/\.desktopActionsSlot\s*\{[^}]*display:\s*none/);
-    expect(match).not.toBeNull();
-    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
+describe('ölü @media (max-width: 768px) breakpoint kapsamı (2026-08-07 temizlik)', () => {
+  it('page.module.css içinde hiçbir "@media (max-width: 768px)" kuralı kalmamalı — masaüstü JSX ağacı bu genişlikte asla mount olmuyor (isDesktopViewport===false erken <HesaplaMobile/>e dönüyor, page.tsx:518)', () => {
+    expect(pageCss).not.toMatch(/@media \(max-width: 768px\)/);
   });
 
-  it('.mobileActionsSlot mobilde koşulsuz display: contents olmalı', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const match = pageCss.match(/\.mobileActionsSlot\s*\{[^}]*display:\s*contents/);
-    expect(match).not.toBeNull();
-    expect(match!.index).toBeGreaterThan(lastMobileMediaIndex);
+  it('.desktopActionsSlot/.mobileActionsSlot class\'ları artık CSS\'te yok — actionsSection tek yerde render ediliyor (Task 1)', () => {
+    expect(pageCss).not.toMatch(/\.desktopActionsSlot/);
+    expect(pageCss).not.toMatch(/\.mobileActionsSlot/);
   });
 });
 
@@ -110,19 +101,15 @@ describe('data-revealed gate kapsamı', () => {
 });
 
 describe('kart yüzeyi migrasyonu — seal-ink/seal-ink-2 doğrudan kullanılmamalı', () => {
-  it('topResultCard, statCard artık --seal-surface kullanmalı (eski --seal-ink-2 gradienti değil; accordion Task 8\'de ölü kod olarak kaldırıldı)', () => {
-    expect(pageCss).toMatch(/\.topResultCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
-    expect(pageCss).toMatch(/\.statCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+  it('--seal-ink-2 hâlâ hiçbir yerde doğrudan kullanılmıyor (Task 8\'de kaldırılmıştı, geri gelmemeli)', () => {
+    expect(pageCss).not.toMatch(/var\(--seal-ink-2\)/);
   });
 
-  it('bu kartlar artık backdrop-filter blur uygulamalı (light temada camsı yüzey için gerekli)', () => {
-    expect(pageCss).toMatch(/\.topResultCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
-    expect(pageCss).toMatch(/\.statCard\s*\{[^}]*backdrop-filter:\s*blur\(24px\)/);
-  });
-
-  it('topResultLabel/statCard h5 artık --seal-text-muted kullanmalı', () => {
-    expect(pageCss).toMatch(/\.topResultLabel\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
-    expect(pageCss).toMatch(/\.statCard h5\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
+  it('.topResultCard/.statCard/.topResultLabel/.statCard h5 --seal-surface/--seal-text-muted override\'ları artık CSS\'te yok (2026-08-07 ölü kod temizliği): bu kurallar yalnızca silinen @media (max-width: 768px) bloğunun içindeydi — masaüstü JSX o genişlikte hiç render olmadığından (isDesktopViewport gate, page.tsx:518) zaten hiç uygulanmıyorlardı. Masaüstünde gerçek yüzey kaynağı .topResultCard\'ın brand-gradient tabanı ve .statCard\'ın stat-bg tabanı (bu task\'ın kapsamı dışında, ölü bloktan önce de gerçekte hiç uygulanmamış önceden var olan bir durum).', () => {
+    expect(pageCss).not.toMatch(/\.topResultCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+    expect(pageCss).not.toMatch(/\.statCard\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+    expect(pageCss).not.toMatch(/\.topResultLabel\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
+    expect(pageCss).not.toMatch(/\.statCard h5\s*\{[^}]*color:\s*var\(--seal-text-muted\)/);
   });
 });
 
@@ -135,17 +122,6 @@ describe('buton reverse — PDF İndir ve Karşılaştır dolgulu stile geçmeli
     expect(pageTsx).toMatch(/handlePdfDownload[^>]*className=\{styles\.sealPrimaryBtn\}/);
   });
 
-  it('button.compareBtn mobilde dolgulu yeşil override almalı, override mobil media query içinde olmalı', () => {
-    const lastMobileMediaIndex = pageCss.lastIndexOf('@media (max-width: 768px)');
-    const matches = [...pageCss.matchAll(/button\.compareBtn\s*\{[^}]*background:\s*var\(--green\)/g)];
-    expect(matches.length).toBe(1);
-    expect(matches[0].index).toBeGreaterThan(lastMobileMediaIndex);
-  });
-
-  it('masaüstü (media query dışı) button.compareBtn hâlâ outline (transparan/açık arka plan) olmalı', () => {
-    const outsideMobileCss = pageCss.slice(0, pageCss.lastIndexOf('@media (max-width: 768px)'));
-    expect(outsideMobileCss).toMatch(/button\.compareBtn\s*\{[^}]*background:\s*rgba\(var\(--green-rgb\), 0\.08\)/);
-  });
 });
 
 describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)', () => {
