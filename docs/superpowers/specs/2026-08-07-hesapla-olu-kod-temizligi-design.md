@@ -80,6 +80,28 @@ desen burada da uygulanır:
   şu an `findAllByRole(...)` + `.forEach(...)` ile ÇOĞUL buton bekliyor (iki
   kopya render edildiği için). `findByRole(...)` (tekil) olarak güncellenir.
 
+## Düzeltme notu (2026-08-07, uygulama sonrası)
+
+Yukarıdaki "Bulgu 2" bölümündeki **"İçindeki HER kural ... Blok tamamen ölü"**
+cümlesi YANLIŞ çıktı. Final whole-branch review (bu spec/plan'ın uygulanmasından
+sonra) bağımsız bir bulgu buldu: `page.module.css`, yalnızca bu dosyanın (`page.tsx`)
+masaüstü JSX ağacı tarafından değil, `AdvancedSettingsSections.tsx`'in de import
+ettiği bir CSS modülü. O dosyanın `BirimMaliyetField`/`MarketField`/`RiskCostFields`
+bileşenleri `src/app/hesapla/mobile/GelismisAyarlarSheet.tsx` tarafından kullanılıyor
+— ki o da `page.tsx`'in `isDesktopViewport===false` dalında (satır 518, `<HesaplaMobile>`
+ile birlikte) mount ediliyor. Yani silinen 226 satırlık blok içindeki `.stepperInput`
+ve `.luxBox` kuralları, "masaüstü ağacı ≤768px'de asla mount olmuyor" önermesine
+rağmen ≤768px'de GERÇEKTEN tetikleniyordu — "ölü" değildi.
+
+Düzeltme: `.stepperInput`/`.stepperInput input`/`.luxBox` kuralları `page.module.css`'e
+kasıtlı, dar kapsamlı, yorumlu bir `@media (max-width: 768px)` bloğu olarak geri
+eklendi (bloğun geri kalanı — `.container`, `.layout`, `button.sealPrimaryBtn` vb. —
+gerçekten ölü olduğu için geri eklenmedi). Ayrıca bu vesileyle `styles.sealPrimaryBtn`'in
+page.tsx'te hiçbir zaman gerçek bir CSS karşılığı olmayan asılı bir referans olduğu
+(Bulgu, bu düzeltme oturumunda kapatıldı) ve `--seal-text-faint`'in artık hiç
+tüketilmediği de temizlendi. Tam ayrıntı ve canlı doğrulama sonuçları için:
+`.superpowers/sdd/2026-08-07-hesapla-olu-kod-temizligi/final-fix-report.md`.
+
 ## Kapsam dışı
 
 - `HesaplaMobile` ve `mobile/` dizini — dokunulmuz, zaten ayrı/canlı bir ağaç.

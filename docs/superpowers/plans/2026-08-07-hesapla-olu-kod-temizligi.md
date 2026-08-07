@@ -8,6 +8,17 @@
 
 **Tech Stack:** Next.js 16, React 19, TypeScript, CSS Modules, Jest + React Testing Library.
 
+> **Düzeltme notu (2026-08-07, uygulama sonrası):** Yukarıdaki "226 satırlık
+> erişilemez blok" ve "Bu ağacı hedefleyen kurallar hiçbir zaman tetiklenemez"
+> önermeleri kısmen YANLIŞ çıktı. Final whole-branch review, bu bloktaki
+> `.stepperInput`/`.luxBox` kurallarının `AdvancedSettingsSections.tsx` üzerinden
+> `GelismisAyarlarSheet` (mobil, `page.tsx`'in `isDesktopViewport===false` dalı)
+> aracılığıyla GERÇEKTEN ≤768px'de tetiklendiğini buldu. Bu iki kural küçük,
+> kasıtlı bir `@media (max-width: 768px)` bloğu olarak geri eklendi; bloğun
+> geri kalanı (gerçekten yalnızca masaüstü JSX ağacına ait class'lar) ölü kaldı.
+> Ayrıntı: `docs/superpowers/specs/2026-08-07-hesapla-olu-kod-temizligi-design.md`
+> "Düzeltme notu" bölümü ve `.superpowers/sdd/2026-08-07-hesapla-olu-kod-temizligi/final-fix-report.md`.
+
 ## Global Constraints
 
 - `HesaplaMobile` ve `src/app/hesapla/mobile/` dizinine DOKUNULMAZ — ayrı, canlı bir ağaç.
