@@ -126,8 +126,8 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
     it('Rapor Kaydet boş durumda devre dışıdır', async () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        const butonlar = await screen.findAllByRole('button', { name: /Rapor Kaydet/i })
-        butonlar.forEach(b => expect(b).toBeDisabled())
+        const buton = await screen.findByRole('button', { name: /Rapor Kaydet/i })
+        expect(buton).toBeDisabled()
     })
 
     it('geç gelen /api/settings defaultUnitPrice, Örnek Proje ile Dene ile girilmiş değeri ezmez', async () => {

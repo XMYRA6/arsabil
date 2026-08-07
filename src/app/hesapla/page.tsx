@@ -858,9 +858,7 @@ export default function Home() {
             </div>
 
 
-            <div className={styles.desktopActionsSlot}>
-              {actionsSection}
-            </div>
+            {actionsSection}
           </main>
 
           {/* Hesap Özeti */}
@@ -944,9 +942,6 @@ export default function Home() {
             </div>
           </aside>
 
-          <div className={styles.mobileActionsSlot}>
-            {actionsSection}
-          </div>
         </section>
       </div >
 
