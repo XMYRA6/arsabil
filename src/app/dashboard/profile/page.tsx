@@ -320,16 +320,16 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {profile?.isVerified && (
-                        <div className={styles.verifiedBadge}>✓ Doğrulandı</div>
-                    )}
-
                     <div className={styles.heroName}>
                         <span className={styles.heroNameText}>{session.user?.name || 'Kullanıcı'}</span>
                         <span className={styles.heroSubline}>
                             {(session.user as { role?: string })?.role || 'USER'}
                         </span>
                     </div>
+
+                    {profile?.isVerified && (
+                        <div className={styles.verifiedBadge}>✓ Doğrulandı</div>
+                    )}
 
                     <div className={styles.completionCard}>
                         <div className={styles.completionTop}>

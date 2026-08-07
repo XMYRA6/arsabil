@@ -228,4 +228,32 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(desktopBlock).toMatch(/\.menuRow\s*\{[^}]*background:\s*var\(--bg-body\)/)
     expect(desktopBlock).toMatch(/\.verifiedBadge\s*\{[^}]*background:\s*rgba\(var\(--green-rgb\)/)
   })
+
+  it('mobilde .menuLabel/.heroNameText/.heroSubline/.menuSubtitle tema-bağımlı var(--text)/var(--muted) KULLANMAMALI (koyu temada okunmaz olur — --m-* light-only glass yüzeyler üzerinde --m-ink/--m-body kullanılmalı)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+
+    const menuLabelMatch = mobileBlock.match(/\.menuLabel\s*\{([^}]*)\}/)
+    expect(menuLabelMatch).not.toBeNull()
+    expect(menuLabelMatch![1]).not.toMatch(/var\(--text\)/)
+    expect(menuLabelMatch![1]).not.toMatch(/var\(--muted\)/)
+    expect(menuLabelMatch![1]).toMatch(/var\(--m-ink\)/)
+
+    const heroNameTextMatch = mobileBlock.match(/\.heroNameText\s*\{([^}]*)\}/)
+    expect(heroNameTextMatch).not.toBeNull()
+    expect(heroNameTextMatch![1]).not.toMatch(/var\(--text\)/)
+    expect(heroNameTextMatch![1]).not.toMatch(/var\(--muted\)/)
+    expect(heroNameTextMatch![1]).toMatch(/var\(--m-ink\)/)
+
+    const heroSublineMatch = mobileBlock.match(/\.heroSubline\s*\{([^}]*)\}/)
+    expect(heroSublineMatch).not.toBeNull()
+    expect(heroSublineMatch![1]).not.toMatch(/var\(--text\)/)
+    expect(heroSublineMatch![1]).not.toMatch(/var\(--muted\)/)
+    expect(heroSublineMatch![1]).toMatch(/var\(--m-body\)/)
+
+    const menuSubtitleMatch = mobileBlock.match(/\.menuSubtitle\s*\{([^}]*)\}/)
+    expect(menuSubtitleMatch).not.toBeNull()
+    expect(menuSubtitleMatch![1]).not.toMatch(/var\(--text\)/)
+    expect(menuSubtitleMatch![1]).not.toMatch(/var\(--muted\)/)
+    expect(menuSubtitleMatch![1]).toMatch(/var\(--m-body\)/)
+  })
 })

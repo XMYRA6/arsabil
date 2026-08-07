@@ -605,6 +605,34 @@
     background: var(--m-grad-btn);
   }
 
+  .completionTrack {
+    background: var(--m-fill);
+  }
+
+  .heroNameText {
+    color: var(--m-ink);
+  }
+
+  .heroSubline {
+    color: var(--m-body);
+  }
+
+  .completionTitle {
+    color: var(--m-ink);
+  }
+
+  .menuLabel {
+    color: var(--m-ink);
+  }
+
+  .menuSubtitle {
+    color: var(--m-body);
+  }
+
+  .menuChevron {
+    color: var(--m-body);
+  }
+
   .menuRow {
     background: var(--m-glass-bg);
     border: 1px solid var(--m-glass-border);
