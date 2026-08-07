@@ -290,7 +290,7 @@
   border-color: rgba(var(--acc), 0.6);
 }
 
-/* ── Mouse spotlight ── */
+/* ── Hover spotlight ── */
 .spotlight {
   position: absolute;
   inset: 0;

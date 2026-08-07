@@ -269,14 +269,9 @@ describe('anasayfa takip kalemleri (2026-07-26) — light cam reçetesi hizalama
 });
 
 describe('anasayfa bento kartları — ölü mouse-tracking kodu kaldırıldı (2026-08-07)', () => {
-  it('page.tsx artık onMouseMove/onMouseLeave fonksiyon tanımlarını içermemeli', () => {
-    expect(pageTsx).not.toMatch(/function onMouseMove/);
-    expect(pageTsx).not.toMatch(/function onMouseLeave/);
-  });
-
-  it('page.tsx bento kartlarında onMouseMove/onMouseLeave prop\'larını kullanmamalı', () => {
-    expect(pageTsx).not.toMatch(/onMouseMove=\{onMouseMove\}/);
-    expect(pageTsx).not.toMatch(/onMouseLeave=\{onMouseLeave\}/);
+  it('page.tsx artık onMouseMove/onMouseLeave identifier\'larını hiçbir biçimde içermemeli (fonksiyon tanımı, prop binding, yeniden adlandırma — hepsi kapsanır)', () => {
+    expect(pageTsx).not.toMatch(/onMouseMove/);
+    expect(pageTsx).not.toMatch(/onMouseLeave/);
   });
 
   it('page.module.css artık --rx/--ry/--mx/--my custom property referansı içermemeli', () => {
@@ -286,15 +281,29 @@ describe('anasayfa bento kartları — ölü mouse-tracking kodu kaldırıldı (
     expect(pageCss).not.toMatch(/var\(--my/);
   });
 
-  it('.spotlight artık sabit merkez (50% 50%) kullanmalı', () => {
-    const match = pageCss.match(/\.spotlight\s*\{([^}]*)\}/);
+  it('page.module.css 3D tilt mekanizması (transform-style/perspective) geri gelmemeli, JS olmasa bile', () => {
+    expect(pageCss).not.toMatch(/transform-style:\s*preserve-3d/);
+    expect(pageCss).not.toMatch(/perspective\(/);
+  });
+
+  it('.spotlight (standalone kural, .bentoCard:hover .spotlight değil) artık sabit merkez (50% 50%) kullanmalı', () => {
+    const match = pageCss.match(/^\.spotlight\s*\{([^}]*)\}/m);
     expect(match).not.toBeNull();
     expect(match![1]).toMatch(/400px circle at 50% 50%/);
   });
 
   it('.bentoCard:hover davranışı (görsel scale + gölge + spotlight fade-in) hâlâ tanımlı olmalı — sadece tilt/imleç-takibi kalkmalı', () => {
-    expect(pageCss).toMatch(/\.bentoCard:hover \.cardBgImage \{/);
-    expect(pageCss).toMatch(/\.bentoCard:hover \{/);
-    expect(pageCss).toMatch(/\.bentoCard:hover \.spotlight \{ opacity: 1; \}/);
+    const liftMatch = pageCss.match(/\.bentoCard:hover\s*\{([^}]*)\}/);
+    expect(liftMatch).not.toBeNull();
+    expect(liftMatch![1]).toMatch(/box-shadow/);
+    expect(liftMatch![1]).toMatch(/border-color/);
+
+    const bgImageMatch = pageCss.match(/\.bentoCard:hover\s*\.cardBgImage\s*\{([^}]*)\}/);
+    expect(bgImageMatch).not.toBeNull();
+    expect(bgImageMatch![1]).toMatch(/transform:\s*scale\(1\.06\)/);
+
+    const spotlightMatch = pageCss.match(/\.bentoCard:hover\s*\.spotlight\s*\{([^}]*)\}/);
+    expect(spotlightMatch).not.toBeNull();
+    expect(spotlightMatch![1]).toMatch(/opacity:\s*1/);
   });
 });
