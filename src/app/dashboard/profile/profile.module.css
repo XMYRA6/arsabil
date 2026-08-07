@@ -431,9 +431,8 @@
 }
 
 .heroNameText {
-  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 700;
   color: var(--text);
 }
 
@@ -501,7 +500,15 @@
 
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
-  .profileCard { position: static; }
+  .profileCard {
+    position: static;
+    background: var(--m-glass-bg);
+    border: 1px solid var(--m-glass-border);
+    border-radius: var(--m-r-card);
+    backdrop-filter: var(--m-glass-blur);
+    -webkit-backdrop-filter: var(--m-glass-blur);
+    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+  }
   .themeGrid { grid-template-columns: repeat(2, 1fr); }
 
   .pageTitle {
@@ -550,11 +557,78 @@
     height: 96px;
   }
 
-  .nameRow {
-    display: none;
+  .avatarRing {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    padding: 3px;
+    margin: 0 auto;
+    background: var(--m-grad-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container {
+    background: var(--m-mesh), var(--m-bg);
+    min-height: 100dvh;
   }
 
   .verifiedBadge {
+    display: none;
+  }
+
+  .container[data-mobile-section="false"] .verifiedBadge {
+    display: inline-flex;
+    background: rgba(16, 185, 129, 0.14);
+    color: #067a56;
+    border: none;
+    margin: 2px auto 0;
+  }
+
+  .completionCard {
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 10px 0 0;
+    border-top: 1px solid rgba(11, 32, 54, 0.08);
+    margin-top: 4px;
+  }
+
+  .completionPct {
+    font-family: var(--m-mono);
+    font-variant-numeric: tabular-nums;
+    color: #1560d0;
+  }
+
+  .completionFill {
+    background: var(--m-grad-btn);
+  }
+
+  .menuRow {
+    background: var(--m-glass-bg);
+    border: 1px solid var(--m-glass-border);
+    border-radius: var(--m-r-card);
+    backdrop-filter: var(--m-glass-blur);
+    -webkit-backdrop-filter: var(--m-glass-blur);
+    box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+  }
+
+  .menuIconBoxBlue { background: linear-gradient(135deg, #4f9bff, var(--primary)); }
+  .menuIconBoxOrange { background: linear-gradient(135deg, #ffb648, var(--orange)); }
+  .menuIconBoxRed { background: linear-gradient(135deg, #ff8189, var(--red)); }
+  .menuIconBoxGray { background: linear-gradient(135deg, #8fa1ba, #64748b); }
+
+  .menuCount {
+    font-family: var(--m-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sectionLabel {
+    color: #4c5d78;
+  }
+
+  .nameRow {
     display: none;
   }
 

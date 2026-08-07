@@ -285,31 +285,33 @@ export default function ProfilePage() {
             <div className={styles.layout}>
                 {/* Sol: Profil kartı */}
                 <div className={styles.profileCard}>
-                    <div className={styles.avatarWrapper} onClick={() => fileInputRef.current?.click()}>
-                        {avatarUrl
-                            ? <Image fill unoptimized src={avatarUrl} alt="Profil fotoğrafı" style={{ objectFit: 'cover', borderRadius: '50%' }} />
-                            : <div className={styles.avatarCircle}>{getInitials()}</div>
-                        }
-                        <div className={styles.avatarOverlay}>
-                            {uploadingAvatar ? '⏳' : '📷'}
+                    <div className={styles.avatarRing}>
+                        <div className={styles.avatarWrapper} onClick={() => fileInputRef.current?.click()}>
+                            {avatarUrl
+                                ? <Image fill unoptimized src={avatarUrl} alt="Profil fotoğrafı" style={{ objectFit: 'cover', borderRadius: '50%' }} />
+                                : <div className={styles.avatarCircle}>{getInitials()}</div>
+                            }
+                            <div className={styles.avatarOverlay}>
+                                {uploadingAvatar ? '⏳' : '📷'}
+                            </div>
+                            <button
+                                type="button"
+                                className={styles.avatarEditBadge}
+                                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
+                                aria-label="Profil fotoğrafını değiştir"
+                            >
+                                <span className={styles.avatarEditBadgeIcon}>
+                                    {uploadingAvatar ? '⏳' : '✏️'}
+                                </span>
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                style={{ display: 'none' }}
+                                onChange={handleAvatarUpload}
+                            />
                         </div>
-                        <button
-                            type="button"
-                            className={styles.avatarEditBadge}
-                            onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
-                            aria-label="Profil fotoğrafını değiştir"
-                        >
-                            <span className={styles.avatarEditBadgeIcon}>
-                                {uploadingAvatar ? '⏳' : '✏️'}
-                            </span>
-                        </button>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                            style={{ display: 'none' }}
-                            onChange={handleAvatarUpload}
-                        />
                     </div>
                     <div className={styles.nameRow}>
                         <div>
@@ -326,7 +328,6 @@ export default function ProfilePage() {
                         <span className={styles.heroNameText}>{session.user?.name || 'Kullanıcı'}</span>
                         <span className={styles.heroSubline}>
                             {(session.user as { role?: string })?.role || 'USER'}
-                            {profile?.isVerified ? ' · ✓ Doğrulandı' : ''}
                         </span>
                     </div>
 

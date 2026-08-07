@@ -161,4 +161,71 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(beforeNoneRule).not.toMatch(/\.nameRow\s+\.displayName/)
     expect(beforeNoneRule).not.toMatch(/\.nameRow\s+\.roleTag/)
   })
+
+  it('.container mobilde m-mesh/m-bg arka planı kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.container\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-mesh\)/)
+    expect(match![1]).toMatch(/var\(--m-bg\)/)
+  })
+
+  it('.profileCard mobilde cam yüzey (m-glass) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.profileCard\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-glass-bg\)/)
+    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
+  })
+
+  it('.menuRow mobilde cam yüzey (m-glass) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.menuRow\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-glass-bg\)/)
+    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
+  })
+
+  it('.menuCount mobilde mono/tabular-nums olmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.menuCount\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-mono\)/)
+    expect(match![1]).toMatch(/tabular-nums/)
+  })
+
+  it('.heroNameText artık Georgia/serif kullanmamalı', () => {
+    const baseIndex = css.indexOf('.heroNameText {')
+    expect(baseIndex).toBeGreaterThan(-1)
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(block).not.toMatch(/Georgia/)
+    expect(block).not.toMatch(/serif/)
+  })
+
+  it('.avatarRing class\'ı hem CSS\'te tanımlı hem page.tsx\'te kullanılmalı', () => {
+    expect(css).toMatch(/\.avatarRing\s*\{/)
+    const tsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8')
+    expect(tsx).toMatch(/styles\.avatarRing/)
+  })
+
+  it('.verifiedBadge mobilde artık koşulsuz gizli olmamalı (yalnızca section açıkken gizli)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    // Koşulsuz "sadece display:none" kuralı kalmamalı — yalnızca
+    // .container[data-mobile-section="false"] altında görünür olmalı.
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="false"\]\s+\.verifiedBadge\s*\{[^}]*display:\s*inline-flex/)
+  })
+
+  it('page.tsx heroSubline içinde artık "Doğrulandı" metni geçmemeli (çipe taşındı)', () => {
+    const tsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8')
+    const sublineMatch = tsx.match(/heroSubline[^>]*>([\s\S]*?)<\/span>/)
+    expect(sublineMatch).not.toBeNull()
+    expect(sublineMatch![1]).not.toMatch(/Doğrulandı/)
+  })
+
+  it('masaüstü (media query dışı) .profileCard/.menuRow/.verifiedBadge tanımları değişmemiş olmalı', () => {
+    const desktopBlock = css.slice(0, mediaIndex)
+    expect(desktopBlock).toMatch(/\.profileCard\s*\{[^}]*background:\s*var\(--panel\)/)
+    expect(desktopBlock).toMatch(/\.menuRow\s*\{[^}]*background:\s*var\(--bg-body\)/)
+    expect(desktopBlock).toMatch(/\.verifiedBadge\s*\{[^}]*background:\s*rgba\(var\(--green-rgb\)/)
+  })
 })
