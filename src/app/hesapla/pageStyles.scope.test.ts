@@ -7,6 +7,31 @@ const globalsCss = fs.readFileSync(
   'utf8'
 );
 
+/**
+ * `css.indexOf(mediaQuery)`'den baslayarak brace-dengeli sekilde bir
+ * `@media` blogunun ICERIGINI (disaridaki { } haric) doner. Basit bir
+ * non-greedy regex (`\{([\s\S]*?)\}`) burada YETERSIZ — blok icinde
+ * `.stepperInput { ... }` gibi ic ice kurallar oldugu icin ilk kapanan
+ * `}`'de durur, dis bloktan cok once biter.
+ */
+function extractMediaBlock(css: string, mediaQuery: string): string | null {
+  const startIdx = css.indexOf(mediaQuery);
+  if (startIdx === -1) return null;
+  const braceStart = css.indexOf('{', startIdx);
+  if (braceStart === -1) return null;
+  let depth = 0;
+  for (let i = braceStart; i < css.length; i++) {
+    if (css[i] === '{') depth++;
+    else if (css[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        return css.slice(braceStart + 1, i);
+      }
+    }
+  }
+  return null;
+}
+
 describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
   it('yeni seal token\'ları globals.css içine hiç sızmamış olmalı', () => {
     expect(globalsCss).not.toMatch(/--seal-(ink|accent|surface|border|text)/);
@@ -21,10 +46,12 @@ describe('hesapla mobil cam kart + aurora mavi vurgu token kapsamı', () => {
     expect(pageCss).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
   });
 
-  it('--seal-accent tanımı artık sayfa geneli (masaüstü dahil) olmalı — mobil media query artık dosyada hiç yok, önceki "media query İÇİNDE OLMAMALI" kısıtı yapısal olarak garanti oldu (2026-08-07 ölü kod temizliği)', () => {
-    expect(pageCss).not.toMatch(/@media \(max-width: 768px\)/);
+  it('--seal-accent tanımı sayfa geneli (masaüstü dahil), herhangi bir @media bloğundan ÖNCE tanımlı olmalı — 2026-08-07 düzeltme: page.module.css içinde artık dar kapsamlı, kasıtlı bir @media (max-width: 768px) bloğu VAR (.stepperInput/.luxBox, AdvancedSettingsSections.tsx üzerinden mobil GelismisAyarlarSheet\'e sızıyor, final review bulgusu), ama --seal-accent onun içinde değil — dosyanın en üstünde, ilk @media bloğundan önce tanımlı kalmalı', () => {
     const sealAccentIndex = pageCss.indexOf('--seal-accent:');
     expect(sealAccentIndex).toBeGreaterThan(-1);
+    const firstMediaIndex = pageCss.indexOf('@media');
+    expect(firstMediaIndex).toBeGreaterThan(-1);
+    expect(sealAccentIndex).toBeLessThan(firstMediaIndex);
   });
 
   it('--seal-surface hem dark hem light tema bloğunda tanımlı olmalı', () => {
@@ -56,14 +83,21 @@ describe('erisilemez mobil ölü kod kapsami', () => {
     expect(pageTsx).not.toMatch(/styles\.mobileSidebar/);
     expect(pageTsx).not.toMatch(/styles\.mobileAccordions/);
   });
+
+  it('.desktopActionsSlot/.mobileActionsSlot page.tsx JSX\'inde hiç kullanılmıyor (Task 1: actionsSection tek yerde render ediliyor, dual-slot sarmalayıcılar kaldırıldı — bu guard yalnızca CSS tarafını değil JSX tarafını da kapsar)', () => {
+    const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
+    expect(pageTsx).not.toMatch(/styles\.desktopActionsSlot/);
+    expect(pageTsx).not.toMatch(/styles\.mobileActionsSlot/);
+  });
 });
 
 describe('paylaşılan bileşen override\'larının özgünlük deseni', () => {
-  it('button.sealPrimaryBtn/button.sealOutlineBtn override kuralları artık CSS\'te yok (2026-08-07 ölü kod temizliği): bu kurallar yalnızca silinen @media (max-width: 768px) bloğunun içindeydi — masaüstü JSX ağacı o genişlikte hiç render olmadığından (isDesktopViewport gate, page.tsx:518) zaten hiçbir zaman uygulanmıyorlardı. sealOutlineBtn ayrıca page.tsx\'te hiçbir yerde kullanılmıyor; sealPrimaryBtn kullanılıyor ama artık page.module.css\'te karşılığı yok — Rapor Kaydet/PDF İndir butonları masaüstünde salt Button bileşeninin kendi variant stilini alıyor (bu task\'ın kapsamı dışında, ölü bloktan önce de gerçekte hiç uygulanmamış önceden var olan bir durum).', () => {
+  it('button.sealPrimaryBtn/button.sealOutlineBtn override kuralları artık CSS\'te yok (2026-08-07 ölü kod temizliği): bu kurallar yalnızca silinen 226 satırlık @media (max-width: 768px) bloğunun içindeydi — masaüstü JSX ağacı o genişlikte hiç render olmadığından (isDesktopViewport gate, page.tsx:518) zaten hiçbir zaman uygulanmıyorlardı. Ne sealOutlineBtn ne sealPrimaryBtn page.tsx\'te kullanılıyor (2026-08-07 düzeltme: sealPrimaryBtn asılı referansı — page.module.css\'te hiçbir zaman gerçek karşılığı olmayan bir class — page.tsx\'ten de kaldırıldı; Rapor Kaydet/PDF İndir butonları salt Button bileşeninin kendi variant stilini alıyor).', () => {
     expect(pageCss).not.toMatch(/button\.sealPrimaryBtn/);
     expect(pageCss).not.toMatch(/button\.sealOutlineBtn/);
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
     expect(pageTsx).not.toMatch(/styles\.sealOutlineBtn/);
+    expect(pageTsx).not.toMatch(/styles\.sealPrimaryBtn/);
   });
 });
 
@@ -80,12 +114,43 @@ describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
   });
 });
 
-describe('ölü @media (max-width: 768px) breakpoint kapsamı (2026-08-07 temizlik)', () => {
-  it('page.module.css içinde hiçbir "@media (max-width: 768px)" kuralı kalmamalı — masaüstü JSX ağacı bu genişlikte asla mount olmuyor (isDesktopViewport===false erken <HesaplaMobile/>e dönüyor, page.tsx:518)', () => {
-    expect(pageCss).not.toMatch(/@media \(max-width: 768px\)/);
+describe('ölü @media (max-width: 768px) breakpoint kapsamı (2026-08-07 temizlik, 2026-08-07 düzeltme)', () => {
+  // DÜZELTME NOTU (2026-08-07): "page.module.css içinde hiçbir @media
+  // (max-width: 768px) kuralı kalmamalı" önermesi YANLIŞ çıktı — final
+  // whole-branch review, `.stepperInput`/`.luxBox` kurallarının
+  // `AdvancedSettingsSections.tsx` (BirimMaliyetField/MarketField/
+  // RiskCostFields) üzerinden bu CSS modülüne, page.tsx'in mobil dalındaki
+  // (isDesktopViewport===false, satır 518) `GelismisAyarlarSheet`e de
+  // sızdığını buldu. Bu iki class gerçekten ≤768px'de render ediliyor,
+  // dolayısıyla küçük ve kasıtlı bir @media (max-width: 768px) bloğu geri
+  // eklendi. Guard artık "hiç @media yok" yerine "genuinely ölü class'lar
+  // bu bloğun İÇİNDE değil" diye daraltıldı — asıl regresyon riski, eski
+  // 226 satırlık bloğun (masaüstü-only kurallar) kazara geri gelmesi.
+  it('page.module.css\'teki @media (max-width: 768px) bloğu SADECE .stepperInput/.luxBox içermeli — genuinely ölü class\'lar (masaüstü JSX ağacının ≤768px\'de asla mount olmadığı, isDesktopViewport gate page.tsx:518 nedeniyle) geri gelmemeli', () => {
+    const mediaBlock = extractMediaBlock(pageCss, '@media (max-width: 768px)');
+    expect(mediaBlock).not.toBeNull();
+
+    const genuinelyDeadClasses = [
+      'container', 'layout', 'leftSidebar', 'rightGrid', 'mainPanel', 'summaryPanel',
+      'pagerTrack', 'pagerDots', 'pagerLabel', 'sliderArea', 'desktopActionsSlot',
+      'mobileActionsSlot', 'stickyCta', 'topResultCard', 'statCard', 'topResultLabel',
+      'actionBottomRow', 'segmentedControl', 'segmentItem', 'mobileCardTitle',
+      'settingsGroup', 'hesapOzetiSeridi', 'swipeCard', 'desktopSidebar',
+    ];
+    for (const cls of genuinelyDeadClasses) {
+      expect(mediaBlock as string).not.toMatch(new RegExp(`\\.${cls}\\b`));
+    }
+    expect(mediaBlock).not.toMatch(/button\.sealPrimaryBtn/);
+    expect(mediaBlock).not.toMatch(/button\.sealOutlineBtn/);
+    expect(mediaBlock).not.toMatch(/button\.compareBtn/);
+
+    // Pozitif taraf: blok gerçekten canlı olan iki class'ı içermeli, yoksa
+    // fix'in kendisi kazara silinmiş olur.
+    expect(mediaBlock).toMatch(/\.stepperInput\b/);
+    expect(mediaBlock).toMatch(/\.luxBox\b/);
   });
 
-  it('.desktopActionsSlot/.mobileActionsSlot class\'ları artık CSS\'te yok — actionsSection tek yerde render ediliyor (Task 1)', () => {
+  it('.desktopActionsSlot/.mobileActionsSlot class\'ları artık CSS\'te (media bloğu içinde ya da dışında) hiç yok — actionsSection tek yerde render ediliyor (Task 1)', () => {
     expect(pageCss).not.toMatch(/\.desktopActionsSlot/);
     expect(pageCss).not.toMatch(/\.mobileActionsSlot/);
   });
@@ -113,15 +178,20 @@ describe('kart yüzeyi migrasyonu — seal-ink/seal-ink-2 doğrudan kullanılmam
   });
 });
 
-describe('buton reverse — PDF İndir ve Karşılaştır dolgulu stile geçmeli', () => {
-  it('PDF İndir artık sealPrimaryBtn (dolgulu) class\'ını kullanmalı, sealOutlineBtn değil', () => {
+describe('sealPrimaryBtn asılı referans temizliği (2026-08-07 düzeltme)', () => {
+  // Eski test burada "PDF İndir artık sealPrimaryBtn (dolgulu) class'ını
+  // kullanmalı" diye bir iddia doğruluyordu — ama bu hiç doğru olmamıştı:
+  // PDF İndir her zaman `<Button variant="outline">` idi, yani hiçbir zaman
+  // "dolgulu" değildi. `styles.sealPrimaryBtn` zaten page.module.css'te
+  // karşılığı olmayan asılı bir referanstı (final review bulgusu); page.tsx
+  // içinden kaldırıldı. Test artık gerçeği yansıtacak şekilde ters çevrildi.
+  it('page.tsx artık styles.sealPrimaryBtn kullanmıyor — Button bileşeninin kendi variant prop\'u zaten stil veriyor', () => {
     const pageTsx = fs.readFileSync(
       path.join(__dirname, 'page.tsx'),
       'utf8'
     );
-    expect(pageTsx).toMatch(/handlePdfDownload[^>]*className=\{styles\.sealPrimaryBtn\}/);
+    expect(pageTsx).not.toMatch(/styles\.sealPrimaryBtn/);
   });
-
 });
 
 describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)', () => {

@@ -36,7 +36,6 @@
     --seal-border-soft: rgba(76, 141, 255, 0.18);
     --seal-text: #F4F0E6;
     --seal-text-muted: rgba(244, 240, 230, 0.7);
-    --seal-text-faint: rgba(244, 240, 230, 0.55);
 }
 
 [data-theme="light"] .container {
@@ -45,7 +44,6 @@
     --seal-border-soft: var(--shell-border);
     --seal-text: var(--card-title);
     --seal-text-muted: var(--muted);
-    --seal-text-faint: var(--muted);
 }
 
 /* Inner Page Header */
@@ -1229,4 +1227,29 @@ button.compareBtn {
     color: var(--muted);
     font-size: 0.85rem;
     text-align: center;
+}
+
+/* 2026-08-07 düzeltme: bu dosyanın 226 satırlık `@media (max-width: 768px)`
+   bloğu "masaüstü JSX ağacı ≤768px'de asla mount olmuyor" önermesiyle
+   tamamen silinmişti (bkz. git log), ama önerme YANLIŞTI — bu üç kural
+   `AdvancedSettingsSections.tsx`'in `BirimMaliyetField`/`MarketField`/
+   `RiskCostFields` bileşenleri üzerinden bu CSS modülüne, `page.tsx`'in
+   isDesktopViewport===false dalındaki `GelismisAyarlarSheet`e (mobil
+   "Gelişmiş ayarlar" sayfası) de sızıyor. O bileşenler `.stepperInput`/
+   `.luxBox` class'larını taşıyor ve mobilde GERÇEKTEN ≤768px'de render
+   ediliyor — final whole-branch review bulgusu, buraya kasıtlı ve dar
+   kapsamlı bir blok olarak geri eklendi (bkz. .superpowers/sdd/
+   2026-08-07-hesapla-olu-kod-temizligi/final-fix-report.md). */
+@media (max-width: 768px) {
+    .stepperInput {
+        height: var(--input-height-mobile);
+    }
+
+    .stepperInput input {
+        font-size: 16px; /* iOS zoom tetiklenmesin */
+    }
+
+    .luxBox {
+        padding: 0.5rem 0.2rem;
+    }
 }
