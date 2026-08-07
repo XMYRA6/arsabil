@@ -267,3 +267,34 @@ describe('anasayfa takip kalemleri (2026-07-26) — light cam reçetesi hizalama
     expect(shadow![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255/); // iç parıltı
   });
 });
+
+describe('anasayfa bento kartları — ölü mouse-tracking kodu kaldırıldı (2026-08-07)', () => {
+  it('page.tsx artık onMouseMove/onMouseLeave fonksiyon tanımlarını içermemeli', () => {
+    expect(pageTsx).not.toMatch(/function onMouseMove/);
+    expect(pageTsx).not.toMatch(/function onMouseLeave/);
+  });
+
+  it('page.tsx bento kartlarında onMouseMove/onMouseLeave prop\'larını kullanmamalı', () => {
+    expect(pageTsx).not.toMatch(/onMouseMove=\{onMouseMove\}/);
+    expect(pageTsx).not.toMatch(/onMouseLeave=\{onMouseLeave\}/);
+  });
+
+  it('page.module.css artık --rx/--ry/--mx/--my custom property referansı içermemeli', () => {
+    expect(pageCss).not.toMatch(/var\(--rx/);
+    expect(pageCss).not.toMatch(/var\(--ry/);
+    expect(pageCss).not.toMatch(/var\(--mx/);
+    expect(pageCss).not.toMatch(/var\(--my/);
+  });
+
+  it('.spotlight artık sabit merkez (50% 50%) kullanmalı', () => {
+    const match = pageCss.match(/\.spotlight\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/400px circle at 50% 50%/);
+  });
+
+  it('.bentoCard:hover davranışı (görsel scale + gölge + spotlight fade-in) hâlâ tanımlı olmalı — sadece tilt/imleç-takibi kalkmalı', () => {
+    expect(pageCss).toMatch(/\.bentoCard:hover \.cardBgImage \{/);
+    expect(pageCss).toMatch(/\.bentoCard:hover \{/);
+    expect(pageCss).toMatch(/\.bentoCard:hover \.spotlight \{ opacity: 1; \}/);
+  });
+});

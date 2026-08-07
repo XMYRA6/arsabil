@@ -26,27 +26,6 @@ function useCounter(end: number, duration = 1600, active = false) {
   return val;
 }
 
-/* ── Mouse spotlight & 3D tilt on each card ── */
-function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const px = (x / rect.width) * 100;
-  const py = (y / rect.height) * 100;
-  const rx = ((y - rect.height / 2) / (rect.height / 2)) * -5;
-  const ry = ((x - rect.width / 2) / (rect.width / 2)) * 5;
-
-  e.currentTarget.style.setProperty('--mx', `${px}%`);
-  e.currentTarget.style.setProperty('--my', `${py}%`);
-  e.currentTarget.style.setProperty('--rx', `${rx}deg`);
-  e.currentTarget.style.setProperty('--ry', `${ry}deg`);
-}
-
-function onMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
-  e.currentTarget.style.setProperty('--rx', '0deg');
-  e.currentTarget.style.setProperty('--ry', '0deg');
-}
-
 /* ── Stats section ── */
 function StatsStrip() {
   const c1 = useCounter(12400, 1600, true);
@@ -134,8 +113,6 @@ function FeaturesGrid() {
       <motion.div
         variants={cardVariants}
         className={`${styles.bentoCard} ${styles.bentoWide}`}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
       >
         <div className={styles.cardBgImage} style={{ backgroundImage: "url('/images/bento/engine-v2-bg.jpg')" }} />
         <div className={styles.spotlight} />
@@ -230,8 +207,6 @@ function FeaturesGrid() {
       <motion.div
         variants={cardVariants}
         className={styles.bentoCard}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
       >
         <div className={styles.cardBgImage} style={{ backgroundImage: "url('/images/bento/cost-analysis-bg.jpg')" }} />
         <div className={styles.spotlight} />
@@ -321,8 +296,6 @@ function FeaturesGrid() {
       <motion.div
         variants={cardVariants}
         className={styles.bentoCard}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
       >
         <div className={styles.cardBgImage} style={{ backgroundImage: "url('/images/bento/marketplace-bg.jpg')" }} />
         <div className={styles.spotlight} />
@@ -374,8 +347,6 @@ function FeaturesGrid() {
       <motion.div
         variants={cardVariants}
         className={`${styles.bentoCard} ${styles.bentoWide}`}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
       >
         <div className={styles.cardBgImage} style={{ backgroundImage: "url('/images/bento/security-pdf-bg.jpg')" }} />
         <div className={styles.spotlight} />
