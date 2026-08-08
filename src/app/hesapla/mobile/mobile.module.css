@@ -804,7 +804,15 @@
         cursor: default;
     }
 
-    .mobilKarsilastirBtn {
+    /* `button.` on-eki KASITLI: `StickyActionBar.module.css`nin `.bar > *`
+       kurali (0,1,0 ozgullugu) ile bu kuralin flex/min-height'i ayni
+       ozgullukte (0,1,0) catisiyordu — kazanan yalnizca CSS modul demet
+       sirasina kalirdi (spec'te belgelenen `.screen > *`/AppBar ve
+       `sealPrimaryBtn` catismalariyla AYNI sinif hata). `button.` etiket
+       secicisi ekleyerek ozgulluk (0,1,1)'e cikariliyor — demet sirasindan
+       BAGIMSIZ, matematiksel olarak her zaman kazanir (bkz. 30bdd1b'deki
+       "specificity-safe override" onceki). */
+    button.mobilKarsilastirBtn {
         flex: 0 0 auto;
         display: flex;
         align-items: center;
@@ -822,7 +830,7 @@
         white-space: nowrap;
     }
 
-    .mobilKarsilastirBtn:disabled {
+    button.mobilKarsilastirBtn:disabled {
         opacity: .5;
         cursor: default;
     }
