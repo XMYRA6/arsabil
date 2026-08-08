@@ -4,7 +4,10 @@ import { authOptions } from '@/lib/auth'
 import { checkRateLimit, RATE_LIMITS, RateLimitOptions, getClientIp } from '@/lib/rate-limit'
 import { fetchParcelByAdaParsel } from '@/lib/tkgm/parcel'
 
-const ADA_PARSEL_PATTERN = /^\d+$/
+// 7 hane, gercek bir Turkiye ada/parsel numarasindan cok daha fazlasini
+// karsilar; TKGM'ye giden URL'in uzunlugunu sinirlar (bkz.
+// ManualParcelEntryForm.tsx'teki ayni desen — iki taraf da senkron tutulmali).
+const ADA_PARSEL_PATTERN = /^\d{1,7}$/
 
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions)

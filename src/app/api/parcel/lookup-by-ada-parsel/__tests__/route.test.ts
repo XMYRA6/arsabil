@@ -71,6 +71,12 @@ describe('GET /api/parcel/lookup-by-ada-parsel', () => {
         expect(fetchParcelMock).not.toHaveBeenCalled()
     })
 
+    it('ada veya parsel 7 haneden uzunsa 400 doner (TKGM\'ye giden URL uzunlugu sinirlanir)', async () => {
+        expect((await GET(req('mahalleId=147964&ada=12345678&parsel=19'))).status).toBe(400)
+        expect((await GET(req('mahalleId=147964&ada=398&parsel=12345678'))).status).toBe(400)
+        expect(fetchParcelMock).not.toHaveBeenCalled()
+    })
+
     it('basarili sorguda parsel doner', async () => {
         const res = await GET(req('mahalleId=147964&ada=398&parsel=19'))
         expect(res.status).toBe(200)
