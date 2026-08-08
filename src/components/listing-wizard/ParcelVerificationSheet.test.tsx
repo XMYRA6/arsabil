@@ -48,6 +48,13 @@ function viewportKur(masaustu: boolean) {
 beforeEach(() => {
     viewportKur(true) // varsayilan: masaustu
     global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ status: 'ok', risk: null }) }) as unknown as typeof fetch
+    // ManualParcelEntryForm modul-seviyesinde il listesini onbellekliyor
+    // (cachedIlListPromise) ve jest ayni dosya icindeki testler arasinda
+    // modulleri sifirlamiyor — bir onceki testin basarili il-listesi cevabi
+    // sonraki testin kendi mock fetch dizisini atlayarak yanlis/kaydirilmis
+    // veriler okumasina yol acar. TUM testler (yalnizca "Elle gir" alt-grubu
+    // degil) bu riske aciktir, bu yuzden dosya-seviyesi beforeEach'te sifirlanir.
+    __resetIlListCacheForTests()
 })
 afterEach(() => { jest.restoreAllMocks() })
 
@@ -290,18 +297,6 @@ describe('ParcelVerificationSheet', () => {
     })
 
     describe('Elle gir — ada/parsel exact match direkt verified state üretir', () => {
-        // NOT: bu dosyadaki erken bir test ("Elle gir ile konum bulununca...",
-        // yukarida) ManualParcelEntryForm'un MODUL-SEVIYESI il-listesi
-        // onbellegini (cachedIlListPromise) zaten dolduruyor — jest ayni dosya
-        // icindeki testler arasinda modulleri sifirlamiyor. Onbellek dolu
-        // kalirsa buradaki testlerin varsaydigi 4 sirali fetch cagrisi kayar
-        // (il-listesi fetch'i hic tetiklenmez) ve testler ILGISIZ bir
-        // "İlçe listesi yüklenemedi" hatasiyla yanlis nedenle kirilir. Her
-        // testten once onbellegi sifirlamak (ManualParcelEntryForm.test.tsx'in
-        // kendi beforeEach'inde yaptigi gibi) bu testleri calistirma sirasindan
-        // bagimsiz kilar.
-        beforeEach(() => { __resetIlListCacheForTests() })
-
         it('mobilde: mahalle+ada+parsel TKGM ile eslesirse harita/Dogrula adimi atlanir, kompakt ozet direkt gorunur', async () => {
             viewportKur(false) // mobil
             // NOT: paylasilan VERIFIED_PARCEL'in geometry.coordinates BOS —
@@ -353,6 +348,53 @@ describe('ParcelVerificationSheet', () => {
                 expect(screen.getByText(/Kırkkepenekli/)).toBeInTheDocument()
                 expect(screen.getByText(/830 m²/)).toBeInTheDocument()
             })
+        })
+
+        it('masaustunde: mahalle+ada+parsel TKGM ile TAM eslesirse "Kullanıcı beyanı...TKGM sonucuyla karşılaştırın" notu gosterilmez (kendiyle celisir — TKGM sonucu zaten kullanicinin beyani)', async () => {
+            viewportKur(true) // masaustu — harita her zaman gorunur, kompakt ozete gecilmez
+            const parcelWithGeometry = {
+                ...VERIFIED_PARCEL,
+                geometry: { type: 'Polygon' as const, coordinates: [[[35.0, 37.0], [35.2, 37.0], [35.2, 37.2], [35.0, 37.2]]] },
+            }
+            let call = 0
+            const responses: unknown[] = [
+                { iller: [{ id: 34, text: 'İstanbul' }] },
+                { ilceler: [{ id: 539, text: 'Kadıköy' }] },
+                { mahalleler: [{ id: 147964, text: 'Göztepe', centroid: { lat: 99, lng: 99 } }] },
+                { status: 'verified', parcel: parcelWithGeometry },
+            ]
+            global.fetch = jest.fn().mockImplementation(() => {
+                const body = responses[Math.min(call, responses.length - 1)]
+                call++
+                return Promise.resolve({ ok: true, json: async () => body })
+            }) as unknown as typeof fetch
+
+            render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+
+            fireEvent.click(screen.getByRole('button', { name: 'Elle gir' }))
+            fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'İstanbul' } })
+            fireEvent.click(await screen.findByText('İstanbul'))
+
+            await waitFor(() => expect(screen.getByLabelText('İlçe *')).not.toBeDisabled())
+            fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Kadıköy' } })
+            fireEvent.click(await screen.findByText('Kadıköy'))
+
+            await waitFor(() => expect(screen.getByLabelText('Mahalle')).not.toBeDisabled())
+            fireEvent.change(screen.getByLabelText('Mahalle'), { target: { value: 'Göztepe' } })
+            fireEvent.click(await screen.findByText('Göztepe'))
+
+            // VERIFIED_PARCEL.adaNo === '0', parselNo === '1871' — beyanla TAM eslesir.
+            fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '0' } })
+            fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '1871' } })
+
+            fireEvent.click(screen.getByRole('button', { name: 'Sorgula' }))
+
+            // Masaustunde harita her zaman gorunur (kompakt ozete GECILMEZ), ama
+            // exact match sonrasi "beyaninizi TKGM ile karsilastirin" notu artik
+            // anlamsiz oldugu icin gosterilmemeli.
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+            expect(screen.queryByText(/Kullanıcı beyanı/i)).not.toBeInTheDocument()
         })
 
         it('mahalle+ada+parsel eslesmezse (not_found) harita moduna doner, status idle kalir (bugunku davranis)', async () => {

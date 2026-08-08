@@ -190,7 +190,19 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
                         <ManualParcelEntryForm onLocationFound={handleManualFound} />
                     )}
 
-                    {manualRef && (
+                    {manualRef && !(
+                        // Tam ada/parsel eslesmesinden sonra bu not kendiyle
+                        // celisir: "TKGM sonucuyla karsilastirin" diyor ama TKGM
+                        // sonucu zaten kullanicinin kendi beyani. Yalnizca bu
+                        // durumda (beyan == dogrulanan parsel) bastirilir —
+                        // uyusmayan (fallback) veya haritadan elle dogrulanan
+                        // FARKLI bir parsel durumunda not anlamli kalir ve
+                        // gosterilmeye devam eder.
+                        parcelValue.status === 'verified' &&
+                        parcelValue.parcel &&
+                        manualRef.ada !== '' && manualRef.ada === parcelValue.parcel.adaNo &&
+                        manualRef.parsel !== '' && manualRef.parsel === parcelValue.parcel.parselNo
+                    ) && (
                         <div className={styles.manualNote}>
                             Kullanıcı beyanı: {[
                                 manualRef.mahalle && `${manualRef.mahalle} Mah.`,
