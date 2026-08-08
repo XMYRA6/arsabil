@@ -91,11 +91,11 @@ function toParcelInfo(json: unknown): ParcelInfo | null {
     }
 }
 
-export async function fetchParcelByPoint(lat: number, lng: number): Promise<ParcelLookupResult> {
+async function fetchAndParseParcel(url: string): Promise<ParcelLookupResult> {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
     try {
-        const res = await fetch(`${TKGM_BASE}/parsel/${lat}/${lng}`, {
+        const res = await fetch(url, {
             signal: controller.signal,
             headers: { Accept: 'application/json' },
         })
@@ -109,4 +109,22 @@ export async function fetchParcelByPoint(lat: number, lng: number): Promise<Parc
     } finally {
         clearTimeout(timer)
     }
+}
+
+export async function fetchParcelByPoint(lat: number, lng: number): Promise<ParcelLookupResult> {
+    return fetchAndParseParcel(`${TKGM_BASE}/parsel/${lat}/${lng}`)
+}
+
+/**
+ * Ada/parsel numarasiyla dogrudan parsel sorgusu. Nokta-tabanli sorgunun
+ * aksine kullanicinin haritada elle tiklamasini GEREKTIRMEZ — mahalleId
+ * (TKGM idari-yapi hiyerarsisinden, bkz. idariYapi.ts) + tapudaki ada/parsel
+ * numaralari yeterli. Canli TKGM API'sine karsi dogrulandi (bkz.
+ * docs/superpowers/specs/2026-08-08-parsel-ada-parsel-sorgusu-design.md):
+ * ayni parsel icin nokta-tabanli ve ada/parsel-tabanli sorgular BIREBIR ayni
+ * GeoJSON Feature'i donuyor; tek fark `alan` alaninin virgullu formati
+ * (parseTkgmArea zaten destekliyor).
+ */
+export async function fetchParcelByAdaParsel(mahalleId: number, ada: string, parsel: string): Promise<ParcelLookupResult> {
+    return fetchAndParseParcel(`${TKGM_BASE}/parsel/${mahalleId}/${ada}/${parsel}`)
 }

@@ -1,4 +1,4 @@
-import { parseTkgmArea, fetchParcelByPoint } from './parcel'
+import { parseTkgmArea, fetchParcelByPoint, fetchParcelByAdaParsel } from './parcel'
 
 const TEKIRDAG_RESPONSE = {
     type: 'Feature',
@@ -106,6 +106,55 @@ describe('fetchParcelByPoint', () => {
     it('alan okunamayan cevap → unavailable', async () => {
         mockFetchOnce(200, { ...TEKIRDAG_RESPONSE, properties: { ...TEKIRDAG_RESPONSE.properties, alan: 'abc' } })
         const res = await fetchParcelByPoint(41.1, 27.5)
+        expect(res).toEqual({ ok: false, reason: 'unavailable' })
+    })
+})
+
+const GOZTEPE_ADA_PARSEL_RESPONSE = {
+    type: 'Feature',
+    geometry: { type: 'Polygon', coordinates: [[[29.065, 40.975], [29.066, 40.975], [29.066, 40.976], [29.065, 40.976], [29.065, 40.975]]] },
+    properties: {
+        ilAd: 'İstanbul', ilceAd: 'Kadıköy', mahalleAd: 'Göztepe',
+        adaNo: '398', parselNo: '19', alan: '965,85', nitelik: 'Bahçeli Kargir Apartman', mahalleId: 147964,
+    },
+}
+
+describe('fetchParcelByAdaParsel', () => {
+    afterEach(() => { jest.restoreAllMocks() })
+
+    it('200 cevabini ParcelInfo olarak normalize eder (virgullu alan formati)', async () => {
+        mockFetchOnce(200, GOZTEPE_ADA_PARSEL_RESPONSE)
+        const res = await fetchParcelByAdaParsel(147964, '398', '19')
+        expect(res.ok).toBe(true)
+        if (!res.ok) throw new Error('beklenmedik')
+        expect(res.parcel.adaNo).toBe('398')
+        expect(res.parcel.parselNo).toBe('19')
+        expect(res.parcel.areaSqm).toBe(965.85)
+        expect(res.parcel.mahalle).toBe('Göztepe')
+    })
+
+    it('dogru TKGM URLsini cagirir', async () => {
+        mockFetchOnce(200, GOZTEPE_ADA_PARSEL_RESPONSE)
+        await fetchParcelByAdaParsel(147964, '398', '19')
+        const calledUrl = (global.fetch as jest.Mock).mock.calls[0][0] as string
+        expect(calledUrl).toBe('https://cbsapi.tkgm.gov.tr/megsiswebapi.v3.1/api/parsel/147964/398/19')
+    })
+
+    it('404 -> not_found', async () => {
+        mockFetchOnce(404, { Message: 'Parsel Bulunamadı' })
+        const res = await fetchParcelByAdaParsel(147964, '1', '1')
+        expect(res).toEqual({ ok: false, reason: 'not_found' })
+    })
+
+    it('500 -> unavailable', async () => {
+        mockFetchOnce(500, {})
+        const res = await fetchParcelByAdaParsel(147964, '1', '1')
+        expect(res).toEqual({ ok: false, reason: 'unavailable' })
+    })
+
+    it('ag hatasi -> unavailable', async () => {
+        global.fetch = jest.fn().mockRejectedValue(new Error('network')) as unknown as typeof fetch
+        const res = await fetchParcelByAdaParsel(147964, '1', '1')
         expect(res).toEqual({ ok: false, reason: 'unavailable' })
     })
 })
