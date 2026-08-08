@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import styles from './ScenarioCompare.module.css';
 
-interface Scenario {
+export interface Scenario {
     id: string;
     name: string;
     luxLevel: number;

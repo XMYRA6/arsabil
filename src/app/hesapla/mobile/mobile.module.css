@@ -1029,6 +1029,10 @@
         gap: 11px;
     }
 
+    .karsilastirmaGovde {
+        margin: 14px 14px 24px;
+    }
+
     .analizKart {
         padding: 13px;
         border-radius: var(--m-r-card);
