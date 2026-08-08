@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './ManualParcelEntryForm.module.css'
 import { TkgmAutocompleteField, type IdariYapiItem } from './TkgmAutocompleteField'
 import type { MahalleItem } from '@/lib/tkgm/idariYapi'
+import type { ParcelInfo } from '@/lib/tkgm/parcel'
+import { polygonCentroid } from '@/lib/geo/polygonCentroid'
 
 export type ManualParcelReference = {
     il: string
@@ -14,7 +16,7 @@ export type ManualParcelReference = {
 }
 
 interface Props {
-    onLocationFound: (lat: number, lng: number, reference: ManualParcelReference) => void
+    onLocationFound: (lat: number, lng: number, reference: ManualParcelReference, exactParcel?: ParcelInfo) => void
 }
 
 /** TKGM idari-yapi fetch'lerinde 429 (rate limit) durumunu ayirt etmek icin. */
@@ -230,6 +232,30 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                 // asla dogrulanmamis serbest metin (mahalleText) sizmaz (bkz. final
                 // review bulgusu: yazim hatasi/eski secim referansa/Nominatim'e ulasiyordu).
                 il: il.text, ilce: ilce.text, mahalle: mahalle?.text ?? '', ada, parsel,
+            }
+
+            // Ada/parsel numarasiyla dogrudan (yaklasik degil, TAM) TKGM eslesmesi.
+            // Mahalle TKGM'den GERCEKTEN secilmis olmali (serbest metin asla
+            // sizmaz — TkgmAutocompleteField'in genel ilkesi burada da gecerli).
+            // Basarisiz olursa (404/ag hatasi/rate limit) SESSIZCE asagidaki
+            // centroid/Nominatim yollarina dusulur — kullanici karari, ayri bir
+            // hata metni EKLENMEZ.
+            const adaTrimmed = ada.trim()
+            const parselTrimmed = parsel.trim()
+            if (mahalle && /^\d+$/.test(adaTrimmed) && /^\d+$/.test(parselTrimmed)) {
+                try {
+                    const res = await fetch(`/api/parcel/lookup-by-ada-parsel?mahalleId=${mahalle.id}&ada=${adaTrimmed}&parsel=${parselTrimmed}`)
+                    const data = await res.json()
+                    if (data.status === 'verified' && data.parcel) {
+                        const centroid = polygonCentroid((data.parcel as ParcelInfo).geometry)
+                        if (centroid) {
+                            onLocationFound(centroid.lat, centroid.lng, reference, data.parcel as ParcelInfo)
+                            return
+                        }
+                    }
+                } catch {
+                    // sessizce asagidaki yaklasik-konum yollarina dus
+                }
             }
 
             if (mahalle?.centroid) {

@@ -64,18 +64,16 @@ describe('ManualParcelEntryForm', () => {
         fireEvent.change(screen.getByLabelText('Mahalle'), { target: { value: 'Akpınar' } })
         fireEvent.click(await screen.findByText('Akpınar'))
 
-        fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '0' } })
-        fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '1871' } })
-
         const fetchCallsBeforeSearch = (global.fetch as jest.Mock).mock.calls.length
         fireEvent.click(screen.getByRole('button', { name: /Sorgula/i }))
 
         await waitFor(() => {
             expect(onLocationFound).toHaveBeenCalledWith(37.1, 35.1, {
-                il: 'Adana', ilce: 'Aladağ', mahalle: 'Akpınar', ada: '0', parsel: '1871',
+                il: 'Adana', ilce: 'Aladağ', mahalle: 'Akpınar', ada: '', parsel: '',
             })
         })
-        // Centroid varken Nominatim'e (veya baska bir uca) HIC gidilmedi.
+        // Ada/parsel bos oldugu icin exact-lookup dalı hic tetiklenmedi — Nominatim'e
+        // (veya baska bir uca) HIC gidilmedi.
         expect((global.fetch as jest.Mock).mock.calls.length).toBe(fetchCallsBeforeSearch)
     })
 
@@ -405,5 +403,90 @@ describe('ManualParcelEntryForm', () => {
 
         await waitFor(() => expect(screen.getByText(/Çok fazla istek yapıldı/i)).toBeInTheDocument())
         expect(screen.queryByText(/İlçe listesi yüklenemedi/i)).not.toBeInTheDocument()
+    })
+
+    // --- Ada/Parsel exact-lookup: mahalle+ada+parsel doluysa once denenir ---
+
+    it('mahalle+ada+parsel dolu ve TKGM eslesirse onLocationFound exactParcel ile (4. arguman) cagirilir', async () => {
+        const parcelInfo = {
+            il: 'İstanbul', ilce: 'Kadıköy', mahalle: 'Göztepe',
+            adaNo: '398', parselNo: '19', areaSqm: 965.85, quality: 'Bahçeli Kargir Apartman',
+            geometry: { type: 'Polygon', coordinates: [[[35.0, 37.0], [35.2, 37.0], [35.2, 37.2], [35.0, 37.2]]] },
+        }
+        mockFetchSequence([
+            { iller: [{ id: 23, text: 'Adana' }] },
+            { ilceler: [{ id: 104, text: 'Aladağ' }] },
+            { mahalleler: [{ id: 45478, text: 'Akpınar', centroid: { lat: 99, lng: 99 } }] },
+            { status: 'verified', parcel: parcelInfo },
+        ])
+        const onLocationFound = jest.fn()
+        render(<ManualParcelEntryForm onLocationFound={onLocationFound} />)
+
+        await waitFor(() => expect(screen.getByLabelText('İl *')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'Adana' } })
+        fireEvent.click(await screen.findByText('Adana'))
+
+        await waitFor(() => expect(screen.getByLabelText('İlçe *')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Aladağ' } })
+        fireEvent.click(await screen.findByText('Aladağ'))
+
+        await waitFor(() => expect(screen.getByLabelText('Mahalle')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('Mahalle'), { target: { value: 'Akpınar' } })
+        fireEvent.click(await screen.findByText('Akpınar'))
+
+        fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '398' } })
+        fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '19' } })
+
+        fireEvent.click(screen.getByRole('button', { name: /Sorgula/i }))
+
+        await waitFor(() => {
+            // 37.1/35.1 = parselin GERCEK poligon-centroid'i, mahallenin
+            // (99/99, kasten yanlis) centroid'i DEGIL — exact-lookup basarili
+            // oldugu icin mahalle centroid'ine hic bakilmadi.
+            expect(onLocationFound).toHaveBeenCalledWith(37.1, 35.1, {
+                il: 'Adana', ilce: 'Aladağ', mahalle: 'Akpınar', ada: '398', parsel: '19',
+            }, parcelInfo)
+        })
+        const lookupCall = (global.fetch as jest.Mock).mock.calls.find(
+            c => typeof c[0] === 'string' && c[0].includes('lookup-by-ada-parsel'),
+        )
+        expect(lookupCall![0]).toBe('/api/parcel/lookup-by-ada-parsel?mahalleId=45478&ada=398&parsel=19')
+    })
+
+    it('mahalle+ada+parsel dolu ama TKGM eslesmezse (not_found) sessizce mahalle centroidine duser, hata gosterilmez', async () => {
+        mockFetchSequence([
+            { iller: [{ id: 23, text: 'Adana' }] },
+            { ilceler: [{ id: 104, text: 'Aladağ' }] },
+            { mahalleler: [{ id: 45478, text: 'Akpınar', centroid: { lat: 37.1, lng: 35.1 } }] },
+            { status: 'not_found' },
+        ])
+        const onLocationFound = jest.fn()
+        render(<ManualParcelEntryForm onLocationFound={onLocationFound} />)
+
+        await waitFor(() => expect(screen.getByLabelText('İl *')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'Adana' } })
+        fireEvent.click(await screen.findByText('Adana'))
+
+        await waitFor(() => expect(screen.getByLabelText('İlçe *')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Aladağ' } })
+        fireEvent.click(await screen.findByText('Aladağ'))
+
+        await waitFor(() => expect(screen.getByLabelText('Mahalle')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('Mahalle'), { target: { value: 'Akpınar' } })
+        fireEvent.click(await screen.findByText('Akpınar'))
+
+        fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '1' } })
+        fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '1' } })
+
+        fireEvent.click(screen.getByRole('button', { name: /Sorgula/i }))
+
+        await waitFor(() => {
+            expect(onLocationFound).toHaveBeenCalledWith(37.1, 35.1, {
+                il: 'Adana', ilce: 'Aladağ', mahalle: 'Akpınar', ada: '1', parsel: '1',
+            })
+        })
+        // exactParcel parametresi HIC gecilmedi (yalnizca 3 arguman).
+        expect(onLocationFound.mock.calls[0].length).toBe(3)
+        expect(screen.queryByText(/hata/i)).not.toBeInTheDocument()
     })
 })
