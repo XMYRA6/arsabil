@@ -1,8 +1,9 @@
 /** @jest-environment jsdom */
 import type { ReactElement } from 'react'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import { HesaplaMobile, type HesaplaMobileProps } from './HesaplaMobile'
 import type { AnalizSekmesiProps } from './AnalizSekmesi'
+import type { Scenario } from '@/components/ScenarioCompare'
 
 // AnalizSekmesi grafik bilesenlerini (canvas gerektirir) tasir; bu dosyanin
 // SOZLESMESI "tek kapi" (spec K4/K5), grafiklerin kendi cizimi degil —
@@ -15,12 +16,25 @@ jest.mock('./AnalizSekmesi', () => ({
     AnalizSekmesi: (props: AnalizSekmesiProps) => mockAnalizSekmesi(props),
 }))
 
+jest.mock('jspdf', () => {
+    return jest.fn().mockImplementation(() => ({
+        setFontSize: jest.fn(),
+        text: jest.fn(),
+        save: jest.fn(),
+    }))
+})
+jest.mock('jspdf-autotable', () => jest.fn())
+
 const BASE_INPUT = {
     x: 0.33, L: 1.2, Ad: 140, P: 12000, K: 1.3,
     isRiskEnabled: false, R: 1,
     isExcavationEnabled: false, excavationMode: 'percentage' as const,
     Z: 0, MzOriginal: 0,
 }
+
+const SCENARIO_1: Scenario = { id: 'sc1', name: 'Senaryo 1', luxLevel: 1.2, apartmentSize: 140, landShareRatio: 0.33, totalApartments: 20, riskLevel: 1.1, builderProfit: 1.3, fdTotal: 8964000, fdPerM2: 64028, mi: 3000000, ma: 2000000, totalCost: 5000000 }
+const SCENARIO_2: Scenario = { ...SCENARIO_1, id: 'sc2', name: 'Senaryo 2', fdTotal: 9500000 }
+const SCENARIO_3: Scenario = { ...SCENARIO_1, id: 'sc3', name: 'Senaryo 3', fdTotal: 8000000 }
 
 function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
     return {
@@ -75,6 +89,14 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
         ctaMetni: 'Özet Rapor Oluştur',
         ctaDevreDisi: false,
         onCta: jest.fn(),
+        savedScenarios: [],
+        onAddScenario: jest.fn(),
+        onRemoveScenario: jest.fn(),
+        hasResult: false,
+        karsilastirmaAcik: false,
+        onKarsilastirmaAc: jest.fn(),
+        onKarsilastirmaKapat: jest.fn(),
+        onShareRequest: jest.fn(),
         ...patch,
     }
 }
@@ -117,5 +139,54 @@ describe('HesaplaMobile — tek kapi', () => {
         } finally {
             mockAnalizSekmesi.mockImplementation(() => <div data-testid="analiz-sekmesi" />)
         }
+    })
+
+    it('savedScenarios bosken pill satiri ve Karsilastir cipi gorunmez', () => {
+        render(<HesaplaMobile {...props({ savedScenarios: [] })} />)
+        expect(screen.queryByText(/Karşılaştır \(/)).toBeNull()
+    })
+
+    it('1 senaryo kaydedilince pill gorunur ama Karsilastir cipi henuz gorunmez (2 esigi)', () => {
+        render(<HesaplaMobile {...props({ savedScenarios: [SCENARIO_1] })} />)
+        expect(screen.getByText('Senaryo 1')).toBeInTheDocument()
+        expect(screen.queryByText(/Karşılaştır \(/)).toBeNull()
+    })
+
+    it('2+ senaryo kaydedilince Karsilastir cipi gorunur, tiklaninca onKarsilastirmaAc cagirir', () => {
+        const onKarsilastirmaAc = jest.fn()
+        render(<HesaplaMobile {...props({ savedScenarios: [SCENARIO_1, SCENARIO_2], onKarsilastirmaAc })} />)
+        fireEvent.click(screen.getByText(/Karşılaştır \(2\)/))
+        expect(onKarsilastirmaAc).toHaveBeenCalled()
+    })
+
+    it('bir pill kaldirilinca onRemoveScenario dogru id ile cagirilir', () => {
+        const onRemoveScenario = jest.fn()
+        render(<HesaplaMobile {...props({ savedScenarios: [SCENARIO_1], onRemoveScenario })} />)
+        fireEvent.click(screen.getByLabelText("Senaryo 1'i kaldır"))
+        expect(onRemoveScenario).toHaveBeenCalledWith('sc1')
+    })
+
+    it('sabit CTA cubugunda "+ Karsilastir" butonu var, hasResult false veya 3 senaryo doluyken devre disi', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ hasResult: false, savedScenarios: [] })} />)
+        expect(screen.getByRole('button', { name: '+ Karşılaştır' })).toBeDisabled()
+
+        rerender(<HesaplaMobile {...props({ hasResult: true, savedScenarios: [SCENARIO_1, SCENARIO_2, SCENARIO_3] })} />)
+        expect(screen.getByRole('button', { name: '+ Karşılaştır' })).toBeDisabled()
+
+        rerender(<HesaplaMobile {...props({ hasResult: true, savedScenarios: [] })} />)
+        expect(screen.getByRole('button', { name: '+ Karşılaştır' })).not.toBeDisabled()
+    })
+
+    it('"+ Karsilastir" tiklaninca onAddScenario cagirir', () => {
+        const onAddScenario = jest.fn()
+        render(<HesaplaMobile {...props({ hasResult: true, onAddScenario })} />)
+        fireEvent.click(screen.getByRole('button', { name: '+ Karşılaştır' }))
+        expect(onAddScenario).toHaveBeenCalled()
+    })
+
+    it('karsilastirmaAcik ile SenaryoKarsilastirmaSekmesi render edilir (sonuc karti yerine)', () => {
+        render(<HesaplaMobile {...props({ karsilastirmaAcik: true, savedScenarios: [SCENARIO_1, SCENARIO_2] })} />)
+        expect(screen.getByRole('heading', { name: 'Senaryo Karşılaştırması' })).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
     })
 })

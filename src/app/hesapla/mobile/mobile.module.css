@@ -776,7 +776,7 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        width: 100%;
+        flex: 1;
         min-height: 48px;
         border: 0;
         border-radius: var(--m-r-btn);
@@ -802,6 +802,71 @@
     .mobilCta:disabled {
         opacity: .6;
         cursor: default;
+    }
+
+    .mobilKarsilastirBtn {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 16px;
+        min-height: 48px;
+        border-radius: var(--m-r-btn);
+        border: 1px solid var(--m-glass-border);
+        background: rgba(255, 255, 255, .55);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        color: var(--m-on-glass);
+        font: 700 13px Inter, sans-serif;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .mobilKarsilastirBtn:disabled {
+        opacity: .5;
+        cursor: default;
+    }
+
+    .senaryoPillSatiri {
+        margin: 12px 14px 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .senaryoPill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .55);
+        border: 1px solid var(--m-glass-border);
+        color: var(--m-ink);
+        font: 700 11.5px Inter, sans-serif;
+    }
+
+    .senaryoPillKaldir {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: inherit;
+        padding: 0;
+        line-height: 1;
+        font-size: 1rem;
+    }
+
+    .senaryoKarsilastirCip {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-fill);
+        color: var(--m-link);
+        font: 800 11.5px Inter, sans-serif;
+        cursor: pointer;
     }
 
     /* ═══ 4a — "Bu fiyat nereden geliyor?" ══════════════════════════════ */

@@ -7,6 +7,8 @@ import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
 import { AnalizSekmesi, type AnalizSekmesiProps } from './AnalizSekmesi';
+import { SenaryoKarsilastirmaSekmesi } from './SenaryoKarsilastirmaSekmesi';
+import type { Scenario } from '@/components/ScenarioCompare';
 import styles from './mobile.module.css';
 
 export type HesaplaMobileProps = {
@@ -28,6 +30,17 @@ export type HesaplaMobileProps = {
     ctaMetni: string;
     ctaDevreDisi: boolean;
     onCta: () => void;
+    /** Masaustundeki savedScenarios ile AYNI state, page.tsx'ten prop olarak akar. */
+    savedScenarios: Scenario[];
+    onAddScenario: () => void;
+    onRemoveScenario: (id: string) => void;
+    /** `!!result` — sabit CTA cubugundaki "+ Karsilastir" butonunun etkinlik kosulu. */
+    hasResult: boolean;
+    /** Karsilastirma derinlestirme yapragi acik mi. Durum `page.tsx`te yasar. */
+    karsilastirmaAcik: boolean;
+    onKarsilastirmaAc: () => void;
+    onKarsilastirmaKapat: () => void;
+    onShareRequest: (ids: string[]) => Promise<string | null>;
 };
 
 /**
@@ -49,6 +62,14 @@ export function HesaplaMobile({
     ctaMetni,
     ctaDevreDisi,
     onCta,
+    savedScenarios,
+    onAddScenario,
+    onRemoveScenario,
+    hasResult,
+    karsilastirmaAcik,
+    onKarsilastirmaAc,
+    onKarsilastirmaKapat,
+    onShareRequest,
 }: HesaplaMobileProps) {
     return (
         <>
@@ -72,6 +93,8 @@ export function HesaplaMobile({
 
                 {analizAcik
                     ? <AnalizSekmesi {...analiz} />
+                    : karsilastirmaAcik
+                    ? <SenaryoKarsilastirmaSekmesi scenarios={savedScenarios} onKapat={onKarsilastirmaKapat} onShareRequest={onShareRequest} />
                     : (
                         <>
                             <SonucKarti {...sonuc} />
@@ -93,6 +116,30 @@ export function HesaplaMobile({
                                             </span>
                                             Gelişmiş ayarlar · risk, iksa, kâr
                                         </button>
+                                        {savedScenarios.length > 0 && (
+                                            <div className={styles.senaryoPillSatiri}>
+                                                {savedScenarios.map(s => (
+                                                    <span key={s.id} className={styles.senaryoPill}>
+                                                        {s.name}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onRemoveScenario(s.id)}
+                                                            aria-label={`${s.name}'i kaldır`}
+                                                            className={styles.senaryoPillKaldir}
+                                                        >×</button>
+                                                    </span>
+                                                ))}
+                                                {savedScenarios.length >= 2 && (
+                                                    <button
+                                                        type="button"
+                                                        className={styles.senaryoKarsilastirCip}
+                                                        onClick={onKarsilastirmaAc}
+                                                    >
+                                                        Karşılaştır ({savedScenarios.length}) ›
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </>
                                 )}
                         </>
@@ -113,6 +160,15 @@ export function HesaplaMobile({
                 disabled={ctaDevreDisi}
             >
                 {ctaMetni}
+            </button>
+            <button
+                type="button"
+                className={styles.mobilKarsilastirBtn}
+                onClick={onAddScenario}
+                disabled={!hasResult || savedScenarios.length >= 3}
+                title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
+            >
+                + Karşılaştır
             </button>
         </StickyActionBar>
         </>
