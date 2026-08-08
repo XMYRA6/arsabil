@@ -4,6 +4,7 @@
  * fetch atmaz (bkz. parcel.ts'in ustundeki gerekce: CORS acik olsa da
  * kullanici IP'sinin devlet servisine acilmamasi ve rate-limit kontrolu).
  */
+import { polygonCentroid } from '@/lib/geo/polygonCentroid'
 import { TKGM_BASE } from './parcel'
 
 const TIMEOUT_MS = 8000
@@ -27,35 +28,6 @@ function toIdariYapiItem(feature: GeoJSONFeature): IdariYapiItem | null {
     // kurala uysun (0/negatif/ondalikli bir id iki katmanda tutarsiz davranmasin).
     if (!Number.isInteger(id) || id <= 0 || text === '') return null
     return { id, text }
-}
-
-/**
- * Polygon/MultiPolygon koordinatlarindaki TUM [lng,lat] koselerini
- * duzlestirip basit aritmetik ortalamasini alir. Alan-agirlikli gercek bir
- * centroid DEGIL — haritayi kabaca dogru mahalleye ortalamak icin yeterli
- * bir yaklasiklik (kullanici zaten pini haritada ince ayarliyor).
- */
-function flattenCoordinates(coordinates: unknown, out: number[][]): void {
-    if (!Array.isArray(coordinates)) return
-    if (coordinates.length === 2 && typeof coordinates[0] === 'number' && typeof coordinates[1] === 'number') {
-        out.push(coordinates as number[])
-        return
-    }
-    for (const item of coordinates) flattenCoordinates(item, out)
-}
-
-function computeCentroid(geometry: GeoJSONFeature['geometry']): { lat: number; lng: number } | null {
-    if (!geometry || (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')) return null
-    const points: number[][] = []
-    flattenCoordinates(geometry.coordinates, points)
-    if (points.length === 0) return null
-    let sumLng = 0
-    let sumLat = 0
-    for (const [lng, lat] of points) {
-        sumLng += lng
-        sumLat += lat
-    }
-    return { lat: sumLat / points.length, lng: sumLng / points.length }
 }
 
 async function fetchFeatureCollection(url: string): Promise<GeoJSONFeature[]> {
@@ -94,7 +66,7 @@ async function fetchAdminUnitsWithCentroid(url: string): Promise<MahalleItem[]> 
     for (const feature of features) {
         const item = toIdariYapiItem(feature)
         if (!item) continue
-        result.push({ ...item, centroid: computeCentroid(feature.geometry) })
+        result.push({ ...item, centroid: polygonCentroid(feature.geometry) })
     }
     return result
 }
