@@ -7,6 +7,7 @@ import { RiskSuggestionCard } from '@/components/risk/RiskSuggestionCard'
 import { BottomSheet } from '@/components/mobile/BottomSheet'
 import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import type { RiskMeasurement } from '@/lib/risk/types'
+import type { ParcelInfo } from '@/lib/tkgm/parcel'
 import styles from './ParcelVerificationSheet.module.css'
 import pickerStyles from './ParcelPicker.module.css'
 
@@ -79,7 +80,7 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
 
     if (!isOpen || isDesktopViewport === null) return null
 
-    const handleManualFound = (lat: number, lng: number, reference: ManualParcelReference) => {
+    const handleManualFound = (lat: number, lng: number, reference: ManualParcelReference, exactParcel?: ParcelInfo) => {
         // `pickerRef.current?.placePin(...)` calisirken ParcelPicker zaten
         // unmount edilmis olur (mode === 'manual' oldugu icin JSX onun
         // yerine ManualParcelEntryForm render ediyordu) — ref o an null,
@@ -92,7 +93,16 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
         // mekanizma) remount sonrasi bu degeri props'tan okuyup pini dogru
         // koyar.
         setManualRef(reference)
-        setParcelValue(v => ({ ...v, lat, lng, status: 'idle', parcel: null }))
+        // `exactParcel` verildiyse (ManualParcelEntryForm gercek TKGM ada/parsel
+        // eslesmesi buldu) parcelValue dogrudan 'verified' olur — kullanici
+        // haritada elle "Parseli Dogrula"ya basmak ZORUNDA degil, zaten var olan
+        // dogrulanmis-durum UI'i (poligon cizimi, kompakt ozet) otomatik devreye
+        // girer. Bulunamazsa (undefined) bugunku 'idle' davranisi degismez.
+        if (exactParcel) {
+            setParcelValue(v => ({ ...v, lat, lng, status: 'verified', parcel: exactParcel }))
+        } else {
+            setParcelValue(v => ({ ...v, lat, lng, status: 'idle', parcel: null }))
+        }
         setMode('map')
     }
 
