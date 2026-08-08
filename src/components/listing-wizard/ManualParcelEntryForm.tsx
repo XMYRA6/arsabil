@@ -6,6 +6,7 @@ import { TkgmAutocompleteField, type IdariYapiItem } from './TkgmAutocompleteFie
 import type { MahalleItem } from '@/lib/tkgm/idariYapi'
 import type { ParcelInfo } from '@/lib/tkgm/parcel'
 import { polygonCentroid } from '@/lib/geo/polygonCentroid'
+import { pointInPolygon } from '@/lib/geo/pointInPolygon'
 
 export type ManualParcelReference = {
     il: string
@@ -31,6 +32,11 @@ async function fetchIdariYapiJson(url: string): Promise<unknown> {
 }
 
 type FetchErrorKind = 'generic' | 'rateLimit' | null
+
+// 7 hane, gercek bir Turkiye ada/parsel numarasindan cok daha fazlasini
+// karsilar; TKGM'ye giden URL'in uzunlugunu sinirlar (bkz. route.ts'teki
+// ayni desen — iki taraf da senkron tutulmali).
+const ADA_PARSEL_PATTERN = /^\d{1,7}$/
 
 const RATE_LIMIT_MESSAGE = 'Çok fazla istek yapıldı, birkaç saniye sonra tekrar deneyin.'
 
@@ -227,11 +233,13 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
         setSearching(true)
         setError(null)
         try {
+            const adaTrimmed = ada.trim()
+            const parselTrimmed = parsel.trim()
             const reference: ManualParcelReference = {
                 // mahalle SADECE TKGM listesinden gercekten secildiyse dolu olur —
                 // asla dogrulanmamis serbest metin (mahalleText) sizmaz (bkz. final
                 // review bulgusu: yazim hatasi/eski secim referansa/Nominatim'e ulasiyordu).
-                il: il.text, ilce: ilce.text, mahalle: mahalle?.text ?? '', ada, parsel,
+                il: il.text, ilce: ilce.text, mahalle: mahalle?.text ?? '', ada: adaTrimmed, parsel: parselTrimmed,
             }
 
             // Ada/parsel numarasiyla dogrudan (yaklasik degil, TAM) TKGM eslesmesi.
@@ -240,16 +248,21 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
             // Basarisiz olursa (404/ag hatasi/rate limit) SESSIZCE asagidaki
             // centroid/Nominatim yollarina dusulur — kullanici karari, ayri bir
             // hata metni EKLENMEZ.
-            const adaTrimmed = ada.trim()
-            const parselTrimmed = parsel.trim()
-            if (mahalle && /^\d+$/.test(adaTrimmed) && /^\d+$/.test(parselTrimmed)) {
+            if (mahalle && ADA_PARSEL_PATTERN.test(adaTrimmed) && ADA_PARSEL_PATTERN.test(parselTrimmed)) {
                 try {
                     const res = await fetch(`/api/parcel/lookup-by-ada-parsel?mahalleId=${mahalle.id}&ada=${adaTrimmed}&parsel=${parselTrimmed}`)
                     const data = await res.json()
                     if (data.status === 'verified' && data.parcel) {
-                        const centroid = polygonCentroid((data.parcel as ParcelInfo).geometry)
-                        if (centroid) {
-                            onLocationFound(centroid.lat, centroid.lng, reference, data.parcel as ParcelInfo)
+                        const parcel = data.parcel as ParcelInfo
+                        const centroid = polygonCentroid(parcel.geometry)
+                        // Aritmetik-ortalama centroid, disbukey olmayan (ornegin
+                        // L-sekilli) parsellerde poligonun DISINA dusebilir — bu
+                        // durumda "TKGM ile dogrulandi" rozetini kazanmis gibi
+                        // davranmadan asagidaki (mahalle/ilce/Nominatim) sessiz
+                        // fallback yollarina dusulur (bkz. final review bulgusu).
+                        const ring = parcel.geometry.coordinates?.[0]
+                        if (centroid && Array.isArray(ring) && pointInPolygon(centroid, ring)) {
+                            onLocationFound(centroid.lat, centroid.lng, reference, parcel)
                             return
                         }
                     }
@@ -357,6 +370,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                     <input
                         id="manual-ada"
                         className={styles.input}
+                        inputMode="numeric"
                         value={ada}
                         onChange={e => setAda(e.target.value)}
                         placeholder="örn. 1521"
@@ -367,6 +381,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
                     <input
                         id="manual-parsel"
                         className={styles.input}
+                        inputMode="numeric"
                         value={parsel}
                         onChange={e => setParsel(e.target.value)}
                         placeholder="örn. 7"

@@ -487,6 +487,56 @@ describe('ManualParcelEntryForm', () => {
         })
         // exactParcel parametresi HIC gecilmedi (yalnizca 3 arguman).
         expect(onLocationFound.mock.calls[0].length).toBe(3)
-        expect(screen.queryByText(/hata/i)).not.toBeInTheDocument()
+        expect(screen.queryByText(/Bu adres için konum bulunamadı/i)).not.toBeInTheDocument()
+        expect(screen.queryByText(/Konum aranırken bir sorun oluştu/i)).not.toBeInTheDocument()
+    })
+
+    // --- Final review bulgusu: aritmetik-ortalama centroid poligonun DISINA
+    // duserse (disbukey/L-sekilli parsel), "TKGM ile dogrulandi" sayilmaz ---
+
+    it('TKGM eslesir ama parselin aritmetik-ortalama centroid\'i kendi (L-sekilli/disbukey) poligonunun DISINA duserse, dogrulanmis sayilmaz ve sessizce mahalle centroidine duser', async () => {
+        // L-sekilli (disbukey olmayan) bir poligon: koselerin aritmetik
+        // ortalamasi [4/3, 4/3] (lng, lat) parselin kesilmis kosesine (notch)
+        // denk gelir — gercek govdenin disinda. Bkz. pointInPolygon.test.ts.
+        const lShapedParcel = {
+            il: 'İstanbul', ilce: 'Kadıköy', mahalle: 'Göztepe',
+            adaNo: '398', parselNo: '19', areaSqm: 965.85, quality: 'Bahçeli Kargir Apartman',
+            geometry: { type: 'Polygon', coordinates: [[[0, 0], [3, 0], [3, 1], [1, 1], [1, 3], [0, 3]]] },
+        }
+        mockFetchSequence([
+            { iller: [{ id: 23, text: 'Adana' }] },
+            { ilceler: [{ id: 104, text: 'Aladağ' }] },
+            { mahalleler: [{ id: 45478, text: 'Akpınar', centroid: { lat: 37.1, lng: 35.1 } }] },
+            { status: 'verified', parcel: lShapedParcel },
+        ])
+        const onLocationFound = jest.fn()
+        render(<ManualParcelEntryForm onLocationFound={onLocationFound} />)
+
+        await waitFor(() => expect(screen.getByLabelText('İl *')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'Adana' } })
+        fireEvent.click(await screen.findByText('Adana'))
+
+        await waitFor(() => expect(screen.getByLabelText('İlçe *')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('İlçe *'), { target: { value: 'Aladağ' } })
+        fireEvent.click(await screen.findByText('Aladağ'))
+
+        await waitFor(() => expect(screen.getByLabelText('Mahalle')).not.toBeDisabled())
+        fireEvent.change(screen.getByLabelText('Mahalle'), { target: { value: 'Akpınar' } })
+        fireEvent.click(await screen.findByText('Akpınar'))
+
+        fireEvent.change(screen.getByLabelText('Ada No'), { target: { value: '398' } })
+        fireEvent.change(screen.getByLabelText('Parsel No'), { target: { value: '19' } })
+
+        fireEvent.click(screen.getByRole('button', { name: /Sorgula/i }))
+
+        await waitFor(() => {
+            // Mahallenin KENDI centroidine dustu (37.1/35.1) — parselin
+            // poligon-disi centroid'i DEGIL, TKGM sonucu dogrulanmis sayilmadi.
+            expect(onLocationFound).toHaveBeenCalledWith(37.1, 35.1, {
+                il: 'Adana', ilce: 'Aladağ', mahalle: 'Akpınar', ada: '398', parsel: '19',
+            })
+        })
+        // exactParcel parametresi HIC gecilmedi (yalnizca 3 arguman).
+        expect(onLocationFound.mock.calls[0].length).toBe(3)
     })
 })
