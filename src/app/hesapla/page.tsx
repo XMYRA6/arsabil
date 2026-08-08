@@ -17,7 +17,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'react-hot-toast';
 // Dynamically imported to avoid SSR issues with @react-pdf/renderer
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
-import { ScenarioCompare } from '@/components/ScenarioCompare';
+import { ScenarioCompare, type Scenario as ScenarioItem } from '@/components/ScenarioCompare';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
 
@@ -66,24 +66,6 @@ const AYAR_VARSAYILANLARI = {
   arsaAlani: 360,
 };
 
-interface ScenarioItem {
-  id: string;
-  name: string;
-  luxLevel: number;
-  apartmentSize: number;
-  landShareRatio: number;
-  totalApartments?: number | null;
-  riskLevel: number;
-  builderProfit: number;
-  fdTotal: number;
-  fdPerM2: number;
-  mi: number;
-  ma: number;
-  totalCost: number;
-  fa?: number | null;
-  sdx?: number | null;
-}
-
 export default function Home() {
   const { data: session } = useSession();
 
@@ -100,6 +82,10 @@ export default function Home() {
   // Analiz derinlestirme yapragi (maliyet dagilimi, hassasiyet, kirilma).
   // Task 6 tuketecek; burada yalnizca tanimlanir ve onAnalizAc tarafindan yazilir.
   const [mobilAnalizAcik, setMobilAnalizAcik] = useState<boolean>(false);
+  // Senaryo karsilastirma derinlestirme yapragi (Task 6/7'nin AnalizSekmesi'yle
+  // AYNI desen). savedScenarios/handleAddScenario/handleRemoveScenario zaten
+  // var — bu state yalnizca YAPRAGIN acik/kapali gorunumunu tutar.
+  const [mobilKarsilastirmaAcik, setMobilKarsilastirmaAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState(false);
   // `parsel` bolumu artik burada degil: parsel secimi `ParcelModal`a tasindi,
@@ -392,7 +378,16 @@ export default function Home() {
     setSavedScenarios(prev => prev.filter(s => s.id !== id));
   };
 
-
+  const handleShareScenarios = async (ids: string[]): Promise<string | null> => {
+    const res = await fetch('/api/compare/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenarioIds: ids }),
+    });
+    if (!res.ok) return null;
+    const { token } = await res.json();
+    return `${window.location.origin}/compare/${token}`;
+  };
 
   const marketPriceNum = parseMarketPrice(manualMarketPrice);
 
@@ -442,16 +437,7 @@ export default function Home() {
           </h3>
           <ScenarioCompare
             scenarios={savedScenarios}
-            onShareRequest={async (ids) => {
-              const res = await fetch('/api/compare/share', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ scenarioIds: ids }),
-              });
-              if (!res.ok) return null;
-              const { token } = await res.json();
-              return `${window.location.origin}/compare/${token}`;
-            }}
+            onShareRequest={handleShareScenarios}
           />
         </div>
       )}
@@ -572,6 +558,14 @@ export default function Home() {
           ctaMetni={isSaving ? 'Kaydediliyor...' : 'Özet Rapor Oluştur'}
           ctaDevreDisi={!result || isSaving}
           onCta={handleSaveReport}
+          savedScenarios={savedScenarios}
+          onAddScenario={handleAddScenario}
+          onRemoveScenario={handleRemoveScenario}
+          hasResult={!!result}
+          karsilastirmaAcik={mobilKarsilastirmaAcik}
+          onKarsilastirmaAc={() => setMobilKarsilastirmaAcik(true)}
+          onKarsilastirmaKapat={() => setMobilKarsilastirmaAcik(false)}
+          onShareRequest={handleShareScenarios}
         />
 
         <GelismisAyarlarSheet
