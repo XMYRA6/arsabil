@@ -22,9 +22,15 @@ bulmaktı.
 `GET {TKGM_BASE}/parsel/{mahalleId}/{ada}/{parsel}` gerçek, çalışan bir endpoint. Round-trip ile doğrulandı:
 İstanbul (id 56) → Kadıköy (id 521) → Göztepe (mahalleId 147964) altında, nokta-tabanlı sorgu (`/parsel/{lat}/{lng}`)
 ile bulunan gerçek bir parsel (Ada 398, Parsel 19) aynı mahalleId + ada + parsel ile geri sorgulandığında
-**birebir aynı GeoJSON Feature'ı** (aynı `properties`, aynı `geometry.type: Polygon`) döndü. Bulunamayan
+**aynı `properties`/`geometry.type: Polygon` içerikli GeoJSON Feature'ı** döndü. Bulunamayan
 kombinasyonlar için `404` + `{"Message":"Parsel Bulunamadı: Mahalle Id = ... - Ada = ... - Parsel = ..."}`
 dönüyor — mevcut `fetchParcelByPoint`'in 404 işleme deseniyle birebir aynı şekilde ele alınabilir.
+
+**DÜZELTME (final whole-branch review'de bulundu, 2026-08-08):** iki sorgu **birebir aynı** değil — ada/parsel
+sorgusu Türkçe karakterleri doğru döndürüyor (`"İstanbul"`, `"Kadıköy"`), nokta-tabanlı sorgu ASCII'ye
+sadeleştiriyor (`"Istanbul"`, `"Kadiköy"`). Etkisi zararsız (bu alanlar hiçbir yerde kalıcı olarak
+saklanmıyor, sunucu ilan kaydında kendi TKGM re-lookup'ını yapıyor) ama kayıt için düzeltiliyor: yalnızca
+`alan` ayracı DEĞİL, il/ilçe adlarının karakter kümesi de farklı.
 
 Önemli detay: ada/parsel sorgusunun `alan` alanı **virgüllü** format kullanıyor (`"965,85"`), nokta-tabanlı
 sorgununki **noktalı** (`"965.85"`). Mevcut `parseTkgmArea` (`src/lib/tkgm/parcel.ts`) bu ayrımı zaten
@@ -63,9 +69,13 @@ değişiklik hem `/hesapla` hem ilan sihirbazını aynı anda kazanır.
    Mevcut `fetchParcelByPoint` ile aynı fetch/timeout/404/`toParcelInfo` mantığını paylaşır (ortak bir
    `fetchAndParseParcel(url)` yardımcısına çıkarılabilir — küçük, dar kapsamlı bir dedup).
 2. **Yeni route `src/app/api/parcel/lookup-by-ada-parsel/route.ts`** — mevcut `src/app/api/parcel/lookup/route.ts`
-   ile birebir aynı auth/rate-limit deseni (`getServerSession`, `RATE_LIMITS.PARCEL_LOOKUP`/`_ANON`, oturum
-   varsa `parcel:{userId}`, yoksa `parcel:ip:{ip}`). Query param'lar: `mahalleId`, `ada`, `parsel`. `mahalleId`
-   pozitif tam sayı değilse 400.
+   ile aynı auth/rate-limit MEKANİZMASINI (`getServerSession`, `RATE_LIMITS.PARCEL_LOOKUP`/`_ANON`) izler, ama
+   **ayrı bir bucket'ta**: oturum varsa `parcel-ada-parsel:{userId}`, yoksa `parcel-ada-parsel:ip:{ip}`
+   (nokta-tabanlı route'un `parcel:{userId}`/`parcel:ip:{ip}` bucket'ından KASITLI OLARAK ayrı — final
+   whole-branch review'de düzeltildi: ilk taslak "aynı bucket" diyordu, ama kullanıcı haritada tıklayarak
+   yaptığı doğrulama denemelerinin kotasının ada/parsel denemeleriyle paylaşılması istenmeyen bir bağlantı;
+   ayrı bucket'lar bu iki farklı eylemi birbirinden bağımsız kotalıyor). Query param'lar: `mahalleId`, `ada`,
+   `parsel`. `mahalleId` pozitif tam sayı değilse 400.
 3. **Paylaşılan `polygonCentroid` yardımcı fonksiyonu** — `src/lib/tkgm/idariYapi.ts`'teki `computeCentroid`
    mantığının (poligon köşelerinin düz aritmetik ortalaması) çıkarılmış hali; hem admin-sınır centroid'i hem
    bu yeni parsel-poligon centroid'i tarafından paylaşılır. Konum: `src/lib/geo/` altına (mevcut
