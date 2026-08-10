@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
+const AUTH_ROUTE_PREFIXES = ["/login", "/register", "/reset-password", "/verify-email"];
 
 interface BeforeInstallPromptEvent extends Event {
     prompt: () => Promise<void>;
@@ -9,6 +12,8 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function InstallPrompt() {
+    const pathname = usePathname();
+    const isAuthRoute = AUTH_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
     const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [showBanner, setShowBanner] = useState(false);
     const [isIOS, setIsIOS] = useState(false);
@@ -16,6 +21,11 @@ export function InstallPrompt() {
     const [isStandalone, setIsStandalone] = useState(false);
 
     useEffect(() => {
+        // Auth akışındaki formların (girişteki gönder butonu dahil) altında
+        // tam ekran bloke edici bir backdrop acmamak icin bu rotalarda hic
+        // zamanlayici kurulmaz.
+        if (isAuthRoute) return;
+
         // Check if already dismissed
         const dismissed = localStorage.getItem("arsabil-install-dismissed");
         if (dismissed) return;
@@ -66,7 +76,7 @@ export function InstallPrompt() {
             window.removeEventListener("beforeinstallprompt", handler);
             clearTimeout(fallbackTimer);
         };
-    }, []);
+    }, [isAuthRoute]);
 
     const handleInstall = async () => {
         if (!deferredPrompt) return;
@@ -83,7 +93,7 @@ export function InstallPrompt() {
         localStorage.setItem("arsabil-install-dismissed", Date.now().toString());
     };
 
-    if (!showBanner || isStandalone) return null;
+    if (!showBanner || isStandalone || isAuthRoute) return null;
 
     return (
         <>
