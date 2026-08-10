@@ -379,14 +379,22 @@ export default function Home() {
   };
 
   const handleShareScenarios = async (ids: string[]): Promise<string | null> => {
-    const res = await fetch('/api/compare/share', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenarioIds: ids }),
-    });
-    if (!res.ok) return null;
-    const { token } = await res.json();
-    return `${window.location.origin}/compare/${token}`;
+    // `fetch` ag hatasinda reject eder, `res.json()` bozuk govdede fırlatir;
+    // ikisi de yakalanmazsa cagiran (`ScenarioCompare.handleShare`) hicbir
+    // try/catch olmadan `await` ettigi icin "Paylaş" butonu
+    // `setSharing(false)` hic calismadan surekli devre disi kalirdi.
+    try {
+      const res = await fetch('/api/compare/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenarioIds: ids }),
+      });
+      if (!res.ok) return null;
+      const { token } = await res.json();
+      return `${window.location.origin}/compare/${token}`;
+    } catch {
+      return null;
+    }
   };
 
   const marketPriceNum = parseMarketPrice(manualMarketPrice);

@@ -840,7 +840,13 @@
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 8px;
+        /* Dikey bosluk 14px'e cikarildi (yatay 8px korunuyor): `.senaryoPillKaldir`
+           dokunma alani asagida bir padding/negatif-margin hilesiyle gorsel
+           kutusunun disina tasiyor; sarilan satirlar arasinda yeterli bosluk
+           olmazsa bu genisletilmis (gorunmez) alan bir ustteki/alttaki satirin
+           pilini de kapsayabilir. Yatay `gap` ayni pilin icindeki ad metnine
+           tasmayi onlemek icin bilerek kucuk tutuldu (bkz. `.senaryoPillKaldir`). */
+        gap: 14px 8px;
     }
 
     .senaryoPill {
@@ -855,12 +861,22 @@
         font: 700 11.5px Inter, sans-serif;
     }
 
+    /* Gorsel boyut (~16x10px glif) korunuyor, ama bu pilin icindeki AD
+       metnine ve komsu pillere/satirlara cok yakin oldugu icin `::after` ile
+       tam 44px'e genisletmek riskli (bkz. dosya basindaki 44px politikasi
+       yorumu, satir 1142+): seffaf hit-alani komsu kontrollerin ustune
+       tasabilir. Bunun yerine padding+negatif-margin hilesi kullanilir —
+       DUZEN boyutu degismez (komsu ogeler bu buyumeyi gormez), yalnizca
+       TIKLAMA/DOKUNMA kutusu buyur. Yatay bilesen kasitli olarak dikeyden
+       kucuk tutuldu (6px < 10px): tam simetrik 10px, pilin solundaki ad
+       metnine cok yaklasip yanlislikla onu da tiklanabilir kilardi. */
     .senaryoPillKaldir {
         background: none;
         border: none;
         cursor: pointer;
         color: inherit;
-        padding: 0;
+        padding: 10px 6px;
+        margin: -10px -6px;
         line-height: 1;
         font-size: 1rem;
     }
@@ -869,6 +885,12 @@
         display: inline-flex;
         align-items: center;
         padding: 5px 10px;
+        /* Karsilastirma ozelligine TEK giris noktasi — genisletilmis TIKLAMA
+           alani yerine dogrudan gorsel yukseklik buyutuldu (44px politikasi,
+           satir 1142+). Diger kucuk kontrollerin aksine burada gorsel boyutun
+           kompakt kalmasi onemli degil, bu yuzden `::after` hilesi yerine
+           basit `min-height` yeterli ve daha saglam. */
+        min-height: 44px;
         border-radius: 999px;
         border: 1px solid var(--m-glass-border);
         background: var(--m-fill);
