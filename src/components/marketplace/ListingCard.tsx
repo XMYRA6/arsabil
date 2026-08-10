@@ -24,7 +24,7 @@ export interface Listing {
     fizibiliteSkoru?: number;
     emsalFiyat?: number;
     imarDurumu?: string;
-    photoUrl?: string;
+    photos?: string[];
     isNew?: boolean;
     changePercent?: number;
     report?: { landShareRatio?: number; minApartmentPrice?: number };
@@ -54,6 +54,7 @@ const IMAR_LABEL: Record<string, string> = {
 
 export function ListingCard({ listing, highlighted, view, onHover, isFavorite, onFavoriteToggle }: Props) {
     const router = useRouter();
+    const photoUrl = listing.photos?.[0];
     const score = listing.fizibiliteSkoru ?? seededInt(listing.id, 50, 90);
     const price = listing.price ?? listing.report?.minApartmentPrice ?? 0;
     const payiMin = listing.arsaPayiMin ?? (listing.report?.landShareRatio ? listing.report.landShareRatio * 100 * 0.85 : 28);
@@ -90,8 +91,8 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 <div style={{
                     width: 180, flexShrink: 0, position: 'relative', overflow: 'hidden',
                 }}>
-                    {listing.photoUrl ? (
-                        <Image fill unoptimized src={listing.photoUrl} alt={listing.title} style={{ objectFit: 'cover' }} />
+                    {photoUrl ? (
+                        <Image fill unoptimized src={photoUrl} alt={listing.title} style={{ objectFit: 'cover' }} />
                     ) : (
                         <div style={{
                             width: '100%', height: '100%',
@@ -229,8 +230,8 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                 background: 'linear-gradient(135deg, #1a3a6e, #0b2443)',
                 position: 'relative', overflow: 'hidden',
             }}>
-                {listing.photoUrl ? (
-                    <Image fill unoptimized src={listing.photoUrl} alt={listing.title} style={{ objectFit: 'cover' }} />
+                {photoUrl ? (
+                    <Image fill unoptimized src={photoUrl} alt={listing.title} style={{ objectFit: 'cover' }} />
                 ) : (
                     <div style={{
                         width: '100%', height: '100%',
