@@ -7,6 +7,8 @@ import type { Prisma } from '@prisma/client'
 import { buildParcelSnapshot } from '@/lib/listing/parcelSnapshot'
 import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
 
+const LISTING_TYPES = ['SALE', 'KAT_KARSILIGI', 'ORTAKLIK']
+
 export async function GET(
     _req: Request,
     context: { params: Promise<{ id: string }> }
@@ -107,7 +109,7 @@ export async function PATCH(
                 ...(landSizeSqm !== undefined ? { landSizeSqm: landSizeSqm ? Number(landSizeSqm) : null } : {}),
                 ...(price !== undefined ? { price: price ? Number(price) : null } : {}),
                 ...(zoning !== undefined ? { zoning } : {}),
-                ...(type !== undefined ? { type } : {}),
+                ...(type !== undefined ? { type: LISTING_TYPES.includes(type) ? type : 'KAT_KARSILIGI' } : {}),
                 ...(titleDeed !== undefined ? { titleDeed } : {}),
                 ...(description !== undefined ? { description } : {}),
                 ...(phone !== undefined ? { phone } : {}),

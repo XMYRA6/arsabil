@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { FilterSidebar } from '@/components/marketplace/FilterSidebar'
 
 const FILTERS = {
-    type: ['KAT_KARSILIGI'],
+    type: ['KAT_KARSILIGI', 'ORTAKLIK'],
     minSize: 200, maxSize: 10000,
     imar: [] as string[],
     fizibiliteOnly: false, minScore: 10,
@@ -47,5 +47,14 @@ describe('FilterSidebar', () => {
         render(<FilterSidebar filters={FILTERS} onChange={onChange} totalCount={0} />)
         fireEvent.click(screen.getByRole('button', { name: 'Ticari' }))
         expect(onChange).toHaveBeenCalledWith({ ...FILTERS, imar: ['TICARI'] })
+    })
+
+    it('Kat Karşılığı / Ortaklık checkbox tıklaması KAT_KARSILIGI ve ORTAKLIK ikisini birden kaldırır', () => {
+        const onChange = jest.fn()
+        render(<FilterSidebar filters={FILTERS} onChange={onChange} totalCount={0} />)
+        const row = screen.getByText('Kat Karşılığı / Ortaklık').closest('label')
+        const checkbox = row?.querySelector('div')
+        fireEvent.click(checkbox as HTMLElement)
+        expect(onChange).toHaveBeenCalledWith({ ...FILTERS, type: [] })
     })
 })

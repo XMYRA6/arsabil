@@ -7,6 +7,8 @@ import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { buildParcelSnapshot } from "@/lib/listing/parcelSnapshot";
 import { buildRiskSnapshot } from "@/lib/risk/riskSnapshot";
 
+const LISTING_TYPES = ['SALE', 'KAT_KARSILIGI', 'ORTAKLIK']
+
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url)
@@ -124,7 +126,7 @@ export async function POST(req: Request) {
                 price: price ? Number(price) : null,
                 landSizeSqm: landSizeSqm ? Number(landSizeSqm) : null,
                 zoning: zoning || null,
-                type: type || 'KAT_KARSILIGI',
+                type: LISTING_TYPES.includes(type) ? type : 'KAT_KARSILIGI',
                 titleDeed: titleDeed || null,
                 photos: photos || [],
                 lat: latNum,

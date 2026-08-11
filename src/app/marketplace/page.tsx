@@ -23,9 +23,9 @@ const MapView = dynamic<MapViewProps>(
 type View = 'split' | 'map' | 'list';
 
 const DEFAULT_FILTERS: ListingFilters = {
-    type: ['KAT_KARSILIGI'],
-    minSize: 200,
-    maxSize: 10000,
+    type: ['KAT_KARSILIGI', 'ORTAKLIK'],
+    minSize: 0,
+    maxSize: 1000000,
     imar: [],
     fizibiliteOnly: false,
     minScore: 10,
@@ -162,13 +162,16 @@ function MarketplaceContent() {
                 />
 
                 {/* Quick filter chips */}
-                {['Satış', 'Kat Karşılığı / Ortaklık'].map((label, i) => {
-                    const type = i === 0 ? 'SALE' : 'KAT_KARSILIGI';
-                    const active = filters.type.includes(type);
+                {[{ label: 'Satış', ids: ['SALE'] }, { label: 'Kat Karşılığı / Ortaklık', ids: ['KAT_KARSILIGI', 'ORTAKLIK'] }].map(({ label, ids }) => {
+                    const active = ids.every(id => filters.type.includes(id));
                     return (
                         <button key={label} onClick={() => {
-                            const has = filters.type.includes(type);
-                            setFilters(f => ({ ...f, type: has ? f.type.filter(t => t !== type) : [...f.type, type] }));
+                            setFilters(f => ({
+                                ...f,
+                                type: active
+                                    ? f.type.filter(t => !ids.includes(t))
+                                    : [...f.type, ...ids.filter(id => !f.type.includes(id))],
+                            }));
                         }} className={`${styles.quickChip} ${active ? styles.quickChipActive : ''}`}>{label}</button>
                     );
                 })}
@@ -195,7 +198,7 @@ function MarketplaceContent() {
                     <strong>Örnek veri</strong>
                     {demoData === 'all'
                         ? ' — Şu anda yayında ilan bulunmadığı için bu listedeki ilanların tamamı tanıtım amaçlı örnektir.'
-                        : ' — İlanlar gerçek, ancak fizibilite skoru, arsa payı aralığı ve imar durumu henüz toplanmadığı için örnek değerlerle gösteriliyor.'}
+                        : ' — İlanlar gerçek, ancak fizibilite skoru ve arsa payı aralığı henüz toplanmadığı için örnek değerlerle gösteriliyor.'}
                 </div>
             )}
 

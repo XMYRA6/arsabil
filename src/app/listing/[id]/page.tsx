@@ -34,7 +34,7 @@ const MOCK_LISTING = {
     arsaPayiMin: 30,
     arsaPayiMax: 42,
     changePercent: 42.5,
-    zoning: 'KARMA',
+    zoning: null as string | null,
     emsal: 2.0,
     price: 5171642,
     netKar: 34,

@@ -43,6 +43,12 @@ describe('filterListings', () => {
         const result = filterListings(listings, { ...BASE_FILTERS, fizibiliteOnly: true, minScore: 10 })
         expect(result).toEqual([{ type: 'SALE', fizibiliteSkoru: 50 }])
     })
+
+    it('ORTAKLIK ilanı KAT_KARSILIGI ile birlikte varsayılan type filtresinde görünür kalır', () => {
+        const listings = [{ type: 'ORTAKLIK' }, { type: 'SALE' }]
+        const result = filterListings(listings, { ...BASE_FILTERS, type: ['KAT_KARSILIGI', 'ORTAKLIK'] })
+        expect(result).toEqual([{ type: 'ORTAKLIK' }])
+    })
 })
 
 describe('sortListings', () => {

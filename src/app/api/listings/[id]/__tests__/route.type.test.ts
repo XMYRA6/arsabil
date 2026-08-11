@@ -47,4 +47,10 @@ describe('PATCH /api/listings/[id] — type alanı', () => {
         const data = updateMock.mock.calls[0][0].data
         expect(data).not.toHaveProperty('type')
     })
+
+    it('geçersiz/null type gönderilirse varsayılana düşer, NOT NULL ihlali oluşmaz', async () => {
+        await PATCH(patchReq({ type: null }), ctx)
+        const data = updateMock.mock.calls[0][0].data
+        expect(data.type).toBe('KAT_KARSILIGI')
+    })
 })

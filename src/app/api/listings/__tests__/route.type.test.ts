@@ -46,4 +46,10 @@ describe('POST /api/listings — type alanı', () => {
         const data = createMock.mock.calls[0][0].data
         expect(data.type).toBe('KAT_KARSILIGI')
     })
+
+    it('geçersiz/tanınmayan type gönderilirse varsayılana düşer', async () => {
+        await POST(postReq({ city: 'Tekirdağ', type: 'CRAP' }))
+        const data = createMock.mock.calls[0][0].data
+        expect(data.type).toBe('KAT_KARSILIGI')
+    })
 })

@@ -14,8 +14,8 @@ interface Props {
 }
 
 const TYPES = [
-    { id: 'SALE', label: 'Satış' },
-    { id: 'KAT_KARSILIGI', label: 'Kat Karşılığı / Ortaklık' },
+    { key: 'SALE', ids: ['SALE'], label: 'Satış' },
+    { key: 'KAT_KARSILIGI', ids: ['KAT_KARSILIGI', 'ORTAKLIK'], label: 'Kat Karşılığı / Ortaklık' },
 ];
 
 const IMAR_OPTS = ['Konut', 'Ticari', 'Karma', 'Tarım'];
@@ -24,9 +24,13 @@ const IMAR_VALS = ['KONUT', 'TICARI', 'KARMA', 'TARIM'];
 export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, onApply }: Props) {
     const set = (partial: Partial<ListingFilters>) => onChange({ ...filters, ...partial });
 
-    const toggleType = (id: string) => {
-        const has = filters.type.includes(id);
-        set({ type: has ? filters.type.filter(t => t !== id) : [...filters.type, id] });
+    const toggleType = (ids: string[]) => {
+        const allActive = ids.every(id => filters.type.includes(id));
+        set({
+            type: allActive
+                ? filters.type.filter(t => !ids.includes(t))
+                : [...filters.type, ...ids.filter(id => !filters.type.includes(id))],
+        });
     };
 
     const toggleImar = (val: string) => {
@@ -35,8 +39,8 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
     };
 
     const resetAll = () => onChange({
-        type: ['KAT_KARSILIGI'],
-        minSize: 200, maxSize: 10000,
+        type: ['KAT_KARSILIGI', 'ORTAKLIK'],
+        minSize: 0, maxSize: 1000000,
         imar: [],
         fizibiliteOnly: false, minScore: 10,
     });
@@ -52,17 +56,20 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
             {/* Satış Türü */}
             <div className={styles.section}>
                 <span className={styles.sectionLabel}>SATIŞ TÜRÜ</span>
-                {TYPES.map(t => (
-                    <label key={t.id} className={styles.checkRow}>
-                        <div
-                            onClick={() => toggleType(t.id)}
-                            className={`${styles.checkBox} ${filters.type.includes(t.id) ? styles.checkBoxActive : ''}`}
-                        >
-                            {filters.type.includes(t.id) && <span className={styles.checkMark}>✓</span>}
-                        </div>
-                        {t.label}
-                    </label>
-                ))}
+                {TYPES.map(t => {
+                    const active = t.ids.every(id => filters.type.includes(id));
+                    return (
+                        <label key={t.key} className={styles.checkRow}>
+                            <div
+                                onClick={() => toggleType(t.ids)}
+                                className={`${styles.checkBox} ${active ? styles.checkBoxActive : ''}`}
+                            >
+                                {active && <span className={styles.checkMark}>✓</span>}
+                            </div>
+                            {t.label}
+                        </label>
+                    );
+                })}
             </div>
 
             {/* Arsa Boyutu */}
