@@ -661,6 +661,90 @@
   border: 1px solid #ef4444;
 }
 
+.deleteModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.deleteModalCard {
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  border: 1px solid var(--border);
+}
+
+.deleteModalTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--card-title);
+  margin-bottom: 8px;
+}
+
+.deleteModalBody {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.deleteModalError {
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+}
+
+.deleteModalInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: 8px;
+}
+
+.deleteModalCancel {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
+.deleteModalConfirm {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  background: #ef4444;
+  color: white;
+}
+
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
   .profileCard {
@@ -992,5 +1076,44 @@
     background: rgba(255, 45, 85, 0.08);
     color: var(--m-danger);
     border: 1px solid rgba(255, 45, 85, 0.3);
+  }
+
+  .deleteModalOverlay {
+    background: rgba(8, 23, 41, 0.42);
+    backdrop-filter: blur(2px);
+  }
+
+  .deleteModalCard {
+    background: rgba(242, 248, 255, 0.88);
+    border: 1px solid var(--m-glass-border);
+    border-radius: var(--m-r-card);
+    backdrop-filter: var(--m-glass-blur);
+    -webkit-backdrop-filter: var(--m-glass-blur);
+    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+  }
+
+  .deleteModalTitle {
+    color: var(--m-ink);
+  }
+
+  .deleteModalBody {
+    color: var(--m-body);
+  }
+
+  .deleteModalInput {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--m-glass-border);
+    color: var(--m-ink);
+  }
+
+  .deleteModalCancel {
+    border: 1px solid var(--m-glass-border);
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--m-ink);
+  }
+
+  .deleteModalConfirm {
+    background: var(--m-danger);
+    box-shadow: 0 8px 18px rgba(255, 45, 85, 0.35);
   }
 }

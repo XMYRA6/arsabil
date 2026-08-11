@@ -584,27 +584,21 @@ export default function ProfilePage() {
 
             {showDeleteModal && (
                 <div
-                    style={{
-                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-                    }}
+                    className={styles.deleteModalOverlay}
                     onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError('') }}
                 >
                     <div
-                        style={{
-                            background: 'var(--panel)', borderRadius: 16, padding: 24,
-                            maxWidth: 400, width: '90%', border: '1px solid var(--border)',
-                        }}
+                        className={styles.deleteModalCard}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 8 }}>
+                        <h3 className={styles.deleteModalTitle}>
                             Hesabını silmek istediğine emin misin?
                         </h3>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: 16 }}>
+                        <p className={styles.deleteModalBody}>
                             Bu işlem geri alınamaz. Tüm projelerin, ilanların, mesajların ve raporların kalıcı olarak silinecek.
                         </p>
                         {deleteError && (
-                            <div style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.1)', color: '#ef4444', borderRadius: 8, fontSize: '0.8rem', marginBottom: 12 }}>
+                            <div className={styles.deleteModalError}>
                                 {deleteError}
                             </div>
                         )}
@@ -613,32 +607,20 @@ export default function ProfilePage() {
                             placeholder="Şifreni gir"
                             value={deletePassword}
                             onChange={(e) => setDeletePassword(e.target.value)}
-                            style={{
-                                width: '100%', padding: '10px 12px', borderRadius: 8,
-                                border: '1px solid var(--border)', background: 'var(--bg)',
-                                color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.85rem', marginBottom: 16,
-                            }}
+                            className={styles.deleteModalInput}
                         />
-                        <div style={{ display: 'flex', gap: 8 }}>
+                        <div className={styles.deleteModalActions}>
                             <button
                                 onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError('') }}
-                                style={{
-                                    flex: 1, padding: '10px', borderRadius: 8, border: '1px solid var(--border)',
-                                    background: 'transparent', color: 'var(--text)', cursor: 'pointer',
-                                    fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                                }}
+                                className={styles.deleteModalCancel}
                             >
                                 Vazgeç
                             </button>
                             <button
                                 onClick={handleDeleteAccount}
                                 disabled={deleting}
-                                style={{
-                                    flex: 1, padding: '10px', borderRadius: 8, border: 'none',
-                                    background: '#ef4444', color: 'white', cursor: 'pointer',
-                                    fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                                    opacity: deleting ? 0.6 : 1,
-                                }}
+                                className={styles.deleteModalConfirm}
+                                style={{ opacity: deleting ? 0.6 : 1 }}
                             >
                                 {deleting ? 'Siliniyor…' : 'Evet, Hesabımı Sil'}
                             </button>

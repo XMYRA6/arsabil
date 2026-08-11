@@ -391,4 +391,52 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(settingsBlock).toMatch(/styles\.btnDangerSmall/)
     expect(settingsBlock).not.toMatch(/color:\s*'#ef4444'/)
   })
+
+  it('.deleteModalCard mobilde cam yüzey (m-glass) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.deleteModalCard\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-glass-border\)/)
+    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
+  })
+
+  it('.deleteModalConfirm mobilde var(--m-danger) kullanmalı, #ef4444 KULLANMAMALI', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.deleteModalConfirm\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-danger\)/)
+    expect(match![1]).not.toMatch(/#ef4444/)
+  })
+
+  it('.deleteModalTitle/.deleteModalBody mobilde var(--m-ink)/var(--m-body) kullanmalı, var(--card-title)/var(--muted) KULLANMAMALI', () => {
+    const mobileBlock = css.slice(mediaIndex)
+
+    const titleMatch = mobileBlock.match(/\.deleteModalTitle\s*\{([^}]*)\}/)
+    expect(titleMatch).not.toBeNull()
+    expect(titleMatch![1]).toMatch(/var\(--m-ink\)/)
+    expect(titleMatch![1]).not.toMatch(/var\(--card-title\)/)
+
+    const bodyMatch = mobileBlock.match(/\.deleteModalBody\s*\{([^}]*)\}/)
+    expect(bodyMatch).not.toBeNull()
+    expect(bodyMatch![1]).toMatch(/var\(--m-body\)/)
+    expect(bodyMatch![1]).not.toMatch(/var\(--muted\)/)
+  })
+
+  it('masaüstü (media query dışı) .deleteModalConfirm/.deleteModalCard tanımları mevcut inline değerlerin birebir karşılığı olmalı (pixel-parity)', () => {
+    const desktopBlock = css.slice(0, mediaIndex)
+    expect(desktopBlock).toMatch(/\.deleteModalConfirm\s*\{[^}]*#ef4444/)
+    expect(desktopBlock).toMatch(/\.deleteModalCard\s*\{[^}]*background:\s*var\(--panel\)/)
+  })
+
+  it('page.tsx silme modalı bloğunda artık style={{ deseni geçmemeli (dinamik opacity haric)', () => {
+    const tsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8')
+    const modalStart = tsx.indexOf('{showDeleteModal &&')
+    const modalEnd = tsx.indexOf('<div className={styles.mobileSignOut}>')
+    expect(modalStart).toBeGreaterThan(-1)
+    expect(modalEnd).toBeGreaterThan(modalStart)
+    const modalBlock = tsx.slice(modalStart, modalEnd)
+    expect(modalBlock).toMatch(/styles\.deleteModalOverlay/)
+    expect(modalBlock).toMatch(/styles\.deleteModalConfirm/)
+    expect(modalBlock).not.toMatch(/background:\s*'#ef4444'/)
+  })
 })
