@@ -182,7 +182,7 @@ const DISTRICTS: Record<string, District[]> = {
 };
 
 interface Props {
-    onCitySelect: (city: { name: string; lat: number; lng: number; zoom: number }) => void;
+    onCitySelect: (city: { name: string; lat: number; lng: number; zoom: number; province?: string }) => void;
     selectedCity: string;
 }
 
@@ -190,9 +190,10 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
     const [query, setQuery] = useState('');
     const [open, setOpen] = useState(false);
     const [showDistricts, setShowDistricts] = useState(false);
+    const [provinceName, setProvinceName] = useState(selectedCity);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
-    const districts = DISTRICTS[selectedCity] || [];
+    const districts = DISTRICTS[provinceName] || [];
 
     const filtered = query.length > 0
         ? TURKEY_CITIES.filter(c =>
@@ -256,6 +257,7 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                 <div
                                     key={city.name}
                                     onClick={() => {
+                                        setProvinceName(city.name);
                                         onCitySelect(city);
                                         setQuery('');
                                         setOpen(false);
@@ -322,7 +324,7 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                 <div
                                     key={d.name}
                                     onClick={() => {
-                                        onCitySelect({ name: d.name, lat: d.lat, lng: d.lng, zoom: d.zoom });
+                                        onCitySelect({ name: d.name, lat: d.lat, lng: d.lng, zoom: d.zoom, province: provinceName });
                                         setShowDistricts(false);
                                     }}
                                     style={{

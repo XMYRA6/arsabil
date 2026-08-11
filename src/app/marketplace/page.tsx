@@ -157,7 +157,7 @@ function MarketplaceContent() {
                     onCitySelect={(city) => {
                         setSelectedCity(city.name);
                         mapRef.current?.flyTo(city.lat, city.lng, city.zoom);
-                        mapRef.current?.showProvinceBorder(city.name);
+                        mapRef.current?.showProvinceBorder(city.province ?? city.name);
                     }}
                 />
 
