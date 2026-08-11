@@ -469,41 +469,35 @@ export default function ProfilePage() {
 
                         {tab === 'favorites' && (
                             <div>
-                                <h3 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>
+                                <h3 className={styles.favSectionTitle}>
                                     Favorilerim
                                 </h3>
                                 {loadingFavs ? (
-                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>Yükleniyor…</div>
+                                    <div className={styles.favEmpty}>Yükleniyor…</div>
                                 ) : favorites.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted)' }}>
-                                        <div style={{ fontSize: '2rem', marginBottom: 8 }}>❤️</div>
+                                    <div className={styles.favEmpty}>
+                                        <div className={styles.favEmptyIcon}>❤️</div>
                                         Henüz favori ilan eklemediniz
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                    <div className={styles.favList}>
                                         {favorites.map((fav) => (
                                             <a
                                                 key={fav.id}
                                                 href={`/listing/${fav.listingId}`}
-                                                style={{
-                                                    display: 'flex', alignItems: 'center', gap: 12,
-                                                    padding: '12px 14px',
-                                                    background: 'var(--bg)', borderRadius: 10,
-                                                    border: '1.5px solid var(--border)',
-                                                    textDecoration: 'none', color: 'inherit',
-                                                }}
+                                                className={styles.favRow}
                                             >
-                                                <span style={{ fontSize: '1.2rem' }}>🏗️</span>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--card-title)' }}>
+                                                <span className={styles.favIcon}>🏗️</span>
+                                                <div className={styles.favBody}>
+                                                    <div className={styles.favTitle}>
                                                         {fav.listing?.title ?? fav.listing?.report?.title ?? 'İlan'}
                                                     </div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                                                    <div className={styles.favMeta}>
                                                         {fav.listing?.district && `${fav.listing.district}, `}{fav.listing?.city ?? '—'}
                                                         {fav.listing?.price ? ` · ${fav.listing.price.toLocaleString('tr-TR')} TL` : ''}
                                                     </div>
                                                 </div>
-                                                <span style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>→</span>
+                                                <span className={styles.favArrow}>→</span>
                                             </a>
                                         ))}
                                     </div>

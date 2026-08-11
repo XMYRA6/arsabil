@@ -290,4 +290,53 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(emptyNoteMatch![1]).toMatch(/var\(--m-body\)/)
     expect(emptyNoteMatch![1]).not.toMatch(/var\(--muted\)/)
   })
+
+  it('.favRow/.favIcon mobil bloğunda cam yüzey (m-glass) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const favRowMatch = mobileBlock.match(/\.favRow\s*\{([^}]*)\}/)
+    expect(favRowMatch).not.toBeNull()
+    expect(favRowMatch![1]).toMatch(/var\(--m-glass-border\)/)
+
+    const favIconMatch = mobileBlock.match(/\.favIcon\s*\{([^}]*)\}/)
+    expect(favIconMatch).not.toBeNull()
+    expect(favIconMatch![1]).toMatch(/var\(--m-grad-btn\)/)
+  })
+
+  it('.favTitle/.favMeta/.favSectionTitle/.favEmpty mobilde var(--m-ink)/var(--m-body) kullanmalı, var(--text)/var(--muted)/var(--card-title) KULLANMAMALI', () => {
+    const mobileBlock = css.slice(mediaIndex)
+
+    const favTitleMatch = mobileBlock.match(/\.favTitle\s*\{([^}]*)\}/)
+    expect(favTitleMatch).not.toBeNull()
+    expect(favTitleMatch![1]).toMatch(/var\(--m-ink\)/)
+    expect(favTitleMatch![1]).not.toMatch(/var\(--card-title\)/)
+
+    const favMetaMatch = mobileBlock.match(/\.favMeta\s*\{([^}]*)\}/)
+    expect(favMetaMatch).not.toBeNull()
+    expect(favMetaMatch![1]).toMatch(/var\(--m-body\)/)
+    expect(favMetaMatch![1]).not.toMatch(/var\(--muted\)/)
+
+    const favSectionTitleMatch = mobileBlock.match(/\.favSectionTitle\s*\{([^}]*)\}/)
+    expect(favSectionTitleMatch).not.toBeNull()
+    expect(favSectionTitleMatch![1]).toMatch(/var\(--m-ink\)/)
+
+    const favEmptyMatch = mobileBlock.match(/\.favEmpty\s*\{([^}]*)\}/)
+    expect(favEmptyMatch).not.toBeNull()
+    expect(favEmptyMatch![1]).toMatch(/var\(--m-body\)/)
+  })
+
+  it('masaüstü (media query dışı) .favRow tanımı mevcut inline değerlerin birebir karşılığı olmalı (pixel-parity)', () => {
+    const desktopBlock = css.slice(0, mediaIndex)
+    expect(desktopBlock).toMatch(/\.favRow\s*\{[^}]*background:\s*var\(--bg\)/)
+  })
+
+  it('page.tsx favorites bloğunda artık style={{ deseni geçmemeli', () => {
+    const tsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8')
+    const favStart = tsx.indexOf("tab === 'favorites' &&")
+    const favEnd = tsx.indexOf("tab === 'settings' &&")
+    expect(favStart).toBeGreaterThan(-1)
+    expect(favEnd).toBeGreaterThan(favStart)
+    const favBlock = tsx.slice(favStart, favEnd)
+    expect(favBlock).not.toMatch(/style=\{\{/)
+    expect(favBlock).toMatch(/styles\.favRow/)
+  })
 })
