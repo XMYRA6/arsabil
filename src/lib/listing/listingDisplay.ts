@@ -32,3 +32,15 @@ export function formatAreaCells(l: {
 
     return { declared, official, warning }
 }
+
+const ZONING_LABEL: Record<string, string> = {
+    KONUT: 'Konut',
+    TICARI: 'Ticari',
+    KARMA: 'Karma',
+    TARIM: 'Tarım',
+}
+
+export function formatZoningLabel(zoning?: string | null): string {
+    if (!zoning) return '—'
+    return ZONING_LABEL[zoning] ?? zoning
+}

@@ -1,4 +1,4 @@
-import { formatParcelIdentity, formatAreaCells } from './listingDisplay'
+import { formatParcelIdentity, formatAreaCells, formatZoningLabel } from './listingDisplay'
 
 describe('formatParcelIdentity', () => {
     it('ada/parsel/mahalle varsa okunur bir satır üretir', () => {
@@ -63,5 +63,23 @@ describe('formatAreaCells', () => {
     it('uyarı metni suçlayıcı değil — hisseli tapuda farkın normal olabileceğini söyler', () => {
         const r = formatAreaCells({ landSizeSqm: 1240, parcelAreaSqm: 830 })
         expect(r.warning).toMatch(/[Hh]isseli/)
+    })
+})
+
+describe('formatZoningLabel', () => {
+    it('null/undefined ise "—" döner (uydurma değer YAZILMAZ)', () => {
+        expect(formatZoningLabel(null)).toBe('—')
+        expect(formatZoningLabel(undefined)).toBe('—')
+    })
+
+    it('bilinen enum değerlerini Türkçe etikete çevirir', () => {
+        expect(formatZoningLabel('KONUT')).toBe('Konut')
+        expect(formatZoningLabel('TICARI')).toBe('Ticari')
+        expect(formatZoningLabel('KARMA')).toBe('Karma')
+        expect(formatZoningLabel('TARIM')).toBe('Tarım')
+    })
+
+    it('bilinmeyen bir değer gelirse olduğu gibi gösterir (veri kaybı yok)', () => {
+        expect(formatZoningLabel('BESKE_DEGER')).toBe('BESKE_DEGER')
     })
 })

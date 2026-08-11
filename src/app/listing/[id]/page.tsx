@@ -9,7 +9,7 @@ import { toast } from 'react-hot-toast';
 import { AppBar } from '@/components/mobile/AppBar';
 import { SwipeGallery } from '@/components/mobile/SwipeGallery';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { formatParcelIdentity, formatAreaCells } from '@/lib/listing/listingDisplay';
+import { formatParcelIdentity, formatAreaCells, formatZoningLabel } from '@/lib/listing/listingDisplay';
 import styles from './page.module.css';
 
 const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m => m.MiniMap), { ssr: false });
@@ -34,7 +34,7 @@ const MOCK_LISTING = {
     arsaPayiMin: 30,
     arsaPayiMax: 42,
     changePercent: 42.5,
-    imarDurumu: 'KONUT_TICARET',
+    zoning: 'KARMA',
     emsal: 2.0,
     price: 5171642,
     netKar: 34,
@@ -238,7 +238,7 @@ export default function ListingDetailPage() {
                                     {[
                                         ['Alan (beyan)', areaCells.declared],
                                         ...(areaCells.official ? [['Alan (tapu · TKGM)', areaCells.official] as [string, string]] : []),
-                                        ['İmar Durumu', listing.imarDurumu?.replace('_', ' ') ?? 'Konut + Ticaret'],
+                                        ['İmar Durumu', formatZoningLabel(listing.zoning)],
                                         ['Emsal', listing.emsal?.toString() ?? '2.0'],
                                         ['Arsa Payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
                                         // Uydurma sehir/ilce YOK: "820 m2" duzeltmesinin
@@ -252,11 +252,12 @@ export default function ListingDetailPage() {
                                         </div>
                                     ))}
                                 </div>
-                                {/* imarDurumu / emsal / arsaPayi alanlari Prisma semasinda HIC yok;
-                                    API onlari donduremez, dolayisiyla her ilanda ayni ornek
-                                    degerler gorunur. Veriler toplanana kadar acikca isaretleniyor. */}
+                                {/* emsal / arsaPayi alanlari Prisma semasinda HIC yok; API
+                                    onlari donduremez, dolayisiyla her ilanda ayni ornek
+                                    degerler gorunur. imarDurumu artik GERCEK `zoning` alanindan
+                                    okunuyor (bkz. formatZoningLabel) — bu banner artik onu kapsamaz. */}
                                 <div className={styles.demoNote} role="note">
-                                    <strong>Örnek veri</strong> — İmar durumu, emsal ve arsa payı bilgileri henüz
+                                    <strong>Örnek veri</strong> — Emsal ve arsa payı bilgileri henüz
                                     toplanmadığı için tanıtım amaçlı örnek değerlerdir; bu ilana ait değildir.
                                 </div>
                                 {areaCells.warning && (
