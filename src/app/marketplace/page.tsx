@@ -26,22 +26,24 @@ const DEFAULT_FILTERS = {
     minSize: 200,
     maxSize: 10000,
     imar: [] as string[],
+    minEmsal: 0.8,
+    maxEmsal: 3.0,
     fizibiliteOnly: false,
     minScore: 10,
 };
 
 // Mock listings enriched with fizibilite data
 const MOCK_LISTINGS_EXTRA = [
-    { fizibiliteSkoru: 83, arsaPayiMin: 30, arsaPayiMax: 46, changePercent: 42.8, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 82, arsaPayiMin: 34, arsaPayiMax: 48, changePercent: 44.3, zoning: 'KARMA', isNew: false },
-    { fizibiliteSkoru: 82, arsaPayiMin: 35, arsaPayiMax: 48, changePercent: 48.8, zoning: 'TICARI', isNew: true },
-    { fizibiliteSkoru: 88, arsaPayiMin: 23, arsaPayiMax: 34, changePercent: 36.1, zoning: 'KONUT', isNew: true },
-    { fizibiliteSkoru: 76, arsaPayiMin: 28, arsaPayiMax: 40, changePercent: 28.5, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 64, arsaPayiMin: 25, arsaPayiMax: 38, changePercent: 18.2, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 91, arsaPayiMin: 32, arsaPayiMax: 45, changePercent: 55.3, zoning: 'KARMA', isNew: true },
-    { fizibiliteSkoru: 58, arsaPayiMin: 22, arsaPayiMax: 35, changePercent: -8.4, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 79, arsaPayiMin: 30, arsaPayiMax: 42, changePercent: 31.7, zoning: 'TICARI', isNew: false },
-    { fizibiliteSkoru: 86, arsaPayiMin: 33, arsaPayiMax: 46, changePercent: 46.2, zoning: 'KONUT', isNew: true },
+    { fizibiliteSkoru: 83, arsaPayiMin: 30, arsaPayiMax: 46, changePercent: 42.8, imarDurumu: 'KONUT', isNew: false },
+    { fizibiliteSkoru: 82, arsaPayiMin: 34, arsaPayiMax: 48, changePercent: 44.3, imarDurumu: 'KONUT_TICARET', isNew: false },
+    { fizibiliteSkoru: 82, arsaPayiMin: 35, arsaPayiMax: 48, changePercent: 48.8, imarDurumu: 'TICARET', isNew: true },
+    { fizibiliteSkoru: 88, arsaPayiMin: 23, arsaPayiMax: 34, changePercent: 36.1, imarDurumu: 'KONUT', isNew: true },
+    { fizibiliteSkoru: 76, arsaPayiMin: 28, arsaPayiMax: 40, changePercent: 28.5, imarDurumu: 'KONUT', isNew: false },
+    { fizibiliteSkoru: 64, arsaPayiMin: 25, arsaPayiMax: 38, changePercent: 18.2, imarDurumu: 'DIGER', isNew: false },
+    { fizibiliteSkoru: 91, arsaPayiMin: 32, arsaPayiMax: 45, changePercent: 55.3, imarDurumu: 'KONUT_TICARET', isNew: true },
+    { fizibiliteSkoru: 58, arsaPayiMin: 22, arsaPayiMax: 35, changePercent: -8.4, imarDurumu: 'KONUT', isNew: false },
+    { fizibiliteSkoru: 79, arsaPayiMin: 30, arsaPayiMax: 42, changePercent: 31.7, imarDurumu: 'TICARET', isNew: false },
+    { fizibiliteSkoru: 86, arsaPayiMin: 33, arsaPayiMax: 46, changePercent: 46.2, imarDurumu: 'KONUT', isNew: true },
 ];
 
 export default function MarketplacePage() {
@@ -65,7 +67,7 @@ function MarketplaceContent() {
     // Ekranda uydurma veri var mi, ve ne kadari?
     //   'all'         → ilanlarin TAMAMI ornek (API bos dondu veya hata verdi)
     //   'fizibilite'  → ilanlar gercek, ama skor/arsa payi/imar alanlari ornek
-    // Bu alanlar (fizibiliteSkoru, arsaPayiMin/Max, zoning) Prisma
+    // Bu alanlar (fizibiliteSkoru, arsaPayiMin/Max, imarDurumu) Prisma
     // semasinda HIC yok; API onlari donduremez. Veriler gercekten toplanana
     // kadar ekranda acikca isaretleniyorlar.
     const [demoData, setDemoData] = useState<'none' | 'fizibilite' | 'all'>('none');
@@ -142,7 +144,7 @@ function MarketplaceContent() {
     // Filter logic
     const filtered = listings.filter(l => {
         if (filters.type.length > 0 && !filters.type.includes(l.type)) return false;
-        if (filters.imar.length > 0 && !filters.imar.includes(l.zoning ?? '')) return false;
+        if (filters.imar.length > 0 && !filters.imar.includes(l.imarDurumu ?? '')) return false;
         if (filters.fizibiliteOnly && (!l.fizibiliteSkoru || l.fizibiliteSkoru < filters.minScore)) return false;
         return true;
     });
@@ -186,6 +188,11 @@ function MarketplaceContent() {
                         }} className={`${styles.quickChip} ${active ? styles.quickChipActive : ''}`}>{label}</button>
                     );
                 })}
+
+                {/* Emsal quick filter */}
+                <span className={styles.emsalChip}>
+                    Emsal: {filters.minEmsal}–{filters.maxEmsal}
+                </span>
 
                 {/* Spacer (Hidden on mobile via CSS or flex logic) */}
                 <div className={styles.desktopOnlySpacer} />
