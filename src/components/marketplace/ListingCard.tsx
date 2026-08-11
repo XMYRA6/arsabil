@@ -19,14 +19,16 @@ export interface Listing {
     district?: string;
     m2?: number;
     price?: number;
+    landSizeSqm?: number | null;
     arsaPayiMin?: number;
     arsaPayiMax?: number;
     fizibiliteSkoru?: number;
     emsalFiyat?: number;
-    imarDurumu?: string;
+    zoning?: string;
     photos?: string[];
     isNew?: boolean;
     changePercent?: number;
+    createdAt?: string;
     report?: { landShareRatio?: number; minApartmentPrice?: number };
 }
 
@@ -47,9 +49,9 @@ const TYPE_LABEL: Record<string, string> = {
 
 const IMAR_LABEL: Record<string, string> = {
     KONUT: 'Konut',
-    TICARET: 'Ticaret',
-    KONUT_TICARET: 'Konut + Ticaret',
-    DIGER: 'Diğer',
+    TICARI: 'Ticari',
+    KARMA: 'Karma',
+    TARIM: 'Tarım',
 };
 
 export function ListingCard({ listing, highlighted, view, onHover, isFavorite, onFavoriteToggle }: Props) {
@@ -139,7 +141,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     {/* Location */}
                     <div style={{ fontSize: '0.78rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         📍 {listing.district || 'Beşiktaş'}, {listing.city || 'İstanbul'}
-                        {listing.imarDurumu && <> · {IMAR_LABEL[listing.imarDurumu] ?? listing.imarDurumu}</>}
+                        {listing.zoning && <> · {IMAR_LABEL[listing.zoning] ?? listing.zoning}</>}
                     </div>
 
                     {/* Fizibilite score inline */}

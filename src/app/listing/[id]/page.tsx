@@ -34,7 +34,7 @@ const MOCK_LISTING = {
     arsaPayiMin: 30,
     arsaPayiMax: 42,
     changePercent: 42.5,
-    imarDurumu: 'KONUT_TICARET',
+    zoning: 'KARMA',
     emsal: 2.0,
     price: 5171642,
     netKar: 34,
@@ -238,7 +238,7 @@ export default function ListingDetailPage() {
                                     {[
                                         ['Alan (beyan)', areaCells.declared],
                                         ...(areaCells.official ? [['Alan (tapu · TKGM)', areaCells.official] as [string, string]] : []),
-                                        ['İmar Durumu', listing.imarDurumu?.replace('_', ' ') ?? 'Konut + Ticaret'],
+                                        ['İmar Durumu', listing.zoning ?? '—'],
                                         ['Emsal', listing.emsal?.toString() ?? '2.0'],
                                         ['Arsa Payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
                                         // Uydurma sehir/ilce YOK: "820 m2" duzeltmesinin

@@ -35,3 +35,18 @@ describe('ListingCard — gerçek fotoğraf gösterimi', () => {
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });
+
+describe('ListingCard — imar durumu (zoning)', () => {
+  it('list görünümde zoning gerçek enum etiketiyle gösterilir', () => {
+    const listing: Listing = { id: 'z-1', title: 'Zoning Test', type: 'SALE', zoning: 'TARIM' };
+    render(<ListingCard listing={listing} view="list" />);
+    expect(screen.getByText(/Tarım/)).toBeInTheDocument();
+  });
+
+  it('zoning yoksa imar etiketi hiç render edilmez', () => {
+    const listing: Listing = { id: 'z-2', title: 'Zoningsiz', type: 'SALE' };
+    render(<ListingCard listing={listing} view="list" />);
+    expect(screen.queryByText('Tarım')).not.toBeInTheDocument();
+    expect(screen.queryByText('Konut')).not.toBeInTheDocument();
+  });
+});
