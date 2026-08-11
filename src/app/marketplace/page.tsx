@@ -11,6 +11,7 @@ import { CitySearch } from '@/components/marketplace/CitySearch';
 import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
 import { SegmentedTabs } from '@/components/mobile/SegmentedTabs';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
+import { filterListings, sortListings, mergeDemoOverlay, type ListingFilters } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
 
 // SSR-safe map import — dynamic + forwardRef birlikte ForwardRefExoticComponent olarak tip verilmeli
@@ -21,29 +22,27 @@ const MapView = dynamic<MapViewProps>(
 
 type View = 'split' | 'map' | 'list';
 
-const DEFAULT_FILTERS = {
+const DEFAULT_FILTERS: ListingFilters = {
     type: ['KAT_KARSILIGI'],
     minSize: 200,
     maxSize: 10000,
-    imar: [] as string[],
-    minEmsal: 0.8,
-    maxEmsal: 3.0,
+    imar: [],
     fizibiliteOnly: false,
     minScore: 10,
 };
 
 // Mock listings enriched with fizibilite data
 const MOCK_LISTINGS_EXTRA = [
-    { fizibiliteSkoru: 83, arsaPayiMin: 30, arsaPayiMax: 46, changePercent: 42.8, imarDurumu: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 82, arsaPayiMin: 34, arsaPayiMax: 48, changePercent: 44.3, imarDurumu: 'KONUT_TICARET', isNew: false },
-    { fizibiliteSkoru: 82, arsaPayiMin: 35, arsaPayiMax: 48, changePercent: 48.8, imarDurumu: 'TICARET', isNew: true },
-    { fizibiliteSkoru: 88, arsaPayiMin: 23, arsaPayiMax: 34, changePercent: 36.1, imarDurumu: 'KONUT', isNew: true },
-    { fizibiliteSkoru: 76, arsaPayiMin: 28, arsaPayiMax: 40, changePercent: 28.5, imarDurumu: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 64, arsaPayiMin: 25, arsaPayiMax: 38, changePercent: 18.2, imarDurumu: 'DIGER', isNew: false },
-    { fizibiliteSkoru: 91, arsaPayiMin: 32, arsaPayiMax: 45, changePercent: 55.3, imarDurumu: 'KONUT_TICARET', isNew: true },
-    { fizibiliteSkoru: 58, arsaPayiMin: 22, arsaPayiMax: 35, changePercent: -8.4, imarDurumu: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 79, arsaPayiMin: 30, arsaPayiMax: 42, changePercent: 31.7, imarDurumu: 'TICARET', isNew: false },
-    { fizibiliteSkoru: 86, arsaPayiMin: 33, arsaPayiMax: 46, changePercent: 46.2, imarDurumu: 'KONUT', isNew: true },
+    { fizibiliteSkoru: 83, arsaPayiMin: 30, arsaPayiMax: 46, changePercent: 42.8, zoning: 'KONUT', isNew: false },
+    { fizibiliteSkoru: 82, arsaPayiMin: 34, arsaPayiMax: 48, changePercent: 44.3, zoning: 'KARMA', isNew: false },
+    { fizibiliteSkoru: 82, arsaPayiMin: 35, arsaPayiMax: 48, changePercent: 48.8, zoning: 'TICARI', isNew: true },
+    { fizibiliteSkoru: 88, arsaPayiMin: 23, arsaPayiMax: 34, changePercent: 36.1, zoning: 'KONUT', isNew: true },
+    { fizibiliteSkoru: 76, arsaPayiMin: 28, arsaPayiMax: 40, changePercent: 28.5, zoning: 'KONUT', isNew: false },
+    { fizibiliteSkoru: 64, arsaPayiMin: 25, arsaPayiMax: 38, changePercent: 18.2, zoning: 'TARIM', isNew: false },
+    { fizibiliteSkoru: 91, arsaPayiMin: 32, arsaPayiMax: 45, changePercent: 55.3, zoning: 'KARMA', isNew: true },
+    { fizibiliteSkoru: 58, arsaPayiMin: 22, arsaPayiMax: 35, changePercent: -8.4, zoning: 'KONUT', isNew: false },
+    { fizibiliteSkoru: 79, arsaPayiMin: 30, arsaPayiMax: 42, changePercent: 31.7, zoning: 'TICARI', isNew: false },
+    { fizibiliteSkoru: 86, arsaPayiMin: 33, arsaPayiMax: 46, changePercent: 46.2, zoning: 'KONUT', isNew: true },
 ];
 
 export default function MarketplacePage() {
@@ -99,11 +98,9 @@ function MarketplaceContent() {
             .then(data => {
                 const arr = Array.isArray(data) ? data : [];
                 // Enrich API data with mock fizibilite fields for demo
-                const enriched = (arr as Listing[]).map((l, i): Listing => ({
-                    ...l,
-                    ...(MOCK_LISTINGS_EXTRA[i % MOCK_LISTINGS_EXTRA.length] || {}),
-                    type: (l.type ?? 'KAT_KARSILIGI') as Listing['type'],
-                }));
+                const enriched = (arr as Listing[]).map((l, i): Listing =>
+                    mergeDemoOverlay(l, MOCK_LISTINGS_EXTRA[i % MOCK_LISTINGS_EXTRA.length] || {})
+                );
                 // If no listings from API, add mock data
                 if (enriched.length === 0) {
                     const mock: Listing[] = Array.from({ length: 10 }, (_, i) => ({
@@ -141,21 +138,8 @@ function MarketplaceContent() {
             });
     }, []);
 
-    // Filter logic
-    const filtered = listings.filter(l => {
-        if (filters.type.length > 0 && !filters.type.includes(l.type)) return false;
-        if (filters.imar.length > 0 && !filters.imar.includes(l.imarDurumu ?? '')) return false;
-        if (filters.fizibiliteOnly && (!l.fizibiliteSkoru || l.fizibiliteSkoru < filters.minScore)) return false;
-        return true;
-    });
-
-    // Sort
-    const sorted = [...filtered].sort((a, b) => {
-        if (sortBy === 'score_desc') return (b.fizibiliteSkoru ?? 0) - (a.fizibiliteSkoru ?? 0);
-        if (sortBy === 'price_asc') return (a.price ?? a.report?.minApartmentPrice ?? 0) - (b.price ?? b.report?.minApartmentPrice ?? 0);
-        if (sortBy === 'newest') return 0; // Would use createdAt
-        return 0;
-    });
+    const filtered = filterListings(listings, filters);
+    const sorted = sortListings(filtered, sortBy);
 
     const PER_PAGE = 6;
     const paginated = sorted.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
@@ -188,11 +172,6 @@ function MarketplaceContent() {
                         }} className={`${styles.quickChip} ${active ? styles.quickChipActive : ''}`}>{label}</button>
                     );
                 })}
-
-                {/* Emsal quick filter */}
-                <span className={styles.emsalChip}>
-                    Emsal: {filters.minEmsal}–{filters.maxEmsal}
-                </span>
 
                 {/* Spacer (Hidden on mobile via CSS or flex logic) */}
                 <div className={styles.desktopOnlySpacer} />

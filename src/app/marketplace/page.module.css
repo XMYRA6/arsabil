@@ -128,16 +128,6 @@
     font-weight: 700;
 }
 
-.emsalChip {
-    font-size: 0.78rem;
-    color: var(--muted);
-    padding: 6px 14px;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 20px;
-    white-space: nowrap;
-}
-
 .sortSelect {
     padding: 6px 10px;
     background: var(--bg);
@@ -375,11 +365,6 @@
 
     .listPanel {
         background: var(--seal-surface);
-    }
-
-    .emsalChip {
-        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-variant-numeric: tabular-nums;
     }
 
     .quickChipActive,
