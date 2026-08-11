@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Listing" ADD COLUMN     "type" TEXT NOT NULL DEFAULT 'KAT_KARSILIGI';

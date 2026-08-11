@@ -79,7 +79,7 @@ export async function POST(req: Request) {
             reportId, city, district, notes,
             title, address, phone, description,
             price, landSizeSqm, zoning, titleDeed, photos,
-            lat, lng,
+            lat, lng, type,
         } = await req.json()
         // NOT: adaNo / parselNo / neighborhood / parcelAreaSqm / parcelQuality /
         // parcelGeometry / parcelVerifiedAt / parcelLookupStatus gövdeden OKUNMAZ.
@@ -124,6 +124,7 @@ export async function POST(req: Request) {
                 price: price ? Number(price) : null,
                 landSizeSqm: landSizeSqm ? Number(landSizeSqm) : null,
                 zoning: zoning || null,
+                type: type || 'KAT_KARSILIGI',
                 titleDeed: titleDeed || null,
                 photos: photos || [],
                 lat: latNum,

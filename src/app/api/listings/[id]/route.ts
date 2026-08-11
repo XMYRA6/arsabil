@@ -68,7 +68,7 @@ export async function PATCH(
         }
 
         const body = await req.json()
-        const { title, address, phone, description, price, landSizeSqm, zoning, titleDeed, photos, city, district, reportId, lat, lng } = body
+        const { title, address, phone, description, price, landSizeSqm, zoning, titleDeed, photos, city, district, reportId, lat, lng, type } = body
         // NOT: parsel alanları (adaNo, parselNo, neighborhood, parcelAreaSqm,
         // parcelQuality, parcelGeometry, parcelVerifiedAt, parcelLookupStatus)
         // gövdeden OKUNMAZ — snapshot'ı yalnızca sunucu üretir.
@@ -107,6 +107,7 @@ export async function PATCH(
                 ...(landSizeSqm !== undefined ? { landSizeSqm: landSizeSqm ? Number(landSizeSqm) : null } : {}),
                 ...(price !== undefined ? { price: price ? Number(price) : null } : {}),
                 ...(zoning !== undefined ? { zoning } : {}),
+                ...(type !== undefined ? { type } : {}),
                 ...(titleDeed !== undefined ? { titleDeed } : {}),
                 ...(description !== undefined ? { description } : {}),
                 ...(phone !== undefined ? { phone } : {}),

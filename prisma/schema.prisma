@@ -167,6 +167,7 @@ model Listing {
   price       Float?
   landSizeSqm Float?
   zoning      String?
+  type        String   @default("KAT_KARSILIGI")
   titleDeed   String?
   photos      String[] @default([])
   lat                 Float?
