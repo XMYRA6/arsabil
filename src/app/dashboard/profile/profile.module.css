@@ -365,6 +365,10 @@
   padding: 2rem;
 }
 
+.emptyNoteLink {
+  color: var(--primary);
+}
+
 .listRow {
   display: flex;
   justify-content: space-between;
@@ -990,6 +994,10 @@
     color: var(--m-body);
   }
 
+  .emptyNoteLink {
+    color: var(--m-link);
+  }
+
   .favSectionTitle {
     color: var(--m-ink);
   }
@@ -1061,6 +1069,10 @@
     box-shadow: 0 4px 10px rgba(43, 124, 255, 0.3);
   }
 
+  .toggleKnob {
+    box-shadow: 0 1px 3px rgba(11, 32, 54, 0.25);
+  }
+
   .btnPrimarySmall {
     background: var(--m-grad-btn);
     box-shadow: 0 8px 18px rgba(43, 124, 255, 0.25);
@@ -1115,5 +1127,10 @@
   .deleteModalConfirm {
     background: var(--m-danger);
     box-shadow: 0 8px 18px rgba(255, 45, 85, 0.35);
+  }
+
+  .deleteModalError {
+    background: rgba(255, 45, 85, 0.16);
+    color: #b8102f;
   }
 }

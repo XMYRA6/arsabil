@@ -452,7 +452,7 @@ export default function ProfilePage() {
                                     <span className={styles.listMeta}>Arsa payı: %{(r.landShareRatio * 100).toFixed(0)}</span>
                                 </Link>
                             )) : (
-                                <p className={styles.emptyNote}>Henüz hesaplama yok. <Link href="/hesapla" style={{ color: 'var(--primary)' }}>Hesapla →</Link></p>
+                                <p className={styles.emptyNote}>Henüz hesaplama yok. <Link href="/hesapla" className={styles.emptyNoteLink}>Hesapla →</Link></p>
                             )
                         )}
 
@@ -463,7 +463,7 @@ export default function ProfilePage() {
                                     <span className={styles.listMeta}>{l.city || '—'} · {l.price ? l.price.toLocaleString('tr-TR') + ' ₺' : 'Fiyat yok'}</span>
                                 </Link>
                             )) : (
-                                <p className={styles.emptyNote}>Aktif ilan yok. <Link href="/listings/new" style={{ color: 'var(--primary)' }}>İlan Oluştur →</Link></p>
+                                <p className={styles.emptyNote}>Aktif ilan yok. <Link href="/listings/new" className={styles.emptyNoteLink}>İlan Oluştur →</Link></p>
                             )
                         )}
 

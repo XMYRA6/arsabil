@@ -439,4 +439,13 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(modalBlock).toMatch(/styles\.deleteModalConfirm/)
     expect(modalBlock).not.toMatch(/background:\s*'#ef4444'/)
   })
+
+  it('mobil blok genelinde var(--text)/var(--muted)/var(--card-title) sızmamalı (tek bilinen istisna: onceden var olan .cancelBtn)', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    // .cancelBtn onceden var olan (bu branch'ten once) bir kural, kapsam disi — geri kalan blokta hicbir yerde bu token'lar gecmemeli
+    const withoutCancelBtn = mobileBlock.replace(/\.cancelBtn\s*\{[^}]*\}/, '')
+    expect(withoutCancelBtn).not.toMatch(/var\(--text\)/)
+    expect(withoutCancelBtn).not.toMatch(/var\(--muted\)/)
+    expect(withoutCancelBtn).not.toMatch(/var\(--card-title\)/)
+  })
 })
