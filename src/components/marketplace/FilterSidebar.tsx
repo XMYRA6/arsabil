@@ -1,21 +1,11 @@
 "use client";
 
+import type { ListingFilters } from '@/lib/listing/marketplaceFilters';
 import styles from './FilterSidebar.module.css';
 
-interface Filters {
-    type: string[];
-    minSize: number;
-    maxSize: number;
-    imar: string[];
-    minEmsal: number;
-    maxEmsal: number;
-    fizibiliteOnly: boolean;
-    minScore: number;
-}
-
 interface Props {
-    filters: Filters;
-    onChange: (f: Filters) => void;
+    filters: ListingFilters;
+    onChange: (f: ListingFilters) => void;
     totalCount: number;
     /** BottomSheet içinde tam genişlik varyantı */
     inSheet?: boolean;
@@ -28,11 +18,11 @@ const TYPES = [
     { id: 'KAT_KARSILIGI', label: 'Kat Karşılığı / Ortaklık' },
 ];
 
-const IMAR_OPTS = ['Konut', 'Ticaret', 'Konut + Ticaret', 'Diğer'];
-const IMAR_VALS = ['KONUT', 'TICARET', 'KONUT_TICARET', 'DIGER'];
+const IMAR_OPTS = ['Konut', 'Ticari', 'Karma', 'Tarım'];
+const IMAR_VALS = ['KONUT', 'TICARI', 'KARMA', 'TARIM'];
 
 export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, onApply }: Props) {
-    const set = (partial: Partial<Filters>) => onChange({ ...filters, ...partial });
+    const set = (partial: Partial<ListingFilters>) => onChange({ ...filters, ...partial });
 
     const toggleType = (id: string) => {
         const has = filters.type.includes(id);
@@ -47,7 +37,7 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
     const resetAll = () => onChange({
         type: ['KAT_KARSILIGI'],
         minSize: 200, maxSize: 10000,
-        imar: [], minEmsal: 0.8, maxEmsal: 3.0,
+        imar: [],
         fizibiliteOnly: false, minScore: 10,
     });
 
@@ -100,16 +90,6 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
                             >{label}</button>
                         );
                     })}
-                </div>
-            </div>
-
-            {/* Emsal */}
-            <div className={styles.section}>
-                <span className={styles.sectionLabel}>EMSAL</span>
-                <div className={styles.rangeRow}>
-                    <input type="number" step={0.1} value={filters.minEmsal} onChange={e => set({ minEmsal: +e.target.value })} className={styles.rangeInput} />
-                    <span className={styles.rangeDash}>–</span>
-                    <input type="number" step={0.1} value={filters.maxEmsal} onChange={e => set({ maxEmsal: +e.target.value })} className={styles.rangeInput} />
                 </div>
             </div>
 

@@ -6,7 +6,7 @@ import { FilterSidebar } from '@/components/marketplace/FilterSidebar'
 const FILTERS = {
     type: ['KAT_KARSILIGI'],
     minSize: 200, maxSize: 10000,
-    imar: [] as string[], minEmsal: 0.8, maxEmsal: 3.0,
+    imar: [] as string[],
     fizibiliteOnly: false, minScore: 10,
 }
 
@@ -35,5 +35,17 @@ describe('FilterSidebar', () => {
         render(<FilterSidebar filters={FILTERS} onChange={() => {}} totalCount={0} onApply={onApply} />)
         fireEvent.click(screen.getByRole('button', { name: 'Filtreleri Uygula' }))
         expect(onApply).toHaveBeenCalledTimes(1)
+    })
+
+    it('EMSAL bölümü artık render edilmiyor (backing alan yok)', () => {
+        render(<FilterSidebar filters={FILTERS} onChange={() => {}} totalCount={0} />)
+        expect(screen.queryByText('EMSAL')).not.toBeInTheDocument()
+    })
+
+    it('Ticari imar chip tıklaması TICARI değerini gönderir (yeni enum, eski TICARET DEĞİL)', () => {
+        const onChange = jest.fn()
+        render(<FilterSidebar filters={FILTERS} onChange={onChange} totalCount={0} />)
+        fireEvent.click(screen.getByRole('button', { name: 'Ticari' }))
+        expect(onChange).toHaveBeenCalledWith({ ...FILTERS, imar: ['TICARI'] })
     })
 })
