@@ -521,32 +521,23 @@ export default function ProfilePage() {
                                 </div>
 
                                 {/* E-posta Tercihleri */}
-                                <div style={{ marginTop: 28 }}>
-                                    <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 16 }}>
+                                <div className={styles.settingsSection}>
+                                    <h3 className={styles.settingsSectionTitle}>
                                         E-posta Bildirimleri
                                     </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <div className={styles.toggleList}>
                                         {([
                                             { key: 'mesaj', label: 'Yeni mesaj bildirimleri' },
                                             { key: 'teklif', label: 'Yeni teklif bildirimleri' },
                                             { key: 'ilan', label: 'İlan durum bildirimleri' },
                                         ] as const).map(({ key, label }) => (
-                                            <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text)' }}>{label}</span>
+                                            <div key={key} className={styles.toggleRow}>
+                                                <span className={styles.toggleLabel}>{label}</span>
                                                 <div
                                                     onClick={() => setEmailPrefs(p => ({ ...p, [key]: !p[key] }))}
-                                                    style={{
-                                                        width: 40, height: 22, borderRadius: 11,
-                                                        background: emailPrefs[key] ? 'var(--primary)' : 'var(--border)',
-                                                        position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
-                                                    }}
+                                                    className={`${styles.toggleSwitch} ${emailPrefs[key] ? styles.toggleSwitchOn : ''}`}
                                                 >
-                                                    <div style={{
-                                                        width: 16, height: 16, background: 'white', borderRadius: '50%',
-                                                        position: 'absolute', top: 3,
-                                                        left: emailPrefs[key] ? 21 : 3,
-                                                        transition: 'left 0.2s',
-                                                    }} />
+                                                    <div className={`${styles.toggleKnob} ${emailPrefs[key] ? styles.toggleKnobOn : ''}`} />
                                                 </div>
                                             </div>
                                         ))}
@@ -554,42 +545,29 @@ export default function ProfilePage() {
                                     <button
                                         onClick={saveEmailPrefs}
                                         disabled={savingPrefs}
-                                        style={{
-                                            marginTop: 16, padding: '8px 20px',
-                                            background: savedPrefs ? 'var(--green)' : 'var(--primary)', color: 'white',
-                                            border: 'none', borderRadius: 8, cursor: 'pointer',
-                                            fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                                            opacity: savingPrefs ? 0.6 : 1, transition: 'background 0.3s',
-                                        }}
+                                        className={styles.btnPrimarySmall}
+                                        style={{ background: savedPrefs ? 'var(--green)' : undefined, opacity: savingPrefs ? 0.6 : 1 }}
                                     >
                                         {savingPrefs ? 'Kaydediliyor…' : savedPrefs ? 'Kaydedildi ✓' : 'Kaydet'}
                                     </button>
                                 </div>
 
                                 {/* Hesap Yönetimi */}
-                                <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
-                                    <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: 12 }}>
+                                <div className={styles.settingsSection}>
+                                    <h3 className={styles.settingsSectionTitle}>
                                         Hesap
                                     </h3>
                                     <button
                                         onClick={handleExportData}
                                         disabled={exporting}
-                                        style={{
-                                            padding: '8px 20px', background: 'var(--panel)', color: 'var(--text)',
-                                            border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer',
-                                            fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                                            opacity: exporting ? 0.6 : 1, marginRight: 10,
-                                        }}
+                                        className={styles.btnSecondarySmall}
+                                        style={{ opacity: exporting ? 0.6 : 1 }}
                                     >
                                         {exporting ? 'Hazırlanıyor…' : '📥 Verilerimi İndir'}
                                     </button>
                                     <button
                                         onClick={() => setShowDeleteModal(true)}
-                                        style={{
-                                            padding: '8px 20px', background: 'transparent', color: '#ef4444',
-                                            border: '1px solid #ef4444', borderRadius: 8, cursor: 'pointer',
-                                            fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem',
-                                        }}
+                                        className={styles.btnDangerSmall}
                                     >
                                         Hesabımı Sil
                                     </button>

@@ -339,4 +339,56 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(favBlock).not.toMatch(/style=\{\{/)
     expect(favBlock).toMatch(/styles\.favRow/)
   })
+
+  it('.toggleSwitchOn/.btnPrimarySmall mobilde var(--m-grad-btn) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const toggleMatch = mobileBlock.match(/\.toggleSwitchOn\s*\{([^}]*)\}/)
+    expect(toggleMatch).not.toBeNull()
+    expect(toggleMatch![1]).toMatch(/var\(--m-grad-btn\)/)
+
+    const btnMatch = mobileBlock.match(/\.btnPrimarySmall\s*\{([^}]*)\}/)
+    expect(btnMatch).not.toBeNull()
+    expect(btnMatch![1]).toMatch(/var\(--m-grad-btn\)/)
+  })
+
+  it('.btnDangerSmall mobilde var(--m-danger) kullanmalı, #ef4444 KULLANMAMALI', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.btnDangerSmall\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-danger\)/)
+    expect(match![1]).not.toMatch(/#ef4444/)
+  })
+
+  it('.settingsSectionTitle/.toggleLabel mobilde var(--m-ink) kullanmalı, var(--text)/var(--card-title) KULLANMAMALI', () => {
+    const mobileBlock = css.slice(mediaIndex)
+
+    const titleMatch = mobileBlock.match(/\.settingsSectionTitle\s*\{([^}]*)\}/)
+    expect(titleMatch).not.toBeNull()
+    expect(titleMatch![1]).toMatch(/var\(--m-ink\)/)
+    expect(titleMatch![1]).not.toMatch(/var\(--card-title\)/)
+
+    const labelMatch = mobileBlock.match(/\.toggleLabel\s*\{([^}]*)\}/)
+    expect(labelMatch).not.toBeNull()
+    expect(labelMatch![1]).toMatch(/var\(--m-ink\)/)
+    expect(labelMatch![1]).not.toMatch(/var\(--text\)/)
+  })
+
+  it('masaüstü (media query dışı) .btnDangerSmall tanımı hâlâ #ef4444 kullanmalı (pixel-parity)', () => {
+    const desktopBlock = css.slice(0, mediaIndex)
+    const match = desktopBlock.match(/\.btnDangerSmall\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/#ef4444/)
+  })
+
+  it('page.tsx settings bloğunda artık toggle/silme butonu style={{ deseni geçmemeli', () => {
+    const tsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8')
+    const settingsStart = tsx.indexOf("tab === 'settings' &&")
+    const settingsEnd = tsx.indexOf('{showDeleteModal &&')
+    expect(settingsStart).toBeGreaterThan(-1)
+    expect(settingsEnd).toBeGreaterThan(settingsStart)
+    const settingsBlock = tsx.slice(settingsStart, settingsEnd)
+    expect(settingsBlock).toMatch(/styles\.toggleSwitch/)
+    expect(settingsBlock).toMatch(/styles\.btnDangerSmall/)
+    expect(settingsBlock).not.toMatch(/color:\s*'#ef4444'/)
+  })
 })

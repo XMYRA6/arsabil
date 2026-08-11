@@ -560,6 +560,107 @@
   color: var(--primary);
 }
 
+.settingsSection {
+  margin-top: 28px;
+}
+
+.settingsSection + .settingsSection {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.settingsSectionTitle {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--card-title);
+  margin-bottom: 16px;
+}
+
+.toggleList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggleLabel {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.toggleSwitch {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: var(--border);
+}
+
+.toggleSwitchOn {
+  background: var(--primary);
+}
+
+.toggleKnob {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: left 0.2s;
+}
+
+.toggleKnobOn {
+  left: 21px;
+}
+
+.btnPrimarySmall {
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  background: var(--primary);
+  color: white;
+  margin-top: 16px;
+  transition: background 0.3s;
+}
+
+.btnSecondarySmall {
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  margin-right: 10px;
+}
+
+.btnDangerSmall {
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
   .profileCard {
@@ -852,5 +953,44 @@
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
+  }
+
+  .settingsSection + .settingsSection {
+    border-top-color: rgba(11, 32, 54, 0.08);
+  }
+
+  .settingsSectionTitle {
+    color: var(--m-ink);
+  }
+
+  .toggleLabel {
+    color: var(--m-ink);
+    font-weight: 600;
+  }
+
+  .toggleSwitch {
+    background: var(--m-fill);
+  }
+
+  .toggleSwitchOn {
+    background: var(--m-grad-btn);
+    box-shadow: 0 4px 10px rgba(43, 124, 255, 0.3);
+  }
+
+  .btnPrimarySmall {
+    background: var(--m-grad-btn);
+    box-shadow: 0 8px 18px rgba(43, 124, 255, 0.25);
+  }
+
+  .btnSecondarySmall {
+    background: rgba(255, 255, 255, 0.55);
+    color: var(--m-ink);
+    border: 1px solid var(--m-glass-border);
+  }
+
+  .btnDangerSmall {
+    background: rgba(255, 45, 85, 0.08);
+    color: var(--m-danger);
+    border: 1px solid rgba(255, 45, 85, 0.3);
   }
 }
