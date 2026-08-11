@@ -14,6 +14,7 @@ export interface WizardFormData {
     price: string
     zoning: string
     titleDeed: string
+    type: string
     description: string
     phone: string
     photos: { url: string; publicId: string }[]
@@ -24,7 +25,7 @@ export const emptyFormData: WizardFormData = {
     city: '', district: '', address: '',
     lat: null, lng: null, parcel: null, parcelStatus: 'idle',
     title: '', landSizeSqm: '', price: '',
-    zoning: '', titleDeed: '', description: '', phone: '',
+    zoning: '', titleDeed: '', type: 'KAT_KARSILIGI', description: '', phone: '',
     photos: [],
     reportId: '',
 }

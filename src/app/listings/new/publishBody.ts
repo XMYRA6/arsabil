@@ -23,6 +23,7 @@ export function buildListingPublishBody(form: WizardFormData) {
         landSizeSqm: form.landSizeSqm ? Number(form.landSizeSqm) : null,
         price: form.price ? Number(form.price) : null,
         zoning: form.zoning || null,
+        type: form.type,
         titleDeed: form.titleDeed || null,
         description: form.description || null,
         phone: form.phone || null,

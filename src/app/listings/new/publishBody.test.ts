@@ -66,4 +66,14 @@ describe('buildListingPublishBody', () => {
         }))
         expect(body.photos).toEqual(['https://x/a.jpg', 'https://x/b.jpg'])
     })
+
+    it('type alanını olduğu gibi gönderir', () => {
+        const body = buildListingPublishBody(form({ lat: 41, lng: 27, type: 'SALE' }))
+        expect(body.type).toBe('SALE')
+    })
+
+    it('type formda varsayılan (KAT_KARSILIGI) ise onu gönderir', () => {
+        const body = buildListingPublishBody(form({ lat: 41, lng: 27 }))
+        expect(body.type).toBe('KAT_KARSILIGI')
+    })
 })

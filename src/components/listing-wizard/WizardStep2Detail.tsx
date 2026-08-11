@@ -57,6 +57,20 @@ export function WizardStep2Detail({ data, onChange }: Props) {
         </div>
       </div>
 
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>İlan Türü</label>
+        <select
+          className={styles.select}
+          aria-label="İlan Türü"
+          value={data.type}
+          onChange={e => onChange({ type: e.target.value })}
+        >
+          <option value="KAT_KARSILIGI">Kat Karşılığı</option>
+          <option value="SALE">Satış</option>
+          <option value="ORTAKLIK">Ortaklık</option>
+        </select>
+      </div>
+
       <div className={styles.twoCol}>
         <div className={styles.fieldGroup}>
           <label className={styles.label}>İmar Durumu</label>
