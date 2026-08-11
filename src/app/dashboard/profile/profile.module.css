@@ -715,4 +715,31 @@
   .container[data-mobile-section="true"] .mobileSignOut {
     display: none;
   }
+
+  .container[data-mobile-section="true"] .tabPanel {
+    background: var(--m-glass-bg);
+    border: 1px solid var(--m-glass-border);
+    border-radius: var(--m-r-card);
+    backdrop-filter: var(--m-glass-blur);
+    -webkit-backdrop-filter: var(--m-glass-blur);
+    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+  }
+
+  .listRow {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid var(--m-glass-border);
+    border-radius: var(--m-r-inner);
+  }
+
+  .listTitle {
+    color: var(--m-ink);
+  }
+
+  .listMeta {
+    color: var(--m-body);
+  }
+
+  .emptyNote {
+    color: var(--m-body);
+  }
 }

@@ -256,4 +256,38 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(menuSubtitleMatch![1]).not.toMatch(/var\(--muted\)/)
     expect(menuSubtitleMatch![1]).toMatch(/var\(--m-body\)/)
   })
+
+  it('data-mobile-section="true" iken .tabPanel mobilde cam yüzey (m-glass) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.container\[data-mobile-section="true"\]\s+\.tabPanel\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-glass-bg\)/)
+    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
+  })
+
+  it('.listRow mobil bloğunda var(--m-glass-border) kullanmalı', () => {
+    const mobileBlock = css.slice(mediaIndex)
+    const match = mobileBlock.match(/\.listRow\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/var\(--m-glass-border\)/)
+  })
+
+  it('.listTitle/.listMeta/.emptyNote mobilde var(--m-ink)/var(--m-body) kullanmalı, var(--text)/var(--muted) KULLANMAMALI', () => {
+    const mobileBlock = css.slice(mediaIndex)
+
+    const listTitleMatch = mobileBlock.match(/\.listTitle\s*\{([^}]*)\}/)
+    expect(listTitleMatch).not.toBeNull()
+    expect(listTitleMatch![1]).toMatch(/var\(--m-ink\)/)
+    expect(listTitleMatch![1]).not.toMatch(/var\(--text\)/)
+
+    const listMetaMatch = mobileBlock.match(/\.listMeta\s*\{([^}]*)\}/)
+    expect(listMetaMatch).not.toBeNull()
+    expect(listMetaMatch![1]).toMatch(/var\(--m-body\)/)
+    expect(listMetaMatch![1]).not.toMatch(/var\(--muted\)/)
+
+    const emptyNoteMatch = mobileBlock.match(/\.emptyNote\s*\{([^}]*)\}/)
+    expect(emptyNoteMatch).not.toBeNull()
+    expect(emptyNoteMatch![1]).toMatch(/var\(--m-body\)/)
+    expect(emptyNoteMatch![1]).not.toMatch(/var\(--muted\)/)
+  })
 })
