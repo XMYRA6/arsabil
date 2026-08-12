@@ -93,24 +93,27 @@ export function SmartContextCard({
                 tek kontrol masaustu JSX agacindaydi, mobilde parsel
                 onaylamadan arsa alani HIC girilemiyordu. Kart iki platformda
                 da render edildigi icin anahtar burada olunca ikisi de kazanir
-                (spec: risk ve alan parselden BAGIMSIZ kullanilabilmeli). */}
+                (spec: risk ve alan parselden BAGIMSIZ kullanilabilmeli).
+                Durum metni artik baslik+toggle satirinin DISINDA, kendi
+                satirinda render oluyor — toggle KAPALIYKEN baslik+toggle
+                satiri hic kirilmadan tek satirda kalir (mobil mockup'ta
+                onaylanan davranis, bkz. docs/superpowers/specs/
+                2026-08-12-hesapla-girdi-karti-simetri-design.md). */}
             <div className={styles.areaSection}>
                 <div className={styles.areaHeader}>
                     <span>Arsa Alanı</span>
-                    <span className={styles.areaHeaderRight}>
-                        {isAaEnabled && (
-                            <span className={isAreaVerified ? styles.areaStatusOk : styles.areaStatus}>
-                                {isAreaVerified ? '✓ TKGM Onaylı' : 'Elle girilmesi gerekiyor'}
-                            </span>
-                        )}
-                        <Toggle
-                            className={styles.aaToggle}
-                            checked={isAaEnabled}
-                            aria-label="Arsa alanını hesaba kat"
-                            onChange={(e) => onIsAaEnabled(e.target.checked)}
-                        />
-                    </span>
+                    <Toggle
+                        className={styles.aaToggle}
+                        checked={isAaEnabled}
+                        aria-label="Arsa alanını hesaba kat"
+                        onChange={(e) => onIsAaEnabled(e.target.checked)}
+                    />
                 </div>
+                {isAaEnabled && (
+                    <p className={isAreaVerified ? styles.areaStatusOk : styles.areaStatus}>
+                        {isAreaVerified ? '✓ TKGM Onaylı' : 'Elle girilmesi gerekiyor'}
+                    </p>
+                )}
                 {isAaEnabled && (
                     <div className={styles.areaInputRow}>
                         <input

@@ -135,12 +135,6 @@
     justify-content: space-between;
 }
 
-.areaHeaderRight {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 /* Bu anahtar (isAaEnabled) daha once yalnizca masaustunde render ediliyordu;
    simdi kart uzerinden mobilde de tiklanabilir oldugu icin projenin kendi
    `--touch-target: 44px` tabanina uymasi gerekiyor — paylasilan `Toggle`in
@@ -150,9 +144,12 @@
     min-height: var(--touch-target);
 }
 
+/* `<p>` — UA varsayilan dikey margin'i areaSection'in kendi `gap:8px`ine
+   eklenip istenmeyen fazladan bosluk yaratmasin diye sifirlanir. */
 .areaStatus {
     font-size: 0.75rem;
     color: #f59e0b;
+    margin: 0;
 }
 
 .areaStatusOk {
@@ -174,4 +171,52 @@
     font-size: 1rem;
     font-weight: 600;
     color: var(--fg);
+}
+
+@media (max-width: 768px) {
+    .unselectedBtn {
+        background: rgba(21, 96, 208, .06);
+        border-color: rgba(21, 96, 208, .4);
+        color: var(--m-link);
+        border-radius: var(--m-r-btn);
+    }
+    .address { color: var(--m-ink); }
+    .editBtn { color: var(--m-link); }
+
+    .riskSection, .areaSection {
+        background: rgba(11, 32, 54, .055);
+        border: 1px solid rgba(11, 32, 54, .07);
+        border-radius: var(--m-r-inner);
+    }
+    .riskHeader { color: var(--m-body); }
+    .areaHeader { color: var(--m-body); }
+    .riskKaynakEtiket { color: var(--m-body); }
+    .riskNote { color: var(--m-body); }
+
+    /* Risk pilleri -> segment gorunumu (Yapi Standardi ile ayni desen) */
+    .riskPills { gap: 5px; }
+    .riskPill {
+        background: transparent;
+        border: none;
+        border-radius: 12px;
+        color: var(--m-on-glass);
+        min-height: 40px;
+    }
+    .riskPillActive {
+        background: var(--m-grad-btn);
+        color: #fff;
+        box-shadow: var(--m-sh-grad-btn);
+        border: none;
+    }
+
+    .areaStatus { color: #b45309; }
+    .areaStatusOk { color: var(--m-success); }
+
+    .areaInputRow input {
+        background: #f8fafd;
+        border: 1px solid rgba(11, 32, 54, .14);
+        border-radius: var(--m-r-input);
+        color: var(--m-ink);
+        font-size: 16px;
+    }
 }
