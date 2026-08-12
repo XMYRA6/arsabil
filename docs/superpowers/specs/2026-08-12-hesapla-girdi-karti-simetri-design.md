@@ -58,8 +58,12 @@ ve (Daire Büyüklüğü için) tek bir davranış eklemesi: elle giriş.
    (`src/app/hesapla/page.tsx` masaüstü, `SmartContextCard.tsx`) — masaüstü
    kullanım base kurallardan etkilenmez.
 3. `GirdiKarti.tsx` — "Daire büyüklüğü" değeri artık statik `<span>` değil,
-   gerçek bir `<input>`; ±5 stepper butonları aynen kalır.
-4. Testler: `SmartContextCard`/`Toggle` için mobil↔masaüstü ayrım guard'ı,
+   gerçek bir `<input>`; ±5 stepper butonları aynen kalır. Kendi `.stepperSatir`
+   kuralına da kenarlık kontrastı eklenir (bkz. "Kenarlık kontrastı" notu).
+4. Kenarlık/panel kontrastı — yalnızca bu karttaki panellere/input'a özel, dar
+   kapsamlı değerler (`--m-fill`/`--m-glass-border` token'larının kendisi
+   DEĞİŞMİYOR — bkz. "Kenarlık kontrastı" notu).
+5. Testler: `SmartContextCard`/`Toggle` için mobil↔masaüstü ayrım guard'ı,
    `GirdiKarti` için elle giriş + sınır davranışı testleri.
 
 ## Kapsam dışı (bu turda YAPILMIYOR)
@@ -82,7 +86,7 @@ olan aynı token'lar kullanılıyor, yeni bir renk/değer icat edilmiyor:
 | Kullanım | Şu an (mobilde de) | Liquid Glass (mobil override) |
 |---|---|---|
 | Konum çipi zemini | `rgba(59,130,246,.08)` + dashed `#3b82f6` | `rgba(21,96,208,.06)` + dashed `var(--m-link)`, `var(--m-r-btn)` |
-| Risk/Arsa Alanı panel zemini | `var(--input-bg)` | `var(--m-fill)`, `var(--m-r-inner)` |
+| Risk/Arsa Alanı panel zemini | `var(--input-bg)` | `rgba(11,32,54,.055)` + `1px solid rgba(11,32,54,.07)`, `var(--m-r-inner)` (bkz. "Kenarlık kontrastı" notu) |
 | Risk pilleri | outline buton, aktifken `rgba(59,130,246,.12)` + `#3b82f6` kenarlık | `.segment`/`.segmentAktif` deseni: dolgu şeffaf → aktifken `var(--m-grad-btn)` + `var(--m-sh-grad-btn)` |
 | Bölüm başlığı/etiket | `var(--label-color)` | `var(--m-body)`, `.girdiEtiket` ile aynı 700/10.5px uppercase |
 | Adres/başlık metni | `var(--fg)` | `var(--m-ink)` |
@@ -90,7 +94,21 @@ olan aynı token'lar kullanılıyor, yeni bir renk/değer icat edilmiyor:
 | Toggle (açık) | `var(--brand-gradient)` | `var(--m-grad-btn)` + `var(--m-sh-grad-btn)`, boyut 46×27 / topuz 21×21 (GirdiKarti `.anahtar` ile birebir) |
 | Durum metni (TKGM onaylı) | `#10b981` | `var(--m-success)`, kendi satırında (satır kırılması yok) |
 | Durum metni (elle giriş) | `#f59e0b` | `#b45309` (mockup'ta onaylanan), kendi satırında |
-| Alan input'u | `var(--card-bg)` + `var(--border)` | beyaz zemin + `var(--m-glass-border)`, `var(--m-r-input)`, `font-size:16px` (iOS zoom guard, projenin kendi deseni) |
+| Alan input'u | `var(--card-bg)` + `var(--border)` | `#f8fafd` zemin + `1px solid rgba(11,32,54,.14)`, `var(--m-r-input)`, `font-size:16px` (iOS zoom guard, projenin kendi deseni) |
+| Daire büyüklüğü stepper kutusu (`GirdiKarti`, zaten göçmüştü) | `var(--m-fill)`, kenarlıksız | `rgba(11,32,54,.055)` + `1px solid rgba(11,32,54,.07)` (bkz. aşağıdaki not) |
+
+### Kenarlık kontrastı — ayrı bir bulgu, kullanıcı onayıyla kapsama alındı
+
+Kullanıcı mockup'ı incelerken ayrı bir gözlem yaptı: `--m-fill` (`rgba(11,32,54,.05)`)
+ve `--m-glass-border` (`rgba(255,255,255,.85)`) o kadar soluk ki paneller/input'lar
+sayfa zemininde ("beyaz alanlar") neredeyse sınırsız görünüyor. Onaylanan çözüm
+**yalnızca bu karttaki** panellere/input'a yukarıdaki tabloda gösterilen biraz
+daha belirgin, kendi (`--m-fill`'den bağımsız, dar kapsamlı) değerleri uygular.
+**`--m-fill`/`--m-glass-border` token'larının kendisi DEĞİŞMİYOR** — bu değişiklik
+uygulamanın geri kalanındaki (Yapı Standardı segmenti, `konumBlogu`, vb.) hiçbir
+diğer mobil yüzeyi etkilemez. Token'ların kendisini güncelleyip değişikliği
+uygulama genelindeki tüm mobil panellere yaymak ayrı, daha büyük bir karardır —
+bu spec'in kapsamı dışında, kullanıcı onayı almadı.
 
 **Kritik kısıt (önceki iki göçün final review'lerinde bulunan gerçek
 regresyonlardan miras — bkz. [[project_arsabil]] 2026-08-08/2026-08-11
@@ -116,7 +134,8 @@ DEĞİŞMEDEN kalır.
   .editBtn { color: var(--m-link); }
 
   .riskSection, .areaSection {
-    background: var(--m-fill);
+    background: rgba(11, 32, 54, .055);
+    border: 1px solid rgba(11, 32, 54, .07);
     border-radius: var(--m-r-inner);
   }
   .riskHeader, .areaHeader { color: var(--m-body); }
@@ -144,8 +163,8 @@ DEĞİŞMEDEN kalır.
   .areaStatusRow.ok { color: var(--m-success); }
 
   .areaInputRow input {
-    background: #fff;
-    border: 1px solid var(--m-glass-border);
+    background: #f8fafd;
+    border: 1px solid rgba(11, 32, 54, .14);
     border-radius: var(--m-r-input);
     color: var(--m-ink);
     font-size: 16px;
@@ -254,6 +273,14 @@ ama gerçek çağıran (`page.tsx:560`) `handleApartmentSizeChange`'i geçiyor, 
 DEĞİŞMİYOR — yalnızca artık statik bir `<span>` yerine gerçek bir `<input>`'un
 yanında duruyorlar.
 
+**Ek küçük dokunuş (kenarlık kontrastı, kullanıcı onayıyla):** `mobile.module.css`'teki
+mevcut (zaten göçmüş) `.stepperSatir` kuralı da aynı gerekçeyle güncellenir —
+`background: var(--m-fill)` yerine `background: rgba(11,32,54,.055); border: 1px
+solid rgba(11,32,54,.07);`. Bu, `GirdiKarti`'nin kendi dosyasında dar kapsamlı
+bir değişiklik; `.segmentKap`/`.konumBlogu` gibi aynı `--m-fill`'i kullanan diğer
+kurallar DOKUNULMADAN kalır (yalnızca stepper kutusu, yukarıdaki "Kenarlık
+kontrastı" notundaki gerekçeyle).
+
 `.stepperInput` CSS'i (`mobile.module.css`), mevcut `.stepperDeger` ile aynı
 görsel (font 19px/800, `var(--m-ink)`, `flex:1`, `padding-left:13px`) +
 `background:transparent; border:none; outline:none; -webkit-appearance:textfield; font-size:16px`
@@ -277,6 +304,10 @@ sıfır fark, yalnızca artık odaklanılıp yazılabilir.
 - `Toggle.module.css` için aynı guard: mobil bloktaki `input:checked + .slider`
   kuralının `var(--m-grad-btn)` kullandığı, masaüstü (media query dışı)
   kuralın `var(--brand-gradient)` ile DEĞİŞMEDEN kaldığı.
+- Yeni kenarlık kontrastı guard'ı: `.segmentKap`/`.konumBlogu` gibi `--m-fill`
+  kullanan DİĞER kuralların `mobile.module.css`'te DEĞİŞMEDİĞİ (yalnızca
+  `.stepperSatir`'in yeni `rgba(11,32,54,.055)`/border değerlerine geçtiği) —
+  bu iyileştirmenin kartın dışına sızmadığını kilitler.
 - `GirdiKarti.test.tsx`'e yeni testler: (1) elle yazılan değerin
   `onApartmentSize`'a doğru sayıyla (clamp'siz — masaüstüyle tutarlı) ulaştığı,
   (2) input boşaltılınca `onApartmentSize(null)` çağrıldığı, (3) ±5 stepper
