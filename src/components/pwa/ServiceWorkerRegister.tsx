@@ -1,8 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
+import { installChunkErrorReload } from "@/lib/pwa/chunkErrorReload";
 
 export function ServiceWorkerRegister() {
+    // controllerchange reload'u yalnızca sekme gizlenince tetiklenir (aşağıda);
+    // sekme hiç gizlenmezse (mobilde aktif kullanım) bayat JS bundle bir chunk'ı
+    // lazy-import etmeye çalışınca kalıcı olarak bozuk kalır. Bu, o durumu ayrıca
+    // ve hemen yakalayıp tek seferlik zorla yeniler.
+    useEffect(() => {
+        if (process.env.NODE_ENV !== "production") return;
+        return installChunkErrorReload();
+    }, []);
+
     useEffect(() => {
         if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
             // Reload the page when the service worker changes
