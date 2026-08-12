@@ -233,11 +233,11 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                     }}
                 />
                 {selectedCity && !open && (
-                    <span style={{
+                    <span data-testid="cityBadge" style={{
                         position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
                         fontSize: '0.62rem', background: 'var(--primary)', color: 'white',
                         padding: '2px 6px', borderRadius: 5, fontWeight: 700,
-                    }}>{selectedCity}</span>
+                    }}>{provinceName}</span>
                 )}
 
                 {/* City Dropdown */}

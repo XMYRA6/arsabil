@@ -66,9 +66,9 @@ function MarketplaceContent() {
     // Ekranda uydurma veri var mi, ve ne kadari?
     //   'all'         → ilanlarin TAMAMI ornek (API bos dondu veya hata verdi)
     //   'fizibilite'  → ilanlar gercek, ama skor/arsa payi/imar alanlari ornek
-    // Bu alanlar (fizibiliteSkoru, arsaPayiMin/Max, imarDurumu) Prisma
-    // semasinda HIC yok; API onlari donduremez. Veriler gercekten toplanana
-    // kadar ekranda acikca isaretleniyorlar.
+    // Bu alanlar (fizibiliteSkoru, arsaPayiMin/Max) Prisma semasinda HIC yok;
+    // API onlari donduremez. Veriler gercekten toplanana kadar ekranda
+    // acikca isaretleniyorlar.
     const [demoData, setDemoData] = useState<'none' | 'fizibilite' | 'all'>('none');
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('score_desc');
@@ -275,7 +275,7 @@ function MarketplaceContent() {
                     <div className={styles.mapPanel}>
                         <MapView
                             ref={mapRef}
-                            listings={listings}
+                            listings={sorted}
                             highlightedId={highlightedId}
                             onHighlight={setHighlightedId}
                         />

@@ -10,6 +10,7 @@ import { AppBar } from '@/components/mobile/AppBar';
 import { SwipeGallery } from '@/components/mobile/SwipeGallery';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { formatParcelIdentity, formatAreaCells, formatZoningLabel } from '@/lib/listing/listingDisplay';
+import { mergeDemoOverlay } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
 
 const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m => m.MiniMap), { ssr: false });
@@ -83,7 +84,7 @@ export default function ListingDetailPage() {
             .then(r => r.json())
             .then(data => {
                 if (data && data.id) {
-                    setListing({ ...MOCK_LISTING, ...data, id });
+                    setListing({ ...mergeDemoOverlay(data, MOCK_LISTING), id });
                 } else {
                     setListing({ ...MOCK_LISTING, id });
                 }

@@ -17,7 +17,6 @@ export interface Listing {
     type: 'SALE' | 'KAT_KARSILIGI' | 'ORTAKLIK';
     city?: string;
     district?: string;
-    m2?: number;
     price?: number;
     landSizeSqm?: number | null;
     arsaPayiMin?: number;

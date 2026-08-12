@@ -40,4 +40,17 @@ describe('CitySearch — il/ilçe state', () => {
 
         expect(onSelect).toHaveBeenLastCalledWith({ name: 'İstanbul', lat: 41.015, lng: 28.979, zoom: 12 })
     })
+
+    it('ilçe seçildikten sonra köşe rozeti ilçe adını değil, ili göstermeye devam eder', () => {
+        render(<Harness />)
+
+        fireEvent.change(screen.getByPlaceholderText('İl ara…'), { target: { value: 'İstanbul' } })
+        fireEvent.click(screen.getByText('İstanbul'))
+        expect(screen.getByTestId('cityBadge')).toHaveTextContent('İstanbul')
+
+        fireEvent.click(screen.getByRole('button', { name: /İlçe/i }))
+        fireEvent.click(screen.getByText('Kadıköy'))
+
+        expect(screen.getByTestId('cityBadge')).toHaveTextContent('İstanbul')
+    })
 })
