@@ -572,7 +572,8 @@
         height: 44px;
         padding: 3px;
         border-radius: 16px;
-        background: var(--m-fill);
+        background: rgba(11, 32, 54, .055);
+        border: 1px solid rgba(11, 32, 54, .07);
     }
 
     .stepperAzalt,
@@ -607,6 +608,27 @@
         font-size: 19px;
         font-weight: 800;
         color: var(--m-ink);
+    }
+
+    /* `.stepperDeger`in gorsel ikizi ama artik odaklanip yazilabilir bir
+       input — 16px font-size iOS Safari'nin odakta sayfayi otomatik
+       yakinlastirmasini engellemek icin SART (projenin kendi deseni,
+       bkz. `.konumAramaGiris`). */
+    .stepperInput {
+        flex: 1;
+        min-width: 0;
+        padding-left: 13px;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--m-ink);
+        background: transparent;
+        border: none;
+        outline: none;
+    }
+    .stepperInput::-webkit-outer-spin-button,
+    .stepperInput::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 
     .stepperBirim {

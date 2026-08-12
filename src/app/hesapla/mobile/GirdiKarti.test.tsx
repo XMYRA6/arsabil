@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GirdiKarti } from './GirdiKarti'
 
@@ -122,9 +122,11 @@ describe('GirdiKarti', () => {
         expect(onApartmentCountEnabled).toHaveBeenCalledWith(true)
     })
 
-    it('apartmentSize null iken deger yerine tire gosterir', () => {
+    it('apartmentSize null iken input placeholder tire gosterir', () => {
         render(<GirdiKarti {...props({ apartmentSize: null })} />)
-        expect(screen.getByText('—')).toBeInTheDocument()
+        const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
+        expect(input).toHaveValue(null)
+        expect(input).toHaveAttribute('placeholder', '—')
     })
 
     it('apartmentSize null iken azalt hicbir sey yapmaz', async () => {
@@ -139,5 +141,21 @@ describe('GirdiKarti', () => {
         render(<GirdiKarti {...props({ apartmentSize: null, onApartmentSize })} />)
         await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi artır' }))
         expect(onApartmentSize).toHaveBeenCalledWith(140)
+    })
+
+    it('elle yazilan deger dogrudan onApartmentSize a iletilir (clamp yok, masaustuyle tutarli)', () => {
+        const onApartmentSize = jest.fn()
+        render(<GirdiKarti {...props({ apartmentSize: 140, onApartmentSize })} />)
+        const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
+        fireEvent.change(input, { target: { value: '999' } })
+        expect(onApartmentSize).toHaveBeenCalledWith(999)
+    })
+
+    it('input bosaltilinca onApartmentSize(null) cagrilir', () => {
+        const onApartmentSize = jest.fn()
+        render(<GirdiKarti {...props({ apartmentSize: 140, onApartmentSize })} />)
+        const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
+        fireEvent.change(input, { target: { value: '' } })
+        expect(onApartmentSize).toHaveBeenCalledWith(null)
     })
 })

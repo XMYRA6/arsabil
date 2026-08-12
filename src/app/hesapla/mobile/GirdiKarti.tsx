@@ -22,7 +22,7 @@ export type GirdiKartiProps = {
     luxLevel: number;
     onLuxLevel: (v: number) => void;
     apartmentSize: number | null;
-    onApartmentSize: (v: number) => void;
+    onApartmentSize: (v: number | null) => void;
     landShareRatio: number;
     onLandShareRatio: (v: number) => void;
     isApartmentCountEnabled: boolean;
@@ -149,10 +149,16 @@ export function GirdiKarti({
             <div className={styles.girdiSatir}>
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
-                    <span className={`${styles.stepperDeger} mNum`}>
-                        {apartmentSize ?? '—'}
-                        <span className={styles.stepperBirim}> m²</span>
-                    </span>
+                    <input
+                        type="number"
+                        inputMode="numeric"
+                        className={`${styles.stepperInput} mNum`}
+                        value={apartmentSize ?? ''}
+                        placeholder="—"
+                        aria-label="Daire büyüklüğü, m²"
+                        onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
+                    />
+                    <span className={styles.stepperBirim}>m²</span>
                     <button
                         type="button"
                         className={styles.stepperAzalt}
