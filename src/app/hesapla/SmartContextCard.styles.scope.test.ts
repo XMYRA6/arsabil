@@ -31,7 +31,7 @@ describe('SmartContextCard.module.css — mobil Liquid Glass kapsamı', () => {
       const re = new RegExp('\\' + sel + '\\s*\\{([^}]*)\\}')
       const m = mobileBlock.match(re)
       expect(m).not.toBeNull()
-      expect(m![1]).toMatch(/var\(--m-ink\)|var\(--m-body\)|var\(--m-success\)|#b45309/)
+      expect(m![1]).toMatch(/var\(--m-ink\)|var\(--m-body\)|var\(--m-success-text\)|#b45309/)
       expect(m![1]).not.toMatch(/var\(--fg\)|var\(--label-color\)|var\(--muted\)/)
     }
   })

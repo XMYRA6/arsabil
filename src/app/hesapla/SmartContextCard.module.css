@@ -141,6 +141,7 @@
    gorsel yuksekligi (30px) degismeden, tiklama alani genisletiliyor
    (globals.css'teki diger Toggle kullanimlarini etkilemez, sadece burasi). */
 .aaToggle {
+    width: auto;
     min-height: var(--touch-target);
 }
 
@@ -200,7 +201,7 @@
         border: none;
         border-radius: 12px;
         color: var(--m-on-glass);
-        min-height: 40px;
+        min-height: 44px;
     }
     .riskPillActive {
         background: var(--m-grad-btn);
@@ -210,7 +211,7 @@
     }
 
     .areaStatus { color: #b45309; }
-    .areaStatusOk { color: var(--m-success); }
+    .areaStatusOk { color: var(--m-success-text); }
 
     .areaInputRow input {
         background: #f8fafd;

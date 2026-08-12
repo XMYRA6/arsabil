@@ -602,20 +602,18 @@
         color: #fff;
     }
 
-    .stepperDeger {
-        flex: 1;
-        padding-left: 13px;
-        font-size: 19px;
-        font-weight: 800;
-        color: var(--m-ink);
-    }
-
-    /* `.stepperDeger`in gorsel ikizi ama artik odaklanip yazilabilir bir
-       input — 16px font-size iOS Safari'nin odakta sayfayi otomatik
-       yakinlastirmasini engellemek icin SART (projenin kendi deseni,
-       bkz. `.konumAramaGiris`). */
+    /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin
+       odakta sayfayi otomatik yakinlastirmasini engellemek icin SART
+       (projenin kendi deseni, bkz. `.konumAramaGiris`). `flex: 1` yerine
+       sabit bir `ch` genisligi kullanilir: input replaced element oldugu
+       icin `flex: 1` kutusunu satirin tamamina geriyor, "m²" birimi de
+       o genisletilmis kutunun disina, satirin cok saginda kaliyordu
+       (final review bulgusu, olcum: 234px bosluk). 5ch, bu alanin
+       gercekci araligindaki (M2_MIN/M2_MAX: 50-400) 3 haneli degerleri
+       rahatca kapsar. */
     .stepperInput {
-        flex: 1;
+        flex: 0 1 auto;
+        width: 5ch;
         min-width: 0;
         padding-left: 13px;
         font-size: 16px;
@@ -631,10 +629,17 @@
         margin: 0;
     }
 
+    /* `margin-right: auto` birim etiketinden sonraki bosluğu yutar ve
+       ±butonlarini satirin sagina iter — input artik `flex:1` olmadigi
+       icin bu buyumeyi birinin ustlenmesi gerekiyor (eski `.stepperDeger`
+       tek kutuda hem sayiyi hem birimi tasidigi icin bu soruna hic
+       girmiyordu). */
     .stepperBirim {
         font-size: 12px;
         font-weight: 700;
         color: var(--m-body);
+        margin-right: auto;
+        padding-left: 4px;
     }
 
     /* ── Mod anahtari ── */

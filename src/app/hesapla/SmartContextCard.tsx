@@ -110,7 +110,7 @@ export function SmartContextCard({
                     />
                 </div>
                 {isAaEnabled && (
-                    <p className={isAreaVerified ? styles.areaStatusOk : styles.areaStatus}>
+                    <p className={`${styles.areaStatus} ${isAreaVerified ? styles.areaStatusOk : ''}`}>
                         {isAreaVerified ? '✓ TKGM Onaylı' : 'Elle girilmesi gerekiyor'}
                     </p>
                 )}
