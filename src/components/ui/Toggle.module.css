@@ -84,3 +84,15 @@ input:focus + .slider {
 input:checked + .slider:before {
     transform: translateX(20px);
 }
+
+@media (max-width: 768px) {
+    .switch { width: 46px; height: 27px; }
+    .slider { background: var(--m-fill); border: none; box-shadow: none; }
+    .slider:before { width: 21px; height: 21px; box-shadow: 0 2px 6px rgba(11, 32, 54, .25); }
+    input:checked + .slider {
+        background: var(--m-grad-btn);
+        border: none;
+        box-shadow: var(--m-sh-grad-btn);
+    }
+    input:checked + .slider:before { transform: translateX(19px); }
+}
