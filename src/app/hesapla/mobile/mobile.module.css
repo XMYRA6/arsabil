@@ -605,19 +605,27 @@
     /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin
        odakta sayfayi otomatik yakinlastirmasini engellemek icin SART
        (projenin kendi deseni, bkz. `.konumAramaGiris`). `flex: 1` yerine
-       sabit bir `ch` genisligi kullanilir: input replaced element oldugu
-       icin `flex: 1` kutusunu satirin tamamina geriyor, "m²" birimi de
-       o genisletilmis kutunun disina, satirin cok saginda kaliyordu
-       (final review bulgusu, olcum: 234px bosluk). 5ch, bu alanin
-       gercekci araligindaki (M2_MIN/M2_MAX: 50-400) 3 haneli degerleri
-       rahatca kapsar. */
+       sabit bir genislik kullanilir: input replaced element oldugu icin
+       `flex: 1` kutusunu satirin tamamina geriyor, "m²" birimi de o
+       genisletilmis kutunun disina, satirin cok saginda kaliyordu (final
+       review bulgusu, olcum: 234px bosluk). Genislik SABIT `px` ile
+       verilir, `ch`/`em` DEGIL: `globals.css`nin genel
+       `* { box-sizing: border-box }` resetinde `width` PADDING'i de
+       kapsiyor, ve `ch`/`em` degerleri font yuklenme durumuna gore
+       degisken cikabiliyor (ikinci final review bulgusu, `5ch`
+       kirpiyordu). Gercek sayfada Playwright ile olculdu: 800 agirlikli
+       Inter fontuyla "400" (M2_MAX, 3 haneli, gercekci en kotu durum)
+       + `padding-left: 13px` = 45px dogal icerik genisligi. `54px`,
+       bunun uzerine ~9px rahat pay birakir (scrollWidth/clientWidth
+       her ikisi de 54, kirpma yok). */
     .stepperInput {
         flex: 0 1 auto;
-        width: 5ch;
+        width: 54px;
         min-width: 0;
         padding-left: 13px;
         font-size: 16px;
         font-weight: 800;
+        font-family: Inter, sans-serif;
         color: var(--m-ink);
         background: transparent;
         border: none;
