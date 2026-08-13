@@ -19,7 +19,7 @@ import { toast } from 'react-hot-toast';
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare, type Scenario as ScenarioItem } from '@/components/ScenarioCompare';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { MarketField, BirimMaliyetField } from './AdvancedSettingsSections';
+import { MarketField, BirimMaliyetField, RiskCostFields } from './AdvancedSettingsSections';
 
 import { HesapFisi } from './HesapFisi';
 import type { RiskLevel } from './riskSuggestionHelpers';
@@ -706,58 +706,11 @@ export default function Home() {
             </div>
 
             <div className={styles.settingsGroup}>
-              <h4>Piyasa Analizi</h4>
               <BirimMaliyetField
                 globalUnitPrice={globalUnitPrice}
                 birimMaliyetKaynagi={birimMaliyetKaynagi}
                 onBirimMaliyet={handleGlobalUnitPriceChange}
               />
-              <MarketField
-                manualMarketPrice={manualMarketPrice}
-                setManualMarketPrice={setManualMarketPrice}
-              />
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Müteahhit Kazancı</h4>
-              <div className={styles.luxGrid}>
-                {profitLevels.map(opt => (
-                  <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-                    <span>{opt.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>İksa Masrafı</h4>
-              <div className={styles.luxGrid}>
-                {[
-                  { label: 'Yok', value: 'off' as const },
-                  { label: 'Yüzde', value: 'percentage' as const },
-                  { label: 'Elle', value: 'manual' as const },
-                ].map(opt => (
-                  <div key={opt.label} className={`${styles.luxBox} ${iksaMode === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setIksaMode(opt.value)}>
-                    <span>{opt.label}</span>
-                  </div>
-                ))}
-              </div>
-              {iksaMode === 'percentage' && (
-                <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
-                  <input type="number" value={iksaPercentage} min={0} max={100} onChange={(e) => setIksaPercentage(Number(e.target.value))} />
-                  <div className={styles.stepperRight}>
-                    <span>%</span>
-                  </div>
-                </div>
-              )}
-              {iksaMode === 'manual' && (
-                <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
-                  <input type="number" value={iksaManualTL} min={0} onChange={(e) => setIksaManualTL(Number(e.target.value))} />
-                  <div className={styles.stepperRight}>
-                    <span>TL</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -941,6 +894,27 @@ export default function Home() {
               {summaryPage === 2 && '💰 Finansal Modelleme'}
             </div>
           </aside>
+
+          <div className={styles.advancedPanel}>
+            <div className={styles.advancedPanelTitle}>Gelişmiş Ayarlar</div>
+            <div className={styles.advancedPanelCols}>
+              <MarketField
+                manualMarketPrice={manualMarketPrice}
+                setManualMarketPrice={setManualMarketPrice}
+              />
+              <RiskCostFields
+                iksaMode={iksaMode}
+                setIksaMode={setIksaMode}
+                iksaPercentage={iksaPercentage}
+                setIksaPercentage={setIksaPercentage}
+                iksaManualTL={iksaManualTL}
+                setIksaManualTL={setIksaManualTL}
+                builderProfit={builderProfit}
+                setBuilderProfit={setBuilderProfit}
+                profitLevels={profitLevels}
+              />
+            </div>
+          </div>
 
         </section>
       </div >

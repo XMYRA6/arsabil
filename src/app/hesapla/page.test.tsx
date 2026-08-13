@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 import React from 'react'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import HesaplaPage from './page'
 
@@ -161,5 +161,47 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
         })
 
         expect(screen.getByText('Örnek Veri')).toBeInTheDocument()
+    })
+})
+
+describe('/hesapla — masaüstü Gelişmiş Ayarlar paneli (sütun dengesi)', () => {
+    it('İksa Masrafı ve Müteahhit Kazancı artık sol "Proje Bilgileri" sidebar\'ında DEĞİL', () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        const sidebar = screen.getByText('Proje Bilgileri').closest('aside') as HTMLElement
+        expect(within(sidebar).queryByText('İksa Masrafı')).toBeNull()
+        expect(within(sidebar).queryByText('Müteahhit Kazancı')).toBeNull()
+        expect(within(sidebar).queryByText('Piyasa Analizi')).toBeNull()
+    })
+
+    it('Birim İnşaat Maliyeti sol sidebar\'da KALIR', () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        const sidebar = screen.getByText('Proje Bilgileri').closest('aside') as HTMLElement
+        expect(within(sidebar).getByText('Birim inşaat maliyeti')).toBeInTheDocument()
+    })
+
+    it('"Gelişmiş Ayarlar" paneli İksa Masrafı + Müteahhit Kazancı + Piyasa Karşılaştırması içerir', () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        // `getByText('Gelişmiş Ayarlar')` başlık div'inin KENDİSİNİ döner
+        // (`.advancedPanelTitle` de bir div) — `.closest('div')` bu durumda
+        // kendisini döner, kardeş `.advancedPanelCols`'u KAPSAMAZ. CSS
+        // module'ler jest'te `identity-obj-proxy` ile literal class adına
+        // eşleniyor (`jest.config.js:7`), bu yüzden `.advancedPanel`
+        // gerçek bir CSS selector olarak çalışır.
+        const panel = screen.getByText('Gelişmiş Ayarlar').closest('.advancedPanel') as HTMLElement
+        expect(within(panel).getByText('İksa Masrafı')).toBeInTheDocument()
+        expect(within(panel).getByText('Müteahhit Kazancı')).toBeInTheDocument()
+        expect(within(panel).getByText('Yaklaşık Piyasa Fiyatı')).toBeInTheDocument()
+    })
+
+    it('yeni konumda İksa Masrafı "Yüzde" seçilince yüzde input\'u açılır (kablolama sağlam)', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        const panel = screen.getByText('Gelişmiş Ayarlar').closest('.advancedPanel') as HTMLElement
+        await user.click(within(panel).getByText('Yüzde'))
+        expect(within(panel).getByRole('spinbutton')).toBeInTheDocument()
     })
 })
