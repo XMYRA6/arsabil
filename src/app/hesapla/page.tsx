@@ -742,7 +742,9 @@ export default function Home() {
                   {/* Arsa Fiyatı — sadece Sd açıkken görünür */}
                   {isApartmentCountEnabled && (
                     <div className={styles.statCard}>
-                      <h5>Arsa Fiyatı (Arsa Sahibine)</h5>
+                      {/* "Min." — piyasa degeri DEGIL, hesaplanan minimum
+                          daire fiyatina dayali (denetim bulgusu C5). */}
+                      <h5>Min. Arsa Fiyatı (Arsa Sahibine)</h5>
                       <div className={styles.statCardValue}>
                         {result?.FA ? result.FA.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '—'}
                         <span>TL</span>

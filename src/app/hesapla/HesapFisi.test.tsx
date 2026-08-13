@@ -55,9 +55,14 @@ describe('HesapFisi', () => {
     expect(screen.queryByText(/Arsa Fiyatı \(FA\)/)).not.toBeInTheDocument();
   });
 
-  it('FA doluyken Arsa Fiyatı satırı render edilir', () => {
+  it('FA doluyken "Min." niteleyicisiyle etiketlenir (denetim bulgusu C5: FA piyasa degeri DEGIL, hesaplanan minimum fiyata dayali)', () => {
+    // "Min. Daire Fiyatı (FD)" ile AYNI gerekce/desen (bkz. yukaridaki
+    // "Daire Fiyatı satırı" testi) — kullanici bu rakami gercek/piyasa arsa
+    // degeriyle karistirabilirdi, aslinda motorun hesapladigi minimum
+    // gerekli fiyata gore.
     render(<HesapFisi result={{ ...baseResult, FA: 133714284, Sdx: 6 }} />);
-    expect(screen.getByText(/Arsa Fiyatı \(FA\)/)).toBeInTheDocument();
+    expect(screen.getByText('Min. Arsa Fiyatı (FA)')).toBeInTheDocument();
+    expect(screen.queryByText('Arsa Fiyatı (FA)')).not.toBeInTheDocument();
     expect(screen.getByText('133.714.284,00 ₺')).toBeInTheDocument();
   });
 });

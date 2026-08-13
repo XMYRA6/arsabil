@@ -43,7 +43,10 @@ export function HesapFisi({ result }: HesapFisiProps) {
       </div>
       {result?.FA != null && (
         <div className={`${styles.hesapFisiRow} ${styles.hesapFisiRowTotal}`}>
-          <span className={styles.hesapFisiRowLabel}>Arsa Fiyatı (FA)</span>
+          {/* "Min." — FA piyasa degeri DEGIL, hesaplanan minimum daire
+              fiyatina (FD_total) dayali (denetim bulgusu C5). Ayni gerekce
+              "Min. Daire Fiyatı (FD)" satırıyla. */}
+          <span className={styles.hesapFisiRowLabel}>Min. Arsa Fiyatı (FA)</span>
           <span>{formatTRCurrency(result.FA)}</span>
         </div>
       )}

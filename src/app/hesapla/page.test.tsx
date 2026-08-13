@@ -272,6 +272,20 @@ describe('/hesapla — masaüstü Gelişmiş Ayarlar paneli (sütun dengesi)', (
     })
 })
 
+describe('/hesapla — masaüstü "Arsa Fiyatı" stat kartı "Min." niteleyicisiyle etiketlenir (denetim bulgusu C5)', () => {
+    it('FA piyasa degeri degil, hesaplanan minimum fiyata dayali oldugu icin "Min." on eki tasir', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        const toggleRow = screen.getByText('Toplam Daire Sayısı').closest('div') as HTMLElement
+        await user.click(within(toggleRow).getByRole('checkbox'))
+
+        expect(await screen.findByText('Min. Arsa Fiyatı (Arsa Sahibine)')).toBeInTheDocument()
+        expect(screen.queryByText('Arsa Fiyatı (Arsa Sahibine)')).not.toBeInTheDocument()
+    })
+})
+
 describe('/hesapla — masaüstü "Arsa Sahibine Düşen Daire" slider üst sınırı (denetim bulgusu C1)', () => {
     it('slider max totalApartments-1 olmalı, müteahhide en az 1 daire kalmalı', async () => {
         viewportKur(true)
