@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useBufferedNumberInput } from './useBufferedNumberInput';
 import styles from './page.module.css';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
@@ -39,17 +40,6 @@ export function RiskCostFields({
   return (
     <>
       <div className={`${styles.drawerRow} ${styles.column}`}>
-        <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
-        <div className={styles.luxGrid}>
-          {profitLevels.map(opt => (
-            <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
-              <span>{opt.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className={`${styles.drawerRow} ${styles.column}`}>
         <div className={styles.drawerRowLabel}>İksa Masrafı</div>
         <div className={styles.luxGrid}>
           {[
@@ -78,6 +68,17 @@ export function RiskCostFields({
             </div>
           </div>
         )}
+      </div>
+
+      <div className={`${styles.drawerRow} ${styles.column}`}>
+        <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
+        <div className={styles.luxGrid}>
+          {profitLevels.map(opt => (
+            <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
@@ -109,18 +110,7 @@ export interface BirimMaliyetFieldProps {
  * olarak test edilebilsin.
  */
 export function BirimMaliyetField({ globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet }: BirimMaliyetFieldProps) {
-  const [girdi, setGirdi] = useState<string>(globalUnitPrice === null ? '' : String(globalUnitPrice));
-  // Dis kaynakli degisiklikleri (ilce secimi, "elle" commit sonrasi geri
-  // akan prop) render SIRASINDA yakalar — `useEffect` icinde setState
-  // cagirmak ekstra bir commit dongusune yol acardi (eslint
-  // `react-hooks/set-state-in-effect`); bu, React'in kendi onerdigi "prop
-  // degisince state'i ayarla" deseni (bkz. react.dev "You Might Not Need
-  // an Effect").
-  const [oncekiFiyat, setOncekiFiyat] = useState<number | null>(globalUnitPrice);
-  if (globalUnitPrice !== oncekiFiyat) {
-    setOncekiFiyat(globalUnitPrice);
-    setGirdi(globalUnitPrice === null ? '' : String(globalUnitPrice));
-  }
+  const { girdi, handleChange } = useBufferedNumberInput(globalUnitPrice, onBirimMaliyet);
 
   return (
     <div className={`${styles.drawerRow} ${styles.column}`}>
@@ -135,14 +125,7 @@ export function BirimMaliyetField({ globalUnitPrice, birimMaliyetKaynagi, onBiri
           step={100}
           value={girdi}
           aria-label="Birim inşaat maliyeti (TL/m²)"
-          onChange={e => {
-            const raw = e.target.value;
-            setGirdi(raw);
-            const v = Number(raw);
-            if (Number.isFinite(v) && v > 0) {
-              onBirimMaliyet(v);
-            }
-          }}
+          onChange={e => handleChange(e.target.value)}
         />
         <div className={styles.stepperRight}>
           <span>TL/m²</span>

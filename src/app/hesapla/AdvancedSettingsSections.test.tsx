@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BirimMaliyetField, type BirimMaliyetFieldProps } from './AdvancedSettingsSections';
+import { BirimMaliyetField, RiskCostFields, type BirimMaliyetFieldProps } from './AdvancedSettingsSections';
 import type { BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 /**
@@ -80,4 +80,28 @@ describe('BirimMaliyetField (review Finding 2, 2026-07-30)', () => {
     expect(input.value).toBe('');
     expect(screen.getByText('—')).toBeInTheDocument();
   });
+});
+
+describe('RiskCostFields sirasi', () => {
+    function riskCostProps(patch: Partial<React.ComponentProps<typeof RiskCostFields>> = {}) {
+        return {
+            iksaMode: 'off' as const, setIksaMode: jest.fn(),
+            iksaPercentage: 5, setIksaPercentage: jest.fn(),
+            iksaManualTL: 0, setIksaManualTL: jest.fn(),
+            builderProfit: 1.3, setBuilderProfit: jest.fn(),
+            profitLevels: [
+                { id: '1', label: 'Düşük', value: 1.15, sortOrder: 0, isDefault: false },
+                { id: '2', label: 'Orta', value: 1.30, sortOrder: 1, isDefault: true },
+            ],
+            ...patch,
+        };
+    }
+
+    it('İksa Masrafı, Müteahhit Kazancı\'ndan ÖNCE render olur', () => {
+        const { container } = render(<RiskCostFields {...riskCostProps()} />)
+        const metin = container.textContent ?? ''
+        expect(metin.indexOf('İksa Masrafı')).toBeGreaterThan(-1)
+        expect(metin.indexOf('Müteahhit Kazancı')).toBeGreaterThan(-1)
+        expect(metin.indexOf('İksa Masrafı')).toBeLessThan(metin.indexOf('Müteahhit Kazancı'))
+    })
 });
