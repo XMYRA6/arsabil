@@ -1,6 +1,7 @@
 "use client";
 
 import { IconCheckCircle } from '@/components/icons';
+import { formatTRThousands } from '../trNumberFormat';
 import styles from './mobile.module.css';
 
 export type KarsilastirmaBloguProps = {
@@ -48,7 +49,7 @@ export function KarsilastirmaBlogu({
                     value={piyasaFiyati}
                     placeholder="—"
                     aria-label="Yaklaşık piyasa fiyatı (yalnızca karşılaştırma)"
-                    onChange={e => onPiyasaFiyati(e.target.value)}
+                    onChange={e => onPiyasaFiyati(formatTRThousands(e.target.value))}
                 />
             </label>
 

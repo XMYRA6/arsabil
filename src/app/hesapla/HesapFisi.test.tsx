@@ -23,12 +23,12 @@ describe('HesapFisi', () => {
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
 
-  it('Mi, Ma, M, FD, FDbirim satırlarını gösterir', () => {
+  it('Mi, Ma, M, FD tutarlari binlik ayirac + iki ondalik + ₺ ile, FDbirim orani TL/m² ile gosterilir', () => {
     render(<HesapFisi result={baseResult} />);
-    expect(screen.getByText('12.000.000 TL')).toBeInTheDocument();
-    expect(screen.getByText('5.142.857 TL')).toBeInTheDocument();
-    expect(screen.getByText('17.142.857 TL')).toBeInTheDocument();
-    expect(screen.getByText('22.285.714 TL')).toBeInTheDocument();
+    expect(screen.getByText('12.000.000,00 ₺')).toBeInTheDocument();
+    expect(screen.getByText('5.142.857,00 ₺')).toBeInTheDocument();
+    expect(screen.getByText('17.142.857,00 ₺')).toBeInTheDocument();
+    expect(screen.getByText('22.285.714,00 ₺')).toBeInTheDocument();
     expect(screen.getByText('159.183 TL/m²')).toBeInTheDocument();
   });
 
@@ -58,6 +58,6 @@ describe('HesapFisi', () => {
   it('FA doluyken Arsa Fiyatı satırı render edilir', () => {
     render(<HesapFisi result={{ ...baseResult, FA: 133714284, Sdx: 6 }} />);
     expect(screen.getByText(/Arsa Fiyatı \(FA\)/)).toBeInTheDocument();
-    expect(screen.getByText('133.714.284 TL')).toBeInTheDocument();
+    expect(screen.getByText('133.714.284,00 ₺')).toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useBufferedNumberInput } from './useBufferedNumberInput';
+import { formatTRThousands } from './trNumberFormat';
 import styles from './page.module.css';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
@@ -36,6 +37,9 @@ export function RiskCostFields({
   iksaManualTL, setIksaManualTL,
   builderProfit, setBuilderProfit, profitLevels,
 }: RiskCostProps) {
+  const { girdi: iksaManualGirdi, handleChange: handleIksaManualChange } =
+    useBufferedNumberInput(iksaManualTL, setIksaManualTL);
+
   return (
     <>
       <div className={`${styles.drawerRow} ${styles.column}`}>
@@ -61,7 +65,7 @@ export function RiskCostFields({
         )}
         {iksaMode === 'manual' && (
           <div className={`${styles.stepperInput} ${styles.stepperFixed}`}>
-            <input type="number" value={iksaManualTL} min={0} onChange={(e) => setIksaManualTL(Number(e.target.value))} />
+            <input type="text" inputMode="decimal" value={iksaManualGirdi} onChange={(e) => handleIksaManualChange(e.target.value)} />
             <div className={styles.stepperRight}>
               <span className={styles.stepperUnitCenter}>TL</span>
             </div>
@@ -119,9 +123,8 @@ export function BirimMaliyetField({ globalUnitPrice, birimMaliyetKaynagi, onBiri
       </div>
       <div className={styles.stepperInput}>
         <input
-          type="number"
-          min={0}
-          step={100}
+          type="text"
+          inputMode="decimal"
           value={girdi}
           aria-label="Birim inşaat maliyeti (TL/m²)"
           onChange={e => handleChange(e.target.value)}
@@ -145,7 +148,7 @@ export function MarketField({ manualMarketPrice, setManualMarketPrice }: MarketF
     <div className={`${styles.drawerRow} ${styles.column}`}>
       <div className={styles.drawerRowLabel}>Yaklaşık Piyasa Fiyatı</div>
       <div className={styles.stepperInput}>
-        <input type="text" value={manualMarketPrice} onChange={(e) => setManualMarketPrice(e.target.value)} />
+        <input type="text" inputMode="decimal" value={manualMarketPrice} onChange={(e) => setManualMarketPrice(formatTRThousands(e.target.value))} />
         <div className={styles.stepperRight}>
           <span className={styles.stepperUnitWide}>TL</span>
         </div>

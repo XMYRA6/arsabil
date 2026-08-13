@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BirimMaliyetField, RiskCostFields, type BirimMaliyetFieldProps } from './AdvancedSettingsSections';
+import { BirimMaliyetField, RiskCostFields, MarketField, type BirimMaliyetFieldProps } from './AdvancedSettingsSections';
 import type { BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 
 /**
@@ -32,7 +32,7 @@ describe('BirimMaliyetField (review Finding 2, 2026-07-30)', () => {
   it('baslangicta gecerli sayiyi ve kaynak etiketini gosterir', () => {
     render(<Sarmalayici />);
     const input = screen.getByLabelText('Birim inşaat maliyeti (TL/m²)') as HTMLInputElement;
-    expect(input.value).toBe('12000');
+    expect(input.value).toBe('12.000');
     expect(screen.getByText(/Varsayılan 12.000 TL\/m²/)).toBeInTheDocument();
   });
 
@@ -55,7 +55,7 @@ describe('BirimMaliyetField (review Finding 2, 2026-07-30)', () => {
     const input = screen.getByLabelText('Birim inşaat maliyeti (TL/m²)') as HTMLInputElement;
     await user.clear(input);
     await user.type(input, '15500');
-    expect(input.value).toBe('15500');
+    expect(input.value).toBe('15.500');
     // Parent (Sarmalayici) `onBirimMaliyet` ile gercekten commit almis mi?
     // Kaynak etiketi 'elle' gecmisse (Varsayilan -> Elle girildi), commit
     // BASARILI olmus demektir — bu, controlled input dongusunun (prop geri
@@ -104,4 +104,30 @@ describe('RiskCostFields sirasi', () => {
         expect(metin.indexOf('Müteahhit Kazancı')).toBeGreaterThan(-1)
         expect(metin.indexOf('İksa Masrafı')).toBeLessThan(metin.indexOf('Müteahhit Kazancı'))
     })
+
+    it('İksa Masrafı "Elle" modunda TL girisi binlik ayirac gosterir', () => {
+        render(<RiskCostFields {...riskCostProps({ iksaMode: 'manual', iksaManualTL: 45000 })} />)
+        expect(screen.getByDisplayValue('45.000')).toBeInTheDocument()
+    })
 });
+
+describe('MarketField', () => {
+    it('yazarken piyasa fiyati binlik ayiracla bildirilir (Gelismis Ayarlar modali + ana kart ortak alani)', async () => {
+        const user = userEvent.setup()
+        const setManualMarketPrice = jest.fn()
+        function Sarmalayici() {
+            const [deger, setDeger] = React.useState('')
+            return (
+                <MarketField
+                    manualMarketPrice={deger}
+                    setManualMarketPrice={(v: string) => { setManualMarketPrice(v); setDeger(v) }}
+                />
+            )
+        }
+        render(<Sarmalayici />)
+        const input = screen.getByRole('textbox')
+        await user.type(input, '2500000')
+        expect(input).toHaveValue('2.500.000')
+        expect(setManualMarketPrice).toHaveBeenLastCalledWith('2.500.000')
+    })
+})

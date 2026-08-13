@@ -2,6 +2,7 @@
 
 import styles from './page.module.css';
 import { CalculationOutput } from '@/lib/calculator/engine_v2';
+import { formatTRCurrency } from './trNumberFormat';
 
 export interface HesapFisiProps {
   result: CalculationOutput | null;
@@ -9,7 +10,7 @@ export interface HesapFisiProps {
 
 /** Her zaman açık hesap dökümü — izlenebilirlik = güven (bkz. spec 2026-07-24). */
 export function HesapFisi({ result }: HesapFisiProps) {
-  const fmt = (n: number) => Math.round(n).toLocaleString('tr-TR');
+  const fmtRate = (n: number) => Math.round(n).toLocaleString('tr-TR');
   // K (kâr katsayısı) CalculationOutput'ta ayrı bir alan olarak yok (engine_v2 dondurulmuş,
   // kapsam dışı); FD_total = M * K olduğundan izlenebilirlik için orandan türetiliyor.
   const kMultiplier = result && result.M > 0 ? result.FD_total / result.M : null;
@@ -18,15 +19,15 @@ export function HesapFisi({ result }: HesapFisiProps) {
     <div className={styles.hesapFisi}>
       <div className={styles.hesapFisiRow}>
         <span className={styles.hesapFisiRowLabel}>İnşaat Maliyeti (Mi)</span>
-        <span>{result ? `${fmt(result.Mi)} TL` : '—'}</span>
+        <span>{result ? formatTRCurrency(result.Mi) : '—'}</span>
       </div>
       <div className={styles.hesapFisiRow}>
         <span className={styles.hesapFisiRowLabel}>Arsa Maliyeti (Ma)</span>
-        <span>{result ? `${fmt(result.Ma)} TL` : '—'}</span>
+        <span>{result ? formatTRCurrency(result.Ma) : '—'}</span>
       </div>
       <div className={`${styles.hesapFisiRow} ${styles.hesapFisiRowTotal}`}>
         <span className={styles.hesapFisiRowLabel}>Toplam Maliyet (M)</span>
-        <span>{result ? `${fmt(result.M)} TL` : '—'}</span>
+        <span>{result ? formatTRCurrency(result.M) : '—'}</span>
       </div>
       <div className={styles.hesapFisiRow}>
         <span className={styles.hesapFisiRowLabel}>× Kâr Katsayısı (K)</span>
@@ -34,16 +35,16 @@ export function HesapFisi({ result }: HesapFisiProps) {
       </div>
       <div className={styles.hesapFisiRow}>
         <span className={styles.hesapFisiRowLabel}>Min. Daire Fiyatı (FD)</span>
-        <span>{result ? `${fmt(result.FD_total)} TL` : '—'}</span>
+        <span>{result ? formatTRCurrency(result.FD_total) : '—'}</span>
       </div>
       <div className={styles.hesapFisiRow}>
         <span className={styles.hesapFisiRowLabel}>Daire Birim (FDbirim)</span>
-        <span>{result ? `${fmt(result.FD_per_m2)} TL/m²` : '—'}</span>
+        <span>{result ? `${fmtRate(result.FD_per_m2)} TL/m²` : '—'}</span>
       </div>
       {result?.FA != null && (
         <div className={`${styles.hesapFisiRow} ${styles.hesapFisiRowTotal}`}>
           <span className={styles.hesapFisiRowLabel}>Arsa Fiyatı (FA)</span>
-          <span>{`${fmt(result.FA)} TL`}</span>
+          <span>{formatTRCurrency(result.FA)}</span>
         </div>
       )}
     </div>

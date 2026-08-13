@@ -208,7 +208,7 @@ export function GirdiKarti({
                 </span>
                 <div className={styles.birimMaliyetSatir}>
                     <input
-                        type="number"
+                        type="text"
                         inputMode="decimal"
                         className={`${styles.birimMaliyetInput} mNum`}
                         value={birimMaliyetGirdi}

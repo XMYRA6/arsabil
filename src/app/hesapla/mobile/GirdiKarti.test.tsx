@@ -160,17 +160,17 @@ describe('GirdiKarti', () => {
         expect(onApartmentSize).toHaveBeenCalledWith(null)
     })
 
-    it('Birim insaat maliyeti alani dogru degeri ve kaynak etiketini gosterir', () => {
+    it('Birim insaat maliyeti alani dogru degeri (binlik ayiracla) ve kaynak etiketini gosterir', () => {
         render(<GirdiKarti {...props({ globalUnitPrice: 18500, birimMaliyetKaynagi: { tur: 'elle' } })} />)
-        const input = screen.getByRole('spinbutton', { name: 'Birim inşaat maliyeti, TL/m²' })
-        expect(input).toHaveValue(18500)
+        const input = screen.getByRole('textbox', { name: 'Birim inşaat maliyeti, TL/m²' })
+        expect(input).toHaveValue('18.500')
         expect(screen.getByText(/Elle girildi/)).toBeInTheDocument()
     })
 
     it('Birim insaat maliyetine elle yazilan deger onBirimMaliyet\'e iletilir', () => {
         const onBirimMaliyet = jest.fn()
         render(<GirdiKarti {...props({ globalUnitPrice: 12000, onBirimMaliyet })} />)
-        const input = screen.getByRole('spinbutton', { name: 'Birim inşaat maliyeti, TL/m²' })
+        const input = screen.getByRole('textbox', { name: 'Birim inşaat maliyeti, TL/m²' })
         fireEvent.change(input, { target: { value: '21000' } })
         expect(onBirimMaliyet).toHaveBeenCalledWith(21000)
     })

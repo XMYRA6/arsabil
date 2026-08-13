@@ -43,11 +43,16 @@ describe('KarsilastirmaBlogu', () => {
             .toBeInTheDocument()
     })
 
-    it('girilen deger bildirilir', async () => {
+    it('girilen deger binlik ayiracla bildirilir', async () => {
         // Alan KONTROLLU: yazilan metnin birikmesi icin state geri beslemesi
         // sart. Duz bir jest.fn() ile React her tus vurusundan sonra DOM
         // degerini degismeyen prop'tan geri yazar — bu, bilesenin degil
         // test kosumunun kisitidir.
+        //
+        // Regresyon: kullanici canli TL girisinde otomatik binlik ayirac
+        // istedi (1000 -> 1.000) — `formatTRThousands` her tus vurusunda
+        // uygulanir, cursor daima sonda kalir (manuel cursor-konumu
+        // korunumu KASITLI olarak yapilmadi, bkz. trNumberFormat.ts).
         const onPiyasaFiyati = jest.fn()
         function Sarmalayici() {
             const [deger, setDeger] = useState('')
@@ -63,8 +68,8 @@ describe('KarsilastirmaBlogu', () => {
         render(<Sarmalayici />)
         const alan = screen.getByLabelText(/Yaklaşık piyasa fiyatı/)
         await userEvent.type(alan, '6000000')
-        expect(alan).toHaveValue('6000000')
-        expect(onPiyasaFiyati).toHaveBeenLastCalledWith('6000000')
+        expect(alan).toHaveValue('6.000.000')
+        expect(onPiyasaFiyati).toHaveBeenLastCalledWith('6.000.000')
     })
 
     it('prop degisimi alana YANSIR (ilce secimi piyasa fiyatini doldurur)', () => {

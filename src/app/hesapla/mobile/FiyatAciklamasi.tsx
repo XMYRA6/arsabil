@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { IconChevronRight, IconMoney, IconRuler } from '@/components/icons';
 import { HesapFisi } from '../HesapFisi';
+import { formatTRCurrency } from '../trNumberFormat';
 import type { CalculationOutput } from '@/lib/calculator/engine_v2';
 import styles from './mobile.module.css';
 
@@ -26,6 +27,13 @@ const trFormat = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 
 function fmt(n: number | null): string {
     return n === null ? '—' : trFormat.format(n);
+}
+
+/** Satirlardaki TUTAR (₺) alanlari icin — `fmt`den ayri: `fmt` m²/TL/m² gibi
+    birimsiz/farkli-birimli degerler icin de kullaniliyor, oraya "₺" eklemek
+    yanlis olurdu (bkz. satir 89'daki "{fmt(apartmentSize)} m² × ..."). */
+function fmtTutar(n: number | null): string {
+    return n === null ? '—' : formatTRCurrency(n);
 }
 
 /**
@@ -89,7 +97,7 @@ export function FiyatAciklamasi({
                             {fmt(apartmentSize)} m² × {fmt(unitPrice)} TL/m²
                         </span>
                     </span>
-                    <span className={`${styles.aciklamaTutar}`}>{fmt(result?.Mi ?? null)}</span>
+                    <span className={`${styles.aciklamaTutar}`}>{fmtTutar(result?.Mi ?? null)}</span>
                 </li>
 
                 <li className={styles.aciklamaSatir}>
@@ -102,7 +110,7 @@ export function FiyatAciklamasi({
                             Anlaşılan arsa payı %{landSharePercent}
                         </span>
                     </span>
-                    <span className={`${styles.aciklamaTutar}`}>{fmt(result?.Ma ?? null)}</span>
+                    <span className={`${styles.aciklamaTutar}`}>{fmtTutar(result?.Ma ?? null)}</span>
                 </li>
 
                 <li className={styles.aciklamaSatir}>
@@ -122,13 +130,13 @@ export function FiyatAciklamasi({
                             </button>
                         </span>
                     </span>
-                    <span className={`${styles.aciklamaTutar}`}>{fmt(muteahhitKazanci)}</span>
+                    <span className={`${styles.aciklamaTutar}`}>{fmtTutar(muteahhitKazanci)}</span>
                 </li>
             </ol>
 
             <div className={styles.aciklamaToplam}>
                 <span className={styles.aciklamaToplamAd}>Toplam · satış fiyatı</span>
-                <span className={`${styles.aciklamaToplamTutar}`}>{fmt(result?.FD_total ?? null)}</span>
+                <span className={`${styles.aciklamaToplamTutar}`}>{fmtTutar(result?.FD_total ?? null)}</span>
             </div>
 
             <div className={styles.muhendisSatir}>

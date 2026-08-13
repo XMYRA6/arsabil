@@ -21,12 +21,12 @@ beforeEach(() => {
 })
 
 describe('FiyatAciklamasi', () => {
-    it('uc satiri motor alanlarindan turetir', () => {
+    it('uc satiri motor alanlarindan turetir, tutarlar binlik ayirac + iki ondalik + ₺ ile', () => {
         render(<FiyatAciklamasi {...props()} />)
-        expect(screen.getByText('1.680.000')).toBeInTheDocument()   // Mi
-        expect(screen.getByText('4.216.000')).toBeInTheDocument()   // Ma
-        expect(screen.getByText('3.068.000')).toBeInTheDocument()   // FD_total - M
-        expect(screen.getByText('8.964.000')).toBeInTheDocument()   // FD_total
+        expect(screen.getByText('1.680.000,00 ₺')).toBeInTheDocument()   // Mi
+        expect(screen.getByText('4.216.000,00 ₺')).toBeInTheDocument()   // Ma
+        expect(screen.getByText('3.068.000,00 ₺')).toBeInTheDocument()   // FD_total - M
+        expect(screen.getByText('8.964.000,00 ₺')).toBeInTheDocument()   // FD_total
     })
 
     it('insaat satirinda metrekare ve birim fiyati aciklar', () => {
