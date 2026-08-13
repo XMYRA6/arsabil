@@ -110,6 +110,44 @@ describe('TkgmAutocompleteField', () => {
         expect(onSelectSpy).toHaveBeenCalledTimes(1)
     })
 
+    // Regresyon: dropdown eskiden `.field` icinde `position:absolute` idi —
+    // `ParcelVerificationSheet`in `overflow-y:auto` govdesi icine yerlestigi
+    // icin sheet'in ust kenarina yakin acilinca KIRPILIYORDU (kullanici
+    // bulgusu: "asagiya dogru acilan secenekler oldukca kotu bir tasarim
+    // gosteriyor"). Artik `document.body`ye portallanip input'un gercek
+    // ekran konumuna (`getBoundingClientRect`) gore `position:fixed` ile
+    // yerlesiyor — hicbir overflow:hidden/auto atasi onu kirpamiyor.
+    it('listbox document.body altina portallanir, .field wrapper icine DEGIL', () => {
+        const { container } = render(<Wrapper />)
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'ist' } })
+        const listbox = screen.getByRole('listbox')
+        expect(container.contains(listbox)).toBe(false)
+        expect(document.body.contains(listbox)).toBe(true)
+    })
+
+    it('listbox konumu input\'un gercek ekran konumuna (getBoundingClientRect) gore hesaplanir', () => {
+        render(<Wrapper />)
+        const input = screen.getByLabelText('İl *')
+        input.getBoundingClientRect = () => ({
+            top: 200, bottom: 234, left: 40, right: 340, width: 300, height: 34,
+            x: 40, y: 200, toJSON: () => {},
+        })
+        fireEvent.change(input, { target: { value: 'ist' } })
+        const listbox = screen.getByRole('listbox')
+        expect(listbox.style.position).toBe('fixed')
+        expect(listbox.style.top).toBe('238px')  // bottom (234) + 4px bosluk
+        expect(listbox.style.left).toBe('40px')
+        expect(listbox.style.width).toBe('300px')
+    })
+
+    it('sayfa kaydirilinca dropdown kapanir (yeniden konumlandirmak yerine basit/saglam cozum)', () => {
+        render(<Wrapper />)
+        fireEvent.change(screen.getByLabelText('İl *'), { target: { value: 'ist' } })
+        expect(screen.getByRole('listbox')).toBeInTheDocument()
+        fireEvent.scroll(window)
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+    })
+
     it('secim sonrasi metin degistirilip AYNI degere geri donulurse onSelect yeniden tetiklenir', () => {
         const onSelectSpy = jest.fn()
         render(<Wrapper onSelectSpy={onSelectSpy} />)

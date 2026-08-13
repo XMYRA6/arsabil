@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
+import { createPortal } from 'react-dom'
 import styles from './TkgmAutocompleteField.module.css'
 
 export type IdariYapiItem = { id: number; text: string }
@@ -36,10 +37,36 @@ export function TkgmAutocompleteField({
     // yakalandi — jsdom testleri bu "zaten secili alani terk etme" akisini
     // hic zincirlemedigi icin gormemisti).
     const lastCommittedIdRef = useRef<number | null>(null)
+    const inputRef = useRef<HTMLInputElement>(null)
+    // Listbox artik `document.body`ye portallaniyor (asagida) — `.field`
+    // icinde `position:absolute` iken sheet'in `overflow-y:auto` govdesi
+    // onu KIRPIYORDU (kullanici bulgusu, canli ekran goruntusu). Konum,
+    // input'un GERCEK ekran koordinatlarindan (`getBoundingClientRect`)
+    // hesaplanir; boylece hicbir ata `overflow:hidden/auto` onu kesemez.
+    const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
 
     const matches = value.trim() === ''
         ? items.slice(0, 8)
         : items.filter(item => turkishIncludes(item.text, value)).slice(0, 8)
+
+    const gorunuyor = open && matches.length > 0
+
+    useLayoutEffect(() => {
+        if (!gorunuyor || !inputRef.current) return
+        const r = inputRef.current.getBoundingClientRect()
+        setRect({ top: r.bottom + 4, left: r.left, width: r.width })
+    }, [gorunuyor]);
+
+    // Surekli yeniden konumlandirmak (scroll takibi) yerine BILEREK basit
+    // ve saglam bir cozum: kullanici kaydirinca dropdown kapanir. Surekli
+    // takip, scroll sirasinda "yapiskan" bir dropdown'in yanlis yerde
+    // asili kalmasi gibi kendi hata siniflarini acardi.
+    useEffect(() => {
+        if (!gorunuyor) return
+        const kapat = () => setOpen(false)
+        window.addEventListener('scroll', kapat, true)
+        return () => window.removeEventListener('scroll', kapat, true)
+    }, [gorunuyor]);
 
     const commit = (item: IdariYapiItem) => {
         lastCommittedIdRef.current = item.id
@@ -86,6 +113,7 @@ export function TkgmAutocompleteField({
         <div className={styles.field}>
             <label className={styles.label} htmlFor={id}>{label}{required ? ' *' : ''}</label>
             <input
+                ref={inputRef}
                 id={id}
                 className={styles.input}
                 value={value}
@@ -93,7 +121,7 @@ export function TkgmAutocompleteField({
                 placeholder={placeholder}
                 autoComplete="off"
                 role="combobox"
-                aria-expanded={open && matches.length > 0}
+                aria-expanded={gorunuyor}
                 aria-activedescendant={activeIndex >= 0 && matches[activeIndex] ? `${id}-option-${matches[activeIndex].id}` : undefined}
                 aria-controls={`${id}-listbox`}
                 onChange={e => {
@@ -110,8 +138,13 @@ export function TkgmAutocompleteField({
                 onBlur={handleBlur}
                 onKeyDown={handleKeyDown}
             />
-            {open && matches.length > 0 && (
-                <ul className={styles.listbox} id={`${id}-listbox`} role="listbox">
+            {gorunuyor && rect && typeof document !== 'undefined' && createPortal(
+                <ul
+                    className={styles.listbox}
+                    id={`${id}-listbox`}
+                    role="listbox"
+                    style={{ position: 'fixed', top: rect.top, left: rect.left, width: rect.width }}
+                >
                     {matches.map((item, idx) => (
                         <li
                             key={item.id}
@@ -129,7 +162,8 @@ export function TkgmAutocompleteField({
                             {item.text}
                         </li>
                     ))}
-                </ul>
+                </ul>,
+                document.body,
             )}
         </div>
     )

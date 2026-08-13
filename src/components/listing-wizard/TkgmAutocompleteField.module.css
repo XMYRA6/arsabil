@@ -26,18 +26,24 @@
     cursor: not-allowed;
 }
 
+/* Konum (`position`/`top`/`left`/`width`) artik JS'ten (`getBoundingClientRect`)
+   satir-ici style olarak geliyor — `document.body`ye portallandigi icin
+   `.field`e gore `position:absolute` KULLANILAMAZ (bkz. TkgmAutocompleteField.tsx).
+   z-index, en yuksek sheet katmanindan (`--z-sheet`, globals.css) daha
+   yuksek olmali — aksi halde portallanmis dropdown modal'in ARKASINDA kalir. */
 .listbox {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 20;
-    margin: 4px 0 0 0;
+    z-index: 1102;
+    margin: 0;
     padding: 4px;
     list-style: none;
     max-height: 220px;
     overflow-y: auto;
-    background: var(--card-bg);
+    /* `--card-bg` projede HICBIR YERDE tanimli degil (grep ile dogrulandi) —
+       eskiden listbox goruntude YARI SAYDAM/SEFFAF render oluyordu, arkadaki
+       ilce/mahalle etiketleri sizıyordu (kullanicinin "kotu tasarim"
+       bulgusunun bir parcasi). `--panel`, BottomSheet.module.css'in ayni
+       amacla kullandigi gercek/tanimli token. */
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
