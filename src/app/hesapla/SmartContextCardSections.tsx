@@ -87,9 +87,16 @@ export type AreaSectionProps = {
     onArsaAlani: (v: number) => void;
     isAaEnabled: boolean;
     onIsAaEnabled: (v: boolean) => void;
+    /**
+     * Verilirse mobil stepper gorunumu (Daire Buyuklugu ile ayni desen:
+     * ortalanmis deger + saga yaslanmis -/+) render edilir. Masaustu cagri
+     * sitesi (SmartContextCard.tsx) bu prop'u HIC gecmez — eski duz
+     * input+span JSX'i BIREBIR korunur.
+     */
+    stepper?: { step: number; min: number };
 };
 
-export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled, onIsAaEnabled }: AreaSectionProps) {
+export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled, onIsAaEnabled, stepper }: AreaSectionProps) {
     const isAreaVerified = parcelContext?.status === 'verified' && !!parcelContext.parcel?.areaSqm;
 
     return (
@@ -108,7 +115,39 @@ export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled
                     {isAreaVerified ? '✓ TKGM Onaylı' : 'Elle girilmesi gerekiyor'}
                 </p>
             )}
-            {isAaEnabled && (
+            {isAaEnabled && (stepper ? (
+                <div className={styles.areaStepperSatir}>
+                    <div className={styles.areaStepperTextGrup}>
+                        <input
+                            type="number"
+                            className={`${styles.areaStepperInput} mNum`}
+                            value={arsaAlani || ''}
+                            onChange={(e) => onArsaAlani(Number(e.target.value))}
+                            placeholder="Alanı girin"
+                        />
+                        <span className={styles.areaStepperBirim}>m²</span>
+                    </div>
+                    <button
+                        type="button"
+                        className={styles.areaStepperAzalt}
+                        aria-label="Arsa alanını azalt"
+                        onClick={() => {
+                            const yeni = arsaAlani - stepper.step;
+                            if (yeni >= stepper.min) onArsaAlani(yeni);
+                        }}
+                    >
+                        −
+                    </button>
+                    <button
+                        type="button"
+                        className={styles.areaStepperArtir}
+                        aria-label="Arsa alanını artır"
+                        onClick={() => onArsaAlani(arsaAlani + stepper.step)}
+                    >
+                        +
+                    </button>
+                </div>
+            ) : (
                 <div className={styles.areaInputRow}>
                     <input
                         type="number"
@@ -118,7 +157,7 @@ export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled
                     />
                     <span>m²</span>
                 </div>
-            )}
+            ))}
         </div>
     );
 }

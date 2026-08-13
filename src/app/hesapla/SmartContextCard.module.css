@@ -220,4 +220,76 @@
         color: var(--m-ink);
         font-size: 16px;
     }
+
+    /* Arsa alani stepper — Daire Buyuklugu'nun `.stepperSatir` deseniyle
+       BIREBIR ayni gorunum (mobile.module.css'teki degerlerle eslenir):
+       deger ortali, -/+ birlikte satirin sagina yaslanir. */
+    .areaStepperSatir {
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding: 3px;
+        border-radius: 16px;
+        background: rgba(11, 32, 54, .055);
+        border: 1px solid rgba(11, 32, 54, .07);
+    }
+
+    .areaStepperTextGrup {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .areaStepperInput {
+        width: 54px;
+        min-width: 0;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 800;
+        font-family: Inter, sans-serif;
+        color: var(--m-ink);
+        background: transparent;
+        border: none;
+        outline: none;
+    }
+    .areaStepperInput::-webkit-outer-spin-button,
+    .areaStepperInput::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .areaStepperBirim {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--m-body);
+    }
+
+    .areaStepperAzalt,
+    .areaStepperArtir {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        border: 1px solid rgba(255, 255, 255, .9);
+        font: 800 19px Inter, sans-serif;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .areaStepperAzalt {
+        background: rgba(255, 255, 255, .55);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        color: var(--m-on-glass);
+    }
+
+    .areaStepperArtir {
+        margin-left: 4px;
+        background: var(--m-grad-btn);
+        box-shadow: var(--m-sh-grad-btn);
+        border-color: transparent;
+        color: #fff;
+    }
 }

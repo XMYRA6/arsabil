@@ -602,6 +602,21 @@
         color: #fff;
     }
 
+    /* Deger+birim grubu — Arsa Alani stepper'i ile ayni desen
+       (`SmartContextCard.module.css`teki `.areaStepperTextGrup`): `flex:1`
+       ile satirin -/+ disindaki tum bosluğunu alir, kendi icinde
+       `justify-content:center` ile ortalar. Butonlar bu gruptan SONRA
+       normal akista gelir, dolayisiyla grup buyudukce butonlar satirin
+       sagina itilir. */
+    .stepperTextGrup {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+    }
+
     /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin
        odakta sayfayi otomatik yakinlastirmasini engellemek icin SART
        (projenin kendi deseni, bkz. `.konumAramaGiris`). `flex: 1` yerine
@@ -614,15 +629,15 @@
        kapsiyor, ve `ch`/`em` degerleri font yuklenme durumuna gore
        degisken cikabiliyor (ikinci final review bulgusu, `5ch`
        kirpiyordu). Gercek sayfada Playwright ile olculdu: 800 agirlikli
-       Inter fontuyla "400" (M2_MAX, 3 haneli, gercekci en kotu durum)
-       + `padding-left: 13px` = 45px dogal icerik genisligi. `54px`,
-       bunun uzerine ~9px rahat pay birakir (scrollWidth/clientWidth
+       Inter fontuyla "400" (M2_MAX, 3 haneli, gercekci en kotu durum) =
+       ~32px dogal icerik genisligi (metin artik ortali, sol dolgu yok).
+       `54px`, bunun uzerine rahat pay birakir (scrollWidth/clientWidth
        her ikisi de 54, kirpma yok). */
     .stepperInput {
         flex: 0 1 auto;
         width: 54px;
         min-width: 0;
-        padding-left: 13px;
+        text-align: center;
         font-size: 16px;
         font-weight: 800;
         font-family: Inter, sans-serif;
@@ -637,17 +652,10 @@
         margin: 0;
     }
 
-    /* `margin-right: auto` birim etiketinden sonraki bosluğu yutar ve
-       ±butonlarini satirin sagina iter — input artik `flex:1` olmadigi
-       icin bu buyumeyi birinin ustlenmesi gerekiyor (eski `.stepperDeger`
-       tek kutuda hem sayiyi hem birimi tasidigi icin bu soruna hic
-       girmiyordu). */
     .stepperBirim {
         font-size: 12px;
         font-weight: 700;
         color: var(--m-body);
-        margin-right: auto;
-        padding-left: 4px;
     }
 
     /* ── Birim insaat maliyeti ── */

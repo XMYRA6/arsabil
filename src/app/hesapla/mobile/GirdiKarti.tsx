@@ -67,6 +67,9 @@ const M2_ADIM = 5;
 const M2_MIN = 50;
 const M2_MAX = 400;
 
+const AA_ADIM = 10;
+const AA_MIN = 10;
+
 /**
  * `2a` cam girdi karti (tasarim kaynagi:
  * docs/tasarim/mobil-2026-07-28/kartlar/2a.html).
@@ -127,6 +130,7 @@ export function GirdiKarti({
                 onArsaAlani={onArsaAlani}
                 isAaEnabled={isAaEnabled}
                 onIsAaEnabled={onIsAaEnabled}
+                stepper={{ step: AA_ADIM, min: AA_MIN }}
             />
 
             <div className={styles.girdiSatir} data-girdi-blok="yapi-standardi">
@@ -157,16 +161,18 @@ export function GirdiKarti({
             <div className={styles.girdiSatir} data-girdi-blok="daire-buyuklugu">
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
-                    <input
-                        type="number"
-                        inputMode="numeric"
-                        className={`${styles.stepperInput} mNum`}
-                        value={apartmentSize ?? ''}
-                        placeholder="—"
-                        aria-label="Daire büyüklüğü, m²"
-                        onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
-                    />
-                    <span className={styles.stepperBirim}>m²</span>
+                    <div className={styles.stepperTextGrup}>
+                        <input
+                            type="number"
+                            inputMode="numeric"
+                            className={`${styles.stepperInput} mNum`}
+                            value={apartmentSize ?? ''}
+                            placeholder="—"
+                            aria-label="Daire büyüklüğü, m²"
+                            onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
+                        />
+                        <span className={styles.stepperBirim}>m²</span>
+                    </div>
                     <button
                         type="button"
                         className={styles.stepperAzalt}

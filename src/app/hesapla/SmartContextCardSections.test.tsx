@@ -82,4 +82,42 @@ describe('AreaSection', () => {
         render(<AreaSection parcelContext={parcelContext} arsaAlani={500} onArsaAlani={jest.fn()} isAaEnabled={true} onIsAaEnabled={jest.fn()} />)
         expect(screen.getByText('✓ TKGM Onaylı')).toBeInTheDocument()
     })
+
+    // `stepper` prop verilmezse (masaustu cagri sitesi SmartContextCard.tsx)
+    // eski duz input+span JSX'i BIREBIR korunur — +/- butonu render edilmez.
+    it('stepper prop verilmezse artir/azalt butonu render edilmez (masaüstü regresyon kilidi)', () => {
+        render(<AreaSection parcelContext={null} arsaAlani={500} onArsaAlani={jest.fn()} isAaEnabled={true} onIsAaEnabled={jest.fn()} />)
+        expect(screen.queryByRole('button', { name: /Arsa alanını (artır|azalt)/ })).toBeNull()
+    })
+
+    it('stepper prop verilince artir/azalt butonu render edilir', () => {
+        render(
+            <AreaSection parcelContext={null} arsaAlani={500} onArsaAlani={jest.fn()} isAaEnabled={true} onIsAaEnabled={jest.fn()}
+                stepper={{ step: 10, min: 10 }} />
+        )
+        expect(screen.getByRole('button', { name: 'Arsa alanını azalt' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Arsa alanını artır' })).toBeInTheDocument()
+    })
+
+    it('stepper artir/azalt adim kadar degistirir', async () => {
+        const onArsaAlani = jest.fn()
+        render(
+            <AreaSection parcelContext={null} arsaAlani={500} onArsaAlani={onArsaAlani} isAaEnabled={true} onIsAaEnabled={jest.fn()}
+                stepper={{ step: 10, min: 10 }} />
+        )
+        await userEvent.click(screen.getByRole('button', { name: 'Arsa alanını artır' }))
+        expect(onArsaAlani).toHaveBeenCalledWith(510)
+        await userEvent.click(screen.getByRole('button', { name: 'Arsa alanını azalt' }))
+        expect(onArsaAlani).toHaveBeenCalledWith(490)
+    })
+
+    it('stepper azalt minimumun altina inmez', async () => {
+        const onArsaAlani = jest.fn()
+        render(
+            <AreaSection parcelContext={null} arsaAlani={10} onArsaAlani={onArsaAlani} isAaEnabled={true} onIsAaEnabled={jest.fn()}
+                stepper={{ step: 10, min: 10 }} />
+        )
+        await userEvent.click(screen.getByRole('button', { name: 'Arsa alanını azalt' }))
+        expect(onArsaAlani).not.toHaveBeenCalled()
+    })
 })
