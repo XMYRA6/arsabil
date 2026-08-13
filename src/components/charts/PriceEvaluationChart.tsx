@@ -10,9 +10,12 @@ interface PriceEvaluationChartProps {
 export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minPrice, marketPrice }) => {
     if (!marketPrice) return <div style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', width: '100%', padding: '1rem' }}>Piyasa Fiyatı Girilmedi</div>;
 
-    // Positive = Market price is higher (Pahalı)
-    // Negative = Market price is lower (Ucuz)
-    const diffPercent = ((marketPrice - minPrice) / minPrice) * 100;
+    // Mobil karttaki `piyasaFarkiYuzdesi` (hesaplaMobileProps.ts) ile AYNI
+    // formul/isaret: pozitif = hesaplanan min. fiyat piyasadan YUKSEK
+    // (Pahalı), negatif = piyasadan DUSUK (Ucuz). Onceki formul
+    // ((market-min)/min) TERS isaretliydi — ayni veri icin masaustu
+    // "Pahalı" derken mobil "Ucuz" diyordu (denetim bulgusu C2).
+    const diffPercent = ((minPrice - marketPrice) / marketPrice) * 100;
 
     // Varsayılan: Fırsat / Ucuz
     let color = 'var(--green)';
