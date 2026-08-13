@@ -153,8 +153,6 @@ export default function Home() {
   const [iksaPercentage, setIksaPercentage] = useState<number>(AYAR_VARSAYILANLARI.iksaPercentage); // %
   const [iksaManualTL, setIksaManualTL] = useState<number>(AYAR_VARSAYILANLARI.iksaManualTL);
 
-  const [, setGlobalExcavationLow] = useState<number>(0.01);
-  const [, setGlobalExcavationMedium] = useState<number>(0.02);
   const [globalUnitPrice, setGlobalUnitPrice] = useState<number | null>(null);
   // "Örnek Proje ile Dene" ile doldurulmus veri mi gosteriliyor. Kullanici
   // apartmentSize/globalUnitPrice alanlarindan birini eliyle degistirdiginde
@@ -168,8 +166,6 @@ export default function Home() {
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
-        if (data.excavationLowPercent) setGlobalExcavationLow(data.excavationLowPercent);
-        if (data.excavationMediumPercent) setGlobalExcavationMedium(data.excavationMediumPercent);
         if (data.defaultUnitPrice) setGlobalUnitPrice(prev => prev ?? data.defaultUnitPrice);
       })
       .catch(console.error);

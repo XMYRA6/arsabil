@@ -21,10 +21,6 @@ interface RiskLevel {
 }
 
 export default function AdminSettings() {
-    // İksa Ayarları
-    const [excavationLow, setExcavationLow] = useState(0.01);
-    const [excavationMedium, setExcavationMedium] = useState(0.02);
-
     // Kalite Katsayıları
     const [qualityStandard, setQualityStandard] = useState(1.0);
     const [qualityMedium, setQualityMedium] = useState(1.2);
@@ -83,8 +79,6 @@ export default function AdminSettings() {
         fetch('/api/settings')
             .then(r => r.json())
             .then(data => {
-                if (data.excavationLowPercent) setExcavationLow(data.excavationLowPercent);
-                if (data.excavationMediumPercent) setExcavationMedium(data.excavationMediumPercent);
                 if (data.qualityStandard) setQualityStandard(data.qualityStandard);
                 if (data.qualityMedium) setQualityMedium(data.qualityMedium);
                 if (data.qualityLux) setQualityLux(data.qualityLux);
@@ -105,8 +99,6 @@ export default function AdminSettings() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    excavationLowPercent: excavationLow,
-                    excavationMediumPercent: excavationMedium,
                     qualityStandard,
                     qualityMedium,
                     qualityLux,
@@ -522,20 +514,6 @@ export default function AdminSettings() {
                         </div>
                     </>
                 )}
-            </div>
-
-            <div className={styles.settingsCard}>
-                <h3>📐 İksa Maliyeti Katsayıları</h3>
-                <div className={styles.formGrid}>
-                    <div className={styles.formGroup}>
-                        <label>Düşük İksa Oranı (Z)</label>
-                        <input type="number" step="0.001" value={excavationLow} onChange={e => setExcavationLow(Number(e.target.value))} />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label>Orta İksa Oranı (Z)</label>
-                        <input type="number" step="0.001" value={excavationMedium} onChange={e => setExcavationMedium(Number(e.target.value))} />
-                    </div>
-                </div>
             </div>
 
             <div className={styles.settingsCard}>
