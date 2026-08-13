@@ -614,11 +614,21 @@
        buton — `.stepperAzalt` — ustleniyor), deger ile "m²" arasindaki
        bosluk 20px — 3 haneli deger girilince birim etikete sikisik
        gorunmesin diye (kullanici: "biraz daha bosluk olsun"). */
+    /* `flex:1` — kullanici bulgusu: "koskoca buton var, cok kucuk bir
+       cizgiye tiklamamiz gerekiyor". Grup eskiden kendi icerik genisligi
+       kadar yer kapliyordu (input+bosluk+m²), butonlara kadar olan geniş
+       bosluk hicbir tiklamaya tepki vermiyordu. `flex:1` grubu satirin
+       kalan tum genisligine yayar; `cursor:text` + JSX'teki onClick (bkz.
+       GirdiKarti.tsx) o genis alanin herhangi bir yerine tiklandiginda
+       input'u focuslar — "m²" input'a bitisik kalir, cunku input KENDISI
+       flex:1 DEGIL (asagida sabit genislikte). */
     .stepperTextGrup {
         display: flex;
         align-items: center;
         gap: 20px;
         min-width: 0;
+        flex: 1;
+        cursor: text;
     }
 
     /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin
@@ -632,16 +642,21 @@
        `* { box-sizing: border-box }` resetinde `width` PADDING'i de
        kapsiyor, ve `ch`/`em` degerleri font yuklenme durumuna gore
        degisken cikabiliyor (ikinci final review bulgusu, `5ch`
-       kirpiyordu). Gercek sayfada Playwright ile olculdu: 800 agirlikli
-       Inter fontuyla "400" (M2_MAX, 3 haneli, gercekci en kotu durum) =
-       ~32px dogal icerik genisligi (metin artik ortali, sol dolgu yok).
-       `54px`, bunun uzerine rahat pay birakir (scrollWidth/clientWidth
-       her ikisi de 54, kirpma yok). */
+       kirpiyordu). `54px`/`text-align:center` kombinasyonu M2_MAX (400,
+       3 hane) icin yeterliydi ama kullanici 5+ haneli deger yazinca
+       (input `type=number`de M2_MAX sinirlamasi yok, elle yazilan deger
+       dogrudan iletiliyor — bkz. GirdiKarti.test.tsx) merkezi hizalama
+       metni HER IKI YANDAN simetrik kirpiyordu, rakamlar gorunmuyordu.
+       Genislik `90px`e cikarildi, hizalama `left`e cevrildi: input artik
+       clickable/typeable alani da (wrapper'in flex:1 olmasiyla birlikte)
+       gorsel olarak "koskoca buton" beklentisine yaklasiyor, ve sola
+       hizali+genis kutuda tarayicinin native input-scroll davranisi son
+       yazilan rakamlarin her zaman gorunur kalmasini sagliyor. */
     .stepperInput {
         flex: 0 1 auto;
-        width: 54px;
+        width: 90px;
         min-width: 0;
-        text-align: center;
+        text-align: left;
         font-size: 16px;
         font-weight: 800;
         font-family: Inter, sans-serif;

@@ -234,20 +234,32 @@
         border: 1px solid rgba(11, 32, 54, .07);
     }
 
-    /* Kullanici geri bildirimi (ucuncu revizyon) — bkz. mobile.module.css'teki
-       `.stepperTextGrup` (ayni degisiklik, ayni gerekce): grup satirin
-       SOLUNA yaslanir, deger-birim arasi bosluk 10px'e genisletildi. */
+    /* `flex:1` — kullanici bulgusu: "koskoca buton var, cok kucuk bir
+       cizgiye tiklamamiz gerekiyor". Grup eskiden kendi icerik genisligi
+       kadar yer kapliyordu (input+bosluk+m²), butonlara kadar olan geniş
+       bosluk hicbir tiklamaya tepki vermiyordu. `flex:1` grubu satirin
+       kalan tum genisligine yayar; `cursor:text` + JSX'teki onClick (bkz.
+       SmartContextCardSections.tsx) o genis alanin herhangi bir yerine
+       tiklandiginda input'u focuslar — "m²" input'a bitisik kalir, cunku
+       input KENDISI flex:1 DEGIL (asagida sabit genislikte). */
     .areaStepperTextGrup {
         display: flex;
         align-items: center;
         gap: 20px;
         min-width: 0;
+        flex: 1;
+        cursor: text;
     }
 
+    /* Genislik 54px'ten 90px'e, hizalama center'dan left'e (kullanici
+       bulgusu: 5 haneli deger 54px'e sigmiyordu, ortali metin simetrik
+       kirpiliyordu — sola hizali+genis kutuda yazarken en son rakamlar
+       her zaman gorunur kalir, tarayicinin native input-scroll davranisi
+       ile). */
     .areaStepperInput {
-        width: 54px;
+        width: 90px;
         min-width: 0;
-        text-align: center;
+        text-align: left;
         font-size: 16px;
         font-weight: 800;
         font-family: Inter, sans-serif;

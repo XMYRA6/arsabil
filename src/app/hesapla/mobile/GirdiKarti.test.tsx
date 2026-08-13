@@ -152,6 +152,17 @@ describe('GirdiKarti', () => {
         expect(onApartmentSize).toHaveBeenCalledWith(999)
     })
 
+    it('deger+birim grubunun bos alanina tiklaninca input focuslanir (kullanici bulgusu: "koskoca buton var, cok kucuk cizgiye tiklamamiz gerekiyor")', () => {
+        render(<GirdiKarti {...props()} />)
+        const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
+        // Inputun kendisine degil, sarmalayan grubun (m² etiketine yakin,
+        // input disi ama grup ici) bos alanina tiklaniyor.
+        const grup = input.parentElement as HTMLElement
+        expect(input).not.toHaveFocus()
+        fireEvent.click(grup)
+        expect(input).toHaveFocus()
+    })
+
     it('input bosaltilinca onApartmentSize(null) cagrilir', () => {
         const onApartmentSize = jest.fn()
         render(<GirdiKarti {...props({ apartmentSize: 140, onApartmentSize })} />)

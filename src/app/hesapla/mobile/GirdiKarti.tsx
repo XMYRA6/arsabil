@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from 'react';
 import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE } from '../calculatorUiHelpers';
 import { LocationHeader, RiskSection, AreaSection } from '../SmartContextCardSections';
 import { useBufferedNumberInput } from '../useBufferedNumberInput';
@@ -120,6 +121,8 @@ export function GirdiKarti({
     const { girdi: birimMaliyetGirdi, handleChange: handleBirimMaliyetChange } =
         useBufferedNumberInput(globalUnitPrice, onBirimMaliyet);
 
+    const stepperInputRef = useRef<HTMLInputElement>(null);
+
     return (
         <section className={styles.girdiKarti} aria-label="Proje girdileri">
             <LocationHeader parcelContext={parcelContext} onOpenMap={onParselDogrulaAc} />
@@ -161,8 +164,12 @@ export function GirdiKarti({
             <div className={styles.girdiSatir} data-girdi-blok="daire-buyuklugu">
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
-                    <div className={styles.stepperTextGrup}>
+                    <div
+                        className={styles.stepperTextGrup}
+                        onClick={() => stepperInputRef.current?.focus()}
+                    >
                         <input
+                            ref={stepperInputRef}
                             type="number"
                             inputMode="numeric"
                             className={`${styles.stepperInput} mNum`}

@@ -46,6 +46,28 @@ describe('mobile.module.css kapsam guard', () => {
         expect(css).toMatch(/min-height/) // dosyada gercekten var, test bos gecmiyor
     })
 
+    it('.stepperInput 5+ haneli sayiyi gosterecek kadar genis ve sola hizali olmali (54px/center regresyonu)', () => {
+        // Kullanici bulgusu: 54px + text-align:center ile 5 haneli deger
+        // ("12345") kutuya sigmiyor, ortalanmis metin her iki yandan
+        // simetrik kirpiliyordu. Genislik >= 80px, hizalama sola olmali.
+        const match = css.match(/\.stepperInput\s*\{([^}]*)\}/)
+        expect(match).not.toBeNull()
+        const widthMatch = match![1].match(/width:\s*(\d+)px/)
+        expect(widthMatch).not.toBeNull()
+        expect(Number(widthMatch![1])).toBeGreaterThanOrEqual(80)
+        expect(match![1]).toMatch(/text-align:\s*left/)
+    })
+
+    it('.stepperTextGrup satirin kalan tum genisligini kaplamali (tiklama alani buton kadar buyuk olsun diye)', () => {
+        // Kullanici bulgusu: "koskoca buton var, cok kucuk bir cizgiye
+        // tiklamamiz gerekiyor" — grup satirin sadece kendi icerik
+        // genisligini kapliyordu, butonlara kadar olan bosluk hicbir seye
+        // tepki vermiyordu.
+        const match = css.match(/\.stepperTextGrup\s*\{([^}]*)\}/)
+        expect(match).not.toBeNull()
+        expect(match![1]).toMatch(/flex:\s*1/)
+    })
+
     it('guard sizinti yakalar (kendini dogrulayan test degil)', () => {
         // Medya sorgusunun disina kural eklenmis bir fikstur: kapanis
         // parantezi KENDI SATIRINDA — acgozlu regex'i kandiran sekil.

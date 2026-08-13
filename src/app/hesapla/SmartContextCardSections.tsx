@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from 'react';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import { Toggle } from '@/components/ui/Toggle';
 import type { RiskLevel } from './riskSuggestionHelpers';
@@ -98,6 +99,7 @@ export type AreaSectionProps = {
 
 export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled, onIsAaEnabled, stepper }: AreaSectionProps) {
     const isAreaVerified = parcelContext?.status === 'verified' && !!parcelContext.parcel?.areaSqm;
+    const stepperInputRef = useRef<HTMLInputElement>(null);
 
     return (
         <div className={styles.areaSection} data-girdi-blok="arsa-alani">
@@ -117,8 +119,12 @@ export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled
             )}
             {isAaEnabled && (stepper ? (
                 <div className={styles.areaStepperSatir}>
-                    <div className={styles.areaStepperTextGrup}>
+                    <div
+                        className={styles.areaStepperTextGrup}
+                        onClick={() => stepperInputRef.current?.focus()}
+                    >
                         <input
+                            ref={stepperInputRef}
                             type="number"
                             className={`${styles.areaStepperInput} mNum`}
                             value={arsaAlani || ''}
