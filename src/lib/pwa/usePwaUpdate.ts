@@ -55,17 +55,21 @@ export function usePwaUpdate(
     useEffect(() => {
         let cancelled = false;
         let reg: PwaUpdateRegistration | undefined;
+        let installingWorker: PwaUpdateWorker | undefined;
+        let onStateChange: (() => void) | undefined;
 
         const onUpdateFound = () => {
-            const installing = reg?.installing;
-            if (!installing) return;
-            const onStateChange = () => {
-                if (installing.state === 'installed' && target.hasController()) {
-                    setWaitingWorker(installing);
+            if (cancelled) return;
+            installingWorker = reg?.installing ?? undefined;
+            if (!installingWorker) return;
+            onStateChange = () => {
+                if (cancelled) return;
+                if (installingWorker!.state === 'installed' && target.hasController()) {
+                    setWaitingWorker(installingWorker!);
                 }
-                installing.removeEventListener('statechange', onStateChange);
+                installingWorker!.removeEventListener('statechange', onStateChange!);
             };
-            installing.addEventListener('statechange', onStateChange);
+            installingWorker.addEventListener('statechange', onStateChange);
         };
 
         target.getRegistration().then((r) => {
@@ -80,6 +84,9 @@ export function usePwaUpdate(
         return () => {
             cancelled = true;
             reg?.removeEventListener('updatefound', onUpdateFound);
+            if (installingWorker && onStateChange) {
+                installingWorker.removeEventListener('statechange', onStateChange);
+            }
         };
     }, [target]);
 

@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import { usePwaUpdate, type PwaUpdateTarget } from './usePwaUpdate'
 
 class FakeEventTarget {
-    private listeners: Record<string, Array<() => void>> = {}
+    listeners: Record<string, Array<() => void>> = {}
     addEventListener(type: string, cb: () => void) {
         (this.listeners[type] ??= []).push(cb)
     }
@@ -102,5 +102,38 @@ describe('usePwaUpdate', () => {
 
         act(() => { fireControllerChange() })
         expect(reload).toHaveBeenCalledTimes(1)
+    })
+
+    it('unmount aninda statechange dinleyicisi temizlenir, kacirilmis olay hataya neden olmaz', async () => {
+        const reg = new FakeRegistration()
+        const { target } = makeTarget(reg, true)
+
+        const { unmount } = renderHook(() => usePwaUpdate(target))
+        await act(async () => { await Promise.resolve() })
+
+        // updatefound'u tetikle, installing worker'a statechange dinleyicisi eklenecek
+        const installing = new FakeWorker()
+        reg.installing = installing
+        act(() => { reg.dispatch('updatefound') })
+
+        // Dinleyicinin eklenmiş olduğunu doğrula
+        expect(installing.listeners['statechange'] || []).toHaveLength(1)
+
+        // Hook'u unmount et
+        // Cleanup fonksiyonu çalışacak ve statechange dinleyicisini temizlemesi gerekir
+        unmount()
+
+        // Unmount sonrası dinleyicinin temizlenmiş olduğunu doğrula
+        // (cleanup sırasında, statechange'den ÖNCE temizlenmesi gerekir)
+        expect(installing.listeners['statechange'] || []).toHaveLength(0)
+
+        // Şimdi statechange'i tetikle - hiçbir dinleyici olmadığı için hiçbir şey yapılmaz
+        act(() => {
+            installing.state = 'installed'
+            installing.dispatch('statechange')
+        })
+
+        // Yine hiçbir dinleyici olmamalı
+        expect(installing.listeners['statechange'] || []).toHaveLength(0)
     })
 })
