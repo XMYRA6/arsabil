@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { UpdateBanner } from "@/components/pwa/UpdateBanner";
 import { Toaster } from "react-hot-toast";
 
 import Script from 'next/script';
@@ -69,6 +70,7 @@ export default function RootLayout({
           <Toaster position="bottom-right" />
           <ServiceWorkerRegister />
           <InstallPrompt />
+          <UpdateBanner />
           <SiteChrome>{children}</SiteChrome>
         </AuthProvider>
       </body>
