@@ -448,4 +448,22 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(withoutCancelBtn).not.toMatch(/var\(--muted\)/)
     expect(withoutCancelBtn).not.toMatch(/var\(--card-title\)/)
   })
+
+  // Regresyon (canli site bulgusu): `.sectionLabel` (mobil menu listesinin
+  // ilk ogesi "Hesabım") `.tabPanel`in yuvarlatilmis kosesine
+  // (border-radius:20px + overflow:hidden, `data-mobile-section="false"`
+  // durumunda padding BILEREK 0) flush oturunca ilk harfin sol-ustu
+  // kirpiliyordu. `margin-left` bu kosenin egrisinden kacinmak icin sart.
+  it('.sectionLabel sol kenardan bosluklu (tabPanel kose yuvarlamasinin kirpmasini onler)', () => {
+    const baseIndex = css.indexOf('.sectionLabel {')
+    expect(baseIndex).toBeGreaterThan(-1)
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    const marginMatch = block.match(/margin:\s*([^;]+);/)
+    expect(marginMatch).not.toBeNull()
+    const parts = marginMatch![1].trim().split(/\s+/)
+    // shorthand: top right bottom left — 4 deger olmali, left (son deger) 0 OLMAMALI
+    expect(parts.length).toBe(4)
+    expect(parts[3]).not.toBe('0')
+    expect(parts[3]).not.toBe('0px')
+  })
 })

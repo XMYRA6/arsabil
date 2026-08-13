@@ -247,13 +247,20 @@
   gap: 10px;
 }
 
+/* `margin-left` KRITIK: `.tabPanel`'in `border-radius:20px` + `overflow:
+   hidden`'i var, bu gorunumde (`data-mobile-section="false"`) padding'i
+   BILEREK 0 (satir ~800) — kart cocuklari (.menuRow) kendi ic dolgusuyla
+   bunu fark ettirmiyor ama bu CIPLAK METIN etiketi (ozellikle listenin
+   ILK ogesi, panelin tam sol-ust kosesinde) panelin yuvarlatilmis
+   kosesince kirpiliyordu — "HESABIM" -> "⊣ESABIM" (canli site bulgusu,
+   ilk harfin sol-ust vuruşu kayboluyordu). */
 .sectionLabel {
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
-  margin: 4px 0 2px;
+  margin: 4px 0 2px 6px;
 }
 
 .sectionLabel:not(:first-child) {
