@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 /**
  * `usePwaUpdate` ihtiyaç duydugu tum tarayici API'lerini bu arayuz uzerinden
@@ -32,8 +32,13 @@ export interface PwaUpdateTarget {
 export function createBrowserPwaUpdateTarget(): PwaUpdateTarget {
     return {
         getRegistration: () =>
-            navigator.serviceWorker.getRegistration() as Promise<PwaUpdateRegistration | undefined>,
-        hasController: () => navigator.serviceWorker.controller !== null,
+            typeof navigator !== 'undefined' && 'serviceWorker' in navigator
+                ? (navigator.serviceWorker.getRegistration() as Promise<PwaUpdateRegistration | undefined>)
+                : Promise.resolve(undefined),
+        hasController: () =>
+            typeof navigator !== 'undefined' && 'serviceWorker' in navigator
+                ? navigator.serviceWorker.controller !== null
+                : false,
         addControllerChangeListener: (listener) =>
             navigator.serviceWorker.addEventListener('controllerchange', listener),
         removeControllerChangeListener: (listener) =>
@@ -47,9 +52,12 @@ export interface UsePwaUpdateResult {
     applyUpdate: () => void;
 }
 
-export function usePwaUpdate(
-    target: PwaUpdateTarget = createBrowserPwaUpdateTarget()
-): UsePwaUpdateResult {
+export function usePwaUpdate(target?: PwaUpdateTarget): UsePwaUpdateResult {
+    // `target` parametre olarak verilmezse varsayilan hedef HER render'da
+    // yeniden olusturulmamasi icin burada memoize edilir — aksi halde asagidaki
+    // useEffect'in bagimlilik dizisi ([resolvedTarget]) her render'da degisir ve
+    // 'updatefound' aboneligi surekli sokulup yeniden kurulur (bkz. final review).
+    const resolvedTarget = useMemo(() => target ?? createBrowserPwaUpdateTarget(), [target]);
     const [waitingWorker, setWaitingWorker] = useState<PwaUpdateWorker | null>(null);
 
     useEffect(() => {
@@ -64,7 +72,7 @@ export function usePwaUpdate(
             if (!installingWorker) return;
             onStateChange = () => {
                 if (cancelled) return;
-                if (installingWorker!.state === 'installed' && target.hasController()) {
+                if (installingWorker!.state === 'installed' && resolvedTarget.hasController()) {
                     setWaitingWorker(installingWorker!);
                 }
                 installingWorker!.removeEventListener('statechange', onStateChange!);
@@ -72,14 +80,21 @@ export function usePwaUpdate(
             installingWorker.addEventListener('statechange', onStateChange);
         };
 
-        target.getRegistration().then((r) => {
-            if (cancelled || !r) return;
-            reg = r;
-            if (r.waiting && target.hasController()) {
-                setWaitingWorker(r.waiting);
-            }
-            r.addEventListener('updatefound', onUpdateFound);
-        });
+        resolvedTarget
+            .getRegistration()
+            .then((r) => {
+                if (cancelled || !r) return;
+                reg = r;
+                if (r.waiting && resolvedTarget.hasController()) {
+                    setWaitingWorker(r.waiting);
+                }
+                r.addEventListener('updatefound', onUpdateFound);
+            })
+            .catch(() => {
+                // Desteklenmeyen tarayici/guvensiz baglam (orn. SecurityError) —
+                // PWA guncelleme altyapisindaki hatalari kullaniciya sizdirmadan
+                // sessizce basarisiz ol (bkz. chunkErrorReload.ts'teki ayni yaklasim).
+            });
 
         return () => {
             cancelled = true;
@@ -88,16 +103,38 @@ export function usePwaUpdate(
                 installingWorker.removeEventListener('statechange', onStateChange);
             }
         };
-    }, [target]);
+    }, [resolvedTarget]);
 
     const applyUpdate = () => {
         if (!waitingWorker) return;
+        let settled = false;
         const onControllerChange = () => {
-            target.removeControllerChangeListener(onControllerChange);
-            target.reload();
+            if (settled) return;
+            settled = true;
+            clearTimeout(fallbackTimer);
+            resolvedTarget.removeControllerChangeListener(onControllerChange);
+            resolvedTarget.reload();
         };
-        target.addControllerChangeListener(onControllerChange);
-        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+        resolvedTarget.addControllerChangeListener(onControllerChange);
+        // Baska bir sekme guncellemeyi zaten uygulamis olabilir: bu durumda bu
+        // worker `activated`/`redundant` olabilir, postMessage InvalidStateError
+        // firlatabilir ve controllerchange bu sekme icin hic tetiklenmeyebilir
+        // (zaten daha once ateslenmis olabilir). Zaman asimi yedegi, tikin
+        // asla sessiz bir no-op olmamasini garanti eder.
+        const fallbackTimer = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            resolvedTarget.removeControllerChangeListener(onControllerChange);
+            resolvedTarget.reload();
+        }, 3000);
+        try {
+            waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+        } catch {
+            // Worker zaten activated/redundant durumda (orn. baska bir sekme
+            // guncellemeyi once uyguladi) — controllerchange bu sekme icin hic
+            // tetiklenmeyebilir, yukaridaki fallback zamanlayici reload'un yine
+            // de gerceklesmesini garanti eder.
+        }
     };
 
     return { updateAvailable: waitingWorker !== null, applyUpdate };

@@ -104,6 +104,99 @@ describe('usePwaUpdate', () => {
         expect(reload).toHaveBeenCalledTimes(1)
     })
 
+    it('serviceWorker desteklenmeyen tarayicida (getRegistration undefined doner) hata firlatmaz, updateAvailable false kalir', async () => {
+        const target: PwaUpdateTarget = {
+            getRegistration: () => Promise.resolve(undefined),
+            hasController: () => false,
+            addControllerChangeListener: () => {},
+            removeControllerChangeListener: () => {},
+            reload: jest.fn(),
+        }
+
+        const { result } = renderHook(() => usePwaUpdate(target))
+        await act(async () => { await Promise.resolve() })
+
+        expect(result.current.updateAvailable).toBe(false)
+    })
+
+    it('getRegistration reddedilirse (orn. SecurityError) yakalanmamis promise reddi olusmaz', async () => {
+        const target: PwaUpdateTarget = {
+            getRegistration: () => Promise.reject(new Error('SecurityError')),
+            hasController: () => false,
+            addControllerChangeListener: () => {},
+            removeControllerChangeListener: () => {},
+            reload: jest.fn(),
+        }
+
+        const onUnhandledRejection = jest.fn()
+        process.on('unhandledRejection', onUnhandledRejection)
+
+        const { result } = renderHook(() => usePwaUpdate(target))
+        await act(async () => { await Promise.resolve(); await Promise.resolve() })
+
+        expect(result.current.updateAvailable).toBe(false)
+        expect(onUnhandledRejection).not.toHaveBeenCalled()
+
+        process.off('unhandledRejection', onUnhandledRejection)
+    })
+
+    it('applyUpdate() no-arg target ile iki render sonrasi da hata firlatmaz (varsayilan target render basina yeniden olusturulmaz)', () => {
+        const { rerender } = renderHook(() => usePwaUpdate())
+        expect(() => rerender()).not.toThrow()
+    })
+
+    describe('applyUpdate() coklu-sekme senaryosu (postMessage basarisiz olur)', () => {
+        beforeEach(() => {
+            jest.useFakeTimers()
+        })
+
+        afterEach(() => {
+            jest.useRealTimers()
+        })
+
+        it('postMessage firlatirsa (worker zaten activated/redundant) yine de fallback zaman asimindan sonra tam olarak bir kez reload cagirir', async () => {
+            const reg = new FakeRegistration()
+            const waiting = new FakeWorker()
+            waiting.postMessage = jest.fn(() => {
+                throw new DOMException('worker redundant', 'InvalidStateError')
+            })
+            reg.waiting = waiting
+            const { target, reload } = makeTarget(reg, true)
+
+            const { result } = renderHook(() => usePwaUpdate(target))
+            await act(async () => { await Promise.resolve() })
+            expect(result.current.updateAvailable).toBe(true)
+
+            expect(() => {
+                act(() => { result.current.applyUpdate() })
+            }).not.toThrow()
+            expect(reload).not.toHaveBeenCalled()
+
+            act(() => { jest.advanceTimersByTime(3000) })
+            expect(reload).toHaveBeenCalledTimes(1)
+        })
+
+        it('controllerchange zaman asimindan once normal gelirse reload tam olarak bir kez cagirilir (fallback ikinci kez tetiklenmez)', async () => {
+            const reg = new FakeRegistration()
+            const waiting = new FakeWorker()
+            reg.waiting = waiting
+            const { target, fireControllerChange, reload } = makeTarget(reg, true)
+
+            const { result } = renderHook(() => usePwaUpdate(target))
+            await act(async () => { await Promise.resolve() })
+            expect(result.current.updateAvailable).toBe(true)
+
+            act(() => { result.current.applyUpdate() })
+            expect(waiting.postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' })
+
+            act(() => { fireControllerChange() })
+            expect(reload).toHaveBeenCalledTimes(1)
+
+            act(() => { jest.advanceTimersByTime(3000) })
+            expect(reload).toHaveBeenCalledTimes(1)
+        })
+    })
+
     it('unmount aninda statechange dinleyicisi temizlenir, kacirilmis olay hataya neden olmaz', async () => {
         const reg = new FakeRegistration()
         const { target } = makeTarget(reg, true)
