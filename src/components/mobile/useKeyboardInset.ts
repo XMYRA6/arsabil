@@ -3,21 +3,33 @@
 import { useEffect, useState } from 'react';
 
 /**
- * iOS/Android'de sanal klavye acilinca `window.visualViewport.height`
- * kuculur, `window.innerHeight` (layout viewport) DEGISMEZ. Aradaki fark,
- * klavyenin ekranda kapladigi piksel yuksekligidir — `position:fixed;
- * bottom:0` olan bir eleman (bkz. `BottomSheet.module.css`in `.sheet`i)
- * bunu bilmeden klavyenin ALTINDA kalir, kullanicinin duzenledigi input
- * gorunmez olur ve gecisler sirasinda gorsel olarak "zipliyormus" gibi
- * durur (kullanici bulgusu: "klavyenin acilmasiyla tasarim berbat oluyor").
+ * `window.innerHeight` (layout viewport, SABIT) ile `window.visualViewport`
+ * (gercek gorunur alan, DINAMIK) arasindaki farki px olarak doner. Iki ayri
+ * senaryoyu kapsar, ikisi de `position:fixed;bottom:0` olan elemanlari
+ * (bkz. `BottomSheet.module.css`in `.sheet`i, `BottomNavbar.module.css`in
+ * `.bottomNav`u) yanlis konumlandirir:
  *
- * `visualViewport.offsetTop` da dusulur: klavye disinda, sayfa kaydirmasi
- * (adres cubugu gizlenmesi vb.) de gorsel viewport'un ust kenarini
- * kaydirabilir — yalnizca YUKSEKLIK farkina bakmak bu durumlarda yanlis
- * bir "klavye acik" degeri urretirdi.
+ * 1. **Sanal klavye acilir** (POZITIF deger) — `visualViewport.height`
+ *    KUCULUR. `bottom:0` eleman klavyenin ALTINDA kalir, kullanicinin
+ *    duzenledigi input gorunmez olur (kullanici bulgusu: "klavyenin
+ *    acilmasiyla tasarim berbat oluyor").
+ * 2. **Safari arac cubugu (URL bar) kaydirmayla gizlenir** (NEGATIF deger)
+ *    — `visualViewport.height` `window.innerHeight`den BUYUR (gercek
+ *    gorunur alan genisler). `bottom:0` eleman ESKI (kucuk) viewport'a
+ *    gore sabitlenmis kalir, GERCEK alt kenara ulasamaz — kullanici
+ *    bulgusu: "kaydirma cubugu ile navbar arasinda gereksiz boluk kaliyor".
  *
- * Eski tarayicilarda (`visualViewport` yok) sessizce 0 doner — klavye
- * farkinda olma OZELLIGI kaybolur ama hicbir hata firlatilmaz, eski
+ * Deger KIRPILMAZ (`Math.max(0,...)` KASITLI OLARAK KULLANILMAZ) — negatif
+ * durumda tuketici `bottom` ofsetini bu kadar AZALTARAK (eksi yonde) elemani
+ * yeni acilan alani doldurana kadar asagi itebilmeli; 0'a kirpmak bu
+ * sinyali yok ederdi.
+ *
+ * `visualViewport.offsetTop` da dusulur: sayfa kaydirmasi gorsel
+ * viewport'un ust kenarini da kaydirabilir — yalnizca YUKSEKLIK farkina
+ * bakmak yanlis bir deger uretirdi.
+ *
+ * Eski tarayicilarda (`visualViewport` yok) sessizce 0 doner — bu
+ * farkindalik OZELLIGI kaybolur ama hicbir hata firlatilmaz, eski
  * `bottom:0` davranisina sessizce geri duser.
  */
 export function useKeyboardInset(): number {
@@ -29,7 +41,7 @@ export function useKeyboardInset(): number {
 
         const update = () => {
             const gap = window.innerHeight - vv.height - vv.offsetTop;
-            setInset(Math.max(0, Math.round(gap)));
+            setInset(Math.round(gap));
         };
 
         update();

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { IconBox, IconFile, IconHome, IconMessage, IconUser, type IconProps } from '@/components/icons';
+import { useKeyboardInset } from '@/components/mobile/useKeyboardInset';
 import styles from './BottomNavbar.module.css';
 
 interface Conversation {
@@ -29,6 +30,11 @@ export function BottomNavbar() {
     const pathname = usePathname();
     const { status } = useSession();
     const [unreadTotal, setUnreadTotal] = useState(0);
+    // iOS Safari'de arac cubugu kaydirmayla gizlenince gercek gorunur alan
+    // genisler ama `bottom:0` eski (kucuk) viewport'a sabitlenmis kalir —
+    // kullanici bulgusu: navbar altinda gereksiz bosluk (bkz.
+    // useKeyboardInset.ts, negatif deger senaryosu).
+    const viewportInset = useKeyboardInset();
 
     // Render-time reset (NOT inside useEffect, so react-hooks/set-state-in-effect
     // does not apply): when the session transitions away from 'authenticated'
@@ -70,7 +76,10 @@ export function BottomNavbar() {
     const unreadLabel = unreadTotal > 9 ? '9+' : String(unreadTotal);
 
     return (
-        <nav className={styles.bottomNav}>
+        <nav
+            className={styles.bottomNav}
+            style={{ '--keyboard-inset': `${viewportInset}px` } as React.CSSProperties}
+        >
             {TABS.map(({ href, label, Icon }) => {
                 const active = pathname === href;
                 return (

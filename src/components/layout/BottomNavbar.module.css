@@ -2,7 +2,13 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    /* `--keyboard-inset` isaretli: pozitifken (klavye acik) navbar YUKARI
+       kayar, negatifken (Safari arac cubugu gizlenip gercek gorunur alan
+       genisleyince) navbar bu kadar AŞAĞI kayip gercek alt kenara ulasir
+       (bkz. useKeyboardInset.ts). AYNI formul BottomSheet.module.css'teki
+       `.sheet`de zaten dogrulandi — burada TERSINE CEVRILMEZ. Normal
+       durumda 0px, eski davranis degismez. */
+    bottom: var(--keyboard-inset, 0px);
     z-index: var(--z-bottomnav);
     display: flex;
     /* Yukseklik `--bottomnav-height` token'indan okunur (globals.css). Bu
