@@ -107,6 +107,14 @@
 }
 
 .quickChip {
+    /* KRITIK (Safari/WebKit bulgusu): `.topBar` (mobil) `overflow-x:auto`
+       ile BILEREK yatay kaydirmali — hicbir cocugun KUCULMESI gerekmiyor,
+       tasan icerik kaydirmayla gorulur. `flex-shrink:0` olmadan Safari'nin
+       flex algoritmasi bu chip'i (white-space:nowrap ile) kendi icerik
+       genisliginin ALTINA sikistirabiliyor, metin tasip komsu elemanlarla
+       ORTUSUYORDU ("Kat Karşılığı / Ortaklık" ekranin yarisini kapliyor
+       gibi gorunuyordu) — Chrome bu senaryoda kucultmuyor, Safari kucultuyor. */
+    flex-shrink: 0;
     padding: 6px 14px;
     border-radius: 20px;
     background: var(--bg);
@@ -129,6 +137,8 @@
 }
 
 .sortSelect {
+    /* Ayni WebKit kaydirmali-satir kucultme hatasi, bkz. .quickChip. */
+    flex-shrink: 0;
     padding: 6px 10px;
     background: var(--bg);
     border: 1.5px solid var(--border);

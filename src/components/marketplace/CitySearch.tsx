@@ -214,7 +214,7 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
     }, []);
 
     return (
-        <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', gap: 6, alignItems: 'center' }}>
+        <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
             {/* City Input */}
             <div style={{ position: 'relative', flex: '0 0 180px' }}>
                 <span style={{
