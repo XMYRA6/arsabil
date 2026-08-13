@@ -5,10 +5,8 @@ import { BottomSheet } from '@/components/mobile/BottomSheet';
 import {
     MarketField,
     RiskCostFields,
-    BirimMaliyetField,
     type MarketFieldProps,
     type RiskCostProps,
-    type BirimMaliyetFieldProps,
 } from '../AdvancedSettingsSections';
 import styles from './mobile.module.css';
 
@@ -20,7 +18,6 @@ export type AyarBolumu = 'kar' | 'iksa' | 'piyasa';
 export type GelismisAyarlarSheetProps =
     & RiskCostProps
     & MarketFieldProps
-    & BirimMaliyetFieldProps
     & {
         open: boolean;
         onClose: () => void;
@@ -82,14 +79,9 @@ export function GelismisAyarlarSheet({
                     ref={piyasaRef}
                     className={styles.ayarBolum}
                     role="group"
-                    aria-label="Piyasa fiyatı"
+                    aria-label="Piyasa karşılaştırması"
                     data-acilis={bolum('piyasa')}
                 >
-                    <BirimMaliyetField
-                        globalUnitPrice={alanlar.globalUnitPrice}
-                        birimMaliyetKaynagi={alanlar.birimMaliyetKaynagi}
-                        onBirimMaliyet={alanlar.onBirimMaliyet}
-                    />
                     <MarketField
                         manualMarketPrice={alanlar.manualMarketPrice}
                         setManualMarketPrice={alanlar.setManualMarketPrice}

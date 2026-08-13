@@ -22,8 +22,6 @@ function props(patch = {}) {
 
         manualMarketPrice: '', setManualMarketPrice: jest.fn(),
 
-        globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
-
         ...patch,
     }
 }
@@ -38,7 +36,7 @@ describe('GelismisAyarlarSheet', () => {
         render(<GelismisAyarlarSheet {...props()} />)
         expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true')
         expect(screen.getByRole('group', { name: 'Maliyet ve riskler' })).toBeInTheDocument()
-        expect(screen.getByRole('group', { name: 'Piyasa fiyatı' })).toBeInTheDocument()
+        expect(screen.getByRole('group', { name: 'Piyasa karşılaştırması' })).toBeInTheDocument()
         expect(screen.queryByRole('group', { name: 'Arsa alanı' })).toBeNull()
     })
 
@@ -53,13 +51,13 @@ describe('GelismisAyarlarSheet', () => {
         render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'kar' })} />)
         expect(screen.getByRole('group', { name: 'Maliyet ve riskler' }))
             .toHaveAttribute('data-acilis', 'true')
-        expect(screen.getByRole('group', { name: 'Piyasa fiyatı' }))
+        expect(screen.getByRole('group', { name: 'Piyasa karşılaştırması' }))
             .toHaveAttribute('data-acilis', 'false')
     })
 
     it('acilisBolumu piyasa ise piyasa bolumu isaretlenir', () => {
         render(<GelismisAyarlarSheet {...props({ acilisBolumu: 'piyasa' })} />)
-        expect(screen.getByRole('group', { name: 'Piyasa fiyatı' }))
+        expect(screen.getByRole('group', { name: 'Piyasa karşılaştırması' }))
             .toHaveAttribute('data-acilis', 'true')
     })
 
@@ -94,5 +92,10 @@ describe('GelismisAyarlarSheet', () => {
     it('risk secimi yapraktan KALKTI (SmartContextCard tek kaynak)', () => {
         render(<GelismisAyarlarSheet {...props()} />)
         expect(screen.queryByText('Risk Payı')).toBeNull()
+    })
+
+    it('Birim insaat maliyeti yapraktan KALKTI (ana karta tasindi)', () => {
+        render(<GelismisAyarlarSheet {...props()} />)
+        expect(screen.queryByText('Birim inşaat maliyeti')).toBeNull()
     })
 })
