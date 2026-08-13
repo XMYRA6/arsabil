@@ -128,6 +128,17 @@ describe('CalculatorEngineV2 (Deterministic Rules)', () => {
         expect(result.FD_per_m2).toBe(0);
     });
 
+    it('Scenario 9: Negatif Ad guard\'sizdi, artik 0a kelepceleniyor (denetim bulgusu C7)', () => {
+        // UI zaten negatif alan girisine izin vermiyor ama motor tek basina
+        // (orn. gelecekte API'ye acilirsa) korumasizdi — negatif Mi_base/
+        // FD_total sessizce uretiyordu. Ad=0 ile ayni davranisa kelepcelendi.
+        const negatif = CalculatorEngineV2.calculate({ ...baseInput, Ad: -50 });
+        const sifir = CalculatorEngineV2.calculate({ ...baseInput, Ad: 0 });
+        expect(negatif.Mi_base).toBe(sifir.Mi_base);
+        expect(negatif.Mi_base).toBe(0);
+        expect(negatif.FD_total).toBeGreaterThanOrEqual(0);
+    });
+
     describe('x_max — maksimum sürdürülebilir arsa payı (denetim bulgusu C6)', () => {
         // x_max: muteahhidin K hedefini koruyarak verebilecegi maksimum arsa
         // payi. Tanim: x_max'ta FD_total TAM OLARAK Pmarket'e esit olmali —

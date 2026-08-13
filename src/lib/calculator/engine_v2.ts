@@ -73,8 +73,11 @@ export const CalculatorEngineV2 = {
         const { x, L, Ad, P, K, Sd, Aa, isRiskEnabled, R, isExcavationEnabled, excavationMode, Z, MzOriginal, Pmarket } = input;
 
         // A) İnşaat Maliyeti
-        // 1. Ham
-        const Mi_base = L * P * Ad;
+        // 1. Ham — negatif Ad hicbir cagri yolunda anlamli degil (UI zaten
+        // engelliyor, motor kendi basina da guardlar — denetim bulgusu C7).
+        // Ad=0 ile AYNI davranisa kelepcelenir, ayri bir hata dali acilmaz.
+        const safeAd = Math.max(Ad, 0);
+        const Mi_base = L * P * safeAd;
 
         // 2. İksa
         let finalMz = 0;
@@ -100,7 +103,7 @@ export const CalculatorEngineV2 = {
         const { M, Ma } = computeLandCostAndTotal(Mi, x);
         
         const FD_total = M * K;
-        const FD_per_m2 = Ad > 0 ? (FD_total / Ad) : 0;
+        const FD_per_m2 = safeAd > 0 ? (FD_total / safeAd) : 0;
 
         // C) Arsa Sahibine Düşen Paylar
         let Sdx: number | null = null;
