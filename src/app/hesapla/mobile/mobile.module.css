@@ -650,6 +650,49 @@
         padding-left: 4px;
     }
 
+    /* ── Birim insaat maliyeti ── */
+    .girdiEtiketKaynak {
+        margin-left: 6px;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: normal;
+        color: var(--m-body);
+        opacity: .8;
+    }
+
+    .birimMaliyetSatir {
+        display: flex;
+        align-items: center;
+        height: 44px;
+        padding: 3px 13px;
+        border-radius: 16px;
+        background: rgba(11, 32, 54, .055);
+        border: 1px solid rgba(11, 32, 54, .07);
+    }
+
+    .birimMaliyetInput {
+        flex: 1;
+        min-width: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--m-ink);
+        background: transparent;
+        border: none;
+        outline: none;
+    }
+    .birimMaliyetInput::-webkit-outer-spin-button,
+    .birimMaliyetInput::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .birimMaliyetBirim {
+        flex: none;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--m-body);
+    }
+
     /* ── Mod anahtari ── */
     .modSatir {
         display: flex;

@@ -21,6 +21,7 @@ function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
         onParselDogrulaAc: jest.fn(),
         luxLevel: 1.2, onLuxLevel: jest.fn(),
         apartmentSize: 140, onApartmentSize: jest.fn(),
+        globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
         landShareRatio: 33, onLandShareRatio: jest.fn(),
         isApartmentCountEnabled: false, onApartmentCountEnabled: jest.fn(),
         totalApartments: 20, onTotalApartments: jest.fn(),
@@ -157,5 +158,28 @@ describe('GirdiKarti', () => {
         const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
         fireEvent.change(input, { target: { value: '' } })
         expect(onApartmentSize).toHaveBeenCalledWith(null)
+    })
+
+    it('Birim insaat maliyeti alani dogru degeri ve kaynak etiketini gosterir', () => {
+        render(<GirdiKarti {...props({ globalUnitPrice: 18500, birimMaliyetKaynagi: { tur: 'elle' } })} />)
+        const input = screen.getByRole('spinbutton', { name: 'Birim inşaat maliyeti, TL/m²' })
+        expect(input).toHaveValue(18500)
+        expect(screen.getByText(/Elle girildi/)).toBeInTheDocument()
+    })
+
+    it('Birim insaat maliyetine elle yazilan deger onBirimMaliyet\'e iletilir', () => {
+        const onBirimMaliyet = jest.fn()
+        render(<GirdiKarti {...props({ globalUnitPrice: 12000, onBirimMaliyet })} />)
+        const input = screen.getByRole('spinbutton', { name: 'Birim inşaat maliyeti, TL/m²' })
+        fireEvent.change(input, { target: { value: '21000' } })
+        expect(onBirimMaliyet).toHaveBeenCalledWith(21000)
+    })
+
+    it('kartin alan sirasi: konum, arsa alani, yapi standardi, daire buyuklugu, birim maliyet, arsa payi, deprem riski', () => {
+        const { container } = render(<GirdiKarti {...props()} />)
+        const bloklar = Array.from(container.querySelectorAll('[data-girdi-blok]'))
+        expect(bloklar.map(el => el.getAttribute('data-girdi-blok'))).toEqual([
+            'konum', 'arsa-alani', 'yapi-standardi', 'daire-buyuklugu', 'birim-maliyet', 'arsa-payi', 'deprem-riski',
+        ])
     })
 })

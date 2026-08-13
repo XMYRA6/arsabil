@@ -1,7 +1,9 @@
 "use client";
 
 import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE } from '../calculatorUiHelpers';
-import { SmartContextCard } from '../SmartContextCard';
+import { LocationHeader, RiskSection, AreaSection } from '../SmartContextCardSections';
+import { useBufferedNumberInput } from '../useBufferedNumberInput';
+import { kaynakEtiketi, type BirimMaliyetKaynagi } from './unitPriceSource';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import type { RiskLevel } from '../riskSuggestionHelpers';
 import type { RiskKaynagi } from './riskSource';
@@ -23,6 +25,9 @@ export type GirdiKartiProps = {
     onLuxLevel: (v: number) => void;
     apartmentSize: number | null;
     onApartmentSize: (v: number | null) => void;
+    globalUnitPrice: number | null;
+    birimMaliyetKaynagi: BirimMaliyetKaynagi;
+    onBirimMaliyet: (v: number) => void;
     landShareRatio: number;
     onLandShareRatio: (v: number) => void;
     isApartmentCountEnabled: boolean;
@@ -86,6 +91,9 @@ export function GirdiKarti({
     onLuxLevel,
     apartmentSize,
     onApartmentSize,
+    globalUnitPrice,
+    birimMaliyetKaynagi,
+    onBirimMaliyet,
     landShareRatio,
     onLandShareRatio,
     isApartmentCountEnabled,
@@ -106,22 +114,22 @@ export function GirdiKarti({
         landShareRatio,
     }) * 100);
 
+    const { girdi: birimMaliyetGirdi, handleChange: handleBirimMaliyetChange } =
+        useBufferedNumberInput(globalUnitPrice, onBirimMaliyet);
+
     return (
         <section className={styles.girdiKarti} aria-label="Proje girdileri">
-            <SmartContextCard
+            <LocationHeader parcelContext={parcelContext} onOpenMap={onParselDogrulaAc} />
+
+            <AreaSection
                 parcelContext={parcelContext}
-                onOpenMap={onParselDogrulaAc}
                 arsaAlani={arsaAlani}
                 onArsaAlani={onArsaAlani}
-                riskLevel={riskLevel}
-                riskLevels={riskLevels}
-                onRiskLevel={onRiskLevel}
-                riskKaynagi={riskKaynagi}
                 isAaEnabled={isAaEnabled}
                 onIsAaEnabled={onIsAaEnabled}
             />
 
-            <div className={styles.girdiSatir}>
+            <div className={styles.girdiSatir} data-girdi-blok="yapi-standardi">
                 <span className={styles.girdiEtiket}>Yapı standardı</span>
                 <div className={styles.segmentKap} role="tablist" aria-label="Yapı standardı">
                     {YAPI_STANDARTLARI.map(({ etiket, deger }) => {
@@ -146,7 +154,7 @@ export function GirdiKarti({
             </div>
 
             {/* ── Daire buyuklugu ── */}
-            <div className={styles.girdiSatir}>
+            <div className={styles.girdiSatir} data-girdi-blok="daire-buyuklugu">
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
                     <input
@@ -186,8 +194,28 @@ export function GirdiKarti({
                 </div>
             </div>
 
+            {/* ── Birim insaat maliyeti — YENI, ana karta tasindi ── */}
+            <div className={styles.girdiSatir} data-girdi-blok="birim-maliyet">
+                <span className={styles.girdiEtiket}>
+                    Birim inşaat maliyeti
+                    <span className={styles.girdiEtiketKaynak}>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
+                </span>
+                <div className={styles.birimMaliyetSatir}>
+                    <input
+                        type="number"
+                        inputMode="decimal"
+                        className={`${styles.birimMaliyetInput} mNum`}
+                        value={birimMaliyetGirdi}
+                        placeholder="—"
+                        aria-label="Birim inşaat maliyeti, TL/m²"
+                        onChange={(e) => handleBirimMaliyetChange(e.target.value)}
+                    />
+                    <span className={styles.birimMaliyetBirim}>TL/m²</span>
+                </div>
+            </div>
+
             {/* ── Arsa payi modu ── */}
-            <div className={styles.girdiSatir}>
+            <div className={styles.girdiSatir} data-girdi-blok="arsa-payi">
                 <div className={styles.modSatir}>
                     <span className={styles.modEtiket}>
                         Daire sayısıyla gir{' '}
@@ -267,6 +295,13 @@ export function GirdiKarti({
                     </>
                 )}
             </div>
+
+            <RiskSection
+                riskLevel={riskLevel}
+                riskLevels={riskLevels}
+                onRiskLevel={onRiskLevel}
+                riskKaynagi={riskKaynagi}
+            />
         </section>
     );
 }
