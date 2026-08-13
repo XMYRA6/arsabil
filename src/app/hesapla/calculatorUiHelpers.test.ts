@@ -30,8 +30,8 @@ describe('computeEffectiveLandShareX', () => {
 });
 
 describe('clampOwnerApartmentShare', () => {
-  it('totalApartments azaltılınca ownerApartmentShare üst sınıra çekilir', () => {
-    expect(clampOwnerApartmentShare(15, 10)).toBe(10);
+  it('totalApartments azaltılınca ownerApartmentShare üst sınıra (N-1) çekilir', () => {
+    expect(clampOwnerApartmentShare(15, 10)).toBe(9);
   });
 
   it('negatif değer 0a çekilir', () => {
@@ -44,6 +44,15 @@ describe('clampOwnerApartmentShare', () => {
 
   it('totalApartments 0 ise 0 döner', () => {
     expect(clampOwnerApartmentShare(5, 0)).toBe(0);
+  });
+
+  it('BUG REGRESYONU: ownerApartmentShare totalApartments\'a eşit girilirse N-1\'e çekilir (müteahhide en az 1 daire kalmalı, x=1 olmamalı)', () => {
+    expect(clampOwnerApartmentShare(10, 10)).toBe(9);
+  });
+
+  it('totalApartments=1 iken (tek daire) owner payı 0a çekilir — müteahhit tek daireyi elinde tutar', () => {
+    expect(clampOwnerApartmentShare(1, 1)).toBe(0);
+    expect(clampOwnerApartmentShare(0, 1)).toBe(0);
   });
 });
 

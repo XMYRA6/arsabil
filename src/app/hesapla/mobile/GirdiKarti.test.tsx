@@ -97,11 +97,11 @@ describe('GirdiKarti', () => {
             .toHaveValue('6')
     })
 
-    it('daire sayisi slider i 0..totalApartments araliginda', () => {
+    it('daire sayisi slider i 0..totalApartments-1 araliginda (muteahhide en az 1 daire kalmali, denetim bulgusu C1)', () => {
         render(<GirdiKarti {...props({ isApartmentCountEnabled: true, totalApartments: 20 })} />)
         const s = screen.getByRole('slider', { name: /Arsa sahibinin daire sayısı/ })
         expect(s).toHaveAttribute('min', '0')
-        expect(s).toHaveAttribute('max', '20')
+        expect(s).toHaveAttribute('max', '19')
     })
 
     it('daire sayisi modu ACIKKEN turetilen yuzdeyi salt-okunur gosterir', () => {

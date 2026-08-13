@@ -675,8 +675,9 @@ export default function Home() {
                   </div>
                   <RangeSlider
                     label="Arsa Sahibine Düşen Daire"
+                    aria-label="Arsa Sahibine Düşen Daire"
                     min={0}
-                    max={totalApartments}
+                    max={Math.max(totalApartments - 1, 0)}
                     step={1}
                     value={ownerApartmentShare}
                     unit="daire"

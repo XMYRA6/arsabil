@@ -267,10 +267,10 @@ export function GirdiKarti({
                             type="range"
                             className={styles.slider}
                             min={0}
-                            max={totalApartments}
+                            max={Math.max(totalApartments - 1, 0)}
                             step={1}
                             value={ownerApartmentShare}
-                            style={ilerleme(ownerApartmentShare, 0, totalApartments)}
+                            style={ilerleme(ownerApartmentShare, 0, Math.max(totalApartments - 1, 0))}
                             aria-label="Arsa sahibinin daire sayısı"
                             onChange={e => onOwnerApartmentShare(Number(e.target.value))}
                         />

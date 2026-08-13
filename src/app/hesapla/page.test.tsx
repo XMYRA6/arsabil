@@ -205,3 +205,17 @@ describe('/hesapla — masaüstü Gelişmiş Ayarlar paneli (sütun dengesi)', (
         expect(within(panel).getByRole('spinbutton')).toBeInTheDocument()
     })
 })
+
+describe('/hesapla — masaüstü "Arsa Sahibine Düşen Daire" slider üst sınırı (denetim bulgusu C1)', () => {
+    it('slider max totalApartments-1 olmalı, müteahhide en az 1 daire kalmalı', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        const toggleRow = screen.getByText('Toplam Daire Sayısı').closest('div') as HTMLElement
+        await user.click(within(toggleRow).getByRole('checkbox'))
+
+        const slider = screen.getByRole('slider', { name: 'Arsa Sahibine Düşen Daire' })
+        // Varsayılan totalApartments (AYAR_VARSAYILANLARI) 24'tür.
+        expect(slider).toHaveAttribute('max', '23')
+    })
+})

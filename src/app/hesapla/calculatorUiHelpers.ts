@@ -18,9 +18,13 @@ export function computeEffectiveLandShareX({
   return landShareRatio / 100;
 }
 
+/** Ust sinir N-1'dir, N DEGIL: muteahhide en az 1 daire kalmali. N=totalApartments'a
+ * esit bir pay x=1'e (arsa sahibi TUM daireleri alir) yol acar, engine_v2.ts bunu
+ * sessizce 0.999'a kelepceleyip maliyeti ~1000 kat siskin gosterir (denetim bulgusu C1). */
 export function clampOwnerApartmentShare(ownerApartmentShare: number, totalApartments: number): number {
   if (totalApartments <= 0) return 0;
-  return Math.min(Math.max(ownerApartmentShare, 0), totalApartments);
+  const maxOwnerShare = Math.max(totalApartments - 1, 0);
+  return Math.min(Math.max(ownerApartmentShare, 0), maxOwnerShare);
 }
 
 export function parseMarketPrice(raw: string): number {
