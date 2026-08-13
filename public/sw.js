@@ -18,7 +18,16 @@ self.addEventListener('install', (event) => {
             return cache.addAll(STATIC_ASSETS);
         })
     );
-    self.skipWaiting();
+});
+
+// Kullanici "Guncelle" butonuna dokununca UpdateBanner bu mesaji gonderir
+// (bkz. src/lib/pwa/usePwaUpdate.ts). skipWaiting() artik install'da
+// OTOMATIK cagrilmiyor - yeni SW `waiting` durumunda kullanici onayini
+// bekliyor.
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Activate event: clean old caches
