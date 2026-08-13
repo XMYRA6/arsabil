@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import { useBufferedNumberInput } from './useBufferedNumberInput';
 import styles from './page.module.css';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
