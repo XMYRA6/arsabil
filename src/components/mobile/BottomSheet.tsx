@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'framer-motion';
+import { useKeyboardInset } from './useKeyboardInset';
 import styles from './BottomSheet.module.css';
 
 interface BottomSheetProps {
@@ -71,6 +72,10 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
     const mounted = useIsMounted();
     const sheetRef = useRef<HTMLDivElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
+    // Klavye acilinca sheet'in kendisini klavyenin USTUNE oturtur (bkz.
+    // useKeyboardInset.ts) — kullanici bulgusu: klavye acilinca sabit
+    // `bottom:0` sheet klavyenin altinda kalip tasarimi bozuyordu.
+    const keyboardInset = useKeyboardInset();
 
     useEffect(() => {
         if (!open) return;
@@ -123,6 +128,7 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
                         aria-modal="true"
                         aria-label={title || DEFAULT_ARIA_LABEL}
                         className={`${styles.sheet} ${className || ''}`}
+                        style={{ '--keyboard-inset': `${keyboardInset}px` } as React.CSSProperties}
                         initial={reduceMotion ? { opacity: 0 } : { y: '100%' }}
                         animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
                         exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}

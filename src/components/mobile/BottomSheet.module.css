@@ -9,11 +9,19 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 0;
+    /* Klavye acikken `--keyboard-inset` (BottomSheet.tsx, useKeyboardInset)
+       sheet'i klavyenin ustune kaydirir; kapaliyken 0px, eski davranis
+       (gercek viewport altina yaslanma) degismez. */
+    bottom: var(--keyboard-inset, 0px);
     z-index: var(--z-sheet, 1101);
     display: flex;
     flex-direction: column;
-    max-height: 85dvh;
+    /* `--keyboard-inset` kadar da DUSULUR — aksi halde sheet'in ustunu
+       (bottom yukari kayarken yuksekligi ayni kalirsa) ekranin disina
+       itebilir. Canli Playwright olcumuyle dogrulandi: 320px'lik simule
+       edilmis klavyede bu satir olmadan sheet'in tepesi -26px'e (ekranin
+       26px UZERINE) tasiyordu. */
+    max-height: calc(85dvh - var(--keyboard-inset, 0px));
     background: var(--panel);
     border-top-left-radius: var(--radius-lg);
     border-top-right-radius: var(--radius-lg);

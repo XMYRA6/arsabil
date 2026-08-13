@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 import { useState } from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { BottomSheet, sheetTransition } from '../BottomSheet'
 
@@ -126,6 +126,31 @@ describe('BottomSheet', () => {
             </BottomSheet>,
         )
         expect(getByRole('dialog').className).toMatch(/custom-glass/)
+    })
+
+    // Kullanici bulgusu: klavye acilinca sheet klavyenin altinda kalip
+    // tasarim bozuluyordu. `useKeyboardInset` `window.visualViewport`
+    // kucculunce sheet'i klavyenin USTUNE kaydirir (bkz. useKeyboardInset.ts,
+    // BottomSheet.module.css'teki `.sheet { bottom: var(--keyboard-inset) }`).
+    it('klavye acilinca (visualViewport kucculunce) sheet --keyboard-inset ile yukari kayar', () => {
+        class FakeVisualViewport extends EventTarget {
+            height = 844
+            offsetTop = 0
+            resizeTo(height: number) {
+                this.height = height
+                this.dispatchEvent(new Event('resize'))
+            }
+        }
+        const fakeVv = new FakeVisualViewport()
+        Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
+        Object.defineProperty(window, 'visualViewport', { value: fakeVv, configurable: true })
+
+        render(<BottomSheet open onClose={jest.fn()} title="Test"><p>icerik</p></BottomSheet>)
+        const sheet = screen.getByRole('dialog')
+        expect(sheet.style.getPropertyValue('--keyboard-inset')).toBe('0px')
+
+        act(() => fakeVv.resizeTo(844 - 320))
+        expect(sheet.style.getPropertyValue('--keyboard-inset')).toBe('320px')
     })
 
     describe('showCloseButton', () => {
