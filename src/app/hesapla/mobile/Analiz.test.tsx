@@ -30,7 +30,7 @@ const BASE_INPUT = {
 
 const RESULT = {
     Mi_base: 1500000, Mz: 0, Mi: 1680000, Ma: 4216000, M: 5896000,
-    FD_total: 8964000, FD_per_m2: 64028, Z: 0, Sdx: null, FA: null, FAbirim: null,
+    FD_total: 8964000, FD_per_m2: 64028, Z: 0, Sdx: null, FA: null, FAbirim: null, x_max: null,
 }
 
 describe('analiz grafikleri', () => {

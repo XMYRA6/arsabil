@@ -15,6 +15,7 @@ const baseResult: CalculationOutput = {
   Sdx: null,
   FA: null,
   FAbirim: null,
+  x_max: null,
 };
 
 describe('HesapFisi', () => {

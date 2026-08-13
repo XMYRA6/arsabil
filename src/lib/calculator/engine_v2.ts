@@ -26,6 +26,9 @@ export interface CalculationInput {
     excavationMode?: "percentage" | "manual"; // İksa modu: Yüzde veya Elle
     Z?: number;       // İksa yüzde oranı (0-1 arası, Örn: %5 -> 0.05)
     MzOriginal?: number; // Elle girilen iksa tutarı (TL)
+
+    // Piyasa Fiyatı (opsiyonel) — verilirse x_max hesaplanır.
+    Pmarket?: number;
 }
 
 export interface CalculationOutput {
@@ -43,6 +46,13 @@ export interface CalculationOutput {
     Sdx: number | null; // Arsasahibine düşen daire sayısı
     FA: number | null;  // Toplam arsa değeri (TL)
     FAbirim: number | null; // Arsa m² birim değeri (TL/m²)
+
+    /** Müteahhidin K (kâr) hedefini koruyarak verebileceği maksimum arsa
+     * payı oranı (0-1). `Pmarket` verilmemiş/pozitif değilse `null`.
+     * Sınırlanmaz — maliyet zaten piyasa fiyatını aşıyorsa negatif çıkabilir,
+     * bu da "bu fiyata bu payla proje yapılamaz" anlamına gelir, motor bunu
+     * gizlemez (denetim bulgusu C6). */
+    x_max: number | null;
 }
 
 /**
@@ -60,7 +70,7 @@ function computeLandCostAndTotal(Mi: number, x: number): { M: number, Ma: number
 
 export const CalculatorEngineV2 = {
     calculate(input: CalculationInput): CalculationOutput {
-        const { x, L, Ad, P, K, Sd, Aa, isRiskEnabled, R, isExcavationEnabled, excavationMode, Z, MzOriginal } = input;
+        const { x, L, Ad, P, K, Sd, Aa, isRiskEnabled, R, isExcavationEnabled, excavationMode, Z, MzOriginal, Pmarket } = input;
 
         // A) İnşaat Maliyeti
         // 1. Ham
@@ -108,6 +118,11 @@ export const CalculatorEngineV2 = {
             }
         }
 
+        // D) Maksimum Sürdürülebilir Arsa Payı (yalnızca Pmarket verilmişse)
+        const x_max = typeof Pmarket === 'number' && Pmarket > 0
+            ? 1 - (Mi * K) / Pmarket
+            : null;
+
         return {
             Mi_base,
             Mz: finalMz,
@@ -119,7 +134,8 @@ export const CalculatorEngineV2 = {
             FD_per_m2,
             Sdx,
             FA,
-            FAbirim
+            FAbirim,
+            x_max
         };
     }
 }

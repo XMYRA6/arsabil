@@ -286,6 +286,43 @@ describe('/hesapla — masaüstü "Arsa Fiyatı" stat kartı "Min." niteleyicisi
     })
 })
 
+describe('/hesapla — masaüstü Maksimum Sürdürülebilir Arsa Payı (denetim bulgusu C6)', () => {
+    it('piyasa fiyatı girilmemişse kart hiç görünmez', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        expect(screen.queryByText('Maks. Sürdürülebilir Arsa Payı')).toBeNull()
+    })
+
+    it('piyasa fiyatı girilince x_max yüzde olarak gösterilir', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        const piyasaBlok = (await screen.findByText('Yaklaşık Piyasa Fiyatı')).closest('.drawerRow') as HTMLElement
+        const piyasaInput = within(piyasaBlok).getByRole('textbox')
+        await user.type(piyasaInput, '10000000')
+
+        expect(await screen.findByText('Maks. Sürdürülebilir Arsa Payı')).toBeInTheDocument()
+        expect(screen.getByText(/^%/)).toBeInTheDocument()
+    })
+
+    it('x_max negatifse ("bu fiyata proje mümkün değil") yüzde yerine anlaşılır bir uyarı gösterir, cam sayı DEĞİL', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        const piyasaBlok = (await screen.findByText('Yaklaşık Piyasa Fiyatı')).closest('.drawerRow') as HTMLElement
+        const piyasaInput = within(piyasaBlok).getByRole('textbox')
+        // Cok dusuk bir piyasa fiyati -> maliyet fiyati asiyor -> x_max negatif.
+        await user.type(piyasaInput, '1')
+
+        expect(await screen.findByText(/mümkün değil/)).toBeInTheDocument()
+        expect(screen.queryByText(/^%-/)).toBeNull()
+    })
+})
+
 describe('/hesapla — masaüstü "Arsa Sahibine Düşen Daire" slider üst sınırı (denetim bulgusu C1)', () => {
     it('slider max totalApartments-1 olmalı, müteahhide en az 1 daire kalmalı', async () => {
         viewportKur(true)

@@ -127,4 +127,51 @@ describe('CalculatorEngineV2 (Deterministic Rules)', () => {
         // Daire metrekare fiyatı sıfıra bölünmemeli, 0 dönmeli
         expect(result.FD_per_m2).toBe(0);
     });
+
+    describe('x_max — maksimum sürdürülebilir arsa payı (denetim bulgusu C6)', () => {
+        // x_max: muteahhidin K hedefini koruyarak verebilecegi maksimum arsa
+        // payi. Tanim: x_max'ta FD_total TAM OLARAK Pmarket'e esit olmali —
+        // yani "1 - Mi*K/Pmarket" formulu, x=x_max ile calculate() tekrar
+        // cagrildiginda FD_total===Pmarket vermeli (iceriden tutarlilik testi).
+
+        it('Pmarket verilmezse x_max null doner (opsiyonel girdi)', () => {
+            const result = CalculatorEngineV2.calculate(baseInput);
+            expect(result.x_max).toBeNull();
+        });
+
+        it('Pmarket <= 0 ise x_max null doner', () => {
+            expect(CalculatorEngineV2.calculate({ ...baseInput, Pmarket: 0 }).x_max).toBeNull();
+            expect(CalculatorEngineV2.calculate({ ...baseInput, Pmarket: -100 }).x_max).toBeNull();
+        });
+
+        it('x_max = 1 - (Mi*K)/Pmarket formulunu uygular', () => {
+            // Mi_base = 1*10000*100 = 1,000,000 (risk/iksa kapali, Mi=Mi_base)
+            // x_max = 1 - (1,000,000 * 1.25) / 1,562,500 = 1 - 0.8 = 0.20
+            const result = CalculatorEngineV2.calculate({ ...baseInput, Pmarket: 1562500 });
+            expect(result.x_max).toBeCloseTo(0.20, 6);
+        });
+
+        it('ICERIDEN TUTARLILIK: x=x_max ile tekrar hesaplaninca FD_total tam olarak Pmarket e esitlenir', () => {
+            const Pmarket = 3_500_000;
+            const withMarket = CalculatorEngineV2.calculate({ ...baseInput, Pmarket });
+            expect(withMarket.x_max).not.toBeNull();
+
+            const atMax = CalculatorEngineV2.calculate({ ...baseInput, x: withMarket.x_max as number });
+            expect(atMax.FD_total).toBeCloseTo(Pmarket, 4);
+        });
+
+        it('x_max negatif cikabilir (maliyet zaten piyasa fiyatini asiyorsa) — bu durum sinirlanmiyor, oldugu gibi donuyor', () => {
+            // Mi*K = 1,000,000*1.25 = 1,250,000 > Pmarket=1,000,000 -> x_max negatif
+            const result = CalculatorEngineV2.calculate({ ...baseInput, Pmarket: 1_000_000 });
+            expect(result.x_max).toBeLessThan(0);
+        });
+
+        it('risk ve iksa acikken de Mi (post-risk/iksa) kullanilir, Mi_base DEGIL', () => {
+            const input = { ...baseInput, isRiskEnabled: true as const, R: 1.10, Pmarket: 2_000_000 };
+            const result = CalculatorEngineV2.calculate(input);
+            // Mi = 1,000,000 * 1.10 = 1,100,000
+            const expectedXMax = 1 - (1100000 * 1.25) / 2000000;
+            expect(result.x_max).toBeCloseTo(expectedXMax, 6);
+        });
+    });
 });

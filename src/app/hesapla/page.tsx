@@ -244,11 +244,13 @@ export default function Home() {
       excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
       Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
       MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
+
+      Pmarket: parseMarketPrice(manualMarketPrice) || undefined,
     };
 
     const res = CalculatorEngineV2.calculate(input);
     setResult(res);
-  }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice]);
+  }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice, manualMarketPrice]);
 
 
   const hasEnoughDataForResult = apartmentSize !== null && globalUnitPrice !== null;
@@ -771,6 +773,29 @@ export default function Home() {
                       />
                     </div>
                   </div>
+
+                  {/* Yalnizca piyasa fiyati girilmisse gorunur (denetim
+                      bulgusu C6) — Pmarket olmadan x_max motor tarafindan
+                      zaten null donuyor. */}
+                  {result?.x_max != null && (
+                    <div className={styles.statCard}>
+                      <h5>Maks. Sürdürülebilir Arsa Payı</h5>
+                      {result.x_max >= 0 ? (
+                        <>
+                          <div className={styles.statCardValue}>
+                            %{(result.x_max * 100).toFixed(1)}
+                          </div>
+                          <div className={styles.statCardSub}>
+                            <span>Kâr hedefini koruyarak verilebilecek en yüksek pay</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className={styles.statCardSub}>
+                          <span>Bu birim maliyet ve kâr hedefiyle, girilen piyasa fiyatında proje mümkün değil (maliyet piyasa fiyatını aşıyor)</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 </div>
               </>
