@@ -234,17 +234,14 @@
         border: 1px solid rgba(11, 32, 54, .07);
     }
 
-    /* Kullanici geri bildirimi (canli deploy sonrasi): ortalanmis deger
-       yerine deger+birim+butonlar sagda kumelenmeli — bkz.
-       mobile.module.css'teki `.stepperTextGrup` (ayni degisiklik, ayni
-       gerekce). */
+    /* Kullanici geri bildirimi (ucuncu revizyon) — bkz. mobile.module.css'teki
+       `.stepperTextGrup` (ayni degisiklik, ayni gerekce): grup satirin
+       SOLUNA yaslanir, deger-birim arasi bosluk 10px'e genisletildi. */
     .areaStepperTextGrup {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-        gap: 4px;
+        gap: 20px;
         min-width: 0;
-        margin: 0 8px 0 auto;
     }
 
     .areaStepperInput {
@@ -282,7 +279,10 @@
         cursor: pointer;
     }
 
+    /* `margin-left:auto` — metin sola yaslanir, -/+ butonlari sagda sabit
+       kalir (bkz. mobile.module.css'teki `.stepperAzalt`, ayni gerekce). */
     .areaStepperAzalt {
+        margin-left: auto;
         background: rgba(255, 255, 255, .55);
         backdrop-filter: var(--m-glass-blur);
         -webkit-backdrop-filter: var(--m-glass-blur);

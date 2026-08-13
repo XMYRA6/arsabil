@@ -588,7 +588,12 @@
         cursor: pointer;
     }
 
+    /* `margin-left:auto` BURAYA (ilk butona) tasindi — kullanici geri
+       bildirimi (4. revizyon): metin (deger+birim) satirin SOLUNA
+       yaslanir, -/+ butonlari ise SAGDA SABIT kalmali (degismeyecekti).
+       Aradaki bosluk bu auto-margin ile dolduruluyor. */
     .stepperAzalt {
+        margin-left: auto;
         background: rgba(255, 255, 255, .55);
         backdrop-filter: var(--m-glass-blur);
         -webkit-backdrop-filter: var(--m-glass-blur);
@@ -604,19 +609,16 @@
     }
 
     /* Deger+birim grubu — Arsa Alani stepper'i ile ayni desen
-       (`SmartContextCard.module.css`teki `.areaStepperTextGrup`). Kullanici
-       geri bildirimi (canli deploy sonrasi): ortalanmis deger yerine deger+
-       birim+butonlar TEK KUME olarak satirin sagina yaslanmali, solda bosluk
-       kalmali. `margin-left:auto` bu grubu (ve ondan sonra normal akista
-       gelen -/+ butonlarini) satirin sagina iter; `flex:1`/`justify-content:
-       center` KALDIRILDI (artik grup kendi icerigi kadar yer kaplar). */
+       (`SmartContextCard.module.css`teki `.areaStepperTextGrup`). Metin
+       satirin SOLUNA yaslanir (bosluk dolduruculuk gorevini artik ilk
+       buton — `.stepperAzalt` — ustleniyor), deger ile "m²" arasindaki
+       bosluk 20px — 3 haneli deger girilince birim etikete sikisik
+       gorunmesin diye (kullanici: "biraz daha bosluk olsun"). */
     .stepperTextGrup {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-        gap: 4px;
+        gap: 20px;
         min-width: 0;
-        margin: 0 8px 0 auto;
     }
 
     /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin
