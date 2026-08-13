@@ -30,18 +30,18 @@ export type GelismisAyarlarSheetProps =
  * `4f` gelismis ayarlar yapragi (tasarim kaynagi:
  * docs/tasarim/mobil-2026-07-28/kartlar/4f.html).
  *
- * Alan icerikleri mevcut `RiskCostFields` / `MarketField` /
- * `BirimMaliyetField` bilesenlerinden gelir — mantik KOPYALANMAZ, ayni state,
+ * Alan icerikleri mevcut `RiskCostFields` / `MarketField`
+ * bilesenlerinden gelir — mantik KOPYALANMAZ, ayni state,
  * ayni dogrulama, ayni kenar durumlari korunur.
  *
- * Yaprak sadece Muteahhit Kazanci + Iksa Masrafi (`RiskCostFields`), Piyasa
- * Fiyati (`MarketField`) ve Birim Maliyet (`BirimMaliyetField`) icerir.
- * Risk seviyesi ve arsa alani BURADA DEGIL — ikisi de `SmartContextCard`a
- * tasindi (2026-08-04 TKGM konsolidasyonu), cunku `GirdiKarti` her zaman
- * gorunur ve parsel secilmeden de kullanilabilir olmalari gerekiyordu; ayni
- * ucu hem kartta hem yaprakta gostermek onceki bir sessiz-ezilme kusuruna
- * yol acmisti (A1 I4, daire-sayisi kontrolleri icin de ayni gerekceyle
- * yapraktan cikarilmisti).
+ * Yaprak sadece Muteahhit Kazanci + Iksa Masrafi (`RiskCostFields`) ve
+ * Piyasa Karsilastirmasi (`MarketField`) icerir. Risk seviyesi, arsa alani
+ * VE Birim Insaat Maliyeti BURADA DEGIL — hepsi `GirdiKarti`nin ana govdesine
+ * tasindi (2026-08-04 TKGM konsolidasyonu + 2026-08-13 alan sirasi/Birim
+ * Maliyet konsolidasyonu), cunku `GirdiKarti` her zaman gorunur ve parsel
+ * secilmeden de kullanilabilir olmalari gerekiyordu; ayni ucu hem kartta hem
+ * yaprakta gostermek onceki bir sessiz-ezilme kusuruna yol acmisti (A1 I4,
+ * daire-sayisi kontrolleri icin de ayni gerekceyle yapraktan cikarilmisti).
  */
 export function GelismisAyarlarSheet({
     open,
