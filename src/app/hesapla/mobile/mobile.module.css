@@ -603,18 +603,19 @@
     }
 
     /* Deger+birim grubu — Arsa Alani stepper'i ile ayni desen
-       (`SmartContextCard.module.css`teki `.areaStepperTextGrup`): `flex:1`
-       ile satirin -/+ disindaki tum bosluğunu alir, kendi icinde
-       `justify-content:center` ile ortalar. Butonlar bu gruptan SONRA
-       normal akista gelir, dolayisiyla grup buyudukce butonlar satirin
-       sagina itilir. */
+       (`SmartContextCard.module.css`teki `.areaStepperTextGrup`). Kullanici
+       geri bildirimi (canli deploy sonrasi): ortalanmis deger yerine deger+
+       birim+butonlar TEK KUME olarak satirin sagina yaslanmali, solda bosluk
+       kalmali. `margin-left:auto` bu grubu (ve ondan sonra normal akista
+       gelen -/+ butonlarini) satirin sagina iter; `flex:1`/`justify-content:
+       center` KALDIRILDI (artik grup kendi icerigi kadar yer kaplar). */
     .stepperTextGrup {
-        flex: 1;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end;
         gap: 4px;
         min-width: 0;
+        margin-left: auto;
     }
 
     /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin

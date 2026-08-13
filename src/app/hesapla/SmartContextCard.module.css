@@ -223,7 +223,7 @@
 
     /* Arsa alani stepper — Daire Buyuklugu'nun `.stepperSatir` deseniyle
        BIREBIR ayni gorunum (mobile.module.css'teki degerlerle eslenir):
-       deger ortali, -/+ birlikte satirin sagina yaslanir. */
+       deger+birim+butonlar TEK KUME olarak satirin sagina yaslanir. */
     .areaStepperSatir {
         display: flex;
         align-items: center;
@@ -234,13 +234,17 @@
         border: 1px solid rgba(11, 32, 54, .07);
     }
 
+    /* Kullanici geri bildirimi (canli deploy sonrasi): ortalanmis deger
+       yerine deger+birim+butonlar sagda kumelenmeli — bkz.
+       mobile.module.css'teki `.stepperTextGrup` (ayni degisiklik, ayni
+       gerekce). */
     .areaStepperTextGrup {
-        flex: 1;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-end;
         gap: 4px;
         min-width: 0;
+        margin-left: auto;
     }
 
     .areaStepperInput {
