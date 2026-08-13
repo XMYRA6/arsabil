@@ -79,3 +79,21 @@ describe('mobil token katmani', () => {
         expect(inside).toMatch(/--m-sh-bottombar:\s*0 -8px 30px rgba\(20,70,150,\.08\)/)
     })
 })
+
+describe('body min-height — iOS Safari fixed-bottom bar bosluk regresyonu', () => {
+    // Regresyon: `body { min-height: 100vh }` iOS Safari'de arac cubugu
+    // (URL bar) kaydirmayla gizlenince/gorununce YANLIS deger olarak
+    // kaliyor — `position:fixed;bottom:0` olan `.bottomNav` (BottomNavbar)
+    // bu durumda gercek viewport altina kadar UZANMIYOR, aradaki bosluk
+    // sayfa arka planiyla doluyor ve home indicator o boslukta "cok yukarda"
+    // duruyormus gibi goruniyor. Proje zaten bu sinifi baska yerde (`.
+    // viewportIskelet`, hesapla/page.module.css) `100dvh` ile cozmus —
+    // burada tutarli olunmasi gerekiyor.
+    it('body min-height 100dvh kullanmali, 100vh DEGIL', () => {
+        const match = /html,\s*body\s*\{[^}]*\}/.exec(css)
+        expect(match).not.toBeNull()
+        const bodyBlock = match![0]
+        expect(bodyBlock).toMatch(/min-height:\s*100dvh/)
+        expect(bodyBlock).not.toMatch(/min-height:\s*100vh\b/)
+    })
+})

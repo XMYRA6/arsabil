@@ -38,4 +38,18 @@ describe('SiteChrome', () => {
         render(<SiteChrome><div>x</div></SiteChrome>)
         expect(screen.queryByTestId('navbar')).not.toBeInTheDocument()
     })
+
+    // Regresyon: `minHeight` sabit `100vh` kullanırsa iOS Safari'de arac
+    // cubugu (URL bar) kaydirmayla gizlenip acildikca deger gecerliligini
+    // yitiriyor — `position:fixed;bottom:0` olan BottomNavbar'in altinda
+    // sayfa arka planinin gorundugu bir bosluk kaliyor, home indicator o
+    // boslukta "cok yukarda" duruyormus gibi goruniyor. `dvh` gercek
+    // (dinamik) viewport yuksekligini takip eder.
+    it('main minHeight 100dvh kullanir, 100vh DEGIL (iOS Safari fixed-bottom bosluk regresyonu)', () => {
+        mockPathname = '/marketplace'
+        render(<SiteChrome><div>içerik</div></SiteChrome>)
+        const main = screen.getByText('içerik').closest('main')!
+        expect(main.style.minHeight).toMatch(/dvh/)
+        expect(main.style.minHeight).not.toMatch(/(?<!d)vh/)
+    })
 })

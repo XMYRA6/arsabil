@@ -17,7 +17,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     return (
         <>
             <Navbar />
-            <main style={{ minHeight: "calc(100vh - 70px)", paddingBottom: "var(--mobile-nav-pb, 0px)" }}>
+            <main style={{ minHeight: "calc(100dvh - 70px)", paddingBottom: "var(--mobile-nav-pb, 0px)" }}>
                 {children}
             </main>
             <div className="desktop-footer">
