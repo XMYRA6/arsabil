@@ -558,6 +558,7 @@ export default function Home() {
             onParselDogrulaAc: () => setIsParcelModalOpen(true),
             luxLevel, onLuxLevel: setLuxLevel,
             apartmentSize, onApartmentSize: handleApartmentSizeChange,
+            globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet: handleGlobalUnitPriceChange,
             landShareRatio, onLandShareRatio: setLandShareRatio,
             isApartmentCountEnabled, onApartmentCountEnabled: setIsApartmentCountEnabled,
             totalApartments, onTotalApartments: setTotalApartments,
@@ -602,9 +603,6 @@ export default function Home() {
             setManualMarketPrice(AYAR_VARSAYILANLARI.manualMarketPrice);
           }}
           acilisBolumu={mobilAyarBolumu}
-          globalUnitPrice={globalUnitPrice}
-          birimMaliyetKaynagi={birimMaliyetKaynagi}
-          onBirimMaliyet={handleGlobalUnitPriceChange}
           iksaMode={iksaMode} setIksaMode={setIksaMode}
           iksaPercentage={iksaPercentage} setIksaPercentage={setIksaPercentage}
           iksaManualTL={iksaManualTL} setIksaManualTL={setIksaManualTL}
