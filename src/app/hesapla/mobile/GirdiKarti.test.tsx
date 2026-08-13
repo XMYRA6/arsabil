@@ -152,15 +152,23 @@ describe('GirdiKarti', () => {
         expect(onApartmentSize).toHaveBeenCalledWith(999)
     })
 
-    it('deger+birim grubunun bos alanina tiklaninca input focuslanir (kullanici bulgusu: "koskoca buton var, cok kucuk cizgiye tiklamamiz gerekiyor")', () => {
+    it('input dogrudan stepperSatir icinde durur, ayri bir sarmalayicisi yok (tiklanabilir alanin tamami input\'un kendisi)', () => {
+        // Nihai tasarim (kullanici onayli mockup): input `flex:1` ile
+        // satirin kontrol kumesine kadar tum genisligini kaplar — ayrica
+        // bir onClick-focus sarmalayicisina gerek kalmaz, input'un kendisi
+        // zaten o alanin tamami.
         render(<GirdiKarti {...props()} />)
         const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
-        // Inputun kendisine degil, sarmalayan grubun (m² etiketine yakin,
-        // input disi ama grup ici) bos alanina tiklaniyor.
-        const grup = input.parentElement as HTMLElement
-        expect(input).not.toHaveFocus()
-        fireEvent.click(grup)
-        expect(input).toHaveFocus()
+        expect(input.parentElement).toHaveClass('stepperSatir')
+    })
+
+    it('"m²" etiketi -/+ butonlariyla AYNI kontrol kumesinde durur, input\'a degil (kullanici: "m2 yazisini -/+ steppera yani sag tarafa yaslayalim")', () => {
+        render(<GirdiKarti {...props()} />)
+        const birim = screen.getByText('m²')
+        const azalt = screen.getByRole('button', { name: 'Metrekareyi azalt' })
+        const artir = screen.getByRole('button', { name: 'Metrekareyi artır' })
+        expect(birim.parentElement).toBe(azalt.parentElement)
+        expect(birim.parentElement).toBe(artir.parentElement)
     })
 
     it('input bosaltilinca onApartmentSize(null) cagrilir', () => {

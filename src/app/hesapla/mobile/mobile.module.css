@@ -588,12 +588,7 @@
         cursor: pointer;
     }
 
-    /* `margin-left:auto` BURAYA (ilk butona) tasindi — kullanici geri
-       bildirimi (4. revizyon): metin (deger+birim) satirin SOLUNA
-       yaslanir, -/+ butonlari ise SAGDA SABIT kalmali (degismeyecekti).
-       Aradaki bosluk bu auto-margin ile dolduruluyor. */
     .stepperAzalt {
-        margin-left: auto;
         background: rgba(255, 255, 255, .55);
         backdrop-filter: var(--m-glass-blur);
         -webkit-backdrop-filter: var(--m-glass-blur);
@@ -601,62 +596,43 @@
     }
 
     .stepperArtir {
-        margin-left: 4px;
         background: var(--m-grad-btn);
         box-shadow: var(--m-sh-grad-btn);
         border-color: transparent;
         color: #fff;
     }
 
-    /* Deger+birim grubu — Arsa Alani stepper'i ile ayni desen
-       (`SmartContextCard.module.css`teki `.areaStepperTextGrup`). Metin
-       satirin SOLUNA yaslanir (bosluk dolduruculuk gorevini artik ilk
-       buton — `.stepperAzalt` — ustleniyor), deger ile "m²" arasindaki
-       bosluk 20px — 3 haneli deger girilince birim etikete sikisik
-       gorunmesin diye (kullanici: "biraz daha bosluk olsun"). */
-    /* `flex:1` — kullanici bulgusu: "koskoca buton var, cok kucuk bir
-       cizgiye tiklamamiz gerekiyor". Grup eskiden kendi icerik genisligi
-       kadar yer kapliyordu (input+bosluk+m²), butonlara kadar olan geniş
-       bosluk hicbir tiklamaya tepki vermiyordu. `flex:1` grubu satirin
-       kalan tum genisligine yayar; `cursor:text` + JSX'teki onClick (bkz.
-       GirdiKarti.tsx) o genis alanin herhangi bir yerine tiklandiginda
-       input'u focuslar — "m²" input'a bitisik kalir, cunku input KENDISI
-       flex:1 DEGIL (asagida sabit genislikte). */
-    .stepperTextGrup {
+    /* Nihai tasarim (kullanici onayli mockup): satir iki bolgeye ayrilir.
+       Sol taraf tamamen degere ait — `.stepperInput` `flex:1` ile satirin
+       kontrol kumesine kadar olan tum genisligini kaplar, tek buyuk
+       tiklanabilir/yazilabilir alan olur (ayrica bir onClick-focus sarmalayicisina
+       gerek kalmaz, input'un kendisi zaten o alanin tamami). Sag tarafta
+       "m²" + iki buton TEK anlamsal kume olarak `.stepperKontrolGrup` ile
+       toplanir (kullanici: "m2 yazisini -/+ steppera yani sag tarafa
+       yaslayalim") — bu da istenen simetrik dengeyi kurar: sol=deger,
+       sag=kontrol. */
+    .stepperKontrolGrup {
         display: flex;
         align-items: center;
-        gap: 20px;
-        min-width: 0;
-        flex: 1;
-        cursor: text;
+        gap: 10px;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     /* Odaklanip yazilabilir bir input — 16px font-size iOS Safari'nin
        odakta sayfayi otomatik yakinlastirmasini engellemek icin SART
-       (projenin kendi deseni, bkz. `.konumAramaGiris`). `flex: 1` yerine
-       sabit bir genislik kullanilir: input replaced element oldugu icin
-       `flex: 1` kutusunu satirin tamamina geriyor, "m²" birimi de o
-       genisletilmis kutunun disina, satirin cok saginda kaliyordu (final
-       review bulgusu, olcum: 234px bosluk). Genislik SABIT `px` ile
-       verilir, `ch`/`em` DEGIL: `globals.css`nin genel
-       `* { box-sizing: border-box }` resetinde `width` PADDING'i de
-       kapsiyor, ve `ch`/`em` degerleri font yuklenme durumuna gore
-       degisken cikabiliyor (ikinci final review bulgusu, `5ch`
-       kirpiyordu). `54px`/`text-align:center` kombinasyonu M2_MAX (400,
-       3 hane) icin yeterliydi ama kullanici 5+ haneli deger yazinca
-       (input `type=number`de M2_MAX sinirlamasi yok, elle yazilan deger
-       dogrudan iletiliyor — bkz. GirdiKarti.test.tsx) merkezi hizalama
-       metni HER IKI YANDAN simetrik kirpiyordu, rakamlar gorunmuyordu.
-       Genislik `90px`e cikarildi, hizalama `left`e cevrildi: input artik
-       clickable/typeable alani da (wrapper'in flex:1 olmasiyla birlikte)
-       gorsel olarak "koskoca buton" beklentisine yaklasiyor, ve sola
-       hizali+genis kutuda tarayicinin native input-scroll davranisi son
-       yazilan rakamlarin her zaman gorunur kalmasini sagliyor. */
+       (projenin kendi deseni, bkz. `.konumAramaGiris`). `flex:1` ile
+       satirin kontrol kumesine kadar olan tum genisligini kaplar — bu artik
+       GUVENLI, cunku "m²" input'un icinde DEGIL, `.stepperKontrolGrup`
+       icinde (input buyudukce m²'yi disari itme sorunu, eski final review
+       bulgusu — 234px bosluk — bu yapida olusamaz). `left` hizalama +
+       genis kutu: uzun degerler kirpilmadan gorunur, native input-scroll
+       son yazilan rakamlari her zaman gorunur tutar. */
     .stepperInput {
-        flex: 0 1 auto;
-        width: 90px;
+        flex: 1;
         min-width: 0;
         text-align: left;
+        padding-left: 12px;
         font-size: 16px;
         font-weight: 800;
         font-family: Inter, sans-serif;

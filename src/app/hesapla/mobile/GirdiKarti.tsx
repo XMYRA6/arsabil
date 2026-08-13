@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from 'react';
 import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE } from '../calculatorUiHelpers';
 import { LocationHeader, RiskSection, AreaSection } from '../SmartContextCardSections';
 import { useBufferedNumberInput } from '../useBufferedNumberInput';
@@ -121,8 +120,6 @@ export function GirdiKarti({
     const { girdi: birimMaliyetGirdi, handleChange: handleBirimMaliyetChange } =
         useBufferedNumberInput(globalUnitPrice, onBirimMaliyet);
 
-    const stepperInputRef = useRef<HTMLInputElement>(null);
-
     return (
         <section className={styles.girdiKarti} aria-label="Proje girdileri">
             <LocationHeader parcelContext={parcelContext} onOpenMap={onParselDogrulaAc} />
@@ -164,46 +161,42 @@ export function GirdiKarti({
             <div className={styles.girdiSatir} data-girdi-blok="daire-buyuklugu">
                 <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
                 <div className={styles.stepperSatir}>
-                    <div
-                        className={styles.stepperTextGrup}
-                        onClick={() => stepperInputRef.current?.focus()}
-                    >
-                        <input
-                            ref={stepperInputRef}
-                            type="number"
-                            inputMode="numeric"
-                            className={`${styles.stepperInput} mNum`}
-                            value={apartmentSize ?? ''}
-                            placeholder="—"
-                            aria-label="Daire büyüklüğü, m²"
-                            onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
-                        />
+                    <input
+                        type="number"
+                        inputMode="numeric"
+                        className={`${styles.stepperInput} mNum`}
+                        value={apartmentSize ?? ''}
+                        placeholder="—"
+                        aria-label="Daire büyüklüğü, m²"
+                        onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
+                    />
+                    <div className={styles.stepperKontrolGrup}>
                         <span className={styles.stepperBirim}>m²</span>
+                        <button
+                            type="button"
+                            className={styles.stepperAzalt}
+                            aria-label="Metrekareyi azalt"
+                            onClick={() => {
+                                if (apartmentSize === null) return;
+                                const yeni = apartmentSize - M2_ADIM;
+                                if (yeni >= M2_MIN) onApartmentSize(yeni);
+                            }}
+                        >
+                            −
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.stepperArtir}
+                            aria-label="Metrekareyi artır"
+                            onClick={() => {
+                                if (apartmentSize === null) { onApartmentSize(ORNEK_APARTMENT_SIZE); return; }
+                                const yeni = apartmentSize + M2_ADIM;
+                                if (yeni <= M2_MAX) onApartmentSize(yeni);
+                            }}
+                        >
+                            +
+                        </button>
                     </div>
-                    <button
-                        type="button"
-                        className={styles.stepperAzalt}
-                        aria-label="Metrekareyi azalt"
-                        onClick={() => {
-                            if (apartmentSize === null) return;
-                            const yeni = apartmentSize - M2_ADIM;
-                            if (yeni >= M2_MIN) onApartmentSize(yeni);
-                        }}
-                    >
-                        −
-                    </button>
-                    <button
-                        type="button"
-                        className={styles.stepperArtir}
-                        aria-label="Metrekareyi artır"
-                        onClick={() => {
-                            if (apartmentSize === null) { onApartmentSize(ORNEK_APARTMENT_SIZE); return; }
-                            const yeni = apartmentSize + M2_ADIM;
-                            if (yeni <= M2_MAX) onApartmentSize(yeni);
-                        }}
-                    >
-                        +
-                    </button>
                 </div>
             </div>
 

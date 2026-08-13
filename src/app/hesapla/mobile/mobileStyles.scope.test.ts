@@ -46,26 +46,23 @@ describe('mobile.module.css kapsam guard', () => {
         expect(css).toMatch(/min-height/) // dosyada gercekten var, test bos gecmiyor
     })
 
-    it('.stepperInput 5+ haneli sayiyi gosterecek kadar genis ve sola hizali olmali (54px/center regresyonu)', () => {
-        // Kullanici bulgusu: 54px + text-align:center ile 5 haneli deger
-        // ("12345") kutuya sigmiyor, ortalanmis metin her iki yandan
-        // simetrik kirpiliyordu. Genislik >= 80px, hizalama sola olmali.
+    it('.stepperInput satirin kontrol kumesine kadar tum genisligini kaplamali ve sola hizali olmali (nihai tasarim: sol=deger)', () => {
+        // Kullanici onayli mockup: input flex:1 ile satirin tamamini
+        // kaplar (tek buyuk tiklanabilir/yazilabilir alan), hizalama sola.
         const match = css.match(/\.stepperInput\s*\{([^}]*)\}/)
         expect(match).not.toBeNull()
-        const widthMatch = match![1].match(/width:\s*(\d+)px/)
-        expect(widthMatch).not.toBeNull()
-        expect(Number(widthMatch![1])).toBeGreaterThanOrEqual(80)
+        expect(match![1]).toMatch(/flex:\s*1/)
         expect(match![1]).toMatch(/text-align:\s*left/)
     })
 
-    it('.stepperTextGrup satirin kalan tum genisligini kaplamali (tiklama alani buton kadar buyuk olsun diye)', () => {
-        // Kullanici bulgusu: "koskoca buton var, cok kucuk bir cizgiye
-        // tiklamamiz gerekiyor" — grup satirin sadece kendi icerik
-        // genisligini kapliyordu, butonlara kadar olan bosluk hicbir seye
-        // tepki vermiyordu.
-        const match = css.match(/\.stepperTextGrup\s*\{([^}]*)\}/)
+    it('.stepperKontrolGrup ("m²" + -/+ butonlari) satirin sagina yaslanmali (nihai tasarim: sag=kontrol kumesi)', () => {
+        // Kullanici bulgusu: "m2 yazisini -/+ steppera yani sag tarafa
+        // yaslayalim" — birim etiketi artik input'a degil, kontrol
+        // dugmeleriyle AYNI kumeye ait ve bu kume margin-left:auto ile
+        // satirin sagina sabitlenir.
+        const match = css.match(/\.stepperKontrolGrup\s*\{([^}]*)\}/)
         expect(match).not.toBeNull()
-        expect(match![1]).toMatch(/flex:\s*1/)
+        expect(match![1]).toMatch(/margin-left:\s*auto/)
     })
 
     it('guard sizinti yakalar (kendini dogrulayan test degil)', () => {

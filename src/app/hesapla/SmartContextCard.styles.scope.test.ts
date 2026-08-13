@@ -63,26 +63,24 @@ describe('SmartContextCard.module.css — mobil Liquid Glass kapsamı', () => {
     expect(statusMatch![1]).toMatch(/margin:\s*0/)
   })
 
-  it('.areaStepperInput 5+ haneli sayıyı gösterecek kadar geniş ve sola hizalı olmalı (54px/center regresyonu)', () => {
-    // Kullanici bulgusu: 54px + text-align:center ile 5 haneli deger
-    // ("12345") kutuya sigmiyor, ortalanmis metin her iki yandan simetrik
-    // kirpiliyordu. Genislik >= 80px, hizalama sola olmali.
+  it('.areaStepperInput satırın kontrol kümesine kadar tüm genişliğini kaplamalı ve sola hizalı olmalı (nihai tasarım: sol=değer)', () => {
+    // Kullanici onayli mockup: input flex:1 ile satirin tamamini kaplar
+    // (tek buyuk tiklanabilir/yazilabilir alan), hizalama sola.
     const mobileBlock = css.slice(mediaIndex)
     const match = mobileBlock.match(/\.areaStepperInput\s*\{([^}]*)\}/)
     expect(match).not.toBeNull()
-    const widthMatch = match![1].match(/width:\s*(\d+)px/)
-    expect(widthMatch).not.toBeNull()
-    expect(Number(widthMatch![1])).toBeGreaterThanOrEqual(80)
+    expect(match![1]).toMatch(/flex:\s*1/)
     expect(match![1]).toMatch(/text-align:\s*left/)
   })
 
-  it('.areaStepperTextGrup satırın kalan tüm genişliğini kaplamalı (tıklama alanı buton kadar büyük olsun diye)', () => {
-    // Kullanici bulgusu: "koskoca buton var, cok kucuk bir cizgiye
-    // tiklamamiz gerekiyor" — grup satirin sadece kendi icerik genisligini
-    // kapliyordu, butonlara kadar olan bosluk hicbir seye tepki vermiyordu.
+  it('.areaStepperKontrolGrup ("m²" + -/+ butonları) satırın sağına yaslanmalı (nihai tasarım: sağ=kontrol kümesi)', () => {
+    // Kullanici bulgusu: "m2 yazisini -/+ steppera yani sag tarafa
+    // yaslayalim" — birim etiketi artik input'a degil, kontrol
+    // dugmeleriyle AYNI kumeye ait ve bu kume margin-left:auto ile
+    // satirin sagina sabitlenir.
     const mobileBlock = css.slice(mediaIndex)
-    const match = mobileBlock.match(/\.areaStepperTextGrup\s*\{([^}]*)\}/)
+    const match = mobileBlock.match(/\.areaStepperKontrolGrup\s*\{([^}]*)\}/)
     expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/flex:\s*1/)
+    expect(match![1]).toMatch(/margin-left:\s*auto/)
   })
 })
