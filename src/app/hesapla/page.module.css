@@ -1243,9 +1243,31 @@ button.compareBtn {
    kapsamlı bir blok olarak geri eklendi (bkz. .superpowers/sdd/
    2026-08-07-hesapla-olu-kod-temizligi/final-fix-report.md). */
 
+@media (max-width: 768px) {
+    .stepperInput {
+        height: var(--input-height-mobile);
+    }
+
+    .stepperInput input {
+        font-size: 16px; /* iOS zoom tetiklenmesin */
+    }
+
+    .luxBox {
+        padding: 0.5rem 0.2rem;
+    }
+}
+
 /* =========================================================================
    ADVANCED PANEL — rightGrid'in eskiden bos olan 2. satirini doldurur
    ========================================================================= */
+/* Bilerek yukaridaki @media (max-width: 768px) blogundan SONRAYA
+   tasindi (Task 2 duzeltmesi): bu blok araya girdiginde, yukarida o
+   media query'yi aciklayan yorumun (backtick icinde AYNI metni birebir
+   iceren) hemen ardindan gelen ilk `{` artik .advancedPanel'e ait olur
+   — pageStyles.scope.test.ts'in extractMediaBlock() yardimcisi
+   css.indexOf(mediaQuery) ile ilk eslesmeyi (yorumun icindeki) bulup
+   ondan sonraki ilk `{`'yi aliyor, boylece yanlislikla bu blogu
+   yakalayip gercek media query icerigini kacirmisti. */
 .advancedPanel {
     grid-column: 1 / -1;
     padding: 0 0 16px;
@@ -1266,18 +1288,4 @@ button.compareBtn {
 .advancedPanelCols .drawerRow {
     padding: 0;
     border-bottom: none;
-}
-
-@media (max-width: 768px) {
-    .stepperInput {
-        height: var(--input-height-mobile);
-    }
-
-    .stepperInput input {
-        font-size: 16px; /* iOS zoom tetiklenmesin */
-    }
-
-    .luxBox {
-        padding: 0.5rem 0.2rem;
-    }
 }
