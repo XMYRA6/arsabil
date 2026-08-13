@@ -64,7 +64,7 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             isAaEnabled: false,
             onIsAaEnabled: jest.fn(),
             onParselDogrulaAc: jest.fn(),
-            luxLevel: 1.2, onLuxLevel: jest.fn(),
+            luxTier: 'orta' as const, onLuxTier: jest.fn(),
             apartmentSize: 140, onApartmentSize: jest.fn(),
             globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
             landShareRatio: 33, onLandShareRatio: jest.fn(),

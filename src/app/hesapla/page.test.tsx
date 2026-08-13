@@ -164,6 +164,72 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
     })
 })
 
+describe('/hesapla — masaüstü Yapı Standardı admin katsayılarına bağlı (denetim bulgusu C3)', () => {
+    it('admin panelinin qualityMedium değeri gerçekten hesaba yansır (artık sabit 1.2 DEĞİL)', async () => {
+        global.fetch = jest.fn((url: string) => {
+            if (url === '/api/settings') {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ qualityStandard: 1.0, qualityMedium: 1.25, qualityLux: 1.4, defaultUnitPrice: 10000 }),
+                })
+            }
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+        }) as unknown as typeof fetch
+
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+
+        // Admin degerinin (defaultUnitPrice=10000) fetch'ten UYGULANMASINI bekle
+        // — yoksa "Örnek Proje ile Dene" globalUnitPrice hala null saniyor ve
+        // kendi varsayilanini (12000) kullaniyor, test yanlis degerle karsilastirirdi.
+        await act(async () => {
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
+
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        const kaliteBloku = screen.getByText('Daire Standardı').closest('div') as HTMLElement
+        await user.click(within(kaliteBloku).getByText('Orta'))
+
+        // Mi_base = 140 m² × 10.000 TL/m² × 1.25 (admin'in qualityMedium'u, SABIT
+        // 1.2 DEGIL) = 1.750.000. Varsayilan risk seviyesi %10 oldugundan
+        // (AYAR_VARSAYILANLARI.riskLevel) HesapFisi'nde gorunen "Insaat Maliyeti
+        // (Mi)" bunun uzerine R=1.10 ile carpilir: 1.750.000 × 1.10 = 1.925.000.
+        expect(await screen.findByText(/1\.925\.000/)).toBeInTheDocument()
+    })
+
+    it('admin qualityMedium\'u degistirdikten SONRA bile "Orta" secimi kaybolmaz (tier bazli secim — denetim bulgusu C3)', async () => {
+        let resolveSettings: () => void = () => {}
+        const settingsGecikmesi = new Promise<void>(resolve => { resolveSettings = resolve })
+        global.fetch = jest.fn((url: string) => {
+            if (url === '/api/settings') {
+                return settingsGecikmesi.then(() => ({
+                    ok: true,
+                    json: () => Promise.resolve({ qualityMedium: 1.25 }),
+                }))
+            }
+            return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+        }) as unknown as typeof fetch
+
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+
+        const kaliteBloku = screen.getByText('Daire Standardı').closest('div') as HTMLElement
+        const ortaKutusu = within(kaliteBloku).getByText('Orta')
+        await user.click(ortaKutusu)
+        expect(ortaKutusu.closest('div')?.className).toMatch(/luxBoxActive/)
+
+        // Admin degeri (1.2 -> 1.25) kullanicinin secimini yaptiktan SONRA gelsin.
+        await act(async () => {
+            resolveSettings()
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
+
+        expect(ortaKutusu.closest('div')?.className).toMatch(/luxBoxActive/)
+    })
+})
+
 describe('/hesapla — masaüstü Gelişmiş Ayarlar paneli (sütun dengesi)', () => {
     it('İksa Masrafı ve Müteahhit Kazancı artık sol "Proje Bilgileri" sidebar\'ında DEĞİL', () => {
         viewportKur(true)

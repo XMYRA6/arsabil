@@ -1,3 +1,33 @@
+/** Yapı standardı katsayı kimliği — SEÇİMİN kendisi (kullanıcının tıkladığı
+ * sekme) bu anahtarla tutulur, HAM SAYIYLA değil. Admin panelinde bir
+ * katsayı değişse bile ("Orta" 1.2'den 1.25'e), kullanıcının seçimi
+ * (tier) aynı kalır — sayı eşleşmesine dayalı bir seçim, katsayı
+ * güncellenince sessizce "hiçbiri seçili değil" durumuna düşerdi
+ * (denetim bulgusu C3). */
+export type QualityTier = 'standart' | 'orta' | 'luks';
+
+export interface QualityLevels {
+  standart: number;
+  orta: number;
+  luks: number;
+}
+
+export const DEFAULT_QUALITY_LEVELS: QualityLevels = { standart: 1.0, orta: 1.2, luks: 1.4 };
+
+/** `/api/settings`den gelen kısmi veriyle varsayılanları birleştirir —
+ * yalnızca gerçekten sayısal olan alanlar üzerine yazılır. */
+export function mergeQualityLevels(
+  base: QualityLevels,
+  fetched: { qualityStandard?: unknown; qualityMedium?: unknown; qualityLux?: unknown } | null | undefined,
+): QualityLevels {
+  if (!fetched) return base;
+  return {
+    standart: typeof fetched.qualityStandard === 'number' ? fetched.qualityStandard : base.standart,
+    orta: typeof fetched.qualityMedium === 'number' ? fetched.qualityMedium : base.orta,
+    luks: typeof fetched.qualityLux === 'number' ? fetched.qualityLux : base.luks,
+  };
+}
+
 export interface EffectiveLandShareInput {
   isApartmentCountEnabled: boolean;
   ownerApartmentShare: number;

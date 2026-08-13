@@ -7,7 +7,7 @@ import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, type QualityTier } from './calculatorUiHelpers';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
@@ -70,7 +70,11 @@ export default function Home() {
   const { data: session } = useSession();
 
   // State: Kullanım Girdileri
-  const [luxLevel, setLuxLevel] = useState<number>(1.4); // Standart (1.0), Orta (1.2), Lüks (1.4)
+  // Secim TIER (kimlik) olarak tutulur, ham katsayi olarak DEGIL — admin
+  // panelinden katsayi degisse bile secim kaybolmamali (denetim bulgusu C3).
+  const [luxTier, setLuxTier] = useState<QualityTier>('luks');
+  const [qualityLevels, setQualityLevels] = useState(DEFAULT_QUALITY_LEVELS);
+  const luxLevel = qualityLevels[luxTier]; // motorun `L` katsayisi — TURETILMIS
   const [apartmentSize, setApartmentSize] = useState<number | null>(null);
   const [isApartmentCountEnabled, setIsApartmentCountEnabled] = useState<boolean>(AYAR_VARSAYILANLARI.isApartmentCountEnabled);
   const [totalApartments, setTotalApartments] = useState<number>(AYAR_VARSAYILANLARI.totalApartments);
@@ -167,6 +171,7 @@ export default function Home() {
       .then(res => res.json())
       .then(data => {
         if (data.defaultUnitPrice) setGlobalUnitPrice(prev => prev ?? data.defaultUnitPrice);
+        setQualityLevels(prev => mergeQualityLevels(prev, data));
       })
       .catch(console.error);
 
@@ -552,7 +557,7 @@ export default function Home() {
             onRiskLevel: handleRiskLevel,
             riskKaynagi,
             onParselDogrulaAc: () => setIsParcelModalOpen(true),
-            luxLevel, onLuxLevel: setLuxLevel,
+            luxTier, onLuxTier: setLuxTier,
             apartmentSize, onApartmentSize: handleApartmentSizeChange,
             globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet: handleGlobalUnitPriceChange,
             landShareRatio, onLandShareRatio: setLandShareRatio,
@@ -626,11 +631,11 @@ export default function Home() {
               <h4>Daire Standardı</h4>
               <div className={styles.luxGrid}>
                 {[
-                  { label: 'Standart', value: 1.0, icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.84L17.5 12h-11L12 5.84z" /></svg> },
-                  { label: 'Orta', value: 1.2, icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zm6-4h6V5H9v12zm8 0h6v-8h-6v8zm-16 0h6v-6H1v6z" /></svg> },
-                  { label: 'Lüks', value: 1.4, icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z" /><circle cx="17.5" cy="5.5" r="3.5" fill="#4ade80" /><path d="M16 6l1 1 2-2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg> }
+                  { tier: 'standart' as const, label: 'Standart', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.84L17.5 12h-11L12 5.84z" /></svg> },
+                  { tier: 'orta' as const, label: 'Orta', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zm6-4h6V5H9v12zm8 0h6v-8h-6v8zm-16 0h6v-6H1v6z" /></svg> },
+                  { tier: 'luks' as const, label: 'Lüks', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z" /><circle cx="17.5" cy="5.5" r="3.5" fill="#4ade80" /><path d="M16 6l1 1 2-2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg> }
                 ].map(opt => (
-                  <div key={opt.label} className={`${styles.luxBox} ${luxLevel === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setLuxLevel(opt.value)}>
+                  <div key={opt.label} className={`${styles.luxBox} ${luxTier === opt.tier ? styles.luxBoxActive : ''}`} onClick={() => setLuxTier(opt.tier)}>
                     {opt.icon}
                     <span>{opt.label}</span>
                   </div>

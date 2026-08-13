@@ -19,7 +19,7 @@ function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
         isAaEnabled: false,
         onIsAaEnabled: jest.fn(),
         onParselDogrulaAc: jest.fn(),
-        luxLevel: 1.2, onLuxLevel: jest.fn(),
+        luxTier: 'orta' as const, onLuxTier: jest.fn(),
         apartmentSize: 140, onApartmentSize: jest.fn(),
         globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
         landShareRatio: 33, onLandShareRatio: jest.fn(),
@@ -54,11 +54,11 @@ describe('GirdiKarti', () => {
         expect(screen.getByRole('tab', { name: 'Orta' })).toHaveAttribute('aria-selected', 'true')
     })
 
-    it('segment tiklaninca luxLevel degeri bildirilir', async () => {
-        const onLuxLevel = jest.fn()
-        render(<GirdiKarti {...props({ onLuxLevel })} />)
+    it('segment tiklaninca TIER bildirilir (ham katsayi DEGIL — denetim C3: admin katsayiyi degistirse bile secim kaybolmamali)', async () => {
+        const onLuxTier = jest.fn()
+        render(<GirdiKarti {...props({ onLuxTier })} />)
         await userEvent.click(screen.getByRole('tab', { name: 'Lüks' }))
-        expect(onLuxLevel).toHaveBeenCalledWith(1.4)
+        expect(onLuxTier).toHaveBeenCalledWith('luks')
     })
 
     it('metrekare artir/azalt 5 adimla calisir', async () => {

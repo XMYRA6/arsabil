@@ -1,4 +1,23 @@
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, ORNEK_GLOBAL_UNIT_PRICE } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, ORNEK_GLOBAL_UNIT_PRICE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS } from './calculatorUiHelpers';
+
+describe('mergeQualityLevels (denetim bulgusu C3)', () => {
+  it('fetched veri yoksa (null/undefined) base degismeden doner', () => {
+    expect(mergeQualityLevels(DEFAULT_QUALITY_LEVELS, null)).toEqual(DEFAULT_QUALITY_LEVELS);
+    expect(mergeQualityLevels(DEFAULT_QUALITY_LEVELS, undefined)).toEqual(DEFAULT_QUALITY_LEVELS);
+  });
+
+  it('sayisal alanlar base uzerine yazilir', () => {
+    expect(mergeQualityLevels(DEFAULT_QUALITY_LEVELS, { qualityStandard: 1.05, qualityMedium: 1.25, qualityLux: 1.45 }))
+      .toEqual({ standart: 1.05, orta: 1.25, luks: 1.45 });
+  });
+
+  it('sayisal olmayan/eksik alanlar base degerini korur (kismi guncelleme)', () => {
+    expect(mergeQualityLevels(DEFAULT_QUALITY_LEVELS, { qualityMedium: 1.3 }))
+      .toEqual({ standart: 1.0, orta: 1.3, luks: 1.4 });
+    expect(mergeQualityLevels(DEFAULT_QUALITY_LEVELS, { qualityStandard: 'nan' as unknown as number }))
+      .toEqual(DEFAULT_QUALITY_LEVELS);
+  });
+});
 
 describe('computeEffectiveLandShareX', () => {
   it('Sd kapalıyken landShareRatio/100 döner', () => {

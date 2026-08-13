@@ -1,6 +1,6 @@
 "use client";
 
-import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE } from '../calculatorUiHelpers';
+import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE, type QualityTier } from '../calculatorUiHelpers';
 import { LocationHeader, RiskSection, AreaSection } from '../SmartContextCardSections';
 import { useBufferedNumberInput } from '../useBufferedNumberInput';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './unitPriceSource';
@@ -21,8 +21,8 @@ export type GirdiKartiProps = {
     onIsAaEnabled: (v: boolean) => void;
     /** Parsel doğrulama modalını açar */
     onParselDogrulaAc: () => void;
-    luxLevel: number;
-    onLuxLevel: (v: number) => void;
+    luxTier: QualityTier;
+    onLuxTier: (v: QualityTier) => void;
     apartmentSize: number | null;
     onApartmentSize: (v: number | null) => void;
     globalUnitPrice: number | null;
@@ -49,12 +49,14 @@ const GLIF: Record<string, string> = {
     'Lüks': 'M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z',
 };
 
-/** Yapi standardi segmentleri — degerler motorun `L` katsayisidir. */
-const YAPI_STANDARTLARI = [
-    { etiket: 'Standart', deger: 1.0 },
-    { etiket: 'Orta', deger: 1.2 },
-    { etiket: 'Lüks', deger: 1.4 },
-] as const;
+/** Yapi standardi segmentlerinin SABIT kimligi (etiket+tier) — sayisal
+ * katsayi (`deger`) artik `qualityLevels` prop'undan (admin panelinden)
+ * geliyor, burada sabit kodlanmiyor (denetim bulgusu C3). */
+const YAPI_STANDARTLARI_SIRASI: { tier: QualityTier; etiket: string }[] = [
+    { tier: 'standart', etiket: 'Standart' },
+    { tier: 'orta', etiket: 'Orta' },
+    { tier: 'luks', etiket: 'Lüks' },
+];
 
 /** Slider dolgusunun yuzdesi. CSS `--progress` olarak okur (RangeSlider deseni). */
 function ilerleme(deger: number, min: number, max: number): React.CSSProperties {
@@ -90,8 +92,8 @@ export function GirdiKarti({
     riskKaynagi,
     isAaEnabled,
     onIsAaEnabled,
-    luxLevel,
-    onLuxLevel,
+    luxTier,
+    onLuxTier,
     apartmentSize,
     onApartmentSize,
     globalUnitPrice,
@@ -136,8 +138,8 @@ export function GirdiKarti({
             <div className={styles.girdiSatir} data-girdi-blok="yapi-standardi">
                 <span className={styles.girdiEtiket}>Yapı standardı</span>
                 <div className={styles.segmentKap} role="tablist" aria-label="Yapı standardı">
-                    {YAPI_STANDARTLARI.map(({ etiket, deger }) => {
-                        const secili = luxLevel === deger;
+                    {YAPI_STANDARTLARI_SIRASI.map(({ etiket, tier }) => {
+                        const secili = luxTier === tier;
                         return (
                             <button
                                 key={etiket}
@@ -145,7 +147,7 @@ export function GirdiKarti({
                                 role="tab"
                                 aria-selected={secili}
                                 className={`${styles.segment} ${secili ? styles.segmentAktif : ''}`}
-                                onClick={() => onLuxLevel(deger)}
+                                onClick={() => onLuxTier(tier)}
                             >
                                 <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path d={GLIF[etiket]} />
