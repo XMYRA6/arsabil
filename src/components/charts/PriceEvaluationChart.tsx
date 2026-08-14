@@ -1,14 +1,89 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import { formatTRThousands } from '@/app/hesapla/trNumberFormat';
 
 interface PriceEvaluationChartProps {
     minPrice: number;
     marketPrice: number;
+    manualMarketPrice: string;
+    onManualMarketPriceChange: (v: string) => void;
 }
 
-export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minPrice, marketPrice }) => {
-    if (!marketPrice) return <div style={{ color: 'var(--muted)', fontSize: '0.9rem', textAlign: 'center', width: '100%', padding: '1rem' }}>Piyasa Fiyatı Girilmedi</div>;
+export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minPrice, marketPrice, manualMarketPrice, onManualMarketPriceChange }) => {
+    // Piyasa fiyati artik Gelismis Ayarlar'da degil — bu kart kendi bos
+    // durumunu bir davete cevirip degeri yerinde topluyor (2026-08-14 UX
+    // karari). Yazarken her tus vurusunda ebeveyne bildirilseydi `marketPrice`
+    // ilk rakamdan itibaren (orn. "1" -> 1 TL) sacma bir yuzde hesaplatirdi;
+    // bu yuzden taslak yerel state'te tutulup yalnizca Enter/blur'da commit
+    // ediliyor.
+    const [isEditing, setIsEditing] = useState(false);
+    const [draft, setDraft] = useState(manualMarketPrice);
+
+    const openEditor = () => {
+        setDraft(manualMarketPrice);
+        setIsEditing(true);
+    };
+
+    const commit = () => {
+        const trimmed = draft.trim();
+        if (trimmed.length > 0) {
+            onManualMarketPriceChange(trimmed);
+        }
+        setIsEditing(false);
+    };
+
+    if (!marketPrice || isEditing) {
+        if (!isEditing) {
+            return (
+                <button
+                    type="button"
+                    onClick={openEditor}
+                    style={{
+                        display: 'flex', gap: '0.75rem', alignItems: 'flex-start', width: '100%',
+                        background: 'var(--card-bg-subtle, #f7faff)', border: '1px dashed var(--primary, #1f6feb)',
+                        borderRadius: '12px', padding: '0.9rem', cursor: 'pointer', textAlign: 'left', font: 'inherit',
+                    }}
+                >
+                    <span style={{
+                        flex: 'none', width: '30px', height: '30px', borderRadius: '8px',
+                        background: 'var(--primary, #1f6feb)', color: '#fff', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem',
+                    }}>₺</span>
+                    <span>
+                        <span style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>
+                            Piyasa Fiyatını Gir
+                        </span>
+                        <span style={{ display: 'block', fontSize: '0.76rem', color: 'var(--muted)', lineHeight: 1.5 }}>
+                            Hesaplanan fiyatla karşılaştıralım ve bırakabileceğin maksimum arsa payını gösterelim.
+                        </span>
+                    </span>
+                </button>
+            );
+        }
+
+        return (
+            <div style={{ background: 'var(--card-bg-subtle, #f7faff)', border: '1.5px solid var(--primary, #1f6feb)', borderRadius: '12px', padding: '0.85rem 1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                        type="text"
+                        inputMode="decimal"
+                        aria-label="Yaklaşık Piyasa Fiyatı"
+                        value={draft}
+                        autoFocus
+                        onChange={(e) => setDraft(formatTRThousands(e.target.value))}
+                        onKeyDown={(e) => { if (e.key === 'Enter') commit(); }}
+                        onBlur={commit}
+                        style={{ flex: 1, border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem 0.7rem', font: 'inherit', fontWeight: 700 }}
+                    />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--muted)', fontWeight: 600 }}>TL</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.4rem' }}>
+                    Yaz ve Enter&apos;a bas · boş bırakıp dışarı tıklarsan iptal olur
+                </div>
+            </div>
+        );
+    }
 
     // Mobil karttaki `piyasaFarkiYuzdesi` (hesaplaMobileProps.ts) ile AYNI
     // formul/isaret: pozitif = hesaplanan min. fiyat piyasadan YUKSEK
@@ -88,6 +163,16 @@ export const PriceEvaluationChart: React.FC<PriceEvaluationChartProps> = ({ minP
                 <span>+30%</span>
             </div>
 
+            <button
+                type="button"
+                onClick={openEditor}
+                style={{
+                    alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0,
+                    color: 'var(--primary, #1f6feb)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer',
+                }}
+            >
+                Değiştir
+            </button>
         </div>
     );
 };

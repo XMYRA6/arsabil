@@ -19,13 +19,13 @@ import { toast } from 'react-hot-toast';
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare, type Scenario as ScenarioItem } from '@/components/ScenarioCompare';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { MarketField, BirimMaliyetField, RiskCostFields } from './AdvancedSettingsSections';
+import { BirimMaliyetField, RiskCostFields } from './AdvancedSettingsSections';
 
 import { HesapFisi } from './HesapFisi';
 import type { RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { ParcelVerificationSheet } from '@/components/listing-wizard/ParcelVerificationSheet';
-import { SmartContextCard } from './SmartContextCard';
+import { LocationHeader, AreaSection, RiskSection } from './SmartContextCardSections';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import type { RiskMeasurement } from '@/lib/risk/types';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
@@ -630,6 +630,20 @@ export default function Home() {
             <div className={styles.sidebarTitle}>Proje Bilgileri</div>
 
             <div className={styles.settingsGroup}>
+              <LocationHeader parcelContext={parcelContext} onOpenMap={() => setIsParcelModalOpen(true)} />
+            </div>
+
+            <div className={styles.settingsGroup}>
+              <AreaSection
+                parcelContext={parcelContext}
+                arsaAlani={arsaAlani}
+                onArsaAlani={setArsaAlani}
+                isAaEnabled={isAaEnabled}
+                onIsAaEnabled={setIsAaEnabled}
+              />
+            </div>
+
+            <div className={styles.settingsGroup}>
               <h4>Daire Standardı</h4>
               <div className={styles.luxGrid}>
                 {[
@@ -648,11 +662,7 @@ export default function Home() {
             <div className={styles.settingsGroup}>
               <h4>Ortalama Daire Metrekaresi</h4>
               <div className={styles.stepperInput}>
-                <input
-                  type="number"
-                  value={apartmentSize ?? ''}
-                  onChange={(e) => handleApartmentSizeChange(e.target.value === '' ? null : Number(e.target.value))}
-                />
+                <input type="number" value={apartmentSize ?? ''} onChange={(e) => handleApartmentSizeChange(e.target.value === '' ? null : Number(e.target.value))} />
                 <div className={styles.stepperRight}>
                   <span>m²</span>
                   <button onClick={() => { if (apartmentSize !== null) handleApartmentSizeChange(Math.max(50, apartmentSize - 5)); }}>−</button>
@@ -662,11 +672,15 @@ export default function Home() {
             </div>
 
             <div className={styles.settingsGroup}>
+              <BirimMaliyetField globalUnitPrice={globalUnitPrice} birimMaliyetKaynagi={birimMaliyetKaynagi} onBirimMaliyet={handleGlobalUnitPriceChange} />
+            </div>
+
+            <div className={styles.settingsGroup}>
               <div className={styles.toggleRow}>
-                <h4>Toplam Daire Sayısı</h4>
+                <h4>Arsa Payı</h4>
                 <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
               </div>
-              {isApartmentCountEnabled && (
+              {isApartmentCountEnabled ? (
                 <>
                   <div className={styles.stepperInput}>
                     <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
@@ -676,45 +690,26 @@ export default function Home() {
                       <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
                     </div>
                   </div>
-                  <RangeSlider
-                    label="Arsa Sahibine Düşen Daire"
-                    aria-label="Arsa Sahibine Düşen Daire"
-                    min={0}
-                    max={Math.max(totalApartments - 1, 0)}
-                    step={1}
-                    value={ownerApartmentShare}
-                    unit="daire"
-                    onChange={(e) => setOwnerApartmentShare(Number(e.target.value))}
-                  />
+                  <RangeSlider label="Arsa Sahibine Düşen Daire" aria-label="Arsa Sahibine Düşen Daire" min={0} max={Math.max(totalApartments - 1, 0)} step={1} value={ownerApartmentShare} unit="daire" onChange={(e) => setOwnerApartmentShare(Number(e.target.value))} />
+                  <p className={styles.sliderValueBox}>Arsa payı %{Math.round(effectiveLandShareRatio)} olarak hesaplanıyor.</p>
                 </>
+              ) : (
+                <div className={styles.sliderContainer}>
+                  <div className={styles.sliderTrackWrapper}>
+                    <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
+                      <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
+                      <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
+                      <input type="range" min="10" max="100" value={landShareRatio} onChange={(e) => setLandShareRatio(Number(e.target.value))} className={styles.sliderInput} aria-label="Arsa payı yüzdesi" />
+                      <div className={styles.sliderTicks}><span>10%</span><span>100%</span></div>
+                    </div>
+                  </div>
+                  <div className={styles.sliderValueBox}>{landShareRatio}%</div>
+                </div>
               )}
             </div>
 
-            {/* Arsa alanini acan anahtar artik `SmartContextCard`in kendi
-                alan basliginda — disarida durdugunda mobil dala hic
-                gelmiyordu ve "Arsa Alanı" basligi risk bolumunu de kapsayan
-                yaniltici bir sarmalayici olusturuyordu. */}
             <div className={styles.settingsGroup}>
-              <SmartContextCard
-                parcelContext={parcelContext}
-                onOpenMap={() => setIsParcelModalOpen(true)}
-                arsaAlani={arsaAlani}
-                onArsaAlani={setArsaAlani}
-                riskLevel={riskLevel}
-                riskLevels={riskLevels}
-                onRiskLevel={handleRiskLevel}
-                riskKaynagi={riskKaynagi}
-                isAaEnabled={isAaEnabled}
-                onIsAaEnabled={setIsAaEnabled}
-              />
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <BirimMaliyetField
-                globalUnitPrice={globalUnitPrice}
-                birimMaliyetKaynagi={birimMaliyetKaynagi}
-                onBirimMaliyet={handleGlobalUnitPriceChange}
-              />
+              <RiskSection riskLevel={riskLevel} riskLevels={riskLevels} onRiskLevel={handleRiskLevel} riskKaynagi={riskKaynagi} />
             </div>
           </div>
 
@@ -770,6 +765,8 @@ export default function Home() {
                       <PriceEvaluationChart
                         minPrice={result ? result.FD_total : 0}
                         marketPrice={marketPriceNum}
+                        manualMarketPrice={manualMarketPrice}
+                        onManualMarketPriceChange={setManualMarketPrice}
                       />
                     </div>
                   </div>
@@ -809,35 +806,6 @@ export default function Home() {
                 </Button>
               </div>
             )}
-
-            <div className={styles.sliderArea}>
-              <h4 className={styles.sliderHeader}>Arsa Payı</h4>
-              {isApartmentCountEnabled ? (
-                <div className={styles.sliderValueBox}>
-                  %{Math.round(effectiveLandShareRatio)} ({ownerApartmentShare}/{totalApartments} daire)
-                </div>
-              ) : (
-                <div className={styles.sliderContainer}>
-                  <div className={styles.sliderTrackWrapper}>
-                    <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
-                      <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
-                      <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
-                      <input
-                        type="range" min="10" max="100"
-                        value={landShareRatio}
-                        onChange={(e) => setLandShareRatio(Number(e.target.value))}
-                        className={styles.sliderInput}
-                      />
-                      <div className={styles.sliderTicks}>
-                        <span>10%</span>
-                        <span>100%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className={styles.sliderValueBox}>{landShareRatio}%</div>
-                </div>
-              )}
-            </div>
 
 
             {actionsSection}
@@ -927,10 +895,11 @@ export default function Home() {
           <div className={styles.advancedPanel}>
             <div className={styles.advancedPanelTitle}>Gelişmiş Ayarlar</div>
             <div className={styles.advancedPanelCols}>
-              <MarketField
-                manualMarketPrice={manualMarketPrice}
-                setManualMarketPrice={setManualMarketPrice}
-              />
+              {/* Yaklaşık Piyasa Fiyatı artık burada değil — "Piyasa
+                  Değerine Göre" kartının kendi bos-durumundan (tikla ->
+                  yaz -> Enter) giriliyor (2026-08-14 UX kararı). Alan
+                  mobil `GelismisAyarlarSheet`de hâlâ kullanılıyor,
+                  `MarketField` bilesenin kendisi SILINMEDI. */}
               <RiskCostFields
                 iksaMode={iksaMode}
                 setIksaMode={setIksaMode}

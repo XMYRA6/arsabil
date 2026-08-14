@@ -77,6 +77,11 @@
     display: grid;
     grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
     gap: 14px;
+    /* Sidebar ve sağ sütun artık birbirine zorla eşitlenmiyor (eskiden
+       varsayılan `stretch`, sidebar sağ sütundan uzun olunca sağ sütunun
+       altında boşta kalan bir alan bırakıyordu). Sağ sütun artık kendi
+       içeriğine göre bitiyor. */
+    align-items: start;
 }
 
 /* =========================================================================
@@ -1275,7 +1280,7 @@ button.compareBtn {
 
 .advancedPanelCols {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
     padding: 0 16px;
 }

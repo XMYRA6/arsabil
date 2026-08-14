@@ -29,7 +29,7 @@ export const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
     }
 
     const data = {
-        labels: ['İnşaat', 'Arsa', 'Kâr', 'Risk'],
+        labels: ['İnşaat (risksiz)', 'Arsa', 'Kâr', 'Risk'],
         datasets: [
             {
                 data: [constructionCost, landValue, profit, risk],
@@ -67,7 +67,7 @@ export const CostBreakdownChart: React.FC<CostBreakdownChartProps> = ({
     };
 
     const items = [
-        { label: 'İnşaat', color: '#3b82f6', value: constructionCost },
+        { label: 'İnşaat (risksiz)', color: '#3b82f6', value: constructionCost },
         { label: 'Arsa', color: '#10b981', value: landValue },
         { label: 'Kâr', color: '#f59e0b', value: profit },
         { label: 'Risk', color: '#ff5a5f', value: risk }, // --red'in literal degeri (canvas var() cozemez)
