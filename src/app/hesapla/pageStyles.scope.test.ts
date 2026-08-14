@@ -257,11 +257,18 @@ describe('piyasa fiyatı ve grafik P tutarlılığı (2026-07-24 UX/UI redesign)
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
     const hardcodedMatches = pageTsx.match(/P:\s*10000,/g) ?? [];
     expect(hardcodedMatches.length).toBe(0);
-    // `?? 0`'lı hal, chartBaseInput'un (Task 5) result'a bagli olmadan
-    // her zaman render edilmesi icin gereken null-guvenli varsayilan —
-    // hala sabit 10000 degil, hala dinamik globalUnitPrice'tan turuyor.
-    const dynamicMatches = pageTsx.match(/P:\s*globalUnitPrice(?:\s*\?\?\s*0)?,/g) ?? [];
+    // Denetim-2 (2026-08-14): `input` ve `chartBaseInput` artik elle
+    // kopyalanan iki ayri nesne DEGIL, TEK bir `buildCalculationInput`
+    // fonksiyonundan (calculatorUiHelpers.ts) turuyor — asil `P: globalUnitPrice`
+    // atamasi artik page.tsx'te degil, o fonksiyonun icinde, TEK yerde
+    // yasiyor. Bu test artik page.tsx'in iki cagri sitesinin de
+    // `globalUnitPrice`'i (hardcoded bir sayi degil) o fonksiyona GERCEKTEN
+    // gectigini dogruluyor — drift riski (2026-07-24'teki asil hata) artik
+    // yapisal olarak imkansiz, ama "kimse globalUnitPrice parametresini
+    // silip sabit bir sayi yazmasin" kilidini burada tutuyoruz.
+    const dynamicMatches = pageTsx.match(/\bglobalUnitPrice,/g) ?? [];
     expect(dynamicMatches.length).toBeGreaterThanOrEqual(2);
+    expect(pageTsx).toMatch(/buildCalculationInput\(/);
   });
 
   it('Sd modu (Toplam Daire Sayısı) sayfa açılışında varsayılan kapalı olmalı', () => {

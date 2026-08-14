@@ -9,7 +9,7 @@ Bu doküman, ArsaBil hesaplama motorunun girdilerini, çıktılarını ve determ
 *   **`L` (Kalite sınıf katsayısı):** İnşaatın lüks derecesi (Standart=1.0, Orta=1.2, Lüks=1.4 vb.)
 *   **`Ad` (Daire brüt alanı):** Bir dairenin ortalama brüt metrekaresi (m²)
 *   **`P` (Birim inşaat fiyatı):** 1 m² inşaatın taban maliyeti (Örn: 15.000 TL/m²)
-*   **`K` (Müteahhit kâr katsayısı):** Beklenen kâr oranı (Örn: Düşük=1.15, Orta=1.3, Yüksek=1.5, Kafa kafaya=1.0)
+*   **`K` (Müteahhit kâr katsayısı):** Beklenen kâr oranı (Örn: Zarar=0.90, Düşük=1.15, Orta=1.3, Yüksek=1.5, Kafa kafaya=1.0). "Zarar" (K<1.0, maliyetin altında satış) denetim taslağının §1/§13'te tanımladığı 4. kademedir, admin panelinden yönetilir (2026-08-14).
 
 ### 1.2 Opsiyonel (Toggle) Girdiler
 Motor, bu girdilerin açık (`enabled`) veya kapalı (`disabled`) olma durumuna göre farklı hesaplama yollarına girer veya ilgili çıktıları `null` döndürür.
@@ -46,7 +46,7 @@ Motor, bu girdilerin açık (`enabled`) veya kapalı (`disabled`) olma durumuna 
 3.  **Risk Katsayısı (`R`):**
     *   Risk *kapalıysa*: `R = 1`
     *   Risk *açıksa*: Girdi olarak verilen `R` kullanılır.
-4.  **Toplam İnşaat Maliyeti:** `Mi = (Mi_base + Mz) * R`
+4.  **Toplam İnşaat Maliyeti:** `Mi = (Mi_base + Mz) * R` — risk katsayısı **kasıtlı olarak** iksa masrafını da kapsar (`Mi_base + Mz` toplamı üzerinden çarpılır), yalnızca ham inşaata değil. Gerekçe: iksa da malzeme/işçilik riskine tabi bir inşaat kalemi (denetim bulgusu, 2026-08-14).
 
 ### Adım B: Toplam Maliyet (`M`) ve Daire Fiyatı (`FD`)
 *   **Arsa Maliyeti (Ma):** *[TBD - Antigravity tarafından 3 alternatif geliştirilecek]* Şimdilik bir placeholder/stub fonksiyon kullanılacak veya basitçe `Ma = M - Mi` mantığıyla orantısal hesaplanacaktır. 

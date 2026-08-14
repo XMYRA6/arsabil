@@ -849,6 +849,17 @@
         color: var(--m-ink);
     }
 
+    .landShareHighWarning {
+        margin: 6px 0 0;
+        padding: 8px 10px;
+        background: rgba(var(--orange-rgb), 0.1);
+        border: 1px solid var(--orange);
+        border-radius: 8px;
+        color: var(--orange);
+        font: 600 11px Inter, sans-serif;
+        line-height: 1.4;
+    }
+
     /* ── Sabit CTA (Raporu kaydet) ── */
     .mobilCta {
         position: relative;

@@ -1,3 +1,5 @@
+import type { CalculationInput } from '@/lib/calculator/engine_v2';
+
 /** Yapı standardı katsayı kimliği — SEÇİMİN kendisi (kullanıcının tıkladığı
  * sekme) bu anahtarla tutulur, HAM SAYIYLA değil. Admin panelinde bir
  * katsayı değişse bile ("Orta" 1.2'den 1.25'e), kullanıcının seçimi
@@ -59,6 +61,58 @@ export function clampOwnerApartmentShare(ownerApartmentShare: number, totalApart
 
 export function parseMarketPrice(raw: string): number {
   return parseInt(raw.replace(/\D/g, '') || '0', 10);
+}
+
+export interface BuildCalculationInputParams {
+  x: number;
+  luxLevel: number;
+  apartmentSize: number | null;
+  globalUnitPrice: number | null;
+  builderProfit: number;
+  isApartmentCountEnabled: boolean;
+  totalApartments: number;
+  isAaEnabled: boolean;
+  arsaAlani: number;
+  riskLevel: number;
+  iksaMode: 'off' | 'percentage' | 'manual';
+  iksaPercentage: number;
+  iksaManualTL: number;
+  Pmarket?: number;
+}
+
+/** Hesap motoruna (`CalculatorEngineV2.calculate`) verilecek `CalculationInput`
+ * nesnesini TEK yerden üretir. Önceden `page.tsx`te iki ayrı yerde (asıl
+ * hesap + grafik girdisi) elle senkron tutulan, satır satır kopya iki nesne
+ * vardı — 2026-07-24'te tam bu yüzden grafikler sabit bir değer kullanmıştı
+ * (biri güncellenip diğeri unutulmuştu). Her iki çağrı sitesi artık bunu
+ * kullanır (denetim-2 bulgusu). */
+export function buildCalculationInput(params: BuildCalculationInputParams): CalculationInput {
+  const {
+    x, luxLevel, apartmentSize, globalUnitPrice, builderProfit,
+    isApartmentCountEnabled, totalApartments, isAaEnabled, arsaAlani,
+    riskLevel, iksaMode, iksaPercentage, iksaManualTL, Pmarket,
+  } = params;
+
+  return {
+    x,
+    L: luxLevel,
+    Ad: apartmentSize ?? 0,
+    P: globalUnitPrice ?? 0,
+    K: builderProfit,
+
+    Sd: isApartmentCountEnabled ? totalApartments : undefined,
+    Aa: isAaEnabled ? arsaAlani : undefined,
+
+    isRiskEnabled: riskLevel > 0,
+    R: riskLevel > 0 ? 1 + (riskLevel / 100) : 1,
+
+    isExcavationEnabled: iksaMode !== 'off',
+    excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
+    Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
+    MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
+
+    Pmarket,
+  };
 }
 
 /** "Örnek Proje ile Dene" demo sabitleri — eski AYAR_VARSAYILANLARI'nin apartmentSize/globalUnitPrice degerleriyle AYNI (140/12000), artik demo amacli. TEK kaynak. */

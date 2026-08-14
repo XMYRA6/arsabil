@@ -7,7 +7,7 @@ import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, type QualityTier } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput, type QualityTier } from './calculatorUiHelpers';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
 import { SensitivityChart } from '@/components/charts/SensitivityChart';
@@ -136,6 +136,11 @@ export default function Home() {
 
   const [builderProfit, setBuilderProfit] = useState<number>(AYAR_VARSAYILANLARI.builderProfit);
   const [profitLevels, setProfitLevels] = useState<ProfitLevel[]>([
+    // "Zarar" — denetim taslağının §1/§13'te tanımladığı 4. kademe, K<1.0
+    // (maliyetin altında satış). Kod tarafı hazır; canlı DB'ye admin
+    // panelinden ("+ Yeni Seviye Ekle") eklenmesi gerekiyor çünkü tablo
+    // zaten seed'lenmiş (denetim-2 bulgusu, kullanıcı onayıyla eklendi).
+    { id: 'default-0', label: 'Zarar', value: 0.90, sortOrder: -1, isDefault: false },
     { id: 'default-1', label: 'Düşük', value: 1.15, sortOrder: 0, isDefault: false },
     { id: 'default-2', label: 'Orta', value: 1.30, sortOrder: 1, isDefault: true },
     { id: 'default-3', label: 'Yüksek', value: 1.50, sortOrder: 2, isDefault: false },
@@ -227,26 +232,22 @@ export default function Home() {
       landShareRatio,
     });
 
-    const input: CalculationInput = {
+    const input: CalculationInput = buildCalculationInput({
       x: activeLandShare,
-      L: luxLevel,
-      Ad: apartmentSize,
-      P: globalUnitPrice,
-      K: builderProfit,
-
-      Sd: isApartmentCountEnabled ? totalApartments : undefined,
-      Aa: isAaEnabled ? arsaAlani : undefined,
-
-      isRiskEnabled: riskLevel > 0,
-      R: riskLevel > 0 ? 1 + (riskLevel / 100) : 1,
-
-      isExcavationEnabled: iksaMode !== 'off',
-      excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
-      Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
-      MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
-
+      luxLevel,
+      apartmentSize,
+      globalUnitPrice,
+      builderProfit,
+      isApartmentCountEnabled,
+      totalApartments,
+      isAaEnabled,
+      arsaAlani,
+      riskLevel,
+      iksaMode,
+      iksaPercentage,
+      iksaManualTL,
       Pmarket: parseMarketPrice(manualMarketPrice) || undefined,
-    };
+    });
 
     const res = CalculatorEngineV2.calculate(input);
     setResult(res);
@@ -459,21 +460,25 @@ export default function Home() {
   // iki kez satir ici yaziliydi; mobil analiz sekmesi ucuncu bir kopya
   // olusturacakti. Kopyalar zamanla ayrisir — 2026-07-24'te grafiklerin
   // sabit `P: 10000` kullanmasi tam olarak bu sinifin hatasiydi.
-  const chartBaseInput: CalculationInput = {
+  // Artik `input` (yukarida, sonuc hesabinda) ile AYNI `buildCalculationInput`
+  // fonksiyonundan turuyor (denetim-2 bulgusu) — tek fark Pmarket'in burada
+  // hic verilmemesi (grafikler piyasa fiyatini kendi ayri `marketPrice`
+  // prop'uyla aliyor).
+  const chartBaseInput: CalculationInput = buildCalculationInput({
     x: effectiveLandShareRatio / 100,
-    L: luxLevel,
-    Ad: apartmentSize ?? 0,
-    P: globalUnitPrice ?? 0,
-    K: builderProfit,
-    Sd: isApartmentCountEnabled ? totalApartments : undefined,
-    Aa: isAaEnabled ? arsaAlani : undefined,
-    isRiskEnabled: riskLevel > 0,
-    R: riskLevel > 0 ? 1 + (riskLevel / 100) : 1,
-    isExcavationEnabled: iksaMode !== 'off',
-    excavationMode: iksaMode === 'manual' ? 'manual' : 'percentage',
-    Z: iksaMode === 'percentage' ? (iksaPercentage / 100) : 0,
-    MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
-  };
+    luxLevel,
+    apartmentSize,
+    globalUnitPrice,
+    builderProfit,
+    isApartmentCountEnabled,
+    totalApartments,
+    isAaEnabled,
+    arsaAlani,
+    riskLevel,
+    iksaMode,
+    iksaPercentage,
+    iksaManualTL,
+  });
 
   /**
    * PLATFORMDAN BAGIMSIZ OVERLAY'LER — tek tanim, iki dalda da render edilir.
@@ -699,11 +704,25 @@ export default function Home() {
                     <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
                       <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
                       <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
+                      {/* Ust sinir 100 — musteri bilerek %100'e kadar
+                          cikabilmesini istedi (daire-sayisi modundaki N-1
+                          kelepcesi burada UYGULANMIYOR). x=1'e yaklasinca
+                          engine_v2.ts maliyeti matematiksel olarak
+                          buyutuyor (M=Mi/(1-x)) — bu YANLIS degil, arsa
+                          sahibinin projenin neredeyse tamamini aldigi
+                          senaryonun dogru sonucu; kullaniciya asagidaki
+                          uyari metniyle acikca anlatiliyor (denetim-2
+                          bulgusu, cozum: kelepce yerine seffaflik). */}
                       <input type="range" min="10" max="100" value={landShareRatio} onChange={(e) => setLandShareRatio(Number(e.target.value))} className={styles.sliderInput} aria-label="Arsa payı yüzdesi" />
                       <div className={styles.sliderTicks}><span>10%</span><span>100%</span></div>
                     </div>
                   </div>
                   <div className={styles.sliderValueBox}>{landShareRatio}%</div>
+                  {landShareRatio >= 90 && (
+                    <p className={styles.landShareHighWarning}>
+                      Bu kadar yüksek bir arsa payında proje maliyeti matematiksel olarak çok yükselir — arsa sahibi projenin neredeyse tamamını alıyor demektir.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

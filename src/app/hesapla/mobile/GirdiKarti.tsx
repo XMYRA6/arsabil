@@ -300,6 +300,17 @@ export function GirdiKarti({
                             aria-label="Arsa payı yüzdesi"
                             onChange={e => onLandShareRatio(Number(e.target.value))}
                         />
+                        {/* Musteri bilerek %100'e kadar cikabilmesini istedi —
+                            kelepce yerine seffaflik: x=1'e yaklasinca engine_v2.ts
+                            maliyeti matematiksel olarak buyutuyor (M=Mi/(1-x)),
+                            bu bir hata degil, arsa sahibinin projenin neredeyse
+                            tamamini aldigi senaryonun dogru sonucu (denetim-2
+                            bulgusu, desktop page.tsx'teki ayni satirin ikizi). */}
+                        {landShareRatio >= 90 && (
+                            <p className={styles.landShareHighWarning}>
+                                Bu kadar yüksek bir arsa payında proje maliyeti matematiksel olarak çok yükselir — arsa sahibi projenin neredeyse tamamını alıyor demektir.
+                            </p>
+                        )}
                     </>
                 )}
             </div>

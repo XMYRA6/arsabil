@@ -396,6 +396,31 @@ describe('/hesapla — masaüstü Arsa Payı TEK blokta (denetim sonrası UX dü
         expect(slider).toHaveValue('45')
     })
 
+    it('yüzde slider\'ı hâlâ %100\'e kadar çıkabilir — müşteri talebiyle üst sınır kaldırılmadı, KELEPÇELENMEDİ', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        const sidebar = screen.getByText('Proje Bilgileri').closest('.desktopSidebar') as HTMLElement
+        const slider = within(sidebar).getByLabelText('Arsa payı yüzdesi') as HTMLInputElement
+        expect(slider.max).toBe('100')
+    })
+
+    it('yüzde %90 ve üzerine çıkınca motorun matematiksel olarak şiştiğini açıklayan bir uyarı belirir (denetim-2 bulgusu, kelepçe yerine şeffaflık)', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
+        const sidebar = screen.getByText('Proje Bilgileri').closest('.desktopSidebar') as HTMLElement
+        const slider = within(sidebar).getByLabelText('Arsa payı yüzdesi')
+
+        fireEvent.change(slider, { target: { value: '50' } })
+        expect(screen.queryByText(/matematiksel olarak çok yükselir/)).toBeNull()
+
+        fireEvent.change(slider, { target: { value: '95' } })
+        expect(await screen.findByText(/matematiksel olarak çok yükselir/)).toBeInTheDocument()
+    })
+
     it('daire-sayısı modunda (toggle açık) sidebar\'daki tek blokta türetilmiş yüzde notu görünür', async () => {
         viewportKur(true)
         const user = userEvent.setup()

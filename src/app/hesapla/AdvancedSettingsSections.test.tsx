@@ -109,6 +109,25 @@ describe('RiskCostFields sirasi', () => {
         render(<RiskCostFields {...riskCostProps({ iksaMode: 'manual', iksaManualTL: 45000 })} />)
         expect(screen.getByDisplayValue('45.000')).toBeInTheDocument()
     })
+
+    it('4 kademeli profitLevels (Zarar dahil) hepsini render eder, grid 4 kolona genisler (denetim taslagi §1/§13)', () => {
+        render(<RiskCostFields {...riskCostProps({
+            profitLevels: [
+                { id: 'zarar', label: 'Zarar', value: 0.90, sortOrder: -1, isDefault: false },
+                { id: '1', label: 'Düşük', value: 1.15, sortOrder: 0, isDefault: false },
+                { id: '2', label: 'Orta', value: 1.30, sortOrder: 1, isDefault: true },
+                { id: '3', label: 'Yüksek', value: 1.50, sortOrder: 2, isDefault: false },
+            ],
+        })} />)
+        expect(screen.getByText('Zarar')).toBeInTheDocument()
+        expect(screen.getByText('Düşük')).toBeInTheDocument()
+        expect(screen.getByText('Orta')).toBeInTheDocument()
+        expect(screen.getByText('Yüksek')).toBeInTheDocument()
+
+        // luxBox (span'in ebeveyni) -> luxGrid (luxBox'in ebeveyni)
+        const grid = screen.getByText('Zarar').parentElement?.parentElement
+        expect(grid?.getAttribute('style')).toContain('repeat(4, minmax(0, 1fr))')
+    })
 });
 
 describe('MarketField', () => {

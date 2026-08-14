@@ -1,4 +1,4 @@
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, ORNEK_GLOBAL_UNIT_PRICE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, ORNEK_GLOBAL_UNIT_PRICE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput } from './calculatorUiHelpers';
 
 describe('mergeQualityLevels (denetim bulgusu C3)', () => {
   it('fetched veri yoksa (null/undefined) base degismeden doner', () => {
@@ -82,6 +82,92 @@ describe('parseMarketPrice', () => {
 
   it('binlik ayraçlı TL string sayıya çevrilir', () => {
     expect(parseMarketPrice('7.500.000')).toBe(7500000);
+  });
+});
+
+describe('buildCalculationInput (denetim-2 bulgusu: input/chartBaseInput çift tanımı)', () => {
+  const BASE_PARAMS = {
+    x: 0.30,
+    luxLevel: 1.2,
+    apartmentSize: 140,
+    globalUnitPrice: 12000,
+    builderProfit: 1.30,
+    isApartmentCountEnabled: false,
+    totalApartments: 24,
+    isAaEnabled: false,
+    arsaAlani: 360,
+    riskLevel: 10,
+    iksaMode: 'off' as const,
+    iksaPercentage: 5,
+    iksaManualTL: 0,
+  };
+
+  it('temel alanlar doğru eşleniyor', () => {
+    expect(buildCalculationInput(BASE_PARAMS)).toEqual({
+      x: 0.30,
+      L: 1.2,
+      Ad: 140,
+      P: 12000,
+      K: 1.30,
+      Sd: undefined,
+      Aa: undefined,
+      isRiskEnabled: true,
+      R: 1.10,
+      isExcavationEnabled: false,
+      excavationMode: 'percentage',
+      Z: 0,
+      MzOriginal: 0,
+      Pmarket: undefined,
+    });
+  });
+
+  it('apartmentSize/globalUnitPrice null iken 0a düşer (henüz veri girilmemiş render için güvenli varsayılan)', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, apartmentSize: null, globalUnitPrice: null });
+    expect(res.Ad).toBe(0);
+    expect(res.P).toBe(0);
+  });
+
+  it('Sd (daire sayısı modu) açıkken totalApartments Sd olarak geçer', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, isApartmentCountEnabled: true, totalApartments: 20 });
+    expect(res.Sd).toBe(20);
+  });
+
+  it('Aa (arsa alanı) açıkken arsaAlani Aa olarak geçer', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, isAaEnabled: true, arsaAlani: 500 });
+    expect(res.Aa).toBe(500);
+  });
+
+  it('riskLevel=0 iken risk kapalı, R=1', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, riskLevel: 0 });
+    expect(res.isRiskEnabled).toBe(false);
+    expect(res.R).toBe(1);
+  });
+
+  it('iksa yüzde modunda Z oran olarak geçer', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, iksaMode: 'percentage', iksaPercentage: 8 });
+    expect(res.isExcavationEnabled).toBe(true);
+    expect(res.excavationMode).toBe('percentage');
+    expect(res.Z).toBeCloseTo(0.08);
+  });
+
+  it('iksa elle modunda MzOriginal geçer, excavationMode manual olur', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, iksaMode: 'manual', iksaManualTL: 250000 });
+    expect(res.isExcavationEnabled).toBe(true);
+    expect(res.excavationMode).toBe('manual');
+    expect(res.MzOriginal).toBe(250000);
+  });
+
+  it('Pmarket verilirse aynen geçer, verilmezse undefined kalır', () => {
+    expect(buildCalculationInput({ ...BASE_PARAMS, Pmarket: 6000000 }).Pmarket).toBe(6000000);
+    expect(buildCalculationInput(BASE_PARAMS).Pmarket).toBeUndefined();
+  });
+
+  it('REGRESYON KİLİDİ: ana hesap (Pmarket ile) ve grafik girdisi (Pmarket olmadan) aynı state için Pmarket dışında BİREBİR aynı nesneyi üretir', () => {
+    const mainInput = buildCalculationInput({ ...BASE_PARAMS, Pmarket: 6000000 });
+    const chartInput = buildCalculationInput(BASE_PARAMS);
+    const { Pmarket: _mainPmarket, ...mainRest } = mainInput;
+    const { Pmarket: _chartPmarket, ...chartRest } = chartInput;
+    expect(mainRest).toEqual(chartRest);
   });
 });
 

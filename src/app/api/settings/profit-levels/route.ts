@@ -13,6 +13,11 @@ export async function GET() {
         // Eğer hiç kayıt yoksa varsayılanları oluştur ve döndür
         if (levels.length === 0) {
             const defaultLevels = [
+                // "Zarar" — denetim taslağının §1/§13'te tanımladığı 4. kademe,
+                // K<1.0 (maliyetin altında satış). Yalnızca tablo BOŞSA (ilk
+                // kurulum/fresh DB) çalışır; canlıda zaten seed'li tabloyu
+                // etkilemez, oraya admin panelinden eklenmesi gerekir.
+                { label: "Zarar", value: 0.90, sortOrder: -1, isDefault: false },
                 { label: "Düşük", value: 1.15, sortOrder: 0, isDefault: false },
                 { label: "Orta", value: 1.30, sortOrder: 1, isDefault: true },
                 { label: "Yüksek", value: 1.50, sortOrder: 2, isDefault: false },

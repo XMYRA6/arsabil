@@ -75,7 +75,11 @@ export function RiskCostFields({
 
       <div className={`${styles.drawerRow} ${styles.column}`}>
         <div className={styles.drawerRowLabel}>Müteahhit Kazancı</div>
-        <div className={styles.luxGrid}>
+        {/* .luxGrid varsayilan 3 kolonlu (Iksa Masrafi/Daire Standardi ile
+            paylasilan sabit grid) — kar kademesi "Zarar" tier'iyla (denetim
+            taslagi §1/§13) 4'e cikinca kolon sayisi inline stille dinamik
+            ayarlanir, diger 3-oge'li .luxGrid kullanimlari ETKILENMEZ. */}
+        <div className={styles.luxGrid} style={{ gridTemplateColumns: `repeat(${profitLevels.length}, minmax(0, 1fr))` }}>
           {profitLevels.map(opt => (
             <div key={opt.id} className={`${styles.luxBox} ${builderProfit === opt.value ? styles.luxBoxActive : ''}`} onClick={() => setBuilderProfit(opt.value)}>
               <span>{opt.label}</span>

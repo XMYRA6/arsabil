@@ -1058,6 +1058,17 @@
     left: var(--share-pct, 0%);
 }
 
+.landShareHighWarning {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    background: rgba(var(--orange-rgb), 0.1);
+    border: 1px solid var(--orange);
+    border-radius: 8px;
+    color: var(--orange);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
 .sliderInput {
     position: absolute;
     width: 100%;

@@ -139,6 +139,22 @@ describe('CalculatorEngineV2 (Deterministic Rules)', () => {
         expect(negatif.FD_total).toBeGreaterThanOrEqual(0);
     });
 
+    it('Scenario 10: Negatif P (birim maliyet) ve negatif K (kâr) 0a kelepceleniyor (denetim bulgusu C7-ikiz)', () => {
+        // UI zaten negatif deger girisine izin vermiyor (formatTRThousands
+        // eksi kabul etmiyor, kar katsayisi sabit pozitif tier listesinden
+        // geliyor) ama motor tek basina (orn. gelecekte API'ye acilirsa)
+        // korumasizdi — Ad icin C7'de eklenen guard P/K'ye hic tasinmamisti.
+        const negatifP = CalculatorEngineV2.calculate({ ...baseInput, P: -10000 });
+        const sifirP = CalculatorEngineV2.calculate({ ...baseInput, P: 0 });
+        expect(negatifP.Mi_base).toBe(sifirP.Mi_base);
+        expect(negatifP.Mi_base).toBe(0);
+
+        const negatifK = CalculatorEngineV2.calculate({ ...baseInput, K: -1.25 });
+        const sifirK = CalculatorEngineV2.calculate({ ...baseInput, K: 0 });
+        expect(negatifK.FD_total).toBe(sifirK.FD_total);
+        expect(negatifK.FD_total).toBe(0);
+    });
+
     describe('x_max — maksimum sürdürülebilir arsa payı (denetim bulgusu C6)', () => {
         // x_max: muteahhidin K hedefini koruyarak verebilecegi maksimum arsa
         // payi. Tanim: x_max'ta FD_total TAM OLARAK Pmarket'e esit olmali —
