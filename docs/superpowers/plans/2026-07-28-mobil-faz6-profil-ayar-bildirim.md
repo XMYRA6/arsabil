@@ -38,10 +38,10 @@
 - Test: `src/app/dashboard/profile/edit/page.test.tsx`
 - Test: `src/app/dashboard/settings/page.test.tsx`
 
-- [ ] **Step 1: Failing tests for editable fields and settings toggles**
-- [ ] **Step 2: Mevcut profile/account API ile formlari bagla**
-- [ ] **Step 3: Mobil form, toggle ve kaydet barini tasarla**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for editable fields and settings toggles**
+- [x] **Step 2: Mevcut profile/account API ile formlari bagla**
+- [x] **Step 3: Mobil form, toggle ve kaydet barini tasarla**
+- [x] **Step 4: Commit**
 
 ## Task 3: Bildirimler route'u
 
