@@ -1,0 +1,96 @@
+{
+  "generatedFor": "docs/superpowers/specs",
+  "purpose": "Maps design specs to canonical implementation, umbrella, closure, or pointer plans.",
+  "statusLegend": {
+    "canonical": "Detailed implementation plan; can be dispatched directly by task.",
+    "umbrella": "Orchestration plan; dispatch one of its subPlans instead.",
+    "pointer": "Thin mapping to another canonical plan.",
+    "closure": "Closed or superseded; do not dispatch as new implementation work.",
+    "implemented": "Already implemented via another canonical plan/status record."
+  },
+  "entries": [
+    {
+      "spec": "2026-06-07-arsabil-gelistirme-yol-haritasi-design.md",
+      "plan": "2026-06-07-arsabil-gelistirme-yol-haritasi.md",
+      "status": "umbrella",
+      "subPlans": [
+        "2026-06-07-arsabil-faz1a-plan.md",
+        "2026-06-07-arsabil-faz1b-plan.md",
+        "2026-06-07-arsabil-faz2.md",
+        "2026-06-07-arsabil-faz3a-plan.md",
+        "2026-06-07-arsabil-faz3b.md",
+        "2026-06-08-arsabil-faz4-ui-design-system.md"
+      ]
+    },
+    {
+      "spec": "2026-06-07-arsabil-faz2-design.md",
+      "plan": "2026-06-07-arsabil-faz2.md",
+      "status": "umbrella",
+      "subPlans": [
+        "2026-06-07-arsabil-faz2a-plan.md",
+        "2026-06-07-arsabil-faz2b-plan.md"
+      ]
+    },
+    {
+      "spec": "2026-06-07-arsabil-faz3b-design.md",
+      "plan": "2026-06-07-arsabil-faz3b.md",
+      "status": "umbrella",
+      "subPlans": [
+        "2026-06-07-arsabil-faz3b-i-cloudinary-photos.md",
+        "2026-06-07-arsabil-faz3b-ii-listing-edit.md",
+        "2026-06-07-arsabil-faz3b-iii-sse-messaging.md"
+      ]
+    },
+    {
+      "spec": "2026-06-07-mobile-ui-premium-redesign.md",
+      "plan": "2026-06-07-mobile-ui-premium-redesign.md",
+      "status": "closure",
+      "canonicalPlan": null,
+      "note": "Superseded by later Aurora/mobile structural and Liquid Glass plans."
+    },
+    {
+      "spec": "2026-06-08-arsabil-ui-design-system.md",
+      "plan": "2026-06-08-arsabil-ui-design-system.md",
+      "status": "pointer",
+      "canonicalPlan": "2026-06-08-arsabil-faz4-ui-design-system.md"
+    },
+    {
+      "spec": "2026-06-08-arsabil-professional-ui-redesign.md",
+      "plan": "2026-06-08-arsabil-professional-ui-redesign.md",
+      "status": "canonical"
+    },
+    {
+      "spec": "2026-07-01-emsal-arsa-maliyeti-design.md",
+      "plan": "2026-07-01-emsal-arsa-maliyeti.md",
+      "status": "canonical"
+    },
+    {
+      "spec": "2026-07-03-mobile-ui-redesign-design.md",
+      "plan": "2026-07-03-mobile-ui-redesign.md",
+      "status": "umbrella",
+      "subPlans": [
+        "2026-07-03-mobil-ui-faz0-temel-ve-primitifler.md",
+        "2026-07-03-mobil-ui-faz1-cekirdek-sayfalar.md",
+        "2026-07-09-mobil-faz2-akis-sayfalari.md",
+        "2026-07-12-mobil-faz3-ikincil-sayfalar.md",
+        "2026-07-14-admin-panel-mobil-muhur-kimlik.md"
+      ]
+    },
+    {
+      "spec": "2026-07-28-mobil-premium-liquid-glass-design.md",
+      "plan": "2026-07-28-mobil-premium-liquid-glass.md",
+      "status": "umbrella",
+      "subPlans": [
+        "2026-07-28-mobil-faz0-temel-faz1-hesapla.md"
+      ],
+      "note": "Remaining Liquid Glass phases require new detailed phase plans before dispatch."
+    },
+    {
+      "spec": "2026-07-29-hesapla-girdi-mimarisi-design.md",
+      "plan": "2026-07-29-hesapla-girdi-mimarisi.md",
+      "status": "implemented",
+      "canonicalPlan": "2026-07-30-hesapla-girdi-mimarisi.md",
+      "statusRecord": "2026-07-30-hesapla-girdi-mimarisi-DURUM.md"
+    }
+  ]
+}

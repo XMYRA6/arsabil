@@ -332,14 +332,14 @@ git commit -m "refactor(hesapla): masaustu girdi sirasi mobille ayni sıraya get
 Run: `grep -rn "SmartContextCard'" src/ --include=*.tsx --include=*.ts | grep -v "SmartContextCardSections"`
 Expected: Yalnızca silinecek 3 dosyanın kendi içindeki self-referanslar (varsa) — `page.tsx` artık HİÇ eşleşmemeli (Task 1'de import değiştirildi).
 
-- [ ] **Step 2: `SmartContextCard.module.css`'i incele**
+- [x] **Step 2: `SmartContextCard.module.css`'i incele**
 
 `src/app/hesapla/SmartContextCard.module.css`'i oku. Yalnızca `.container` (ve varsa `SmartContextCard.tsx`'e özgü, `LocationHeader`/`AreaSection`/`RiskSection`'ın KULLANMADIĞI başka bir sınıf) siliniyor mu diye kontrol et — `SmartContextCardSections.tsx`'teki (`.header`, `.riskSection`, `.areaSection` vb.) TÜM sınıflar, mobil `@media` override'ları DAHİL, KORUNUYOR. `.container` sınıfının SmartContextCardSections.tsx içinde KULLANILMADIĞINI grep ile doğrula:
 
 Run: `grep -n "styles.container" src/app/hesapla/SmartContextCardSections.tsx`
 Expected: Eşleşme YOK (yalnızca `SmartContextCard.tsx` kullanıyordu).
 
-- [ ] **Step 3: Dosyaları sil**
+- [x] **Step 3: Dosyaları sil**
 
 ```bash
 git rm src/app/hesapla/SmartContextCard.tsx src/app/hesapla/SmartContextCard.test.tsx src/app/hesapla/SmartContextCard.styles.scope.test.ts
@@ -347,7 +347,7 @@ git rm src/app/hesapla/SmartContextCard.tsx src/app/hesapla/SmartContextCard.tes
 
 `SmartContextCard.module.css`'ten YALNIZCA `.container { ... }` kuralını (Step 2'de doğrulanan, başka hiçbir yerde kullanılmayan kural) sil — dosyanın geri kalanı DOKUNULMADAN kalır.
 
-- [ ] **Step 4: Tüm proje test + tip kontrolü**
+- [x] **Step 4: Tüm proje test + tip kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata (silinen dosyalara hiçbir import kalmamalı).

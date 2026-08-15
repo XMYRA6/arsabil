@@ -30,7 +30,7 @@
 **Interfaces:**
 - Produces: `Listing.type: string` (DB, default `"KAT_KARSILIGI"`) — POST body'sinde `type?: string`, PATCH body'sinde `type?: string` olarak okunur, `prisma.listing.create`/`update`'e `type` alanı olarak yazılır.
 
-- [ ] **Step 1: Şema alanını ekle**
+- [x] **Step 1: Şema alanını ekle**
 
 `prisma/schema.prisma` içinde `model Listing` bloğunda `zoning` satırının hemen altına ekle:
 
@@ -41,12 +41,12 @@
 
 (Mevcut `zoning      String?` satırının altına, `titleDeed` satırından önce.)
 
-- [ ] **Step 2: Migration üret ve uygula**
+- [x] **Step 2: Migration üret ve uygula**
 
 Run: `npx prisma migrate dev --name add_listing_type`
 Expected: yeni bir `prisma/migrations/<timestamp>_add_listing_type/migration.sql` oluşur, migration DB'ye uygulanır, Prisma Client yeniden üretilir (çıktıda "already in sync" değil, "The migration has been created and applied" benzeri bir mesaj görülür).
 
-- [ ] **Step 3: POST route testi yaz (RED)**
+- [x] **Step 3: POST route testi yaz (RED)**
 
 Create `src/app/api/listings/__tests__/route.type.test.ts`:
 
@@ -102,12 +102,12 @@ describe('POST /api/listings — type alanı', () => {
 })
 ```
 
-- [ ] **Step 4: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/api/listings/__tests__/route.type.test.ts`
 Expected: FAIL — `data.type` `undefined` (route henüz `type`'ı okumuyor/yazmıyor).
 
-- [ ] **Step 5: POST route'a wiring ekle**
+- [x] **Step 5: POST route'a wiring ekle**
 
 `src/app/api/listings/route.ts` içinde destructure satırını genişlet (satır 78-83):
 
@@ -127,12 +127,12 @@ Expected: FAIL — `data.type` `undefined` (route henüz `type`'ı okumuyor/yazm
                 type: type || 'KAT_KARSILIGI',
 ```
 
-- [ ] **Step 6: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 6: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/api/listings/__tests__/route.type.test.ts`
 Expected: PASS (2/2).
 
-- [ ] **Step 7: PATCH route testi yaz (RED)**
+- [x] **Step 7: PATCH route testi yaz (RED)**
 
 Create `src/app/api/listings/[id]/__tests__/route.type.test.ts`:
 
@@ -189,12 +189,12 @@ describe('PATCH /api/listings/[id] — type alanı', () => {
 })
 ```
 
-- [ ] **Step 8: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 8: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest "src/app/api/listings/\[id\]/__tests__/route.type.test.ts"`
 Expected: FAIL — her iki test de `data.type` `undefined` olduğu için başarısız (ilk test `toBe('ORTAKLIK')` beklerken `undefined` bulur).
 
-- [ ] **Step 9: PATCH route'a wiring ekle**
+- [x] **Step 9: PATCH route'a wiring ekle**
 
 `src/app/api/listings/[id]/route.ts` satır 71'deki destructure'ı genişlet:
 
@@ -209,12 +209,12 @@ Expected: FAIL — her iki test de `data.type` `undefined` olduğu için başar�
                 ...(type !== undefined ? { type } : {}),
 ```
 
-- [ ] **Step 10: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 10: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest "src/app/api/listings/\[id\]/__tests__/route.type.test.ts"`
 Expected: PASS (2/2).
 
-- [ ] **Step 11: tsc kontrolü**
+- [x] **Step 11: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -242,7 +242,7 @@ git commit -m "feat(listing): type alanı şemaya eklendi, POST/PATCH ile yazıl
 - Consumes: Task 1'in POST/PATCH route'ları — `type` alanını gövdeden okuyorlar.
 - Produces: `WizardFormData.type: string` (varsayılan `'KAT_KARSILIGI'`), `buildListingPublishBody(form).type: string`.
 
-- [ ] **Step 1: `WizardFormData`'ya `type` ekle**
+- [x] **Step 1: `WizardFormData`'ya `type` ekle**
 
 `src/components/listing-wizard/types.ts`:
 
@@ -277,7 +277,7 @@ export const emptyFormData: WizardFormData = {
 }
 ```
 
-- [ ] **Step 2: Testi yaz (RED)**
+- [x] **Step 2: Testi yaz (RED)**
 
 Create `src/components/listing-wizard/WizardStep2Detail.test.tsx`:
 
@@ -310,12 +310,12 @@ describe('WizardStep2Detail — İlan Türü', () => {
 })
 ```
 
-- [ ] **Step 3: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 3: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/components/listing-wizard/WizardStep2Detail.test.tsx`
 Expected: FAIL — `getByRole('combobox', { name: 'İlan Türü' })` bulunamaz (henüz JSX'te yok).
 
-- [ ] **Step 4: Select'i ekle**
+- [x] **Step 4: Select'i ekle**
 
 `src/components/listing-wizard/WizardStep2Detail.tsx` içinde, "İstenen Fiyat" alanını içeren `twoCol` div'inin kapanışından (`</div>` — mevcut satır 58) hemen sonra, "İmar Durumu"/"Tapu Durumu" `twoCol` div'inden (mevcut satır 60) önce ekle:
 
@@ -335,12 +335,12 @@ Expected: FAIL — `getByRole('combobox', { name: 'İlan Türü' })` bulunamaz (
       </div>
 ```
 
-- [ ] **Step 5: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 5: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/components/listing-wizard/WizardStep2Detail.test.tsx`
 Expected: PASS (3/3).
 
-- [ ] **Step 6: `publishBody.ts`'e `type` ekle**
+- [x] **Step 6: `publishBody.ts`'e `type` ekle**
 
 `src/app/listings/new/publishBody.ts`, `zoning: form.zoning || null,` satırının altına:
 
@@ -349,7 +349,7 @@ Expected: PASS (3/3).
         type: form.type,
 ```
 
-- [ ] **Step 7: `publishBody.test.ts`'e assertion ekle (RED önce doğrulanır)**
+- [x] **Step 7: `publishBody.test.ts`'e assertion ekle (RED önce doğrulanır)**
 
 `src/app/listings/new/publishBody.test.ts` dosyasının sonuna yeni bir `it` ekle:
 
@@ -368,7 +368,7 @@ Expected: PASS (3/3).
 Run: `npx jest src/app/listings/new/publishBody.test.ts`
 Expected: Step 6 zaten uygulandığı için doğrudan PASS (7/7) — bu adımda RED/GREEN ayrımı yerine, testin gerçek regresyonu yakaladığını doğrulamak için `publishBody.ts`'teki `type: form.type,` satırını geçici olarak silip testin FAIL verdiğini, sonra geri ekleyip PASS verdiğini gözle doğrula.
 
-- [ ] **Step 8: Edit sayfasına wiring ekle**
+- [x] **Step 8: Edit sayfasına wiring ekle**
 
 `src/app/listings/[id]/edit/page.tsx`, `setForm` içindeki `zoning: listing.zoning ?? '',` satırının altına (satır 66 civarı):
 
@@ -384,7 +384,7 @@ Expected: Step 6 zaten uygulandığı için doğrudan PASS (7/7) — bu adımda 
                     type: form.type,
 ```
 
-- [ ] **Step 9: tsc kontrolü**
+- [x] **Step 9: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -413,7 +413,7 @@ git commit -m "feat(wizard): İlan Türü seçici eklendi, publishBody/edit wiri
   - `sortListings<T extends SortableListing>(listings: T[], sortBy: string): T[]`
   - `mergeDemoOverlay<T extends object>(real: T, overlay: Partial<T>): T` — gerçek veride VAR OLAN alanlar (null dahil) demo overlay'i EZER; yalnızca gerçek veride hiç bulunmayan alanlar overlay'den gelir. **Kritik:** `zoning` artık gerçek bir alan olduğundan, ters sırada birleştirme (`{...real, ...overlay}`) gerçek bir satıcının girdiği zoning'i sessizce mock değerle EZERDİ — tam da bu planın düzelttiği türden bir bug'ı yeniden sokardı.
 
-- [ ] **Step 1: Testi yaz (RED)**
+- [x] **Step 1: Testi yaz (RED)**
 
 Create `src/lib/listing/marketplaceFilters.test.ts`:
 
@@ -528,12 +528,12 @@ describe('mergeDemoOverlay', () => {
 })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/lib/listing/marketplaceFilters.test.ts`
 Expected: FAIL — modül `./marketplaceFilters` bulunamadığı için derleme hatası.
 
-- [ ] **Step 3: Implementasyonu yaz**
+- [x] **Step 3: Implementasyonu yaz**
 
 Create `src/lib/listing/marketplaceFilters.ts`:
 
@@ -592,12 +592,12 @@ export function mergeDemoOverlay<T extends object>(real: T, overlay: Partial<T>)
 }
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/lib/listing/marketplaceFilters.test.ts`
 Expected: PASS (13/13).
 
-- [ ] **Step 5: tsc kontrolü**
+- [x] **Step 5: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -622,7 +622,7 @@ git commit -m "feat(marketplace): filterListings/sortListings saf fonksiyonları
 - Consumes: `ListingFilters` tipi — `import type { ListingFilters } from '@/lib/listing/marketplaceFilters'` (Task 3).
 - Produces: `FilterSidebar`'ın `Filters` prop tipi artık `ListingFilters` ile birebir aynı (emsal alanları yok, `imar` gerçek zoning değerleri taşıyor).
 
-- [ ] **Step 1: Mevcut testi güncelle (RED)**
+- [x] **Step 1: Mevcut testi güncelle (RED)**
 
 `src/components/mobile/__tests__/FilterSidebar.test.tsx` içindeki `FILTERS` sabitini güncelle:
 
@@ -662,12 +662,12 @@ const FILTERS = {
     })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/components/mobile/__tests__/FilterSidebar.test.tsx`
 Expected: FAIL — "EMSAL bölümü artık render edilmiyor" testi henüz FAIL vermez (EMSAL hâlâ orada, bu adım aslında PASS gösterebilir çünkü assertion `not.toBeInTheDocument` — yanlış RED işareti vermemesi için önce component'i DEĞİŞTİRMEDEN "Ticari imar chip" testinin FAIL verdiğini doğrula (eski kod `TICARET` gönderiyor, `TICARI` değil) — bu gerçek RED'dir.
 
-- [ ] **Step 3: `FilterSidebar.tsx`'i güncelle**
+- [x] **Step 3: `FilterSidebar.tsx`'i güncelle**
 
 `src/components/marketplace/FilterSidebar.tsx` tam içeriğini şu şekilde güncelle:
 
@@ -803,12 +803,12 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
 
 (Değişiklikler: `Filters` interface silindi, `ListingFilters` import edildi; `IMAR_OPTS`/`IMAR_VALS` yeni enum'a hizalandı; EMSAL `<div className={styles.section}>` bloğu tamamen kaldırıldı; `resetAll()`'dan `minEmsal`/`maxEmsal` çıkarıldı.)
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/components/mobile/__tests__/FilterSidebar.test.tsx`
 Expected: PASS (6/6).
 
-- [ ] **Step 5: tsc kontrolü**
+- [x] **Step 5: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -831,7 +831,7 @@ git commit -m "fix(marketplace): FilterSidebar emsal kaldırıldı, imar enum'u 
 **Interfaces:**
 - Produces: `Listing` interface'i — `type`, `landSizeSqm?: number | null`, `zoning?: string`, `createdAt?: string` alanlarını taşır (Task 3'teki `FilterableListing`/`SortableListing`'e yapısal olarak uyumlu).
 
-- [ ] **Step 1: Testi yaz (RED)**
+- [x] **Step 1: Testi yaz (RED)**
 
 `src/components/marketplace/ListingCard.photo.test.tsx` dosyasının sonuna yeni bir `describe` ekle:
 
@@ -852,12 +852,12 @@ describe('ListingCard — imar durumu (zoning)', () => {
 });
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/components/marketplace/ListingCard.photo.test.tsx`
 Expected: FAIL — `Listing` tipinde `zoning` alanı yok (tsc/jest tip hatası) ve `IMAR_LABEL`/render hâlâ `imarDurumu`'na bakıyor, "Tarım" metni hiç basılmıyor.
 
-- [ ] **Step 3: `ListingCard.tsx`'i güncelle**
+- [x] **Step 3: `ListingCard.tsx`'i güncelle**
 
 `Listing` interface'inde (satır 14-31) `imarDurumu?: string;` satırını sil, yerine ve ek olarak şunları ekle:
 
@@ -901,12 +901,12 @@ List view içindeki gösterim satırını (satır 142) güncelle:
                         {listing.zoning && <> · {IMAR_LABEL[listing.zoning] ?? listing.zoning}</>}
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/components/marketplace/ListingCard.photo.test.tsx`
 Expected: PASS (5/5 — 3 mevcut + 2 yeni).
 
-- [ ] **Step 5: tsc kontrolü**
+- [x] **Step 5: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -929,7 +929,7 @@ git commit -m "fix(marketplace): ListingCard zoning/landSizeSqm/createdAt alanla
 **Interfaces:**
 - Consumes: `filterListings`, `sortListings`, `mergeDemoOverlay`, `ListingFilters` (Task 3); `Listing` tipi (Task 5, artık `zoning`/`landSizeSqm`/`createdAt` taşıyor).
 
-- [ ] **Step 1: `DEFAULT_FILTERS`'ı güncelle ve import ekle**
+- [x] **Step 1: `DEFAULT_FILTERS`'ı güncelle ve import ekle**
 
 Dosyanın en üstündeki import bloğuna ekle:
 
@@ -950,7 +950,7 @@ const DEFAULT_FILTERS: ListingFilters = {
 };
 ```
 
-- [ ] **Step 2: `MOCK_LISTINGS_EXTRA`'yı `zoning`'e taşı**
+- [x] **Step 2: `MOCK_LISTINGS_EXTRA`'yı `zoning`'e taşı**
 
 Satır 36-47'deki diziyi güncelle (eski `imarDurumu` değerleri → yeni `zoning` enum'una eşlenmiş):
 
@@ -969,7 +969,7 @@ const MOCK_LISTINGS_EXTRA = [
 ];
 ```
 
-- [ ] **Step 3: `type` zorlamasını kaldır, overlay birleşimini `mergeDemoOverlay`'e taşı**
+- [x] **Step 3: `type` zorlamasını kaldır, overlay birleşimini `mergeDemoOverlay`'e taşı**
 
 `enriched` map'indeki (satır 100-106) tüm bloğu değiştir. **Sıra önemli:** eski kod `{...l, ...mockExtra}` sırasıyla mock overlay'in gerçek veriyi EZMESİNE izin veriyordu — `zoning` artık gerçek bir alan olduğundan bu, satıcının girdiği zoning'i sessizce mock değerle değiştirirdi (Task 3'teki `mergeDemoOverlay` tam olarak bunu önlemek için yazıldı, ters sırayı kullanır):
 
@@ -979,7 +979,7 @@ const MOCK_LISTINGS_EXTRA = [
                 );
 ```
 
-- [ ] **Step 4: `filtered`/`sorted`'ı paylaşılan fonksiyonlara taşı**
+- [x] **Step 4: `filtered`/`sorted`'ı paylaşılan fonksiyonlara taşı**
 
 Satır 144-158'deki mevcut `filtered`/`sorted` bloklarını sil, yerine:
 
@@ -988,7 +988,7 @@ Satır 144-158'deki mevcut `filtered`/`sorted` bloklarını sil, yerine:
     const sorted = sortListings(filtered, sortBy);
 ```
 
-- [ ] **Step 5: Üst bardaki Emsal çipini kaldır**
+- [x] **Step 5: Üst bardaki Emsal çipini kaldır**
 
 Satır 192-195'teki bloğu tamamen sil:
 
@@ -999,16 +999,16 @@ Satır 192-195'teki bloğu tamamen sil:
                 </span>
 ```
 
-- [ ] **Step 6: `page.module.css`'teki ölü `.emsalChip` kurallarını sil**
+- [x] **Step 6: `page.module.css`'teki ölü `.emsalChip` kurallarını sil**
 
 `src/app/marketplace/page.module.css` içindeki iki `.emsalChip` bloğunu (satır 131-139 base, satır 380-383 mobil media query içinde) tamamen sil.
 
-- [ ] **Step 7: tsc kontrolü**
+- [x] **Step 7: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata. (Bu, `filters.minEmsal`/`maxEmsal` referanslarının hiçbir yerde kalmadığını da doğrular — kaldıysa tip hatası verir.)
 
-- [ ] **Step 8: Jest tam paket koşumu**
+- [x] **Step 8: Jest tam paket koşumu**
 
 Run: `npx jest src/app/marketplace src/lib/listing/marketplaceFilters.test.ts src/components/marketplace src/components/mobile/__tests__/FilterSidebar.test.tsx`
 Expected: tüm paketler PASS (page.tsx'in kendi doğrudan testi yok — mantık zaten Task 3/4/5'te test edildi; bu adım yalnızca regresyon taramasıdır).
@@ -1032,7 +1032,7 @@ git commit -m "fix(marketplace): type zorlaması kaldırıldı, filtre/sıralama
 **Interfaces:**
 - Produces: `formatZoningLabel(zoning?: string | null): string` — `'—'` (boşsa) veya Türkçe etiket (`'Konut'|'Ticari'|'Karma'|'Tarım'`) veya bilinmeyen değeri olduğu gibi döner.
 
-- [ ] **Step 1: Testi yaz (RED)**
+- [x] **Step 1: Testi yaz (RED)**
 
 `src/lib/listing/listingDisplay.test.ts` dosyasının sonuna ekle:
 
@@ -1058,12 +1058,12 @@ describe('formatZoningLabel', () => {
 })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/lib/listing/listingDisplay.test.ts`
 Expected: FAIL — `formatZoningLabel` export edilmiyor.
 
-- [ ] **Step 3: Fonksiyonu ekle**
+- [x] **Step 3: Fonksiyonu ekle**
 
 `src/lib/listing/listingDisplay.ts` dosyasının sonuna ekle:
 
@@ -1081,12 +1081,12 @@ export function formatZoningLabel(zoning?: string | null): string {
 }
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/lib/listing/listingDisplay.test.ts`
 Expected: PASS (tüm testler, önceki `formatParcelIdentity`/`formatAreaCells` testleri dahil).
 
-- [ ] **Step 5: `listing/[id]/page.tsx`'i güncelle**
+- [x] **Step 5: `listing/[id]/page.tsx`'i güncelle**
 
 Import satırını güncelle (satır 12):
 
@@ -1119,7 +1119,7 @@ Kod yorumunu (satır 255-257) ve demo banner metnini (satır 258-261) güncelle:
                                 </div>
 ```
 
-- [ ] **Step 6: tsc kontrolü**
+- [x] **Step 6: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -1143,7 +1143,7 @@ git commit -m "fix(listing): İmar Durumu artık gerçek zoning alanından okunu
 **Interfaces:**
 - Produces: `onCitySelect: (city: { name: string; lat: number; lng: number; zoom: number; province?: string }) => void` — ilçe seçiminde `province` dolu gelir, il seçiminde gelmez.
 
-- [ ] **Step 1: Testi yaz (RED)**
+- [x] **Step 1: Testi yaz (RED)**
 
 Create `src/components/marketplace/CitySearch.test.tsx`:
 
@@ -1193,12 +1193,12 @@ describe('CitySearch — il/ilçe state', () => {
 })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/components/marketplace/CitySearch.test.tsx`
 Expected: FAIL — ilk test'te ilçe seçiminden sonra "İlçe" butonu artık DOM'da yok (eski kod `DISTRICTS[selectedCity]`'e bakıyor, `selectedCity` prop'u `'Kadıköy'` olunca boş dizi döner) ve `onSelect` çağrısı `province` alanı taşımıyor.
 
-- [ ] **Step 3: `CitySearch.tsx`'i güncelle**
+- [x] **Step 3: `CitySearch.tsx`'i güncelle**
 
 `Props` interface'ini (satır 184-187) güncelle:
 
@@ -1243,12 +1243,12 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                     }}
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/components/marketplace/CitySearch.test.tsx`
 Expected: PASS (2/2).
 
-- [ ] **Step 5: `marketplace/page.tsx`'teki `onCitySelect` handler'ını güncelle**
+- [x] **Step 5: `marketplace/page.tsx`'teki `onCitySelect` handler'ını güncelle**
 
 Satır 171-178'i güncelle:
 
@@ -1263,12 +1263,12 @@ Satır 171-178'i güncelle:
                 />
 ```
 
-- [ ] **Step 6: tsc kontrolü**
+- [x] **Step 6: tsc kontrolü**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
 
-- [ ] **Step 7: Tam jest paketi + son doğrulama**
+- [x] **Step 7: Tam jest paketi + son doğrulama**
 
 Run: `npx jest`
 Expected: tüm suite'ler PASS, önceki task'larda eklenen/değiştirilen hiçbir test kırılmamış.
@@ -1284,6 +1284,7 @@ git commit -m "fix(marketplace): CitySearch ilçe seçiminde il/province bilgisi
 
 ## Son Doğrulama (task'lar bittikten sonra, tek seferlik)
 
-- [ ] `npx tsc --noEmit` — 0 hata (tüm proje)
-- [ ] `npx jest` — tüm suite'ler yeşil
+- [x] `npx tsc --noEmit` — 0 hata (tüm proje)
+- [x] `npx jest` — tüm suite'ler yeşil
 - [ ] Docker/DB açıksa: gerçek bir ilan `type: SALE` ile yayınlanıp pazar yerinde "Satış" hızlı filtresiyle gerçekten görünüp görünmediği, boyut filtresinin sonuç sayısını gerçekten değiştirip değiştirmediği, bir il seçilip ilçeye geçildikten sonra "İlçe ▾" butonunun kaybolmadığı Playwright ile canlı doğrulanır.
+

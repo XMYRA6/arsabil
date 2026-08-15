@@ -71,7 +71,7 @@ React Testing Library, TypeScript, Playwright (doğrulama için).
 - Produces: `page.module.css`'te `.advancedPanel`/`.advancedPanelTitle`/
   `.advancedPanelCols` class'ları — bu plan dışında başka bir tüketicisi yok.
 
-- [ ] **Step 1: Başarısız testleri yaz**
+- [x] **Step 1: Başarısız testleri yaz**
 
 `src/app/hesapla/page.test.tsx`'in sonuna, mevcut `describe` bloklarının
 ALTINA yeni bir blok ekle (dosyanın üstündeki `jest.mock`/`viewportKur`/
@@ -124,13 +124,13 @@ describe('/hesapla — masaüstü Gelişmiş Ayarlar paneli (sütun dengesi)', (
 `within` import'u dosyanın üstündeki `@testing-library/react` import'una
 eklenmeli: `import { act, render, screen, within } from '@testing-library/react'`.
 
-- [ ] **Step 2: Testleri çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testleri çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/hesapla/page.test.tsx -t "Gelişmiş Ayarlar paneli"`
 Expected: 4 test de FAIL — ya "Gelişmiş Ayarlar" metni hiç bulunamaz (henüz
 yok) ya da alanlar hâlâ eski sidebar konumunda bulunur.
 
-- [ ] **Step 3: `page.module.css`'e yeni class'ları ekle**
+- [x] **Step 3: `page.module.css`'e yeni class'ları ekle**
 
 `.leftSidebar,\n.mainPanel,\n.summaryPanel {` (satır 85-87) bloğunu
 `.advancedPanel`'i de kapsayacak şekilde genişlet:
@@ -208,14 +208,14 @@ Dosyanın SONUNA (mevcut son kuraldan sonra) yeni class'ları ekle:
 }
 ```
 
-- [ ] **Step 4: `page.tsx`'te import'u güncelle**
+- [x] **Step 4: `page.tsx`'te import'u güncelle**
 
 `page.tsx:22`:
 ```tsx
 import { MarketField, BirimMaliyetField, RiskCostFields } from './AdvancedSettingsSections';
 ```
 
-- [ ] **Step 5: Sol sidebar'daki 3 grubu kaldır, `BirimMaliyetField` grubunu sadeleştir**
+- [x] **Step 5: Sol sidebar'daki 3 grubu kaldır, `BirimMaliyetField` grubunu sadeleştir**
 
 `page.tsx:708-761` bloğunun TAMAMINI (üç `settingsGroup`: Piyasa Analizi,
 Müteahhit Kazancı, İksa Masrafı) şununla DEĞİŞTİR:
@@ -234,7 +234,7 @@ Müteahhit Kazancı, İksa Masrafı) şununla DEĞİŞTİR:
 düşer, `Müteahhit Kazancı`/`İksa Masrafı` `settingsGroup`'ları TAMAMEN
 silinir.)
 
-- [ ] **Step 6: Yeni "Gelişmiş Ayarlar" panelini `rightGrid`'e ekle**
+- [x] **Step 6: Yeni "Gelişmiş Ayarlar" panelini `rightGrid`'e ekle**
 
 `page.tsx:943` (`</aside>`, summaryPanel'in kapanışı) ile `:945`
 (`</section>`, rightGrid'in kapanışı) ARASINA ekle:
@@ -262,12 +262,12 @@ silinir.)
           </div>
 ```
 
-- [ ] **Step 7: Testleri çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 7: Testleri çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/hesapla/page.test.tsx`
 Expected: TÜM testler (yeni 4 + mevcut olanlar) PASS.
 
-- [ ] **Step 8: tsc çalıştır**
+- [x] **Step 8: tsc çalıştır**
 
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
@@ -293,12 +293,12 @@ küçük bir düzeltme + ayrı commit).
 
 **Interfaces:** Yok — bu task kod üretmez, Task 1'in çıktısını doğrular.
 
-- [ ] **Step 1: Dev server'ı başlat**
+- [x] **Step 1: Dev server'ı başlat**
 
 Run: `npx next dev --webpack -p 3010` (arka planda)
 Bekle: `http://localhost:3010/hesapla` 200 dönene kadar.
 
-- [ ] **Step 2: Playwright ile 1440×900'de gerçek ölçüm al**
+- [x] **Step 2: Playwright ile 1440×900'de gerçek ölçüm al**
 
 `playwright-skill` ile (`/tmp/playwright-test-hesapla-desktop-after.js`):
 - `page.setViewportSize({width:1440,height:900})`
@@ -307,7 +307,7 @@ Bekle: `http://localhost:3010/hesapla` 200 dönene kadar.
   `boundingBox()`'larını al, konsola yazdır
 - Tam sayfa ekran görüntüsü al (`/tmp/hesapla-desktop-after.png`)
 
-- [ ] **Step 3: Ölçümleri değerlendir**
+- [x] **Step 3: Ölçümleri değerlendir**
 
 Sol sütun yüksekliği ile (`rightGrid` toplam yüksekliği = mainPanel/
 summaryPanel + advancedPanel + aralarındaki gap) arasındaki farkı hesapla.
@@ -316,7 +316,7 @@ panel) ile karşılaştır — büyük bir sapma (ör. hâlâ 400px+ fark) varsa
 3 sütunlu `.advancedPanelCols`'ta herhangi bir input/pill metni kırpılmış/
 taşmışsa (ekran görüntüsünden gözle kontrol), bir sonraki adımda düzelt.
 
-- [ ] **Step 4: Gerekirse küçük bir CSS düzeltmesi yap**
+- [x] **Step 4: Gerekirse küçük bir CSS düzeltmesi yap**
 
 Yalnızca Step 3'te somut bir sorun bulunduysa (ör. `.advancedPanelCols`
 sütunları 1100-1440px arası dar viewport'ta metin taşırıyor): `page.module.css`
@@ -324,7 +324,7 @@ içinde `.advancedPanelCols`'a `@media (max-width: 1100px) { grid-template-colum
 ekle (rightGrid'in kendi 1100px breakpoint'iyle tutarlı). Sorun yoksa bu adımı
 atla.
 
-- [ ] **Step 5: Tam test paketini çalıştır (mobil dahil, regresyon kontrolü)**
+- [x] **Step 5: Tam test paketini çalıştır (mobil dahil, regresyon kontrolü)**
 
 Run: `npx jest src/app/hesapla`
 Expected: TÜM suite'ler (mobil `GirdiKarti`/`HesaplaMobile` dahil) yeşil —
@@ -333,11 +333,11 @@ bu plan mobili hiç değiştirmedi, bu adım yalnızca kanıtlıyor.
 Run: `npx tsc --noEmit`
 Expected: 0 hata.
 
-- [ ] **Step 6: Dev server'ı kapat**
+- [x] **Step 6: Dev server'ı kapat**
 
 Run: (dev server process'ini sonlandır)
 
-- [ ] **Step 7: Ölçüm sonucunu rapor et, gerekirse commit**
+- [x] **Step 7: Ölçüm sonucunu rapor et, gerekirse commit**
 
 Kullanıcıya gerçek sol/sağ yükseklik farkını (px) ve ekran görüntüsünü
 raporla. Step 4'te bir düzeltme yapıldıysa:
@@ -348,3 +348,4 @@ git commit -m "fix(hesapla): advancedPanelCols dar viewport'ta tek sutuna doser"
 ```
 
 Düzeltme gerekmediyse commit YOK — Task 1'in commit'i zaten yeterli.
+

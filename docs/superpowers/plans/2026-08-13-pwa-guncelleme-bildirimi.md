@@ -30,7 +30,7 @@
 
 `sw.js` bir tarayıcı script'i olduğu için Jest onu ÇALIŞTIRAMAZ — test, dosyanın METNİNİ okuyup regex ile yapısal sözleşmeyi doğrular (projenin `*.scope.test.ts` deseniyle aynı yaklaşım).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `public/sw.contract.test.ts` dosyasını oluştur:
 
@@ -62,12 +62,12 @@ describe('public/sw.js — güncelleme sözleşmesi', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx jest public/sw.contract.test.ts`
 Expected: FAIL — ilk test `self.skipWaiting()`'in install içinde OLMASI nedeniyle başarısız (`not.toMatch` ihlali), ikinci test `message` dinleyicisi hiç olmadığı için `not.toBeNull()` ihlaliyle başarısız.
 
-- [ ] **Step 3: `public/sw.js`'i düzenle**
+- [x] **Step 3: `public/sw.js`'i düzenle**
 
 `install` olay dinleyicisindeki `self.skipWaiting();` satırını SİL. Dosyanın güncel hali (yalnızca `install` ve yeni `message` bloğu, geri kalan dosya AYNEN kalır):
 
@@ -109,7 +109,7 @@ self.addEventListener('activate', (event) => {
 
 (Dosyanın geri kalanı — `CACHE_NAME`/`SW_VERSION` sabitleri, `STATIC_ASSETS`, `fetch` olayı — DEĞİŞMEDEN kalır.)
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx jest public/sw.contract.test.ts`
 Expected: PASS — 3/3 test yeşil.
@@ -133,7 +133,7 @@ git commit -m "feat(pwa): sw.js kullanici onayli guncellemeye gecti (skipWaiting
 - Consumes: Task 1'in SW sözleşmesi (`waiting` worker'a `{type:'SKIP_WAITING'}` postMessage).
 - Produces: `usePwaUpdate(target?: PwaUpdateTarget): { updateAvailable: boolean; applyUpdate: () => void }` — Task 3'ün `UpdateBanner.tsx`'i bunu tüketecek.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/lib/pwa/usePwaUpdate.test.ts`:
 
@@ -246,12 +246,12 @@ describe('usePwaUpdate', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx jest src/lib/pwa/usePwaUpdate.test.ts`
 Expected: FAIL — `Cannot find module './usePwaUpdate'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `src/lib/pwa/usePwaUpdate.ts`:
 
@@ -355,7 +355,7 @@ export function usePwaUpdate(
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx jest src/lib/pwa/usePwaUpdate.test.ts`
 Expected: PASS — 4/4 test yeşil.
@@ -379,7 +379,7 @@ git commit -m "feat(pwa): usePwaUpdate hook — waiting worker tespiti + kullani
 - Consumes: `usePwaUpdate()` (Task 2) — `{ updateAvailable, applyUpdate }`.
 - Produces: `<UpdateBanner />` — Task 4'te `layout.tsx`'e eklenecek, prop almaz.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `src/components/pwa/__tests__/UpdateBanner.test.tsx`:
 
@@ -425,12 +425,12 @@ describe('UpdateBanner', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx jest src/components/pwa/__tests__/UpdateBanner.test.tsx`
 Expected: FAIL — `Cannot find module '../UpdateBanner'`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `src/components/pwa/UpdateBanner.tsx`:
 
@@ -527,7 +527,7 @@ export function UpdateBanner() {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx jest src/components/pwa/__tests__/UpdateBanner.test.tsx`
 Expected: PASS — 4/4 test yeşil.
@@ -558,7 +558,7 @@ satırlık bağlama değişikliği, güvenlik ağı Task 3'ün `UpdateBanner`
 testleri (bileşenin kendisi zaten kanıtlanmış) + bu adımın sonundaki tam
 proje `tsc`+`jest` regresyon taraması.
 
-- [ ] **Step 1: `layout.tsx`'i düzenle**
+- [x] **Step 1: `layout.tsx`'i düzenle**
 
 `src/app/layout.tsx`'te satır 7'deki import'un hemen altına ekle:
 
@@ -585,7 +585,7 @@ Sonuç (satır 68-73 civarı):
         </AuthProvider>
 ```
 
-- [ ] **Step 2: Tüm proje testlerini ve tsc'yi çalıştır**
+- [x] **Step 2: Tüm proje testlerini ve tsc'yi çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: tsc 0 hata, TÜM proje suite'i yeşil (bu turdan önceki toplam +
