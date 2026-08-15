@@ -22,10 +22,13 @@ describe('dashboard reports mobile liquid glass scope', () => {
         expect(page).toMatch(/fetch\("\/api\/reports"\)/)
     })
 
-    it('mobil kabuk --m-* mesh ve cam yuzey tokenlarini kullanir', () => {
+    it('mobil kabuk --m-* mesh tokenini kullanir', () => {
         expect(mobile).toMatch(/\.reportsShell\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
-        expect(mobile).toMatch(/\.heroCard,\s*\.reportCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-        expect(mobile).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
+    })
+
+    it('hero/rapor/bos/durum kartlari paylasilan .mStatSurface yuzeyine baglanir', () => {
+        expect(mobile).toMatch(/\.heroCard,\s*\.reportCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(mobile).not.toMatch(/\.heroCard,\s*\.reportCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     })
 
     it('mobil metrikler mono font ve tabular sayi gorunumune sahip olur', () => {

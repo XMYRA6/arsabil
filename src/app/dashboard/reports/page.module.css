@@ -245,11 +245,7 @@
     .reportCard,
     .emptyCard,
     .stateCard {
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
+        composes: mStatSurface from global;
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
