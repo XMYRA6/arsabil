@@ -22,10 +22,10 @@
 - Modify: `src/app/login/login.module.css`
 - Test: `src/app/login/loginMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing CSS scope tests**
-- [ ] **Step 2: Mobil-only cam form yuzeyi ve marka ust bolumunu ekle**
-- [ ] **Step 3: Touch target ve focus state kurallarini dogrula**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing CSS scope tests**
+- [x] **Step 2: Mobil-only cam form yuzeyi ve marka ust bolumunu ekle**
+- [x] **Step 3: Touch target ve focus state kurallarini dogrula**
+- [x] **Step 4: Commit**
 
 ## Task 2: Mobil kayit sayfasi
 

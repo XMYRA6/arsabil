@@ -259,42 +259,50 @@
 }
 
 @media (max-width: 768px) {
-    [data-theme="dark"] .panel {
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border: rgba(43, 124, 255, 0.25);
-        --seal-text: #F4F0E6;
-    }
-
-    [data-theme="light"] .panel {
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
-        --seal-surface: var(--shell-bg);
-        --seal-border: var(--shell-border);
-        --seal-text: var(--card-title);
+    .page {
+        background: var(--m-mesh);
+        color: var(--m-ink);
+        padding: 16px;
     }
 
     .panel,
     .authShell {
         grid-template-columns: 1fr;
         max-width: 500px;
-        border: 1px solid var(--seal-border);
-        border-radius: 24px;
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        border-radius: var(--m-r-sheet);
         overflow: hidden;
+        box-shadow: var(--m-sh-card);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
     }
 
     .brandSide {
         padding: 2.5rem;
+        background: var(--m-grad-accent);
     }
 
     .formSide,
     .formPanel {
         padding: 2.5rem 2rem;
-        background: var(--seal-surface);
-        color: var(--seal-text);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+        background: transparent;
+        color: var(--m-ink);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .formTitle {
+        color: var(--m-ink);
+    }
+
+    .formSubtitle,
+    .footerText {
+        color: var(--m-body);
+    }
+
+    .label {
+        color: var(--m-body);
     }
 
     .input {
@@ -302,25 +310,39 @@
         height: var(--input-height-mobile);
         font-size: 16px; /* iOS zoom tetiklenmesin */
         box-sizing: border-box;
-        background: transparent;
-        border: 1px solid var(--seal-border);
-        color: var(--seal-text);
+        background: var(--m-fill);
+        border: 1px solid var(--m-glass-border);
+        color: var(--m-ink);
+        border-radius: var(--m-r-input);
     }
 
     .input:focus {
-        border-color: var(--seal-accent);
-        box-shadow: 0 0 0 3px rgba(var(--seal-accent-rgb), 0.18);
+        border-color: var(--m-link);
+        box-shadow: 0 0 0 3px rgba(21, 96, 208, 0.18);
     }
 
     .submitBtn {
         min-height: var(--touch-target);
-        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
+        background: var(--m-grad-btn);
         border: none;
         color: #fff;
+        box-shadow: var(--m-sh-grad-btn);
+        border-radius: var(--m-r-btn);
     }
 
-    .forgotLink {
-        color: var(--seal-accent);
+    .forgotLink,
+    .footerLink {
+        color: var(--m-link);
+    }
+
+    .errorBanner {
+        border-radius: var(--m-r-inner);
+        background: rgba(255, 45, 85, 0.1);
+    }
+
+    .errorBannerSuccess {
+        background: rgba(16, 185, 129, 0.12);
+        color: var(--m-success-text);
     }
 }
 
@@ -360,7 +382,7 @@
     }
 
     .formPanel {
-        background: var(--seal-surface);
+        background: transparent;
     }
 }
 
@@ -376,7 +398,6 @@
     }
 
     .formSide {
-        background: var(--seal-surface);
+        background: transparent;
     }
 }
-

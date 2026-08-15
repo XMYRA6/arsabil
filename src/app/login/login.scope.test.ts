@@ -41,67 +41,55 @@ describe('login sayfası mobil CSS kapsam guard', () => {
   })
 })
 
-describe('login mobil mühür kimliği (Faz 2.5)', () => {
+describe('login mobil Liquid Glass kimligi (Faz 3)', () => {
   const globalsCss = fs.readFileSync(path.join(__dirname, '../globals.css'), 'utf8');
 
-  it('seal token\'ları globals.css içine sızmamış olmalı', () => {
-    expect(globalsCss).not.toMatch(/--seal-(accent|surface|border|text)/);
+  it('mobil Liquid Glass tokenlari globals.css icinde tanimli olmali', () => {
+    expect(globalsCss).toMatch(/--m-glass-bg:/);
+    expect(globalsCss).toMatch(/--m-mesh:/);
+    expect(globalsCss).toMatch(/--m-grad-btn:/);
   });
 
-  it('--seal-accent kanonik Aurora cyan olmalı (literal hex değil)', () => {
-    expect(css).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
-    expect(css).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
-    expect(css).not.toMatch(/#4C8DFF/i);
-  });
-
-  it('token tanımları mobil media query İÇİNDE olmalı', () => {
-    const mediaIndex = css.indexOf('@media (max-width: 768px)');
-    expect(mediaIndex).toBeGreaterThan(-1);
-    expect(css.indexOf('--seal-surface:')).toBeGreaterThan(mediaIndex);
-  });
-
-  it('--seal-surface hem dark hem light tema dalında tanımlı olmalı', () => {
-    expect(css).toMatch(/\[data-theme="dark"\]\s*\.panel\s*\{[^}]*--seal-surface:/);
-    expect(css).toMatch(/\[data-theme="light"\]\s*\.panel\s*\{[^}]*--seal-surface:/);
-  });
-
-  it('light dalı mevcut global cam token\'larını yeniden kullanmalı', () => {
-    const lightBlockMatch = css.match(/\[data-theme="light"\]\s*\.panel\s*\{([^}]*)\}/);
-    expect(lightBlockMatch).not.toBeNull();
-    const lightBlock = lightBlockMatch![1];
-    expect(lightBlock).toMatch(/--seal-surface:\s*var\(--shell-bg\)/);
-    expect(lightBlock).toMatch(/--seal-border:\s*var\(--shell-border\)/);
-    expect(lightBlock).toMatch(/--seal-text:\s*var\(--card-title\)/);
-  });
-
-  it('.formSide ve .input mobilde seal yüzeyine geçmeli', () => {
+  it('mobil CSS artik --seal-* token sozlesmesine bagli degil', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.formSide\s*\{[^}]*background:\s*var\(--seal-surface\)/);
-    expect(mobile).toMatch(/\.input\s*\{[^}]*border:\s*1px solid var\(--seal-border\)/);
+    expect(mobile).not.toMatch(/--seal-/);
   });
 
-  it('.submitBtn mobilde seal aksanına geçmeli — koyultulmuş ton (whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, WCAG AA 4.5:1 altında — Task 5\'in .bubbleMine için ölçüp onayladığı color-mix ile aynı deger)', () => {
+  it('mobil sayfa mesh, panel cam yuzeyi kullanmali', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.submitBtn\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
+    expect(mobile).toMatch(/\.page\s*\{[^}]*background:\s*var\(--m-mesh\)/);
+    expect(mobile).toMatch(/\.panel,\s*\.authShell\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+    expect(mobile).toMatch(/\.panel,\s*\.authShell\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
   });
 
-  it('.input mobilde iOS zoom korumasını KORUMALI (regresyon)', () => {
+  it('.formSide ve .formPanel mobilde cam panel icinde transparan kalmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.formSide,\s*\.formPanel\s*\{[^}]*background:\s*transparent/);
+  });
+
+  it('.input ve .submitBtn mobilde Liquid Glass tokenlarini kullanmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.input\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
+    expect(mobile).toMatch(/\.input:focus\s*\{[^}]*border-color:\s*var\(--m-link\)/);
+    expect(mobile).toMatch(/\.submitBtn\s*\{[^}]*background:\s*var\(--m-grad-btn\)/);
+  });
+
+  it('.input mobilde iOS zoom korumasini KORUMALI (regresyon)', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
     expect(mobile).toMatch(/\.input\s*\{[^}]*font-size:\s*16px/);
     expect(mobile).toMatch(/\.input\s*\{[^}]*height:\s*var\(--input-height-mobile\)/);
   });
 
-  it('.brandSide kimliğe girmemeli (kendi marka yüzeyi korunuyor)', () => {
+  it('.brandSide mobilde Faz 3 accent gradient yuzeyini kullanmali', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).not.toMatch(/\.brandSide\s*\{[^}]*--seal/);
+    expect(mobile).toMatch(/\.brandSide\s*\{[^}]*background:\s*var\(--m-grad-accent\)/);
   });
 
-  it('masaüstü dalı değişmemeli: .panel masaüstünde hâlâ 2 kolon', () => {
+  it('masaustu dali degismemeli: .panel masaustunde hala 2 kolon', () => {
     const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
     expect(desktop).toMatch(/\.panel\s*\{[^}]*grid-template-columns:\s*42% 58%/);
   });
 });
-
 describe('login profesyonel split layout', () => {
   it('authShell desktop split ve brand/form panel tokenlarini tanimlar', () => {
     expect(css).toMatch(/\.authShell\s*\{[^}]*grid-template-columns:\s*42% 58%/)
@@ -123,4 +111,3 @@ describe('login profesyonel split layout', () => {
     expect(css).toMatch(/\.input\s*\{[^}]*min-height:\s*48px/)
   })
 })
-
