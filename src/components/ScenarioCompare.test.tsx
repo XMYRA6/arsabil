@@ -65,21 +65,21 @@ describe('ScenarioCompare', () => {
         render(<ScenarioCompare scenarios={scenarios} onShareRequest={onShareRequest} />);
 
         await act(async () => {
-            screen.getByText(/🔗 Paylaş/).click();
+            screen.getByRole('button', { name: /Paylaş/ }).click();
         });
         await waitFor(() => expect(onShareRequest).toHaveBeenCalledWith(['s1', 's2']));
         expect(await screen.findByText('https://arsabil.com/compare/abc123')).toBeInTheDocument();
 
         await act(async () => {
-            screen.getByText('Kopyala').click();
+            screen.getByRole('button', { name: /Kopyala/ }).click();
         });
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://arsabil.com/compare/abc123');
-        expect(await screen.findByText('✓ Kopyalandı')).toBeInTheDocument();
+        expect(await screen.findByRole('button', { name: /Kopyalandı/ })).toBeInTheDocument();
     });
 
     it('PDF İndir tıklanınca jsPDF çağrılır', () => {
         render(<ScenarioCompare scenarios={scenarios} />);
-        screen.getByText(/📄 PDF İndir/).click();
+        screen.getByRole('button', { name: /PDF indir/ }).click();
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const jsPDFMock = require('jspdf') as jest.Mock;
         expect(jsPDFMock).toHaveBeenCalled();

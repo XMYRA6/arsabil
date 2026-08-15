@@ -3,6 +3,7 @@
 import React, { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { IconCheckCircle, IconChevronRight, IconFile } from '@/components/icons';
 import styles from './ScenarioCompare.module.css';
 
 export interface Scenario {
@@ -36,11 +37,7 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
     const cardTrackRef = useRef<HTMLDivElement>(null);
 
     if (scenarios.length < 2) {
-        return (
-            <div className={styles.emptyMessage}>
-                Karşılaştırma için en az 2 senaryo gereklidir.
-            </div>
-        );
+        return <div className={styles.emptyMessage}>Karşılaştırma için en az 2 senaryo gereklidir.</div>;
     }
 
     const formatTL = (v: number) => '₺' + v.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
@@ -59,9 +56,7 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
         { label: 'Kâr Tutarı', values: scenarios.map(s => formatTL(s.fdTotal - s.totalCost)) },
     ];
 
-    const bestIdx = scenarios.reduce((best, s, i) =>
-        s.fdTotal < scenarios[best].fdTotal ? i : best, 0
-    );
+    const bestIdx = scenarios.reduce((best, s, i) => s.fdTotal < scenarios[best].fdTotal ? i : best, 0);
 
     const handlePdf = () => {
         const doc = new jsPDF();
@@ -97,31 +92,41 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
 
     const onCardScroll = () => {
         const el = cardTrackRef.current;
-        if (!el || el.clientWidth === 0) return;
-        setActiveCard(Math.round(el.scrollLeft / el.clientWidth));
+        if (!el) return;
+        const firstCard = el.querySelector('[data-scenario-card="true"]') as HTMLElement | null;
+        const step = firstCard ? firstCard.offsetWidth + 12 : el.clientWidth;
+        if (step > 0) setActiveCard(Math.round(el.scrollLeft / step));
+    };
+
+    const selectCard = (index: number) => {
+        setActiveCard(index);
+        const card = cardTrackRef.current?.querySelectorAll('[data-scenario-card="true"]')[index] as HTMLElement | undefined;
+        card?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     };
 
     return (
         <div className={styles.root}>
             <div className={styles.actions}>
-                <button onClick={handlePdf} className={styles.actionBtn}>
-                    📄 PDF İndir
+                <button onClick={handlePdf} className={styles.actionBtn} aria-label="PDF indir" title="PDF indir">
+                    <IconFile size={18} strokeWidth={2.3} />
                 </button>
                 {onShareRequest && (
                     <button
                         onClick={handleShare}
                         disabled={sharing}
                         className={`${styles.actionBtn} ${sharing ? styles.actionBtnSharing : ''}`}
+                        aria-label={sharing ? 'Link oluşturuluyor' : 'Paylaş'}
+                        title={sharing ? 'Link oluşturuluyor' : 'Paylaş'}
                     >
-                        {sharing ? 'Link oluşturuluyor...' : '🔗 Paylaş'}
+                        {sharing ? <IconCheckCircle size={18} strokeWidth={2.3} /> : <IconChevronRight size={18} strokeWidth={2.3} />}
                     </button>
                 )}
             </div>
             {shareUrl && (
                 <div className={styles.shareBox}>
                     <span className={styles.shareUrlText}>{shareUrl}</span>
-                    <button onClick={handleCopy} className={styles.copyBtn}>
-                        {copied ? '✓ Kopyalandı' : 'Kopyala'}
+                    <button onClick={handleCopy} className={styles.copyBtn} aria-label={copied ? 'Kopyalandı' : 'Kopyala'} title={copied ? 'Kopyalandı' : 'Kopyala'}>
+                        {copied ? <IconCheckCircle size={15} strokeWidth={2.5} /> : <IconChevronRight size={15} strokeWidth={2.5} />}
                     </button>
                 </div>
             )}
@@ -129,14 +134,9 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                 <table className={styles.table}>
                     <thead>
                         <tr>
-                            <th className={styles.thLabel}>
-                                Parametre
-                            </th>
+                            <th className={styles.thLabel}>Parametre</th>
                             {scenarios.map((s, i) => (
-                                <th
-                                    key={s.id}
-                                    className={`${styles.thScenario} ${i === bestIdx ? styles.thScenarioBest : ''}`}
-                                >
+                                <th key={s.id} className={`${styles.thScenario} ${i === bestIdx ? styles.thScenarioBest : ''}`}>
                                     {s.name} {i === bestIdx && '⭐'}
                                 </th>
                             ))}
@@ -145,14 +145,9 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                     <tbody>
                         {rows.map((row, ri) => (
                             <tr key={ri}>
-                                <td className={styles.tdLabel}>
-                                    {row.label}
-                                </td>
+                                <td className={styles.tdLabel}>{row.label}</td>
                                 {row.values.map((v, vi) => (
-                                    <td
-                                        key={vi}
-                                        className={`${styles.tdValue} ${row.highlight ? styles.tdValueHighlight : ''} ${vi === bestIdx ? styles.tdValueBest : ''}`}
-                                    >
+                                    <td key={vi} className={`${styles.tdValue} ${row.highlight ? styles.tdValueHighlight : ''} ${vi === bestIdx ? styles.tdValueBest : ''}`}>
                                         {v}
                                     </td>
                                 ))}
@@ -162,34 +157,36 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                 </table>
             </div>
             <div className={styles.mobileCards}>
+                <div className={styles.scenarioTabs} role="tablist" aria-label="Mobil senaryo seçimi">
+                    {scenarios.map((s, i) => (
+                        <button
+                            key={s.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={i === activeCard}
+                            className={i === activeCard ? styles.scenarioTabActive : styles.scenarioTab}
+                            onClick={() => selectCard(i)}
+                        >
+                            {s.name}
+                        </button>
+                    ))}
+                </div>
                 <div className={styles.cardTrack} ref={cardTrackRef} onScroll={onCardScroll}>
                     {scenarios.map((s, i) => (
-                        <div
-                            key={s.id}
-                            className={`${styles.scenarioCard} ${i === bestIdx ? styles.scenarioCardBest : ''}`}
-                        >
+                        <div key={s.id} className={`${styles.scenarioCard} ${i === bestIdx ? styles.scenarioCardBest : ''}`} data-scenario-card="true">
                             <div className={styles.cardHeader}>
                                 <span className={styles.cardName}>{s.name}</span>
-                                {i === bestIdx && <span className={styles.cardBadge}>⭐ En Uygun</span>}
+                                {i === bestIdx && <span className={styles.cardBadge}>En Uygun</span>}
                             </div>
                             {rows.map((row, ri) => (
                                 <div key={ri} className={styles.cardRow}>
                                     <span className={styles.cardLabel}>{row.label}</span>
-                                    <span className={`${styles.cardValue} ${row.highlight ? styles.cardValueHighlight : ''}`}>
-                                        {row.values[i]}
-                                    </span>
+                                    <span className={`${styles.cardValue} ${row.highlight ? styles.cardValueHighlight : ''}`}>{row.values[i]}</span>
                                 </div>
                             ))}
                         </div>
                     ))}
                 </div>
-                {scenarios.length > 1 && (
-                    <div className={styles.cardDots} aria-hidden="true">
-                        {scenarios.map((_, i) => (
-                            <span key={i} className={`${styles.dot} ${i === activeCard ? styles.dotActive : ''}`} />
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );

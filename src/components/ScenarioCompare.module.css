@@ -20,15 +20,15 @@
 }
 
 .actionBtn {
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
+    width: 42px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 12px;
     background: var(--panel);
     border: 1px solid var(--border);
     color: var(--text);
     cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 700;
-    font-family: inherit;
 }
 
 .actionBtnSharing {
@@ -57,16 +57,16 @@
 }
 
 .copyBtn {
-    padding: 3px 10px;
-    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 10px;
     background: var(--primary);
     border: none;
     color: white;
-    font-size: 0.72rem;
-    font-weight: 700;
     cursor: pointer;
     flex-shrink: 0;
-    font-family: inherit;
 }
 
 .tableWrap {
@@ -146,20 +146,53 @@
         display: block;
     }
 
-    [data-theme="dark"] .root {
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border-soft: rgba(43, 124, 255, 0.18);
-        --seal-text: #E8EEF7;
-        --seal-text-muted: rgba(232, 238, 247, 0.68);
-        --seal-accent: var(--aurora-cyan);
+    .root {
+        color: var(--m-ink);
     }
 
-    [data-theme="light"] .root {
-        --seal-surface: var(--shell-bg);
-        --seal-border-soft: var(--shell-border);
-        --seal-text: var(--card-title);
-        --seal-text-muted: var(--muted);
-        --seal-accent: var(--aurora-cyan);
+    .actions {
+        justify-content: flex-end;
+    }
+
+    .actionBtn,
+    .copyBtn {
+        min-width: var(--touch-target);
+        min-height: var(--touch-target);
+        border-radius: var(--m-r-btn);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-glass-bg);
+        color: var(--m-link);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+    }
+
+    .scenarioTabs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+        gap: 4px;
+        padding: 4px;
+        margin-bottom: 12px;
+        border-radius: var(--m-r-input);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-fill);
+    }
+
+    .scenarioTab,
+    .scenarioTabActive {
+        min-height: var(--touch-target);
+        border: 0;
+        border-radius: var(--m-r-btn);
+        background: transparent;
+        color: var(--m-on-glass);
+        font-weight: 900;
+        font-size: 12px;
+    }
+
+    .scenarioTabActive {
+        background: var(--m-grad-btn);
+        color: #fff;
+        box-shadow: var(--m-sh-grad-btn);
     }
 
     .cardTrack {
@@ -174,16 +207,17 @@
     .scenarioCard {
         flex: 0 0 85%;
         scroll-snap-align: start;
-        background: var(--seal-surface);
-        border: 1px solid var(--seal-border-soft);
-        border-radius: 16px;
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        border-radius: var(--m-r-card);
         padding: 1rem;
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
     .scenarioCardBest {
-        border-color: var(--seal-accent);
+        border-color: var(--m-link);
     }
 
     .cardHeader {
@@ -192,66 +226,47 @@
         align-items: center;
         margin-bottom: 0.75rem;
         padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--seal-border-soft);
+        border-bottom: 1px solid var(--m-divider);
     }
 
     .cardName {
         font-weight: 800;
         font-size: 0.95rem;
-        color: var(--seal-text);
+        color: var(--m-ink);
     }
 
     .cardBadge {
         font-size: 0.68rem;
         font-weight: 800;
-        color: var(--seal-accent);
+        color: var(--m-link);
     }
 
     .cardRow {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 12px;
         padding: 0.4rem 0;
     }
 
     .cardLabel {
         font-size: 0.78rem;
-        color: var(--seal-text-muted);
+        color: var(--m-body);
         font-weight: 600;
     }
 
     .cardValue {
-        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-family: var(--m-mono);
         font-variant-numeric: tabular-nums;
         font-size: 0.82rem;
         font-weight: 700;
-        color: var(--seal-text);
+        color: var(--m-ink);
+        text-align: right;
     }
 
     .cardValueHighlight {
         font-size: 0.95rem;
         font-weight: 900;
-        color: var(--seal-accent);
-    }
-
-    .cardDots {
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        margin-top: 10px;
-    }
-
-    .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--seal-border-soft);
-        transition: background 0.2s, width 0.2s;
-    }
-
-    .dotActive {
-        background: var(--seal-accent);
-        width: 16px;
-        border-radius: 3px;
+        color: var(--m-link);
     }
 }

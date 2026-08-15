@@ -48,10 +48,10 @@
 - Modify: `src/components/ScenarioCompare.module.css`
 - Test: `src/components/ScenarioCompare.mobile.test.tsx`
 
-- [ ] **Step 1: Failing tests for horizontal-safe mobile comparison**
-- [ ] **Step 2: Tabloyu mobil kart/segment gorunumune donustur**
-- [ ] **Step 3: Paylasim/indir aksiyonlarini icon button olarak hizala**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for horizontal-safe mobile comparison**
+- [x] **Step 2: Tabloyu mobil kart/segment gorunumune donustur**
+- [x] **Step 3: Paylasim/indir aksiyonlarini icon button olarak hizala**
+- [x] **Step 4: Commit**
 
 ## Final Verification
 
