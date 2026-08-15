@@ -275,6 +275,11 @@ a {
     --m-fill: rgba(11,32,54,.05);
     --m-divider: rgba(11,32,54,.07);
     --m-panel: #ffffff;
+    /* Faz 2 (2026-08-15): yalnizca .editorialListingCard basliginda kullanilir
+       (onaylanan mockup: https://claude.ai/code/artifact/3b9656aa-a9fa-4bdd-a778-
+       1c9631f5c0e6) — genel bir site-geneli font migrasyonu DEGIL, Inter govde/UI
+       metninde kalir. */
+    --m-font-serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
 
     --m-success: #10b981;
     --m-success-text: #067a56;
@@ -370,6 +375,30 @@ a {
     background: var(--m-fill);
   }
   .mFlatRow:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  /* Faz 2 (2026-08-15): fotoğraf içeren ilan kartları için (Favoriler,
+     İlanlarım — onaylanan mockup: https://claude.ai/code/artifact/3b9656aa-
+     a9fa-4bdd-a778-1c9631f5c0e6). Üstte fotoğraf/gradyan alanı (tüketici
+     kendi .itemPhoto'sunu ekler), tüketicinin serif başlığı için --m-font-serif
+     kullanılır. Yalnızca mobilde (bu class'ın kendisi gibi) — dark tema
+     desteği bu fazda İCAT EDİLMEZ (bkz. plan Global Constraints). */
+  .editorialListingCard {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--m-r-card);
+    border: 1px solid var(--m-divider);
+    background: var(--m-panel);
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s ease;
+  }
+  .editorialListingCard:active {
+    transform: scale(0.98);
+  }
+  .editorialListingCard:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
   }

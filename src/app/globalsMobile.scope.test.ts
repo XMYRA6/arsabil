@@ -133,6 +133,26 @@ describe('Kart tekdüzeliği düzeltmesi — paylaşılan yüzey sınıfları (2
     })
 })
 
+describe('Faz 2 — fotograf iceren ilan karti yuzeyi (2026-08-15)', () => {
+    it('--m-font-serif tanimli', () => {
+        expect(mobileBlock()).toMatch(/--m-font-serif:\s*Georgia/)
+    })
+
+    it('.editorialListingCard panel yuzeyi + overflow:hidden + link sifirlama tanimlar, cam/blur YOK', () => {
+        const inside = mobileBlock()
+        expect(inside).toMatch(/\.editorialListingCard\s*\{[^}]*background:\s*var\(--m-panel\)/)
+        expect(inside).toMatch(/\.editorialListingCard\s*\{[^}]*border:\s*1px solid var\(--m-divider\)/)
+        expect(inside).toMatch(/\.editorialListingCard\s*\{[^}]*border-radius:\s*var\(--m-r-card\)/)
+        expect(inside).toMatch(/\.editorialListingCard\s*\{[^}]*overflow:\s*hidden/)
+        expect(inside).not.toMatch(/\.editorialListingCard\s*\{[^}]*backdrop-filter/)
+    })
+
+    it('.editorialListingCard:active/:focus-visible basma ve odak geri bildirimi verir', () => {
+        expect(mobileBlock()).toMatch(/\.editorialListingCard:active\s*\{[^}]*transform:\s*scale\(0\.98\)/)
+        expect(mobileBlock()).toMatch(/\.editorialListingCard:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/)
+    })
+})
+
 describe('Faz 2 — duz/ayracli liste yuzeyi (2026-08-15)', () => {
     it('.mFlatRow arka plan/kenarlik/koseYaricapi TASIMAZ — sadece border-bottom ile ayrisir (kart-icinde-kart olmasin diye)', () => {
         const inside = mobileBlock()

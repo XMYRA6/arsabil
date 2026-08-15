@@ -23,10 +23,22 @@ describe('dashboard listings mobile page', () => {
         expect(page).toMatch(/filter === 'draft'/)
     })
 
-    it('mobil kabuk ve liste kartlari liquid glass tokenlarini kullanir', () => {
+    it('mobil kabuk ve bos durum liquid glass tokenlarini kullanir', () => {
         expect(mobile).toMatch(/\.portfolioShell\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
-        expect(mobile).toMatch(/\.heroCard,\s*\.itemCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+        expect(mobile).toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
         expect(mobile).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
+    })
+
+    it('Listing tipi photos alanini tasir, .itemCard fotografli editorialListingCard yuzeyine baglanir', () => {
+        expect(page).toMatch(/photos\?:\s*string\[\]\s*\|\s*null/)
+        expect(css).toMatch(/\.itemCard\s*\{[^}]*composes:\s*editorialListingCard from global/)
+        expect(mobile).not.toMatch(/\.itemCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+    })
+
+    it('.itemCard fotograf alani (foto varsa Image, yoksa gradyan placeholder) ve serif baslik icerir', () => {
+        expect(page).toMatch(/styles\.itemPhoto/)
+        expect(page).toMatch(/listing\.photos\?\.\[0\]/)
+        expect(css).toMatch(/\.itemCard h2\s*\{[^}]*font-family:\s*var\(--m-font-serif\)/)
     })
 
     it('mobil segment ve yeni ilan aksiyonu touch-safe premium gorunumdedir', () => {

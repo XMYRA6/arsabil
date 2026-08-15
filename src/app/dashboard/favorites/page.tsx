@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -16,10 +17,17 @@ type Favorite = {
         district?: string | null;
         price?: number | null;
         type?: string | null;
+        photos?: string[] | null;
         report?: { title?: string | null; landShareRatio?: number | null } | null;
         _count?: { offers: number };
     } | null;
 };
+
+/** ListingCard.tsx'teki fotosuz-durum placeholder desenini yeniden kullanır (id'ye bağlı hue varyasyonu). */
+function photoPlaceholderGradient(id: string): string {
+    const hue = 220 + (id.charCodeAt(0) % 60);
+    return `linear-gradient(135deg, hsl(${hue}, 50%, 20%), hsl(${hue - 20}, 60%, 15%))`;
+}
 
 export default function FavoritesPage() {
     const { status } = useSession();
@@ -70,17 +78,28 @@ export default function FavoritesPage() {
                     {favorites.map(favorite => {
                         const listing = favorite.listing;
                         const title = listing?.title || listing?.report?.title || 'İlan';
+                        const photoUrl = listing?.photos?.[0];
                         return (
                             <Link key={favorite.id} href={`/listing/${favorite.listingId}`} className={styles.itemCard}>
-                                <div className={styles.itemTopline}>
-                                    <span>{listing?.type || 'KAT_KARSILIGI'}</span>
-                                    <strong>{listing?._count?.offers ?? 0} teklif</strong>
+                                <div
+                                    className={styles.itemPhoto}
+                                    style={!photoUrl ? { background: photoPlaceholderGradient(favorite.listingId) } : undefined}
+                                >
+                                    {photoUrl && (
+                                        <Image fill unoptimized src={photoUrl} alt={title} style={{ objectFit: 'cover' }} />
+                                    )}
                                 </div>
-                                <h2>{title}</h2>
-                                <p>{[listing?.district, listing?.city].filter(Boolean).join(', ') || 'Konum belirtilmedi'}</p>
-                                <div className={styles.metricRow}>
-                                    <div><span>Fiyat</span><strong>{listing?.price ? `₺${listing.price.toLocaleString('tr-TR')}` : 'Yok'}</strong></div>
-                                    <div><span>Arsa payı</span><strong>{listing?.report?.landShareRatio != null ? `%${(listing.report.landShareRatio * 100).toFixed(0)}` : 'Yok'}</strong></div>
+                                <div className={styles.itemBody}>
+                                    <div className={styles.itemTopline}>
+                                        <span>{listing?.type || 'KAT_KARSILIGI'}</span>
+                                        <strong>{listing?._count?.offers ?? 0} teklif</strong>
+                                    </div>
+                                    <h2>{title}</h2>
+                                    <p>{[listing?.district, listing?.city].filter(Boolean).join(', ') || 'Konum belirtilmedi'}</p>
+                                    <div className={styles.metricRow}>
+                                        <div><span>Fiyat</span><strong>{listing?.price ? `₺${listing.price.toLocaleString('tr-TR')}` : 'Yok'}</strong></div>
+                                        <div><span>Arsa payı</span><strong>{listing?.report?.landShareRatio != null ? `%${(listing.report.landShareRatio * 100).toFixed(0)}` : 'Yok'}</strong></div>
+                                    </div>
                                 </div>
                             </Link>
                         );

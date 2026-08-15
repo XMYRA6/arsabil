@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -14,9 +15,16 @@ type Listing = {
     isActive: boolean;
     status: string;
     type?: string | null;
+    photos?: string[] | null;
     createdAt: string;
     offers?: unknown[];
 };
+
+/** ListingCard.tsx'teki fotosuz-durum placeholder desenini yeniden kullanır (id'ye bağlı hue varyasyonu). */
+function photoPlaceholderGradient(id: string): string {
+    const hue = 220 + (id.charCodeAt(0) % 60);
+    return `linear-gradient(135deg, hsl(${hue}, 50%, 20%), hsl(${hue - 20}, 60%, 15%))`;
+}
 
 type Filter = 'all' | 'active' | 'draft';
 
@@ -91,22 +99,35 @@ export default function DashboardListingsPage() {
                 </section>
             ) : (
                 <section className={styles.listStack} aria-label="İlanlarım">
-                    {filteredListings.map(listing => (
-                        <Link key={listing.id} href={`/listing/${listing.id}`} className={styles.itemCard}>
-                            <div className={styles.itemTopline}>
-                                <span>{listing.type || 'KAT_KARSILIGI'}</span>
-                                <strong className={listing.isActive && listing.status === 'APPROVED' ? styles.statusActive : styles.statusDraft}>
-                                    {listing.isActive && listing.status === 'APPROVED' ? 'Aktif' : listing.status === 'PENDING' ? 'Onay bekliyor' : 'Taslak'}
-                                </strong>
-                            </div>
-                            <h2>{listing.title || 'İsimsiz ilan'}</h2>
-                            <p>{[listing.district, listing.city].filter(Boolean).join(', ') || 'Konum belirtilmedi'}</p>
-                            <div className={styles.metricRow}>
-                                <div><span>Fiyat</span><strong>{listing.price ? `₺${listing.price.toLocaleString('tr-TR')}` : 'Yok'}</strong></div>
-                                <div><span>Teklif</span><strong>{listing.offers?.length ?? 0}</strong></div>
-                            </div>
-                        </Link>
-                    ))}
+                    {filteredListings.map(listing => {
+                        const photoUrl = listing.photos?.[0];
+                        return (
+                            <Link key={listing.id} href={`/listing/${listing.id}`} className={styles.itemCard}>
+                                <div
+                                    className={styles.itemPhoto}
+                                    style={!photoUrl ? { background: photoPlaceholderGradient(listing.id) } : undefined}
+                                >
+                                    {photoUrl && (
+                                        <Image fill unoptimized src={photoUrl} alt={listing.title || 'İlan'} style={{ objectFit: 'cover' }} />
+                                    )}
+                                </div>
+                                <div className={styles.itemBody}>
+                                    <div className={styles.itemTopline}>
+                                        <span>{listing.type || 'KAT_KARSILIGI'}</span>
+                                        <strong className={listing.isActive && listing.status === 'APPROVED' ? styles.statusActive : styles.statusDraft}>
+                                            {listing.isActive && listing.status === 'APPROVED' ? 'Aktif' : listing.status === 'PENDING' ? 'Onay bekliyor' : 'Taslak'}
+                                        </strong>
+                                    </div>
+                                    <h2>{listing.title || 'İsimsiz ilan'}</h2>
+                                    <p>{[listing.district, listing.city].filter(Boolean).join(', ') || 'Konum belirtilmedi'}</p>
+                                    <div className={styles.metricRow}>
+                                        <div><span>Fiyat</span><strong>{listing.price ? `₺${listing.price.toLocaleString('tr-TR')}` : 'Yok'}</strong></div>
+                                        <div><span>Teklif</span><strong>{listing.offers?.length ?? 0}</strong></div>
+                                    </div>
+                                </div>
+                            </Link>
+                        );
+                    })}
                 </section>
             )}
         </main>
