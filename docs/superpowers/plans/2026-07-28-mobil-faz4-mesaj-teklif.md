@@ -33,10 +33,10 @@
 - Modify: `src/app/inbox/[userId]/page.module.css`
 - Test: `src/app/inbox/[userId]/chatMobile.test.tsx`
 
-- [ ] **Step 1: Failing tests for hidden bottom nav and sticky composer**
-- [ ] **Step 2: Bubble, appbar ve composer mobil stilini ekle**
-- [ ] **Step 3: Odak/klavye durumunda composer cakismasini kontrol et**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for hidden bottom nav and sticky composer**
+- [x] **Step 2: Bubble, appbar ve composer mobil stilini ekle**
+- [x] **Step 3: Odak/klavye durumunda composer cakismasini kontrol et**
+- [x] **Step 4: Commit**
 
 ## Task 3: Ilan teklifleri sayfasi
 
