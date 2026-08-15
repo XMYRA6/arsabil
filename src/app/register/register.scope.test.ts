@@ -20,50 +20,54 @@ describe('register sayfası mobil CSS kapsam guard', () => {
   })
 })
 
-describe('register mobil mühür kimliği (Faz 2.5)', () => {
-  it('--seal-accent kanonik Aurora cyan olmalı', () => {
-    expect(css).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
-    expect(css).not.toMatch(/#4C8DFF/i);
+describe('register mobil Liquid Glass kimligi (Faz 3)', () => {
+  const globalsCss = fs.readFileSync(path.join(__dirname, '../globals.css'), 'utf8');
+
+  it('mobil Liquid Glass tokenlari globals.css icinde tanimli olmali', () => {
+    expect(globalsCss).toMatch(/--m-glass-bg:/);
+    expect(globalsCss).toMatch(/--m-mesh:/);
+    expect(globalsCss).toMatch(/--m-grad-btn:/);
   });
 
-  it('token tanımları mobil media query İÇİNDE olmalı', () => {
-    const mediaIndex = css.indexOf('@media (max-width: 768px)');
-    expect(css.indexOf('--seal-surface:')).toBeGreaterThan(mediaIndex);
+  it('mobil CSS artik --seal-* token sozlesmesine bagli degil', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).not.toMatch(/--seal-/);
   });
 
-  it('Card override\'ı bileşik seçici olmalı (sıra bağımlılığı tuzağı)', () => {
-    expect(css).toMatch(/div\.sealCard\s*\{/);
+  it('Card override bilesik seciciyle cam shell icinde transparan olmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/div\.sealCard\s*\{[^}]*background:\s*transparent/);
+    expect(mobile).toMatch(/div\.sealCard\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
   });
 
-  it('Input override\'ı bileşik seçici + input inişi kullanmalı', () => {
-    expect(css).toMatch(/\.sealInput\s+input\s*\{/);
+  it('Input override bilesik secici + input inisi kullanmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/\.sealInput\s+input\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
+    expect(mobile).toMatch(/\.sealInput input:focus\s*\{[^}]*border-color:\s*var\(--m-link\)/);
   });
 
-  it('Button override\'ı bileşik seçici olmalı', () => {
-    expect(css).toMatch(/button\.sealSubmit\s*\{/);
+  it('Button override bilesik secici ve gradient m token kullanmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toMatch(/button\.sealSubmit\s*\{[^}]*min-height:\s*var\(--touch-target\)/);
+    expect(mobile).toMatch(/button\.sealSubmit\s*\{[^}]*background:\s*var\(--m-grad-btn\)/);
   });
 
-  it('button.sealSubmit arkaplanı koyultulmuş ton olmalı — whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, WCAG AA 4.5:1 altında', () => {
-    expect(css).toMatch(/button\.sealSubmit\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
-  });
-
-  it('page.tsx override sınıflarını gerçekten geçiriyor olmalı', () => {
+  it('page.tsx override siniflarini gercekten geciriyor olmali', () => {
     expect(tsx).toMatch(/styles\.sealCard/);
     expect(tsx).toMatch(/styles\.sealInput/);
     expect(tsx).toMatch(/styles\.sealSubmit/);
   });
 
-  it('paylaşılan bileşenler hâlâ import ediliyor olmalı (dosyalarına dokunulmadı)', () => {
+  it('paylasilan bilesenler hala import ediliyor olmali (dosyalarina dokunulmadi)', () => {
     expect(tsx).toMatch(/from "@\/components\/ui\/Card"/);
     expect(tsx).toMatch(/from "@\/components\/ui\/Input"/);
     expect(tsx).toMatch(/from "@\/components\/ui\/Button"/);
   });
 
-  it('.errorBanner semantik kırmızısı korunmalı', () => {
+  it('.errorBanner semantik kirmizisi korunmali', () => {
     expect(css).toMatch(/\.errorBanner\s*\{[^}]*color:\s*var\(--red\)/);
   });
 });
-
 describe('register profesyonel split layout', () => {
   it('authShell desktop 42/58 split, brand primary ve form bg-body kullanir', () => {
     expect(css).toMatch(/\.authShell\s*\{[^}]*grid-template-columns:\s*42% 58%/)
@@ -87,4 +91,3 @@ describe('register profesyonel split layout', () => {
     expect(tsx).toMatch(/styles\.formCard/)
   })
 })
-

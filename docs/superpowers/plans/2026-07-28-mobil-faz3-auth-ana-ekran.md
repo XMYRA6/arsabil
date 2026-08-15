@@ -34,10 +34,10 @@
 - Modify: `src/app/register/register.module.css`
 - Test: `src/app/register/registerMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing CSS scope tests**
-- [ ] **Step 2: Kayit formunu mobil cam kart ve adim hissine tasima**
-- [ ] **Step 3: Hata/basari durumlarini cam alert stiline bagla**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing CSS scope tests**
+- [x] **Step 2: Kayit formunu mobil cam kart ve adim hissine tasima**
+- [x] **Step 3: Hata/basari durumlarini cam alert stiline bagla**
+- [x] **Step 4: Commit**
 
 ## Task 3: Ana ekran mobil dashboard/home
 
