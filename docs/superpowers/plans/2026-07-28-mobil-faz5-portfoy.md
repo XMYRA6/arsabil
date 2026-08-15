@@ -36,10 +36,10 @@
 - Test: `src/app/dashboard/favorites/page.test.tsx`
 - Test: `src/app/dashboard/listings/page.test.tsx`
 
-- [ ] **Step 1: Failing tests for API-backed lists**
-- [ ] **Step 2: `api/favorites` ve listings kaynaklariyla sayfalari kur**
-- [ ] **Step 3: Mobil liste kartlari, bos durumlar ve hata durumlari**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for API-backed lists**
+- [x] **Step 2: `api/favorites` ve listings kaynaklariyla sayfalari kur**
+- [x] **Step 3: Mobil liste kartlari, bos durumlar ve hata durumlari**
+- [x] **Step 4: Commit**
 
 ## Task 3: Senaryo karsilastirma mobil yuzeyi
 

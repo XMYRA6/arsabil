@@ -16,10 +16,19 @@ export async function GET(req: Request) {
         const district = searchParams.get('district')
         const minPrice = searchParams.get('minPrice')
         const maxPrice = searchParams.get('maxPrice')
+        const mine = searchParams.get('mine') === '1'
 
-        const where: Record<string, unknown> = {
+        let where: Record<string, unknown> = {
             status: 'APPROVED',
             isActive: true,
+        }
+
+        if (mine) {
+            const session = await getServerSession(authOptions)
+            if (!session?.user?.id) {
+                return NextResponse.json({ message: 'Yetkisiz erişim.' }, { status: 401 })
+            }
+            where = { userId: session.user.id as string }
         }
 
         if (city) where.city = city
