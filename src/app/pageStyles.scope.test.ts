@@ -317,12 +317,12 @@ describe('anasayfa profesyonel tema token kullanimi', () => {
     expect(match![1]).toMatch(/background:\s*var\(--bg-body\)/);
   });
 
-  it('ana CTA primary token, ikincil CTA primary border kullanir', () => {
+  it('ana CTA aurora gradient tokeni, ikincil CTA primary border kullanir', () => {
     const primary = pageCss.match(/\.primaryBtn\s*\{([^}]*)\}/);
     const secondary = pageCss.match(/^\.secondaryBtn\s*\{([^}]*)\}/m);
     expect(primary).not.toBeNull();
     expect(secondary).not.toBeNull();
-    expect(primary![1]).toMatch(/background:\s*var\(--primary\)/);
+    expect(primary![1]).toMatch(/background:\s*var\(--brand-gradient\)/);
     expect(secondary![1]).toMatch(/border:\s*1px solid var\(--primary\)/);
   });
 

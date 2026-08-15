@@ -67,7 +67,7 @@
 }
 
 .heroTitle span {
-  background: linear-gradient(100deg, var(--primary) 0%, var(--red) 100%);
+  background: linear-gradient(100deg, var(--aurora-violet) 0%, var(--red) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -84,7 +84,7 @@
   margin-right: auto;
 }
 
-.heroSubtitle strong { color: var(--primary); font-weight: 800; }
+.heroSubtitle strong { color: var(--aurora-blue); font-weight: 800; }
 
 .heroCta {
   display: flex;
@@ -106,7 +106,7 @@
 }
 
 .primaryBtn {
-  background: var(--primary);
+  background: var(--brand-gradient);
   color: white;
   border: none;
   box-shadow: 0 6px 20px rgba(31, 111, 235, 0.38);
