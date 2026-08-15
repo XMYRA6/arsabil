@@ -60,7 +60,14 @@
 
 ## Final Verification
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npx jest`
-- [ ] `npm run build`
-- [ ] Playwright 390x844: `/marketplace`, `/listing/[id]` smoke; yatay overflow yok, alt nav/CTA cakismiyor.
+- [x] `npx tsc --noEmit`
+- [x] `npx jest`
+- [x] `npm run build`
+- [x] Playwright 390x844: `/marketplace`, `/listing/[id]` smoke; unauthenticated middleware `/login` redirect verdi, redirect ekrani 390px yatay overflow olmadan render edildi. Oturumlu icerik smoke sonraki dogrulama notu olarak kalir.
+
+## Validation Notes
+
+- Task 1: `npx jest src/app/marketplace/marketplaceMobile.scope.test.ts src/app/marketplace/pageStyles.scope.test.ts src/components/marketplace/ListingCard.scope.test.ts src/components/marketplace/ListingCard.photo.test.tsx src/components/marketplace/ListingCard.flexShrink.test.tsx` PASS.
+- Task 2: `npx jest src/components/marketplace/FilterSidebar.mobile.scope.test.ts src/components/mobile/__tests__/FilterSidebar.test.tsx` PASS; `MapView.markers`, `MiniMap`, `page.filterMapSync` PASS with existing MiniMap act warnings.
+- Task 3: `npx jest --runTestsByPath src/app/listing/[id]/listingDetail.mobile.scope.test.ts src/app/listing/[id]/pageStyles.scope.test.ts src/app/listing/[id]/ScoreRevealBadge.test.tsx` PASS.
+- Final: `npx tsc --noEmit` PASS, `npm run build` PASS, `output/playwright/phase2-mobile-smoke-report.json` ok=true but routes redirected to `/login` because no authenticated session was present.
