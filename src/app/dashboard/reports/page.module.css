@@ -1,0 +1,364 @@
+.reportsShell {
+    width: 100%;
+}
+
+.heroCard {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 24px;
+    margin-bottom: 16px;
+    border-radius: 20px;
+    background: var(--stat-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow2);
+}
+
+.eyebrow,
+.stateKicker {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.heroCard h1 {
+    margin: 0;
+    color: var(--card-title);
+    font-size: 30px;
+    line-height: 1.08;
+}
+
+.heroCard p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-weight: 600;
+    max-width: 620px;
+}
+
+.heroStats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(96px, 1fr));
+    gap: 10px;
+    min-width: 360px;
+}
+
+.heroStats div,
+.metricGrid div,
+.valueRows div {
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    padding: 14px;
+}
+
+.metricValue,
+.metricGrid strong,
+.valueRows strong {
+    display: block;
+    color: var(--val-color);
+    font-family: var(--m-mono, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.metricValue {
+    font-size: 22px;
+}
+
+.metricLabel,
+.metricGrid span,
+.valueRows span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.segmentedTabs {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+}
+
+.segment,
+.segmentActive {
+    min-height: 40px;
+    border: 0;
+    border-radius: 12px;
+    padding: 0 16px;
+    font: 800 13px/1 Inter, sans-serif;
+    color: var(--muted);
+    background: transparent;
+    cursor: pointer;
+}
+
+.segmentActive {
+    color: #fff;
+    background: var(--primary);
+    box-shadow: 0 10px 22px rgba(var(--primary-rgb), .22);
+}
+
+.cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.reportCard,
+.emptyCard,
+.stateCard {
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--stat-bg);
+    box-shadow: var(--shadow2);
+}
+
+.reportCard {
+    padding: 18px;
+}
+
+.cardTopline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.datePill,
+.listingBadge {
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.datePill {
+    color: var(--muted);
+    background: var(--panel-2);
+}
+
+.listingBadge {
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), .10);
+    border: 1px solid rgba(var(--primary-rgb), .18);
+}
+
+.reportCard h2 {
+    margin: 0 0 14px;
+    color: var(--card-title);
+    font-size: 18px;
+    line-height: 1.25;
+}
+
+.metricGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.metricGrid strong {
+    font-size: 17px;
+}
+
+.valueRows {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.valueRows strong {
+    font-size: 18px;
+}
+
+.reportPdfAction button {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(var(--primary-rgb), .08);
+    color: var(--primary);
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.reportPdfAction button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.emptyCard,
+.stateCard {
+    padding: 28px 18px;
+    text-align: center;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.emptyIcon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    color: #fff;
+    background: var(--primary);
+    font-family: var(--m-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-weight: 900;
+}
+
+.emptyCard h2 {
+    margin: 0 0 8px;
+    color: var(--card-title);
+    font-size: 18px;
+}
+
+.emptyCard p,
+.stateCard p {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .reportsShell {
+        min-height: 100dvh;
+        margin: -2rem;
+        padding: calc(16px + var(--safe-top)) 14px calc(92px + var(--safe-bottom));
+        background: var(--m-mesh), var(--m-bg);
+        color: var(--m-ink);
+    }
+
+    .heroCard,
+    .reportCard,
+    .emptyCard,
+    .stateCard {
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+    }
+
+    .heroCard {
+        display: grid;
+        padding: 18px;
+        margin-bottom: 12px;
+    }
+
+    .eyebrow,
+    .stateKicker {
+        color: var(--m-link);
+        letter-spacing: 0;
+    }
+
+    .heroCard h1,
+    .reportCard h2,
+    .emptyCard h2 {
+        color: var(--m-ink);
+    }
+
+    .heroCard h1 {
+        font-size: 28px;
+    }
+
+    .heroCard p,
+    .metricLabel,
+    .metricGrid span,
+    .valueRows span,
+    .emptyCard,
+    .stateCard,
+    .datePill {
+        color: var(--m-body);
+    }
+
+    .heroStats {
+        min-width: 0;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .heroStats div,
+    .metricGrid div,
+    .valueRows div {
+        border-radius: var(--m-r-inner);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-fill);
+    }
+
+    .metricValue,
+    .metricGrid strong,
+    .valueRows strong {
+        color: var(--m-ink);
+        font-family: var(--m-mono);
+    }
+
+    .metricValue {
+        font-size: 18px;
+    }
+
+    .segmentedTabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+        min-height: 48px;
+        border-radius: var(--m-r-input);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-fill);
+    }
+
+    .segment,
+    .segmentActive {
+        min-height: var(--touch-target);
+        border-radius: var(--m-r-btn);
+        color: var(--m-on-glass);
+        font-size: 12px;
+    }
+
+    .segmentActive {
+        color: #fff;
+        background: var(--m-grad-btn);
+        box-shadow: var(--m-sh-grad-btn);
+    }
+
+    .cardsGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .reportCard {
+        padding: 16px;
+    }
+
+    .datePill,
+    .listingBadge {
+        border-radius: var(--m-r-chip);
+        background: var(--m-fill);
+    }
+
+    .listingBadge {
+        color: var(--m-success-text);
+        border-color: rgba(16, 185, 129, .22);
+    }
+
+    .reportPdfAction button {
+        min-height: var(--touch-target);
+        border-radius: var(--m-r-btn);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-grad-btn);
+        color: #fff;
+        box-shadow: var(--m-sh-grad-btn);
+    }
+}

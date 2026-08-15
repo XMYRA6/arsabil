@@ -50,12 +50,21 @@ export async function POST(req: Request) {
 
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ success: false, error: 'Yetkisiz erişim.' }, { status: 401 });
+        }
+
         const reports = await prisma.report.findMany({
-            include: { user: true },
-            orderBy: { createdAt: 'desc' }
+            where: { userId: session.user.id as string },
+            include: {
+                listing: { select: { id: true, title: true, isActive: true, status: true } },
+            },
+            orderBy: { createdAt: 'desc' },
         });
         return NextResponse.json({ success: true, reports });
-    } catch {
+    } catch (error) {
+        console.error('Report listing error:', error);
         return NextResponse.json({ success: false }, { status: 500 });
     }
 }

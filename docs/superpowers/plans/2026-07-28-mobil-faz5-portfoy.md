@@ -21,10 +21,10 @@
 - Modify: `src/app/dashboard/reports/page.module.css`
 - Test: `src/app/dashboard/reports/reportsMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing tests for report cards and mobile tabs**
-- [ ] **Step 2: Rapor listesini cam kart, mono metrik ve segmented filtrelerle tasima**
-- [ ] **Step 3: Bos/yukleniyor durumlarini ekle**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for report cards and mobile tabs**
+- [x] **Step 2: Rapor listesini cam kart, mono metrik ve segmented filtrelerle tasima**
+- [x] **Step 3: Bos/yukleniyor durumlarini ekle**
+- [x] **Step 4: Commit**
 
 ## Task 2: Favoriler ve ilanlarim route'lari
 
