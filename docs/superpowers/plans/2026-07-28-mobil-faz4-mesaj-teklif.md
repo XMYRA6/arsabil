@@ -21,10 +21,10 @@
 - Modify: `src/app/inbox/inbox.module.css`
 - Test: `src/app/inbox/inboxMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing tests for conversation cards and unread state**
-- [ ] **Step 2: Konusma listesini cam kartlara ve mono zaman etiketlerine tasima**
-- [ ] **Step 3: Bos durum ve yukleniyor iskeletini ekle**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for conversation cards and unread state**
+- [x] **Step 2: Konusma listesini cam kartlara ve mono zaman etiketlerine tasima**
+- [x] **Step 3: Bos durum ve yukleniyor iskeletini ekle**
+- [x] **Step 4: Commit**
 
 ## Task 2: Mobil sohbet detay
 

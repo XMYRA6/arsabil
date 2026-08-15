@@ -183,6 +183,7 @@ function InboxContent() {
     )
 
     const avatarInitials = (name: string | null) => (name || 'U').slice(0, 2).toUpperCase()
+    const formatConversationTime = (value: string) => new Date(value).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
 
     if (status === 'loading') return null
 
@@ -217,12 +218,13 @@ function InboxContent() {
                             className={`${styles.convItem} ${c.otherUser.id === activeOtherId ? styles.convItemActive : ''}`}
                             onClick={() => openConversation(c.otherUser.id)}
                         >
-                            <div className={`${styles.avatar} ${styles.avatarSidebar}`}>
+                            <div className={`${styles.avatar} ${styles.avatarSidebar} ${c.unreadCount > 0 ? styles.avatarUnread : ''}`}>
                                 {avatarInitials(c.otherUser.name)}
                             </div>
                             <div className={styles.convText}>
                                 <div className={styles.convNameRow}>
                                     <span className={styles.convName}>{c.otherUser.name || 'Kullanıcı'}</span>
+                                    <span className={styles.convTime}>{formatConversationTime(c.lastMessageAt)}</span>
                                 </div>
                                 <div className={`${styles.convLastMsg} ${c.unreadCount > 0 ? styles.convUnreadText : ''}`}>
                                     {c.lastMessage.length > 45 ? c.lastMessage.slice(0, 45) + '…' : c.lastMessage}
