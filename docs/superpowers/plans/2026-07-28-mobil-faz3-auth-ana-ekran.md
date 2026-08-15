@@ -55,7 +55,7 @@
 
 ## Final Verification
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npx jest`
-- [ ] `npm run build`
-- [ ] Playwright 390x844: `/`, `/login`, `/register`; form alanlari tasma yapmaz, alt nav auth ekranlarinda yok.
+- [x] `npx tsc --noEmit`
+- [x] `npx jest`
+- [x] `npm run build`
+- [x] Playwright 390x844: `/`, `/login`, `/register`; form alanlari tasma yapmaz, alt nav auth ekranlarinda yok.
