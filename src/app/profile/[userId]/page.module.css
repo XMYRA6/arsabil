@@ -5,15 +5,21 @@
 }
 
 .header {
+  composes: mStatSurface from global;
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  background: var(--bg-body);
-  border: 1px solid var(--border);
   border-left: 4px solid var(--primary);
-  border-radius: 20px;
   padding: 1.5rem 2rem;
   margin-bottom: 1.5rem;
+}
+
+@media (min-width: 769px) {
+  .header {
+    background: var(--bg-body);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
 }
 
 .avatarCircle {
@@ -78,11 +84,17 @@
 }
 
 .section {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  composes: mStatSurface from global;
   padding: 1.25rem;
   margin-bottom: 1rem;
+}
+
+@media (min-width: 769px) {
+  .section {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
 }
 
 .sectionTitle {
@@ -95,15 +107,20 @@
 }
 
 .listRow {
+  composes: mFlatRow from global;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.625rem 0.75rem;
-  background: var(--bg);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-bottom: 6px;
-  text-decoration: none;
+}
+
+@media (min-width: 769px) {
+  .listRow {
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
 }
 
 .listTitle {
@@ -139,23 +156,15 @@
 
   .header,
   .section {
-    background: var(--m-glass-bg);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-card);
-    backdrop-filter: var(--m-glass-blur);
-    -webkit-backdrop-filter: var(--m-glass-blur);
     box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
   }
 
   .header {
-    border-left: 1px solid var(--m-glass-border);
+    border-left: 1px solid var(--m-divider);
     padding: 18px;
   }
 
   .listRow {
-    background: var(--m-fill);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-inner);
     min-height: var(--touch-target);
   }
 

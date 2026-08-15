@@ -17,16 +17,19 @@ describe('public profile mobile liquid glass scope', () => {
         expect(mobileSection).toMatch(/\.container\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/);
     });
 
-    it('.header ve .section mobilde m-glass yuzey kullanmali, masaustu .section var(--panel) kalmali', () => {
-        expect(mobileSection).toMatch(/\.header,\s*\.section\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-        expect(mobileSection).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/);
-        expect(desktopSection).toMatch(/\.section\s*\{[^}]*background:\s*var\(--panel\)/);
+    it('.header ve .section paylasilan .mStatSurface yuzeyine baglanir (top-level composes), masaustu arka planini @media(min-width:769px) ile korur', () => {
+        expect(pageCss).toMatch(/\.header\s*\{[^}]*composes:\s*mStatSurface from global/);
+        expect(pageCss).toMatch(/\.section\s*\{[^}]*composes:\s*mStatSurface from global/);
+        expect(mobileSection).not.toMatch(/\.header,\s*\.section\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+        expect(pageCss).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.header\s*\{[^}]*background:\s*var\(--bg-body\)/);
+        expect(pageCss).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.section\s*\{[^}]*background:\s*var\(--panel\)/);
     });
 
-    it('.listRow mobilde m-fill, m-glass-border ve dokunma hedefi kullanmali', () => {
-        expect(mobileSection).toMatch(/\.listRow\s*\{[^}]*background:\s*var\(--m-fill\)/);
-        expect(mobileSection).toMatch(/\.listRow\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
+    it('.listRow mobilde paylasilan .mFlatRow (duz, ayracli liste) yuzeyine baglanir — kendi kart kabugunu kaybeder', () => {
+        expect(pageCss).toMatch(/\.listRow\s*\{[^}]*composes:\s*mFlatRow from global/);
+        expect(mobileSection).not.toMatch(/\.listRow\s*\{[^}]*background:\s*var\(--m-fill\)/);
         expect(mobileSection).toMatch(/\.listRow\s*\{[^}]*min-height:\s*var\(--touch-target\)/);
+        expect(pageCss).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.listRow\s*\{[^}]*background:\s*var\(--bg\)/);
     });
 
     it('mobil metinler m-ink/m-body ve metrikler m-mono tabular kullanmali', () => {

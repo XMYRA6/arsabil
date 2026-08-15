@@ -132,3 +132,20 @@ describe('Kart tekdüzeliği düzeltmesi — paylaşılan yüzey sınıfları (2
         expect(mobileBlock()).toMatch(/--m-panel:\s*#fff/i)
     })
 })
+
+describe('Faz 2 — duz/ayracli liste yuzeyi (2026-08-15)', () => {
+    it('.mFlatRow arka plan/kenarlik/koseYaricapi TASIMAZ — sadece border-bottom ile ayrisir (kart-icinde-kart olmasin diye)', () => {
+        const inside = mobileBlock()
+        expect(inside).toMatch(/\.mFlatRow\s*\{[^}]*border-bottom:\s*1px solid var\(--m-divider\)/)
+        expect(inside).not.toMatch(/\.mFlatRow\s*\{[^}]*background:/)
+        expect(inside).not.toMatch(/\.mFlatRow\s*\{[^}]*border-radius:/)
+    })
+
+    it('.mFlatRow:active dokunma geri bildirimi verir (fill tonu)', () => {
+        expect(mobileBlock()).toMatch(/\.mFlatRow:active\s*\{[^}]*background:\s*var\(--m-fill\)/)
+    })
+
+    it('.mFlatRow:focus-visible --focus-ring kullanir', () => {
+        expect(mobileBlock()).toMatch(/\.mFlatRow:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/)
+    })
+})

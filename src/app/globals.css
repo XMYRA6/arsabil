@@ -354,6 +354,26 @@ a {
     box-shadow: var(--focus-ring);
   }
 
+  /* Faz 2 (2026-08-15): baska bir kartin (.mStatSurface) ICINDE oturan liste
+     satirlari icin — .mRowList'in kendi beyaz kart kabugu (background+radius)
+     burada "kart icinde kart" yaratirdi. .mFlatRow arka plan/kenarlik/kose
+     yaricapi TASIMAZ, yalnizca border-bottom ile ayrisir (onaylanan mockup'taki
+     duz/ayracli liste vizyonuna sadik). */
+  .mFlatRow {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--m-divider);
+    transition: background-color .15s ease;
+  }
+  .mFlatRow:active {
+    background: var(--m-fill);
+  }
+  .mFlatRow:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
   .page-container {
     padding: 1.5rem;
   }
