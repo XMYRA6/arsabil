@@ -8,10 +8,20 @@
 .settingsCard,
 .alertCard,
 .successCard {
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--stat-bg);
-    box-shadow: var(--shadow2);
+    composes: mStatSurface from global;
+}
+
+@media (min-width: 769px) {
+    .heroCard,
+    .formCard,
+    .settingsCard,
+    .alertCard,
+    .successCard {
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--stat-bg);
+        box-shadow: var(--shadow2);
+    }
 }
 
 .heroCard {
@@ -186,11 +196,6 @@
     .settingsCard,
     .alertCard,
     .successCard {
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 

@@ -20,10 +20,16 @@ describe('dashboard settings route', () => {
         expect(page).toMatch(/aria-pressed=\{prefs\[item\.key\]\}/)
     })
 
-    it('mobil ayarlar karti, toggle ve save bar --m-* liquid glass tokenlarini kullanir', () => {
+    it('mobil kabuk mesh, toggle ve save bar --m-* liquid glass tokenlarini kullanir', () => {
         expect(mobile).toMatch(/\.editShell,\s*\.settingsShell\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
         expect(mobile).toMatch(/\.toggleSwitchOn\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
         expect(mobile).toMatch(/\.saveBar\s*\{[^}]*backdrop-filter:\s*var\(--m-glass-blur\)/)
         expect(mobile).toMatch(/\.saveButton\s*\{[^}]*min-height:\s*var\(--touch-target\)/)
+    })
+
+    it('.heroCard/.formCard/.settingsCard/.alertCard/.successCard paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+        expect(css).toMatch(/\.heroCard,\s*\.formCard,\s*\.settingsCard,\s*\.alertCard,\s*\.successCard\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(mobile).not.toMatch(/\.heroCard,\s*\.formCard,\s*\.settingsCard,\s*\.alertCard,\s*\.successCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+        expect(css).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.heroCard,\s*\.formCard,\s*\.settingsCard,\s*\.alertCard,\s*\.successCard\s*\{[^}]*background:\s*var\(--stat-bg\)/)
     })
 })
