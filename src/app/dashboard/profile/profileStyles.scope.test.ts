@@ -170,20 +170,29 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(match![1]).toMatch(/var\(--m-bg\)/)
   })
 
-  it('.profileCard mobilde cam yüzey (m-glass) kullanmalı', () => {
+  it('.profileCard paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi, 2026-08-15)', () => {
+    expect(css).toMatch(/\.profileCard\s*\{[^}]*composes:\s*mStatSurface from global/)
     const mobileBlock = css.slice(mediaIndex)
-    const match = mobileBlock.match(/\.profileCard\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/var\(--m-glass-bg\)/)
-    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
+    expect(mobileBlock).not.toMatch(/\.profileCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
   })
 
-  it('.menuRow mobilde cam yüzey (m-glass) kullanmalı', () => {
+  it('.tabPanel paylasilan .mStatSurface yuzeyine baglanir, [data-mobile-section=false] ayrimi seffaflastirmaya devam eder', () => {
+    expect(css).toMatch(/\.tabPanel\s*\{[^}]*composes:\s*mStatSurface from global/)
     const mobileBlock = css.slice(mediaIndex)
-    const match = mobileBlock.match(/\.menuRow\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/var\(--m-glass-bg\)/)
-    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
+    expect(mobileBlock).not.toMatch(/\.container\[data-mobile-section="true"\]\s+\.tabPanel/)
+    expect(mobileBlock).toMatch(/\.container\[data-mobile-section="false"\]\s+\.tabPanel\s*\{[^}]*background:\s*none/)
+  })
+
+  it('.menuRow (.tabPanel/.mStatSurface icinde oturuyor) paylasilan duz .mFlatRow yuzeyine baglanir — kendi kart kabugunu kaybeder', () => {
+    expect(css).toMatch(/\.menuRow\s*\{[^}]*composes:\s*mFlatRow from global/)
+    const mobileBlock = css.slice(mediaIndex)
+    expect(mobileBlock).not.toMatch(/\.menuRow\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+  })
+
+  it('.menuList mobilde satirlar arasi bosluk birakmaz (duz/ayracli liste gorunumu icin)', () => {
+    const baseIndex = css.indexOf('.menuList {')
+    const block = css.slice(baseIndex, css.indexOf('}', baseIndex))
+    expect(block).toMatch(/gap:\s*0/)
   })
 
   it('.menuCount mobilde mono/tabular-nums olmalı', () => {
@@ -222,11 +231,17 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(sublineMatch![1]).not.toMatch(/Doğrulandı/)
   })
 
-  it('masaüstü (media query dışı) .profileCard/.menuRow/.verifiedBadge tanımları değişmemiş olmalı', () => {
+  it('masaüstü (media query dışı) .profileCard/.tabPanel/.verifiedBadge gorsel degerleri korunmus olmali (artik @media(min-width:769px) ile media-gate edilmis, pixel-parity)', () => {
     const desktopBlock = css.slice(0, mediaIndex)
-    expect(desktopBlock).toMatch(/\.profileCard\s*\{[^}]*background:\s*var\(--panel\)/)
-    expect(desktopBlock).toMatch(/\.menuRow\s*\{[^}]*background:\s*var\(--bg-body\)/)
+    expect(desktopBlock).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.profileCard\s*\{[^}]*background:\s*var\(--panel\)/)
+    expect(desktopBlock).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.tabPanel\s*\{[^}]*background:\s*var\(--panel\)/)
     expect(desktopBlock).toMatch(/\.verifiedBadge\s*\{[^}]*background:\s*rgba\(var\(--green-rgb\)/)
+  })
+
+  it('.menuRow masaustunde asla gorunmez (.menuList{display:none}) — cascade-gate GEREKMEZ, background/border/border-radius bilerek yok', () => {
+    const desktopBlock = css.slice(0, mediaIndex)
+    expect(desktopBlock).toMatch(/\.menuRow\s*\{[^}]*composes:\s*mFlatRow from global/)
+    expect(desktopBlock).not.toMatch(/\.menuRow\s*\{[^}]*background:\s*var\(--bg-body\)/)
   })
 
   it('mobilde .menuLabel/.heroNameText/.heroSubline/.menuSubtitle tema-bağımlı var(--text)/var(--muted) KULLANMAMALI (koyu temada okunmaz olur — --m-* light-only glass yüzeyler üzerinde --m-ink/--m-body kullanılmalı)', () => {
@@ -257,19 +272,9 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(menuSubtitleMatch![1]).toMatch(/var\(--m-body\)/)
   })
 
-  it('data-mobile-section="true" iken .tabPanel mobilde cam yüzey (m-glass) kullanmalı', () => {
+  it('[data-mobile-section="true"] .tabPanel artik ayri bir kural degil — .mStatSurface composes ile kapsanir (bkz. yukaridaki kart tekduzeligi testi)', () => {
     const mobileBlock = css.slice(mediaIndex)
-    const match = mobileBlock.match(/\.container\[data-mobile-section="true"\]\s+\.tabPanel\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/var\(--m-glass-bg\)/)
-    expect(match![1]).toMatch(/var\(--m-glass-blur\)/)
-  })
-
-  it('.listRow mobil bloğunda var(--m-glass-border) kullanmalı', () => {
-    const mobileBlock = css.slice(mediaIndex)
-    const match = mobileBlock.match(/\.listRow\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/var\(--m-glass-border\)/)
+    expect(mobileBlock).not.toMatch(/\.container\[data-mobile-section="true"\]\s+\.tabPanel/)
   })
 
   it('.listTitle/.listMeta/.emptyNote mobilde var(--m-ink)/var(--m-body) kullanmalı, var(--text)/var(--muted) KULLANMAMALI', () => {
@@ -291,11 +296,12 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(emptyNoteMatch![1]).not.toMatch(/var\(--muted\)/)
   })
 
-  it('.favRow/.favIcon mobil bloğunda cam yüzey (m-glass) kullanmalı', () => {
+  it('.listRow/.favRow paylasilan .mRowList yuzeyine baglanir (kart tekduzeligi duzeltmesi) — .favIcon kendi gradyanini korur', () => {
+    expect(css).toMatch(/\.listRow\s*\{[^}]*composes:\s*mRowList from global/)
+    expect(css).toMatch(/\.favRow\s*\{[^}]*composes:\s*mRowList from global/)
     const mobileBlock = css.slice(mediaIndex)
-    const favRowMatch = mobileBlock.match(/\.favRow\s*\{([^}]*)\}/)
-    expect(favRowMatch).not.toBeNull()
-    expect(favRowMatch![1]).toMatch(/var\(--m-glass-border\)/)
+    expect(mobileBlock).not.toMatch(/\.listRow\s*\{[^}]*background:\s*rgba\(255, 255, 255, 0\.55\)/)
+    expect(mobileBlock).not.toMatch(/\.favRow\s*\{[^}]*background:\s*rgba\(255, 255, 255, 0\.55\)/)
 
     const favIconMatch = mobileBlock.match(/\.favIcon\s*\{([^}]*)\}/)
     expect(favIconMatch).not.toBeNull()

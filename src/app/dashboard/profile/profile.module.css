@@ -21,15 +21,21 @@
 
 /* Sol kart */
 .profileCard {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  composes: mStatSurface from global;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   position: sticky;
   top: 80px;
+}
+
+@media (min-width: 769px) {
+  .profileCard {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
 }
 
 .avatarWrapper {
@@ -236,16 +242,22 @@
 
 /* Sağ sekme paneli */
 .tabPanel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  composes: mStatSurface from global;
   overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .tabPanel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
 }
 
 .menuList {
   display: none;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
 }
 
 /* `margin-left` KRITIK: `.tabPanel`'in `border-radius:20px` + `overflow:
@@ -268,16 +280,19 @@
   margin-top: 14px;
 }
 
+/* .menuList (dolayisiyla .menuRow) yalnizca mobilde gorunur (desktop: .menuList{display:none},
+   bkz. yukarida) — masaustu icin cascade-gate GEREKMEZ, asagidaki background/border/border-radius
+   zaten hicbir zaman render edilmiyor. .menuRow, .tabPanel'in (artik .mStatSurface) ICINDE oturuyor
+   — kendi kart kabugu yerine duz/ayracli .mFlatRow'a baglanir (kart icinde kart olmasin diye,
+   bkz. profile/[userId] pilotu). */
 .menuRow {
+  composes: mFlatRow from global;
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
   min-height: 76px;
   padding: 14px 16px;
-  background: var(--bg-body);
-  border: 1px solid var(--border);
-  border-radius: 18px;
   color: var(--text);
   font-family: inherit;
   text-align: left;
@@ -378,15 +393,20 @@
 }
 
 .listRow {
+  composes: mRowList from global;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0.875rem;
-  background: var(--bg-body);
-  border-radius: 10px;
-  border: 1px solid var(--border);
   gap: 0.5rem;
-  text-decoration: none;
+}
+
+@media (min-width: 769px) {
+  .listRow {
+    background: var(--bg-body);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
 }
 
 .listTitle {
@@ -535,15 +555,19 @@
 }
 
 .favRow {
+  composes: mRowList from global;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: var(--bg);
-  border-radius: 10px;
-  border: 1.5px solid var(--border);
-  text-decoration: none;
-  color: inherit;
+}
+
+@media (min-width: 769px) {
+  .favRow {
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+  }
 }
 
 .favIcon {
@@ -761,11 +785,6 @@
   .layout { grid-template-columns: 1fr; }
   .profileCard {
     position: static;
-    background: var(--m-glass-bg);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-card);
-    backdrop-filter: var(--m-glass-blur);
-    -webkit-backdrop-filter: var(--m-glass-blur);
     box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
   }
   .themeGrid { grid-template-columns: repeat(2, 1fr); }
@@ -892,15 +911,6 @@
     color: var(--m-body);
   }
 
-  .menuRow {
-    background: var(--m-glass-bg);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-card);
-    backdrop-filter: var(--m-glass-blur);
-    -webkit-backdrop-filter: var(--m-glass-blur);
-    box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
-  }
-
   .menuIconBoxBlue { background: linear-gradient(135deg, #4f9bff, var(--primary)); }
   .menuIconBoxOrange { background: linear-gradient(135deg, #ffb648, var(--orange)); }
   .menuIconBoxRed { background: linear-gradient(135deg, #ff8189, var(--red)); }
@@ -975,19 +985,15 @@
     display: none;
   }
 
-  .container[data-mobile-section="true"] .tabPanel {
-    background: var(--m-glass-bg);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-card);
-    backdrop-filter: var(--m-glass-blur);
-    -webkit-backdrop-filter: var(--m-glass-blur);
+  /* [data-mobile-section="true"] durumu artik ayri bir kural GEREKTIRMIYOR:
+     .tabPanel'in kendisi zaten .mStatSurface'a composes ediyor (yukarida) —
+     [data-mobile-section="false"] .tabPanel (0-3-0 ozgullugu, .mStatSurface'in
+     0-1-0'ini her zaman eziyor) yalnizca "false" durumunda seffaflastiriyor,
+     digger her durumda (true dahil) varsayilan .mStatSurface yuzeyi gecerli
+     kalir. Yalnizca golge (composed sinifta YOK, context'e ozel) burada
+     kaliyor. */
+  .tabPanel {
     box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-  }
-
-  .listRow {
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-inner);
   }
 
   .listTitle {
@@ -1015,9 +1021,6 @@
   }
 
   .favRow {
-    background: rgba(255, 255, 255, 0.55);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-inner);
     box-shadow: var(--m-sh-card-sm);
   }
 
