@@ -6,6 +6,47 @@ import { sendEmail, buildOfferEmail, getEmailPrefs } from "@/lib/email";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 import { authOptions } from "@/lib/auth";
 
+export async function GET(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const listingId = searchParams.get('listingId');
+        if (!listingId) {
+            return NextResponse.json({ message: "Eksik listingId." }, { status: 400 });
+        }
+
+        const listing = await prisma.listing.findUnique({
+            where: { id: listingId },
+            select: { userId: true }
+        });
+        if (!listing) {
+            return NextResponse.json({ message: "İlan bulunamadı." }, { status: 404 });
+        }
+
+        const offers = await prisma.offer.findMany({
+            where: {
+                listingId,
+                OR: [
+                    { bidderId: session.user.id },
+                    { listing: { userId: session.user.id } }
+                ]
+            },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                bidder: { select: { id: true, name: true, image: true, isVerified: true } }
+            }
+        });
+
+        return NextResponse.json({ offers, isOwner: listing.userId === session.user.id });
+    } catch (error) {
+        console.error("Offer list error:", error);
+        return NextResponse.json({ message: "Teklifler alınırken hata oluştu." }, { status: 500 });
+    }
+}
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);

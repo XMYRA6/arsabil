@@ -1,0 +1,206 @@
+@media (max-width: 768px) {
+    .offersShell {
+        min-height: 100dvh;
+        background: var(--m-mesh);
+        color: var(--m-ink);
+        padding: calc(12px + var(--safe-top)) 14px 0;
+    }
+
+    .topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .backLink {
+        width: var(--touch-target);
+        height: var(--touch-target);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--m-r-btn);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        color: var(--m-ink);
+        text-decoration: none;
+        font-size: 30px;
+        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+    }
+
+    .kicker {
+        margin: 0 0 2px;
+        font: 800 10px Inter, sans-serif;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        color: var(--m-body);
+    }
+
+    .title {
+        margin: 0;
+        font: 900 20px/1.1 Inter, sans-serif;
+        color: var(--m-ink);
+    }
+
+    .summaryCard {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 12px;
+        padding: 18px;
+        border-radius: var(--m-r-card);
+        background: var(--m-grad-accent);
+        color: #fff;
+        box-shadow: var(--m-sh-grad-card), inset 0 1px 0 rgba(255, 255, 255, .42);
+    }
+
+    .summaryCard p {
+        margin: 0;
+        font: 700 12px/1.4 Inter, sans-serif;
+        opacity: .86;
+    }
+
+    .summaryCard strong {
+        font: 900 24px/1 var(--m-mono);
+    }
+
+    .offerList {
+        display: grid;
+        gap: 10px;
+        padding: 14px 0;
+    }
+
+    .offerCard {
+        padding: 14px;
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+    }
+
+    .emptyState {
+        padding: 14px;
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+    }
+
+    .offerHead {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .offerHead h2 {
+        margin: 0 0 3px;
+        font: 800 14px/1.2 Inter, sans-serif;
+        color: var(--m-ink);
+    }
+
+    .offerHead time {
+        font: 700 10px/1 var(--m-mono);
+        color: var(--m-body);
+    }
+
+    .statusBadge {
+        flex-shrink: 0;
+        border-radius: var(--m-r-chip);
+        padding: 5px 8px;
+        font: 800 10px/1 Inter, sans-serif;
+        background: var(--m-fill);
+        color: var(--m-body);
+    }
+
+    .statusACCEPTED {
+        color: var(--m-success-text);
+        background: rgba(16, 185, 129, .12);
+    }
+
+    .statusREJECTED {
+        color: var(--m-danger);
+        background: rgba(255, 45, 85, .10);
+    }
+
+    .shareValue {
+        margin-top: 12px;
+        font: 900 22px/1 var(--m-mono);
+        color: var(--m-link);
+    }
+
+    .offerMessage,
+    .emptyState {
+        margin: 10px 0 0;
+        font: 600 13px/1.45 Inter, sans-serif;
+        color: var(--m-body);
+    }
+
+    .emptyState {
+        margin: 0;
+        text-align: center;
+    }
+
+    .createPanel {
+        position: sticky;
+        bottom: 0;
+        display: grid;
+        gap: 10px;
+        margin: 0 -14px;
+        padding: 14px 14px 0;
+        padding-bottom: calc(16px + var(--safe-bottom));
+        background: var(--m-glass-bg);
+        border-top: 1px solid var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-sheet), inset 0 1px 0 #fff;
+    }
+
+    .rangeLabel {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--m-body);
+        font: 800 12px Inter, sans-serif;
+    }
+
+    .rangeLabel strong {
+        color: var(--m-ink);
+        font-family: var(--m-mono);
+    }
+
+    .range {
+        width: 100%;
+        accent-color: var(--m-link);
+    }
+
+    .textarea {
+        min-height: 76px;
+        padding: 12px;
+        border-radius: var(--m-r-input);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-fill);
+        color: var(--m-ink);
+        font: 600 16px/1.4 Inter, sans-serif;
+        resize: vertical;
+    }
+
+    .submitButton {
+        min-height: var(--touch-target);
+        border: 0;
+        border-radius: var(--m-r-btn);
+        background: var(--m-grad-btn);
+        color: #fff;
+        font: 900 14px Inter, sans-serif;
+        box-shadow: var(--m-sh-grad-btn);
+    }
+
+    .submitButton:disabled {
+        opacity: .55;
+        box-shadow: none;
+    }
+}

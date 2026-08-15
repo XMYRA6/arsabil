@@ -45,10 +45,10 @@
 - Add: `src/app/listing/[id]/offers/page.module.css`
 - Test: `src/app/listing/[id]/offers/page.test.tsx`
 
-- [ ] **Step 1: Failing page tests for offer list and create action**
-- [ ] **Step 2: Mevcut offers API ile listeleme/gonderme baglantisini kur**
-- [ ] **Step 3: Mobil teklif kartlarini ve durum badge'lerini tasarla**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing page tests for offer list and create action**
+- [x] **Step 2: Mevcut offers API ile listeleme/gonderme baglantisini kur**
+- [x] **Step 3: Mobil teklif kartlarini ve durum badge'lerini tasarla**
+- [x] **Step 4: Commit**
 
 ## Final Verification
 
