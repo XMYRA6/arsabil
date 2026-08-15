@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { AppBar } from '@/components/mobile/AppBar';
 import { MobileScreen } from '@/components/mobile/MobileScreen';
 import { QuickActionGrid } from './QuickActionGrid';
@@ -43,6 +44,18 @@ export function HomeMobile() {
                         <p className={styles.loading}>Yükleniyor...</p>
                     ) : (
                         <>
+                            <section className={styles.mobileHero}>
+                                <div>
+                                    <p className={styles.heroEyebrow}>Bugunku portfoy ozeti</p>
+                                    <h1 className={styles.heroTitle}>Arsa aksiyonlariniz hazir</h1>
+                                    <p className={styles.heroText}>
+                                        Hesap, ilan, teklif ve mesaj akisini tek mobil panelden yonetin.
+                                    </p>
+                                </div>
+                                <Link href="/hesapla" className={styles.heroPrimaryAction}>
+                                    Yeni hesap yap
+                                </Link>
+                            </section>
                             <QuickActionGrid stats={data.stats} />
                             <RecentReportsList reports={data.recentReports} />
                             <RecentActivityRows messages={data.recentMessages} offers={data.recentOffers} />

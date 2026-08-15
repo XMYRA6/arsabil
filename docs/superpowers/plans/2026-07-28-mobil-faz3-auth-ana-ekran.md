@@ -44,12 +44,14 @@
 **Files:**
 - Modify: `src/app/page.tsx`
 - Modify: `src/app/page.module.css`
+- Modify: `src/app/mobile/HomeMobile.tsx`
+- Modify: `src/app/mobile/mobile.module.css`
 - Test: `src/app/homeMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing tests for mobile hero/actions/stat cards**
-- [ ] **Step 2: Ilk viewportu gercek urun aksiyonlariyla kur**
-- [ ] **Step 3: BottomNavbar boslugu ve safe-area guard'ini dogrula**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for mobile hero/actions/stat cards**
+- [x] **Step 2: Ilk viewportu gercek urun aksiyonlariyla kur**
+- [x] **Step 3: BottomNavbar boslugu ve safe-area guard'ini dogrula**
+- [x] **Step 4: Commit**
 
 ## Final Verification
 
