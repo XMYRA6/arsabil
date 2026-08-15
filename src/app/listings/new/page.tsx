@@ -27,6 +27,7 @@ export default function NewListingPage() {
   const [form, setForm] = useState<WizardFormData>(emptyFormData)
   const [publishing, setPublishing] = useState(false)
   const [tempId] = useState(() => `temp-${crypto.randomUUID()}`)
+  const [publishError, setPublishError] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -42,6 +43,7 @@ export default function NewListingPage() {
 
   const handlePublish = async () => {
     setPublishing(true)
+    setPublishError('')
     try {
       const res = await fetch('/api/listings', {
         method: 'POST',
@@ -53,11 +55,11 @@ export default function NewListingPage() {
         router.push(`/listing/${listing.id}`)
       } else {
         const err = await res.json()
-        alert(err.message || 'İlan yayınlanırken bir hata oluştu.')
+        setPublishError(err.message || 'İlan yayınlanırken bir hata oluştu.')
         setPublishing(false)
       }
     } catch {
-      alert('Bir hata oluştu.')
+      setPublishError('Bir hata oluştu.')
       setPublishing(false)
     }
   }
@@ -65,19 +67,26 @@ export default function NewListingPage() {
   if (status === 'loading') return null
 
   return (
-    <WizardShell
-      pageTitle="Yeni İlan Oluştur"
-      stepTitle={STEP_TITLES[step - 1]}
-      step={step}
-      onBack={step > 1 ? () => setStep(s => s - 1) : undefined}
-      onNext={step < 5 ? () => setStep(s => s + 1) : undefined}
-      nextDisabled={!canGoNext()}
-    >
-      {step === 1 && <WizardStep1Location data={form} onChange={update} />}
-      {step === 2 && <WizardStep2Detail data={form} onChange={update} />}
-      {step === 3 && <WizardStep3Photos data={form} onChange={update} tempListingId={tempId} />}
-      {step === 4 && <WizardStep4Feasibility data={form} onChange={update} />}
-      {step === 5 && <WizardStep5Preview data={form} publishing={publishing} onPublish={handlePublish} />}
-    </WizardShell>
+    <>
+      {publishError && (
+        <div role="alert" style={{ padding: '10px 16px', background: 'rgba(255,45,85,.12)', color: '#b8102f', fontSize: '.85rem', fontWeight: 600 }}>
+          {publishError}
+        </div>
+      )}
+      <WizardShell
+        pageTitle="Yeni İlan Oluştur"
+        stepTitle={STEP_TITLES[step - 1]}
+        step={step}
+        onBack={step > 1 ? () => setStep(s => s - 1) : undefined}
+        onNext={step < 5 ? () => setStep(s => s + 1) : undefined}
+        nextDisabled={!canGoNext()}
+      >
+        {step === 1 && <WizardStep1Location data={form} onChange={update} />}
+        {step === 2 && <WizardStep2Detail data={form} onChange={update} />}
+        {step === 3 && <WizardStep3Photos data={form} onChange={update} tempListingId={tempId} />}
+        {step === 4 && <WizardStep4Feasibility data={form} onChange={update} />}
+        {step === 5 && <WizardStep5Preview data={form} publishing={publishing} onPublish={handlePublish} />}
+      </WizardShell>
+    </>
   )
 }

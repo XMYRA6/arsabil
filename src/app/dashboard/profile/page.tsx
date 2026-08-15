@@ -88,6 +88,7 @@ export default function ProfilePage() {
     const [deleteError, setDeleteError] = useState('')
     const [deleting, setDeleting] = useState(false)
     const [exporting, setExporting] = useState(false)
+    const [exportError, setExportError] = useState('')
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hidrasyon + localStorage başlangıç teması
@@ -194,6 +195,7 @@ export default function ProfilePage() {
 
     const handleExportData = async () => {
         setExporting(true)
+        setExportError('')
         try {
             const res = await fetch('/api/user/export')
             if (!res.ok) throw new Error('export failed')
@@ -206,7 +208,7 @@ export default function ProfilePage() {
             a.click()
             URL.revokeObjectURL(url)
         } catch {
-            alert('Veri indirme sırasında bir hata oluştu.')
+            setExportError('Veri indirme sırasında bir hata oluştu.')
         } finally {
             setExporting(false)
         }
@@ -565,6 +567,11 @@ export default function ProfilePage() {
                                     >
                                         {exporting ? 'Hazırlanıyor…' : '📥 Verilerimi İndir'}
                                     </button>
+                                    {exportError && (
+                                        <div className={styles.deleteModalError}>
+                                            {exportError}
+                                        </div>
+                                    )}
                                     <button
                                         onClick={() => setShowDeleteModal(true)}
                                         className={styles.btnDangerSmall}
