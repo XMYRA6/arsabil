@@ -6,11 +6,11 @@ const css = fs.readFileSync(path.join(__dirname, 'WizardShell.module.css'), 'utf
 describe('WizardShell mobil CSS kapsam guard', () => {
   const mediaIndex = css.indexOf('@media (max-width: 768px)')
 
-  it('mobil media query en az bir kez tanımlı olmalı', () => {
+  it('mobil media query en az bir kez tanimli olmali', () => {
     expect(mediaIndex).toBeGreaterThan(-1)
   })
 
-  it('.pageTitle masaüstünde görünür, mobilde gizli olmalı (AppBar zaten başlığı gösteriyor)', () => {
+  it('.pageTitle masaustunde gorunur, mobilde gizli olmali (AppBar zaten basligi gosteriyor)', () => {
     const baseIndex = css.indexOf('.pageTitle {')
     expect(baseIndex).toBeGreaterThan(-1)
     expect(baseIndex).toBeLessThan(mediaIndex)
@@ -20,7 +20,7 @@ describe('WizardShell mobil CSS kapsam guard', () => {
     expect(mobileBlock).toMatch(/\.pageTitle\s*\{[^}]*display:\s*none/)
   })
 
-  it('.stepTitle masaüstünde görünür, mobilde gizli olmalı (AppBar aynı metni gösteriyor, çift başlık önlenir)', () => {
+  it('.stepTitle masaustunde gorunur, mobilde gizli olmali (AppBar ayni metni gosteriyor, cift baslik onlenir)', () => {
     const baseIndex = css.indexOf('.stepTitle {')
     expect(baseIndex).toBeGreaterThan(-1)
     expect(baseIndex).toBeLessThan(mediaIndex)
@@ -30,7 +30,7 @@ describe('WizardShell mobil CSS kapsam guard', () => {
     expect(mobileBlock).toMatch(/\.stepTitle\s*\{[^}]*display:\s*none/)
   })
 
-  it('.nav masaüstünde görünür, mobilde gizli olmalı (StickyActionBar yerini alıyor)', () => {
+  it('.nav masaustunde gorunur, mobilde gizli olmali (StickyActionBar yerini aliyor)', () => {
     const baseIndex = css.indexOf('.nav {')
     expect(baseIndex).toBeGreaterThan(-1)
     expect(baseIndex).toBeLessThan(mediaIndex)
@@ -40,60 +40,59 @@ describe('WizardShell mobil CSS kapsam guard', () => {
     expect(mobileBlock).toMatch(/\.nav\s*\{[^}]*display:\s*none/)
   })
 
-  it('.container mobilde StickyActionBar+BottomNavbar için alt boşluk bırakmalı', () => {
+  it('.container mobilde StickyActionBar+safe-area icin alt bosluk birakmali', () => {
     const mobileBlock = css.slice(mediaIndex)
-    expect(mobileBlock).toMatch(/\.container\s*\{[^}]*calc\(var\(--bottomnav-height\)\s*\+\s*76px\)/)
+    expect(mobileBlock).toMatch(/\.container\s*\{[^}]*calc\(var\(--bottomnav-height\)\s*\+\s*76px\s*\+\s*env\(safe-area-inset-bottom\)\)/)
   })
 })
 
-describe('wizard mobil mühür kimliği (Faz 2.5)', () => {
-  const progressCss = fs.readFileSync(path.join(__dirname, 'WizardProgress.module.css'), 'utf8');
-  const wizardCss = fs.readFileSync(path.join(__dirname, 'wizard.module.css'), 'utf8');
+describe('wizard mobil Liquid Glass kimligi (Faz 7)', () => {
+  const progressCss = fs.readFileSync(path.join(__dirname, 'WizardProgress.module.css'), 'utf8')
+  const wizardCss = fs.readFileSync(path.join(__dirname, 'wizard.module.css'), 'utf8')
 
-  it('token tanımı YALNIZCA WizardShell.module.css\'te olmalı (tek kaynak)', () => {
-    expect(css).toMatch(/--seal-surface:/);
-    expect(progressCss).not.toMatch(/--seal-[a-z-]*:/);
-    expect(wizardCss).not.toMatch(/--seal-[a-z-]*:/);
-  });
+  it('mobil shell --m-* mesh ve cam yuzey tokenlarini kullanmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'))
+    expect(mobile).toMatch(/\.container\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
+    expect(mobile).toMatch(/\.card\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+    expect(mobile).toMatch(/\.card\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/)
+    expect(mobile).toMatch(/\.card\s*\{[^}]*backdrop-filter:\s*var\(--m-glass-blur\)/)
+  })
 
-  it('--seal-accent kanonik Aurora cyan olmalı', () => {
-    expect(css).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
-    expect(css).not.toMatch(/#4C8DFF/i);
-  });
+  it('eski --seal-* tokenlari wizard kabugundan temizlenmis olmali', () => {
+    expect(css).not.toMatch(/--seal-[a-z-]*:/)
+    expect(css).not.toMatch(/var\(--seal-/)
+    expect(progressCss).not.toMatch(/--seal-[a-z-]*:/)
+    expect(progressCss).not.toMatch(/var\(--seal-/)
+    expect(wizardCss).not.toMatch(/--seal-[a-z-]*:/)
+    expect(wizardCss).not.toMatch(/var\(--seal-/)
+  })
 
-  it('token tanımları mobil media query İÇİNDE olmalı', () => {
-    const mediaIndex = css.indexOf('@media (max-width: 768px)');
-    expect(css.indexOf('--seal-surface:')).toBeGreaterThan(mediaIndex);
-  });
+  it('.stickyNextBtn mobilde --m-grad-btn, .stickyBackBtn ise --m-fill outline kullanmali', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'))
+    expect(mobile).toMatch(/\.stickyNextBtn\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
+    expect(mobile).toMatch(/\.stickyNextBtn\s*\{[^}]*box-shadow:\s*var\(--m-sh-grad-btn\)/)
+    expect(mobile).toMatch(/\.stickyBackBtn\s*\{[^}]*background:\s*var\(--m-fill\)/)
+    expect(mobile).toMatch(/\.stickyBackBtn\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/)
+  })
 
-  it('.card mobilde seal cam yüzeyine geçmeli', () => {
-    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.card\s*\{[^}]*background:\s*var\(--seal-surface\)/);
-  });
+  it('WizardProgress aktif/tamamlanmis durumlari mobilde --m-* aksanlarini kullanmali', () => {
+    const mobile = progressCss.slice(progressCss.indexOf('@media (max-width: 768px)'))
+    expect(mobile).toMatch(/\.circle\s*\{[^}]*background:\s*var\(--m-fill\)/)
+    expect(mobile).toMatch(/\.circleActive\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
+    expect(mobile).toMatch(/\.circleDone\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
+    expect(mobile).toMatch(/\.connectorDone\s*\{[^}]*background:\s*var\(--m-link\)/)
+    expect(mobile).toMatch(/\.connectorActive\s*\{[^}]*background:\s*var\(--m-grad-accent\)/)
+  })
 
-  it('.stickyNextBtn seal aksan dolgusu (koyultulmuş ton — whole-branch review bulgusu: düz --seal-accent üzerinde beyaz metin 3.868:1, AA altında), .stickyBackBtn outline almalı', () => {
-    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.stickyNextBtn\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
-    expect(mobile).toMatch(/\.stickyBackBtn\s*\{[^}]*border:\s*1px solid var\(--seal-border\)/);
-  });
+  it('masaustu dallari korunmali: .nav/.pageTitle/.stepTitle mobilde hala gizli', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'))
+    expect(mobile).toMatch(/\.pageTitle\s*\{[^}]*display:\s*none/)
+    expect(mobile).toMatch(/\.stepTitle\s*\{[^}]*display:\s*none/)
+    expect(mobile).toMatch(/\.nav\s*\{[^}]*display:\s*none/)
+  })
 
-  it('WizardProgress aktif/tamamlanmış durumları mobilde seal aksanı tüketmeli (daire arkaplanı koyultulmuş ton — beyaz rakam metni için kontrast)', () => {
-    const mobile = progressCss.slice(progressCss.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.circleActive\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
-    expect(mobile).toMatch(/\.circleDone\s*\{[^}]*background:\s*color-mix\(in srgb,\s*var\(--seal-accent\)\s*82%,\s*#0F2A43\)/);
-    expect(mobile).toMatch(/\.connectorDone\s*\{[^}]*background:\s*var\(--seal-accent\)/);
-    expect(mobile).toMatch(/\.connectorActive\s*\{[^}]*background:\s*var\(--seal-accent\)/);
-  });
-
-  it('masaüstü dalları korunmalı: .nav/.pageTitle/.stepTitle mobilde hâlâ gizli', () => {
-    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
-    expect(mobile).toMatch(/\.pageTitle\s*\{[^}]*display:\s*none/);
-    expect(mobile).toMatch(/\.stepTitle\s*\{[^}]*display:\s*none/);
-    expect(mobile).toMatch(/\.nav\s*\{[^}]*display:\s*none/);
-  });
-
-  it('masaüstü .nextBtn hâlâ brand-gradient kullanmalı (değişmedi)', () => {
-    const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
-    expect(desktop).toMatch(/\.nextBtn\s*\{[^}]*background:\s*var\(--brand-gradient\)/);
-  });
-});
+  it('masaustu .nextBtn hala brand-gradient kullanmali (degismedi)', () => {
+    const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'))
+    expect(desktop).toMatch(/\.nextBtn\s*\{[^}]*background:\s*var\(--brand-gradient\)/)
+  })
+})

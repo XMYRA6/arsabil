@@ -24,10 +24,10 @@
 - Modify: `src/components/listing-wizard/wizard.module.css`
 - Test: `src/app/listings/new/wizardMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing tests for mobile shell, hidden nav and progress**
-- [ ] **Step 2: Mobil appbar/progress/step container kur**
-- [ ] **Step 3: Sticky action bar ve safe-area guard ekle**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for mobile shell, hidden nav and progress**
+- [x] **Step 2: Mobil appbar/progress/step container kur**
+- [x] **Step 3: Sticky action bar ve safe-area guard ekle**
+- [x] **Step 4: Commit**
 
 ## Task 2: Adim kartlari
 
@@ -50,3 +50,5 @@
 - [ ] `npx jest`
 - [ ] `npm run build`
 - [ ] Playwright 390x844: `/listings/new`; alt nav gizli, action bar gorunur, tum adimlar tasmasiz.
+
+
