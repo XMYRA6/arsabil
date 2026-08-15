@@ -36,8 +36,15 @@
      ikisi ayrisamaz. 2026-07-29'da ayrismislardi: yeni tasarim cubugu
      74px govde + 22px home indicator = 96px yaptigi halde bu token 83px'te
      kalmisti; `StickyActionBar.aboveNav` token'i kullandigi icin sabit CTA
-     alt cubugun 13px UZERINE binmisti (canli olcumle yakalandi). */
-  --bottomnav-height: calc(74px + 22px + env(safe-area-inset-bottom, 0px));
+     alt cubugun 13px UZERINE binmisti (canli olcumle yakalandi).
+     2026-08-15: o 22px'lik "home indicator payi" gercek safe-area'nin
+     (env(safe-area-inset-bottom)) USTUNE binen, gerekcesi hic belgelenmemis
+     fazladan bir sabitti — gercek iPhone ekran goruntusuyle geldi: etiketlerin
+     altinda home indicator'a kadar buyuk bir bos serit vardi (34px gercek
+     safe-area + 22px sabit = 56px, iOS'un kendi tab bar kuralinin iki
+     katindan fazla). Kaldirildi — redesign ONCESI kodun da yaptigi gibi
+     yalnizca gercek safe-area payi birakiliyor. */
+  --bottomnav-height: calc(74px + env(safe-area-inset-bottom, 0px));
   --font-size-title: clamp(1.25rem, 4vw, 1.5rem);
   --font-size-page-title: clamp(1.5rem, 5vw, 2rem);
 

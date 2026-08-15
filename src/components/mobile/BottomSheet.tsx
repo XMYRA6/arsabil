@@ -72,10 +72,47 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
     const mounted = useIsMounted();
     const sheetRef = useRef<HTMLDivElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
     // Klavye acilinca sheet'in kendisini klavyenin USTUNE oturtur (bkz.
     // useKeyboardInset.ts) — kullanici bulgusu: klavye acilinca sabit
     // `bottom:0` sheet klavyenin altinda kalip tasarimi bozuyordu.
     const keyboardInset = useKeyboardInset();
+    // focusin dinleyicisi mount'ta bir kere kurulur (yalnizca `open`
+    // degisiminde yeniden baglanir) — o yuzden guncel keyboardInset'i bir
+    // ref'ten okur, stale closure'a dusmez.
+    const keyboardInsetRef = useRef(keyboardInset);
+    keyboardInsetRef.current = keyboardInset;
+
+    // Kullanici bulgusu: "Elle gir" formunda inputa tiklayip klavye gelince
+    // input yukari kaciyor, gorunmuyor. Kok neden (Playwright ile canli
+    // olculdu): icerik max-height'e ulasmadigi surece --keyboard-inset
+    // yukselince sheet'in YUKSEKLIGI SABIT KALIP TAMAMI klavye kadar yukari
+    // kayiyor — ustteki alanlar ekranin disina (negatif y) tasiyor. Odak
+    // .content icindeyken hem klavye ilk acildiginda (keyboardInset degisimi)
+    // hem klavye acikken baska bir alana gecildiginde (focusin) o alani
+    // .content'in kendi scrollTop'uyla gorunur alana geri getirir.
+    useEffect(() => {
+        if (!open || keyboardInset === 0) return;
+        const active = document.activeElement;
+        if (active instanceof HTMLElement && contentRef.current?.contains(active)) {
+            active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+    }, [open, keyboardInset]);
+
+    useEffect(() => {
+        if (!open) return;
+        const content = contentRef.current;
+        if (!content) return;
+        const onFocusIn = (e: FocusEvent) => {
+            if (keyboardInsetRef.current === 0) return;
+            const target = e.target;
+            if (target instanceof HTMLElement) {
+                target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+        };
+        content.addEventListener('focusin', onFocusIn);
+        return () => content.removeEventListener('focusin', onFocusIn);
+    }, [open]);
 
     useEffect(() => {
         if (!open) return;
@@ -177,7 +214,7 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
                         ) : (
                             title && <div className={styles.title}>{title}</div>
                         )}
-                        <div className={styles.content}>{children}</div>
+                        <div ref={contentRef} className={styles.content}>{children}</div>
                     </motion.div>
                 </>
             )}

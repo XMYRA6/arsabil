@@ -208,8 +208,18 @@
            gorunur birakan, GelismisAyarlarSheet gibi hafif panellere uygun
            tasarim) burada mockup'la eslesmiyordu. --safe-top cikarilir ki
            yuvarlatilmis ust koseler gercek bir centikli/Dynamic Island'li
-           cihazda donanimin altina girmesin. */
-        max-height: calc(100dvh - var(--safe-top, 0px)) !important;
+           cihazda donanimin altina girmesin. --keyboard-inset de cikarilir:
+           bu !important, BottomSheet.module.css'in temel klavye-farkindalikli
+           max-height kuralini komple ezer — kullanici bulgusu: "Elle gir"
+           formunda inputa tiklayip klavye gelince input yukari kaciyor,
+           gorunmuyordu. Kok neden (Playwright ile canli olculdu): bu satir
+           --keyboard-inset'i hic hesaba katmadigi icin klavye acilinca sheet
+           tam ekran boyunda KALIYOR, --bottom (BottomSheet'ten miras) klavye
+           kadar yukseliyor — net etki: sheet'in TAMAMI klavye kadar yukari
+           kayiyor, icerik hicbir zaman tasmadigi icin BottomSheet'in
+           scrollIntoView duzeltmesinin kaydiracagi bir scroll konteyneri de
+           hic olusmuyordu. */
+        max-height: calc(100dvh - var(--safe-top, 0px) - var(--keyboard-inset, 0px)) !important;
     }
 
     /* Parsel henuz dogrulanmamisken (harita/elle-giris modu) sheet'i sadece
@@ -217,9 +227,13 @@
        icerik artik kompakt oldugu icin (bkz. onceki duzeltme) max-height tek
        basina yetmiyordu, sheet kendi icerigine gore kuculuyordu. Dogrulama
        sonrasi (.isVerifiedCompact) bu sinif UYGULANMAZ — kisa ozet + risk
-       karti kendi dogal boyunda kalir, altinda bos alan birakmaz. */
+       karti kendi dogal boyunda kalir, altinda bos alan birakmaz.
+       --keyboard-inset burada da dusulur — ayni gerekce: height (max-height
+       degil) burada GERCEK zorlayici deger, klavye acilinca guncellenmezse
+       icerik hicbir zaman tasmaz ve BottomSheet'in odak-kaydirma duzeltmesi
+       icin scroll edilecek bir seyi olmaz. */
     .sheetPicking {
-        height: calc(100dvh - var(--safe-top, 0px)) !important;
+        height: calc(100dvh - var(--safe-top, 0px) - var(--keyboard-inset, 0px)) !important;
     }
 
     /* ParcelPicker'in .wrapper'ina eklenir — haritanin kendisi kalan dikey

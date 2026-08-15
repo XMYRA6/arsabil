@@ -153,6 +153,90 @@ describe('BottomSheet', () => {
         expect(sheet.style.getPropertyValue('--keyboard-inset')).toBe('320px')
     })
 
+    // Kullanici bulgusu: "Elle gir" formunda inputlara tiklayip klavye
+    // gelince input haliyle yukari kaciyor ve gorunmuyor bile. Kok neden
+    // (Playwright ile canli olculdu): sheet icerigi max-height'e hic
+    // ulasmadigindan (kisa form), --keyboard-inset yukselince sheet'in
+    // YUKSEKLIGI SABIT KALIP TAMAMI klavye kadar yukari kayiyor — ustteki
+    // alanlar (Il/Ilce) ekranin DISINA (negatif y) tasiyor. Hicbir sey
+    // odaklanan alani geri kaydirmiyordu.
+    describe('klavye acilinca odaklanan alan gorunur tutulur', () => {
+        class FakeVisualViewport extends EventTarget {
+            height = 844
+            offsetTop = 0
+            resizeTo(height: number) {
+                this.height = height
+                this.dispatchEvent(new Event('resize'))
+            }
+        }
+
+        let fakeVv: FakeVisualViewport
+        let scrollIntoViewSpy: jest.Mock
+
+        beforeEach(() => {
+            fakeVv = new FakeVisualViewport()
+            Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
+            Object.defineProperty(window, 'visualViewport', { value: fakeVv, configurable: true })
+            scrollIntoViewSpy = jest.fn()
+            // jsdom Element.prototype.scrollIntoView'i implemente etmiyor.
+            Element.prototype.scrollIntoView = scrollIntoViewSpy
+        })
+
+        it('odaklanmis inputtayken klavye acilinca (visualViewport kucculunce) input .content icinde gorunur alana kaydirilir', () => {
+            render(
+                <BottomSheet open onClose={jest.fn()} title="Elle gir">
+                    <input aria-label="İl" />
+                </BottomSheet>,
+            )
+            const input = screen.getByLabelText('İl')
+            act(() => input.focus())
+            expect(scrollIntoViewSpy).not.toHaveBeenCalled()
+
+            act(() => fakeVv.resizeTo(844 - 320))
+
+            expect(scrollIntoViewSpy).toHaveBeenCalledWith(
+                expect.objectContaining({ block: 'center' }),
+            )
+        })
+
+        it('klavye zaten acikken baska bir alana odaklaninca da o alan gorunur alana kaydirilir', () => {
+            render(
+                <BottomSheet open onClose={jest.fn()} title="Elle gir">
+                    <input aria-label="İl" />
+                    <input aria-label="İlçe" />
+                </BottomSheet>,
+            )
+            act(() => fakeVv.resizeTo(844 - 320))
+            scrollIntoViewSpy.mockClear()
+
+            act(() => screen.getByLabelText('İlçe').focus())
+
+            expect(scrollIntoViewSpy).toHaveBeenCalledWith(
+                expect.objectContaining({ block: 'center' }),
+            )
+        })
+
+        it('klavye kapaliyken (--keyboard-inset 0) odak degisikliginde scrollIntoView cagrilmaz', () => {
+            render(
+                <BottomSheet open onClose={jest.fn()} title="Elle gir">
+                    <input aria-label="İl" />
+                </BottomSheet>,
+            )
+            act(() => screen.getByLabelText('İl').focus())
+            expect(scrollIntoViewSpy).not.toHaveBeenCalled()
+        })
+
+        it('sheet icinde odaklanmis eleman yokken klavye acilinca scrollIntoView cagrilmaz', () => {
+            render(
+                <BottomSheet open onClose={jest.fn()} title="Elle gir">
+                    <input aria-label="İl" />
+                </BottomSheet>,
+            )
+            act(() => fakeVv.resizeTo(844 - 320))
+            expect(scrollIntoViewSpy).not.toHaveBeenCalled()
+        })
+    })
+
     describe('showCloseButton', () => {
         // Mockup bazi sheet'lerde (ornegin ParcelVerificationSheet) sadece
         // ustte bir X kapatma butonu gosteriyor, surukleme tutamaci (grabber)

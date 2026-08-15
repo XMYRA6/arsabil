@@ -38,7 +38,11 @@ describe('ParcelVerificationSheet mobil mühür kimliği', () => {
         expect(desktop).not.toMatch(/--seal-/)
     })
 
-    it('.sheet mobilde tam ekran yuksekligine cikabilmeli (mockup: sayfayi dolduran sheet, BottomSheet.module.css\'in varsayilan 85dvh "peek" kapagi degil) — !important, ayni cakisma gerekcesiyle', () => {
-        expect(mobile()).toMatch(/\.sheet\s*\{[^}]*max-height:\s*calc\(100dvh\s*-\s*var\(--safe-top,\s*0px\)\)\s*!important/)
+    it('.sheet mobilde tam ekran yuksekligine cikabilmeli (mockup: sayfayi dolduran sheet, BottomSheet.module.css\'in varsayilan 85dvh "peek" kapagi degil) — !important, ayni cakisma gerekcesiyle; --keyboard-inset de dusulmeli, aksi halde klavye acilinca BottomSheet.module.css\'in temel max-height kuralini !important ile ezip klavye farkindaligini kaybettirir (kullanici bulgusu: Elle gir formunda input klavyenin ustune kayarken sheet tam ekran boyunda kalip inputu ekranin disina itiyordu)', () => {
+        expect(mobile()).toMatch(/\.sheet\s*\{[^}]*max-height:\s*calc\(100dvh\s*-\s*var\(--safe-top,\s*0px\)\s*-\s*var\(--keyboard-inset,\s*0px\)\)\s*!important/)
+    })
+
+    it('.sheetPicking sabit yuksekligi de --keyboard-inset dusmeli — .sheet ile ayni gerekce, height (max-height degil) sheetPicking\'de gercek zorlayici deger oldugu icin klavye acilinca bu da guncellenmezse sheet icerigi tasmaz ve odaklanan alani gorunur alana kaydiracak bir scroll konteyneri hic olusmaz', () => {
+        expect(mobile()).toMatch(/\.sheetPicking\s*\{[^}]*height:\s*calc\(100dvh\s*-\s*var\(--safe-top,\s*0px\)\s*-\s*var\(--keyboard-inset,\s*0px\)\)\s*!important/)
     })
 })
