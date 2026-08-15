@@ -72,18 +72,12 @@
     }
 
     .listRow {
+        composes: mRowList from global;
         display: flex;
         flex-direction: column;
         gap: 3px;
         padding: 12px 14px;
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-        text-decoration: none;
-        color: inherit;
     }
 
     .listTitle {
@@ -123,15 +117,11 @@
     .statusRejected { color: var(--m-danger); }
 
     .statGrid {
+        composes: mStatSurface from global;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 6px;
         padding: 10px 8px;
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 

@@ -27,8 +27,13 @@ describe('HomeMobile Faz 3 ana ekran sozlesmesi', () => {
     expect(mediaIndex).toBeGreaterThan(-1)
     expect(mobile).toMatch(/\.homeMobileKok\s*\{[^}]*background:\s*var\(--m-mesh\)/)
     expect(mobile).toMatch(/\.mobileHero\s*\{[^}]*background:\s*var\(--m-grad-accent\)/)
-    expect(mobile).toMatch(/\.statGrid\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+    expect(mobile).toMatch(/\.statGrid\s*\{[^}]*composes:\s*mStatSurface from global/)
     expect(mobile).toMatch(/\.actionTile\s*\{[^}]*min-height:\s*var\(--touch-target\)/)
+  })
+
+  it('.listRow paylasilan .mRowList yuzeyine baglanir, glass ozelliklerini elle tekrarlamaz', () => {
+    expect(mobile).toMatch(/\.listRow\s*\{[^}]*composes:\s*mRowList from global/)
+    expect(mobile).not.toMatch(/\.listRow\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
   })
 
   it('BottomNavbar boslugu iki kez uygulanmaz; global main dolgusu korunur', () => {
