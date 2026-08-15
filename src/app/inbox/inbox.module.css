@@ -108,9 +108,19 @@
     gap: 12px;
     align-items: center;
     cursor: pointer;
-    border-radius: 14px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
+}
+
+/* border-radius/border are desktop-only here: on mobile these must come
+   exclusively from the composed .mRowList (see the mobile @media block
+   below), otherwise this rule's own CSS-module chunk (which loads after
+   globals.css) would beat the composed surface at equal specificity and
+   silently defeat the mobile card language on all viewports. */
+@media (min-width: 769px) {
+    .convItem {
+        border-radius: 14px;
+        border: 1px solid transparent;
+    }
 }
 
 .convItem:hover {
@@ -565,10 +575,13 @@
     }
 
     .convItem {
-        composes: mRowList from global;
         min-height: 72px;
         padding: 12px;
         box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+    }
+
+    .convItem:hover {
+        background: var(--m-panel);
     }
 
     .convItem.convItemActive {
@@ -615,7 +628,6 @@
 
     .emptyConvList,
     .loadingList {
-        composes: mStatSurface from global;
         margin: 8px 0;
         padding: 18px;
         color: var(--m-body);
@@ -653,4 +665,15 @@
     .bubbleMine {
         background: var(--m-grad-btn);
     }
+}
+
+/* `composes` cannot live inside a nested @media rule under Turbopack/lightningcss
+   (next build hard-errors). These top-level rules carry the composition. */
+.convItem {
+    composes: mRowList from global;
+}
+
+.emptyConvList,
+.loadingList {
+    composes: mStatSurface from global;
 }

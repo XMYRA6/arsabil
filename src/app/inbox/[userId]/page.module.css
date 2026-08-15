@@ -110,7 +110,6 @@
     }
 
     .stateCard {
-        composes: mStatSurface from global;
         margin: 20px 0 0;
         padding: 18px;
         color: var(--m-body);
@@ -171,4 +170,11 @@
         opacity: .45;
         box-shadow: none;
     }
+}
+
+/* `composes` cannot live inside a nested @media rule under Turbopack/lightningcss
+   (next build hard-errors). This top-level rule carries the composition; see
+   mobile.module.css for the same pattern. */
+.stateCard {
+    composes: mStatSurface from global;
 }

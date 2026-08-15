@@ -568,7 +568,7 @@ export default function ProfilePage() {
                                         {exporting ? 'Hazırlanıyor…' : '📥 Verilerimi İndir'}
                                     </button>
                                     {exportError && (
-                                        <div className={styles.deleteModalError}>
+                                        <div role="alert" className={styles.deleteModalError}>
                                             {exportError}
                                         </div>
                                     )}

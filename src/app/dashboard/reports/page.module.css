@@ -9,10 +9,20 @@
     gap: 18px;
     padding: 24px;
     margin-bottom: 16px;
-    border-radius: 20px;
-    background: var(--stat-bg);
-    border: 1px solid var(--border);
     box-shadow: var(--shadow2);
+}
+
+/* border-radius/background/border are desktop-only here: on mobile these
+   properties must come exclusively from the composed .mStatSurface (see
+   the mobile @media block below), otherwise this rule's own CSS-module chunk
+   (which loads after globals.css) would beat the composed surface at equal
+   specificity and silently defeat the mobile card language on all viewports. */
+@media (min-width: 769px) {
+    .heroCard {
+        border-radius: 20px;
+        background: var(--stat-bg);
+        border: 1px solid var(--border);
+    }
 }
 
 .eyebrow,
@@ -116,10 +126,18 @@
 .reportCard,
 .emptyCard,
 .stateCard {
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--stat-bg);
     box-shadow: var(--shadow2);
+}
+
+/* Same desktop-only gating as .heroCard above — see comment there. */
+@media (min-width: 769px) {
+    .reportCard,
+    .emptyCard,
+    .stateCard {
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--stat-bg);
+    }
 }
 
 .reportCard {
@@ -245,7 +263,6 @@
     .reportCard,
     .emptyCard,
     .stateCard {
-        composes: mStatSurface from global;
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
@@ -357,4 +374,13 @@
         color: #fff;
         box-shadow: var(--m-sh-grad-btn);
     }
+}
+
+/* `composes` cannot live inside a nested @media rule under Turbopack/lightningcss
+   (next build hard-errors). This top-level rule carries the composition. */
+.heroCard,
+.reportCard,
+.emptyCard,
+.stateCard {
+    composes: mStatSurface from global;
 }
