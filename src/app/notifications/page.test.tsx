@@ -21,10 +21,16 @@ describe('notifications mobile route', () => {
         expect(page).toMatch(/Okundu/)
     })
 
-    it('mobil kabuk ve bildirim kartlari liquid glass tokenlarini kullanir', () => {
+    it('mobil kabuk mesh tokenlarini kullanir', () => {
         expect(mobile).toMatch(/\.notificationsShell\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
-        expect(mobile).toMatch(/\.heroCard,\s*\.notificationCard,\s*\.emptyCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-        expect(mobile).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
+    })
+
+    it('.heroCard/.emptyCard paylasilan .mStatSurface, .notificationCard paylasilan .mRowList yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+        expect(css).toMatch(/\.heroCard\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(css).toMatch(/\.emptyCard\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(css).toMatch(/\.notificationCard\s*\{[^}]*composes:\s*mRowList from global/)
+        expect(mobile).not.toMatch(/\.heroCard,\s*\.notificationCard,\s*\.emptyCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+        expect(css).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.heroCard,\s*\.notificationCard,\s*\.emptyCard\s*\{[^}]*background:\s*var\(--stat-bg\)/)
     })
 
     it('mobil aksiyonlar touch-safe gradient, metrikler mono olmalidir', () => {

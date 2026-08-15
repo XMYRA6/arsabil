@@ -2,16 +2,19 @@
     width: 100%;
 }
 
-.heroCard,
-.notificationCard,
-.emptyCard {
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--stat-bg);
-    box-shadow: var(--shadow2);
+@media (min-width: 769px) {
+    .heroCard,
+    .notificationCard,
+    .emptyCard {
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--stat-bg);
+        box-shadow: var(--shadow2);
+    }
 }
 
 .heroCard {
+    composes: mStatSurface from global;
     display: flex;
     justify-content: space-between;
     gap: 16px;
@@ -102,6 +105,7 @@
 }
 
 .notificationCard {
+    composes: mRowList from global;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -167,6 +171,7 @@
 }
 
 .emptyCard {
+    composes: mStatSurface from global;
     padding: 28px 18px;
     text-align: center;
     color: var(--muted);
@@ -207,11 +212,6 @@
     .heroCard,
     .notificationCard,
     .emptyCard {
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
