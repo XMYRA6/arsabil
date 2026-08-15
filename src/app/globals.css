@@ -274,6 +274,7 @@ a {
     --m-glass-blur: blur(42px) saturate(220%);
     --m-fill: rgba(11,32,54,.05);
     --m-divider: rgba(11,32,54,.07);
+    --m-panel: #ffffff;
 
     --m-success: #10b981;
     --m-success-text: #067a56;
@@ -316,6 +317,41 @@ a {
   .mNum {
     font-family: var(--m-mono);
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Kart tekdüzeliği düzeltmesi (2026-08-15): .mGlass her icerik turune
+     (istatistik/liste/foto) ayni cam formulunu dayatiyordu — "her sayfa
+     ayni gorunuyor" hissinin kaynagi (bkz. docs/superpowers/specs/2026-08-15-
+     mobil-kart-dili-revizyonu-design.md). Bu iki sinif ROLE gore ayrisir:
+     sayfa CSS'leri `composes: ... from global` ile bunlara baglanir,
+     glass ozelliklerini bir daha elle kopyalamaz. Box-shadow BILEREK
+     disaridi birakildi — tuketiciler arasinda --m-sh-card / --m-sh-card-sm
+     farkli agirliklarda kullaniliyor, bu context'e ozel kalmali. */
+  .mStatSurface {
+    background: var(--m-panel);
+    border: 1px solid var(--m-divider);
+    border-radius: var(--m-r-card);
+  }
+  .mStatSurface:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .mRowList {
+    display: block;
+    background: var(--m-panel);
+    border: 1px solid var(--m-divider);
+    border-radius: var(--m-r-card);
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s ease;
+  }
+  .mRowList:active {
+    transform: scale(0.98);
+  }
+  .mRowList:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
   .page-container {

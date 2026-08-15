@@ -97,3 +97,38 @@ describe('body min-height — iOS Safari fixed-bottom bar bosluk regresyonu', ()
         expect(bodyBlock).not.toMatch(/min-height:\s*100vh\b/)
     })
 })
+
+describe('Kart tekdüzeliği düzeltmesi — paylaşılan yüzey sınıfları (2026-08-15)', () => {
+    it('.mStatSurface panel yüzeyi + kenarlık + köşe yarıçapı tanımlar, cam/blur YOK', () => {
+        const inside = mobileBlock()
+        expect(inside).toMatch(/\.mStatSurface\s*\{[^}]*background:\s*var\(--m-panel\)/)
+        expect(inside).toMatch(/\.mStatSurface\s*\{[^}]*border:\s*1px solid var\(--m-divider\)/)
+        expect(inside).toMatch(/\.mStatSurface\s*\{[^}]*border-radius:\s*var\(--m-r-card\)/)
+        expect(inside).not.toMatch(/\.mStatSurface\s*\{[^}]*backdrop-filter/)
+    })
+
+    it('.mStatSurface:focus-visible --focus-ring kullanır', () => {
+        expect(mobileBlock()).toMatch(/\.mStatSurface:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/)
+    })
+
+    it('.mRowList panel yüzeyi + link sıfırlama + basma geri bildirimi tanımlar', () => {
+        const inside = mobileBlock()
+        expect(inside).toMatch(/\.mRowList\s*\{[^}]*background:\s*var\(--m-panel\)/)
+        expect(inside).toMatch(/\.mRowList\s*\{[^}]*border:\s*1px solid var\(--m-divider\)/)
+        expect(inside).toMatch(/\.mRowList\s*\{[^}]*border-radius:\s*var\(--m-r-card\)/)
+        expect(inside).toMatch(/\.mRowList\s*\{[^}]*text-decoration:\s*none/)
+        expect(inside).not.toMatch(/\.mRowList\s*\{[^}]*backdrop-filter/)
+    })
+
+    it('.mRowList:active kucuk bir olcek gerilemesiyle basma geri bildirimi verir', () => {
+        expect(mobileBlock()).toMatch(/\.mRowList:active\s*\{[^}]*transform:\s*scale\(0\.98\)/)
+    })
+
+    it('.mRowList:focus-visible --focus-ring kullanır', () => {
+        expect(mobileBlock()).toMatch(/\.mRowList:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/)
+    })
+
+    it('--m-panel tema-bagimsiz sabit acik bir yuzey tanimlar (--panel DEGIL — o [data-theme]e gore degisir ve --m-ink/--m-body gibi light-only metin tokenlariyla dark temada catisirdi)', () => {
+        expect(mobileBlock()).toMatch(/--m-panel:\s*#fff/i)
+    })
+})
