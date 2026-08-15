@@ -218,10 +218,16 @@
 }
 
 .tabContent {
-    background: var(--panel);
-    border: 1.5px solid var(--border);
-    border-radius: 16px;
+    composes: mStatSurface from global;
     padding: 20px;
+}
+
+@media (min-width: 769px) {
+    .tabContent {
+        background: var(--panel);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+    }
 }
 
 .sectionTitle {
@@ -390,15 +396,21 @@
 
 /* ── Sağ sidebar ── */
 .sidebar {
+    composes: mStatSurface from global;
     position: sticky;
     top: 80px;
-    background: var(--panel);
-    border: 1.5px solid var(--border);
-    border-radius: 18px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+}
+
+@media (min-width: 769px) {
+    .sidebar {
+        background: var(--panel);
+        border: 1.5px solid var(--border);
+        border-radius: 18px;
+    }
 }
 
 .priceLabel {
@@ -603,11 +615,6 @@
 
     .sidebar,
     .tabContent {
-        background: var(--m-glass-bg);
-        border-color: var(--m-glass-border);
-        border-radius: var(--m-r-card);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
@@ -740,14 +747,3 @@
     text-align: center;
 }
 
-
-
-@media (max-width: 768px) {
-    .sidebar {
-        background: var(--m-glass-bg);
-    }
-
-    .tabContent {
-        background: var(--m-glass-bg);
-    }
-}

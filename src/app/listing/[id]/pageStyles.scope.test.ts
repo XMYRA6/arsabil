@@ -32,8 +32,13 @@ describe('listing/[id] mobil Liquid Glass token kapsamı', () => {
     expect(pageCss).toMatch(/\.detailCell,\s*\.fizCell,\s*\.miniStat,\s*\.noLocationNote\s*\{[^}]*background:\s*var\(--m-fill\)/);
   });
 
-  it('.sidebar ve .tabContent mobilde --m-glass-bg cam yuzeyine gecmeli', () => {
-    expect(pageCss).toMatch(/\.sidebar\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-    expect(pageCss).toMatch(/\.tabContent\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+  it('.sidebar ve .tabContent paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+    expect(pageCss).toMatch(/\.sidebar\s*\{[^}]*composes:\s*mStatSurface from global/);
+    expect(pageCss).toMatch(/\.tabContent\s*\{[^}]*composes:\s*mStatSurface from global/);
+    const mediaIndex = pageCss.indexOf('MOBİL');
+    const mobileSection = pageCss.slice(mediaIndex);
+    expect(mobileSection).not.toMatch(/\.sidebar,\s*\n?\s*\.tabContent\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+    expect(pageCss).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.sidebar\s*\{[^}]*background:\s*var\(--panel\)/);
+    expect(pageCss).toMatch(/@media \(min-width:\s*769px\)\s*\{\s*\.tabContent\s*\{[^}]*background:\s*var\(--panel\)/);
   });
 });

@@ -8,11 +8,15 @@ describe('listing detay mobil Liquid Glass faz 2', () => {
   const mediaIndex = css.indexOf('MOBİL');
   const mobile = css.slice(mediaIndex);
 
-  it('mobil sayfa, hero ve icerik kartlari --m-* cam tokenlarini kullanir', () => {
+  it('mobil sayfa mesh, foto alani --m-* tokenlarini kullanir', () => {
     expect(mobile).toMatch(/\.page\s*\{[^}]*background:\s*var\(--m-mesh\)/);
     expect(mobile).toMatch(/\.photoArea\s*\{[^}]*border-radius:\s*var\(--m-r-card\)/);
-    expect(mobile).toMatch(/\.sidebar\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-    expect(mobile).toMatch(/\.tabContent\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+  });
+
+  it('.sidebar/.tabContent paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+    expect(css).toMatch(/\.sidebar\s*\{[^}]*composes:\s*mStatSurface from global/);
+    expect(css).toMatch(/\.tabContent\s*\{[^}]*composes:\s*mStatSurface from global/);
+    expect(mobile).not.toMatch(/\.sidebar,\s*\n?\s*\.tabContent\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
   });
 
   it('mobil teklif CTA bottom nav uzerinde safe-area ile cakismaz', () => {
