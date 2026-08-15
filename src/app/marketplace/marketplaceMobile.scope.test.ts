@@ -17,10 +17,12 @@ describe('marketplace mobil Liquid Glass faz 2', () => {
     expect(mobileSection).toMatch(/\.listPanel\s*\{[^}]*background:\s*transparent/);
   });
 
-  it('mobil ListingCard cam kart, mono sayi ve mavi gradient aksan kullanir', () => {
+  it('mobil ListingCard mono sayi ve mavi gradient aksan kullanir, glass override kaldirabilir', () => {
     const cardMobile = listingCardCss.slice(listingCardCss.indexOf('@media (max-width: 768px)'));
-    expect(cardMobile).toMatch(/\.cardRoot\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-    expect(cardMobile).toMatch(/\.cardRoot\s*\{[^}]*backdrop-filter:\s*var\(--m-glass-blur\)/);
+    // .cardRoot mobilde artik glass override tasimaz (2026-08-15 duzeltmesi)
+    expect(cardMobile).not.toMatch(/\.cardRoot\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+    expect(cardMobile).not.toMatch(/\.cardRoot\s*\{[^}]*backdrop-filter:\s*var\(--m-glass-blur\)/);
+    // Fakat priceText mono sayi ve typeBadge gradient hala kullanilir
     expect(cardMobile).toMatch(/\.priceText\s*\{[^}]*font-family:\s*var\(--m-mono\)/);
     expect(cardMobile).toMatch(/\.typeBadge\s*\{[^}]*background:\s*var\(--m-grad-accent\)/);
   });

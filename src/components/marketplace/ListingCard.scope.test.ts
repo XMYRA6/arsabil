@@ -44,5 +44,11 @@ describe('ListingCard profesyonel kart dili', () => {
   it('aktif durum rozeti yesil nokta pseudo-elementi tanimlar', () => {
     expect(css).toMatch(/\.statusBadge::before\s*\{[^}]*background:\s*var\(--green\)/);
   });
+
+  it('.cardRoot mobilde masaustu tasariminin glass override etmeyen halini korur (2026-08-15 duzeltmesi)', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).not.toMatch(/\.cardRoot\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+    expect(mobile).not.toMatch(/\.cardRoot\s*\{[^}]*backdrop-filter:\s*var\(--m-glass-blur\)/);
+  });
 });
 

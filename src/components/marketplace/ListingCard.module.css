@@ -102,14 +102,6 @@
         font-family: var(--m-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
         font-variant-numeric: tabular-nums;
     }
-    .cardRoot {
-        background: var(--m-glass-bg) !important;
-        border: 1px solid var(--m-glass-border) !important;
-        border-radius: var(--m-r-card) !important;
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
-        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff !important;
-    }
 
     .photoFrame {
         border-radius: calc(var(--m-r-card) - 10px) calc(var(--m-r-card) - 10px) var(--m-r-inner) var(--m-r-inner);
