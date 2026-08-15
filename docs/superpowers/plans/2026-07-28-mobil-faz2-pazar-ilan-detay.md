@@ -39,11 +39,11 @@
 - Modify: `src/components/map/MapView.tsx`
 - Test: `src/components/listing/FilterSidebar.mobile.test.tsx`
 
-- [ ] **Step 1: Failing tests for mobile filter sheet and selected chips**
-- [ ] **Step 2: Filtreleri BottomSheet icine mobil-only tasima**
-- [ ] **Step 3: Harita/liste segmented kontrolunu ekle**
-- [ ] **Step 4: Leaflet regresyon testlerini calistir**
-- [ ] **Step 5: Commit**
+- [x] **Step 1: Failing tests for mobile filter sheet and selected chips**
+- [x] **Step 2: Filtreleri BottomSheet icine mobil-only tasima**
+- [x] **Step 3: Harita/liste segmented kontrolunu ekle**
+- [x] **Step 4: Leaflet regresyon testlerini calistir**
+- [x] **Step 5: Commit**
 
 ## Task 3: Mobil ilan detay ve teklif CTA
 
@@ -56,7 +56,7 @@
 - [ ] **Step 2: Mobil detay hero ve bilgi kartlarini cam dile tasima**
 - [ ] **Step 3: Alt nav gizlenirken teklif barinin safe-area ile cakismamasini sagla**
 - [ ] **Step 4: `npx jest src/app/listing/[id]`**
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ## Final Verification
 
