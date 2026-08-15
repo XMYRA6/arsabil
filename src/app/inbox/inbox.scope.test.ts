@@ -38,8 +38,9 @@ describe('inbox mobil Liquid Glass kimligi (Faz 4) — kabuk ve liste', () => {
     expect(mobile()).not.toMatch(/\.unreadBadge\s*\{[^}]*--m-/);
   });
 
-  it('.convItem mobilde cam kart, .convTime mono zaman etiketi olmali', () => {
-    expect(mobile()).toMatch(/\.convItem\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+  it('.convItem paylasilan .mRowList yuzeyine baglanir, .convTime mono zaman etiketi olmali', () => {
+    expect(mobile()).toMatch(/\.convItem\s*\{[^}]*composes:\s*mRowList from global/);
+    expect(mobile()).not.toMatch(/\.convItem\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
     expect(mobile()).toMatch(/\.convTime\s*\{[^}]*font-family:\s*var\(--m-mono\)/);
   });
 });

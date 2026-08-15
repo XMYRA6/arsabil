@@ -38,3 +38,13 @@ describe('mobil sohbet detay Faz 4', () => {
     expect(mobile).toMatch(/\.bubbleTheirs\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
   })
 })
+
+describe('inbox sohbet detay — durum notu paylasilan yuzeye baglanir (2026-08-15)', () => {
+  const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : ''
+  const mobile = css.slice(css.indexOf('@media (max-width: 768px)'))
+
+  it('.stateCard paylasilan .mStatSurface yuzeyine baglanir', () => {
+    expect(mobile).toMatch(/\.stateCard\s*\{[^}]*composes:\s*mStatSurface from global/)
+    expect(mobile).not.toMatch(/\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+  })
+})

@@ -9,7 +9,7 @@ describe('inbox mobil Liquid Glass Faz 4 liste', () => {
   it('konusma listesi cam kartlar, okunmamis durum ve mono zaman etiketi tasir', () => {
     expect(tsx).toMatch(/styles\.convTime/)
     expect(tsx).toMatch(/styles\.avatarUnread/)
-    expect(mobile).toMatch(/\.convItem\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+    expect(mobile).toMatch(/\.convItem\s*\{[^}]*composes:\s*mRowList from global/)
     expect(mobile).toMatch(/\.convItem\.convItemActive\s*\{[^}]*background:\s*var\(--m-fill\)\s*!important/)
     expect(mobile).toMatch(/\.convTime\s*\{[^}]*font-family:\s*var\(--m-mono\)/)
     expect(mobile).toMatch(/\.unreadCountBadge\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
@@ -21,9 +21,9 @@ describe('inbox mobil Liquid Glass Faz 4 liste', () => {
     expect(mobile).toMatch(/\.searchInput\s*\{[^}]*background:\s*var\(--m-fill\)/)
   })
 
-  it('bos durum ve yukleniyor mobilde cam not karti olarak stillenir', () => {
-    expect(mobile).toMatch(/\.emptyConvList,\s*\.loadingList\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-    expect(mobile).toMatch(/\.emptyConvList,\s*\.loadingList\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/)
+  it('bos durum ve yukleniyor mobilde paylasilan .mStatSurface yuzeyini kullanir', () => {
+    expect(mobile).toMatch(/\.emptyConvList,\s*\.loadingList\s*\{[^}]*composes:\s*mStatSurface from global/)
+    expect(mobile).not.toMatch(/\.emptyConvList,\s*\.loadingList\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
   })
 
   it('mobil inbox CSS artik --seal-* token sozlesmesine bagli degil', () => {

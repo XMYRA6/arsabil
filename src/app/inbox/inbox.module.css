@@ -565,16 +565,10 @@
     }
 
     .convItem {
+        composes: mRowList from global;
         min-height: 72px;
         padding: 12px;
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
         box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
-    }
-
-    .convItem:hover {
-        background: var(--m-glass-bg);
     }
 
     .convItem.convItemActive {
@@ -621,11 +615,9 @@
 
     .emptyConvList,
     .loadingList {
+        composes: mStatSurface from global;
         margin: 8px 0;
         padding: 18px;
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
         color: var(--m-body);
         box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
     }
