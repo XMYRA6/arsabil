@@ -54,7 +54,8 @@
     .messagePane {
         height: calc(100dvh - 58px - var(--safe-top));
         overflow-y: auto;
-        padding: 16px 14px 0;`r`n        padding-bottom: calc(92px + var(--safe-bottom));
+        padding: 16px 14px 0;
+        padding-bottom: calc(92px + var(--safe-bottom));
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -153,7 +154,8 @@
         resize: none;
         background: transparent;
         color: var(--m-ink);
-        font: 600 16px/1.35 Inter, sans-serif;`r`n        font-size: 16px;
+        font: 600 16px/1.35 Inter, sans-serif;
+        font-size: 16px;
     }
 
     .sendButton {
