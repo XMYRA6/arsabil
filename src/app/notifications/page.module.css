@@ -1,0 +1,271 @@
+.notificationsShell {
+    width: 100%;
+}
+
+.heroCard,
+.notificationCard,
+.emptyCard {
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--stat-bg);
+    box-shadow: var(--shadow2);
+}
+
+.heroCard {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px;
+    margin-bottom: 14px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.heroCard h1 {
+    margin: 0;
+    color: var(--card-title);
+    font-size: 28px;
+}
+
+.heroCard p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.unreadMetric {
+    min-width: 110px;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    text-align: center;
+}
+
+.unreadMetric strong {
+    display: block;
+    color: var(--val-color);
+    font: 900 26px/1 var(--m-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+
+.unreadMetric span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.actionRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.markAllButton,
+.markButton {
+    min-height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(var(--primary-rgb), .08);
+    color: var(--primary);
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.markAllButton {
+    padding: 0 14px;
+}
+
+.markButton {
+    padding: 0 10px;
+    flex-shrink: 0;
+}
+
+.markAllButton:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.notificationList {
+    display: grid;
+    gap: 10px;
+}
+
+.cardLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.notificationCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+}
+
+.notificationRead {
+    opacity: .78;
+}
+
+.notificationUnread {
+    border-color: rgba(var(--primary-rgb), .24);
+}
+
+.notificationIcon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--panel-2);
+    flex-shrink: 0;
+}
+
+.notificationBody {
+    min-width: 0;
+    flex: 1;
+}
+
+.notificationTopline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.notificationTopline h2 {
+    margin: 0;
+    color: var(--card-title);
+    font-size: 15px;
+}
+
+.notificationBody p {
+    margin: 4px 0;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.notificationBody time {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.unreadDot {
+    border-radius: 999px;
+    padding: 4px 8px;
+    color: var(--primary);
+    background: rgba(var(--primary-rgb), .10);
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.emptyCard {
+    padding: 28px 18px;
+    text-align: center;
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.emptyIcon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 12px;
+    border-radius: 16px;
+    color: #fff;
+    background: var(--primary);
+    font-family: var(--m-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-weight: 900;
+}
+
+.emptyCard h2 {
+    margin: 0 0 8px;
+    color: var(--card-title);
+}
+
+.emptyCard p {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .notificationsShell {
+        min-height: 100dvh;
+        margin: -2rem;
+        padding: calc(16px + var(--safe-top)) 14px calc(92px + var(--safe-bottom));
+        background: var(--m-mesh), var(--m-bg);
+        color: var(--m-ink);
+    }
+
+    .heroCard,
+    .notificationCard,
+    .emptyCard {
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+    }
+
+    .heroCard {
+        display: grid;
+        padding: 18px;
+    }
+
+    .eyebrow {
+        color: var(--m-link);
+        letter-spacing: 0;
+    }
+
+    .heroCard h1,
+    .notificationTopline h2,
+    .emptyCard h2 {
+        color: var(--m-ink);
+    }
+
+    .heroCard p,
+    .notificationBody p,
+    .notificationBody time,
+    .emptyCard {
+        color: var(--m-body);
+    }
+
+    .unreadMetric,
+    .notificationIcon {
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-fill);
+    }
+
+    .unreadMetric strong {
+        color: var(--m-ink);
+        font-family: var(--m-mono);
+    }
+
+    .markAllButton,
+    .markButton {
+        min-height: var(--touch-target);
+        border-radius: var(--m-r-btn);
+        border: 1px solid var(--m-glass-border);
+        background: var(--m-grad-btn);
+        color: #fff;
+        box-shadow: var(--m-sh-grad-btn);
+    }
+
+    .unreadDot {
+        color: var(--m-link);
+        background: var(--m-fill);
+    }
+
+    .emptyIcon {
+        background: var(--m-grad-btn);
+        box-shadow: var(--m-sh-grad-btn);
+    }
+}

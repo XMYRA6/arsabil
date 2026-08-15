@@ -50,10 +50,10 @@
 - Add: `src/app/notifications/page.module.css`
 - Test: `src/app/notifications/page.test.tsx`
 
-- [ ] **Step 1: Failing tests for notification list and mark-read action**
-- [ ] **Step 2: `api/notifications` ile listeleme ve okundu isaretleme**
-- [ ] **Step 3: Mobil bildirim kartlari ve bos durumlar**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for notification list and mark-read action**
+- [x] **Step 2: `api/notifications` ile listeleme ve okundu isaretleme**
+- [x] **Step 3: Mobil bildirim kartlari ve bos durumlar**
+- [x] **Step 4: Commit**
 
 ## Final Verification
 
