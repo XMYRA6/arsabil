@@ -1,141 +1,76 @@
 # Superpowers Execution Queue
 
-Bu dosya plan arşivini uygulanabilir bir sıraya indirger. `README.md` hangi
-spec'in hangi planla kapandığını gösterir; bu dosya ise **hangi işi önce
-başlatmanın daha mantıklı olduğunu** söyler.
+Bu dosya plan arsivini uygulanabilir bir siraya indirger. `README.md` hangi spec'in hangi planla kapandigini gosterir; bu dosya ise hangi isi once baslatmanin daha mantikli oldugunu soyler.
 
 ## Queue Principles
 
-- Önce veri doğruluğu ve hesap motoru, sonra görsel/yerleşim işleri.
-- Aynı yüzeye dokunan planlar çakışmayacak şekilde sıralanır.
-- Obsolete/closure/orchestration dosyaları dispatch edilmez.
-- Büyük görsel redesign planları, daha küçük ve kritik UX düzeltmeleri bittikten
-  sonra ele alınır.
-- Her item kendi canonical planındaki test/build kapılarıyla kapanır.
+- Once veri dogrulugu ve hesap motoru, sonra gorsel/yerlesim isleri.
+- Ayni yuzeye dokunan planlar cakismayacak sekilde siralanir.
+- Obsolete/closure/orchestration dosyalari dispatch edilmez.
+- Her item kendi canonical planindaki test/build kapilariyla kapanir.
 
 ---
 
-## Recommended Order
+## Completed / Closed In Current Branch
 
-### 1. Emsal arsa maliyeti modeli
-
-**Plan:** `2026-07-01-emsal-arsa-maliyeti.md`
-
-**Neden önce:** Hesap motoru ve veri modeliyle ilgili temel bir ürün kabiliyetidir.
-Sonraki UI iyileştirmeleri bu kavramı bilerek tasarlanırsa daha az geri dönüş
-olur.
-
-**Risk:** Orta-yüksek. Prisma migration + admin/API + engine + `/hesapla` UI zinciri.
-
-**Definition of Done:**
-- `avgLandPricePerM2` nullable alanı DB/API/admin boyunca çalışıyor.
-- `engine_v2` proportional/comparable modelleri testli.
-- `/hesapla` Emsal seçeneğini yalnızca veri varsa aktif ediyor.
+- [x] `2026-07-01-emsal-arsa-maliyeti.md` — kod commit: `c0fe45b`.
+- [x] `2026-08-14-hesapla-masaustu-girdi-sirasi.md` — mevcut uygulama dogrulandi, kod commit: `c0fe45b`.
+- [x] `2026-08-13-hesapla-masaustu-sutun-dengesi.md` — mevcut uygulama dogrulandi, kod commit: `c0fe45b`.
+- [x] `2026-08-12-pazaryeri-veri-butunlugu.md` — mevcut uygulama dogrulandi, kod commit: `c0fe45b`.
+- [x] `2026-08-13-pwa-guncelleme-bildirimi.md` — mevcut uygulama dogrulandi, kod commit: `c0fe45b`.
+- [x] `2026-06-08-arsabil-professional-ui-redesign.md` — kod commit: `c0fe45b`; Playwright smoke PASS.
+- [x] `2026-07-28-mobil-premium-liquid-glass.md` Gate 2 — Faz 2-9 detay planlari olusturuldu.
 
 ---
 
-### 2. Masaüstü `/hesapla` girdi sırası ve arsa payı tek blok
+## Recommended Next Dispatch
 
-**Plan:** `2026-08-14-hesapla-masaustu-girdi-sirasi.md`
+### 1. Mobil Premium Liquid Glass Faz 2: Pazar + ilan detay
 
-**Neden şimdi:** 2026-07-29/30 girdi mimarisi ve 2026-08-13 sütun dengesiyle aynı
-yüzeye dokunuyor. Emsal modeli eklendikten sonra Arsa Payı bloğu zaten yeniden
-düşünüleceği için bu iş onun hemen arkasından gelmeli.
+**Plan:** `2026-07-28-mobil-faz2-pazar-ilan-detay.md`
 
-**Risk:** Orta. `page.tsx` JSX sırası ve eski `SmartContextCard` temizliği.
+**Neden once:** Pazar yeri ve ilan detay, mobil urun kesfinin ana yuzeyi. Veri butunlugu ve profesyonel UI katmani kapandigi icin artik mobil cam diline guvenle tasinabilir.
 
-**Definition of Done:**
-- Sidebar sırası mobil zihinsel modelle aynı.
-- Arsa Payı tek kontrol bloğu.
-- `SmartContextCard` ölü sarmalayıcısı silindi.
-
----
-
-### 3. Masaüstü `/hesapla` sütun dengesi
-
-**Plan:** `2026-08-13-hesapla-masaustu-sutun-dengesi.md`
-
-**Neden bu sırada:** Girdi sırası değiştikten sonra sağ/sol yükseklik dengesi daha
-doğru ölçülür. Bu işi önce yapmak, sonra sidebar içeriğini tekrar taşımak demek.
-
-**Risk:** Orta. Gelişmiş Ayarlar paneli yeni grid satırına taşınıyor.
+**Risk:** Orta-yuksek. Marketplace liste/filtre/harita ve ilan detay CTA ayni fazda ele aliniyor.
 
 **Definition of Done:**
-- Sol sidebar gereksiz uzamıyor.
-- Gelişmiş Ayarlar sağ grid altında tek panel.
-- Desktop Playwright ölçümü raporlu.
+- Mobil marketplace kartlari, filtreleri ve harita/liste gecisi Liquid Glass dilinde.
+- Mobil ilan detay hero, metrikler ve teklif CTA safe-area ile cakismiyor.
+- 390x844 Playwright smoke raporlu.
 
----
+### 2. Mobil Premium Liquid Glass Faz 3: Giris, kayit, ana ekran
 
-### 4. Pazaryeri veri bütünlüğü
+**Plan:** `2026-07-28-mobil-faz3-auth-ana-ekran.md`
 
-**Plan:** `2026-08-12-pazaryeri-veri-butunlugu.md`
+### 3. Mobil Premium Liquid Glass Faz 4: Mesajlar, sohbet, teklifler
 
-**Neden şimdi:** Görsel redesign’dan önce kartların ve filtrelerin doğru veriyle
-beslenmesi gerekir. UI polish, yanlış veya tutarsız veri üstünde yapılmamalı.
+**Plan:** `2026-07-28-mobil-faz4-mesaj-teklif.md`
 
-**Risk:** Orta. Listing display/filter helpers ve marketplace page davranışı.
+### 4. Mobil Premium Liquid Glass Faz 5: Portfoy
 
-**Definition of Done:**
-- ListingCard mock fallback’leri kontrollü.
-- Filtre/harita/liste verisi tutarlı.
-- İlan kartları fotoğraf/score/metrikleri doğru kaynaktan okuyor.
+**Plan:** `2026-07-28-mobil-faz5-portfoy.md`
 
----
+### 5. Mobil Premium Liquid Glass Faz 6: Profil, ayarlar, bildirimler
 
-### 5. PWA güncelleme bildirimi
+**Plan:** `2026-07-28-mobil-faz6-profil-ayar-bildirim.md`
 
-**Plan:** `2026-08-13-pwa-guncelleme-bildirimi.md`
+### 6. Mobil Premium Liquid Glass Faz 7: Ilan sihirbazi
 
-**Neden burada:** Kullanıcı güvenini artıran, ana ürün yüzeylerinden bağımsız bir
-stabilite işi. Büyük UI redesign’dan önce yapılırsa sonraki build/deploy döngülerini
-daha rahat test ettirir.
+**Plan:** `2026-07-28-mobil-faz7-ilan-sihirbazi.md`
 
-**Risk:** Düşük-orta. Service worker contract + update banner.
+### 7. Mobil Premium Liquid Glass Faz 8: Admin
 
-**Definition of Done:**
-- Yeni sürüm algılanıyor.
-- Kullanıcı kontrollü refresh.
-- Chunk error reload davranışı testli.
+**Plan:** `2026-07-28-mobil-faz8-admin.md`
 
----
+### 8. Mobil Premium Liquid Glass Faz 9: Durum ekranlari
 
-### 6. Profesyonel UI redesign
-
-**Plan:** `2026-06-08-arsabil-professional-ui-redesign.md`
-
-**Neden daha sonra:** Çok geniş CSS yüzeyi var. Hesapla/pazar veri ve UX kararları
-oturduktan sonra uygulanırsa görsel sistem daha az tekrar değişir.
-
-**Risk:** Yüksek. Global token + çok sayıda CSS module.
-
-**Definition of Done:**
-- Token katmanı ve ana yüzeyler profesyonel gayrimenkul diline geçti.
-- Desktop/mobile smoke görsel regresyonu yok.
-- Yeni inline style eklenmedi.
-
----
-
-### 7. Mobil Premium Liquid Glass sonraki fazları
-
-**Plan:** `2026-07-28-mobil-premium-liquid-glass.md`
-
-**Neden sonra:** Faz 0+1 Hesapla zaten detaylı planlanmış. Kalan pazar/auth/portföy
-fazları için ayrı planlar yazılmalı; profesyonel UI token kararlarıyla çakışma
-kontrolü gerekir.
-
-**Risk:** Yüksek. Birçok route ve mobil görsel sistem.
-
-**Definition of Done:**
-- Kalan fazlar için yeni detay planları oluşturuldu.
-- Her faz 390x844 Playwright turuyla kapanıyor.
+**Plan:** `2026-07-28-mobil-faz9-durum-ekranlari.md`
 
 ---
 
 ## Do Not Dispatch Directly
 
-Bu dosyalar orchestration/closure/pointer dosyalarıdır; doğrudan kod işi olarak
-başlatılmamalı:
+Bu dosyalar orchestration/closure/pointer dosyalaridir; dogrudan kod isi olarak baslatilmamali:
 
 - `2026-06-07-arsabil-gelistirme-yol-haritasi.md`
 - `2026-06-07-arsabil-faz2.md`
@@ -145,14 +80,3 @@ başlatılmamalı:
 - `2026-07-03-mobile-ui-redesign.md`
 - `2026-07-28-mobil-premium-liquid-glass.md`
 - `2026-07-29-hesapla-girdi-mimarisi.md`
-
-## Suggested First Dispatch
-
-Start with:
-
-```text
-docs/superpowers/plans/2026-07-01-emsal-arsa-maliyeti.md
-Task 1: Veri modeli, API ve admin ekranina avgLandPricePerM2 ekle
-```
-
-This creates the data foundation without forcing immediate broad UI redesign.

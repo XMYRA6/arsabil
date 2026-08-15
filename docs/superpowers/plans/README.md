@@ -1,7 +1,6 @@
 # Superpowers Plan Coverage Index
 
-Bu indeks, `docs/superpowers/specs/*-design.md` dosyalarinin hangi uygulama
-planiyla kapandigini gosterir. Amac iki seyi onlemek:
+Bu indeks, `docs/superpowers/specs/*-design.md` dosyalarinin hangi uygulama planiyla kapandigini gosterir. Amac iki seyi onlemek:
 
 - Ayni spec icin ikinci kez celisen plan yazmak.
 - Obsolete veya umbrella spec'leri yanlislikla yeni is gibi dispatch etmek.
@@ -9,12 +8,8 @@ planiyla kapandigini gosterir. Amac iki seyi onlemek:
 ## Canonical Rules
 
 - Bir spec'in birebir ayni adli plan dosyasi varsa once o okunur.
-- Birebir plan dosyasi yalnizca orchestration/closure ise, icindeki
-  **Canonical Implementation Plan** veya **Sub-plans** bolumu asil uygulama
-  kaynagidir.
-- `STATUS: OBSOLETE`, `STATUS: CLOSED` veya `STATUS: IMPLEMENTED VIA
-  CANONICAL PLAN` iceren dosyalar yeni implementasyon brief'i olarak
-  kullanilmaz.
+- Birebir plan dosyasi yalnizca orchestration/closure ise, icindeki **Canonical Implementation Plan** veya **Sub-plans** bolumu asil uygulama kaynagidir.
+- `STATUS: OBSOLETE`, `STATUS: CLOSED` veya `STATUS: IMPLEMENTED VIA CANONICAL PLAN` iceren dosyalar yeni implementasyon brief'i olarak kullanilmaz.
 
 ## Umbrella / Closure Plans
 
@@ -26,7 +21,7 @@ planiyla kapandigini gosterir. Amac iki seyi onlemek:
 | `2026-06-07-mobile-ui-premium-redesign.md` | `2026-06-07-mobile-ui-premium-redesign.md` | Closed/superseded; do not implement older mobile premium direction. |
 | `2026-06-08-arsabil-ui-design-system.md` | `2026-06-08-arsabil-ui-design-system.md` | Pointer to Faz 4 UI design system canonical plan. |
 | `2026-07-03-mobile-ui-redesign-design.md` | `2026-07-03-mobile-ui-redesign.md` | Umbrella for mobile structural refactor phases. |
-| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-premium-liquid-glass.md` | Umbrella for Liquid Glass mobile phases; first canonical phase plan is Faz 0 + Faz 1 Hesapla. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-premium-liquid-glass.md` | Umbrella for Liquid Glass mobile phases; Faz 0+1 and Faz 2-9 detailed plans are canonical sub-plans. |
 | `2026-07-29-hesapla-girdi-mimarisi-design.md` | `2026-07-29-hesapla-girdi-mimarisi.md` | Implemented via 2026-07-30 canonical plan + DURUM file. |
 
 ## Recently Added Detailed Plans
@@ -35,6 +30,14 @@ planiyla kapandigini gosterir. Amac iki seyi onlemek:
 |---|---|---|
 | `2026-06-08-arsabil-professional-ui-redesign.md` | `2026-06-08-arsabil-professional-ui-redesign.md` | Detailed CSS/token visual redesign plan. |
 | `2026-07-01-emsal-arsa-maliyeti-design.md` | `2026-07-01-emsal-arsa-maliyeti.md` | Detailed Prisma/API/admin/calculator/UI plan for comparable land cost model. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz2-pazar-ilan-detay.md` | Detailed Liquid Glass Faz 2 plan for marketplace and listing detail. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz3-auth-ana-ekran.md` | Detailed Liquid Glass Faz 3 plan for auth and home. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz4-mesaj-teklif.md` | Detailed Liquid Glass Faz 4 plan for inbox, chat and offers. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz5-portfoy.md` | Detailed Liquid Glass Faz 5 plan for portfolio surfaces. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz6-profil-ayar-bildirim.md` | Detailed Liquid Glass Faz 6 plan for profile, settings and notifications. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz7-ilan-sihirbazi.md` | Detailed Liquid Glass Faz 7 plan for listing wizard. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz8-admin.md` | Detailed Liquid Glass Faz 8 plan for admin. |
+| `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz9-durum-ekranlari.md` | Detailed Liquid Glass Faz 9 plan for state/offline screens. |
 
 ## Coverage Check
 

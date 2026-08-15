@@ -40,14 +40,14 @@
 
 Spec'teki kalan ekran gruplari icin ayri plan dosyalari olusturulmadan implementasyon baslatilmaz:
 
-- [ ] Faz 2 Pazar + ilan detay.
-- [ ] Faz 3 Giris, kayit, ana ekran.
-- [ ] Faz 4 Mesajlar + sohbet + teklifler.
-- [ ] Faz 5 Portfoy.
-- [ ] Faz 6 Profil/duzenleme/ayarlar/bildirimler.
-- [ ] Faz 7 Ilan sihirbazi.
-- [ ] Faz 8 Admin.
-- [ ] Faz 9 Bos/iskelet/offline/404.
+- [x] Faz 2 Pazar + ilan detay. Plan: `2026-07-28-mobil-faz2-pazar-ilan-detay.md`
+- [x] Faz 3 Giris, kayit, ana ekran. Plan: `2026-07-28-mobil-faz3-auth-ana-ekran.md`
+- [x] Faz 4 Mesajlar + sohbet + teklifler. Plan: `2026-07-28-mobil-faz4-mesaj-teklif.md`
+- [x] Faz 5 Portfoy. Plan: `2026-07-28-mobil-faz5-portfoy.md`
+- [x] Faz 6 Profil/duzenleme/ayarlar/bildirimler. Plan: `2026-07-28-mobil-faz6-profil-ayar-bildirim.md`
+- [x] Faz 7 Ilan sihirbazi. Plan: `2026-07-28-mobil-faz7-ilan-sihirbazi.md`
+- [x] Faz 8 Admin. Plan: `2026-07-28-mobil-faz8-admin.md`
+- [x] Faz 9 Bos/iskelet/offline/404. Plan: `2026-07-28-mobil-faz9-durum-ekranlari.md`
 
 ## Final Acceptance
 
@@ -55,3 +55,4 @@ Spec'teki kalan ekran gruplari icin ayri plan dosyalari olusturulmadan implement
 - 390x844 mobil turda alt nav/CTA cakismasi yok.
 - Masaustu screenshot regresyonu yok.
 - Kalan fazlar icin yeni plan gereksinimi acik.
+
