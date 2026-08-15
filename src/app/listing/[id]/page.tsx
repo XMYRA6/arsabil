@@ -18,11 +18,11 @@ const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m 
 type Tab = 'genel' | 'fizibilite' | 'senaryo' | 'teklifler' | 'mesajlar';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: 'genel', label: 'Genel Bilgiler', icon: '📋' },
-    { id: 'fizibilite', label: 'Ön Fizibilite', icon: '📊' },
-    { id: 'senaryo', label: 'Senaryo', icon: '🧮' },
-    { id: 'teklifler', label: 'Teklifler', icon: '📩' },
-    { id: 'mesajlar', label: 'Mesajlar', icon: '💬' },
+    { id: 'genel', label: 'Genel Bilgiler', icon: '' },
+    { id: 'fizibilite', label: 'Ön Fizibilite', icon: '' },
+    { id: 'senaryo', label: 'Senaryo', icon: '' },
+    { id: 'teklifler', label: 'Teklifler', icon: '' },
+    { id: 'mesajlar', label: 'Mesajlar', icon: '' },
 ];
 
 const MOCK_LISTING = {
@@ -151,7 +151,7 @@ export default function ListingDetailPage() {
                             <div
                                 className={styles.photoPlaceholder}
                                 style={{ '--photo-hue': photoHue } as React.CSSProperties}
-                            >🏗️</div>
+                            ><span className={styles.photoMark} aria-hidden="true" /></div>
                         )}
 
                         {/* Fizibilite score overlay */}
@@ -184,11 +184,11 @@ export default function ListingDetailPage() {
                                     onClick={() => router.push(`/listings/${id}/edit`)}
                                     className={styles.editBtn}
                                 >
-                                    ✏️ Düzenle
+                                    Düzenle
                                 </button>
                             )}
                         </div>
-                        <div className={styles.location}>📍 {listing.district}, {listing.city}</div>
+                        <div className={styles.location}>{listing.district}, {listing.city}</div>
                     </div>
 
                     {/* Tabs */}
@@ -199,7 +199,7 @@ export default function ListingDetailPage() {
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
                             >
-                                {tab.icon} {tab.label}
+                                {tab.label}
                             </button>
                         ))}
                     </div>
@@ -262,7 +262,7 @@ export default function ListingDetailPage() {
                                     toplanmadığı için tanıtım amaçlı örnek değerlerdir; bu ilana ait değildir.
                                 </div>
                                 {areaCells.warning && (
-                                    <div className={styles.areaWarning}>⚠️ {areaCells.warning}</div>
+                                    <div className={styles.areaWarning}>{areaCells.warning}</div>
                                 )}
                                 {listing.description && (
                                     <p className={styles.description}>{listing.description}</p>
@@ -302,14 +302,14 @@ export default function ListingDetailPage() {
                                     ))}
                                 </div>
                                 <div className={styles.infoNote}>
-                                    💡 Bu değerler ArsaBil Engine v2 tarafından otomatik hesaplanmıştır. Detaylı analiz için Senaryo sekmesini kullanın.
+                                    Bu değerler ArsaBil Engine v2 tarafından otomatik hesaplanmıştır. Detaylı analiz için Senaryo sekmesini kullanın.
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'senaryo' && (
                             <div className={styles.centerCta}>
-                                <div className={styles.centerCtaIcon}>🧮</div>
+                                <div className={styles.centerCtaIcon}>Senaryo</div>
                                 <div className={styles.centerCtaTitle}>Bu ilan için özel senaryo oluşturun</div>
                                 <button
                                     onClick={() => router.push(`/?listing=${listing.id}`)}
@@ -338,14 +338,14 @@ export default function ListingDetailPage() {
                                     className={styles.offerTextarea}
                                 />
                                 <button onClick={handleOffer} disabled={sending} className={styles.offerSubmit}>
-                                    {sending ? 'Gönderiliyor…' : '📤 Teklifi Gönder'}
+                                    {sending ? 'Gönderiliyor…' : 'Teklifi Gönder'}
                                 </button>
                             </div>
                         )}
 
                         {activeTab === 'mesajlar' && (
                             <div className={styles.centerCta}>
-                                <div className={styles.centerCtaIcon}>💬</div>
+                                <div className={styles.centerCtaIcon}>Mesaj</div>
                                 İlan sahibiyle iletişime geçin
                                 <div className={styles.centerCtaAction}>
                                     <button onClick={() => router.push('/inbox')} className={styles.primaryBtn}>Mesaj Aç →</button>
@@ -394,9 +394,9 @@ export default function ListingDetailPage() {
                     )}
 
                     <div className={styles.sidebarActions}>
-                        <button onClick={() => setActiveTab('senaryo')} className={`${styles.actionBtn} ${styles.actionPrimary}`}>🧮 Senaryo Oluştur</button>
-                        <button onClick={() => setActiveTab('teklifler')} className={`${styles.actionBtn} ${styles.actionGreen}`}>📤 Teklif Ver</button>
-                        <button onClick={() => setActiveTab('mesajlar')} className={`${styles.actionBtn} ${styles.actionGhost}`}>💬 Mesaj At</button>
+                        <button onClick={() => setActiveTab('senaryo')} className={`${styles.actionBtn} ${styles.actionPrimary}`}>Senaryo Oluştur</button>
+                        <button onClick={() => setActiveTab('teklifler')} className={`${styles.actionBtn} ${styles.actionGreen}`}>Teklif Ver</button>
+                        <button onClick={() => setActiveTab('mesajlar')} className={`${styles.actionBtn} ${styles.actionGhost}`}>Mesaj At</button>
                     </div>
 
                     {/* Share + Owner */}
@@ -408,14 +408,14 @@ export default function ListingDetailPage() {
                                     .catch(() => toast.error('Kopyalanamadı.'));
                             }}
                             className={styles.shareBtn}
-                        >🔗 Paylaş</button>
+                        >Paylaş</button>
 
                         {listing.user?.id && (
                             <a
                                 href={`/profile/${listing.user.id}`}
                                 className={styles.ownerLink}
                             >
-                                👤 İlan Sahibinin Profili
+                                İlan Sahibinin Profili
                             </a>
                         )}
                     </div>
@@ -431,11 +431,11 @@ export default function ListingDetailPage() {
                     <button
                         onClick={() => setActiveTab('teklifler')}
                         className={`${styles.actionBtn} ${styles.actionGreen} ${styles.stickyBtn}`}
-                    >📤 Teklif Ver</button>
+                    >Teklif Ver</button>
                     <button
                         onClick={() => setActiveTab('senaryo')}
                         className={`${styles.actionBtn} ${styles.actionPrimary} ${styles.stickyBtn}`}
-                    >🧮 Senaryo</button>
+                    >Senaryo</button>
                 </div>
             </StickyActionBar>
         </div>

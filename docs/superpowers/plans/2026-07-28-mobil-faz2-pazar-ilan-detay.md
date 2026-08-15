@@ -52,10 +52,10 @@
 - Modify: `src/app/listing/[id]/page.module.css`
 - Test: `src/app/listing/[id]/listingDetail.mobile.test.tsx`
 
-- [ ] **Step 1: Failing tests for mobile detail hero, stats and sticky offer bar**
-- [ ] **Step 2: Mobil detay hero ve bilgi kartlarini cam dile tasima**
-- [ ] **Step 3: Alt nav gizlenirken teklif barinin safe-area ile cakismamasini sagla**
-- [ ] **Step 4: `npx jest src/app/listing/[id]`**
+- [x] **Step 1: Failing tests for mobile detail hero, stats and sticky offer bar**
+- [x] **Step 2: Mobil detay hero ve bilgi kartlarini cam dile tasima**
+- [x] **Step 3: Alt nav gizlenirken teklif barinin safe-area ile cakismamasini sagla**
+- [x] **Step 4: `npx jest src/app/listing/[id]`**
 - [x] **Step 5: Commit**
 
 ## Final Verification

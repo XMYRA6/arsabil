@@ -4,47 +4,36 @@ import path from 'path';
 const pageCss = fs.readFileSync(path.join(__dirname, 'page.module.css'), 'utf8');
 const globalsCss = fs.readFileSync(path.join(__dirname, '../../globals.css'), 'utf8');
 
-describe('listing/[id] mobil mühür kimliği token kapsamı', () => {
-  it('yeni seal token\'ları globals.css içine hiç sızmamış olmalı', () => {
-    expect(globalsCss).not.toMatch(/--seal-(ink|accent|surface|border|text|recessed)/);
+describe('listing/[id] mobil Liquid Glass token kapsamı', () => {
+  it('mobil tasarim tokenlari globals.css icinde --m-* olarak tanimli olmali', () => {
+    expect(globalsCss).toMatch(/--m-glass-bg:/);
+    expect(globalsCss).toMatch(/--m-mesh:/);
+    expect(globalsCss).toMatch(/--m-grad-btn:/);
   });
 
-  it('--seal-accent, hesapla ile aynı Aurora cyan\'ı kullanmalı', () => {
-    expect(pageCss).toMatch(/--seal-accent:\s*var\(--aurora-cyan\)/);
-    expect(pageCss).toMatch(/--seal-accent-rgb:\s*43,\s*124,\s*255/);
-  });
-
-  it('--seal-ink tanımı mobil @media (max-width: 768px) bloğunun içinde olmalı', () => {
-    const mediaIndex = pageCss.indexOf('@media (max-width: 768px)');
-    const tokenIndex = pageCss.indexOf('--seal-ink:');
-    expect(mediaIndex).toBeGreaterThan(-1);
-    expect(tokenIndex).toBeGreaterThan(mediaIndex);
-  });
-
-  it('--seal-surface hem dark hem light tema bloğunda tanımlı olmalı', () => {
-    expect(pageCss).toMatch(/\[data-theme="dark"\]\s*\.page\s*\{[^}]*--seal-surface:/);
-    expect(pageCss).toMatch(/\[data-theme="light"\]\s*\.page\s*\{[^}]*--seal-surface:/);
-  });
-
-  it('light temada --seal-surface mevcut --shell-bg\'yi yeniden kullanmalı (yeni rgba icat edilmemeli)', () => {
-    expect(pageCss).toMatch(/\[data-theme="light"\]\s*\.page\s*\{[^}]*--seal-surface:\s*var\(--shell-bg\)/);
-  });
-
-  it('.primaryBtn ve .actionPrimary mobilde brand-gradient kullanmalı, masaüstü tanımları hâlâ düz --primary olmalı', () => {
-    const mediaIndex = pageCss.indexOf('@media (max-width: 768px)');
+  it('.page mobilde --m-mesh kullanmali, masaustu padding duzeni korunmali', () => {
+    const mediaIndex = pageCss.indexOf('MOBİL');
     const desktopSection = pageCss.slice(0, mediaIndex);
     const mobileSection = pageCss.slice(mediaIndex);
-    expect(mobileSection).toMatch(/\.primaryBtn,\s*\n?\s*\.actionPrimary\s*\{[^}]*background:\s*var\(--brand-gradient\)/);
+    expect(mobileSection).toMatch(/\.page\s*\{[^}]*background:\s*var\(--m-mesh\)/);
+    expect(desktopSection).toMatch(/\.page\s*\{[^}]*padding:\s*2rem 1rem/);
+  });
+
+  it('.primaryBtn ve .actionPrimary mobilde --m-grad-btn kullanmali, masaustu tanimlari hala duz --primary olmali', () => {
+    const mediaIndex = pageCss.indexOf('MOBİL');
+    const desktopSection = pageCss.slice(0, mediaIndex);
+    const mobileSection = pageCss.slice(mediaIndex);
+    expect(mobileSection).toMatch(/\.primaryBtn,\s*\.actionPrimary,\s*\.offerSubmit\s*\{[^}]*background:\s*var\(--m-grad-btn\)/);
     expect(desktopSection).toMatch(/\.primaryBtn\s*\{[^}]*background:\s*var\(--primary\)/);
     expect(desktopSection).toMatch(/\.actionPrimary\s*\{[^}]*background:\s*var\(--primary\)/);
   });
 
-  it('.detailCell/.fizCell mobilde --seal-recessed kullanmalı (panelle aynı seal-surface olup kaybolmamalı)', () => {
-    expect(pageCss).toMatch(/\.detailCell,\s*\n?\s*\.fizCell\s*\{[^}]*background:\s*var\(--seal-recessed\)/);
+  it('.detailCell/.fizCell mobilde --m-fill kullanmali', () => {
+    expect(pageCss).toMatch(/\.detailCell,\s*\.fizCell,\s*\.miniStat,\s*\.noLocationNote\s*\{[^}]*background:\s*var\(--m-fill\)/);
   });
 
-  it('.sidebar ve .tabContent mobilde --seal-surface cam yüzeyine geçmeli', () => {
-    expect(pageCss).toMatch(/\.sidebar\s*\{[^}]*background:\s*var\(--seal-surface\)/);
-    expect(pageCss).toMatch(/\.tabContent\s*\{[^}]*background:\s*var\(--seal-surface\)/);
+  it('.sidebar ve .tabContent mobilde --m-glass-bg cam yuzeyine gecmeli', () => {
+    expect(pageCss).toMatch(/\.sidebar\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
+    expect(pageCss).toMatch(/\.tabContent\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
   });
 });

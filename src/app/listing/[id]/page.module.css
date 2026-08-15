@@ -79,6 +79,37 @@
     backdrop-filter: blur(4px);
 }
 
+
+.photoMark {
+    width: 76px;
+    height: 76px;
+    border: 2px solid rgba(255,255,255,.72);
+    border-radius: 22px;
+    position: relative;
+    display: block;
+}
+
+.photoMark::before,
+.photoMark::after {
+    content: "";
+    position: absolute;
+    background: rgba(255,255,255,.78);
+}
+
+.photoMark::before {
+    width: 44px;
+    height: 3px;
+    left: 15px;
+    bottom: 24px;
+    transform: rotate(-32deg);
+}
+
+.photoMark::after {
+    width: 3px;
+    height: 42px;
+    left: 36px;
+    bottom: 16px;
+}
 /* ── Skor progress ── */
 .progressRow {
     display: flex;
@@ -513,10 +544,12 @@
     display: flex;
     gap: 8px;
     width: 100%;
+    padding-bottom: max(var(--safe-bottom), 8px);
 }
 
 .stickyBtn {
     flex: 1;
+    border-radius: var(--m-r-btn);
 }
 
 /* =========================================================================
@@ -524,36 +557,11 @@
    ========================================================================= */
 @media (max-width: 768px) {
     .page {
-        /* alt boşluk: StickyActionBar + BottomNavbar */
         padding: 12px 12px calc(var(--bottomnav-height) + 76px);
-
-        /* Mühür kimliği — sayfa-scope'lu token'lar (bkz. hesapla/page.module.css) */
-        --seal-ink: #0F2A43;
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
+        background: var(--m-mesh);
+        color: var(--m-ink);
     }
 
-    [data-theme="dark"] .page {
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border: rgba(43, 124, 255, 0.25);
-        --seal-border-soft: rgba(43, 124, 255, 0.18);
-        --seal-text: #F4F0E6;
-        --seal-text-muted: rgba(244, 240, 230, 0.7);
-        --seal-text-faint: rgba(244, 240, 230, 0.55);
-        --seal-recessed: rgba(0, 0, 0, 0.2);
-    }
-
-    [data-theme="light"] .page {
-        --seal-surface: var(--shell-bg);
-        --seal-border: var(--shell-border);
-        --seal-border-soft: var(--shell-border);
-        --seal-text: var(--card-title);
-        --seal-text-muted: var(--muted);
-        --seal-text-faint: var(--muted);
-        --seal-recessed: rgba(0, 0, 0, 0.03);
-    }
-
-    /* AppBar'ın geri butonu var; metin geri linki gizlenir */
     .backBtn {
         display: none;
     }
@@ -563,43 +571,57 @@
         gap: 16px;
     }
 
-    /* Grid blowout fix: min-width:auto varsayılanı, sığmayan içerik (ör.
-       detailGrid/description) yüzünden tek kolonu taşırır; sıfırlanır. */
     .grid > div {
         min-width: 0;
     }
 
     .photoArea {
         height: 240px;
-        border-radius: 14px;
+        border-radius: var(--m-r-card);
+        border: 1px solid var(--m-glass-border);
+        box-shadow: var(--m-sh-card);
     }
 
     .title {
         font-size: var(--font-size-title);
+        color: var(--m-ink);
+    }
+
+    .location,
+    .progressLabel,
+    .detailLabel,
+    .fizLabel,
+    .priceLabel,
+    .miniStatLabel,
+    .footnote {
+        color: var(--m-body);
     }
 
     .fizGrid {
         grid-template-columns: 1fr;
     }
 
-    .sidebar {
-        position: static;
-        background: var(--seal-surface);
-        border-color: var(--seal-border-soft);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+    .sidebar,
+    .tabContent {
+        background: var(--m-glass-bg);
+        border-color: var(--m-glass-border);
+        border-radius: var(--m-r-card);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
-    .tabContent {
-        background: var(--seal-surface);
-        border-color: var(--seal-border-soft);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
+    .sidebar {
+        position: static;
     }
 
     .detailCell,
-    .fizCell {
-        background: var(--seal-recessed);
+    .fizCell,
+    .miniStat,
+    .noLocationNote {
+        background: var(--m-fill);
+        border: 1px solid var(--m-divider);
+        border-radius: var(--m-r-inner);
     }
 
     .priceValue,
@@ -609,26 +631,41 @@
     .progressValue,
     .offerShare,
     .changeBadge {
-        font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-family: var(--m-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-variant-numeric: tabular-nums;
     }
 
     .primaryBtn,
-    .actionPrimary {
-        background: var(--brand-gradient);
+    .actionPrimary,
+    .offerSubmit {
+        background: var(--m-grad-btn);
         color: white;
+        box-shadow: var(--m-sh-grad-btn);
     }
 
-    /* aksiyonlar StickyActionBar'a taşındı; sidebar kopyası gizlenir */
+    .actionGreen {
+        background: rgba(16,185,129,.14);
+        color: var(--m-success-text);
+        border-color: rgba(16,185,129,.32);
+    }
+
+    .tabActive {
+        color: var(--m-link);
+        border-bottom-color: var(--m-link);
+    }
+
     .sidebarActions {
         display: none;
     }
 
     .offerTextarea {
         font-size: 16px; /* iOS zoom tetiklenmesin */
+        background: var(--m-fill);
+        border-color: var(--m-glass-border);
+        color: var(--m-ink);
+        border-radius: var(--m-r-input);
     }
 }
-
 .parcelRow {
     display: flex;
     align-items: center;
@@ -689,7 +726,7 @@
 }
 
 .demoNoteLink {
-    color: var(--seal-accent);
+    color: var(--m-link);
     text-decoration: underline;
 }
 
@@ -701,4 +738,16 @@
     color: var(--label-color);
     font-size: 0.82rem;
     text-align: center;
+}
+
+
+
+@media (max-width: 768px) {
+    .sidebar {
+        background: var(--m-glass-bg);
+    }
+
+    .tabContent {
+        background: var(--m-glass-bg);
+    }
 }
