@@ -242,8 +242,8 @@
     padding: 0 14px;
     min-height: var(--touch-target);
     border-radius: var(--radius-md);
-    background: var(--accent);
-    border: 1px solid var(--accent);
+    background: var(--m-grad-btn);
+    border: 1px solid rgba(255,255,255,.72);
     color: white;
     font-family: inherit;
     font-size: 0.76rem;
@@ -257,27 +257,7 @@
    RESPONSIVE DESIGN FOR MOBILE (< 768px)
    ========================================================================= */
 @media (max-width: 768px) {
-
-    /* Mühür kimliği — sayfa-scope'lu token'lar (bkz. hesapla/page.module.css) */
-    .container {
-        --seal-ink: #0F2A43;
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
-    }
-
-    [data-theme="dark"] .container {
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border: rgba(43, 124, 255, 0.25);
-        --seal-border-soft: rgba(43, 124, 255, 0.18);
-    }
-
-    [data-theme="light"] .container {
-        --seal-surface: var(--shell-bg);
-        --seal-border: var(--shell-border);
-        --seal-border-soft: var(--shell-border);
-    }
-
-    .desktopOnlySpacer,
+.desktopOnlySpacer,
     .desktopViewToggle {
         display: none !important;
     }
@@ -288,8 +268,8 @@
         border: none;
         border-radius: 0;
         max-width: 100vw;
-        background: var(--seal-surface);
-        border-bottom-color: var(--seal-border-soft);
+        background: var(--m-mesh);
+        border-bottom-color: var(--m-divider);
     }
 
     .topBar {
@@ -299,8 +279,8 @@
         padding: 8px 12px;
         gap: 8px;
         min-width: 0;
-        background: var(--seal-surface);
-        border-bottom-color: var(--seal-border-soft);
+        background: var(--m-mesh);
+        border-bottom-color: var(--m-divider);
         -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
         mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
     }
@@ -314,10 +294,16 @@
         align-items: center;
         gap: 8px;
         width: 100%;
-        background: var(--panel);
-        border-bottom: 1px solid var(--border);
+        background: var(--m-glass-bg);
+        border-bottom: 1px solid var(--m-glass-border);
         padding: 8px 16px;
         flex-shrink: 0;
+    }
+
+    .filterBtn {
+        background: var(--m-grad-btn);
+        border-color: rgba(255,255,255,.72);
+        box-shadow: var(--m-sh-grad-btn);
     }
 
     .mobileControls > :first-child {
@@ -380,13 +366,13 @@
     }
 
     .listPanel {
-        background: var(--seal-surface);
+        background: transparent;
     }
 
     .quickChipActive,
     .pageBtnActive {
-        background: var(--seal-accent);
-        border-color: var(--seal-accent);
+        background: var(--m-grad-accent);
+        border-color: transparent;
     }
 }
 

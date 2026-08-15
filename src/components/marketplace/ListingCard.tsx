@@ -100,7 +100,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                             background: `linear-gradient(135deg, hsl(${220 + (listing.id.charCodeAt(0) % 60)}, 50%, 20%), hsl(${200 + (listing.id.charCodeAt(0) % 60)}, 60%, 15%))`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: '2rem', opacity: 0.6,
-                        }}>🏗️</div>
+                        }}><span className={styles.placeholderMark} aria-hidden="true" /></div>
                     )}
                     {/* Score overlay */}
                     <div style={{ position: 'absolute', bottom: 10, left: 10 }}>
@@ -112,7 +112,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                             position: 'absolute', top: 8, right: 8,
                             background: 'var(--red)', color: 'white',
                             fontSize: '0.58rem', fontWeight: 800, padding: '2px 6px', borderRadius: 6,
-                        }}>🔥 Yeni</span>
+                        }}>Yeni</span>
                     )}
                 </div>
 
@@ -139,7 +139,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
 
                     {/* Location */}
                     <div style={{ fontSize: '0.78rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        📍 {listing.district || 'Beşiktaş'}, {listing.city || 'İstanbul'}
+                        {listing.district || 'Beşiktaş'}, {listing.city || 'İstanbul'}
                         {listing.zoning && <> · {IMAR_LABEL[listing.zoning] ?? listing.zoning}</>}
                     </div>
 
@@ -157,7 +157,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                             color: change >= 0 ? 'var(--green)' : 'var(--red)',
                             display: 'inline-flex', alignItems: 'center', gap: 2,
                         }}>
-                            📈 {change >= 0 ? '+' : ''}{change.toFixed(1)}%
+                            {change >= 0 ? '+' : ''}{change.toFixed(1)}%
                         </span>
                     </div>
                 </div>
@@ -171,15 +171,15 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     <button
                         onClick={e => { e.stopPropagation(); router.push(`/listing/${listing.id}?tab=scenario`); }}
                         style={{ fontSize: '0.72rem', padding: '6px 14px', borderRadius: 8, background: 'var(--primary)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
-                    >🧮 Senaryo</button>
+                    >Senaryo</button>
                     <button
                         onClick={e => { e.stopPropagation(); router.push(`/listing/${listing.id}`); }}
                         style={{ fontSize: '0.72rem', padding: '6px 14px', borderRadius: 8, background: 'transparent', color: 'var(--muted)', border: '1.5px solid var(--border)', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
-                    >📋 Detay</button>
+                    >Detay</button>
                     <button
                         onClick={e => e.stopPropagation()}
                         style={{ fontSize: '0.72rem', padding: '6px 14px', borderRadius: 8, background: 'rgba(var(--green-rgb),.10)', color: 'var(--green)', border: '1.5px solid rgba(var(--green-rgb),.25)', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
-                    >📤 Teklif Ver</button>
+                    >Teklif Ver</button>
                     {onFavoriteToggle && (
                         <button
                             onClick={e => {
@@ -198,7 +198,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                                 transition: 'transform 0.15s',
                             }}
                         >
-                            {isFavorite ? '❤️' : '🤍'}
+                            {isFavorite ? 'Favoride' : 'Favori'}
                         </button>
                     )}
                 </div>
@@ -240,7 +240,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         background: `linear-gradient(135deg, hsl(${220 + (listing.id.charCodeAt(0) % 60)}, 50%, 20%), hsl(${200 + (listing.id.charCodeAt(0) % 60)}, 60%, 15%))`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: '2rem', opacity: 0.6,
-                    }}>🏗️</div>
+                    }}><span className={styles.placeholderMark} aria-hidden="true" /></div>
                 )}
                 <div style={{ position: 'absolute', top: 8, left: 8 }}>
                     <FizibiliteScoreBadge score={score} size="sm" />
@@ -250,7 +250,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         position: 'absolute', top: 8, right: 8,
                         background: 'var(--red)', color: 'white',
                         fontSize: '0.6rem', fontWeight: 800, padding: '2px 6px', borderRadius: 6,
-                    }}>🔥 Yeni</span>
+                    }}>Yeni</span>
                 )}
                 <span style={{
                     position: 'absolute', bottom: 6, left: 6,
@@ -277,8 +277,8 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         color: change >= 0 ? 'var(--green)' : 'var(--red)',
                     }}>{change >= 0 ? '+' : ''}{change.toFixed(1)}%</span>
                 </div>
-                <div className={styles.locationLine} style={{ fontSize: '0.72rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    📍 {listing.district || 'Beşiktaş'}, {listing.city || 'İstanbul'}
+                <div className={`${styles.locationLine} ${styles.locationLineWithPin}`} style={{ fontSize: '0.72rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {listing.district || 'Beşiktaş'}, {listing.city || 'İstanbul'}
                 </div>
                 {/* Score bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
@@ -314,7 +314,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         transition: 'transform 0.15s',
                     }}
                 >
-                    {isFavorite ? '❤️' : '🤍'}
+                    {isFavorite ? 'Favoride' : 'Favori'}
                 </button>
             )}
         </div>

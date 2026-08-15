@@ -24,12 +24,12 @@
 - Modify: `src/components/listing/ListingCard.module.css`
 - Test: `src/app/marketplace/marketplaceMobile.scope.test.ts`
 
-- [ ] **Step 1: Write failing mobile scope tests**
-- [ ] **Step 2: Mobil-only list container ve kart kurallarini ekle**
-- [ ] **Step 3: Karttaki emoji/renkli placeholderlari cizgi ikon veya cam badge'e cevir**
-- [ ] **Step 4: `npx jest src/app/marketplace/marketplaceMobile.scope.test.ts`**
-- [ ] **Step 5: `npx tsc --noEmit`**
-- [ ] **Step 6: Commit**
+- [x] **Step 1: Write failing mobile scope tests**
+- [x] **Step 2: Mobil-only list container ve kart kurallarini ekle**
+- [x] **Step 3: Karttaki emoji/renkli placeholderlari cizgi ikon veya cam badge'e cevir**
+- [x] **Step 4: `npx jest src/app/marketplace/marketplaceMobile.scope.test.ts`**
+- [x] **Step 5: `npx tsc --noEmit`**
+- [x] **Step 6: Commit**
 
 ## Task 2: Filtre ve harita alt yapraklari
 
