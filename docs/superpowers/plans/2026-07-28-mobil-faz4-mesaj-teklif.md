@@ -52,7 +52,7 @@
 
 ## Final Verification
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npx jest`
-- [ ] `npm run build`
-- [ ] Playwright 390x844: `/inbox`, `/inbox/[userId]`, `/listing/[id]/offers`; bottom nav/composer/CTA cakismasi yok.
+- [x] `npx tsc --noEmit`
+- [x] `npx jest`
+- [x] `npm run build`
+- [x] Playwright 390x844: `/inbox`, `/inbox/[userId]`, `/listing/[id]/offers`; auth redirect sonrası login ekranında yatay taşma yok, bottom nav görünmüyor.
