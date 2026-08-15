@@ -7,11 +7,15 @@ describe('login mobil Liquid Glass Faz 3', () => {
   const mediaIndex = css.indexOf('@media (max-width: 768px)')
   const mobile = css.slice(mediaIndex)
 
-  it('mobil auth sayfasi --m-* mesh ve cam panel tokenlarini kullanir', () => {
+  it('mobil auth sayfasi --m-* mesh tokenini kullanir', () => {
     expect(mediaIndex).toBeGreaterThan(-1)
     expect(mobile).toMatch(/\.page\s*\{[^}]*background:\s*var\(--m-mesh\)/)
-    expect(mobile).toMatch(/\.panel,\s*\.authShell\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     expect(mobile).toMatch(/\.formSide,\s*\.formPanel\s*\{[^}]*background:\s*transparent/)
+  })
+
+  it('.panel paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+    expect(css).toMatch(/\.panel\s*\{[^}]*composes:\s*mStatSurface from global/)
+    expect(mobile).not.toMatch(/\.panel[^}]*\{[^}]*background:\s*var\(--m-glass-bg\)/)
   })
 
   it('mobil input ve submit 44px hedef, m token focus ve gradient kullanir', () => {

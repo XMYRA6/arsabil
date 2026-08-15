@@ -55,11 +55,15 @@ describe('login mobil Liquid Glass kimligi (Faz 3)', () => {
     expect(mobile).not.toMatch(/--seal-/);
   });
 
-  it('mobil sayfa mesh, panel cam yuzeyi kullanmali', () => {
+  it('mobil sayfa mesh tokenini kullanmali', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
     expect(mobile).toMatch(/\.page\s*\{[^}]*background:\s*var\(--m-mesh\)/);
-    expect(mobile).toMatch(/\.panel,\s*\.authShell\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-    expect(mobile).toMatch(/\.panel,\s*\.authShell\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
+  });
+
+  it('.panel paylasilan .mStatSurface yuzeyine baglanir', () => {
+    expect(css).toMatch(/\.panel\s*\{[^}]*composes:\s*mStatSurface from global/);
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).not.toMatch(/\.panel[^}]*\{[^}]*background:\s*var\(--m-glass-bg\)/);
   });
 
   it('.formSide ve .formPanel mobilde cam panel icinde transparan kalmali', () => {

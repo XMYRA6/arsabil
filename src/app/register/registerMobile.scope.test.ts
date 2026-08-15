@@ -7,12 +7,15 @@ describe('register mobil Liquid Glass Faz 3', () => {
   const mediaIndex = css.indexOf('@media (max-width: 768px)')
   const mobile = css.slice(mediaIndex)
 
-  it('mobil register sayfasi --m-* mesh ve cam shell tokenlarini kullanir', () => {
+  it('mobil register sayfasi --m-* mesh tokenini kullanir', () => {
     expect(mediaIndex).toBeGreaterThan(-1)
     expect(mobile).toMatch(/\.page\s*\{[^}]*background:\s*var\(--m-mesh\)/)
-    expect(mobile).toMatch(/\.authShell\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-    expect(mobile).toMatch(/\.authShell\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/)
     expect(mobile).toMatch(/div\.sealCard\s*\{[^}]*background:\s*transparent/)
+  })
+
+  it('.authShell paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+    expect(css).toMatch(/\.authShell\s*\{[^}]*composes:\s*mStatSurface from global/)
+    expect(mobile).not.toMatch(/\.authShell\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
   })
 
   it('mobil kayit input ve submit touch/focus sozlesmesini korur', () => {
