@@ -55,7 +55,7 @@
 
 ## Final Verification
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npx jest`
-- [ ] `npm run build`
-- [ ] Playwright 390x844: `/dashboard/reports`, `/dashboard/favorites`, `/dashboard/listings`; auth redirect bekleniyorsa login ekraninda tasma yok.
+- [x] `npx tsc --noEmit`
+- [x] `npx jest`
+- [x] `npm run build`
+- [x] Playwright 390x844: `/dashboard/reports`, `/dashboard/favorites`, `/dashboard/listings`; auth redirect sonrası login ekranında yatay taşma yok, bottom nav görünmüyor.
