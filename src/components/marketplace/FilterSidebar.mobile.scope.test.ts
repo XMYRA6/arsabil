@@ -7,11 +7,10 @@ describe('FilterSidebar mobil Liquid Glass sheet yuzeyi', () => {
   const mediaIndex = css.indexOf('@media (max-width: 768px)');
   const mobile = css.slice(mediaIndex);
 
-  it('inSheet varyanti mobilde cam yuzey ve m tokenlari kullanir', () => {
+  it('inSheet varyanti paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
     expect(mediaIndex).toBeGreaterThan(-1);
-    expect(mobile).toMatch(/\.inSheet\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-    expect(mobile).toMatch(/\.inSheet\s*\{[^}]*backdrop-filter:\s*var\(--m-glass-blur\)/);
-    expect(mobile).toMatch(/\.inSheet\s*\{[^}]*border-radius:\s*var\(--m-r-sheet\)/);
+    expect(css).toMatch(/\.inSheet\s*\{[^}]*composes:\s*mStatSurface from global/);
+    expect(mobile).not.toMatch(/\.inSheet\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
   });
 
   it('mobil secilebilir kontroller 44px dokunma hedefini korur', () => {

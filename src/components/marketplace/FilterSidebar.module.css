@@ -15,11 +15,17 @@
 
 /* BottomSheet içinde: tam genişlik, kenarlıksız, sheet zaten kaydırıyor */
 .inSheet {
+    composes: mStatSurface from global;
     width: 100%;
-    border-right: none;
-    background: transparent;
     overflow-y: visible;
     padding: 0 4px 8px;
+}
+
+@media (min-width: 769px) {
+    .inSheet {
+        border-right: none;
+        background: transparent;
+    }
 }
 
 .header {
@@ -240,11 +246,6 @@
 
 @media (max-width: 768px) {
     .inSheet {
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        border-radius: var(--m-r-sheet);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-sheet), inset 0 1px 0 #fff;
         padding: 16px;
     }
