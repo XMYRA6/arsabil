@@ -63,3 +63,28 @@ describe('register mobil mühür kimliği (Faz 2.5)', () => {
     expect(css).toMatch(/\.errorBanner\s*\{[^}]*color:\s*var\(--red\)/);
   });
 });
+
+describe('register profesyonel split layout', () => {
+  it('authShell desktop 42/58 split, brand primary ve form bg-body kullanir', () => {
+    expect(css).toMatch(/\.authShell\s*\{[^}]*grid-template-columns:\s*42% 58%/)
+    expect(css).toMatch(/\.brandPanel\s*\{[^}]*var\(--primary\)[^}]*var\(--primary-2\)/)
+    expect(css).toMatch(/\.formPanel\s*\{[^}]*background:\s*var\(--bg-body\)/)
+  })
+
+  it('mobile media query tek kolon ve 48px input kurallarini tasir', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'))
+    expect(mobile).toMatch(/\.authShell\s*\{[^}]*grid-template-columns:\s*1fr/)
+    expect(mobile).toMatch(/\.sealInput\s+input\s*\{[^}]*min-height:\s*48px/)
+    expect(mobile).toMatch(/\.sealInput\s+input\s*\{[^}]*font-size:\s*16px/)
+  })
+
+  it('page.tsx split layout siniflarini ve brandBullets listesini kullanir', () => {
+    expect(tsx).toMatch(/styles\.authShell/)
+    expect(tsx).toMatch(/styles\.brandPanel/)
+    expect(tsx).toMatch(/styles\.brandLogo/)
+    expect(tsx).toMatch(/styles\.brandBullets/)
+    expect(tsx).toMatch(/styles\.formPanel/)
+    expect(tsx).toMatch(/styles\.formCard/)
+  })
+})
+

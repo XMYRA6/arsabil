@@ -155,6 +155,67 @@ describe('CalculatorEngineV2 (Deterministic Rules)', () => {
         expect(negatifK.FD_total).toBe(0);
     });
 
+    describe('Emsal arsa maliyeti modeli', () => {
+        it('tum veriler mevcutsa Ma = Aa * districtLandPricePerM2 ve derivedX = Ma / M hesaplar', () => {
+            const result = CalculatorEngineV2.calculate({
+                ...baseInput,
+                landCostModel: 'comparable',
+                Aa: 500,
+                districtLandPricePerM2: 20000,
+            });
+
+            expect(result.Mi).toBe(1000000);
+            expect(result.Ma).toBe(10000000);
+            expect(result.M).toBe(11000000);
+            expect(result.derivedX).toBeCloseTo(10000000 / 11000000, 8);
+        });
+
+        it('emsal secili ama Aa eksikse orantisal modele duser', () => {
+            const comparable = CalculatorEngineV2.calculate({
+                ...baseInput,
+                landCostModel: 'comparable',
+                districtLandPricePerM2: 20000,
+            });
+            const proportional = CalculatorEngineV2.calculate(baseInput);
+
+            expect(comparable.Ma).toBeCloseTo(proportional.Ma, 6);
+            expect(comparable.M).toBeCloseTo(proportional.M, 6);
+            expect(comparable.derivedX).toBe(baseInput.x);
+        });
+
+        it('emsal secili ama districtLandPricePerM2 eksikse orantisal modele duser', () => {
+            const comparable = CalculatorEngineV2.calculate({
+                ...baseInput,
+                landCostModel: 'comparable',
+                Aa: 500,
+            });
+            const proportional = CalculatorEngineV2.calculate(baseInput);
+
+            expect(comparable.Ma).toBeCloseTo(proportional.Ma, 6);
+            expect(comparable.M).toBeCloseTo(proportional.M, 6);
+            expect(comparable.derivedX).toBe(baseInput.x);
+        });
+
+        it('landCostModel verilmezse proportional davranis ve derivedX input x ile aynidir', () => {
+            const result = CalculatorEngineV2.calculate(baseInput);
+            expect(result.derivedX).toBe(baseInput.x);
+            expect(result.M).toBeCloseTo(1000000 / 0.67, 0);
+        });
+
+        it('Sd acikken emsal model Sdx/FA icin turetilmis arsa payini kullanir', () => {
+            const result = CalculatorEngineV2.calculate({
+                ...baseInput,
+                landCostModel: 'comparable',
+                Aa: 500,
+                Sd: 20,
+                districtLandPricePerM2: 20000,
+            });
+
+            expect(result.derivedX).toBeCloseTo(10000000 / 11000000, 8);
+            expect(result.Sdx).toBeCloseTo(20 * result.derivedX, 6);
+            expect(result.FA).toBeCloseTo((result.Sdx as number) * result.FD_total, 3);
+        });
+    });
     describe('x_max — maksimum sürdürülebilir arsa payı (denetim bulgusu C6)', () => {
         // x_max: muteahhidin K hedefini koruyarak verebilecegi maksimum arsa
         // payi. Tanim: x_max'ta FD_total TAM OLARAK Pmarket'e esit olmali —
@@ -202,3 +263,4 @@ describe('CalculatorEngineV2 (Deterministic Rules)', () => {
         });
     });
 });
+

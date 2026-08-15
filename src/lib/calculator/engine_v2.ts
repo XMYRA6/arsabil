@@ -5,6 +5,8 @@
  * SPEC.md kurallarına göre çalışmaktadır.
  */
 
+export type LandCostModel = 'proportional' | 'comparable';
+
 export interface CalculationInput {
     // Zorunlu (Her zaman gerekenler)
     x: number;        // Arsa payı oranı (0-1)
@@ -29,6 +31,10 @@ export interface CalculationInput {
 
     // Piyasa Fiyatı (opsiyonel) — verilirse x_max hesaplanır.
     Pmarket?: number;
+
+    // Arsa maliyeti modeli. Varsayilan: proportional.
+    landCostModel?: LandCostModel;
+    districtLandPricePerM2?: number;
 }
 
 export interface CalculationOutput {
@@ -39,6 +45,7 @@ export interface CalculationOutput {
     
     Ma: number;       // Arsa Maliyeti (TBD)
     M: number;        // Genel Toplam Maliyet
+    derivedX: number; // Kullanilan modelden tureyen arsa payi orani
 
     FD_total: number; // Daire Satış Fiyatı (TL)
     FD_per_m2: number;// Daire Satış m² Birim Fiyatı (TL/m²)
@@ -55,22 +62,34 @@ export interface CalculationOutput {
     x_max: number | null;
 }
 
-/**
- * TBD: Arsa Maliyeti (Ma) hesaplama modülleri.
- * İleride Kullanıcının seçeceği modele göre stratejiler değiştirilebilir.
- */
-function computeLandCostAndTotal(Mi: number, x: number): { M: number, Ma: number } {
+function computeLandCostAndTotal(
+    Mi: number,
+    x: number,
+    model: LandCostModel = 'proportional',
+    Aa?: number,
+    districtLandPricePerM2?: number
+): { M: number, Ma: number, derivedX: number } {
+    if (
+        model === 'comparable' &&
+        typeof Aa === 'number' && Aa > 0 &&
+        typeof districtLandPricePerM2 === 'number' && districtLandPricePerM2 > 0
+    ) {
+        const Ma = Aa * districtLandPricePerM2;
+        const M = Mi + Ma;
+        return { M, Ma, derivedX: M > 0 ? Ma / M : 0 };
+    }
+
     // Klasik Model: M = Mi / (1 - x),  Ma = M - Mi
     // Eğer x >= 1 ise (Hatalı giriş), sıfıra bölme hatasını önle
     const safeX = Math.min(Math.max(x, 0), 0.999);
     const M = Mi / (1 - safeX);
     const Ma = M - Mi;
-    return { M, Ma };
+    return { M, Ma, derivedX: x };
 }
 
 export const CalculatorEngineV2 = {
     calculate(input: CalculationInput): CalculationOutput {
-        const { x, L, Ad, P, K, Sd, Aa, isRiskEnabled, R, isExcavationEnabled, excavationMode, Z, MzOriginal, Pmarket } = input;
+        const { x, L, Ad, P, K, Sd, Aa, isRiskEnabled, R, isExcavationEnabled, excavationMode, Z, MzOriginal, Pmarket, landCostModel, districtLandPricePerM2 } = input;
 
         // A) İnşaat Maliyeti
         // 1. Ham — negatif Ad/P hicbir cagri yolunda anlamli degil (UI zaten
@@ -102,7 +121,7 @@ export const CalculatorEngineV2 = {
         const Mi = (Mi_base + finalMz) * finalR;
 
         // B) Toplam Maliyet ve Daire Fiyatı
-        const { M, Ma } = computeLandCostAndTotal(Mi, x);
+        const { M, Ma, derivedX } = computeLandCostAndTotal(Mi, x, landCostModel, Aa, districtLandPricePerM2);
 
         const safeK = Math.max(K, 0);
         const FD_total = M * safeK;
@@ -115,7 +134,7 @@ export const CalculatorEngineV2 = {
 
         // Sd switch kapalıysa Sd null ya da undefined gelecektir
         if (typeof Sd === 'number' && Sd > 0) {
-            Sdx = Sd * x;
+            Sdx = Sd * derivedX;
             FA = Sdx * FD_total;
             
             // Sadece Sd açıkken ve Aa da açıksa FAbirim hesaplanır
@@ -138,6 +157,7 @@ export const CalculatorEngineV2 = {
             M,
             FD_total,
             FD_per_m2,
+            derivedX,
             Sdx,
             FA,
             FAbirim,
@@ -145,3 +165,6 @@ export const CalculatorEngineV2 = {
         };
     }
 }
+
+
+

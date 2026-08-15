@@ -27,6 +27,7 @@ Motor, bu girdilerin açık (`enabled`) veya kapalı (`disabled`) olma durumuna 
 *   **`Z`:** İksa masrafı oranı (%). (Kapalıysa 0)
 *   **`Mi`:** Toplam İnşaat Maliyeti (Risk ve İksa dahil).
 *   **`M`:** Toplam Maliyet (İnşaat + Arsa).
+*   **`derivedX`:** Arsa payı hesaplarında kullanılan efektif arsa oranı; oransal modelde `x`, emsal modelde `Ma / M`.
 *   **`FD_total`:** Toplam Daire Satış Fiyatı (TL).
 *   **`FD_per_m2`:** Daire Satış m² Birim Fiyatı (TL/m²).
 *   **`Sdx`:** Arsa Sahibine Düşen Daire Sayısı (Adet). (Eğer `Sd` kapalıysa `null`)
@@ -49,15 +50,22 @@ Motor, bu girdilerin açık (`enabled`) veya kapalı (`disabled`) olma durumuna 
 4.  **Toplam İnşaat Maliyeti:** `Mi = (Mi_base + Mz) * R` — risk katsayısı **kasıtlı olarak** iksa masrafını da kapsar (`Mi_base + Mz` toplamı üzerinden çarpılır), yalnızca ham inşaata değil. Gerekçe: iksa da malzeme/işçilik riskine tabi bir inşaat kalemi (denetim bulgusu, 2026-08-14).
 
 ### Adım B: Toplam Maliyet (`M`) ve Daire Fiyatı (`FD`)
-*   **Arsa Maliyeti (Ma):** *[TBD - Antigravity tarafından 3 alternatif geliştirilecek]* Şimdilik bir placeholder/stub fonksiyon kullanılacak veya basitçe `Ma = M - Mi` mantığıyla orantısal hesaplanacaktır. 
-    * *Geçici Standart Model:* `M = Mi / (1 - x)` 
+*   **Model Seçimi:** `landCostModel` verilmezse varsayılan model `proportional` kabul edilir.
+*   **Oransal Model (`proportional`):** `x` kullanılarak toplam maliyet ve arsa maliyeti türetilir.
+    * `M = Mi / (1 - x)`
     * `Ma = M - Mi`
+    * `derivedX = x`
+*   **Emsal Model (`comparable`):** `Aa` ve `districtLandPricePerM2` pozitifse arsa maliyeti ilçe emsal m² fiyatından hesaplanır.
+    * `Ma = Aa * districtLandPricePerM2`
+    * `M = Mi + Ma`
+    * `derivedX = Ma / M`
+*   **Geri Düşüş:** `comparable` seçili olsa bile `Aa` veya `districtLandPricePerM2` eksik/geçersizse motor oransal modele döner.
 *   **Toplam Daire Fiyatı:** `FD_total = M * K`
 *   **Daire M² Birim Fiyatı:** `FD_per_m2 = FD_total / Ad`
 
 ### Adım C: Arsa Sahibine Düşen Paylar (Sadece `Sd` açıksa)
-Eğer `Sd` toggle'ı açıksa:
-*   **Düşen Daire Sayısı:** `Sdx = Sd * x`
+Eğer Sd toggle'ı açıksa:
+*   **Düşen Daire Sayısı:** `Sdx = Sd * derivedX`
 *   **Arsa Toplam Değeri:** `FA = Sdx * FD_total`
 
 Eğer `Sd` açık ve aynı zamanda `Aa` (Arsa alanı) toggle'ı açıksa:
@@ -65,3 +73,4 @@ Eğer `Sd` açık ve aynı zamanda `Aa` (Arsa alanı) toggle'ı açıksa:
 
 Eğer `Sd` kapalıysa: `Sdx`, `FA`, `FAbirim` `null` döner.
 Eğer `Aa` kapalıysa: `FAbirim` `null` döner.
+

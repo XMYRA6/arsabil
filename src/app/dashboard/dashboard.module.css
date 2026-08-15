@@ -21,7 +21,7 @@
 
 /* Sidebar */
 .sidebar {
-    background: var(--panel);
+    background: var(--bg-body);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow2);
@@ -86,7 +86,8 @@
     font-size: 0.95rem;
     color: var(--text);
     text-decoration: none;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    border-left: 3px solid transparent;
 }
 
 .navItem:hover {
@@ -95,9 +96,10 @@
 
 .navItemActive,
 .navItemActive:hover {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.25);
+    background: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary);
+    border-left-color: var(--primary);
+    box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.16);
 }
 
 .sidebarFooter {
@@ -179,6 +181,7 @@
     background: var(--stat-bg);
     border: 1px solid var(--border);
     text-align: center;
+    border-top: 3px solid var(--primary);
 }
 
 .statBox .icon {
@@ -209,7 +212,8 @@
     font-weight: 800;
     color: var(--card-title);
     margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
+    padding: 0 0 0.75rem 0.75rem;
+    border-left: 4px solid var(--primary);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -228,11 +232,12 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1.25rem;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .reportCard:hover {
-    box-shadow: var(--shadow2);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(var(--primary-rgb), 0.24);
     transform: translateY(-2px);
 }
 
@@ -289,6 +294,13 @@
     border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 1rem;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.listingCard:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(var(--primary-rgb), 0.24);
+    transform: translateY(-2px);
 }
 
 .listingHeader {
@@ -553,3 +565,4 @@
     min-height: var(--touch-target);
   }
 }
+

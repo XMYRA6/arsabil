@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ message: "Yetkisiz erişim." }, { status: 403 });
     }
-    const { il, ilce, avgSalesPricePerM2, avgUnitConstructionPrice } =
+    const { il, ilce, avgSalesPricePerM2, avgUnitConstructionPrice, avgLandPricePerM2 } =
       await request.json();
     if (
       !il ||
@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
         ilce: String(ilce),
         avgSalesPricePerM2: Number(avgSalesPricePerM2),
         avgUnitConstructionPrice: Number(avgUnitConstructionPrice),
+        avgLandPricePerM2: avgLandPricePerM2 === undefined || avgLandPricePerM2 === null || avgLandPricePerM2 === ''
+          ? null
+          : Number(avgLandPricePerM2),
       },
     });
     return NextResponse.json(price, { status: 201 });
@@ -66,3 +69,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

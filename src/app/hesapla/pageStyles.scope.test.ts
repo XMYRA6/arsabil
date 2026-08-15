@@ -335,3 +335,40 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
   // parsel sorgusu (SmartContextCard/ParcelModal) aldi. Bu guardrail artik
   // konusuz; page.tsx'te ne handleKonumSec ne selectedIl var.
 });
+
+describe('hesapla profesyonel desktop token kullanimi', () => {
+  it('sonuc hero karti hero-bg tokenini kullanir', () => {
+    const match = pageCss.match(/\.topResultCard\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/background:\s*var\(--hero-bg\)/);
+  });
+
+  it('primaryActionBtn lacivert primary gradient ve shadow-hover hover kullanir', () => {
+    const base = pageCss.match(/\.primaryActionBtn\s*\{([^}]*)\}/);
+    const hover = pageCss.match(/\.primaryActionBtn:hover\s*\{([^}]*)\}/);
+    expect(base).not.toBeNull();
+    expect(hover).not.toBeNull();
+    expect(base![1]).toMatch(/linear-gradient\(135deg,\s*var\(--primary\) 0%,\s*var\(--primary-2\) 100%\)/);
+    expect(hover![1]).toMatch(/box-shadow:\s*var\(--shadow-hover\)/);
+  });
+
+  it('slider fill ve thumb primary token kullanir', () => {
+    const fill = pageCss.match(/\.sliderFill\s*\{([^}]*)\}/);
+    const thumb = pageCss.match(/\.sliderThumb\s*\{([^}]*)\}/);
+    expect(fill).not.toBeNull();
+    expect(thumb).not.toBeNull();
+    expect(fill![1]).toMatch(/background:\s*var\(--primary\)/);
+    expect(thumb![1]).toMatch(/background:\s*var\(--primary\)/);
+  });
+
+  it('panel/card hover shadow-hover tokenina bagli', () => {
+    expect(pageCss).toMatch(/\.leftSidebar:hover,\s*\n\.mainPanel:hover,\s*\n\.summaryPanel:hover,\s*\n\.advancedPanel:hover\s*\{[^}]*box-shadow:\s*var\(--shadow-hover\)/);
+  });
+
+  it('advanced panel header primary border-left kullanir', () => {
+    const match = pageCss.match(/\.advancedPanelTitle\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/border-left:\s*4px solid var\(--primary\)/);
+  });
+});
+

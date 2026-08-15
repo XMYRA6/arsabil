@@ -4,4 +4,6 @@ export interface DistrictPriceEntry {
   ilce: string;
   avgSalesPricePerM2: number;
   avgUnitConstructionPrice: number;
+  avgLandPricePerM2?: number | null;
 }
+

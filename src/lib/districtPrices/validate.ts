@@ -29,6 +29,9 @@ export function dogrulaIlceFiyatlari(kayitlar: IlceFiyatKaydi[]): DogrulamaHatas
         if (!fiyatGecerli(k.avgUnitConstructionPrice)) {
             hatalar.push({ indeks, mesaj: `avgUnitConstructionPrice pozitif olmali: ${k.avgUnitConstructionPrice}` })
         }
+        if (k.avgLandPricePerM2 !== undefined && k.avgLandPricePerM2 !== null && !fiyatGecerli(k.avgLandPricePerM2)) {
+            hatalar.push({ indeks, mesaj: `avgLandPricePerM2 pozitif olmali: ${k.avgLandPricePerM2}` })
+        }
         const anahtar = `${k.il} ${k.ilce}`
         if (gorulen.has(anahtar)) {
             hatalar.push({ indeks, mesaj: `tekrar eden kayit: ${k.il} / ${k.ilce}` })
@@ -38,3 +41,4 @@ export function dogrulaIlceFiyatlari(kayitlar: IlceFiyatKaydi[]): DogrulamaHatas
 
     return hatalar
 }
+

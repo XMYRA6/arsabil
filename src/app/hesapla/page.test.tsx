@@ -374,6 +374,20 @@ describe('/hesapla — masaüstü girdi kartı sırası mobille aynı (denetim s
         expect(document.querySelector('.container[class*="SmartContextCard"]')).toBeNull()
     })
 })
+describe('/hesapla — masaüstü Emsal arsa maliyeti modeli', () => {
+    it('ilçe arsa m² fiyatı ve arsa alanı yokken Emsal seçeneği devre dışıdır', async () => {
+        viewportKur(true)
+        render(<HesaplaPage />)
+        const sidebar = await screen.findByText('Proje Bilgileri')
+        const container = sidebar.closest('.desktopSidebar') as HTMLElement
+        const modelBloku = within(container).getByText('Arsa Maliyeti Modeli').closest('.settingsGroup') as HTMLElement
+
+        expect(within(modelBloku).getByRole('button', { name: 'Oransal' })).toBeEnabled()
+        expect(within(modelBloku).getByRole('button', { name: 'Emsal' })).toBeDisabled()
+        expect(within(modelBloku).getByText(/Emsal model için doğrulanmış arsa alanı/)).toBeInTheDocument()
+    })
+})
+
 
 describe('/hesapla — masaüstü Arsa Payı TEK blokta (denetim sonrası UX düzeltmesi)', () => {
     it('main icinde eski ayrı "Arsa Payı" yüzde slider\'ı artık YOK', async () => {

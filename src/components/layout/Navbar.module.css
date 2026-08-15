@@ -13,7 +13,7 @@
 
 .navbar {
     pointer-events: auto;
-    height: 74px;
+    height: var(--topbar-height, 64px);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -45,7 +45,7 @@
 .logoText {
     font-size: 26px;
     font-weight: 700;
-    color: var(--topbar-text);
+    color: var(--primary);
     letter-spacing: 0.2px;
 }
 
@@ -63,7 +63,9 @@
     opacity: 0.65;
     font-size: 0.95rem;
     font-weight: 600;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 4px;
 }
 
 .desktopLinks a:hover {
@@ -72,6 +74,8 @@
 
 .desktopLinks .activeLink {
     opacity: 1 !important;
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 
 /* CENTER: Slogan */
@@ -138,8 +142,8 @@
     display: flex;
     align-items: center;
     border-radius: 14px;
-    background: linear-gradient(180deg, var(--primary), var(--primary-2));
-    box-shadow: 0 16px 26px rgba(var(--primary-rgb), .22);
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    box-shadow: 0 16px 26px rgba(var(--accent-rgb), .22);
     color: white;
     font-weight: 700;
     cursor: pointer;
@@ -148,7 +152,7 @@
 }
 
 .primaryBtn:hover {
-    box-shadow: 0 16px 26px rgba(var(--primary-rgb), .35);
+    box-shadow: 0 16px 26px rgba(var(--accent-rgb), .35);
 }
 
 .hamburger {
@@ -393,3 +397,4 @@
         transform: translateY(0);
     }
 }
+

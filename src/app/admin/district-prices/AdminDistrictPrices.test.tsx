@@ -5,7 +5,7 @@ import AdminDistrictPrices from './page'
 
 const mockPrice = {
     id: 'dp-1', il: 'İstanbul', ilce: 'Kadıköy',
-    avgSalesPricePerM2: 95000, avgUnitConstructionPrice: 14500,
+    avgSalesPricePerM2: 95000, avgUnitConstructionPrice: 14500, avgLandPricePerM2: 45000,
 }
 
 beforeEach(() => {
@@ -23,6 +23,12 @@ describe('AdminDistrictPrices — mobil DataCard görünümü', () => {
         })
     })
 
+    it('arsa m2 fiyatini tablo ve mobil kartta gosterir', async () => {
+        render(<AdminDistrictPrices />)
+        await waitFor(() => {
+            expect(screen.getAllByText('45.000').length).toBeGreaterThanOrEqual(2)
+        })
+    })
     it('"+ Yeni Ekle" butonu adminPrimaryBtn class\'ını taşır', async () => {
         render(<AdminDistrictPrices />)
         await waitFor(() => screen.getByText('+ Yeni Ekle'))
@@ -41,3 +47,4 @@ describe('AdminDistrictPrices — mobil DataCard görünümü', () => {
         })
     })
 })
+

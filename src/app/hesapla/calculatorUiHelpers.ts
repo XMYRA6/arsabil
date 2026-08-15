@@ -1,4 +1,4 @@
-import type { CalculationInput } from '@/lib/calculator/engine_v2';
+import type { CalculationInput, LandCostModel } from '@/lib/calculator/engine_v2';
 
 /** Yapı standardı katsayı kimliği — SEÇİMİN kendisi (kullanıcının tıkladığı
  * sekme) bu anahtarla tutulur, HAM SAYIYLA değil. Admin panelinde bir
@@ -78,6 +78,8 @@ export interface BuildCalculationInputParams {
   iksaPercentage: number;
   iksaManualTL: number;
   Pmarket?: number;
+  landCostModel?: LandCostModel;
+  districtLandPricePerM2?: number | null;
 }
 
 /** Hesap motoruna (`CalculatorEngineV2.calculate`) verilecek `CalculationInput`
@@ -90,7 +92,7 @@ export function buildCalculationInput(params: BuildCalculationInputParams): Calc
   const {
     x, luxLevel, apartmentSize, globalUnitPrice, builderProfit,
     isApartmentCountEnabled, totalApartments, isAaEnabled, arsaAlani,
-    riskLevel, iksaMode, iksaPercentage, iksaManualTL, Pmarket,
+    riskLevel, iksaMode, iksaPercentage, iksaManualTL, Pmarket, landCostModel, districtLandPricePerM2,
   } = params;
 
   return {
@@ -112,6 +114,8 @@ export function buildCalculationInput(params: BuildCalculationInputParams): Calc
     MzOriginal: iksaMode === 'manual' ? iksaManualTL : 0,
 
     Pmarket,
+    landCostModel,
+    districtLandPricePerM2: districtLandPricePerM2 ?? undefined,
   };
 }
 
@@ -139,3 +143,4 @@ export function ornekProjeIleDeneDoldur({
     globalUnitPrice: globalUnitPrice ?? ORNEK_GLOBAL_UNIT_PRICE,
   };
 }
+

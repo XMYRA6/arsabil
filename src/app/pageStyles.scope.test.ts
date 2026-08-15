@@ -87,10 +87,11 @@ describe('anasayfa Apple Liquid Glass — vision/mission cam yüzey hizalaması'
     expect(matches.length).toBe(1);
   });
 
-  it('light-tema .visionCard nested-glass referans desenini kullanmalı (mavi tint gradient + kenar parıltısı box-shadow)', () => {
+  it('light-tema .visionCard profesyonel nested-glass desenini kullanmalı', () => {
     const lightMatch = pageCss.match(/:global\(\[data-theme='light'\]\)\s*\.visionCard\s*\{([^}]*)\}/);
     expect(lightMatch).not.toBeNull();
     expect(lightMatch![1]).toMatch(/linear-gradient\(165deg/);
+    expect(lightMatch![1]).toMatch(/var\(--accent-rgb\)/);
     expect(lightMatch![1]).toMatch(/inset 0 1px 0 rgba\(255,\s*255,\s*255,\s*0\.85\)/);
   });
 
@@ -106,6 +107,7 @@ describe('anasayfa Apple Liquid Glass — vision/mission cam yüzey hizalaması'
       /padding:\s*2\.5rem 2rem/,
       /text-align:\s*center/,
       /border-radius:\s*24px/,
+      /border-left:\s*4px solid var\(--accent\)/,
     ]) {
       expect(body).toMatch(prop);
     }
@@ -113,14 +115,14 @@ describe('anasayfa Apple Liquid Glass — vision/mission cam yüzey hizalaması'
 });
 
 describe('anasayfa Apple Liquid Glass — blog kartları', () => {
-  it('.blogCard hover kenar parıltısı mavi-ailesi olmalı (zaten öyleydi, regresyon guard\'ı)', () => {
-    expect(pageCss).toMatch(/\.blogCard:hover\s*\{[^}]*rgba\(31,\s*111,\s*235/);
+  it('.blogCard hover kenar pariltisi profesyonel aksan tokenina bagli olmali', () => {
+    expect(pageCss).toMatch(/\.blogCard:hover\s*\{[^}]*var\(--shadow-hover\)[^}]*rgba\(var\(--accent-rgb\),\s*0\.45\)/);
   });
 
-  it('.blogCategoryTag border\'ı mavi-aileye geçmeli ve arka plan opaklığı düşmeli (0.75→0.55, navy zemin okunabilirlik için korunur)', () => {
+  it('.blogCategoryTag border aksan tokenina bagli olmali ve arka plan opakligi korunmali', () => {
     const match = pageCss.match(/\.blogCategoryTag\s*\{([^}]*)\}/);
     expect(match).not.toBeNull();
-    expect(match![1]).toMatch(/rgba\(31,\s*111,\s*235,\s*0\.35\)/);
+    expect(match![1]).toMatch(/rgba\(var\(--accent-rgb\),\s*0\.45\)/);
     expect(match![1]).toMatch(/rgba\(15,\s*23,\s*42,\s*0\.55\)/);
   });
 });
@@ -307,3 +309,37 @@ describe('anasayfa bento kartları — ölü mouse-tracking kodu kaldırıldı (
     expect(spotlightMatch![1]).toMatch(/opacity:\s*1/);
   });
 });
+
+describe('anasayfa profesyonel tema token kullanimi', () => {
+  it('.hero profesyonel govde zemini tokenini kullanir', () => {
+    const match = pageCss.match(/\.hero\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/background:\s*var\(--bg-body\)/);
+  });
+
+  it('ana CTA primary token, ikincil CTA primary border kullanir', () => {
+    const primary = pageCss.match(/\.primaryBtn\s*\{([^}]*)\}/);
+    const secondary = pageCss.match(/^\.secondaryBtn\s*\{([^}]*)\}/m);
+    expect(primary).not.toBeNull();
+    expect(secondary).not.toBeNull();
+    expect(primary![1]).toMatch(/background:\s*var\(--primary\)/);
+    expect(secondary![1]).toMatch(/border:\s*1px solid var\(--primary\)/);
+  });
+
+  it('bento ve CTA hover gorsel agirligi shadow-hover tokenina bagli', () => {
+    const bentoHover = pageCss.match(/\.bentoCard:hover\s*\{([^}]*)\}/);
+    const ctaHover = pageCss.match(/\.ctaBtn:hover\s*\{([^}]*)\}/);
+    expect(bentoHover).not.toBeNull();
+    expect(ctaHover).not.toBeNull();
+    expect(bentoHover![1]).toMatch(/var\(--shadow-hover\)/);
+    expect(ctaHover![1]).toMatch(/var\(--shadow-hover\)/);
+  });
+
+  it('CTA aksan butonu terracotta accent tokenini kullanir', () => {
+    const match = pageCss.match(/\.ctaBtn\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/var\(--accent\)/);
+  });
+});
+
+

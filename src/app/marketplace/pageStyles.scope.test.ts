@@ -36,3 +36,30 @@ describe('marketplace mobil mühür kimliği token kapsamı', () => {
     expect(desktopSection).toMatch(/\.quickChipActive\s*\{[^}]*background:\s*var\(--primary\)/);
   });
 });
+
+describe('marketplace profesyonel tema token kullanimi', () => {
+  it('container ve map panel radius/border tokenlari kullanir', () => {
+    const container = pageCss.match(/\.container\s*\{([^}]*)\}/);
+    const mapPanel = pageCss.match(/\.mapPanel\s*\{([^}]*)\}/);
+    expect(container).not.toBeNull();
+    expect(mapPanel).not.toBeNull();
+    expect(container![1]).toMatch(/border-radius:\s*0 0 var\(--radius-lg\) var\(--radius-lg\)/);
+    expect(mapPanel![1]).toMatch(/border-left:\s*1px solid var\(--border\)/);
+    expect(mapPanel![1]).toMatch(/border-radius:\s*var\(--radius-lg\)/);
+  });
+
+  it('filter CTA terracotta accent tokenini ve kompakt label stilini kullanir', () => {
+    const match = pageCss.match(/\.filterBtn\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/background:\s*var\(--accent\)/);
+    expect(match![1]).toMatch(/border-radius:\s*var\(--radius-md\)/);
+    expect(match![1]).toMatch(/text-transform:\s*uppercase/);
+  });
+
+  it('empty state ikonu lacivert primary tokenina bagli', () => {
+    const match = pageCss.match(/\.emptyStateIcon\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/color:\s*var\(--primary\)/);
+  });
+});
+

@@ -467,3 +467,29 @@ describe('dashboard/profil mobil UX — CSS kapsam guard', () => {
     expect(parts[3]).not.toBe('0px')
   })
 })
+
+describe('profil profesyonel form token kullanimi', () => {
+  const mediaIndex = css.indexOf('@media (max-width: 768px)')
+  const desktopBlock = css.slice(0, mediaIndex)
+
+  it('desktop input min-height 48px kullanir', () => {
+    const input = desktopBlock.match(/\.input\s*\{([^}]*)\}/)
+    expect(input).not.toBeNull()
+    expect(input![1]).toMatch(/min-height:\s*48px/)
+  })
+
+  it('input ve textarea focus primary border ve focus shadow kullanir', () => {
+    expect(desktopBlock).toMatch(/\.input:focus\s*\{[^}]*border-color:\s*var\(--primary\)[^}]*box-shadow:\s*var\(--input-focus-shadow\)/)
+    expect(desktopBlock).toMatch(/\.textarea:focus\s*\{[^}]*border-color:\s*var\(--primary\)[^}]*box-shadow:\s*var\(--input-focus-shadow\)/)
+  })
+
+  it('primary form butonlari primary gradient kullanir', () => {
+    const save = desktopBlock.match(/\.saveBtn\s*\{([^}]*)\}/)
+    const small = desktopBlock.match(/\.btnPrimarySmall\s*\{([^}]*)\}/)
+    expect(save).not.toBeNull()
+    expect(small).not.toBeNull()
+    expect(save![1]).toMatch(/linear-gradient\(135deg,\s*var\(--primary\),\s*var\(--primary-2\)\)/)
+    expect(small![1]).toMatch(/linear-gradient\(135deg,\s*var\(--primary\),\s*var\(--primary-2\)\)/)
+  })
+})
+

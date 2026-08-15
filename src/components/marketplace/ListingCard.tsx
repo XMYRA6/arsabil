@@ -209,6 +209,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
     /* ───────────────── SPLIT / COLUMN VIEW (card) ───────────────── */
     return (
         <div
+            className={styles.cardRoot}
             onMouseEnter={() => onHover?.(listing.id)}
             onMouseLeave={() => onHover?.(null)}
             onClick={() => router.push(`/listing/${listing.id}`)}
@@ -226,7 +227,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
             }}
         >
             {/* Photo */}
-            <div style={{
+            <div className={styles.photoFrame} style={{
                 width: '100%', height: 140, flexShrink: 0,
                 background: 'linear-gradient(135deg, #1a3a6e, #0b2443)',
                 position: 'relative', overflow: 'hidden',
@@ -263,11 +264,11 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
             <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     {price > 0 ? (
-                        <span className={styles.dataNum} style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                        <span className={`${styles.dataNum} ${styles.priceText}`} style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
                             {(price / 1000000).toFixed(1)}M TL
                         </span>
                     ) : (
-                        <span className={styles.dataNum} style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
+                        <span className={`${styles.dataNum} ${styles.priceText}`} style={{ fontSize: '0.95rem', fontWeight: 900, color: 'var(--card-title)' }}>
                             {payiMin.toFixed(0)}–{payiMax.toFixed(0)}%
                         </span>
                     )}
@@ -276,7 +277,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         color: change >= 0 ? 'var(--green)' : 'var(--red)',
                     }}>{change >= 0 ? '+' : ''}{change.toFixed(1)}%</span>
                 </div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div className={styles.locationLine} style={{ fontSize: '0.72rem', color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     📍 {listing.district || 'Beşiktaş'}, {listing.city || 'İstanbul'}
                 </div>
                 {/* Score bar */}
@@ -284,7 +285,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                     <div style={{ flex: 1, height: 3, borderRadius: 3, background: 'var(--border)', overflow: 'hidden' }}>
                         <div style={{ width: `${score}%`, height: '100%', borderRadius: 3, background: scoreColor }} />
                     </div>
-                    <span className={styles.dataNum} style={{ fontSize: '0.62rem', fontWeight: 800, color: scoreColor }}>{score}</span>
+                    <span className={`${styles.dataNum} ${styles.statusBadge}`} style={{ fontSize: '0.62rem', fontWeight: 800, color: scoreColor }}>{score}</span>
                 </div>
             </div>
 
@@ -297,6 +298,7 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
                         onFavoriteToggle(listing.id)
                     }}
                     title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+                    className={styles.favoriteButton}
                     style={{
                         position: 'absolute',
                         top: 10,
@@ -318,3 +320,4 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
         </div>
     );
 }
+

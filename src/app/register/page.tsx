@@ -44,62 +44,75 @@ export default function RegisterPage() {
 
     return (
         <div className={styles.page}>
-            <div className={styles.column}>
-                <div className={styles.header}>
-                    <h1 className={styles.logo}>ARSABİL</h1>
-                    <p className={styles.subtitle}>Sisteme Kayıt Olun</p>
-                </div>
+            <div className={styles.authShell}>
+                <section className={styles.brandPanel}>
+                    <div className={styles.brandLogo}>ARSABİL</div>
+                    <h1 className={styles.brandTitle}>Profesyonel arsa fizibilitesine başlayın</h1>
+                    <ul className={styles.brandBullets}>
+                        <li>Parsel verisiyle hızlı ön analiz</li>
+                        <li>Raporlarınızı panelinizde saklayın</li>
+                        <li>İlan ve teklif akışını tek yerden yönetin</li>
+                    </ul>
+                </section>
 
-                <Card className={styles.sealCard}>
-                    <form onSubmit={handleSubmit} className={styles.form}>
-                        {error && (
-                            <div className={styles.errorBanner}>
-                                {error}
-                            </div>
-                        )}
-
-                        <Input
-                            label="Ad Soyad"
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            className={styles.sealInput}
-                        />
-
-                        <Input
-                            label="E-Posta Adresi"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className={styles.sealInput}
-                        />
-
-                        <Input
-                            label="Şifre"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className={styles.sealInput}
-                        />
-
-                        <div className={styles.submitRow}>
-                            <Button type="submit" variant="primary" fullWidth disabled={loading} className={styles.sealSubmit}>
-                                {loading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}
-                            </Button>
-                        </div>
-                    </form>
-
-                    <div className={styles.footerText}>
-                        Zaten hesabınız var mı?{" "}
-                        <Link href="/login" className={styles.footerLink}>
-                            Giriş Yapın
-                        </Link>
+                <section className={styles.formPanel}>
+                    <div className={styles.header}>
+                        <h1 className={styles.logo}>Hesap oluştur</h1>
+                        <p className={styles.subtitle}>Sisteme Kayıt Olun</p>
                     </div>
-                </Card>
+
+                    <Card className={`${styles.sealCard} ${styles.formCard}`}>
+                        <form onSubmit={handleSubmit} className={styles.form}>
+                            {error && (
+                                <div className={styles.errorBanner}>
+                                    {error}
+                                </div>
+                            )}
+
+                            <Input
+                                label="Ad Soyad"
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                                className={styles.sealInput}
+                            />
+
+                            <Input
+                                label="E-Posta Adresi"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                className={styles.sealInput}
+                            />
+
+                            <Input
+                                label="Şifre"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className={styles.sealInput}
+                            />
+
+                            <div className={styles.submitRow}>
+                                <Button type="submit" variant="primary" fullWidth disabled={loading} className={styles.sealSubmit}>
+                                    {loading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}
+                                </Button>
+                            </div>
+                        </form>
+
+                        <div className={styles.footerText}>
+                            Zaten hesabınız var mı?{" "}
+                            <Link href="/login" className={styles.footerLink}>
+                                Giriş Yapın
+                            </Link>
+                        </div>
+                    </Card>
+                </section>
             </div>
         </div>
-    );
-}
+    );}
+
+

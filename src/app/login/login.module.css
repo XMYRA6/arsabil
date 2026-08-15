@@ -44,10 +44,10 @@
     max-width: 1000px;
     margin: 0 20px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 42% 58%;
     background: var(--panel);
     border-radius: 24px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-xl);
     border: 1px solid var(--border);
     overflow: hidden;
     z-index: 10;
@@ -60,7 +60,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: var(--hero-bg);
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
     color: white;
     position: relative;
     overflow: hidden;
@@ -113,6 +113,7 @@
 }
 
 .formSide {
+    background: var(--bg-body);
     padding: 4rem 3rem;
     display: flex;
     flex-direction: column;
@@ -200,6 +201,7 @@
 
 .input {
     width: 100%;
+    min-height: 48px;
     padding: 14px 16px;
     border-radius: 12px;
     border: 1px solid var(--border);
@@ -220,7 +222,7 @@
     padding: 16px;
     margin-top: 0.5rem;
     border-radius: 12px;
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
     color: white;
     font-size: 1rem;
     font-weight: 700;
@@ -273,7 +275,8 @@
         --seal-text: var(--card-title);
     }
 
-    .panel {
+    .panel,
+    .authShell {
         grid-template-columns: 1fr;
         max-width: 500px;
         border: 1px solid var(--seal-border);
@@ -285,7 +288,8 @@
         padding: 2.5rem;
     }
 
-    .formSide {
+    .formSide,
+    .formPanel {
         padding: 2.5rem 2rem;
         background: var(--seal-surface);
         color: var(--seal-text);
@@ -294,6 +298,7 @@
     }
 
     .input {
+        min-height: 48px;
         height: var(--input-height-mobile);
         font-size: 16px; /* iOS zoom tetiklenmesin */
         box-sizing: border-box;
@@ -318,3 +323,60 @@
         color: var(--seal-accent);
     }
 }
+
+.authShell {
+    grid-template-columns: 42% 58%;
+}
+
+.brandPanel {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+}
+
+.brandLogo {
+    color: white;
+}
+
+.brandBullets {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.formPanel {
+    background: var(--bg-body);
+}
+
+.formCard {
+    width: 100%;
+}
+
+
+/* auth split alias mobile override */
+@media (max-width: 768px) {
+    .authShell {
+        grid-template-columns: 1fr;
+    }
+
+    .formPanel {
+        background: var(--seal-surface);
+    }
+}
+
+
+/* legacy guard explicit mobile selectors */
+@media (max-width: 768px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+
+    .authShell {
+        grid-template-columns: 1fr;
+    }
+
+    .formSide {
+        background: var(--seal-surface);
+    }
+}
+

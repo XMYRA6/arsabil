@@ -6,7 +6,8 @@ import styles from './page.module.css';
 import { RangeSlider } from '@/components/ui/RangeSlider';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
-import { CalculatorEngineV2, CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
+import { CalculatorEngineV2, CalculationInput, CalculationOutput, type LandCostModel } from '@/lib/calculator/engine_v2';
+import type { DistrictPriceEntry } from '@/components/LocationSelector';
 import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput, type QualityTier } from './calculatorUiHelpers';
 import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
 import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
@@ -99,6 +100,8 @@ export default function Home() {
 
   const [isParcelModalOpen, setIsParcelModalOpen] = useState(false);
   const [parcelContext, setParcelContext] = useState<ParcelPickerValue | null>(null);
+  const [landCostModel, setLandCostModel] = useState<LandCostModel>('proportional');
+  const [districtPrice, setDistrictPrice] = useState<DistrictPriceEntry | null>(null);
 
   const effectiveLandShareRatio = computeEffectiveLandShareX({
     isApartmentCountEnabled,
@@ -157,6 +160,10 @@ export default function Home() {
   const [isAaEnabled, setIsAaEnabled] = useState<boolean>(AYAR_VARSAYILANLARI.isAaEnabled);
   const [arsaAlani, setArsaAlani] = useState<number>(AYAR_VARSAYILANLARI.arsaAlani);
 
+  const selectedDistrictLandPrice = districtPrice?.avgLandPricePerM2 ?? null;
+  const canUseComparableLandCost = isAaEnabled && selectedDistrictLandPrice != null && selectedDistrictLandPrice > 0;
+  const activeLandCostModel: LandCostModel = landCostModel === 'comparable' && canUseComparableLandCost ? 'comparable' : 'proportional';
+
   // İksa modü: 'off' | 'percentage' | 'manual'
   const [iksaMode, setIksaMode] = useState<'off' | 'percentage' | 'manual'>(AYAR_VARSAYILANLARI.iksaMode);
   const [iksaPercentage, setIksaPercentage] = useState<number>(AYAR_VARSAYILANLARI.iksaPercentage); // %
@@ -211,6 +218,43 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const il = parcelContext?.parcel?.il;
+    const ilce = parcelContext?.parcel?.ilce;
+    if (!il || !ilce) {
+      setDistrictPrice(null);
+      setLandCostModel('proportional');
+      return;
+    }
+
+    let cancelled = false;
+    fetch('/api/district-prices?il=' + encodeURIComponent(il))
+      .then(res => res.ok ? res.json() : [])
+      .then((prices: DistrictPriceEntry[]) => {
+        if (cancelled) return;
+        const normalizedIlce = ilce.toLocaleLowerCase('tr-TR');
+        const found = Array.isArray(prices)
+          ? prices.find(p => p.ilce.toLocaleLowerCase('tr-TR') === normalizedIlce) ?? null
+          : null;
+        setDistrictPrice(found);
+        if (!found?.avgLandPricePerM2) setLandCostModel('proportional');
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDistrictPrice(null);
+          setLandCostModel('proportional');
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [parcelContext?.parcel?.il, parcelContext?.parcel?.ilce]);
+
+  useEffect(() => {
+    if (landCostModel === 'comparable' && !canUseComparableLandCost) {
+      setLandCostModel('proportional');
+    }
+  }, [landCostModel, canUseComparableLandCost]);
+
+  useEffect(() => {
     if (isApartmentCountEnabled) {
       const clamped = clampOwnerApartmentShare(ownerApartmentShare, totalApartments);
       if (clamped !== ownerApartmentShare) {
@@ -247,11 +291,13 @@ export default function Home() {
       iksaPercentage,
       iksaManualTL,
       Pmarket: parseMarketPrice(manualMarketPrice) || undefined,
+      landCostModel: activeLandCostModel,
+      districtLandPricePerM2: selectedDistrictLandPrice,
     });
 
     const res = CalculatorEngineV2.calculate(input);
     setResult(res);
-  }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice, manualMarketPrice]);
+  }, [luxLevel, apartmentSize, totalApartments, ownerApartmentShare, landShareRatio, builderProfit, riskLevel, isApartmentCountEnabled, iksaMode, iksaPercentage, iksaManualTL, isAaEnabled, arsaAlani, globalUnitPrice, manualMarketPrice, activeLandCostModel, selectedDistrictLandPrice]);
 
 
   const hasEnoughDataForResult = apartmentSize !== null && globalUnitPrice !== null;
@@ -478,6 +524,8 @@ export default function Home() {
     iksaMode,
     iksaPercentage,
     iksaManualTL,
+    landCostModel: activeLandCostModel,
+    districtLandPricePerM2: selectedDistrictLandPrice,
   });
 
   /**
@@ -646,6 +694,33 @@ export default function Home() {
                 isAaEnabled={isAaEnabled}
                 onIsAaEnabled={setIsAaEnabled}
               />
+            </div>
+
+            <div className={styles.settingsGroup}>
+              <h4>Arsa Maliyeti Modeli</h4>
+              <div className={styles.luxGrid} style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+                <button
+                  type="button"
+                  className={`${styles.luxBox} ${activeLandCostModel === 'proportional' ? styles.luxBoxActive : ''}`}
+                  onClick={() => setLandCostModel('proportional')}
+                >
+                  <span>Oransal</span>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.luxBox} ${activeLandCostModel === 'comparable' ? styles.luxBoxActive : ''}`}
+                  disabled={!canUseComparableLandCost}
+                  title={canUseComparableLandCost ? `${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m² arsa emsali` : 'Emsal için haritadan parsel seçin ve ilçe arsa m² fiyatı tanımlı olsun'}
+                  onClick={() => setLandCostModel('comparable')}
+                >
+                  <span>Emsal</span>
+                </button>
+              </div>
+              <p className={styles.sliderValueBox}>
+                {canUseComparableLandCost
+                  ? `İlçe arsa emsali: ${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m²`
+                  : 'Emsal model için doğrulanmış arsa alanı ve ilçe arsa m² fiyatı gerekir.'}
+              </p>
             </div>
 
             <div className={styles.settingsGroup}>
@@ -951,3 +1026,5 @@ export default function Home() {
     </div >
   );
 }
+
+

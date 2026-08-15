@@ -22,8 +22,9 @@ describe('admin.module.css — Faz 4 pirinç vurgu (masaüstü + mobil, admin ge
     expect(block).not.toMatch(/background:\s*var\(--primary\)/)
   })
 
-  it('.adminPrimaryBtn admin-accent tabanlı bir arka plan tanımlamalı', () => {
-    expect(css).toMatch(/\.adminPrimaryBtn\s*\{[^}]*#C9A15A/)
+  it('.adminPrimaryBtn admin-accent token tabanlı bir arka plan tanımlamalı', () => {
+    expect(css).toMatch(/\.adminPrimaryBtn\s*\{[^}]*var\(--admin-accent\)/)
+    expect(css).not.toMatch(/#C9A15A/)
   })
 })
 
@@ -98,3 +99,41 @@ describe('admin.module.css — Analitik grid fix (Faz 4 task 7)', () => {
     expect(desktopBlock).toMatch(/grid-template-columns:\s*1fr 1fr/)
   })
 })
+
+describe('admin profesyonel token sistemi', () => {
+  it('admin-accent primary token ailesine bagli olmalı', () => {
+    const shell = css.match(/\.adminShell\s*\{([^}]*)\}/)
+    expect(shell).not.toBeNull()
+    expect(shell![1]).toMatch(/--admin-accent:\s*var\(--primary\)/)
+    expect(shell![1]).toMatch(/--admin-accent-2:\s*var\(--primary-2\)/)
+    expect(shell![1]).toMatch(/--admin-accent-rgb:\s*var\(--primary-rgb\)/)
+  })
+
+  it('admin header primary border-bottom kullanır', () => {
+    const match = css.match(/\.sidebarHeader\s*\{([^}]*)\}/)
+    expect(match).not.toBeNull()
+    expect(match![1]).toMatch(/border-bottom:\s*2px solid var\(--primary\)/)
+  })
+
+  it('semantic status badge tokenları pending/approved/rejected için tanımlıdır', () => {
+    expect(css).toMatch(/\.statusPending\s*\{[^}]*var\(--admin-accent\)/)
+    expect(css).toMatch(/\.statusApproved,\s*\n?\.statusAccepted\s*\{[^}]*var\(--green\)/)
+    expect(css).toMatch(/\.statusRejected\s*\{[^}]*var\(--red\)/)
+  })
+
+  it('table hover panel-2 kullanır', () => {
+    expect(css).toMatch(/\.table tr:hover td\s*\{[^}]*background:\s*var\(--panel-2\)/)
+  })
+
+  it('admin stat/settings kartları radius ve shadow token kullanır', () => {
+    const stat = css.match(/\.statBox\s*\{([^}]*)\}/)
+    const settings = css.match(/\.settingsCard\s*\{([^}]*)\}/)
+    expect(stat).not.toBeNull()
+    expect(settings).not.toBeNull()
+    expect(stat![1]).toMatch(/border-radius:\s*var\(--radius-md\)/)
+    expect(stat![1]).toMatch(/box-shadow:\s*var\(--shadow2\)/)
+    expect(settings![1]).toMatch(/border-radius:\s*var\(--radius-md\)/)
+    expect(settings![1]).toMatch(/box-shadow:\s*var\(--shadow2\)/)
+  })
+})
+

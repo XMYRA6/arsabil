@@ -6,7 +6,7 @@
     flex-direction: column;
     height: calc(100dvh - 106px);
     overflow: hidden;
-    border-radius: 0 0 18px 18px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
     border: 1px solid var(--border);
     border-top: none;
     background: var(--panel);
@@ -18,8 +18,8 @@
 .topBar {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
+    gap: 8px;
+    padding: 8px 14px;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
@@ -62,6 +62,9 @@
 .mapPanel {
     flex: 1;
     height: 100%;
+    border-left: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 .desktopOnlySpacer {
@@ -193,6 +196,7 @@
 
 .emptyStateIcon {
     font-size: 2rem;
+    color: var(--primary);
     margin-bottom: 8px;
 }
 
@@ -237,13 +241,15 @@
     flex-shrink: 0;
     padding: 0 14px;
     min-height: var(--touch-target);
-    border-radius: 10px;
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    color: var(--text);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: white;
     font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     cursor: pointer;
 }
 
@@ -383,3 +389,4 @@
         border-color: var(--seal-accent);
     }
 }
+

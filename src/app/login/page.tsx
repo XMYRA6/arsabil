@@ -88,13 +88,13 @@ export default function LoginPage() {
             <div className={styles.orbTop} />
             <div className={styles.orbBottom} />
 
-            <div className={styles.panel}>
+            <div className={`${styles.panel} ${styles.authShell}`}>
                 {/* Left Side: Branding / Intro */}
-                <div className={styles.brandSide}>
+                <div className={`${styles.brandSide} ${styles.brandPanel}`}>
                     <div className={styles.brandPattern} />
 
                     <div className={styles.brandContent}>
-                        <div className={styles.brandLogoRow}>
+                        <div className={`${styles.brandLogoRow} ${styles.brandLogo}`}>
                             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect width="40" height="40" rx="12" fill="white" />
                                 <circle cx="20" cy="20" r="8" fill="var(--primary)" />
@@ -112,11 +112,11 @@ export default function LoginPage() {
                 </div>
 
                 {/* Right Side: Auth Forms */}
-                <div className={styles.formSide}>
+                <div className={`${styles.formSide} ${styles.formPanel}`}>
 
                     {/* VIEW: LOGIN */}
                     {view === "login" && (
-                        <div className={styles.formView}>
+                        <div className={`${styles.formView} ${styles.formCard}`}>
                             <div className={styles.formHeader}>
                                 <h2 className={styles.formTitle}>Tekrar Hoş Geldiniz</h2>
                                 <p className={styles.formSubtitle}>Lütfen hesabınıza giriş yapın.</p>
@@ -156,7 +156,7 @@ export default function LoginPage() {
 
                     {/* VIEW: REGISTER */}
                     {view === "register" && (
-                        <div className={styles.formView}>
+                        <div className={`${styles.formView} ${styles.formCard}`}>
                             <div className={styles.formHeader}>
                                 <h2 className={styles.formTitle}>Aramıza Katılın</h2>
                                 <p className={styles.formSubtitle}>Sistemi hemen kullanmak için kayıt olun.</p>
@@ -198,7 +198,7 @@ export default function LoginPage() {
 
                     {/* VIEW: FORGOT PASSWORD */}
                     {view === "forgot" && (
-                        <div className={styles.formView}>
+                        <div className={`${styles.formView} ${styles.formCard}`}>
                             <div className={styles.formHeader}>
                                 <h2 className={styles.formTitle}>Şifremi Unuttum</h2>
                                 <p className={styles.formSubtitle}>E-posta adresinizi girin, sıfırlama talimatlarını gönderelim.</p>
@@ -232,3 +232,4 @@ export default function LoginPage() {
         </div>
     );
 }
+

@@ -35,6 +35,20 @@ describe('dogrulaIlceFiyatlari', () => {
         expect(dogrulaIlceFiyatlari([{ ...GECERLI, avgSalesPricePerM2: NaN }])).toHaveLength(1)
     })
 
+    it('opsiyonel arsa m2 fiyati yoksa veya null ise hata vermez', () => {
+        expect(dogrulaIlceFiyatlari([{ ...GECERLI }])).toEqual([])
+        expect(dogrulaIlceFiyatlari([{ ...GECERLI, avgLandPricePerM2: null }])).toEqual([])
+    })
+
+    it('opsiyonel arsa m2 fiyati pozitif sayi ise gecerlidir', () => {
+        expect(dogrulaIlceFiyatlari([{ ...GECERLI, avgLandPricePerM2: 40000 }])).toEqual([])
+    })
+
+    it('opsiyonel arsa m2 fiyati sifir, negatif veya sonlu degilse hata verir', () => {
+        expect(dogrulaIlceFiyatlari([{ ...GECERLI, avgLandPricePerM2: 0 }])).toHaveLength(1)
+        expect(dogrulaIlceFiyatlari([{ ...GECERLI, avgLandPricePerM2: -1 }])).toHaveLength(1)
+        expect(dogrulaIlceFiyatlari([{ ...GECERLI, avgLandPricePerM2: NaN }])).toHaveLength(1)
+    })
     it('bos veya bosluklu isim hata verir', () => {
         expect(dogrulaIlceFiyatlari([{ ...GECERLI, ilce: '' }])).toHaveLength(1)
         expect(dogrulaIlceFiyatlari([{ ...GECERLI, il: ' İstanbul' }])).toHaveLength(1)
@@ -48,3 +62,4 @@ describe('ILCE_FIYATLARI veri dosyasi', () => {
         expect(dogrulaIlceFiyatlari(ILCE_FIYATLARI)).toEqual([])
     })
 })
+

@@ -16,7 +16,7 @@ describe('login sayfası mobil CSS kapsam guard', () => {
     expect(baseIndex).toBeGreaterThan(-1)
     expect(baseIndex).toBeLessThan(mediaIndex)
     const baseBlock = css.slice(baseIndex, css.indexOf('}', baseIndex))
-    expect(baseBlock).toMatch(/grid-template-columns:\s*1fr 1fr/)
+    expect(baseBlock).toMatch(/grid-template-columns:\s*42% 58%/)
     const mobileBlock = css.slice(mediaIndex)
     expect(mobileBlock).toMatch(/\.panel\s*\{[^}]*grid-template-columns:\s*1fr;/)
   })
@@ -98,6 +98,29 @@ describe('login mobil mühür kimliği (Faz 2.5)', () => {
 
   it('masaüstü dalı değişmemeli: .panel masaüstünde hâlâ 2 kolon', () => {
     const desktop = css.slice(0, css.indexOf('@media (max-width: 768px)'));
-    expect(desktop).toMatch(/\.panel\s*\{[^}]*grid-template-columns:\s*[^;]*1fr[^;]*1fr/);
+    expect(desktop).toMatch(/\.panel\s*\{[^}]*grid-template-columns:\s*42% 58%/);
   });
 });
+
+describe('login profesyonel split layout', () => {
+  it('authShell desktop split ve brand/form panel tokenlarini tanimlar', () => {
+    expect(css).toMatch(/\.authShell\s*\{[^}]*grid-template-columns:\s*42% 58%/)
+    expect(css).toMatch(/\.brandPanel\s*\{[^}]*var\(--primary\)[^}]*var\(--primary-2\)/)
+    expect(css).toMatch(/\.formPanel\s*\{[^}]*background:\s*var\(--bg-body\)/)
+  })
+
+  it('page.tsx split layout siniflarini kullanir', () => {
+    expect(tsx).toMatch(/styles\.authShell/)
+    expect(tsx).toMatch(/styles\.brandPanel/)
+    expect(tsx).toMatch(/styles\.brandLogo/)
+    expect(tsx).toMatch(/styles\.formPanel/)
+    expect(tsx).toMatch(/styles\.formCard/)
+  })
+
+  it('mobil authShell tek kolona doner ve input 48px korur', () => {
+    const mobile = css.slice(css.lastIndexOf('@media (max-width: 768px)'))
+    expect(mobile).toMatch(/\.authShell\s*\{[^}]*grid-template-columns:\s*1fr/)
+    expect(css).toMatch(/\.input\s*\{[^}]*min-height:\s*48px/)
+  })
+})
+

@@ -72,3 +72,32 @@ describe('dashboard/projects + dashboard/reports mobil mühür kimliği token ka
     expect(matches.length).toBe(1)
   })
 })
+
+describe('dashboard profesyonel tema token kullanimi', () => {
+  it('sidebar bg-body, aktif nav primary border-left kullanir', () => {
+    const sidebar = css.match(/\.sidebar\s*\{([^}]*)\}/)
+    const nav = css.match(/\.navItem\s*\{([^}]*)\}/)
+    const active = css.match(/\.navItemActive,\s*\n?\.navItemActive:hover\s*\{([^}]*)\}/)
+    expect(sidebar).not.toBeNull()
+    expect(nav).not.toBeNull()
+    expect(active).not.toBeNull()
+    expect(sidebar![1]).toMatch(/background:\s*var\(--bg-body\)/)
+    expect(nav![1]).toMatch(/border-left:\s*3px solid transparent/)
+    expect(active![1]).toMatch(/border-left-color:\s*var\(--primary\)/)
+  })
+
+  it('stat box top border ve section title sol border primary kullanir', () => {
+    const stat = css.match(/\.statBox\s*\{([^}]*)\}/)
+    const title = css.match(/\.sectionTitle\s*\{([^}]*)\}/)
+    expect(stat).not.toBeNull()
+    expect(title).not.toBeNull()
+    expect(stat![1]).toMatch(/border-top:\s*3px solid var\(--primary\)/)
+    expect(title![1]).toMatch(/border-left:\s*4px solid var\(--primary\)/)
+  })
+
+  it('report ve listing kart hover shadow-hover kullanir', () => {
+    expect(css).toMatch(/\.reportCard:hover\s*\{[^}]*box-shadow:\s*var\(--shadow-hover\)/)
+    expect(css).toMatch(/\.listingCard:hover\s*\{[^}]*box-shadow:\s*var\(--shadow-hover\)/)
+  })
+})
+

@@ -16,6 +16,9 @@ export type IlceFiyatKaydi = {
     avgSalesPricePerM2: number
     /** Ortalama birim insaat maliyeti, TL/m² */
     avgUnitConstructionPrice: number
+    /** Ortalama arsa fiyati, TL/m². Veri yoksa bos kalir. */
+    avgLandPricePerM2?: number | null
 }
 
 export const ILCE_FIYATLARI: IlceFiyatKaydi[] = []
+

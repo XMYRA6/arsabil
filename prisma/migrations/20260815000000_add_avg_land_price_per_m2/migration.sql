@@ -1,0 +1,1 @@
+ALTER TABLE "DistrictPrice" ADD COLUMN "avgLandPricePerM2" DOUBLE PRECISION;

@@ -154,6 +154,7 @@
 }
 
 .input {
+  min-height: 48px;
   padding: 0.6rem 0.875rem;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -164,10 +165,10 @@
   outline: none;
   width: 100%;
   box-sizing: border-box;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.input:focus { border-color: var(--primary); }
+.input:focus { border-color: var(--primary); box-shadow: var(--input-focus-shadow); }
 
 .textarea {
   padding: 0.6rem 0.875rem;
@@ -182,15 +183,15 @@
   box-sizing: border-box;
   resize: vertical;
   min-height: 80px;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.textarea:focus { border-color: var(--primary); }
+.textarea:focus { border-color: var(--primary); box-shadow: var(--input-focus-shadow); }
 
 .saveBtn {
   padding: 0.625rem 1rem;
   border-radius: 10px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
   border: none;
   color: white;
   font-weight: 700;
@@ -641,7 +642,7 @@
   font-weight: 700;
   font-size: 0.85rem;
   border: none;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
   color: white;
   margin-top: 16px;
   transition: background 0.3s;
@@ -1141,3 +1142,4 @@
     color: #b8102f;
   }
 }
+

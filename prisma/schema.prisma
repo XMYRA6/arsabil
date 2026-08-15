@@ -257,9 +257,11 @@ model DistrictPrice {
   ilce                     String
   avgSalesPricePerM2       Float
   avgUnitConstructionPrice Float
+  avgLandPricePerM2        Float?
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
   @@unique([il, ilce])
   @@index([il])
 }
+

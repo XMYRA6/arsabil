@@ -1,6 +1,60 @@
+.cardRoot {
+    border-radius: var(--radius-lg) !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease !important;
+}
+
+.cardRoot:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover) !important;
+    border-color: rgba(var(--primary-rgb), 0.32) !important;
+}
+
+.photoFrame {
+    aspect-ratio: 16 / 10;
+    height: auto !important;
+}
+
+.priceText {
+    color: var(--primary) !important;
+    font-weight: 900;
+}
+
+.locationLine {
+    color: var(--muted) !important;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.statusBadge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--green);
+}
+
+.favoriteButton {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid rgba(255, 255, 255, 0.62) !important;
+    border-radius: 999px !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cardRoot:hover {
+        transform: none;
+    }
+}
 @media (max-width: 768px) {
     .dataNum {
         font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-variant-numeric: tabular-nums;
     }
 }
+

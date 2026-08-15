@@ -161,6 +161,25 @@ describe('buildCalculationInput (denetim-2 bulgusu: input/chartBaseInput çift t
     expect(buildCalculationInput({ ...BASE_PARAMS, Pmarket: 6000000 }).Pmarket).toBe(6000000);
     expect(buildCalculationInput(BASE_PARAMS).Pmarket).toBeUndefined();
   });
+  it('emsal arsa maliyeti alanlarını motora taşır', () => {
+    const res = buildCalculationInput({
+      ...BASE_PARAMS,
+      isAaEnabled: true,
+      arsaAlani: 500,
+      landCostModel: 'comparable',
+      districtLandPricePerM2: 20000,
+    });
+    expect(res.landCostModel).toBe('comparable');
+    expect(res.districtLandPricePerM2).toBe(20000);
+    expect(res.Aa).toBe(500);
+  });
+
+  it('emsal ilçe arsa fiyatı null ise motora undefined gider', () => {
+    const res = buildCalculationInput({ ...BASE_PARAMS, landCostModel: 'comparable', districtLandPricePerM2: null });
+    expect(res.landCostModel).toBe('comparable');
+    expect(res.districtLandPricePerM2).toBeUndefined();
+  });
+
 
   it('REGRESYON KİLİDİ: ana hesap (Pmarket ile) ve grafik girdisi (Pmarket olmadan) aynı state için Pmarket dışında BİREBİR aynı nesneyi üretir', () => {
     const mainInput = buildCalculationInput({ ...BASE_PARAMS, Pmarket: 6000000 });

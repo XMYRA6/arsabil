@@ -14,13 +14,17 @@ export async function PUT(
     }
     const { id } = await context.params;
     const body = await request.json();
-    const data: Record<string, string | number> = {};
+    const data: Record<string, string | number | null> = {};
     if (body.il !== undefined) data.il = String(body.il);
     if (body.ilce !== undefined) data.ilce = String(body.ilce);
     if (body.avgSalesPricePerM2 !== undefined)
       data.avgSalesPricePerM2 = Number(body.avgSalesPricePerM2);
     if (body.avgUnitConstructionPrice !== undefined)
       data.avgUnitConstructionPrice = Number(body.avgUnitConstructionPrice);
+    if (body.avgLandPricePerM2 !== undefined)
+      data.avgLandPricePerM2 = body.avgLandPricePerM2 === null || body.avgLandPricePerM2 === ''
+        ? null
+        : Number(body.avgLandPricePerM2);
     const price = await prisma.districtPrice.update({ where: { id }, data });
     return NextResponse.json(price);
   } catch (error: unknown) {
@@ -55,3 +59,4 @@ export async function DELETE(
     return NextResponse.json({ message: "Silme başarısız." }, { status: 500 });
   }
 }
+

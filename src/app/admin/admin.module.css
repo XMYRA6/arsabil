@@ -10,7 +10,9 @@
 }
 
 .adminShell {
-    --admin-accent: #C9A15A;
+    --admin-accent: var(--primary);
+    --admin-accent-2: var(--primary-2);
+    --admin-accent-rgb: var(--primary-rgb);
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
     min-height: calc(100dvh - 100px);
@@ -33,7 +35,7 @@
 
 .sidebarHeader {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid var(--primary);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -50,9 +52,9 @@
     border-radius: 99px;
     font-size: 0.7rem;
     font-weight: 800;
-    background: rgba(201, 161, 90, 0.12);
+    background: rgba(var(--admin-accent-rgb), 0.12);
     color: var(--admin-accent);
-    border: 1px solid rgba(201, 161, 90, 0.2);
+    border: 1px solid rgba(var(--admin-accent-rgb), 0.2);
     letter-spacing: 0.5px;
 }
 
@@ -74,7 +76,7 @@
     font-size: 0.95rem;
     color: var(--text);
     text-decoration: none;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .navItem:hover {
@@ -83,8 +85,8 @@
 
 .navItemActive {
     background: var(--admin-accent) !important;
-    color: #0F2A43 !important;
-    box-shadow: 0 4px 14px rgba(201, 161, 90, 0.35);
+    color: white !important;
+    box-shadow: 0 4px 14px rgba(var(--admin-accent-rgb), 0.24);
 }
 
 /* Main Content */
@@ -124,9 +126,10 @@
 
 .statBox {
     padding: 1.25rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     background: var(--stat-bg);
     border: 1px solid var(--border);
+    box-shadow: var(--shadow2);
     text-align: center;
 }
 
@@ -152,8 +155,9 @@
 .settingsCard {
     background: var(--stat-bg);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     padding: 1.5rem;
+    box-shadow: var(--shadow2);
     margin-bottom: 1.5rem;
 }
 
@@ -282,6 +286,25 @@
     border: 1px solid rgba(var(--primary-rgb), 0.2);
 }
 
+.statusPending {
+    background: rgba(var(--admin-accent-rgb), 0.12);
+    color: var(--admin-accent);
+    border: 1px solid rgba(var(--admin-accent-rgb), 0.2);
+}
+
+.statusApproved,
+.statusAccepted {
+    background: rgba(var(--green-rgb), 0.12);
+    color: var(--green);
+    border: 1px solid rgba(var(--green-rgb), 0.2);
+}
+
+.statusRejected {
+    background: rgba(var(--red-rgb), 0.12);
+    color: var(--red);
+    border: 1px solid rgba(var(--red-rgb), 0.2);
+}
+
 .roleUser {
     background: rgba(var(--green-rgb), 0.12);
     color: var(--green);
@@ -382,7 +405,7 @@
 
 .segmentTabActive {
     background: var(--admin-accent);
-    color: #0F2A43;
+    color: white;
     font-weight: 700;
 }
 
@@ -631,13 +654,13 @@
 
 /* Admin birincil buton — pirinç vurgu (masaüstü + mobil, admin geneli) */
 .adminPrimaryBtn {
-    background: linear-gradient(135deg, #C9A15A 0%, #B08A45 100%) !important;
-    color: #0F2A43 !important;
-    box-shadow: 0 8px 24px rgba(201, 161, 90, 0.35), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
+    background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-2) 100%) !important;
+    color: white !important;
+    box-shadow: 0 8px 24px rgba(var(--admin-accent-rgb), 0.28), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
 }
 
 .adminPrimaryBtn:hover:not(:disabled) {
-    box-shadow: 0 12px 32px rgba(201, 161, 90, 0.35), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
+    box-shadow: var(--shadow-hover), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
     filter: brightness(1.05) !important;
 }
 
@@ -645,3 +668,4 @@
 .tabularNums {
     font-variant-numeric: tabular-nums;
 }
+

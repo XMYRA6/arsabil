@@ -10,6 +10,7 @@ const baseResult: CalculationOutput = {
   Mi: 12000000,
   Ma: 5142857,
   M: 17142857,
+  derivedX: 5142857 / 17142857,
   FD_total: 22285714,
   FD_per_m2: 159183,
   Sdx: null,
@@ -67,3 +68,4 @@ describe('HesapFisi', () => {
     expect(screen.getByText('133.714.284,00 ₺')).toBeInTheDocument();
   });
 });
+

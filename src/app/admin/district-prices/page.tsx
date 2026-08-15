@@ -63,7 +63,7 @@ export default function AdminDistrictPrices() {
   };
 
   const handleSave = async () => {
-    const { il, ilce, avgSalesPricePerM2, avgUnitConstructionPrice } =
+    const { il, ilce, avgSalesPricePerM2, avgUnitConstructionPrice, avgLandPricePerM2 } =
       modal.item;
     if (!il || !ilce || avgSalesPricePerM2 === undefined || avgSalesPricePerM2 === null || avgUnitConstructionPrice === undefined || avgUnitConstructionPrice === null) {
       setMessage({ type: "error", text: "Tüm alanlar zorunludur." });
@@ -85,6 +85,9 @@ export default function AdminDistrictPrices() {
             ilce,
             avgSalesPricePerM2: Number(avgSalesPricePerM2),
             avgUnitConstructionPrice: Number(avgUnitConstructionPrice),
+            avgLandPricePerM2: avgLandPricePerM2 === undefined || avgLandPricePerM2 === null
+              ? null
+              : Number(avgLandPricePerM2),
           }),
         }
       );
@@ -143,6 +146,12 @@ export default function AdminDistrictPrices() {
       key: "avgUnitConstructionPrice",
       type: "number",
       placeholder: "örn: 14500",
+    },
+    {
+      label: "Arsa Fiyatı (TL/m²)",
+      key: "avgLandPricePerM2",
+      type: "number",
+      placeholder: "opsiyonel",
     },
   ];
 
@@ -248,7 +257,7 @@ export default function AdminDistrictPrices() {
           >
             <thead>
               <tr style={{ borderBottom: "2px solid var(--border)" }}>
-                {["İl", "İlçe", "Piyasa (TL/m²)", "İnşaat (TL/m²)", "Eylem"].map(
+                {["İl", "İlçe", "Piyasa (TL/m²)", "İnşaat (TL/m²)", "Arsa (TL/m²)", "Eylem"].map(
                   (h) => (
                     <th
                       key={h}
@@ -271,7 +280,7 @@ export default function AdminDistrictPrices() {
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     style={{
                       padding: "2rem",
                       textAlign: "center",
@@ -313,6 +322,15 @@ export default function AdminDistrictPrices() {
                       }}
                     >
                       {p.avgUnitConstructionPrice.toLocaleString("tr-TR")}
+                    </td>
+                    <td
+                      style={{
+                        padding: "10px 12px",
+                        textAlign: "right",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {p.avgLandPricePerM2 == null ? "-" : p.avgLandPricePerM2.toLocaleString("tr-TR")}
                     </td>
                     <td
                       style={{ padding: "10px 12px", textAlign: "center" }}
@@ -401,6 +419,7 @@ export default function AdminDistrictPrices() {
                     fields={[
                       { label: 'Piyasa (TL/m²)', value: <span className={styles.tabularNums}>{p.avgSalesPricePerM2.toLocaleString('tr-TR')}</span> },
                       { label: 'İnşaat (TL/m²)', value: <span className={styles.tabularNums}>{p.avgUnitConstructionPrice.toLocaleString('tr-TR')}</span> },
+                      { label: 'Arsa (TL/m²)', value: <span className={styles.tabularNums}>{p.avgLandPricePerM2 == null ? '-' : p.avgLandPricePerM2.toLocaleString('tr-TR')}</span> },
                     ]}
                     actions={
                       <>
@@ -471,7 +490,7 @@ export default function AdminDistrictPrices() {
                   type={field.type}
                   placeholder={field.placeholder}
                   value={
-                    (modal.item[field.key] as string | number | undefined) ?? ""
+                    (modal.item[field.key] as string | number | null | undefined) ?? ""
                   }
                   onChange={(e) =>
                     setModal((prev) => ({
@@ -480,7 +499,9 @@ export default function AdminDistrictPrices() {
                         ...prev.item,
                         [field.key]:
                           field.type === "number"
-                            ? Number(e.target.value)
+                            ? e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value)
                             : e.target.value,
                       },
                     }))
@@ -532,3 +553,6 @@ export default function AdminDistrictPrices() {
     </>
   );
 }
+
+
+
