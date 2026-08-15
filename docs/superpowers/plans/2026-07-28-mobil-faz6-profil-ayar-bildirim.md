@@ -57,7 +57,8 @@
 
 ## Final Verification
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npx jest`
-- [ ] `npm run build`
-- [ ] Playwright 390x844: `/dashboard/profile`, `/profile/[userId]`, `/dashboard/profile/edit`, `/dashboard/settings`, `/notifications`.
+- [x] `npx tsc --noEmit` (PASS)
+- [x] `npx jest` (159 suites, 1281 tests PASS)
+- [x] `npm run build` (PASS)
+- [x] Playwright 390x844: `/dashboard/profile`, `/profile/test-user`, `/dashboard/profile/edit`, `/dashboard/settings`, `/notifications` (no horizontal overflow; protected dashboard routes redirected to login when signed out; `/profile/test-user` returned expected 404 without seeded user; `/notifications` rendered loading state).
+
