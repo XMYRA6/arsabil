@@ -31,11 +31,41 @@ export function mediaSorgusuDisi(kaynak: string): string {
         .trim()
 }
 
+/**
+ * `composes:` Turbopack/lightningcss'te @media ICINDE bir selector'da OLAMAZ
+ * (bkz. docs/superpowers/plans/2026-08-15-mobil-kart-dili-revizyonu-faz1.md'nin
+ * final review bulgusu) — bu yuzden SADECE composes tasiyan (baska HICBIR
+ * ozellik icermeyen) kurallar bilincli olarak medya sorgusu DISINA taniniyor.
+ * Bunlar hicbir gorsel ozellik tasimadigi icin masaustune SIZMAZ:
+ * .mStatSurface/.mRowList/.mFlatRow'un kendisi de globals.css'te yalnizca
+ * mobil medya sorgusu icinde tanimli, composes edilen sinif adinin disarida
+ * var olmasinin goruntude hicbir etkisi yok. Guard'in asil amaci (gercek
+ * gorsel ozelliklerin — min-height gibi — disari kacmasini yakalamak) bu
+ * istisnayla ZAYIFLAMAZ, cunku bu fonksiyon SADECE "composes: X from global;"
+ * DISINDA hicbir sey icermeyen kurallari cikarir.
+ */
+export function composesKurallariHaric(kaynak: string): string {
+    return kaynak.replace(/\.\w+\s*\{\s*composes:\s*\w+ from global;\s*\}/g, '').trim()
+}
+
 describe('mobile.module.css kapsam guard', () => {
-    it('mobil medya sorgusunun DISINDA hicbir kural yok', () => {
+    it('mobil medya sorgusunun DISINDA hicbir kural yok (composes-only kurallar haric)', () => {
         // Bu dosya branch'in en buyuk yeni CSS dosyasi ve masaustune sizmasi
         // en olasi olan yer. Spec 8: yeni cam siniflari guard altinda olmali.
-        expect(mediaSorgusuDisi(css)).toBe('')
+        expect(composesKurallariHaric(mediaSorgusuDisi(css))).toBe('')
+    })
+
+    it('composes-only olmayan (gorsel ozellik tasiyan) bir kural guard tarafindan hala yakalanir', () => {
+        const sizintili = `
+@media (max-width: 768px) {
+    .kural { color: red; }
+}
+.mStatSurfaceLike {
+    composes: mStatSurface from global;
+    min-height: 44px;
+}
+`
+        expect(composesKurallariHaric(mediaSorgusuDisi(sizintili))).toContain('min-height')
     })
 
     it('TUM min-height tanimlari mobil medya sorgusu icinde', () => {
@@ -83,6 +113,13 @@ describe('mobile.module.css kapsam guard', () => {
     it('temiz fikstur bos doner', () => {
         const temiz = `/* baslik */\n@media (max-width: 768px) {\n    .kural { color: red; }\n}\n`
         expect(mediaSorgusuDisi(temiz)).toBe('')
+    })
+
+    it('.fiyatAciklamasi ve .analizKart paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+        expect(css).toMatch(/\.fiyatAciklamasi\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(css).toMatch(/\.analizKart\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(css).not.toMatch(/\.fiyatAciklamasi\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+        expect(css).not.toMatch(/\.analizKart\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     })
 })
 
