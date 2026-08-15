@@ -146,7 +146,7 @@ npx jest src/lib/districtPrices src/app/admin/district-prices
 npx tsc --noEmit
 ```
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add prisma src/components/LocationSelector.tsx src/lib/data/trProvinces.ts src/lib/districtPrices src/app/api/district-prices src/app/admin/district-prices
@@ -239,7 +239,7 @@ npx jest src/lib/calculator/engine_v2.test.ts
 npx tsc --noEmit
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/calculator/engine_v2.ts src/lib/calculator/engine_v2.test.ts src/lib/calculator/SPEC.md
@@ -353,7 +353,7 @@ npx jest src/lib/calculator/engine_v2.test.ts
 npx tsc --noEmit
 ```
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/app/hesapla/page.tsx src/app/hesapla/page.module.css src/app/hesapla/page.test.tsx
@@ -370,4 +370,8 @@ git commit -m "feat(hesapla): emsal arsa maliyeti secimi eklendi"
 - `npx jest` -> tum proje suite'i yesil.
 - Playwright 1440x900 `/hesapla`: Orantisal modda mevcut slider davranisi, Emsal verisi olan ilcede Emsal modu, Emsal verisi olmayan ilcede disabled durum.
 - Admin `/admin/district-prices`: arsa m2 fiyati ekleme, silme/null'a cekme, mobil DataCard gorunumu.
+
+## Commit Kaydi
+
+- Kod commitleri: c0fe45b (feat: add land cost model and professional UI refresh).
 

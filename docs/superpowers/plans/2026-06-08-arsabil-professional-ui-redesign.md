@@ -99,7 +99,7 @@ npx jest src/app/professionalTheme.scope.test.ts
 npx tsc --noEmit
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/app/globals.css src/app/professionalTheme.scope.test.ts
@@ -144,7 +144,7 @@ Expected: FAIL.
 - Vision/mission: sol `4px` accent border.
 - Blog kartlari: kategori/date aksanlari `--accent`; emoji placeholder varsa cizgi ikon veya gorsel pattern.
 
-- [ ] **Step 4: Dogrulama ve commit**
+- [x] **Step 4: Dogrulama ve commit**
 
 Run:
 
@@ -199,7 +199,7 @@ git commit -m "feat(ui): anasayfa profesyonel gayrimenkul diline tasindi"
 - Status badge: yesil nokta + "Aktif".
 - Hover: `translateY(-4px)` + `--shadow-hover`; reduced motion guard varsa korunur.
 
-- [ ] **Step 4: Dogrulama ve commit**
+- [x] **Step 4: Dogrulama ve commit**
 
 Run:
 
@@ -246,7 +246,7 @@ Test beklentileri:
 - Primary action lacivert gradient; secondary daha sakin border.
 - Mobil 07-28 premium liquid glass kurallariyla cakisan `@media (max-width:768px)` bloklarina dokunma; gerekiyorsa yalnizca desktop/default kurallari guncelle.
 
-- [ ] **Step 4: Dogrulama ve commit**
+- [x] **Step 4: Dogrulama ve commit**
 
 Run:
 
@@ -294,7 +294,7 @@ git commit -m "feat(ui): hesapla kart dili profesyonel tokenlara tasindi"
 - Focus state primary border + focus shadow.
 - Butonlar primary/accent hiyerarsisine uygun.
 
-- [ ] **Step 4: Dogrulama ve commit**
+- [x] **Step 4: Dogrulama ve commit**
 
 Run:
 
@@ -358,7 +358,7 @@ Mobile:
 - brand panel kompakt ust blok veya gizli degil, kisa kimlik sinyali olarak kalir.
 - CTA ve inputlar 48px.
 
-- [ ] **Step 4: Dogrulama ve commit**
+- [x] **Step 4: Dogrulama ve commit**
 
 Run:
 
@@ -403,7 +403,7 @@ git commit -m "feat(ui): auth sayfalari split profesyonel layouta tasindi"
 
 `district-prices`, `users`, `listings`, `offers`, `settings`, `analytics` CSS module'lerinde ortak table/card/button hiyerarsisini tokenlara cek. Mobil DataCard planlariyla cakisan yapisal degisikliklere girme.
 
-- [ ] **Step 4: Dogrulama ve commit**
+- [x] **Step 4: Dogrulama ve commit**
 
 Run:
 
@@ -460,7 +460,7 @@ npx jest
 npm run build
 ```
 
-- [ ] **Step 4: Final commit (yalnizca navbar/final duzeltme olduysa)**
+- [x] **Step 4: Final commit (yalnizca navbar/final duzeltme olduysa)**
 
 ```bash
 git add src/components/layout src/app
@@ -477,4 +477,9 @@ git commit -m "fix(ui): profesyonel redesign final gorsel denetim duzeltmeleri"
 - Playwright 1440x900 ve 390x844: anasayfa, marketplace, hesapla, dashboard/auth/admin yuzeylerinde yatay tasma yok. (2026-08-15 PASS: `/`, `/marketplace`, `/hesapla`, `/login`, `/register`, `/admin`)
 - Dark/light tema: localStorage persistans ve anti-flash script korunur. (2026-08-15 PASS: localStorage `theme=dark` refresh sonrasi korundu)
 - Yeni inline style yok; mevcut inline style sayisi dokunulan sayfalarda azalir.
+
+## Commit Kaydi
+
+- Kod commitleri: c0fe45b (feat: add land cost model and professional UI refresh).
+- Dokumantasyon commitleri: ec84ab4 (docs: archive execution plans and validation runbooks).
 
