@@ -23,10 +23,10 @@
 - Modify: `src/app/profile/[userId]/page.module.css`
 - Test: `src/app/dashboard/profile/profileMobile.scope.test.ts`
 
-- [ ] **Step 1: Failing tests for mobile profile header and stats**
-- [ ] **Step 2: Avatar, metrik ve aksiyonlari cam dile tasima**
-- [ ] **Step 3: Daha once kapatilan avatar/font regresyonlarini koru**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for mobile profile header and stats**
+- [x] **Step 2: Avatar, metrik ve aksiyonlari cam dile tasima**
+- [x] **Step 3: Daha once kapatilan avatar/font regresyonlarini koru**
+- [x] **Step 4: Commit**
 
 ## Task 2: Profil duzenleme ve ayarlar route'lari
 
