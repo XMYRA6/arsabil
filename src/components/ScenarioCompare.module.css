@@ -137,6 +137,14 @@
     background: rgba(var(--primary-rgb), 0.03);
 }
 
+/* .scenarioCard yalnizca mobilde render edilir (bkz. asagidaki media query),
+   ama `composes:` Turbopack/lightningcss'te @media ICINDE bir selector'da
+   OLAMAZ (bkz. docs/superpowers/plans/2026-08-15-mobil-kart-dili-revizyonu-faz1.md) —
+   bu yuzden composes'u tasiyan taban kural burada, media query DISINDA. */
+.scenarioCard {
+    composes: mStatSurface from global;
+}
+
 @media (max-width: 768px) {
     .tableWrap {
         display: none;
@@ -207,12 +215,7 @@
     .scenarioCard {
         flex: 0 0 85%;
         scroll-snap-align: start;
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        border-radius: var(--m-r-card);
         padding: 1rem;
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 

@@ -13,11 +13,14 @@ describe('ScenarioCompare Faz 5 mobil yuzeyi', () => {
         expect(tsx).toMatch(/selectCard\(i\)/)
     })
 
-    it('mobil kartlar --m-* liquid glass tokenlarini kullanir, --seal-* kullanmaz', () => {
-        expect(mobile).toMatch(/\.scenarioCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-        expect(mobile).toMatch(/\.scenarioCard\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/)
+    it('mobil aksiyonlar --m-* liquid glass tokenlarini kullanir, --seal-* kullanmaz', () => {
         expect(mobile).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
         expect(mobile).not.toMatch(/--seal-/)
+    })
+
+    it('.scenarioCard paylasilan .mStatSurface yuzeyine baglanir', () => {
+        expect(css).toMatch(/\.scenarioCard\s*\{[^}]*composes:\s*mStatSurface from global/)
+        expect(mobile).not.toMatch(/\.scenarioCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     })
 
     it('mobil aksiyonlar icon button ve touch-safe olmalidir', () => {

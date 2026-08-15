@@ -10,11 +10,14 @@ describe('ScenarioCompare mobil kart karşılaştırma token kapsamı', () => {
         expect(globalsCss).not.toMatch(/--seal-(surface|border|text|accent)/);
     });
 
-    it('mobil görünüm artık --m-* Liquid Glass tokenlarını kullanmalı, --seal-* değil', () => {
-        expect(mobileSection).toMatch(/\.scenarioCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
-        expect(mobileSection).toMatch(/\.scenarioCard\s*\{[^}]*border:\s*1px solid var\(--m-glass-border\)/);
+    it('mobil görünüm --m-* Liquid Glass tokenlarını (actionBtn/copyBtn) kullanmalı, --seal-* değil', () => {
         expect(mobileSection).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/);
         expect(mobileSection).not.toMatch(/--seal-/);
+    });
+
+    it('.scenarioCard paylasilan .mStatSurface yuzeyine baglanir (kart tekduzeligi duzeltmesi)', () => {
+        expect(css).toMatch(/\.scenarioCard\s*\{[^}]*composes:\s*mStatSurface from global/);
+        expect(mobileSection).not.toMatch(/\.scenarioCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/);
     });
 
     it('.tableWrap masaüstünde görünür/mobilde gizli, .mobileCards tam tersi olmalı', () => {
