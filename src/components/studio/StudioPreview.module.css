@@ -1,0 +1,274 @@
+.studioCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgba(var(--primary-rgb), 0.08), transparent 42%),
+    var(--panel);
+  box-shadow: var(--shadow2);
+  overflow: hidden;
+}
+
+.studioHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--card-title);
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.toolButton {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: var(--shell-bg);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toolButtonActive {
+  border-color: rgba(var(--primary-rgb), 0.36);
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+}
+
+.toolButtonPrimary {
+  border-color: rgba(var(--primary-rgb), 0.36);
+  background: var(--primary);
+  color: #fff;
+}
+
+.canvasShell {
+  height: clamp(360px, 48vw, 520px);
+  min-height: 360px;
+  position: relative;
+}
+
+.canvasLoading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.activateOverlay {
+  position: absolute;
+  inset: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+  background: rgba(15, 23, 42, 0.32);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sourceNote {
+  display: grid;
+  gap: 3px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: rgba(var(--primary-rgb), 0.04);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sourceNote strong {
+  color: var(--card-title);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sourceSummary {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.statusBadge {
+  width: fit-content;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.statusverified {
+  background: rgba(16, 185, 129, .12);
+  color: #047857;
+}
+
+.statusdraft {
+  background: rgba(var(--primary-rgb), .1);
+  color: var(--primary);
+}
+
+.statusdemo {
+  background: rgba(200, 132, 90, .14);
+  color: #9a5a32;
+}
+
+.statusmissing {
+  background: rgba(100, 116, 139, .12);
+  color: #475569;
+}
+
+.assumptionNote {
+  color: #9a5a32;
+  font-weight: 700;
+}
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.metric {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.metric span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--card-title);
+  font-size: 17px;
+}
+
+.emptyState {
+  padding: 18px;
+  color: var(--text);
+}
+
+.emptyState h3 {
+  margin: 0 0 8px;
+  color: var(--card-title);
+  font-size: 18px;
+}
+
+.emptyState p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.warningList {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.warningList li + li {
+  margin-top: 6px;
+}
+
+.warningBand {
+  padding-right: 16px;
+  padding-left: 34px;
+}
+
+.legend {
+  margin: 0;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style: none;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.legendRenk {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .studioHeader {
+    flex-direction: column;
+  }
+
+  .toolbar {
+    justify-content: flex-start;
+  }
+
+  .canvasShell {
+    height: 340px;
+    min-height: 340px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+

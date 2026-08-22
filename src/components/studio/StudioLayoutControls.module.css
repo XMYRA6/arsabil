@@ -1,0 +1,117 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow2);
+  display: grid;
+  gap: 0;
+}
+
+.kontrolGrubu {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.grupBaslik {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.etiket {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.girdi {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+  padding: 0 8px;
+  width: 100%;
+}
+
+.secim {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.etkiMetni {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.segmentSatiri {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.segmentBtn {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.segmentBtnAktif {
+  composes: segmentBtn;
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+}
+
+.ekleBtn {
+  justify-self: start;
+  min-height: 36px;
+  border: 1px dashed rgba(var(--primary-rgb), 0.4);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.kaldirBtn {
+  justify-self: start;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.redMesaji {
+  margin: 0;
+  padding: 12px 16px;
+  color: var(--danger, #dc2626);
+  font-size: 12px;
+}

@@ -35,6 +35,8 @@ model User {
   notifications Notification[]
   compareShares CompareShare[]
   favorites     Favorite[]
+  studioScenarios StudioScenario[]
+  studioShareTokens StudioShareToken[]
 }
 
 model Account {
@@ -264,4 +266,82 @@ model DistrictPrice {
   @@unique([il, ilce])
   @@index([il])
 }
+
+model StudioScenario {
+  id                   String                  @id @default(cuid())
+  userId               String
+  name                 String
+  description          String?
+  parcelIdentity       String?
+  baseInputHash        String
+  parcelSourceStatus   String                  @default("demo")
+  currentVersionNumber Int                     @default(1)
+  isArchived           Boolean                 @default(false)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions             StudioScenarioVersion[]
+  shareTokens          StudioShareToken[]
+
+  @@index([userId])
+  @@index([isArchived])
+}
+
+model StudioScenarioVersion {
+  id             String             @id @default(cuid())
+  scenarioId     String
+  versionNumber  Int
+  snapshotJson   String
+  snapshotHash   String
+  schemaVersion  Int                @default(1)
+  summaryNotes   String?
+  needsRebalance Boolean            @default(false)
+  warningCount   Int                @default(0)
+  createdAt      DateTime           @default(now())
+  scenario       StudioScenario     @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  shareTokens    StudioShareToken[]
+
+  @@unique([scenarioId, versionNumber])
+  @@index([scenarioId])
+  @@index([snapshotHash])
+}
+
+// Faz 4A gap fix (2026-08-22): Once bellek ici (in-memory) bir dizideydi —
+// sunucu yeniden baslayinca/deploy edilince kayboluyordu, serverless
+// ortamda istekler arasinda bile kalici degildi. Notification.entityId ile
+// AYNI desen: gevsek (FK constraint'siz) String referans — audit kaydi,
+// referans verdigi StudioScenario silinse/arsivlense bile BAGIMSIZ kalir.
+model StudioScenarioAuditLog {
+  id            String   @id @default(cuid())
+  userId        String
+  scenarioId    String
+  versionNumber Int?
+  eventType     String
+  metadataJson  String?
+  createdAt     DateTime @default(now())
+
+  @@index([scenarioId])
+  @@index([userId])
+}
+
+model StudioShareToken {
+  id         String                @id @default(cuid())
+  token      String                @unique
+  scenarioId String
+  versionId  String
+  userId     String
+  expiresAt  DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime              @default(now())
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenario   StudioScenario        @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  version    StudioScenarioVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@index([scenarioId])
+  @@index([versionId])
+}
+
+
 

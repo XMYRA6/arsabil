@@ -1,89 +1,14 @@
 # Next Dispatch Brief
 
-**Recommended next work:** `2026-07-01-emsal-arsa-maliyeti.md`
+**Completed Work:** `2026-08-19-arsabil-studio-faz4b-teklif-raporu-ve-guvenli-paylasim.md` (Faz 4B — 100% Tamamlandı ve Doğrulandı).
 
-**Start at:** Task 1 — Veri modeli, API ve admin ekranina `avgLandPricePerM2` ekle.
+## Genel Durum & Faz 4B Kapanış Notları
 
-Bu brief, execution queue'daki ilk isi baslatacak worker icin kisa giris
-notudur. Detayli adimlar canonical plan dosyasindadir; burada yalnizca kapsam,
-baslangic kontrolleri ve dikkat noktasi var.
-
-## Why This First
-
-Emsal arsa maliyeti modeli hesap motoru ve veri modeli karari. UI siralama,
-masaustu denge ve profesyonel redesign isleri bu veri kabiliyeti geldikten sonra
-daha az geri alinacak sekilde uygulanir.
-
-## Read First
-
-1. `docs/superpowers/plans/2026-07-01-emsal-arsa-maliyeti.md`
-2. `docs/superpowers/specs/2026-07-01-emsal-arsa-maliyeti-design.md`
-3. `src/lib/calculator/engine_v2.ts`
-4. `prisma/schema.prisma`
-5. `src/app/admin/district-prices/page.tsx`
-6. `src/app/api/district-prices/route.ts`
-7. `src/app/api/district-prices/[id]/route.ts`
-
-## Initial Commands
-
-```powershell
-git status --short
-npx jest src/lib/districtPrices/__tests__/validate.test.ts
-npx tsc --noEmit
-```
-
-`git status` temiz olmak zorunda degil; sadece mevcut kullanici degisikliklerini
-not et ve ilgisiz dosyalara dokunma.
-
-## Task 1 Scope
-
-Task 1 yalnizca veri/admin/API katmanidir:
-
-- `DistrictPrice.avgLandPricePerM2 Float?`
-- migration SQL
-- shared `DistrictPriceEntry` tipi
-- district price validator
-- `/api/district-prices` POST/PATCH support
-- admin district prices form/table/mobile card support
-- ilgili unit/component testleri
-
-**Do not start yet:**
-
-- `engine_v2` comparable model logic
-- `/hesapla` Orantisal/Emsal UI
-- professional UI redesign
-- masaustu girdi sirasi/sutun dengesi
-
-Those are later tasks.
-
-## Key Decisions
-
-- `avgLandPricePerM2` nullable kalir.
-- Bos admin input'u `null` olarak gider.
-- `avgSalesPricePerM2` daire satis m2 fiyatidir; `avgLandPricePerM2` arsa m2
-  fiyatidir. UI etiketleri bu ayrimi korumali.
-- Existing rows migrate without backfill.
-- Existing seed/static district data is not forced to include land price data.
-
-## Expected Tests
-
-Task 1 sonunda:
-
-```powershell
-npx prisma generate
-npx jest src/lib/districtPrices src/app/admin/district-prices
-npx tsc --noEmit
-```
-
-If Prisma generate fails because dependencies or generated client are stale,
-fix that before moving to Task 2.
-
-## Commit
-
-Canonical planin Task 1 commit mesaji:
-
-```text
-feat(district-prices): emsal arsa m2 fiyati alani eklendi
-```
-
-Commit etmeden once yalnizca Task 1 dosyalarinin staged oldugunu kontrol et.
+Faz 4B (Teklif Raporu ve Güvenli Paylaşım) başarıyla tamamlandı:
+1. `StudioShareToken` Prisma modeli üretildi ve Postgres veritabanına uygulandı.
+2. `src/lib/studio/proposalViewModel.ts`, `exportReadiness.ts`, `proposalAssets.ts` ve `shareToken.ts` kuruldu ve kapsamlı birim testleri yazıldı.
+3. Authenticated paylaşım API route'u (`/api/studio/scenarios/[scenarioId]/versions/[versionNumber]/share`) ve public teklif okuma API route'u (`/api/studio/share/[token]`) çalışır durumda ve test edildi.
+4. Public salt-okunur paylaşım sayfası (`/studio/share/[token]`) responsive tasarım, PDF indirme ve ana sayfaya yönlendirme CTA'ları ile hazırlandı.
+5. `@react-pdf/renderer` tabanlı `StudioProposalDocument.tsx` ve `studioProposalPdfGenerator.ts` entegre edildi.
+6. `ShareProposalDialog.tsx` bileşeni `StudioScenarioBar`, `StudioScenarioLibrary`, `ortakKatmanlar` (`src/app/hesapla/page.tsx`) ve `StudioScenarioMobileLeaf.tsx` ile hem masaüstü hem de mobil görünümünde eksiksiz bağlandı.
+7. Tüm repo testleri (232 suite / 1711 test), `npx tsc --noEmit` (0 hata), `npm run build` (Turbopack) ve Playwright smoke testi (`studio-faz4b-smoke.cjs`) %100 yeşil.

@@ -14,6 +14,17 @@ export type SonucKartiProps = {
     onOrnekProjeIleDene: () => void;
     onFisAc: () => void;
     onAnalizAc: () => void;
+    /** Bilinen bosluk kapatildi: Studio 3D onizleme oncesi yalnizca
+        masaustunde erisilebilirdi (bkz. Faz1B QA bulgusu). */
+    onStudioAc: () => void;
+    /** Faz 2A Task 3: Program Dagilimi paneli. */
+    onProgramMixAc: () => void;
+    /** Faz 2B Task 3: Arsa Sahibi Teklifi paneli. */
+    onLandownerOfferAc: () => void;
+    /** Faz 3A: 2D Yerleşim Tahtası paneli. */
+    onStudio2DAc: () => void;
+    /** Faz 3B: Senaryolar & Karsilastirma paneli. */
+    onStudioScenarioAc?: () => void;
 };
 
 // `maximumFractionDigits: 0` SART: Intl varsayilani 3'tur ve motor ciktisi
@@ -45,6 +56,11 @@ export function SonucKarti({
     onOrnekProjeIleDene,
     onFisAc,
     onAnalizAc,
+    onStudioAc,
+    onProgramMixAc,
+    onLandownerOfferAc,
+    onStudio2DAc,
+    onStudioScenarioAc,
 }: SonucKartiProps) {
     return (
         <div className={styles.sonucKarti}>
@@ -107,6 +123,33 @@ export function SonucKarti({
                 Analiz · maliyet dağılımı, hassasiyet, kırılma
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
+
+            <button type="button" className={styles.fisButonu} onClick={onStudioAc}>
+                3D Önizleme · bina kütlesi
+                <IconChevronRight size={15} strokeWidth={2.4} />
+            </button>
+
+            <button type="button" className={styles.fisButonu} onClick={onProgramMixAc}>
+                Program Dağılımı · daire tipleri, dükkan
+                <IconChevronRight size={15} strokeWidth={2.4} />
+            </button>
+
+            <button type="button" className={styles.fisButonu} onClick={onLandownerOfferAc}>
+                Arsa Sahibi Teklifi · hak ediş, senaryolar
+                <IconChevronRight size={15} strokeWidth={2.4} />
+            </button>
+
+            <button type="button" className={styles.fisButonu} onClick={onStudio2DAc}>
+                2D Yerleşim Tahtası · footprint, çekme, cephe
+                <IconChevronRight size={15} strokeWidth={2.4} />
+            </button>
+
+            {onStudioScenarioAc && (
+                <button type="button" className={styles.fisButonu} onClick={onStudioScenarioAc}>
+                    Senaryolar & Karşılaştırma · alternatifler, geçmiş
+                    <IconChevronRight size={15} strokeWidth={2.4} />
+                </button>
+            )}
         </div>
     );
 }

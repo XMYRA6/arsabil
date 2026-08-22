@@ -1,0 +1,104 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow2);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.gorunumAlani {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.svg {
+  width: 100%;
+  aspect-ratio: 1;
+  display: block;
+}
+
+.yanKolon {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.legendSatiri {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.legendRenk {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.uyarilar {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.bosDurum {
+  padding: 24px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.bosDurumBaslik {
+  margin: 0;
+  color: var(--card-title);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bosDurumSayi {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.parselEkleBtn {
+  min-height: 36px;
+  border: 1px solid rgba(var(--primary-rgb), 0.4);
+  border-radius: 999px;
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+@media (min-width: 900px) {
+  .panel {
+    grid-template-columns: 1fr 260px;
+  }
+
+  .gorunumAlani {
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+  }
+}

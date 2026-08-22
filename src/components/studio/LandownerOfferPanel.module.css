@@ -1,0 +1,187 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow2);
+  overflow: hidden;
+  display: grid;
+  gap: 0;
+}
+
+.bolumBaslik {
+  margin: 0;
+  padding: 16px 16px 0;
+  color: var(--card-title);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.hakEdis {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hakEdisEtiket {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hakEdisDeger {
+  color: var(--card-title);
+  font-size: 18px;
+}
+
+.hakEdisDagilim {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.secenekListesi {
+  margin: 0;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.secenekKarti {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(var(--primary-rgb), 0.05);
+  display: grid;
+  gap: 6px;
+}
+
+.secenekEtiket {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.secenekDetay {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--card-title);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tahminiRozet {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.kaynakRozet {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dogrulamaUyarilari {
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.ticariNotu {
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.uygunlukNotu {
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.degerleme {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.degerlemeUyari {
+  background: rgba(var(--primary-rgb), 0.06);
+}
+
+.degerlemeBaslik {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.degerlemeNot {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.degerlemeGirdiler {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.alan {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.girdi {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+  padding: 0 8px;
+  width: 100%;
+}
+
+.ozelTeklif {
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .degerlemeGirdiler {
+    grid-template-columns: 1fr;
+  }
+}

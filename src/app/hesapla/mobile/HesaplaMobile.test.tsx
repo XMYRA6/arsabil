@@ -48,6 +48,10 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             onOrnekProjeIleDene: jest.fn(),
             onFisAc: jest.fn(),
             onAnalizAc: jest.fn(),
+            onStudioAc: jest.fn(),
+            onProgramMixAc: jest.fn(),
+            onLandownerOfferAc: jest.fn(),
+            onStudio2DAc: jest.fn(),
         },
         girdi: {
             parcelContext: null,
@@ -87,6 +91,42 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
         onAyarlarAc: jest.fn(),
         analizAcik: false,
         analiz: { result: null, baseInput: BASE_INPUT, marketPrice: 0, onKapat: jest.fn() },
+        studioAcik: false,
+        studio: {
+            mass: null,
+            warnings: [],
+            geometrySource: 'Parsel sınırı bilinmiyor',
+            geometryStatus: 'missing',
+            constructionAreaSource: 'İnşaat alanı kaynağı bilinmiyor',
+            constructionAreaEstimated: true,
+            onKapat: jest.fn(),
+        },
+        programMixAcik: false,
+        programMix: {
+            items: [],
+            onItemsChange: jest.fn(),
+            availableAreaM2: null,
+            hasGeometry: false,
+            onKapat: jest.fn(),
+        },
+        landownerOfferAcik: false,
+        landownerOffer: {
+            shareRatio: 0.33,
+            totalUnitCount: 20,
+            valuationAssumptions: null,
+            onValuationAssumptionsChange: jest.fn(),
+            customOverride: null,
+            onCustomOverrideChange: jest.fn(),
+            onKapat: jest.fn(),
+        },
+        studio2DAcik: false,
+        studio2D: {
+            parcelPolygon: null,
+            mass: null,
+            layoutDraft: null,
+            programBands: [],
+            onKapat: jest.fn(),
+        },
         ctaMetni: 'Özet Rapor Oluştur',
         ctaDevreDisi: false,
         onCta: jest.fn(),
@@ -121,6 +161,56 @@ describe('HesaplaMobile — tek kapi', () => {
 
         rerender(<HesaplaMobile {...props({ analizAcik: true })} />)
         expect(screen.getByTestId('analiz-sekmesi')).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
+    })
+
+    // Bilinen bosluk kapatildi: Studio 3D onizleme oncesi yalnizca masaustu
+    // dalinda kabloluydu (Faz1B QA bulgusu) — artik `analizAcik` ile ayni
+    // "derinlestirme yapragi" deseniyle mobilde de acilabiliyor.
+    it('studioAcik ile sonuc karti yerine 3D onizleme gorunumu gelir', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ studioAcik: false })} />)
+        expect(screen.getByText(/Min\. daire fiyatı/)).toBeInTheDocument()
+        expect(screen.queryByRole('heading', { name: '3D Önizleme' })).toBeNull()
+
+        rerender(<HesaplaMobile {...props({ studioAcik: true })} />)
+        expect(screen.getByRole('heading', { name: '3D Önizleme' })).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
+    })
+
+    it('3D onizleme yapraginda Kapat tiklaninca studio.onKapat cagirilir', () => {
+        const onKapat = jest.fn()
+        render(<HesaplaMobile {...props({ studioAcik: true, studio: { ...props().studio, onKapat } })} />)
+        fireEvent.click(screen.getByRole('button', { name: 'Kapat' }))
+        expect(onKapat).toHaveBeenCalledTimes(1)
+    })
+
+    it('programMixAcik ile sonuc karti yerine Program Dagilimi gorunumu gelir', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ programMixAcik: false })} />)
+        expect(screen.getByText(/Min\. daire fiyatı/)).toBeInTheDocument()
+        expect(screen.queryByRole('heading', { name: 'Program Dağılımı' })).toBeNull()
+
+        rerender(<HesaplaMobile {...props({ programMixAcik: true })} />)
+        expect(screen.getByRole('heading', { name: 'Program Dağılımı' })).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
+    })
+
+    it('landownerOfferAcik ile sonuc karti yerine Arsa Sahibi Teklifi gorunumu gelir', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ landownerOfferAcik: false })} />)
+        expect(screen.getByText(/Min\. daire fiyatı/)).toBeInTheDocument()
+        expect(screen.queryByRole('heading', { name: 'Arsa Sahibi Teklifi' })).toBeNull()
+
+        rerender(<HesaplaMobile {...props({ landownerOfferAcik: true })} />)
+        expect(screen.getByRole('heading', { name: 'Arsa Sahibi Teklifi' })).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
+    })
+
+    it('studio2DAcik ile sonuc karti yerine 2D Yerleşim Tahtası gorunumu gelir', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ studio2DAcik: false })} />)
+        expect(screen.getByText(/Min\. daire fiyatı/)).toBeInTheDocument()
+        expect(screen.queryByRole('heading', { name: '2D Yerleşim Tahtası' })).toBeNull()
+
+        rerender(<HesaplaMobile {...props({ studio2DAcik: true })} />)
+        expect(screen.getByRole('heading', { name: '2D Yerleşim Tahtası' })).toBeInTheDocument()
         expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
     })
 

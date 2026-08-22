@@ -1,0 +1,52 @@
+.fallback {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.reason {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.schemaShell {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(var(--primary-rgb), 0.04);
+}
+
+.schema {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+}
+
+.metricTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.metricTable th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 700;
+  padding: 6px 8px 6px 0;
+}
+
+.metricTable td {
+  text-align: right;
+  color: var(--card-title);
+  font-weight: 700;
+  padding: 6px 0;
+}
+
+.metricTable tr + tr th,
+.metricTable tr + tr td {
+  border-top: 1px solid var(--border);
+}

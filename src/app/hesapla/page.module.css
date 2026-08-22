@@ -454,6 +454,12 @@
     flex-direction: column;
 }
 
+.studioPanel {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+
 .mainPanelTitle {
     font-size: 1.15rem;
     font-weight: 800;

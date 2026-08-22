@@ -1,0 +1,46 @@
+import fs from 'fs';
+import path from 'path';
+
+describe('StudioVitrinScene — kaynak dogrulama', () => {
+  it('StudioVitrinScene.tsx kaynak dosyasini denetler', () => {
+    const sourcePath = path.join(__dirname, 'StudioVitrinScene.tsx');
+    expect(fs.existsSync(sourcePath)).toBe(true);
+    const source = fs.readFileSync(sourcePath, 'utf8');
+
+    // 1. Lib katmanindan importlar
+    expect(source).toMatch(/import\s*\{[^}]*generateProceduralFacade[^}]*\}\s*from\s*'@\/lib\/studio\/proceduralFacade'/);
+    expect(source).toMatch(
+      /import\s*\{[^}]*(generateSiteContext|selectRoadEdge)[^}]*\}\s*from\s*'@\/lib\/studio\/siteContext'/
+    );
+
+    // 2. Self-host GLTFLoader ve polyhaven canlı bağlantısı olmaması
+    expect(source).toMatch(/GLTFLoader/);
+    expect(source).toMatch(/\/studio-assets\//);
+    expect(source).not.toMatch(/polyhaven\.com/);
+
+    // 3. Asset hata yakalama
+    expect(source).toMatch(/onError|\.catch\(/);
+
+    // 4. Frameloop demand
+    expect(source).toMatch(/frameloop=["']demand["']/);
+
+    // 5. layoutDraft varsa footprint override GERCEKTEN hesaplanmali
+    // (deriveFootprintPolygon ile) — sabit `undefined` DEGIL. Bug: iki
+    // ternary dali da `undefined` donerse bu regex eslesmez.
+    expect(source).toMatch(/import\s*\{[^}]*deriveFootprintPolygon[^}]*\}\s*from\s*'@\/lib\/studio\/geometry2d'/);
+    expect(source).toMatch(/deriveFootprintPolygon\(\s*mass\.footprint\.points\s*,\s*snapshot\.layoutDraft\.footprint\s*\)/);
+
+    // 6. Poly Haven agac GLB'leri Draco-sikistirilmis — DRACOLoader
+    // baglanmazsa yukleme her zaman basarisiz olur (bkz. bug: her iki
+    // agac da sessizce fallback koniye duserdi). Self-host edilen
+    // cozucu yolu kullanilmali, CDN'e baglanilmamali.
+    expect(source).toMatch(/import\s*\{[^}]*DRACOLoader[^}]*\}\s*from\s*'three\/examples\/jsm\/loaders\/DRACOLoader\.js'/);
+    expect(source).toMatch(/setDecoderPath\(\s*['"]\/studio-assets\/draco\//);
+    expect(source).toMatch(/setDRACOLoader\(/);
+
+    // 7. Environment (HDRI) KENDI Suspense sinirinda olmali — aksi halde
+    // HDR yuklenene kadar TUM sahne (bina/pencere/agac/yol) gizli kalir
+    // (bug: sahne suresiz bos kaliyordu, ekran goruntusuyle dogrulandi).
+    expect(source).toMatch(/<Suspense[^>]*>\s*<Environment/);
+  });
+});

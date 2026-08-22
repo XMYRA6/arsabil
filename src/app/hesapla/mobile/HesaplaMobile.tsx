@@ -8,6 +8,11 @@ import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
 import { AnalizSekmesi, type AnalizSekmesiProps } from './AnalizSekmesi';
 import { SenaryoKarsilastirmaSekmesi } from './SenaryoKarsilastirmaSekmesi';
+import { StudioMobileLeaf, type StudioMobileLeafProps } from './StudioMobileLeaf';
+import { ProgramMixMobileLeaf, type ProgramMixMobileLeafProps } from './ProgramMixMobileLeaf';
+import { LandownerOfferMobileLeaf, type LandownerOfferMobileLeafProps } from './LandownerOfferMobileLeaf';
+import { Studio2DMobileLeaf, type Studio2DMobileLeafProps } from './Studio2DMobileLeaf';
+import { StudioScenarioMobileLeaf, type StudioScenarioMobileLeafProps } from './StudioScenarioMobileLeaf';
 import type { Scenario } from '@/components/ScenarioCompare';
 import styles from './mobile.module.css';
 
@@ -26,6 +31,22 @@ export type HesaplaMobileProps = {
     analizAcik: boolean;
     /** Kapatma affordance'i `AnalizSekmesi.onKapat` icinde yasar — bkz. o dosya. */
     analiz: AnalizSekmesiProps;
+    /** Studio 3D onizleme derinlestirme yapragi acik mi. Bilinen bosluk
+        kapatildi: oncesi Studio yalnizca masaustu dalinda kabloluydu. */
+    studioAcik: boolean;
+    studio: StudioMobileLeafProps;
+    /** Program Dagilimi derinlestirme yapragi acik mi (Faz 2A Task 3). */
+    programMixAcik: boolean;
+    programMix: ProgramMixMobileLeafProps;
+    /** Arsa Sahibi Teklifi derinlestirme yapragi acik mi (Faz 2B Task 3). */
+    landownerOfferAcik: boolean;
+    landownerOffer: LandownerOfferMobileLeafProps;
+    /** 2D Yerleşim Tahtası derinlestirme yapragi acik mi (Faz 3A). */
+    studio2DAcik: boolean;
+    studio2D: Studio2DMobileLeafProps;
+    /** Senaryolar & Karşılaştırma derinlestirme yapragi acik mi (Faz 3B). */
+    studioScenarioAcik?: boolean;
+    studioScenario?: StudioScenarioMobileLeafProps;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
     ctaDevreDisi: boolean;
@@ -59,6 +80,16 @@ export function HesaplaMobile({
     onAyarlarAc,
     analizAcik,
     analiz,
+    studioAcik,
+    studio,
+    programMixAcik,
+    programMix,
+    landownerOfferAcik,
+    landownerOffer,
+    studio2DAcik,
+    studio2D,
+    studioScenarioAcik,
+    studioScenario,
     ctaMetni,
     ctaDevreDisi,
     onCta,
@@ -91,7 +122,17 @@ export function HesaplaMobile({
                     <span className={styles.headerTitle}>Hesapla</span>
                 </header>
 
-                {analizAcik
+                {studioScenarioAcik && studioScenario
+                    ? <StudioScenarioMobileLeaf {...studioScenario} />
+                    : studio2DAcik
+                    ? <Studio2DMobileLeaf {...studio2D} />
+                    : landownerOfferAcik
+                    ? <LandownerOfferMobileLeaf {...landownerOffer} />
+                    : programMixAcik
+                    ? <ProgramMixMobileLeaf {...programMix} />
+                    : studioAcik
+                    ? <StudioMobileLeaf {...studio} />
+                    : analizAcik
                     ? <AnalizSekmesi {...analiz} />
                     : karsilastirmaAcik
                     ? <SenaryoKarsilastirmaSekmesi scenarios={savedScenarios} onKapat={onKarsilastirmaKapat} onShareRequest={onShareRequest} />

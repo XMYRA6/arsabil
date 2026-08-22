@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
 import { RangeSlider } from '@/components/ui/RangeSlider';
@@ -33,6 +33,62 @@ import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
 import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 import { type RiskKaynagi } from './mobile/riskSource';
+import { StudioPreview } from '@/components/studio/StudioPreview';
+import { ProgramMixPanel } from '@/components/studio/ProgramMixPanel';
+import { LandownerOfferPanel } from '@/components/studio/LandownerOfferPanel';
+import { Studio2DPreview } from '@/components/studio/Studio2DPreview';
+import { StudioLayoutControls } from '@/components/studio/StudioLayoutControls';
+import { StudioScenarioBar } from '@/components/studio/StudioScenarioBar';
+import { ScenarioComparison } from '@/components/studio/ScenarioComparison';
+import type { OfferComposerValue } from '@/components/studio/OfferComposer';
+import { createStudioMassingInput } from '@/lib/studio/calculatorAdapter';
+import { createVerifiedParcelPolygon } from '@/lib/studio/parcelGeometry';
+import { collectMassingWarnings, deriveBuildingMass } from '@/lib/studio/massing';
+import { deriveProgramBands } from '@/lib/studio/programInventory';
+import { createDefaultLayoutDraft } from '@/lib/studio/layoutDraft';
+import {
+  createDefaultScenarioDraft,
+  cloneScenarioDraft,
+} from '@/lib/studio/scenarioDraft';
+import {
+  createScenarioHistory,
+  executeScenarioCommand,
+  undoScenario,
+  redoScenario,
+  canUndo,
+  canRedo,
+  isScenarioDirty,
+  getRecentHistoryEntries,
+} from '@/lib/studio/scenarioHistory';
+import { checkRequiresRebalance } from '@/lib/studio/scenarioImpact';
+import {
+  buildScenarioComparison,
+  canCreateAlternative,
+} from '@/lib/studio/scenarioComparison';
+import {
+  saveSessionDrafts,
+  loadSessionDrafts,
+  computeBaseSnapshotHash,
+} from '@/lib/studio/sessionDraftStorage';
+import { createStudioSnapshotFromScenarioDraft } from '@/lib/studio/snapshot';
+import { computeSnapshotHash } from '@/lib/studio/snapshotVersioning';
+import { buildStudioProposalViewModel } from '@/lib/studio/proposalViewModel';
+import { generate2dSvgString, svgToDataUri } from '@/lib/studio/proposalAssets';
+import { StudioSaveDialog } from '@/components/studio/StudioSaveDialog';
+import { StudioScenarioLibrary } from '@/components/studio/StudioScenarioLibrary';
+import { ShareProposalDialog } from '@/components/studio/ShareProposalDialog';
+import type {
+  StudioScenarioRecord,
+  StudioScenarioVersionRecord,
+} from '@/lib/studio/persistenceTypes';
+import type {
+  ProgramMixItem,
+  ScenarioHistoryState,
+  StudioLayoutDraft,
+  StudioPolygon,
+  StudioScenarioDraft,
+  ValuationAssumptions,
+} from '@/lib/studio/types';
 
 interface ProfitLevel {
   id: string;
@@ -67,6 +123,16 @@ const AYAR_VARSAYILANLARI = {
   arsaAlani: 360,
 };
 
+const DEMO_STUDIO_POLYGON: StudioPolygon = {
+  source: 'demo',
+  points: [
+    { x: -16, y: -10 },
+    { x: 14, y: -12 },
+    { x: 18, y: 8 },
+    { x: -12, y: 12 },
+  ],
+};
+
 export default function Home() {
   const { data: session } = useSession();
 
@@ -91,6 +157,16 @@ export default function Home() {
   // AYNI desen). savedScenarios/handleAddScenario/handleRemoveScenario zaten
   // var — bu state yalnizca YAPRAGIN acik/kapali gorunumunu tutar.
   const [mobilKarsilastirmaAcik, setMobilKarsilastirmaAcik] = useState<boolean>(false);
+  // Studio 3D onizleme derinlestirme yapragi — bilinen bosluk kapatildi:
+  // oncesi Studio yalnizca masaustu dalinda kabloluydu (Faz1B QA bulgusu).
+  // Ayni "tek derinlestirme yapragi" deseni (fisAcik/analizAcik ile ayni).
+  const [mobilStudioAcik, setMobilStudioAcik] = useState<boolean>(false);
+  // Program Dagilimi derinlestirme yapragi (Faz 2A Task 3) — ayni desen.
+  const [mobilProgramMixAcik, setMobilProgramMixAcik] = useState<boolean>(false);
+  // Arsa Sahibi Teklifi derinlestirme yapragi (Faz 2B Task 3) — ayni desen.
+  const [mobilLandownerOfferAcik, setMobilLandownerOfferAcik] = useState<boolean>(false);
+  // 2D Yerlesim Tahtasi derinlestirme yapragi (Faz 3A) — ayni desen.
+  const [mobilStudio2DAcik, setMobilStudio2DAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState(false);
   // `parsel` bolumu artik burada degil: parsel secimi `ParcelModal`a tasindi,
@@ -528,6 +604,393 @@ export default function Home() {
     districtLandPricePerM2: selectedDistrictLandPrice,
   });
 
+  const verifiedStudioPolygon = parcelContext?.status === 'verified' && parcelContext.parcel
+    ? createVerifiedParcelPolygon(parcelContext.parcel)
+    : null;
+
+  const studioMassingInput = createStudioMassingInput({
+    calculationInput: {
+      ...chartBaseInput,
+      Aa: chartBaseInput.Aa ?? arsaAlani,
+      Sd: chartBaseInput.Sd ?? totalApartments,
+    },
+    calculationOutput: result,
+    parcelPolygon: result ? (verifiedStudioPolygon ?? DEMO_STUDIO_POLYGON) : undefined,
+  });
+  const studioBuildingMass = result ? deriveBuildingMass(studioMassingInput) : null;
+  const studioWarnings = studioBuildingMass?.warnings ?? collectMassingWarnings(studioMassingInput);
+
+  // Faz 2A Task 3: Program Dagilimi kalemleri. Masaustu+mobil AYNI state'i
+  // paylasir (StudioPreview ile ayni desen) — iki ayri kopya YOK.
+  const [programMixItems, setProgramMixItems] = useState<ProgramMixItem[]>([]);
+  // Faz 2B Task 3: Arsa sahibi teklif senaryolari — degerleme varsayimi ve
+  // ozel teklif de ayni desenle masaustu+mobil arasinda paylasilir.
+  const [valuationAssumptions, setValuationAssumptions] = useState<ValuationAssumptions | null>(null);
+  const [landownerCustomOverride, setLandownerCustomOverride] = useState<OfferComposerValue | null>(null);
+
+  // Faz 3A: 2D yerlesim taslagi.
+  const programBands = deriveProgramBands(programMixItems);
+  const [layoutDraft, setLayoutDraft] = useState<StudioLayoutDraft | null>(null);
+  const effectiveLayoutDraft = layoutDraft ?? (studioBuildingMass ? createDefaultLayoutDraft(programBands) : null);
+  const layoutRequiresRecalculation = !!effectiveLayoutDraft && (
+    effectiveLayoutDraft.footprint.scale !== 1 || (effectiveLayoutDraft.footprint.insetM ?? 0) !== 0
+  );
+
+  // Faz 3B: Senaryo Taslagi, Gecmis ve Karsilastirma
+  const initialBaseScenario = useMemo(() => createDefaultScenarioDraft({
+    id: 'scenario-1',
+    name: 'Varsayılan Senaryo',
+    baseSnapshotRef: {
+      sourceId: result ? 'calc-active' : undefined,
+      parcelAreaM2: studioMassingInput.parcelAreaM2,
+      grossConstructionAreaM2: studioMassingInput.grossConstructionAreaM2,
+      parcelGeometrySource: studioMassingInput.parcelPolygon?.source,
+      hash: computeBaseSnapshotHash({
+        parcelAreaM2: studioMassingInput.parcelAreaM2,
+        grossConstructionAreaM2: studioMassingInput.grossConstructionAreaM2,
+        parcelGeometrySource: studioMassingInput.parcelPolygon?.source,
+      }),
+    },
+    programMix: programMixItems,
+    layout: effectiveLayoutDraft,
+    valuationAssumptions,
+    customOffer: landownerCustomOverride,
+  }), [result, studioMassingInput]);
+
+  const [scenarios, setScenarios] = useState<StudioScenarioDraft[]>([initialBaseScenario]);
+  const [activeScenarioId, setActiveScenarioId] = useState<string>('scenario-1');
+  const [scenarioHistory, setScenarioHistory] = useState<ScenarioHistoryState>(() =>
+    createScenarioHistory(initialBaseScenario)
+  );
+  const [showScenarioComparison, setShowScenarioComparison] = useState(false);
+  const [mobilStudioScenarioAcik, setMobilStudioScenarioAcik] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showScenarioLibrary, setShowScenarioLibrary] = useState(false);
+  const [savedScenarioId, setSavedScenarioId] = useState<string | null>(null);
+  const [savedScenarioVersionNumber, setSavedScenarioVersionNumber] = useState<number | null>(null);
+
+  const activeScenario = scenarios.find((s) => s.id === activeScenarioId) ?? scenarios[0] ?? initialBaseScenario;
+  const isDirty = isScenarioDirty(scenarioHistory);
+  const historyEntries = getRecentHistoryEntries(scenarioHistory, 15);
+  const needsRebalance = checkRequiresRebalance(activeScenario, null);
+
+  const activeScenarioSnapshot = useMemo(() => {
+    return createStudioSnapshotFromScenarioDraft({
+      scenarioDraft: activeScenario,
+      massingInput: studioMassingInput,
+      landShareRatio: effectiveLandShareRatio / 100,
+      averageUnitAreaM2: apartmentSize ?? undefined,
+    });
+  }, [activeScenario, studioMassingInput, effectiveLandShareRatio, apartmentSize]);
+
+  const handleOpenSaveDialog = useCallback(() => {
+    if (!session?.user) {
+      setShowAuthModal(true);
+    } else {
+      setShowSaveDialog(true);
+    }
+  }, [session]);
+
+  const handleOpenLibrary = useCallback(() => {
+    if (!session?.user) {
+      setShowAuthModal(true);
+    } else {
+      setShowScenarioLibrary(true);
+    }
+  }, [session]);
+
+  const handleSaveSuccess = useCallback((scenario: StudioScenarioRecord, version: StudioScenarioVersionRecord) => {
+    setSavedScenarioId(scenario.id);
+    setSavedScenarioVersionNumber(version.versionNumber);
+  }, []);
+
+  const handleLoadScenarioVersion = useCallback((scenario: StudioScenarioRecord, versionRecord: StudioScenarioVersionRecord) => {
+    const snapshot = versionRecord.snapshot;
+    const newDraft: StudioScenarioDraft = {
+      id: `scenario-${Date.now()}`,
+      name: scenario.name,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      baseSnapshotRef: {
+        sourceId: scenario.id,
+        parcelAreaM2: snapshot.massingInput.parcelAreaM2,
+        grossConstructionAreaM2: snapshot.massingInput.grossConstructionAreaM2,
+        parcelGeometrySource: snapshot.massingInput.parcelPolygon?.source,
+        hash: computeBaseSnapshotHash({
+          parcelAreaM2: snapshot.massingInput.parcelAreaM2,
+          grossConstructionAreaM2: snapshot.massingInput.grossConstructionAreaM2,
+          parcelGeometrySource: snapshot.massingInput.parcelPolygon?.source,
+        }),
+      },
+      programMix: snapshot.programMix || [],
+      layout: snapshot.layoutDraft || null,
+      valuationAssumptions: snapshot.valuationAssumptions || null,
+      customOffer: null,
+    };
+
+    setScenarios((prev) => [newDraft, ...prev.filter((s) => s.id !== newDraft.id).slice(0, 2)]);
+    setActiveScenarioId(newDraft.id);
+    setScenarioHistory(createScenarioHistory(newDraft));
+    setProgramMixItems(newDraft.programMix);
+    setLayoutDraft(newDraft.layout);
+    setValuationAssumptions(newDraft.valuationAssumptions);
+    setLandownerCustomOverride(newDraft.customOffer);
+    setSavedScenarioId(scenario.id);
+    setSavedScenarioVersionNumber(versionRecord.versionNumber);
+  }, []);
+
+  const [showShareDialog, setShowShareDialog] = useState(false);
+
+  const activeProposalViewModel = useMemo(() => {
+    const scenarioRec: StudioScenarioRecord = {
+      id: savedScenarioId || activeScenario.id,
+      userId: session?.user?.id || 'anonymous',
+      name: activeScenario.name,
+      description: null,
+      parcelIdentity: studioMassingInput.parcelPolygon?.parcelIdentity ?? null,
+      baseInputHash: activeScenario.baseSnapshotRef.hash || '',
+      parcelSourceStatus: (studioMassingInput.parcelPolygon?.source || 'unavailable') as any,
+      currentVersionNumber: savedScenarioVersionNumber || 1,
+      isArchived: false,
+      createdAt: activeScenario.createdAt,
+      updatedAt: activeScenario.updatedAt,
+    };
+
+    const versionRec: StudioScenarioVersionRecord = {
+      id: savedScenarioId ? `ver-${savedScenarioVersionNumber}` : 'draft-v1',
+      scenarioId: savedScenarioId || activeScenario.id,
+      versionNumber: savedScenarioVersionNumber || 1,
+      snapshot: activeScenarioSnapshot,
+      snapshotHash: computeSnapshotHash(activeScenarioSnapshot),
+      schemaVersion: 1,
+      summaryNotes: null,
+      needsRebalance,
+      warningCount: studioWarnings.length,
+      createdAt: activeScenario.updatedAt,
+    };
+
+    return buildStudioProposalViewModel(scenarioRec, versionRec);
+  }, [
+    activeScenario,
+    savedScenarioId,
+    savedScenarioVersionNumber,
+    activeScenarioSnapshot,
+    needsRebalance,
+    studioWarnings,
+    studioMassingInput,
+    session,
+  ]);
+
+  const handleOpenShareDialog = useCallback(() => {
+    if (!session?.user) {
+      setShowAuthModal(true);
+    } else if (!savedScenarioId) {
+      setShowSaveDialog(true);
+    } else {
+      setShowShareDialog(true);
+    }
+  }, [session, savedScenarioId]);
+
+  const handleDownloadStudioPdf = useCallback(async () => {
+    const { downloadStudioProposalPdf } = await import('@/lib/pdf/studioProposalPdfGenerator');
+    const svgString = generate2dSvgString({
+      parcelPolygon: studioBuildingMass?.footprint ?? null,
+      width: 600,
+      height: 360,
+    });
+    const svgUri = svgToDataUri(svgString);
+    await downloadStudioProposalPdf(activeProposalViewModel, svgUri);
+  }, [studioBuildingMass, activeProposalViewModel]);
+
+  const scenarioComparisonResult = useMemo(() => {
+    return buildScenarioComparison(
+      scenarios,
+      studioMassingInput,
+      effectiveLandShareRatio / 100,
+      apartmentSize ?? undefined
+    );
+  }, [scenarios, studioMassingInput, effectiveLandShareRatio, apartmentSize]);
+
+  // Session storage sync
+  useEffect(() => {
+    const currentBaseHash = computeBaseSnapshotHash({
+      parcelAreaM2: studioMassingInput.parcelAreaM2,
+      grossConstructionAreaM2: studioMassingInput.grossConstructionAreaM2,
+      parcelGeometrySource: studioMassingInput.parcelPolygon?.source,
+    });
+    const loaded = loadSessionDrafts({ currentBaseHash });
+    if (loaded && loaded.scenarios.length > 0) {
+      setScenarios(loaded.scenarios);
+      setActiveScenarioId(loaded.activeScenarioId);
+      const active = loaded.scenarios.find((s) => s.id === loaded.activeScenarioId) ?? loaded.scenarios[0];
+      setScenarioHistory(createScenarioHistory(active));
+      setProgramMixItems(active.programMix);
+      setLayoutDraft(active.layout);
+      setValuationAssumptions(active.valuationAssumptions);
+      setLandownerCustomOverride(active.customOffer);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (scenarios.length > 0) {
+      const baseHash = computeBaseSnapshotHash({
+        parcelAreaM2: studioMassingInput.parcelAreaM2,
+        grossConstructionAreaM2: studioMassingInput.grossConstructionAreaM2,
+        parcelGeometrySource: studioMassingInput.parcelPolygon?.source,
+      });
+      saveSessionDrafts({
+        scenarios,
+        activeScenarioId,
+        baseHash,
+      });
+    }
+  }, [scenarios, activeScenarioId, studioMassingInput]);
+
+  const handleProgramMixChange = useCallback((items: ProgramMixItem[]) => {
+    setProgramMixItems(items);
+    setScenarioHistory((prev) => {
+      const nextHist = executeScenarioCommand(
+        prev,
+        { type: 'SET_PROGRAM_MIX', payload: { items } },
+        'Program dağılımı güncellendi'
+      );
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? nextHist.present : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleLayoutDraftChange = useCallback((layout: StudioLayoutDraft) => {
+    setLayoutDraft(layout);
+    setScenarioHistory((prev) => {
+      const nextHist = executeScenarioCommand(
+        prev,
+        { type: 'SET_LAYOUT', payload: { layout } },
+        '2D Yerleşim güncellendi'
+      );
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? nextHist.present : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleValuationAssumptionsChange = useCallback((assumptions: ValuationAssumptions | null) => {
+    setValuationAssumptions(assumptions);
+    setScenarioHistory((prev) => {
+      const nextHist = executeScenarioCommand(
+        prev,
+        { type: 'SET_VALUATION_ASSUMPTIONS', payload: { assumptions } },
+        'Değerleme varsayımı güncellendi'
+      );
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? nextHist.present : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleCustomOverrideChange = useCallback((override: OfferComposerValue | null) => {
+    setLandownerCustomOverride(override);
+    setScenarioHistory((prev) => {
+      const nextHist = executeScenarioCommand(
+        prev,
+        { type: 'SET_CUSTOM_OFFER', payload: { customOffer: override } },
+        'Özel teklif güncellendi'
+      );
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? nextHist.present : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleScenarioNameChange = useCallback((name: string) => {
+    setScenarioHistory((prev) => {
+      const nextHist = executeScenarioCommand(
+        prev,
+        { type: 'SET_SCENARIO_NAME', payload: { name } },
+        'Senaryo adı değiştirildi'
+      );
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? nextHist.present : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleUndo = useCallback(() => {
+    setScenarioHistory((prev) => {
+      const nextHist = undoScenario(prev);
+      const restored = nextHist.present;
+      setProgramMixItems(restored.programMix);
+      setLayoutDraft(restored.layout);
+      setValuationAssumptions(restored.valuationAssumptions);
+      setLandownerCustomOverride(restored.customOffer);
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? restored : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleRedo = useCallback(() => {
+    setScenarioHistory((prev) => {
+      const nextHist = redoScenario(prev);
+      const restored = nextHist.present;
+      setProgramMixItems(restored.programMix);
+      setLayoutDraft(restored.layout);
+      setValuationAssumptions(restored.valuationAssumptions);
+      setLandownerCustomOverride(restored.customOffer);
+      setScenarios((scs) =>
+        scs.map((s) => (s.id === activeScenarioId ? restored : s))
+      );
+      return nextHist;
+    });
+  }, [activeScenarioId]);
+
+  const handleAddAlternative = useCallback(() => {
+    if (!canCreateAlternative(scenarios)) return;
+    const newId = `scenario-${Date.now()}`;
+    const newName = `Alternatif ${scenarios.length}`;
+    const newDraft = cloneScenarioDraft(activeScenario, newId, newName);
+    setScenarios((prev) => [...prev, newDraft]);
+    setActiveScenarioId(newId);
+    setScenarioHistory(createScenarioHistory(newDraft));
+    setProgramMixItems(newDraft.programMix);
+    setLayoutDraft(newDraft.layout);
+    setValuationAssumptions(newDraft.valuationAssumptions);
+    setLandownerCustomOverride(newDraft.customOffer);
+  }, [scenarios, activeScenario]);
+
+  const handleSelectScenario = useCallback((scenarioId: string) => {
+    const target = scenarios.find((s) => s.id === scenarioId);
+    if (!target) return;
+    setActiveScenarioId(scenarioId);
+    setScenarioHistory(createScenarioHistory(target));
+    setProgramMixItems(target.programMix);
+    setLayoutDraft(target.layout);
+    setValuationAssumptions(target.valuationAssumptions);
+    setLandownerCustomOverride(target.customOffer);
+  }, [scenarios]);
+
+  const handleDeleteScenario = useCallback((scenarioId: string) => {
+    if (scenarios.length <= 1) return;
+    const remaining = scenarios.filter((s) => s.id !== scenarioId);
+    setScenarios(remaining);
+    if (activeScenarioId === scenarioId) {
+      const nextActive = remaining[0];
+      setActiveScenarioId(nextActive.id);
+      setScenarioHistory(createScenarioHistory(nextActive));
+      setProgramMixItems(nextActive.programMix);
+      setLayoutDraft(nextActive.layout);
+      setValuationAssumptions(nextActive.valuationAssumptions);
+      setLandownerCustomOverride(nextActive.customOffer);
+    }
+  }, [scenarios, activeScenarioId]);
+
+
   /**
    * PLATFORMDAN BAGIMSIZ OVERLAY'LER — tek tanim, iki dalda da render edilir.
    *
@@ -553,6 +1016,29 @@ export default function Home() {
         isOpen={isParcelModalOpen}
         onClose={() => setIsParcelModalOpen(false)}
         onConfirm={handleParcelConfirm}
+      />
+      <StudioSaveDialog
+        isOpen={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        currentSnapshot={activeScenarioSnapshot}
+        scenarioName={activeScenario.name}
+        savedScenarioId={savedScenarioId}
+        savedScenarioVersionNumber={savedScenarioVersionNumber}
+        onSaveSuccess={handleSaveSuccess}
+      />
+      <StudioScenarioLibrary
+        isOpen={showScenarioLibrary}
+        onClose={() => setShowScenarioLibrary(false)}
+        currentScenarioId={savedScenarioId}
+        onLoadScenarioVersion={handleLoadScenarioVersion}
+      />
+      <ShareProposalDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        scenarioId={savedScenarioId}
+        versionNumber={savedScenarioVersionNumber}
+        scenarioName={activeScenario.name}
+        viewModel={activeProposalViewModel}
       />
     </>
   );
@@ -583,6 +1069,11 @@ export default function Home() {
             onOrnekProjeIleDene: handleOrnekProjeIleDene,
             onFisAc: () => setMobilFisAcik(true),
             onAnalizAc: () => setMobilAnalizAcik(true),
+            onStudioAc: () => setMobilStudioAcik(true),
+            onProgramMixAc: () => setMobilProgramMixAcik(true),
+            onLandownerOfferAc: () => setMobilLandownerOfferAcik(true),
+            onStudio2DAc: () => setMobilStudio2DAcik(true),
+            onStudioScenarioAc: () => setMobilStudioScenarioAcik(true),
           }}
           fisAcik={mobilFisAcik}
           fiyatAciklamasi={{
@@ -600,6 +1091,81 @@ export default function Home() {
           analiz={{
             result, baseInput: chartBaseInput, marketPrice: marketPriceNum,
             onKapat: () => setMobilAnalizAcik(false),
+          }}
+          studioAcik={mobilStudioAcik}
+          studio={{
+            mass: studioBuildingMass,
+            warnings: studioWarnings,
+            geometrySource: verifiedStudioPolygon ? 'TKGM doğrulanmış parsel sınırı' : result ? 'Demo parsel sınırı' : 'Parsel geometrisi bekleniyor',
+            geometryStatus: verifiedStudioPolygon ? 'verified' : result ? 'demo' : 'missing',
+            constructionAreaSource: studioMassingInput.grossConstructionAreaSource === 'authoritative'
+              ? 'Otoriter inşaat alanı verisi'
+              : 'Daire adedi x ortalama daire m² varsayımı (tahmini)',
+            constructionAreaEstimated: studioMassingInput.grossConstructionAreaSource !== 'authoritative',
+            programMixItems,
+            programBands,
+            layoutDraft: effectiveLayoutDraft,
+            onKapat: () => setMobilStudioAcik(false),
+          }}
+          programMixAcik={mobilProgramMixAcik}
+          programMix={{
+            items: programMixItems,
+            onItemsChange: handleProgramMixChange,
+            availableAreaM2: studioBuildingMass?.grossConstructionAreaM2 ?? null,
+            hasGeometry: !!studioBuildingMass,
+            layoutRequiresRecalculation,
+            onKapat: () => setMobilProgramMixAcik(false),
+          }}
+          landownerOfferAcik={mobilLandownerOfferAcik}
+          landownerOffer={{
+            shareRatio: effectiveLandShareRatio / 100,
+            totalUnitCount: totalApartments,
+            valuationAssumptions,
+            onValuationAssumptionsChange: handleValuationAssumptionsChange,
+            averageUnitAreaM2: apartmentSize ?? undefined,
+            customOverride: landownerCustomOverride,
+            onCustomOverrideChange: handleCustomOverrideChange,
+            programMixItems,
+            onKapat: () => setMobilLandownerOfferAcik(false),
+          }}
+          studio2DAcik={mobilStudio2DAcik}
+          studio2D={{
+            parcelPolygon: studioBuildingMass?.footprint ?? null,
+            mass: studioBuildingMass,
+            layoutDraft: effectiveLayoutDraft,
+            programBands,
+            onLayoutDraftChange: handleLayoutDraftChange,
+            onParcelEkleClick: () => setIsParcelModalOpen(true),
+            onKapat: () => setMobilStudio2DAcik(false),
+          }}
+          studioScenarioAcik={mobilStudioScenarioAcik}
+          studioScenario={{
+            activeScenario,
+            allScenarios: scenarios,
+            canUndo: canUndo(scenarioHistory),
+            canRedo: canRedo(scenarioHistory),
+            isDirty,
+            needsRebalance,
+            historyEntries,
+            comparisonRows: scenarioComparisonResult.rows,
+            canAddMore: scenarioComparisonResult.canAddMore,
+            onUndo: handleUndo,
+            onRedo: handleRedo,
+            onNameChange: handleScenarioNameChange,
+            onAddAlternative: handleAddAlternative,
+            onSelectScenario: handleSelectScenario,
+            onDeleteScenario: handleDeleteScenario,
+            onSaveClick: handleOpenSaveDialog,
+            onLibraryClick: handleOpenLibrary,
+            onShareClick: handleOpenShareDialog,
+            onPdfClick: handleDownloadStudioPdf,
+            savedScenarioId,
+            savedScenarioVersionNumber,
+            onRebalanceClick: () => {
+              setMobilLandownerOfferAcik(true);
+              setMobilStudioScenarioAcik(false);
+            },
+            onKapat: () => setMobilStudioScenarioAcik(false),
           }}
           onParselDogrulaAc={() => setIsParcelModalOpen(true)}
           girdi={{
@@ -905,6 +1471,106 @@ export default function Home() {
             {actionsSection}
           </main>
 
+          <div className={styles.studioPanel}>
+            <StudioScenarioBar
+              activeScenario={activeScenario}
+              allScenarios={scenarios}
+              canUndo={canUndo(scenarioHistory)}
+              canRedo={canRedo(scenarioHistory)}
+              isDirty={isDirty}
+              needsRebalance={needsRebalance}
+              historyEntries={historyEntries}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onNameChange={handleScenarioNameChange}
+              onAddAlternative={handleAddAlternative}
+              onCompareClick={() => setShowScenarioComparison((prev) => !prev)}
+              onSelectScenario={handleSelectScenario}
+              onSaveClick={handleOpenSaveDialog}
+              onLibraryClick={handleOpenLibrary}
+              onShareClick={handleOpenShareDialog}
+              onPdfClick={handleDownloadStudioPdf}
+              savedScenarioId={savedScenarioId}
+              savedScenarioVersionNumber={savedScenarioVersionNumber}
+              onRebalanceClick={() => {
+                const el = document.getElementById('landowner-offer-panel-container');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            />
+          </div>
+
+          {showScenarioComparison && (
+            <div className={styles.studioPanel}>
+              <ScenarioComparison
+                rows={scenarioComparisonResult.rows}
+                activeScenarioId={activeScenario.id}
+                canAddMore={scenarioComparisonResult.canAddMore}
+                onSelectScenario={handleSelectScenario}
+                onDeleteScenario={handleDeleteScenario}
+                onClose={() => setShowScenarioComparison(false)}
+              />
+            </div>
+          )}
+
+          <div className={styles.studioPanel}>
+            <StudioPreview
+              mass={studioBuildingMass}
+              warnings={studioWarnings}
+              geometrySource={verifiedStudioPolygon ? 'TKGM doğrulanmış parsel sınırı' : result ? 'Demo parsel sınırı' : 'Parsel geometrisi bekleniyor'}
+              geometryStatus={verifiedStudioPolygon ? 'verified' : result ? 'demo' : 'missing'}
+              constructionAreaSource={studioMassingInput.grossConstructionAreaSource === 'authoritative'
+                ? 'Otoriter inşaat alanı verisi'
+                : 'Daire adedi x ortalama daire m² varsayımı (tahmini)'}
+              constructionAreaEstimated={studioMassingInput.grossConstructionAreaSource !== 'authoritative'}
+              programMixItems={programMixItems}
+              programBands={programBands}
+              layoutDraft={effectiveLayoutDraft}
+            />
+          </div>
+
+          <div className={styles.studioPanel}>
+            <ProgramMixPanel
+              items={programMixItems}
+              onItemsChange={handleProgramMixChange}
+              availableAreaM2={studioBuildingMass?.grossConstructionAreaM2 ?? null}
+              hasGeometry={!!studioBuildingMass}
+              layoutRequiresRecalculation={layoutRequiresRecalculation}
+            />
+          </div>
+
+          <div className={styles.studioPanel}>
+            <Studio2DPreview
+              parcelPolygon={studioBuildingMass?.footprint ?? null}
+              mass={studioBuildingMass}
+              layoutDraft={effectiveLayoutDraft}
+              programBands={programBands}
+              onParcelEkleClick={() => setIsParcelModalOpen(true)}
+            />
+          </div>
+
+          {studioBuildingMass && effectiveLayoutDraft && (
+            <div className={styles.studioPanel}>
+              <StudioLayoutControls
+                layoutDraft={effectiveLayoutDraft}
+                onLayoutDraftChange={handleLayoutDraftChange}
+                mass={studioBuildingMass}
+              />
+            </div>
+          )}
+
+          <div className={styles.studioPanel} id="landowner-offer-panel-container">
+            <LandownerOfferPanel
+              shareRatio={effectiveLandShareRatio / 100}
+              totalUnitCount={totalApartments}
+              valuationAssumptions={valuationAssumptions}
+              onValuationAssumptionsChange={handleValuationAssumptionsChange}
+              averageUnitAreaM2={apartmentSize ?? undefined}
+              customOverride={landownerCustomOverride}
+              onCustomOverrideChange={handleCustomOverrideChange}
+              programMixItems={programMixItems}
+            />
+          </div>
+
           {/* Hesap Özeti */}
           <aside className={`${styles.summaryPanel} ${styles.swipeCard}`}>
             <div className={styles.summaryPanelTitle}>
@@ -1026,5 +1692,9 @@ export default function Home() {
     </div >
   );
 }
+
+
+
+
 
 

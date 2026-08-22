@@ -17,6 +17,10 @@ const BASE = {
     onOrnekProjeIleDene: jest.fn(),
     onFisAc: jest.fn(),
     onAnalizAc: jest.fn(),
+    onStudioAc: jest.fn(),
+    onProgramMixAc: jest.fn(),
+    onLandownerOfferAc: jest.fn(),
+    onStudio2DAc: jest.fn(),
 }
 
 describe('SonucKarti', () => {
@@ -80,6 +84,36 @@ describe('SonucKarti', () => {
         render(<SonucKarti {...BASE} onAnalizAc={onAnalizAc} />)
         await userEvent.click(screen.getByRole('button', { name: /Analiz/ }))
         expect(onAnalizAc).toHaveBeenCalledTimes(1)
+    })
+
+    // Bilinen bosluk kapatildi: Studio 3D onizleme mobilde artik erisilebilir
+    // (onceden yalnizca masaustunde kabloluydu).
+    it('3D Onizleme satiri onStudioAc i cagirir', async () => {
+        const onStudioAc = jest.fn()
+        render(<SonucKarti {...BASE} onStudioAc={onStudioAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /3D Önizleme/ }))
+        expect(onStudioAc).toHaveBeenCalledTimes(1)
+    })
+
+    it('Program Dagilimi satiri onProgramMixAc i cagirir', async () => {
+        const onProgramMixAc = jest.fn()
+        render(<SonucKarti {...BASE} onProgramMixAc={onProgramMixAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /Program Dağılımı/ }))
+        expect(onProgramMixAc).toHaveBeenCalledTimes(1)
+    })
+
+    it('Arsa Sahibi Teklifi satiri onLandownerOfferAc i cagirir', async () => {
+        const onLandownerOfferAc = jest.fn()
+        render(<SonucKarti {...BASE} onLandownerOfferAc={onLandownerOfferAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /Arsa Sahibi Teklifi/ }))
+        expect(onLandownerOfferAc).toHaveBeenCalledTimes(1)
+    })
+
+    it('2D Yerleşim Tahtası satiri onStudio2DAc i cagirir', async () => {
+        const onStudio2DAc = jest.fn()
+        render(<SonucKarti {...BASE} onStudio2DAc={onStudio2DAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /2D Yerleşim/ }))
+        expect(onStudio2DAc).toHaveBeenCalledTimes(1)
     })
 
     it('karsilastirma blogu kart icinde render edilir', () => {

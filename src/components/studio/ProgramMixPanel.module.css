@@ -1,0 +1,241 @@
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow2);
+  overflow: hidden;
+  display: grid;
+  gap: 0;
+}
+
+.bolumBaslik {
+  margin: 0 0 10px;
+  color: var(--card-title);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.yenidenHesaplamaNotu {
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(var(--primary-rgb), 0.06);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.potansiyel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.potansiyelEtiket {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.potansiyelDeger {
+  color: var(--card-title);
+  font-size: 18px;
+}
+
+.potansiyelBekleniyor {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bantlar {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  transition: opacity 0.2s ease;
+}
+
+/* 3D kat bandi gorunumu pasif — geometri gelene kadar sonuclarin
+   "hesaplanmis gibi" gorunmesini engeller (Task 3 bullet 5). */
+.bantlarPasif {
+  opacity: 0.55;
+}
+
+.bantListesi {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text);
+  font-size: 13px;
+  display: grid;
+  gap: 4px;
+}
+
+.bantYok {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.envanter {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.satir {
+  display: grid;
+  grid-template-columns: minmax(110px, 1fr) minmax(90px, 1fr) 90px 110px 90px 90px auto;
+  align-items: end;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--shell-bg);
+  position: relative;
+}
+
+.satirZeminDukkan {
+  background: rgba(var(--primary-rgb), 0.06);
+  border-color: rgba(var(--primary-rgb), 0.28);
+}
+
+.zeminRozeti {
+  grid-column: 1 / -1;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(var(--primary-rgb), 0.14);
+  color: var(--primary);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.elleRozeti {
+  grid-column: 1 / -1;
+  width: fit-content;
+  color: #9a5a32;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.secim {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.alanEtiket {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sayiGirdi {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+  padding: 0 8px;
+  width: 100%;
+}
+
+.kaldirBtn {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.ekleBtn {
+  justify-self: start;
+  min-height: 36px;
+  border: 1px dashed rgba(var(--primary-rgb), 0.4);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.ozet {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ozetKutu {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(var(--primary-rgb), 0.05);
+  display: grid;
+  gap: 4px;
+}
+
+.ozetKutu span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ozetKutu strong {
+  color: var(--card-title);
+  font-size: 15px;
+}
+
+.uyarilar {
+  margin: 0;
+  padding: 12px 16px 16px 34px;
+  color: var(--muted);
+  font-size: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .satir {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'badge badge'
+      'use use'
+      'type type'
+      'count area'
+      'floorstart floorend'
+      'manual manual'
+      'remove remove';
+  }
+
+  .satir > .zeminRozeti { grid-area: badge; }
+  .satir > .elleRozeti { grid-area: manual; }
+  .satir > .kaldirBtn { grid-area: remove; justify-self: stretch; }
+
+  .ozet {
+    grid-template-columns: 1fr;
+  }
+}
