@@ -15,12 +15,9 @@ const BASE = {
     hasEnoughDataForResult: true,
     isDemoData: false,
     onOrnekProjeIleDene: jest.fn(),
-    onFisAc: jest.fn(),
-    onAnalizAc: jest.fn(),
-    onStudioAc: jest.fn(),
-    onProgramMixAc: jest.fn(),
+    onSonucDetayiAc: jest.fn(),
+    onStudioHubAc: jest.fn(),
     onLandownerOfferAc: jest.fn(),
-    onStudio2DAc: jest.fn(),
 }
 
 describe('SonucKarti', () => {
@@ -72,34 +69,18 @@ describe('SonucKarti', () => {
         expect(screen.getAllByText('—')).toHaveLength(2)
     })
 
-    it('fis butonu onFisAc i cagirir', async () => {
-        const onFisAc = jest.fn()
-        render(<SonucKarti {...BASE} onFisAc={onFisAc} />)
-        await userEvent.click(screen.getByRole('button', { name: /Hesap fişi/ }))
-        expect(onFisAc).toHaveBeenCalledTimes(1)
+    it('Sonuc Detayi satiri onSonucDetayiAc i cagirir', async () => {
+        const onSonucDetayiAc = jest.fn()
+        render(<SonucKarti {...BASE} onSonucDetayiAc={onSonucDetayiAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /Sonuç Detayı/ }))
+        expect(onSonucDetayiAc).toHaveBeenCalledTimes(1)
     })
 
-    it('Analiz satiri onAnalizAc i cagirir', async () => {
-        const onAnalizAc = jest.fn()
-        render(<SonucKarti {...BASE} onAnalizAc={onAnalizAc} />)
-        await userEvent.click(screen.getByRole('button', { name: /Analiz/ }))
-        expect(onAnalizAc).toHaveBeenCalledTimes(1)
-    })
-
-    // Bilinen bosluk kapatildi: Studio 3D onizleme mobilde artik erisilebilir
-    // (onceden yalnizca masaustunde kabloluydu).
-    it('3D Onizleme satiri onStudioAc i cagirir', async () => {
-        const onStudioAc = jest.fn()
-        render(<SonucKarti {...BASE} onStudioAc={onStudioAc} />)
-        await userEvent.click(screen.getByRole('button', { name: /3D Önizleme/ }))
-        expect(onStudioAc).toHaveBeenCalledTimes(1)
-    })
-
-    it('Program Dagilimi satiri onProgramMixAc i cagirir', async () => {
-        const onProgramMixAc = jest.fn()
-        render(<SonucKarti {...BASE} onProgramMixAc={onProgramMixAc} />)
-        await userEvent.click(screen.getByRole('button', { name: /Program Dağılımı/ }))
-        expect(onProgramMixAc).toHaveBeenCalledTimes(1)
+    it('Tasarim Studyosu satiri onStudioHubAc i cagirir', async () => {
+        const onStudioHubAc = jest.fn()
+        render(<SonucKarti {...BASE} onStudioHubAc={onStudioHubAc} />)
+        await userEvent.click(screen.getByRole('button', { name: /Tasarım Stüdyosu/ }))
+        expect(onStudioHubAc).toHaveBeenCalledTimes(1)
     })
 
     it('Arsa Sahibi Teklifi satiri onLandownerOfferAc i cagirir', async () => {
@@ -109,11 +90,12 @@ describe('SonucKarti', () => {
         expect(onLandownerOfferAc).toHaveBeenCalledTimes(1)
     })
 
-    it('2D Yerleşim Tahtası satiri onStudio2DAc i cagirir', async () => {
-        const onStudio2DAc = jest.fn()
-        render(<SonucKarti {...BASE} onStudio2DAc={onStudio2DAc} />)
-        await userEvent.click(screen.getByRole('button', { name: /2D Yerleşim/ }))
-        expect(onStudio2DAc).toHaveBeenCalledTimes(1)
+    it('yalnizca UC buton render edilir (7 degil)', () => {
+        render(<SonucKarti {...BASE} />)
+        const butonlar = screen.getAllByRole('button').filter(b =>
+            /Sonuç Detayı|Tasarım Stüdyosu|Arsa Sahibi Teklifi/.test(b.textContent ?? '')
+        )
+        expect(butonlar).toHaveLength(3)
     })
 
     it('karsilastirma blogu kart icinde render edilir', () => {

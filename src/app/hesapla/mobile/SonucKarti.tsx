@@ -12,19 +12,17 @@ export type SonucKartiProps = {
     hasEnoughDataForResult: boolean;
     isDemoData: boolean;
     onOrnekProjeIleDene: () => void;
-    onFisAc: () => void;
-    onAnalizAc: () => void;
-    /** Bilinen bosluk kapatildi: Studio 3D onizleme oncesi yalnizca
-        masaustunde erisilebilirdi (bkz. Faz1B QA bulgusu). */
-    onStudioAc: () => void;
-    /** Faz 2A Task 3: Program Dagilimi paneli. */
-    onProgramMixAc: () => void;
-    /** Faz 2B Task 3: Arsa Sahibi Teklifi paneli. */
+    /** "Sonuç Detayı" yaprağını açar — Hesap Fişi + Analiz birleşimi
+        (2026-08-23 IA sadeleştirmesi). */
+    onSonucDetayiAc: () => void;
+    /** "Tasarım Stüdyosu" iç-içe hub menüsünü açar — 2D Yerleşim,
+        Program Dağılımı, 3D Önizleme, Tasarım Senaryoları buradan
+        erişilir (2026-08-23 IA sadeleştirmesi). */
+    onStudioHubAc: () => void;
+    /** Faz 2B Task 3: Arsa Sahibi Teklifi paneli. Standalone kalır —
+        tasarım geometrisi iş akışıyla gevşek bağlı, farklı bir amaç
+        (arsa sahibiyle pazarlık) için var. */
     onLandownerOfferAc: () => void;
-    /** Faz 3A: 2D Yerleşim Tahtası paneli. */
-    onStudio2DAc: () => void;
-    /** Faz 3B: Senaryolar & Karsilastirma paneli. */
-    onStudioScenarioAc?: () => void;
 };
 
 // `maximumFractionDigits: 0` SART: Intl varsayilani 3'tur ve motor ciktisi
@@ -54,13 +52,9 @@ export function SonucKarti({
     hasEnoughDataForResult,
     isDemoData,
     onOrnekProjeIleDene,
-    onFisAc,
-    onAnalizAc,
-    onStudioAc,
-    onProgramMixAc,
+    onSonucDetayiAc,
+    onStudioHubAc,
     onLandownerOfferAc,
-    onStudio2DAc,
-    onStudioScenarioAc,
 }: SonucKartiProps) {
     return (
         <div className={styles.sonucKarti}>
@@ -114,42 +108,20 @@ export function SonucKarti({
                 </>
             )}
 
-            <button type="button" className={styles.fisButonu} onClick={onFisAc}>
-                Hesap fişi · Mi → Ma → M → ×K → FD
+            <button type="button" className={styles.fisButonu} onClick={onSonucDetayiAc}>
+                Sonuç Detayı · hesap fişi, analiz
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
 
-            <button type="button" className={styles.fisButonu} onClick={onAnalizAc}>
-                Analiz · maliyet dağılımı, hassasiyet, kırılma
-                <IconChevronRight size={15} strokeWidth={2.4} />
-            </button>
-
-            <button type="button" className={styles.fisButonu} onClick={onStudioAc}>
-                3D Önizleme · bina kütlesi
-                <IconChevronRight size={15} strokeWidth={2.4} />
-            </button>
-
-            <button type="button" className={styles.fisButonu} onClick={onProgramMixAc}>
-                Program Dağılımı · daire tipleri, dükkan
+            <button type="button" className={styles.fisButonu} onClick={onStudioHubAc}>
+                Tasarım Stüdyosu · yerleşim, program, 3D
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
 
             <button type="button" className={styles.fisButonu} onClick={onLandownerOfferAc}>
-                Arsa Sahibi Teklifi · hak ediş, senaryolar
+                Arsa Sahibi Teklifi · hak ediş
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
-
-            <button type="button" className={styles.fisButonu} onClick={onStudio2DAc}>
-                2D Yerleşim Tahtası · footprint, çekme, cephe
-                <IconChevronRight size={15} strokeWidth={2.4} />
-            </button>
-
-            {onStudioScenarioAc && (
-                <button type="button" className={styles.fisButonu} onClick={onStudioScenarioAc}>
-                    Senaryolar & Karşılaştırma · alternatifler, geçmiş
-                    <IconChevronRight size={15} strokeWidth={2.4} />
-                </button>
-            )}
         </div>
     );
 }
