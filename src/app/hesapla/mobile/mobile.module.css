@@ -215,6 +215,39 @@
         cursor: pointer;
     }
 
+    /* ═══ Tasarım Stüdyosu hub (2026-08-23 IA sadelestirmesi) ═══════════
+       `.fisButonu` beyaz-cam/beyaz-metin AYNI mavi degrade `.sonucKarti`
+       arka planina gore tasarlandi, duz sayfa arka planinda kullanilamaz
+       (beyaz metin beyaz zeminde kaybolur). Bu yuzden `.gelismisAyarlarBtn`
+       ile AYNI koyu-mürekkep/acik-cam renk paletiyle, ama `.fisButonu`nun
+       satir-ici (etiket solda + chevron sagda) yerlesimiyle yeni bir
+       varyant. */
+    .hubButonListesi {
+        margin: 0 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .hubButonu {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 13px;
+        border-radius: var(--m-r-input);
+        border: 1px solid rgba(255, 255, 255, .9);
+        background: rgba(255, 255, 255, .55);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: 0 8px 24px rgba(20, 70, 150, .1), inset 0 1px 0 rgba(255, 255, 255, .95);
+        color: var(--m-on-glass);
+        font: 700 11.5px Inter, sans-serif;
+        cursor: pointer;
+    }
+
     /* ═══ Girdi karti (2a alt) ═══════════════════════════════════════════ */
 
     .openParcelBtnMobile {

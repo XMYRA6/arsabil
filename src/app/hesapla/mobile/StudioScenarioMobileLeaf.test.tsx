@@ -46,7 +46,7 @@ describe('StudioScenarioMobileLeaf', () => {
   it('baslik ve icerigi render eder ve Kapat butonuna tiklandiginda onKapat cagirir', () => {
     render(<StudioScenarioMobileLeaf {...defaultProps} />);
 
-    expect(screen.getByText('Senaryolar & Karşılaştırma')).toBeInTheDocument();
+    expect(screen.getByText('Tasarım Senaryoları')).toBeInTheDocument();
     expect(screen.getByTestId('studio-scenario-bar')).toBeInTheDocument();
     expect(screen.getByTestId('scenario-comparison')).toBeInTheDocument();
 

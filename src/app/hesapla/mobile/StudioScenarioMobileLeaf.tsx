@@ -34,7 +34,7 @@ export type StudioScenarioMobileLeafProps = {
 };
 
 /**
- * Mobil "Senaryolar & Karşılaştırma" derinleştirme yaprağı (Faz 3B & 4A & 4B).
+ * Mobil "Tasarım Senaryoları" derinleştirme yaprağı (Faz 3B & 4A & 4B).
  * Masaüstü StudioScenarioBar ve ScenarioComparison bileşenlerini mobilde
  * aynen sarmalar (kopyalamaz).
  */
@@ -66,7 +66,7 @@ export function StudioScenarioMobileLeaf({
   return (
     <>
       <header className={styles.analizKapatSatiri}>
-        <h2 className={styles.aciklamaBaslikMetin}>Senaryolar & Karşılaştırma</h2>
+        <h2 className={styles.aciklamaBaslikMetin}>Tasarım Senaryoları</h2>
         <button type="button" className={styles.aciklamaKapat} onClick={onKapat}>
           Kapat
         </button>
