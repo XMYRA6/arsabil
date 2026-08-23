@@ -149,10 +149,7 @@ export default function Home() {
   const [landShareRatio, setLandShareRatio] = useState<number>(33); // %
   // Mobil `4a` ekrani acik mi. Gorunum durumu da `page.tsx`te yasar —
   // `HesaplaMobile` hicbir state sahiplenmez (plan mimari karari).
-  const [mobilFisAcik, setMobilFisAcik] = useState<boolean>(false);
-  // Analiz derinlestirme yapragi (maliyet dagilimi, hassasiyet, kirilma).
-  // Task 6 tuketecek; burada yalnizca tanimlanir ve onAnalizAc tarafindan yazilir.
-  const [mobilAnalizAcik, setMobilAnalizAcik] = useState<boolean>(false);
+  const [mobilSonucDetayiAcik, setMobilSonucDetayiAcik] = useState<boolean>(false);
   // Senaryo karsilastirma derinlestirme yapragi (Task 6/7'nin AnalizSekmesi'yle
   // AYNI desen). savedScenarios/handleAddScenario/handleRemoveScenario zaten
   // var — bu state yalnizca YAPRAGIN acik/kapali gorunumunu tutar.
@@ -169,6 +166,7 @@ export default function Home() {
   const [mobilStudio2DAcik, setMobilStudio2DAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState(false);
+  const [mobilStudioHubAcik, setMobilStudioHubAcik] = useState<boolean>(false);
   // `parsel` bolumu artik burada degil: parsel secimi `ParcelModal`a tasindi,
   // `AyarBolumu` birlesiminde de yok. Tip artik yaprakla ayni kaynaktan geliyor,
   // boylece yaprak yeni bir bolum kazanirsa/kaybederse burasi derlemede patlar.
@@ -1067,30 +1065,24 @@ export default function Home() {
             hasEnoughDataForResult,
             isDemoData,
             onOrnekProjeIleDene: handleOrnekProjeIleDene,
-            onFisAc: () => setMobilFisAcik(true),
-            onAnalizAc: () => setMobilAnalizAcik(true),
-            onStudioAc: () => setMobilStudioAcik(true),
-            onProgramMixAc: () => setMobilProgramMixAcik(true),
+            onSonucDetayiAc: () => setMobilSonucDetayiAcik(true),
+            onStudioHubAc: () => setMobilStudioHubAcik(true),
             onLandownerOfferAc: () => setMobilLandownerOfferAcik(true),
-            onStudio2DAc: () => setMobilStudio2DAcik(true),
-            onStudioScenarioAc: () => setMobilStudioScenarioAcik(true),
-          }}
-          fisAcik={mobilFisAcik}
-          fiyatAciklamasi={{
-            result,
-            apartmentSize,
-            unitPrice: globalUnitPrice,
-            landSharePercent: Math.round(effectiveLandShareRatio),
-            profitLabel: profitLevels.find(p => p.value === builderProfit)?.label ?? 'Özel',
-            profitMultiplier: builderProfit,
-            onKapat: () => setMobilFisAcik(false),
-            onKarDegistir: () => { setMobilAyarBolumu('kar'); setMobilAyarlarAcik(true); },
           }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
-          analizAcik={mobilAnalizAcik}
-          analiz={{
-            result, baseInput: chartBaseInput, marketPrice: marketPriceNum,
-            onKapat: () => setMobilAnalizAcik(false),
+          sonucDetayiAcik={mobilSonucDetayiAcik}
+          sonucDetayi={{
+            fiyatAciklamasi: {
+              result,
+              apartmentSize,
+              unitPrice: globalUnitPrice,
+              landSharePercent: Math.round(effectiveLandShareRatio),
+              profitLabel: profitLevels.find(p => p.value === builderProfit)?.label ?? 'Özel',
+              profitMultiplier: builderProfit,
+              onKarDegistir: () => { setMobilAyarBolumu('kar'); setMobilAyarlarAcik(true); },
+            },
+            analiz: { result, baseInput: chartBaseInput, marketPrice: marketPriceNum },
+            onKapat: () => setMobilSonucDetayiAcik(false),
           }}
           studioAcik={mobilStudioAcik}
           studio={{
@@ -1107,6 +1099,12 @@ export default function Home() {
             layoutDraft: effectiveLayoutDraft,
             onKapat: () => setMobilStudioAcik(false),
           }}
+          studioHubAcik={mobilStudioHubAcik}
+          onStudioHubKapat={() => setMobilStudioHubAcik(false)}
+          onYerlesimAc={() => setMobilStudio2DAcik(true)}
+          onProgramAc={() => setMobilProgramMixAcik(true)}
+          on3DAc={() => setMobilStudioAcik(true)}
+          onSenaryolarAc={() => setMobilStudioScenarioAcik(true)}
           programMixAcik={mobilProgramMixAcik}
           programMix={{
             items: programMixItems,

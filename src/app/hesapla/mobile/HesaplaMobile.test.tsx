@@ -46,12 +46,9 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             hasEnoughDataForResult: true,
             isDemoData: false,
             onOrnekProjeIleDene: jest.fn(),
-            onFisAc: jest.fn(),
-            onAnalizAc: jest.fn(),
-            onStudioAc: jest.fn(),
-            onProgramMixAc: jest.fn(),
+            onSonucDetayiAc: jest.fn(),
+            onStudioHubAc: jest.fn(),
             onLandownerOfferAc: jest.fn(),
-            onStudio2DAc: jest.fn(),
         },
         girdi: {
             parcelContext: null,
@@ -77,21 +74,28 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             ownerApartmentShare: 6, onOwnerApartmentShare: jest.fn(),
         },
         onParselDogrulaAc: jest.fn(),
-        fisAcik: false,
-        fiyatAciklamasi: {
-            result: null,
-            apartmentSize: 140,
-            unitPrice: 12000,
-            landSharePercent: 33,
-            profitLabel: 'Orta',
-            profitMultiplier: 1.3,
-            onKapat: jest.fn(),
-            onKarDegistir: jest.fn(),
-        },
         onAyarlarAc: jest.fn(),
-        analizAcik: false,
-        analiz: { result: null, baseInput: BASE_INPUT, marketPrice: 0, onKapat: jest.fn() },
+        sonucDetayiAcik: false,
+        sonucDetayi: {
+            fiyatAciklamasi: {
+                result: null,
+                apartmentSize: 140,
+                unitPrice: 12000,
+                landSharePercent: 33,
+                profitLabel: 'Orta',
+                profitMultiplier: 1.3,
+                onKarDegistir: jest.fn(),
+            },
+            analiz: { result: null, baseInput: BASE_INPUT, marketPrice: 0 },
+            onKapat: jest.fn(),
+        },
         studioAcik: false,
+        studioHubAcik: false,
+        onStudioHubKapat: jest.fn(),
+        onYerlesimAc: jest.fn(),
+        onProgramAc: jest.fn(),
+        on3DAc: jest.fn(),
+        onSenaryolarAc: jest.fn(),
         studio: {
             mass: null,
             warnings: [],
@@ -154,14 +158,30 @@ describe('HesaplaMobile — tek kapi', () => {
         expect(within(baslik).queryAllByRole('tab')).toHaveLength(0)
     })
 
-    it('analizAcik ile sonuc karti yerine analiz gorunumu gelir', () => {
-        const { rerender } = render(<HesaplaMobile {...props({ analizAcik: false })} />)
+    it('sonucDetayiAcik ile sonuc karti yerine Sonuc Detayi gorunumu gelir', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ sonucDetayiAcik: false })} />)
         expect(screen.getByText(/Min\. daire fiyatı/)).toBeInTheDocument()
-        expect(screen.queryByTestId('analiz-sekmesi')).toBeNull()
+        expect(screen.queryByRole('heading', { name: 'Sonuç Detayı' })).toBeNull()
 
-        rerender(<HesaplaMobile {...props({ analizAcik: true })} />)
-        expect(screen.getByTestId('analiz-sekmesi')).toBeInTheDocument()
+        rerender(<HesaplaMobile {...props({ sonucDetayiAcik: true })} />)
+        expect(screen.getByRole('heading', { name: 'Sonuç Detayı' })).toBeInTheDocument()
         expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
+    })
+
+    it('studioHubAcik ile sonuc karti yerine Tasarim Studyosu hub gorunumu gelir', () => {
+        const { rerender } = render(<HesaplaMobile {...props({ studioHubAcik: false })} />)
+        expect(screen.getByText(/Min\. daire fiyatı/)).toBeInTheDocument()
+        expect(screen.queryByRole('heading', { name: 'Tasarım Stüdyosu' })).toBeNull()
+
+        rerender(<HesaplaMobile {...props({ studioHubAcik: true })} />)
+        expect(screen.getByRole('heading', { name: 'Tasarım Stüdyosu' })).toBeInTheDocument()
+        expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
+    })
+
+    it('hub acikken 4 alt-yapraktan biri acilirsa hub yerine o yaprak gorunur (studioAcik ornegi)', () => {
+        render(<HesaplaMobile {...props({ studioHubAcik: true, studioAcik: true })} />)
+        expect(screen.getByRole('heading', { name: '3D Önizleme' })).toBeInTheDocument()
+        expect(screen.queryByRole('heading', { name: 'Tasarım Stüdyosu' })).toBeNull()
     })
 
     // Bilinen bosluk kapatildi: Studio 3D onizleme oncesi yalnizca masaustu
@@ -214,18 +234,17 @@ describe('HesaplaMobile — tek kapi', () => {
         expect(screen.queryByText(/Min\. daire fiyatı/)).toBeNull()
     })
 
-    it('analiz yapraginda TEK "Analiz" basligi ve TEK "Kapat" butonu doner (yinelenen satir donmez)', () => {
-        // Bu test SADECE burada gercek `AnalizSekmesi`yi render eder: dosyanin
-        // geri kalani onu stub'lar (canvas gerektiren grafikler yuzunden).
-        // Stub kullanilsaydi Task 6'nin `HesaplaMobile`de biraktigi yinelenen
-        // "Analiz"/"Kapat" satiri geri donse bile testler yesil kalirdi —
-        // tam da bu kor noktayi kapatmak icin gercek bilesen kullanilir.
+    it('Sonuc Detayi yapraginda TEK "Kapat" butonu doner (AnalizSekmesi kendi Kapat ini geri getirmez)', () => {
+        // Bu test SADECE burada gercek `AnalizSekmesi`yi render eder (dosyanin
+        // geri kalani canvas gerektiren grafikler yuzunden stub'lar) — Task 2
+        // AnalizSekmesi'nin KENDI Kapat'ini kaldirdi; stub kullanilsaydi bu
+        // regresyon (ikisi geri gelse bile) testler yesil kalirdi.
         const { AnalizSekmesi: GercekAnalizSekmesi } = jest.requireActual('./AnalizSekmesi') as typeof import('./AnalizSekmesi')
         mockAnalizSekmesi.mockImplementation(GercekAnalizSekmesi)
 
         try {
-            render(<HesaplaMobile {...props({ analizAcik: true })} />)
-            expect(screen.getAllByRole('heading', { name: 'Analiz' })).toHaveLength(1)
+            render(<HesaplaMobile {...props({ sonucDetayiAcik: true })} />)
+            fireEvent.click(screen.getByRole('tab', { name: 'Grafikler' }))
             expect(screen.getAllByRole('button', { name: 'Kapat' })).toHaveLength(1)
         } finally {
             mockAnalizSekmesi.mockImplementation(() => <div data-testid="analiz-sekmesi" />)

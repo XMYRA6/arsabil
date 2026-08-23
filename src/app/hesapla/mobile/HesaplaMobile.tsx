@@ -5,8 +5,8 @@ import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { IconSettings } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
-import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
-import { AnalizSekmesi, type AnalizSekmesiProps } from './AnalizSekmesi';
+import { SonucDetayiMobileLeaf, type SonucDetayiMobileLeafProps } from './SonucDetayiMobileLeaf';
+import { TasarimStudyosuHub } from './TasarimStudyosuHub';
 import { SenaryoKarsilastirmaSekmesi } from './SenaryoKarsilastirmaSekmesi';
 import { StudioMobileLeaf, type StudioMobileLeafProps } from './StudioMobileLeaf';
 import { ProgramMixMobileLeaf, type ProgramMixMobileLeafProps } from './ProgramMixMobileLeaf';
@@ -21,16 +21,13 @@ export type HesaplaMobileProps = {
     girdi: GirdiKartiProps;
     /** Parsel doğrulama modalını açar */
     onParselDogrulaAc: () => void;
-    /** `4a` acik mi. Durum `page.tsx`te yasar; bu bilesen state tutmaz. */
-    fisAcik: boolean;
-    fiyatAciklamasi: FiyatAciklamasiProps;
+    /** "Sonuç Detayı" yaprağı açık mı — Hesap Fişi + Analiz birleşimi
+        (2026-08-23 IA sadeleştirmesi). Durum `page.tsx`te yaşar. */
+    sonucDetayiAcik: boolean;
+    sonucDetayi: SonucDetayiMobileLeafProps;
     /** Girdi kartinin altindaki etiketli buton `4f` yapragini acar — gelismis
         ayarlara TEK kapi (spec K4/K5: basliktaki disli ve konum cipi kalkti). */
     onAyarlarAc: () => void;
-    /** Analiz derinlestirme yapragi acik mi. Durum `page.tsx`te yasar. */
-    analizAcik: boolean;
-    /** Kapatma affordance'i `AnalizSekmesi.onKapat` icinde yasar — bkz. o dosya. */
-    analiz: AnalizSekmesiProps;
     /** Studio 3D onizleme derinlestirme yapragi acik mi. Bilinen bosluk
         kapatildi: oncesi Studio yalnizca masaustu dalinda kabloluydu. */
     studioAcik: boolean;
@@ -47,6 +44,19 @@ export type HesaplaMobileProps = {
     /** Senaryolar & Karşılaştırma derinlestirme yapragi acik mi (Faz 3B). */
     studioScenarioAcik?: boolean;
     studioScenario?: StudioScenarioMobileLeafProps;
+    /** "Tasarım Stüdyosu" iç-içe hub menüsü açık mı — hiçbir alt-yaprak
+        (studioAcik/programMixAcik/studio2DAcik/studioScenarioAcik) açık
+        DEĞİLKEN ve bu true iken görünür (2026-08-23 IA sadeleştirmesi). */
+    studioHubAcik: boolean;
+    onStudioHubKapat: () => void;
+    /** Hub'ın 4 alt-butonunun açtığı yapraklar — `SonucKarti`'nin eski
+        `onStudioAc`/`onProgramMixAc`/`onStudio2DAc`/`onStudioScenarioAc`
+        callback'leriyle AYNI setter'lara (`page.tsx`te) bağlanır, yalnızca
+        artık `SonucKarti` yerine `TasarimStudyosuHub`'tan çağrılırlar. */
+    onYerlesimAc: () => void;
+    onProgramAc: () => void;
+    on3DAc: () => void;
+    onSenaryolarAc: () => void;
     /** Sabit CTA — masaustundeki "Ozet Rapor Olustur" akisinin mobil karsiligi. */
     ctaMetni: string;
     ctaDevreDisi: boolean;
@@ -74,12 +84,10 @@ export type HesaplaMobileProps = {
 export function HesaplaMobile({
     sonuc,
     girdi,
-    fisAcik,
-    fiyatAciklamasi,
+    sonucDetayiAcik,
+    sonucDetayi,
     onParselDogrulaAc,
     onAyarlarAc,
-    analizAcik,
-    analiz,
     studioAcik,
     studio,
     programMixAcik,
@@ -90,6 +98,12 @@ export function HesaplaMobile({
     studio2D,
     studioScenarioAcik,
     studioScenario,
+    studioHubAcik,
+    onStudioHubKapat,
+    onYerlesimAc,
+    onProgramAc,
+    on3DAc,
+    onSenaryolarAc,
     ctaMetni,
     ctaDevreDisi,
     onCta,
@@ -132,57 +146,59 @@ export function HesaplaMobile({
                     ? <ProgramMixMobileLeaf {...programMix} />
                     : studioAcik
                     ? <StudioMobileLeaf {...studio} />
-                    : analizAcik
-                    ? <AnalizSekmesi {...analiz} />
+                    : studioHubAcik
+                    ? <TasarimStudyosuHub
+                        onKapat={onStudioHubKapat}
+                        onYerlesimAc={onYerlesimAc}
+                        onProgramAc={onProgramAc}
+                        on3DAc={on3DAc}
+                        onSenaryolarAc={onSenaryolarAc}
+                      />
+                    : sonucDetayiAcik
+                    ? <SonucDetayiMobileLeaf {...sonucDetayi} />
                     : karsilastirmaAcik
                     ? <SenaryoKarsilastirmaSekmesi scenarios={savedScenarios} onKapat={onKarsilastirmaKapat} onShareRequest={onShareRequest} />
                     : (
                         <>
                             <SonucKarti {...sonuc} />
-                            {fisAcik
-                                ? <FiyatAciklamasi {...fiyatAciklamasi} />
-                                : (
-                                    <>
-                                        <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} />
-                                        {/* Tasarim 2a.html:39 — girdi kartinin ALTINDA birincil
-                                            kesif yolu. Baslikaki disli ikonu tek basina kalsaydi
-                                            kullanici bu ekrani zor bulurdu. */}
+                            <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} />
+                            {/* Tasarim 2a.html:39 — girdi kartinin ALTINDA birincil
+                                kesif yolu. Baslikaki disli ikonu tek basina kalsaydi
+                                kullanici bu ekrani zor bulurdu. */}
+                            <button
+                                type="button"
+                                className={styles.gelismisAyarlarBtn}
+                                onClick={onAyarlarAc}
+                            >
+                                <span className={styles.gelismisAyarlarIkon}>
+                                    <IconSettings size={16} strokeWidth={2.2} />
+                                </span>
+                                Gelişmiş ayarlar · risk, iksa, kâr
+                            </button>
+                            {savedScenarios.length > 0 && (
+                                <div className={styles.senaryoPillSatiri}>
+                                    {savedScenarios.map(s => (
+                                        <span key={s.id} className={styles.senaryoPill}>
+                                            {s.name}
+                                            <button
+                                                type="button"
+                                                onClick={() => onRemoveScenario(s.id)}
+                                                aria-label={`${s.name}'i kaldır`}
+                                                className={styles.senaryoPillKaldir}
+                                            >×</button>
+                                        </span>
+                                    ))}
+                                    {savedScenarios.length >= 2 && (
                                         <button
                                             type="button"
-                                            className={styles.gelismisAyarlarBtn}
-                                            onClick={onAyarlarAc}
+                                            className={styles.senaryoKarsilastirCip}
+                                            onClick={onKarsilastirmaAc}
                                         >
-                                            <span className={styles.gelismisAyarlarIkon}>
-                                                <IconSettings size={16} strokeWidth={2.2} />
-                                            </span>
-                                            Gelişmiş ayarlar · risk, iksa, kâr
+                                            Karşılaştır ({savedScenarios.length}) ›
                                         </button>
-                                        {savedScenarios.length > 0 && (
-                                            <div className={styles.senaryoPillSatiri}>
-                                                {savedScenarios.map(s => (
-                                                    <span key={s.id} className={styles.senaryoPill}>
-                                                        {s.name}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => onRemoveScenario(s.id)}
-                                                            aria-label={`${s.name}'i kaldır`}
-                                                            className={styles.senaryoPillKaldir}
-                                                        >×</button>
-                                                    </span>
-                                                ))}
-                                                {savedScenarios.length >= 2 && (
-                                                    <button
-                                                        type="button"
-                                                        className={styles.senaryoKarsilastirCip}
-                                                        onClick={onKarsilastirmaAc}
-                                                    >
-                                                        Karşılaştır ({savedScenarios.length}) ›
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
+                                    )}
+                                </div>
+                            )}
                         </>
                     )}
             </div>
