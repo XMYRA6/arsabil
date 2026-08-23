@@ -68,6 +68,12 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
     const resizeObserverRef = useRef<ResizeObserver | null>(null)
     const markerRef = useRef<Marker | null>(null)
     const polygonRef = useRef<Polygon | null>(null)
+    // Haritaya tiklandiginda dogrulama otomatik tetiklenir (asagida). Ust
+    // uste hizli tiklamalarda ONCEKI istek iptal edilir — aksi halde gec
+    // gelen bir yanit, daha sonraki bir tiklamanin sonucunu SESSIZCE
+    // ezebilirdi (yaris kosulu). Yalnizca EN SON controller'a ait istegin
+    // sonucu uygulanir.
+    const verifyAbortRef = useRef<AbortController | null>(null)
     // Harita kurulum effect'i icinde tanimlanan, disaridan (geolocation
     // butonu, elle giris modali) cagirilabilen pin-koyma fonksiyonu. Effect
     // sadece bir kez calistigi icin `map` closure'ini burada disari tasiyoruz.
@@ -87,6 +93,43 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
     const onChangeRef = useRef(onChange)
     useEffect(() => { onChangeRef.current = onChange }, [onChange])
 
+    // Koordinat alip TKGM sorgusu yapan cekirdek — hem haritaya tiklama hem
+    // "Parseli Dogrula" butonu bunu cagirir (tek kaynak). `onChangeRef`/
+    // `setVerifying` disinda hicbir render-degerine kapanmadigi icin, harita
+    // kurulum effect'inin (bir kez calisan) click handler'i icinden dogrudan
+    // cagrilabilir — placePinRef gibi ayri bir ref'e ihtiyac yok.
+    const verifyAt = async (lat: number, lng: number) => {
+        verifyAbortRef.current?.abort()
+        const controller = new AbortController()
+        verifyAbortRef.current = controller
+        setVerifying(true)
+        try {
+            const res = await fetch(`/api/parcel/lookup?lat=${lat}&lng=${lng}`, { signal: controller.signal })
+            // /hesapla auth-gated degil ama /api/parcel/lookup anonim kullaniciya
+            // 401 doner. Bunu 'unavailable' (TKGM cevap vermiyor) ile karistirmak
+            // kullaniciya yanlis teshis verir — asil sebep oturum acmamis olmasi.
+            if (res.status === 401) {
+                onChangeRef.current({ parcel: null, status: 'unauthorized' })
+                return
+            }
+            const data = await res.json()
+            if (data.status === 'verified' && data.parcel) {
+                onChangeRef.current({ parcel: data.parcel, status: 'verified' })
+            } else {
+                onChangeRef.current({ parcel: null, status: data.status === 'not_found' ? 'not_found' : 'unavailable' })
+            }
+        } catch (err) {
+            // Daha yeni bir tiklama bu istegi iptal ettiyse sonucu sessizce
+            // yoksay — daha yeni istegin kendi sonucu zaten uygulanacak.
+            if ((err as { name?: string })?.name === 'AbortError') return
+            onChangeRef.current({ parcel: null, status: 'unavailable' })
+        } finally {
+            // Bu callback baska bir tiklama tarafindan iptal edildiyse
+            // "Sorgulanıyor…" durumunu KAPATMA — o iş hâlâ yeni istekte sürüyor.
+            if (verifyAbortRef.current === controller) setVerifying(false)
+        }
+    }
+
     /* Haritayı bir kez kur */
     useEffect(() => {
         let cancelled = false
@@ -98,8 +141,12 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
                 value.lat != null && value.lng != null ? [value.lat, value.lng] : TURKEY_CENTER,
                 value.lat != null ? 17 : 6,
             )
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap',
+            // TKGM'nin kendi Atlas haritasi Arazi (uydu/topografya) gorunumu
+            // sunuyor; arsa sinirlarini degerlendirirken bu, sokak haritasindan
+            // (OSM Mapnik) daha isliyor (kullanici bulgusu). Esri World Imagery,
+            // Leaflet ile atif sarti disinda ucretsiz kullanilabilen uydu katmani.
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
                 maxZoom: 19,
             }).addTo(map)
 
@@ -126,6 +173,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
                 const { lat, lng } = e.latlng
                 placePin(lat, lng, false)
+                void verifyAt(lat, lng)
             })
 
             mapRef.current = map
@@ -155,6 +203,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             markerRef.current = null
             polygonRef.current = null
             placePinRef.current = null
+            verifyAbortRef.current?.abort()
             setMapReady(false)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps -- harita yalnızca bir kez kurulur
@@ -198,7 +247,10 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             const rawRing = value.parcel!.geometry.coordinates?.[0]
             if (!Array.isArray(rawRing) || rawRing.length < 3) return
             const ring = rawRing.map(([lng, lat]) => [lat, lng] as [number, number])
-            polygonRef.current = L.polygon(ring, { color: '#10b981', weight: 2, fillOpacity: 0.12 }).addTo(map)
+            // TKGM dogrulanan parsel sinirini kirmizi ile gosteriyor — gorsel
+            // dilimizi TKGM'ninkiyle tutarli tutmak icin ayni renk (kullanici
+            // bulgusu: onceki yesil #10b981 TKGM'nin gosterdigiyle tutarsizdi).
+            polygonRef.current = L.polygon(ring, { color: '#ef4444', weight: 2, fillOpacity: 0.12 }).addTo(map)
             map.fitBounds(polygonRef.current.getBounds(), { padding: [24, 24] })
         })()
         return () => { cancelled = true }
@@ -224,29 +276,12 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
         )
     }
 
-    const handleVerify = async () => {
+    // Artik haritaya tiklamak zaten otomatik dogrular (bkz. `verifyAt` +
+    // map.on('click', ...)) — bu buton, dogrulanmis bir noktayi (ornegin
+    // TKGM verisi o an degismisse) elle YENIDEN sorgulamak icin kalir.
+    const handleVerify = () => {
         if (value.lat == null || value.lng == null) return
-        setVerifying(true)
-        try {
-            const res = await fetch(`/api/parcel/lookup?lat=${value.lat}&lng=${value.lng}`)
-            // /hesapla auth-gated degil ama /api/parcel/lookup anonim kullaniciya
-            // 401 doner. Bunu 'unavailable' (TKGM cevap vermiyor) ile karistirmak
-            // kullaniciya yanlis teshis verir — asil sebep oturum acmamis olmasi.
-            if (res.status === 401) {
-                onChange({ parcel: null, status: 'unauthorized' })
-                return
-            }
-            const data = await res.json()
-            if (data.status === 'verified' && data.parcel) {
-                onChange({ parcel: data.parcel, status: 'verified' })
-            } else {
-                onChange({ parcel: null, status: data.status === 'not_found' ? 'not_found' : 'unavailable' })
-            }
-        } catch {
-            onChange({ parcel: null, status: 'unavailable' })
-        } finally {
-            setVerifying(false)
-        }
+        void verifyAt(value.lat, value.lng)
     }
 
     return (

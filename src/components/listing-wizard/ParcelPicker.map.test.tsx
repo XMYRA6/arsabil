@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ParcelPicker, type ParcelPickerValue } from './ParcelPicker'
 
@@ -35,6 +35,7 @@ jest.mock('leaflet', () => {
     const katman = () => {
         const l: Record<string, jest.Mock> = { addTo: jest.fn(), bindPopup: jest.fn(), on: jest.fn() }
         Object.values(l).forEach(fn => fn.mockImplementation(() => l))
+        l.getBounds = jest.fn(() => ({}))
         return l
     }
     return {
@@ -50,10 +51,17 @@ const BOS: ParcelPickerValue = { lat: null, lng: null, parcel: null, status: 'id
 
 /** Kurulan `ResizeObserver`in geri cagrisini yakalar. */
 let olcuGeriCagrisi: (() => void) | null = null
+/** Kurulan `map.on('click', ...)` geri cagrisini yakalar — testler gercek
+    bir DOM tiklamasi yerine bunu dogrudan cagirir. */
+let tiklamaGeriCagrisi: ((e: { latlng: { lat: number; lng: number } }) => void) | null = null
 
 beforeEach(() => {
     jest.clearAllMocks()
     olcuGeriCagrisi = null
+    tiklamaGeriCagrisi = null
+    harita.on.mockImplementation((event: string, cb: (e: { latlng: { lat: number; lng: number } }) => void) => {
+        if (event === 'click') tiklamaGeriCagrisi = cb
+    })
     class SahteResizeObserver {
         constructor(cb: () => void) { olcuGeriCagrisi = cb }
         observe = jest.fn()
@@ -61,6 +69,51 @@ beforeEach(() => {
         disconnect = jest.fn()
     }
     ; (global as unknown as { ResizeObserver: unknown }).ResizeObserver = SahteResizeObserver
+})
+
+// Kullanici bulgusu: TKGM'nin kendi Atlas haritasi Arazi (uydu/topografya)
+// gorunumu sunuyor, biz sokak haritasi (OSM Mapnik) kullaniyorduk — arsa
+// sinirlarini/topografyayi degerlendirmek icin Arazi gorunumu daha isliyor.
+// Esri World Imagery, Leaflet ile ayni sekilde (atif sarti disinda) ucretsiz
+// kullanilabilen uydu katmani.
+describe('ParcelPicker — harita katmani (uydu/arazi gorunumu)', () => {
+    it('OpenStreetMap sokak katmani yerine Esri World Imagery uydu katmani kullanilir', async () => {
+        render(<ParcelPicker value={BOS} onChange={jest.fn()} />)
+
+        await waitFor(() => expect(harita.invalidateSize).toHaveBeenCalled())
+
+        const tileLayer = (jest.requireMock('leaflet') as { tileLayer: jest.Mock }).tileLayer
+        expect(tileLayer).toHaveBeenCalledWith(
+            expect.stringContaining('server.arcgisonline.com/ArcGIS/rest/services/World_Imagery'),
+            expect.any(Object),
+        )
+        expect(tileLayer).not.toHaveBeenCalledWith(
+            expect.stringContaining('tile.openstreetmap.org'),
+            expect.any(Object),
+        )
+    })
+})
+
+// Kullanici bulgusu: TKGM'de dogrulanan parsel sinirini haritada kirmizi ile
+// gosteriyor — bizim yesil cizgimiz TKGM'nin gorsel diliyle tutarsiz.
+describe('ParcelPicker — dogrulanan parsel sinir rengi', () => {
+    it('dogrulanan parsel poligonu kirmizi (#ef4444) cizilir', async () => {
+        const VERIFIED: ParcelPickerValue = {
+            lat: 41.167877, lng: 27.583458, status: 'verified',
+            parcel: {
+                il: 'Tekirdağ', ilce: 'Muratli', mahalle: 'Kirkkepenekli',
+                adaNo: '0', parselNo: '1871', areaSqm: 830, quality: 'Arsa',
+                geometry: { type: 'Polygon', coordinates: [[[27.58, 41.16], [27.59, 41.16], [27.59, 41.17]]] },
+            },
+        }
+        render(<ParcelPicker value={VERIFIED} onChange={jest.fn()} />)
+
+        await waitFor(() => expect(harita.invalidateSize).toHaveBeenCalled())
+
+        const polygon = (jest.requireMock('leaflet') as { polygon: jest.Mock }).polygon
+        await waitFor(() => expect(polygon).toHaveBeenCalled())
+        expect(polygon).toHaveBeenCalledWith(expect.any(Array), expect.objectContaining({ color: '#ef4444' }))
+    })
 })
 
 describe('ParcelPicker — harita olculeri', () => {
@@ -165,3 +218,82 @@ describe('ParcelPicker — Konumumu Bul (geolocation)', () => {
 // degil — Task 3 ile bu bilesenden sokuldu, form artik disaridan (sheet
 // seviyesinde, Task 5) suruluyor. Eski test burada silindi; ManualParcelEntryForm
 // kendi test dosyasinda (Task 2) ayrica kapsanmis durumda.
+
+// Kullanici bulgusu: haritada bir noktaya tiklayinca parsel otomatik
+// dogrulanmiyordu, ayri "Parseli Dogrula" butonuna basmak gerekiyordu.
+// Artik tiklama pini koyar VE ayni anda dogrulamayi tetikler.
+describe('ParcelPicker — tiklaninca otomatik dogrulama', () => {
+    const PARCEL = {
+        il: 'Tekirdağ', ilce: 'Muratli', mahalle: 'Kirkkepenekli',
+        adaNo: '0', parselNo: '1871', areaSqm: 830, quality: 'Arsa',
+        geometry: { type: 'Polygon' as const, coordinates: [[[27.58, 41.16], [27.59, 41.16], [27.59, 41.17]]] },
+    }
+
+    afterEach(() => { jest.restoreAllMocks() })
+
+    it('haritaya tiklaninca ayri bir buton tiklamaya gerek kalmadan parsel dogrulanir', async () => {
+        global.fetch = jest.fn().mockResolvedValue({
+            status: 200, json: async () => ({ status: 'verified', parcel: PARCEL }),
+        }) as unknown as typeof fetch
+        const onChange = jest.fn()
+        render(<ParcelPicker value={BOS} onChange={onChange} />)
+        await waitFor(() => expect(harita.invalidateSize).toHaveBeenCalled())
+        await waitFor(() => expect(tiklamaGeriCagrisi).not.toBeNull())
+
+        act(() => { tiklamaGeriCagrisi!({ latlng: { lat: 41.167877, lng: 27.583458 } }) })
+
+        // 1) Tiklama hemen pini koyar (mevcut davranis, degismedi).
+        await waitFor(() => {
+            expect(onChange).toHaveBeenCalledWith({ lat: 41.167877, lng: 27.583458, parcel: null, status: 'idle' })
+        })
+        // 2) Ayri bir "Parseli Dogrula" tiklamasi OLMADAN dogrulama sonucu gelir.
+        await waitFor(() => {
+            expect(onChange).toHaveBeenCalledWith({ parcel: PARCEL, status: 'verified' })
+        })
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('lat=41.167877&lng=27.583458'),
+            expect.anything(),
+        )
+    })
+
+    it('ard arda iki farkli noktaya tiklaninca yalnizca SON tiklamanin sonucu uygulanir (yaris korumasi)', async () => {
+        const ILK_PARSEL = { ...PARCEL, parselNo: 'İLK-YANLIŞ' }
+        const SON_PARSEL = { ...PARCEL, parselNo: 'SON-DOGRU' }
+        const cozucler: Array<(v: { status: number; json: () => Promise<unknown> }) => void> = []
+        const reddediciler: Array<(err: Error) => void> = []
+        global.fetch = jest.fn((_url: string, opts?: { signal?: AbortSignal }) => {
+            return new Promise((resolve, reject) => {
+                cozucler.push(resolve)
+                reddediciler.push(reject)
+                opts?.signal?.addEventListener('abort', () => {
+                    const err = new Error('aborted')
+                    err.name = 'AbortError'
+                    reject(err)
+                })
+            })
+        }) as unknown as typeof fetch
+        const onChange = jest.fn()
+        render(<ParcelPicker value={BOS} onChange={onChange} />)
+        await waitFor(() => expect(harita.invalidateSize).toHaveBeenCalled())
+        await waitFor(() => expect(tiklamaGeriCagrisi).not.toBeNull())
+
+        // Ilk tiklama — istegi baslatir ama henuz cozulmez.
+        act(() => { tiklamaGeriCagrisi!({ latlng: { lat: 41.0, lng: 27.0 } }) })
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1))
+
+        // Ikinci (SON) tiklama — ilk istegi iptal etmeli.
+        act(() => { tiklamaGeriCagrisi!({ latlng: { lat: 42.0, lng: 28.0 } }) })
+        await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2))
+
+        // Ilk istek GEC gelse bile (yarisi kaybetse bile) sonucu yoksayilmali.
+        await act(async () => {
+            cozucler[0]({ status: 200, json: async () => ({ status: 'verified', parcel: ILK_PARSEL }) })
+            cozucler[1]({ status: 200, json: async () => ({ status: 'verified', parcel: SON_PARSEL }) })
+        })
+
+        await waitFor(() => {
+            expect(onChange).toHaveBeenCalledWith({ parcel: SON_PARSEL, status: 'verified' })
+        })
+        expect(onChange).not.toHaveBeenCalledWith({ parcel: ILK_PARSEL, status: 'verified' })
+    })
+})
