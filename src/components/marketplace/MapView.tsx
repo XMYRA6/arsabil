@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Map as LMap, TileLayer, LayerGroup, Marker, MarkerOptions, LeafletMouseEvent, FeatureGroup } from 'leaflet';
+import type { TileLayer, LayerGroup, Marker, MarkerOptions, LeafletMouseEvent, FeatureGroup } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { useLeafletMap } from '@/lib/hooks/useLeafletMap';
 import { splitListingsByCoords } from '@/lib/listing/listingCoords';
 
 /* ─── Tile Sources (all free, no API key) ─── */
@@ -121,7 +122,6 @@ function ToolBtn({ icon, label, active, onClick, disabled, badge }: {
 export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listings, highlightedId, onHighlight }, ref) {
     const router = useRouter();
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<LMap | null>(null);
     const markersRef = useRef<Record<string, { marker: Marker; lat: number; lng: number; score: number }>>({});
     const clusterGroupRef = useRef<FeatureGroup | LayerGroup | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
@@ -134,14 +134,6 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const provinceBorderRef = useRef<LayerGroup | null>(null);
     const geoJsonCacheRef = useRef<{ features?: Array<{ properties?: Record<string, string | undefined> }> } | null>(null);
     const lastView = useRef<{ lat: number; lng: number; zoom: number }>({ lat: 41.015, lng: 28.979, zoom: 12 });
-    const LRef = useRef<typeof import('leaflet') | null>(null);
-    const roRef = useRef<ResizeObserver | null>(null);
-
-    // Marker effect'i bu bayrak ile haritanin hazir olmasini bekler. Harita
-    // async kuruluyor (dinamik leaflet import'u), dolayisiyla yalnizca
-    // `[listings]`e bagli bir effect ilk calismasinda cluster group'u henuz
-    // bulamaz ve sessizce hicbir sey yapmaz.
-    const [mapReady, setMapReady] = useState(false);
 
     // onHighlight marker olay isleyicilerinde kullaniliyor. Ref'te tutulursa
     // marker seti ebeveynin her render'inda yeniden kurulmaz, ama isleyiciler
@@ -170,28 +162,12 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
     const [measureResult, setMeasureResult] = useState<string>('');
     const [drawResult, setDrawResult] = useState<string>('');
 
-    /* ─── Init Map ─── */
-    useEffect(() => {
-        if (!mapContainerRef.current) return;
-        if (mapRef.current) return;
-        let cancelled = false;
-
-        const initMap = async () => {
-            const L = (await import('leaflet')).default;
-            if (cancelled) return;
-            LRef.current = L;
-
-            const container = mapContainerRef.current as HTMLElement & { _leaflet_id?: number };
-            if (!container || cancelled) return;
-            if (container._leaflet_id) container._leaflet_id = undefined;
-
-            const map = L.map(container, {
-                center: [lastView.current.lat, lastView.current.lng],
-                zoom: lastView.current.zoom,
-                zoomControl: false,
-            });
-            if (cancelled) { map.remove(); return; }
-
+    /* ─── Init Map — ortak iskelet useLeafletMap'te (bkz. Task 1) ─── */
+    const { mapRef, LRef, mapReady } = useLeafletMap(mapContainerRef, {
+        center: [lastView.current.lat, lastView.current.lng],
+        zoom: lastView.current.zoom,
+        leafletMapOptions: { zoomControl: false },
+        onReady: async (map, L) => {
             // Zoom control bottom-right
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -205,21 +181,10 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 lastView.current = { lat: c.lat, lng: c.lng, zoom: map.getZoom() };
             });
 
-            mapRef.current = map;
-
-            // ResizeObserver: invalidate map size when container becomes visible (e.g. mobile tab switch)
-            if (mapContainerRef.current) {
-                const ro = new ResizeObserver(() => { map.invalidateSize(); });
-                ro.observe(mapContainerRef.current);
-                roRef.current = ro;
-            }
-
             // MarkerCluster
             try {
                 await import('leaflet.markercluster');
             } catch { /* optional */ }
-
-            if (cancelled) return;
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- leaflet.markercluster dinamik import ile L namespace augmentation uygulanmıyor
             const clusterGroup = (L as any).markerClusterGroup ? (L as any).markerClusterGroup({
@@ -251,30 +216,12 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             clusterGroupRef.current = clusterGroup;
             map.addLayer(clusterGroup);
 
-            // Marker'lar BURADA kurulmaz. Bu effect'in bagimlilik dizisi []
-            // oldugu icin marker'lar bir kez ve cogu zaman BOS `listings` ile
-            // kurulurdu: marketplace listeyi [] ile mount edip sonra fetch ile
-            // dolduruyor, dolayisiyla harita kalici olarak bos kaliyordu ve
-            // filtre degisiklikleri de hic yansimiyordu. Kurulum artik
-            // `[listings, mapReady]` bagimlilikli ayri bir effect'te.
-            setMapReady(true);
-        };
-
-        initMap();
-        return () => {
-            cancelled = true;
-            if (roRef.current) { roRef.current.disconnect(); roRef.current = null; }
-            if (mapRef.current) {
-                const c = mapRef.current.getCenter();
-                lastView.current = { lat: c.lat, lng: c.lng, zoom: mapRef.current.getZoom() };
-                mapRef.current.remove();
-                mapRef.current = null;
-            }
-        };
-    // Harita bir kez başlatılır. Bu effect artık `listings`/`onHighlight`
-    // okumuyor (marker kurulumu aşağıdaki ayrı effect'e taşındı), dolayısıyla
-    // boş bağımlılık dizisi gerçekten doğru — exhaustive-deps istisnası gerekmez.
-    }, []);
+            return () => {
+                const c = map.getCenter();
+                lastView.current = { lat: c.lat, lng: c.lng, zoom: map.getZoom() };
+            };
+        },
+    });
 
     /* ─── Marker'lar ─── */
     // Harita kurulumundan AYRI bir effect: `listings` sonradan geldiginde
