@@ -26,7 +26,10 @@ export type UseLeafletMapOptions = {
     observeResize?: boolean;
     /** Kurulum effect'inin bağımlılık dizisi — varsayılan `[]` (bir kez
         kurulur, asla yeniden kurulmaz). Değişince harita YIKILIP
-        YENİDEN KURULUR (React'ın normal effect-dependency semantiği). */
+        YENİDEN KURULUR (React'ın normal effect-dependency semantiği).
+        `deps` dizisinin uzunlugu render'lar arasinda SABIT kalmalidir
+        (React'in useEffect kurali) — degisken uzunlukta bir dizi gecmek
+        React'in kendi hata mesajini tetikler. */
     deps?: unknown[];
 };
 
@@ -63,8 +66,20 @@ export function useLeafletMap(
         let cancelled = false;
 
         void (async () => {
-            const L = await import('leaflet');
+            const mod = await import('leaflet');
             if (cancelled || !containerRef.current) return;
+
+            // Leaflet eklentileri (leaflet.markercluster, leaflet.heat) modulun
+            // CANLI exports nesnesini (window.L === module.exports) mutasyona
+            // ugratir — L.markerClusterGroup/L.heatLayer gibi ozellikleri KENDI
+            // import'larindan SONRA ekler. ESM namespace nesnesi (`await
+            // import(...)` ciplak) ise bundler'in ilk import aninda urettigi
+            // MUHURLENMIS bir anlik goruntudur; sonradan eklenen ozellikleri
+            // ASLA gosteremez. `.default` ise Leaflet'in hic __esModule bayragi
+            // olmadigi icin dogrudan o canli nesneye baglanir — bu yuzden bu
+            // hook'un uc gercek tuketicisinin UCU DE (ParcelPicker, MiniMap,
+            // MapView) migrasyondan once zaten `.default` kullaniyordu.
+            const L = (mod as unknown as { default?: typeof mod }).default ?? mod;
 
             // React StrictMode dev'de mount->unmount->remount yapar; ayni DOM
             // node onceki (yok edilmis) Leaflet kurulumunun izini tasiyabilir,
@@ -73,10 +88,24 @@ export function useLeafletMap(
             const el = containerRef.current as HTMLElement & { _leaflet_id?: number };
             if (el._leaflet_id) el._leaflet_id = undefined;
 
-            const map = L.map(el, { center, zoom, ...leafletMapOptions });
-            if (cancelled) { map.remove(); return; }
+            let map: LeafletMap;
+            let cleanup: void | (() => void);
+            try {
+                map = L.map(el, { center, zoom, ...leafletMapOptions });
+                if (cancelled) { map.remove(); return; }
+                cleanup = await onReady?.(map, L);
+            } catch (err) {
+                // Ornegin onReady icindeki korumasiz bir localStorage.getItem()
+                // cagrisi bazi tarayici gizlilik baglamlarinda (sandboxli
+                // iframe, bazi Safari private-browsing yapilandirmalari)
+                // SecurityError firlatabilir. Burada tek yerden yakalayip
+                // logluyoruz; mapReady hicbir zaman true olmaz, mapRef.current
+                // hicbir zaman atanmaz (dolayisiyla unmount temizligi no-op
+                // olur — sizinti degil, sadece kurulmamis bir harita).
+                console.error('useLeafletMap: kurulum sirasinda hata, harita hazir isaretlenmeyecek', err);
+                return;
+            }
 
-            const cleanup = await onReady?.(map, L);
             if (cancelled) {
                 if (typeof cleanup === 'function') cleanup();
                 map.remove();

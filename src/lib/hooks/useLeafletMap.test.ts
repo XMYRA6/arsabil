@@ -223,4 +223,35 @@ describe('useLeafletMap', () => {
         expect(onReadyCleanup).toHaveBeenCalledTimes(1)
         expect(harita.remove).toHaveBeenCalled()
     })
+
+    it('onReady icinde SONRADAN eklenen bir Leaflet eklenti metodu (marker cluster/heat benzeri) L uzerinden gorulur — .default CANLI exports referansidir, ESM namespace bunu KACIRIR', async () => {
+        // Gercek dunyada leaflet.markercluster / leaflet.heat, kendi dinamik
+        // import'larindan SONRA Leaflet'in CANLI exports nesnesine yeni
+        // ozellikler ekler (L.markerClusterGroup = ..., L.heatLayer = ...).
+        // Burada ayni sekli, hook'un ilk `import('leaflet')`i coz(ul)dukten
+        // SONRA — ama onReady icinde, L okunmadan hemen once — paylasilan
+        // mock nesnesine yeni bir ozellik ekleyerek taklit ediyoruz.
+        const leafletMock = jest.requireMock('leaflet') as Record<string, unknown>
+        let eklentiMetoduL: unknown
+        const onReady = jest.fn((_map: unknown, L: Record<string, unknown>) => {
+            leafletMock.sahteEklentiMetodu = () => 'eklenti-calisti'
+            eklentiMetoduL = L.sahteEklentiMetodu
+        })
+        const containerRef = { current: document.createElement('div') }
+
+        renderHook(() => useLeafletMap(containerRef, { center: [0, 0], zoom: 1, onReady }))
+        await tikBekle()
+
+        expect(onReady).toHaveBeenCalledTimes(1)
+        // Buggy kodda (ciplak `await import('leaflet')`) bundler/ts-jest'in
+        // urettigi namespace nesnesi, ownKeys() anlik goruntusunu SADECE ilk
+        // import cozulurken alir — sonradan eklenen `sahteEklentiMetodu`
+        // icin hicbir zaman getter kurulmaz, dolayisiyla L.sahteEklentiMetodu
+        // undefined kalir. `.default` ise ham modul nesnesinin KENDISI
+        // oldugundan (canli referans) sonradan eklenen ozelligi de gorur.
+        expect(typeof eklentiMetoduL).toBe('function')
+        expect((eklentiMetoduL as () => string)()).toBe('eklenti-calisti')
+
+        delete leafletMock.sahteEklentiMetodu
+    })
 })
