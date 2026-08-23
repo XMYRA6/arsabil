@@ -4,6 +4,7 @@ import { render, screen, within, fireEvent } from '@testing-library/react'
 import { HesaplaMobile, type HesaplaMobileProps } from './HesaplaMobile'
 import type { AnalizSekmesiProps } from './AnalizSekmesi'
 import type { Scenario } from '@/components/ScenarioCompare'
+import { createDefaultScenarioDraft } from '@/lib/studio/scenarioDraft'
 
 // AnalizSekmesi grafik bilesenlerini (canvas gerektirir) tasir; bu dosyanin
 // SOZLESMESI "tek kapi" (spec K4/K5), grafiklerin kendi cizimi degil —
@@ -35,6 +36,12 @@ const BASE_INPUT = {
 const SCENARIO_1: Scenario = { id: 'sc1', name: 'Senaryo 1', luxLevel: 1.2, apartmentSize: 140, landShareRatio: 0.33, totalApartments: 20, riskLevel: 1.1, builderProfit: 1.3, fdTotal: 8964000, fdPerM2: 64028, mi: 3000000, ma: 2000000, totalCost: 5000000 }
 const SCENARIO_2: Scenario = { ...SCENARIO_1, id: 'sc2', name: 'Senaryo 2', fdTotal: 9500000 }
 const SCENARIO_3: Scenario = { ...SCENARIO_1, id: 'sc3', name: 'Senaryo 3', fdTotal: 8000000 }
+
+const STUDIO_SCENARIO_DRAFT = createDefaultScenarioDraft({
+    id: 'studio-sc-1',
+    name: 'Ana Senaryo',
+    baseSnapshotRef: { parcelAreaM2: 1000, grossConstructionAreaM2: 2000 },
+})
 
 function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
     return {
@@ -129,6 +136,20 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
             mass: null,
             layoutDraft: null,
             programBands: [],
+            onKapat: jest.fn(),
+        },
+        studioScenarioAcik: false,
+        studioScenario: {
+            activeScenario: STUDIO_SCENARIO_DRAFT,
+            allScenarios: [STUDIO_SCENARIO_DRAFT],
+            canUndo: false,
+            canRedo: false,
+            isDirty: false,
+            comparisonRows: [],
+            onUndo: jest.fn(),
+            onRedo: jest.fn(),
+            onNameChange: jest.fn(),
+            onSelectScenario: jest.fn(),
             onKapat: jest.fn(),
         },
         ctaMetni: 'Özet Rapor Oluştur',

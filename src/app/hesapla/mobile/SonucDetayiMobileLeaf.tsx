@@ -37,7 +37,9 @@ export function SonucDetayiMobileLeaf({ fiyatAciklamasi, analiz, onKapat }: Sonu
                 <button
                     type="button"
                     role="tab"
+                    id="sonuc-detayi-tab-ozet"
                     aria-selected={sekme === 'ozet'}
+                    aria-controls="sonuc-detayi-panel"
                     className={`${styles.segment} ${sekme === 'ozet' ? styles.segmentAktif : ''}`}
                     onClick={() => setSekme('ozet')}
                 >
@@ -46,7 +48,9 @@ export function SonucDetayiMobileLeaf({ fiyatAciklamasi, analiz, onKapat }: Sonu
                 <button
                     type="button"
                     role="tab"
+                    id="sonuc-detayi-tab-grafikler"
                     aria-selected={sekme === 'grafikler'}
+                    aria-controls="sonuc-detayi-panel"
                     className={`${styles.segment} ${sekme === 'grafikler' ? styles.segmentAktif : ''}`}
                     onClick={() => setSekme('grafikler')}
                 >
@@ -54,9 +58,15 @@ export function SonucDetayiMobileLeaf({ fiyatAciklamasi, analiz, onKapat }: Sonu
                 </button>
             </div>
 
-            {sekme === 'ozet'
-                ? <FiyatAciklamasi {...fiyatAciklamasi} />
-                : <AnalizSekmesi {...analiz} />}
+            <div
+                role="tabpanel"
+                id="sonuc-detayi-panel"
+                aria-labelledby={sekme === 'ozet' ? 'sonuc-detayi-tab-ozet' : 'sonuc-detayi-tab-grafikler'}
+            >
+                {sekme === 'ozet'
+                    ? <FiyatAciklamasi {...fiyatAciklamasi} />
+                    : <AnalizSekmesi {...analiz} />}
+            </div>
         </>
     );
 }

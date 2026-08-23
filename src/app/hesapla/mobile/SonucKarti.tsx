@@ -108,17 +108,17 @@ export function SonucKarti({
                 </>
             )}
 
-            <button type="button" className={styles.fisButonu} onClick={onSonucDetayiAc}>
+            <button type="button" className={styles.kartMenuButonu} onClick={onSonucDetayiAc}>
                 Sonuç Detayı · hesap fişi, analiz
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
 
-            <button type="button" className={styles.fisButonu} onClick={onStudioHubAc}>
+            <button type="button" className={styles.kartMenuButonu} onClick={onStudioHubAc}>
                 Tasarım Stüdyosu · yerleşim, program, 3D
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
 
-            <button type="button" className={styles.fisButonu} onClick={onLandownerOfferAc}>
+            <button type="button" className={styles.kartMenuButonu} onClick={onLandownerOfferAc}>
                 Arsa Sahibi Teklifi · hak ediş
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>

@@ -198,7 +198,7 @@
     /* `.metrikKutuSkor` / `.metrikDegerSkor` kaldirildi: skor kutusunun veri
        kaynagi yok (insan karari 2026-07-29). Geri gerekirse `5bc784a`de. */
 
-    .fisButonu {
+    .kartMenuButonu {
         position: relative;
         display: flex;
         align-items: center;
@@ -216,10 +216,10 @@
     }
 
     /* ═══ Tasarım Stüdyosu hub (2026-08-23 IA sadelestirmesi) ═══════════
-       `.fisButonu` beyaz-cam/beyaz-metin AYNI mavi degrade `.sonucKarti`
+       `.kartMenuButonu` beyaz-cam/beyaz-metin AYNI mavi degrade `.sonucKarti`
        arka planina gore tasarlandi, duz sayfa arka planinda kullanilamaz
        (beyaz metin beyaz zeminde kaybolur). Bu yuzden `.gelismisAyarlarBtn`
-       ile AYNI koyu-mürekkep/acik-cam renk paletiyle, ama `.fisButonu`nun
+       ile AYNI koyu-mürekkep/acik-cam renk paletiyle, ama `.kartMenuButonu`nun
        satir-ici (etiket solda + chevron sagda) yerlesimiyle yeni bir
        varyant. */
     .hubButonListesi {
@@ -1066,13 +1066,6 @@
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
-    .aciklamaBaslik {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-    }
-
     .aciklamaBaslikMetin {
         margin: 0;
         font: 800 15px Inter, sans-serif;
@@ -1254,12 +1247,11 @@
 
     /* ═══ 4n — Analiz sekmesi ═══════════════════════════════════════════ */
 
-    /* `AnalizSekmesi`nin KENDI render ettigi baslik + "Kapat" satiri (bilesen
-       kapatma affordance'ini kendisi tasir, `FiyatAciklamasi` gibi) —
-       `.fiyatAciklamasi`nin kendi `.aciklamaBaslik`iyla AYNI desen (baslik +
-       kapat, ikon degil), ama bu satir `.hesaplaMobilKok`in duz sutununda
-       dogrudan durdugu icin `.aciklamaBaslik`in aksine kendi yatay kenar
-       boslugunu kendisi tasir. */
+    /* Her tam ekran mobil yaprak/hub'in PAYLASILAN baslik + "Kapat" satiri
+       (8 tuketici) — ne `AnalizSekmesi` ne `FiyatAciklamasi` artik kendi
+       baslikini render etmiyor, kapatma affordance'i bu ortak satirdan
+       geliyor. Bu satir `.hesaplaMobilKok`in duz sutununda dogrudan
+       durdugu icin kendi yatay kenar boslugunu kendisi tasir. */
     .analizKapatSatiri {
         margin: 0 14px;
         display: flex;
@@ -1313,7 +1305,7 @@
        korunur, TIKLAMA alani seffaf bir ::after ile 44px'e genisletilir.
        Boylece kart duzeni degismez ama parmak hedefi standarda uyar.
        (Canli olcumle yakalandi: 7 kontrol 44px'in altindaydi.) */
-    .fisButonu::after,
+    .kartMenuButonu::after,
     .stepperAzalt::after,
     .stepperArtir::after,
     .anahtar::after,
@@ -1328,7 +1320,7 @@
         transform: translateY(-50%);
     }
 
-    .fisButonu,
+    .kartMenuButonu,
     .stepperAzalt,
     .stepperArtir,
     .anahtar,

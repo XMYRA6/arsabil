@@ -147,8 +147,9 @@ export default function Home() {
   const [totalApartments, setTotalApartments] = useState<number>(AYAR_VARSAYILANLARI.totalApartments);
   const [ownerApartmentShare, setOwnerApartmentShare] = useState<number>(AYAR_VARSAYILANLARI.ownerApartmentShare);
   const [landShareRatio, setLandShareRatio] = useState<number>(33); // %
-  // Mobil `4a` ekrani acik mi. Gorunum durumu da `page.tsx`te yasar —
-  // `HesaplaMobile` hicbir state sahiplenmez (plan mimari karari).
+  // Mobil BIRLESIK Sonuc Detayi ekrani acik mi (Hesap Fisi + Analiz, 2
+  // sekme arkasinda). Gorunum durumu da `page.tsx`te yasar — `HesaplaMobile`
+  // hicbir state sahiplenmez (plan mimari karari).
   const [mobilSonucDetayiAcik, setMobilSonucDetayiAcik] = useState<boolean>(false);
   // Senaryo karsilastirma derinlestirme yapragi (Task 6/7'nin AnalizSekmesi'yle
   // AYNI desen). savedScenarios/handleAddScenario/handleRemoveScenario zaten
@@ -156,7 +157,7 @@ export default function Home() {
   const [mobilKarsilastirmaAcik, setMobilKarsilastirmaAcik] = useState<boolean>(false);
   // Studio 3D onizleme derinlestirme yapragi — bilinen bosluk kapatildi:
   // oncesi Studio yalnizca masaustu dalinda kabloluydu (Faz1B QA bulgusu).
-  // Ayni "tek derinlestirme yapragi" deseni (fisAcik/analizAcik ile ayni).
+  // Ayni "tek derinlestirme yapragi" deseni (mobilSonucDetayiAcik ile ayni).
   const [mobilStudioAcik, setMobilStudioAcik] = useState<boolean>(false);
   // Program Dagilimi derinlestirme yapragi (Faz 2A Task 3) — ayni desen.
   const [mobilProgramMixAcik, setMobilProgramMixAcik] = useState<boolean>(false);
@@ -164,9 +165,10 @@ export default function Home() {
   const [mobilLandownerOfferAcik, setMobilLandownerOfferAcik] = useState<boolean>(false);
   // 2D Yerlesim Tahtasi derinlestirme yapragi (Faz 3A) — ayni desen.
   const [mobilStudio2DAcik, setMobilStudio2DAcik] = useState<boolean>(false);
+  // Tasarim Studyosu hub menusu acik mi — 2026-08-23 IA sadelestirmesi.
+  const [mobilStudioHubAcik, setMobilStudioHubAcik] = useState<boolean>(false);
   // `4f` yapragi ve acilirken odaklanacagi bolum.
   const [mobilAyarlarAcik, setMobilAyarlarAcik] = useState(false);
-  const [mobilStudioHubAcik, setMobilStudioHubAcik] = useState<boolean>(false);
   // `parsel` bolumu artik burada degil: parsel secimi `ParcelModal`a tasindi,
   // `AyarBolumu` birlesiminde de yok. Tip artik yaprakla ayni kaynaktan geliyor,
   // boylece yaprak yeni bir bolum kazanirsa/kaybederse burasi derlemede patlar.

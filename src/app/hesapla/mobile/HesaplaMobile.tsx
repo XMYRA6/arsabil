@@ -41,9 +41,9 @@ export type HesaplaMobileProps = {
     /** 2D Yerleşim Tahtası derinlestirme yapragi acik mi (Faz 3A). */
     studio2DAcik: boolean;
     studio2D: Studio2DMobileLeafProps;
-    /** Senaryolar & Karşılaştırma derinlestirme yapragi acik mi (Faz 3B). */
-    studioScenarioAcik?: boolean;
-    studioScenario?: StudioScenarioMobileLeafProps;
+    /** Tasarım Senaryoları derinlestirme yapragi acik mi (Faz 3B). */
+    studioScenarioAcik: boolean;
+    studioScenario: StudioScenarioMobileLeafProps;
     /** "Tasarım Stüdyosu" iç-içe hub menüsü açık mı — hiçbir alt-yaprak
         (studioAcik/programMixAcik/studio2DAcik/studioScenarioAcik) açık
         DEĞİLKEN ve bu true iken görünür (2026-08-23 IA sadeleştirmesi). */
@@ -136,7 +136,7 @@ export function HesaplaMobile({
                     <span className={styles.headerTitle}>Hesapla</span>
                 </header>
 
-                {studioScenarioAcik && studioScenario
+                {studioScenarioAcik
                     ? <StudioScenarioMobileLeaf {...studioScenario} />
                     : studio2DAcik
                     ? <Studio2DMobileLeaf {...studio2D} />

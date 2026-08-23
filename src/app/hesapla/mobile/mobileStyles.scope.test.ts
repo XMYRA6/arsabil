@@ -132,7 +132,7 @@ describe('Derin Cam (B) — tokenize edilmemis sapmalar duzeltildi (2026-08-04)'
         expect(css).not.toMatch(/blur\(26px\)\s*saturate\(180%\)/)
     })
 
-    it('.metrikKutu / .fisButonu BILEREK degismedi — bunlar --m-grad-accent zemini uzerindeki ayri, hafif cam katmani', () => {
+    it('.metrikKutu / .kartMenuButonu BILEREK degismedi — bunlar --m-grad-accent zemini uzerindeki ayri, hafif cam katmani', () => {
         expect(css).toMatch(/blur\(10px\)/)
     })
 
