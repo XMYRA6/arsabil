@@ -2,7 +2,6 @@
 import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { AnalizSekmesi } from './AnalizSekmesi'
 
 // Chart.js jsdom'da canvas gerektirir; sekmenin SOZLESMESI test ediliyor,
@@ -54,7 +53,6 @@ describe('AnalizSekmesi', () => {
         expect(screen.queryByRole('button', { name: /Kapat/ })).toBeNull()
         expect(screen.queryByText('Analiz')).toBeNull()
         expect(screen.queryByRole('group', { name: 'Maliyet dağılımı' })).toBeNull()
-        expect(screen.queryByTestId('cost-breakdown')).toBeNull()
     })
 
     it('grafikleri cam kart icinde render eder', () => {

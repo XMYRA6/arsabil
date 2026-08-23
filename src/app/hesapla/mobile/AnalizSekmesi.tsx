@@ -6,14 +6,11 @@ import { FinancialDashboard } from '@/components/FinancialDashboard';
 import type { CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
 import styles from './mobile.module.css';
 
-// Hesap/Analiz sekme seridi ve onun tip/bileseni Task 6'da kaldirildi:
-// analiz artik kendi etiketli "Kapat" satirini tasiyan bir derinlestirme
-// yapragi, sekme degil (spec K4/K5 — tek kapi). Kapatma affordance'i bu
-// bilesenin kendisinde yasar (bkz. `onKapat`, `FiyatAciklamasi` ile ayni
-// desen) — `HesaplaMobile` yalnizca `analizAcik` durumuna gore bu bileseni
-// render eder, kendi ayri bir kapat satiri TASIMAZ (Task 7 duzeltmesi:
-// Task 6'nin `HesaplaMobile`de biraktigi yinelenen satir kaldirildi).
-// Gecmisi icin bkz. bu commit'ten onceki hal.
+// `4n` analiz paneli — Task 2 (2026-08-23): baslik ve Kapat butonu kaldirildı.
+// Bu veri artık Task 3'te FiyatAciklamasi'nin "Özet" sekmesi ile
+// birleştirilecek (her ikisi de aynı maliyet dağılımı bilgisini gösteriyordu —
+// kopyalanma kaldırıldı). Üst bileşen (Task 3) birleştirilmiş yaprakta sekme
+// başlıklarını ve kapatma affordance'ını sağlar.
 
 export type AnalizSekmesiProps = {
     result: CalculationOutput | null;
