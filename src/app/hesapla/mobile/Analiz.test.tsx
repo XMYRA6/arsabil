@@ -7,10 +7,6 @@ import { AnalizSekmesi } from './AnalizSekmesi'
 
 // Chart.js jsdom'da canvas gerektirir; sekmenin SOZLESMESI test ediliyor,
 // grafiklerin kendi cizimi degil (onlarin kendi testleri var).
-const costProps: Record<string, unknown>[] = []
-jest.mock('@/components/charts/CostBreakdownChart', () => ({
-    CostBreakdownChart: (p: Record<string, unknown>) => { costProps.push(p); return <div data-testid="cost-breakdown" /> },
-}))
 jest.mock('@/components/charts/SensitivityChart', () => ({
     SensitivityChart: () => <div data-testid="sensitivity" />,
 }))
@@ -50,49 +46,37 @@ describe('analiz grafikleri', () => {
 })
 
 describe('AnalizSekmesi', () => {
-    it('uc grafigi de cam kart icinde render eder', () => {
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
-        expect(screen.getByTestId('cost-breakdown')).toBeInTheDocument()
+    it('kendi basligini/Kapat butonunu ve Maliyet Dagilimi panelini render ETMEZ', () => {
+        // Maliyet Dagilimi FiyatAciklamasi'nin (Ozet sekmesi) ayni veriyi
+        // liste olarak zaten gosterdigi icin kasitli olarak buradan
+        // kaldirildi (2026-08-23 IA sadelestirmesi) — kopyalanmadi.
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
+        expect(screen.queryByRole('button', { name: /Kapat/ })).toBeNull()
+        expect(screen.queryByText('Analiz')).toBeNull()
+        expect(screen.queryByRole('group', { name: 'Maliyet dağılımı' })).toBeNull()
+        expect(screen.queryByTestId('cost-breakdown')).toBeNull()
+    })
+
+    it('grafikleri cam kart icinde render eder', () => {
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
         expect(screen.getByTestId('sensitivity')).toBeInTheDocument()
         expect(screen.getByTestId('break-even')).toBeInTheDocument()
     })
 
     it('her grafik erisilebilir bir basliga sahip', () => {
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
-        expect(screen.getByRole('group', { name: 'Maliyet dağılımı' })).toBeInTheDocument()
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
         expect(screen.getByRole('group', { name: 'Hassasiyet' })).toBeInTheDocument()
         expect(screen.getByRole('group', { name: 'Kırılma noktası' })).toBeInTheDocument()
     })
 
     it('sonuc yoksa grafik yerine aciklama gosterir', () => {
-        // Bos grafik cizmek yerine nedenini soyle: sifirlarla dolu bir
-        // maliyet dagilimi kullaniciya yanlis bilgi verirdi.
-        render(<AnalizSekmesi result={null} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
-        expect(screen.queryByTestId('cost-breakdown')).toBeNull()
+        render(<AnalizSekmesi result={null} baseInput={BASE_INPUT} marketPrice={10000000} />)
         expect(screen.getByText(/Hesap sonucu oluşunca/)).toBeInTheDocument()
     })
 
     it('finansal ozet de gosterilir', () => {
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={jest.fn()} />)
+        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
         expect(screen.getByRole('group', { name: 'Finansal özet' })).toBeInTheDocument()
-    })
-
-    it('kapat butonu onKapat i cagirir', async () => {
-        const onKapat = jest.fn()
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} onKapat={onKapat} />)
-        await userEvent.click(screen.getByRole('button', { name: /Kapat/ }))
-        expect(onKapat).toHaveBeenCalledTimes(1)
-    })
-
-    it('maliyet dagilimi proplari motor alanlarindan dogru turetilir', () => {
-        costProps.length = 0
-        render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={0} onKapat={jest.fn()} />)
-        expect(costProps[0]).toEqual({
-            constructionCost: RESULT.Mi_base + RESULT.Mz,
-            landValue: RESULT.Ma,
-            profit: RESULT.FD_total - RESULT.M,
-            risk: RESULT.Mi - RESULT.Mi_base - RESULT.Mz,
-        })
     })
 })
 
