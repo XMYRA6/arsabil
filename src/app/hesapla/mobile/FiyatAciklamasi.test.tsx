@@ -12,7 +12,7 @@ function props(patch = {}) {
     return {
         result: RESULT, apartmentSize: 140, unitPrice: 12000,
         landSharePercent: 33, profitLabel: 'Orta', profitMultiplier: 1.3,
-        onKapat: jest.fn(), onKarDegistir: jest.fn(), ...patch,
+        onKarDegistir: jest.fn(), ...patch,
     }
 }
 
@@ -21,6 +21,12 @@ beforeEach(() => {
 })
 
 describe('FiyatAciklamasi', () => {
+    it('kendi basligini/Kapat butonunu render ETMEZ — sarmalayan yaprak sahiplenir', () => {
+        render(<FiyatAciklamasi {...props()} />)
+        expect(screen.queryByRole('button', { name: /Kapat/ })).toBeNull()
+        expect(screen.queryByText('Bu fiyat nereden geliyor?')).toBeNull()
+    })
+
     it('uc satiri motor alanlarindan turetir, tutarlar binlik ayirac + iki ondalik + ₺ ile', () => {
         render(<FiyatAciklamasi {...props()} />)
         expect(screen.getByText('1.680.000,00 ₺')).toBeInTheDocument()   // Mi
@@ -72,13 +78,6 @@ describe('FiyatAciklamasi', () => {
         render(<FiyatAciklamasi {...props({ onKarDegistir })} />)
         await userEvent.click(screen.getByRole('button', { name: /değiştir/ }))
         expect(onKarDegistir).toHaveBeenCalledTimes(1)
-    })
-
-    it('kapat butonu onKapat i cagirir', async () => {
-        const onKapat = jest.fn()
-        render(<FiyatAciklamasi {...props({ onKapat })} />)
-        await userEvent.click(screen.getByRole('button', { name: /Kapat/ }))
-        expect(onKapat).toHaveBeenCalledTimes(1)
     })
 
     it('sonuc yoksa rakam yerine tire basar', () => {

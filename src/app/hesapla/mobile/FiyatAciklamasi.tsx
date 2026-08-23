@@ -16,7 +16,6 @@ export type FiyatAciklamasiProps = {
     profitLabel: string;
     /** Kar carpani, orn. 1.30. */
     profitMultiplier: number;
-    onKapat: () => void;
     /** `4f` yapragini kar bolumunde acar. */
     onKarDegistir: () => void;
 };
@@ -54,7 +53,6 @@ export function FiyatAciklamasi({
     landSharePercent,
     profitLabel,
     profitMultiplier,
-    onKapat,
     onKarDegistir,
 }: FiyatAciklamasiProps) {
     // Tercih localStorage'da yasar ve DOGRUDAN baslangic degerinde okunur.
@@ -79,13 +77,6 @@ export function FiyatAciklamasi({
 
     return (
         <section className={styles.fiyatAciklamasi} aria-label="Bu fiyat nereden geliyor?">
-            <header className={styles.aciklamaBaslik}>
-                <h2 className={styles.aciklamaBaslikMetin}>Bu fiyat nereden geliyor?</h2>
-                <button type="button" className={styles.aciklamaKapat} onClick={onKapat}>
-                    Kapat
-                </button>
-            </header>
-
             <ol className={styles.aciklamaSatirlar}>
                 <li className={styles.aciklamaSatir}>
                     <span className={`${styles.aciklamaIkon} ${styles.aciklamaIkonMavi}`} aria-hidden="true">
