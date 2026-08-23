@@ -1,8 +1,9 @@
 'use client'
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import type { Map as LeafletMap, Marker, Polygon } from 'leaflet'
+import type { Marker, Polygon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useLeafletMap } from '@/lib/hooks/useLeafletMap'
 import type { ParcelInfo } from '@/lib/tkgm/parcel'
 import { formatParcelIdentity } from '@/lib/listing/listingDisplay'
 import styles from './ParcelPicker.module.css'
@@ -64,8 +65,6 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
     mapClassName,
 }, ref) {
     const containerRef = useRef<HTMLDivElement | null>(null)
-    const mapRef = useRef<LeafletMap | null>(null)
-    const resizeObserverRef = useRef<ResizeObserver | null>(null)
     const markerRef = useRef<Marker | null>(null)
     const polygonRef = useRef<Polygon | null>(null)
     // Haritaya tiklandiginda dogrulama otomatik tetiklenir (asagida). Ust
@@ -84,10 +83,6 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
     const [verifying, setVerifying] = useState(false)
     const [locating, setLocating] = useState(false)
     const [geoError, setGeoError] = useState<string | null>(null)
-    // Harita async kuruluyor (dinamik leaflet import'u). Marker ve poligon
-    // effect'leri ilk calismalarinda mapRef.current'i HENUZ bulamaz; bu bayrak
-    // olmadan sessizce hicbir sey yapip bir daha calismiyorlardi.
-    const [mapReady, setMapReady] = useState(false)
 
     // onChange'i ref'te tut: harita effect'i bir kez çalışsın, her render'da yeniden kurulmasın
     const onChangeRef = useRef(onChange)
@@ -130,17 +125,11 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
         }
     }
 
-    /* Haritayı bir kez kur */
-    useEffect(() => {
-        let cancelled = false
-        void (async () => {
-            const L = await import('leaflet')
-            if (cancelled || !containerRef.current || mapRef.current) return
-
-            const map = L.map(containerRef.current).setView(
-                value.lat != null && value.lng != null ? [value.lat, value.lng] : TURKEY_CENTER,
-                value.lat != null ? 17 : 6,
-            )
+    /* Haritayı bir kez kur — ortak iskelet useLeafletMap'te (bkz. Task 1) */
+    const { mapRef, mapReady } = useLeafletMap(containerRef, {
+        center: value.lat != null && value.lng != null ? [value.lat, value.lng] : TURKEY_CENTER,
+        zoom: value.lat != null ? 17 : 6,
+        onReady: (map, L) => {
             // TKGM'nin kendi Atlas haritasi Arazi (uydu/topografya) gorunumu
             // sunuyor; arsa sinirlarini degerlendirirken bu, sokak haritasindan
             // (OSM Mapnik) daha isliyor (kullanici bulgusu). Esri World Imagery,
@@ -176,38 +165,14 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
                 void verifyAt(lat, lng)
             })
 
-            mapRef.current = map
-            setMapReady(true)
-
-            // Leaflet tile izgarasini KURULUM ANINDAKI konteyner olcusune gore
-            // uretir. Bu bilesen artik acilirken mount edilen bir modalin
-            // (`/hesapla` ParcelModal) icinde de kullaniliyor: konteyner o an
-            // ya 0 boyutlu ya da acilis animasyonunun ortasinda. Olculmus
-            // sonuc — kopuk tile sutunlari, aralarinda bos alanlar ve kayan
-            // tiklama koordinatlari. Bir kez hemen, sonra her olcu degisiminde
-            // yeniden olctur.
-            map.invalidateSize()
-            if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
-                const gozlemci = new ResizeObserver(() => mapRef.current?.invalidateSize())
-                gozlemci.observe(containerRef.current)
-                resizeObserverRef.current = gozlemci
+            return () => {
+                markerRef.current = null
+                polygonRef.current = null
+                placePinRef.current = null
+                verifyAbortRef.current?.abort()
             }
-        })()
-
-        return () => {
-            cancelled = true
-            resizeObserverRef.current?.disconnect()
-            resizeObserverRef.current = null
-            mapRef.current?.remove()
-            mapRef.current = null
-            markerRef.current = null
-            polygonRef.current = null
-            placePinRef.current = null
-            verifyAbortRef.current?.abort()
-            setMapReady(false)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- harita yalnızca bir kez kurulur
-    }, [])
+        },
+    })
 
     /* Disaridan gelen konum icin marker (duzenleme sayfasi, adima geri donus) */
     // Marker YALNIZCA map.on('click') icinde olusturuluyordu; kayitli bir
