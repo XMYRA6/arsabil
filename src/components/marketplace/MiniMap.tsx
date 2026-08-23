@@ -1,8 +1,8 @@
 "use client";
 
 import 'leaflet/dist/leaflet.css';
-import type { Map as LeafletMap } from 'leaflet';
 import { useEffect, useRef, useState } from 'react';
+import { useLeafletMap } from '@/lib/hooks/useLeafletMap';
 import styles from './MiniMap.module.css';
 
 interface Props {
@@ -17,33 +17,28 @@ interface Props {
 
 export function MiniMap({ lat, lng, label, listingId, riskLayers, parcelGeometry }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<LeafletMap | null>(null);
     const faultRef = useRef<import('leaflet').TileLayer | null>(null);
     const floodRef = useRef<import('leaflet').TileLayer | null>(null);
     const shapeRef = useRef<import('leaflet').Polygon | import('leaflet').Circle | null>(null);
-    const [mapReady, setMapReady] = useState(false);
 
-    useEffect(() => {
-        if (!containerRef.current || mapRef.current) return;
-
-        const init = async () => {
-            const L = (await import('leaflet')).default;
-
-            const el = containerRef.current;
-            if (!el) return;
-            const leafletEl = el as HTMLElement & { _leaflet_id?: number };
-            if (leafletEl._leaflet_id) leafletEl._leaflet_id = undefined;
-
-            const map = L.map(el, {
-                center: [lat, lng],
-                zoom: 15,
-                zoomControl: false,
-                scrollWheelZoom: false,
-                dragging: false,
-                doubleClickZoom: false,
-                attributionControl: false,
-            });
-
+    // `deps: [lat, lng]` BİLİNÇLİ: koordinat değişince harita YIKILIP
+    // YENİDEN KURULUR (bu bileşenin var olan davranışı, bkz.
+    // MiniMap.test.tsx — ParcelPicker/MapView'in aksine bir kez kurulup
+    // asla yeniden kurulmuyorlar). `observeResize: false`: sabit 180px
+    // yükseklikte, animasyonlu bir konteynerde asla açılmıyor.
+    const { mapRef, mapReady } = useLeafletMap(containerRef, {
+        center: [lat, lng],
+        zoom: 15,
+        leafletMapOptions: {
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            doubleClickZoom: false,
+            attributionControl: false,
+        },
+        deps: [lat, lng],
+        observeResize: false,
+        onReady: (map, L) => {
             // Use dark CartoDB tile to match platform
             const savedTile = typeof window !== 'undefined' ? localStorage.getItem('arsabil-map-tile') : null;
             const isDark = !savedTile || savedTile === 'dark';
@@ -72,27 +67,17 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers, parcelGeometry
             });
             L.marker([lat, lng], { icon: pinIcon }).addTo(map);
 
-            mapRef.current = map;
-            setMapReady(true);
-        };
-
-        init();
-
-        return () => {
-            if (mapRef.current) {
-                mapRef.current.remove();
-                mapRef.current = null;
-            }
-            // Harita yok edildiğinde eski katman referansları da onunla birlikte
-            // geçersiz olur; sıfırlanmazsa yeniden kurulan haritada "zaten ekli"
-            // sanılıp bir daha eklenmezler (ya da artık ait olmadıkları haritadan
-            // kaldırılmaya çalışılırlar).
-            faultRef.current = null;
-            floodRef.current = null;
-            shapeRef.current = null;
-            setMapReady(false);
-        };
-    }, [lat, lng]);
+            return () => {
+                // Harita yok edildiğinde eski katman referansları da onunla
+                // birlikte geçersiz olur; sıfırlanmazsa yeniden kurulan
+                // haritada "zaten ekli" sanılıp bir daha eklenmezler (ya da
+                // artık ait olmadıkları haritadan kaldırılmaya çalışılırlar).
+                faultRef.current = null;
+                floodRef.current = null;
+                shapeRef.current = null;
+            };
+        },
+    });
 
     /* Parsel sınırı (veya sınır yoksa yaklaşıklık çemberi) */
     // Kurulum effect'inden AYRI: `parcelGeometry` ilan verisiyle birlikte

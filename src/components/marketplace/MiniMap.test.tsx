@@ -17,6 +17,7 @@ jest.mock('leaflet', () => {
     const makeMap = () => ({
         removeLayer: jest.fn(),
         remove: jest.fn(),
+        invalidateSize: jest.fn(),
     })
     const tileLayer = jest.fn(() => makeLayer()) as unknown as jest.Mock & { wms: jest.Mock }
     tileLayer.wms = jest.fn(() => makeLayer())
