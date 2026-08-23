@@ -581,6 +581,22 @@
         color: #fff;
     }
 
+    /* ── Segment (2 sutunlu varyant — Sonuc Detayi Ozet/Grafikler) ──
+       `.segment`/`.segmentAktif` PAYLASILIR (ayni gorsel dil), yalnizca
+       grid sutun sayisi farkli. `.hesaplaMobilKok`in duz sutununda
+       dogrudan durur, `.analizKapatSatiri` ile AYNI 14px yatay
+       margin — dikey aralik `.hesaplaMobilKok`in `gap: 12px`inden
+       gelir (bkz. .girdiKarti'nin yorumu, satir 244-246). */
+    .segmentKap2 {
+        margin: 0 14px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+        padding: 4px;
+        border-radius: 17px;
+        background: var(--m-fill);
+    }
+
     /* ── Metrekare stepper ── */
     .stepperSatir {
         display: flex;
