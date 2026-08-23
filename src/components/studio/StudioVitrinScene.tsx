@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls, Environment, useTexture } from '@react-three/drei';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { generateProceduralFacade, type FacadeWall } from '@/lib/studio/proceduralFacade';
@@ -176,30 +176,25 @@ function RoadMesh({ road }: { road: RoadPlacement }) {
     return { geometry: geo, posX, posZ, angleY, length };
   }, [road]);
 
-  const [textures, setTextures] = useState<{
-    diffuse?: THREE.Texture;
-    normal?: THREE.Texture;
-    roughness?: THREE.Texture;
-  }>({});
+  // useTexture (Suspense-tabanlı) bilerek kullanılıyor: THREE.TextureLoader().load()
+  // dokuyu HEMEN (boş) döndürüp resmi arka planda asenkron indirir — setState o an
+  // tetiklenirse frameloop="demand" altında tek bir kare boş dokuyla çizilir, resim
+  // gerçekten gelince Three'nin needsUpdate'i React dışında gerçekleştiği için bir
+  // daha invalidate tetiklenmez ve yol dokusuz/siyah kalır. useTexture, resim TAM
+  // yüklenene kadar suspend eder; component ilk kez render olduğunda doku zaten hazırdır.
+  const [diffuse, normal, roughness] = useTexture([
+    '/studio-assets/materials/road-asphalt/diffuse.jpg',
+    '/studio-assets/materials/road-asphalt/normal.jpg',
+    '/studio-assets/materials/road-asphalt/roughness.jpg',
+  ]);
 
-  useEffect(() => {
-    const loader = new THREE.TextureLoader();
-    try {
-      const diff = loader.load('/studio-assets/materials/road-asphalt/diffuse.jpg');
-      const norm = loader.load('/studio-assets/materials/road-asphalt/normal.jpg');
-      const rough = loader.load('/studio-assets/materials/road-asphalt/roughness.jpg');
-
-      [diff, norm, rough].forEach((t) => {
-        t.wrapS = THREE.RepeatWrapping;
-        t.wrapT = THREE.RepeatWrapping;
-        t.repeat.set(1, Math.max(1, Math.round(length / 4)));
-      });
-
-      setTextures({ diffuse: diff, normal: norm, roughness: rough });
-    } catch (err) {
-      console.warn('[StudioVitrin] Asfalt dokusu yüklenemedi:', err);
-    }
-  }, [length]);
+  useMemo(() => {
+    [diffuse, normal, roughness].forEach((t) => {
+      t.wrapS = THREE.RepeatWrapping;
+      t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(1, Math.max(1, Math.round(length / 4)));
+    });
+  }, [diffuse, normal, roughness, length]);
 
   return (
     <mesh
@@ -209,9 +204,9 @@ function RoadMesh({ road }: { road: RoadPlacement }) {
     >
       <meshStandardMaterial
         color="#334155"
-        map={textures.diffuse}
-        normalMap={textures.normal}
-        roughnessMap={textures.roughness}
+        map={diffuse}
+        normalMap={normal}
+        roughnessMap={roughness}
         roughness={0.88}
         metalness={0.05}
       />
@@ -312,8 +307,13 @@ export function StudioVitrinScene({ snapshot }: StudioVitrinSceneProps) {
       {/* 3. Site Bağlamı Ağaçları */}
       <SiteTreesMesh placements={sitePlacements} />
 
-      {/* 4. Yol Şeridi */}
-      {roadPlacement && <RoadMesh road={roadPlacement} />}
+      {/* 4. Yol Şeridi — kendi Suspense sınırında: doku yükleme süresi diğer
+          mesh'lerin görünür olmasını engellememeli (Environment ile aynı desen). */}
+      {roadPlacement && (
+        <Suspense fallback={null}>
+          <RoadMesh road={roadPlacement} />
+        </Suspense>
+      )}
 
       {/* Kamera Kontrolleri */}
       <OrbitControls

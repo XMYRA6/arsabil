@@ -42,5 +42,13 @@ describe('StudioVitrinScene — kaynak dogrulama', () => {
     // HDR yuklenene kadar TUM sahne (bina/pencere/agac/yol) gizli kalir
     // (bug: sahne suresiz bos kaliyordu, ekran goruntusuyle dogrulandi).
     expect(source).toMatch(/<Suspense[^>]*>\s*<Environment/);
+
+    // 8. RoadMesh dokulari Suspense-tabanli useTexture ile yuklenmeli, ham
+    // THREE.TextureLoader().load()+setState DEGIL — frameloop="demand"
+    // altinda resim asenkron gelince invalidate tetiklenmedigi icin yol
+    // dokusuz/duz siyah kaliyordu (bug, ekran goruntusuyle dogrulandi).
+    expect(source).toMatch(/import\s*\{[^}]*useTexture[^}]*\}\s*from\s*'@react-three\/drei'/);
+    expect(source).not.toMatch(/new\s+THREE\.TextureLoader/);
+    expect(source).toMatch(/<Suspense[^>]*>\s*<RoadMesh/);
   });
 });
