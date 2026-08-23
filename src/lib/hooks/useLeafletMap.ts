@@ -77,7 +77,11 @@ export function useLeafletMap(
             if (cancelled) { map.remove(); return; }
 
             const cleanup = await onReady?.(map, L);
-            if (cancelled) { map.remove(); return; }
+            if (cancelled) {
+                if (typeof cleanup === 'function') cleanup();
+                map.remove();
+                return;
+            }
             onReadyCleanupRef.current = typeof cleanup === 'function' ? cleanup : null;
 
             mapRef.current = map;
