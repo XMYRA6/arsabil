@@ -202,8 +202,12 @@ function RoadMesh({ road }: { road: RoadPlacement }) {
       position={[posX, 0.01, posZ]}
       rotation={[-Math.PI / 2, 0, -angleY]}
     >
+      {/* color BEYAZ kalmali: THREE `map * color` carpar, koyu bir tint
+          (onceki #334155) zaten koyu olan asfalt fotografini duz siyaha
+          kadar kisiyordu — doku hala oradaydi ama gorunmuyordu (gercek
+          GPU'da dogrulandi: color=#ffffff ile aynı dokuda görünür kontrast). */}
       <meshStandardMaterial
-        color="#334155"
+        color="#ffffff"
         map={diffuse}
         normalMap={normal}
         roughnessMap={roughness}
