@@ -26,4 +26,19 @@ if (typeof window !== 'undefined') {
     if (!window.Element.prototype.scrollIntoView) {
         window.Element.prototype.scrollIntoView = jest.fn()
     }
+    if (!window.ResizeObserver) {
+        class ResizeObserverMock {
+            observe = jest.fn()
+            unobserve = jest.fn()
+            disconnect = jest.fn()
+        }
+        Object.defineProperty(window, 'ResizeObserver', {
+            writable: true,
+            value: ResizeObserverMock,
+        })
+        Object.defineProperty(globalThis, 'ResizeObserver', {
+            writable: true,
+            value: ResizeObserverMock,
+        })
+    }
 }
