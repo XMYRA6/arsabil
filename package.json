@@ -19,9 +19,12 @@
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "^5.22.0",
     "@react-pdf/renderer": "^4.5.1",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
     "@sentry/nextjs": "^10.57.0",
     "@types/leaflet": "^1.9.21",
     "@types/leaflet.markercluster": "^1.5.6",
+    "@types/three": "^0.185.4",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
     "cloudinary": "^2.10.0",
@@ -41,7 +44,8 @@
     "react-dom": "19.2.3",
     "react-hot-toast": "^2.6.0",
     "react-leaflet": "^5.0.0",
-    "resend": "^6.12.4"
+    "resend": "^6.12.4",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
