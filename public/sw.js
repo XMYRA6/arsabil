@@ -1,9 +1,10 @@
-const CACHE_NAME = 'arsabil-cache-v1.0.2';
-const SW_VERSION = '1.0.2'; // Update this to force SW update
+const CACHE_NAME = 'arsabil-cache-v1.0.3';
+const SW_VERSION = '1.0.3'; // Update this to force SW update
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
     '/',
+    '/offline',
     '/manifest.json',
     '/icons/icon-192x192.png',
     '/icons/icon-512x512.png',
@@ -73,7 +74,7 @@ self.addEventListener('fetch', (event) => {
                 .catch(() => {
                     // Fallback to cache ONLY for HTML navigations
                     if (request.mode === 'navigate') {
-                        return caches.match('/') || new Response('Offline', { status: 503 });
+                        return caches.match('/offline') || caches.match('/') || new Response('Offline', { status: 503 });
                     }
                     return new Response('Offline', { status: 503 });
                 })
@@ -97,3 +98,4 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+

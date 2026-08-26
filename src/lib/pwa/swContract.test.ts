@@ -17,9 +17,23 @@ describe('public/sw.js — güncelleme sözleşmesi', () => {
         expect(messageMatch![1]).toMatch(/self\.skipWaiting\(\)/)
     })
 
+    it('offline route install cache listesine eklenir', () => {
+        const assetsMatch = sw.match(/const STATIC_ASSETS = \[([\s\S]*?)\];/)
+        expect(assetsMatch).not.toBeNull()
+        expect(assetsMatch![1]).toMatch(/'\/offline'/)
+    })
+
+    it('navigasyon fetch hatasinda once offline route cache fallback kullanilir', () => {
+        const fetchMatch = sw.match(/self\.addEventListener\('fetch',\s*\(event\)\s*=>\s*\{([\s\S]*?)\n\}\);/)
+        expect(fetchMatch).not.toBeNull()
+        expect(fetchMatch![1]).toMatch(/request\.mode === 'navigate'/)
+        expect(fetchMatch![1]).toMatch(/caches\.match\('\/offline'\) \|\| caches\.match\('\/'\)/)
+    })
+
     it('activate olayindaki eski cache temizleme mantigi degismedi', () => {
         const activateMatch = sw.match(/self\.addEventListener\('activate',\s*\(event\)\s*=>\s*\{([\s\S]*?)\n\}\);/)
         expect(activateMatch).not.toBeNull()
         expect(activateMatch![1]).toMatch(/caches\.delete\(name\)/)
     })
 })
+

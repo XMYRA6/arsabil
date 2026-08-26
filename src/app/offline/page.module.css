@@ -1,0 +1,35 @@
+.screen {
+    min-height: 100dvh;
+}
+
+.main {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: white;
+    padding: 0 18px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: max(var(--safe-top), 18px) 16px max(var(--safe-bottom), 18px);
+    }
+
+    .action {
+        border-radius: var(--m-r-btn);
+        background: var(--m-accent);
+        box-shadow: 0 12px 26px rgba(20, 70, 150, .16);
+    }
+}
