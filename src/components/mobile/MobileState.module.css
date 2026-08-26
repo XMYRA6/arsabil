@@ -1,0 +1,122 @@
+.state {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.iconShell {
+    display: grid;
+    place-items: center;
+}
+
+.copy {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.title,
+.description {
+    margin: 0;
+}
+
+.action {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.spinner {
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: mobileStateSpin .8s linear infinite;
+}
+
+@keyframes mobileStateSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .state {
+        width: 100%;
+        padding: 24px 18px calc(24px + var(--safe-bottom, 0px));
+        background: var(--m-glass);
+        border: 1px solid var(--m-glass-border);
+        border-radius: var(--m-r-card);
+        box-shadow: var(--m-sh-card), inset 0 1px 0 rgba(255, 255, 255, .72);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        color: var(--m-ink);
+        animation: mobileStateIn .22s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .iconShell {
+        width: 58px;
+        height: 58px;
+        border-radius: 22px;
+        color: var(--m-accent);
+        background: rgba(255, 255, 255, .68);
+        border: 1px solid var(--m-divider);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82), 0 12px 28px rgba(20, 70, 150, .12);
+    }
+
+    .error .iconShell {
+        color: var(--m-danger-text, #b42318);
+    }
+
+    .offline .iconShell {
+        color: var(--m-muted);
+    }
+
+    .title {
+        color: var(--m-ink);
+        font-size: 1.06rem;
+        line-height: 1.18;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .description {
+        color: var(--m-body);
+        font-size: .92rem;
+        line-height: 1.45;
+        max-width: 28ch;
+    }
+
+    .action {
+        margin-top: 4px;
+    }
+
+    .action > * {
+        min-height: var(--touch-target);
+        min-width: var(--touch-target);
+    }
+}
+
+@keyframes mobileStateIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .state,
+    .iconShell,
+    .spinner {
+        animation: none;
+        transition: none;
+    }
+}

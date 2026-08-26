@@ -14,15 +14,15 @@ describe('dashboard favorites mobile page', () => {
         expect(page).toMatch(/Pazar yerine git/)
     })
 
-    it('mobilde liquid glass kabuk ve bos durum tokenlarini kullanir', () => {
+    it('mobilde stat kabuk ve bos durum yuzeylerini kullanir', () => {
         expect(mobile).toMatch(/\.portfolioShell\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
-        expect(mobile).toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-        expect(mobile).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
+        expect(mobile).toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-panel\)/)
+        expect(mobile).not.toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*backdrop-filter/)
     })
 
     it('Favorite tipi photos alanini tasir, .itemCard fotografli editorialListingCard yuzeyine baglanir', () => {
         expect(page).toMatch(/photos\?:\s*string\[\]\s*\|\s*null/)
-        expect(css).toMatch(/\.itemCard\s*\{[^}]*composes:\s*editorialListingCard from global/)
+        expect(css).toMatch(/\.itemCard\s*\{[^}]*composes:\s*mEditorialListingCard from global/)
         expect(mobile).not.toMatch(/\.itemCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     })
 
@@ -38,3 +38,5 @@ describe('dashboard favorites mobile page', () => {
         expect(css).toMatch(/font-variant-numeric:\s*tabular-nums/)
     })
 })
+
+

@@ -10,7 +10,10 @@
         position: fixed;
         left: 0;
         right: 0;
-        bottom: 0;
+        /* Klavye acikken --keyboard-inset kadar yukari kayar (bkz.
+           StickyActionBar.tsx, useKeyboardInset.ts) — kapaliyken 0px, eski
+           davranis degismez. */
+        bottom: var(--keyboard-inset, 0px);
         z-index: 90;
         padding: 10px 14px calc(10px + var(--safe-bottom)) 14px;
         background: var(--topbar-bg);
@@ -22,7 +25,7 @@
     /* BottomNavbar görünürken navbar'ın üstüne oturur; navbar kendi
        safe-area padding'ini zaten taşıdığı için burada eklenmez */
     .aboveNav {
-        bottom: var(--bottomnav-height);
+        bottom: calc(var(--bottomnav-height) + var(--keyboard-inset, 0px));
         padding-bottom: 10px;
     }
 

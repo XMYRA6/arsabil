@@ -23,10 +23,10 @@ describe('listing offers mobil Faz 4', () => {
     expect(page).toMatch(/offeredShare/)
   })
 
-  it('mobil teklif sayfasi Liquid Glass kartlari ve status badge tasir', () => {
+  it('mobil teklif sayfasi stat kartlari ve status badge tasir', () => {
     expect(mobile).toMatch(/\.offersShell\s*\{[^}]*background:\s*var\(--m-mesh\)/)
     expect(mobile).toMatch(/\.summaryCard\s*\{[^}]*background:\s*var\(--m-grad-accent\)/)
-    expect(mobile).toMatch(/\.offerCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+    expect(mobile).toMatch(/\.offerCard\s*\{[^}]*background:\s*var\(--m-panel\)/)
     expect(mobile).toMatch(/\.statusBadge\s*\{[^}]*border-radius:\s*var\(--m-r-chip\)/)
   })
 
@@ -36,3 +36,5 @@ describe('listing offers mobil Faz 4', () => {
     expect(mobile).toMatch(/\.submitButton\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
   })
 })
+
+

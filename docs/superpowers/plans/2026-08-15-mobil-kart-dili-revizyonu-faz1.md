@@ -29,7 +29,7 @@
 **Interfaces:**
 - Produces: `.mStatSurface` global CSS class (background/border/border-radius/focus-visible — box-shadow YOK, tüketici kendi `--m-sh-card` veya `--m-sh-card-sm`'ini ekler), `.mRowList` global CSS class (aynı yüzey + `:active` basma geri bildirimi + `text-decoration:none;color:inherit` çünkü hep `<Link>`/`<a>` üzerinde kullanılıyor). Sonraki task'lar bu iki sınıfı `composes: mStatSurface from global;` / `composes: mRowList from global;` ile tüketir.
 
-- [ ] **Step 1: Yeni describe bloğunu `globalsMobile.scope.test.ts`'e ekle (RED)**
+- [x] **Step 1: Yeni describe bloğunu `globalsMobile.scope.test.ts`'e ekle (RED)**
 
 `src/app/globalsMobile.scope.test.ts` dosyası zaten `const css = readFileSync(join(process.cwd(), 'src/app/globals.css'), 'utf8')` (satır 4) ve mobil `@media` bloğunun gövdesini döndüren bir `mobileBlock()` yardımcı fonksiyonu (satır 6-20) tanımlıyor — yeni testler de bu ikisini kullanır. Dosyanın sonuna (satır 99'daki son `})`'dan sonra) ekle:
 
@@ -70,12 +70,12 @@ describe('Kart tekdüzeliği düzeltmesi — paylaşılan yüzey sınıfları (2
 })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/globalsMobile.scope.test.ts -t "Kart tekdüzeliği"`
 Expected: FAIL — `.mStatSurface`/`.mRowList` henüz `globals.css`'te yok.
 
-- [ ] **Step 3: `globals.css`'e `--m-panel` token'ını ve iki sınıfı ekle**
+- [x] **Step 3: `globals.css`'e `--m-panel` token'ını ve iki sınıfı ekle**
 
 `src/app/globals.css`'teki mobil `:root` bloğunda `--m-fill: rgba(11,32,54,.05);` satırının (satır ~275) hemen ALTINA yeni token'ı ekle:
 
@@ -122,12 +122,12 @@ Ardından `.mGlass { ... }` bloğunun (satır ~307-313) hemen ALTINA, `.mNum` bl
   }
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/globalsMobile.scope.test.ts`
 Expected: PASS (tüm testler, yeni eklenenler dahil)
 
-- [ ] **Step 5: tsc + tam jest çalıştır**
+- [x] **Step 5: tsc + tam jest çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: 0 tsc hatası, tüm test suite'leri PASS (bu adımda henüz hiçbir tüketici dosyası değişmedi, sadece yeni CSS eklendi — mevcut hiçbir testin kırılmaması gerekir).
@@ -150,7 +150,7 @@ git commit -m "feat(mobile): .mStatSurface/.mRowList paylasilan yuzey siniflari 
 **Interfaces:**
 - Consumes: `.mStatSurface`/`.mRowList` (Task 1)
 
-- [ ] **Step 1: `homeMobile.scope.test.ts`'teki mevcut assertion'ı YENİ beklenen deseni arayacak şekilde güncelle (RED)**
+- [x] **Step 1: `homeMobile.scope.test.ts`'teki mevcut assertion'ı YENİ beklenen deseni arayacak şekilde güncelle (RED)**
 
 `src/app/homeMobile.scope.test.ts:26-32` içindeki test şu an:
 
@@ -181,12 +181,12 @@ git commit -m "feat(mobile): .mStatSurface/.mRowList paylasilan yuzey siniflari 
   })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/homeMobile.scope.test.ts`
 Expected: FAIL — `.statGrid`/`.listRow` henüz `composes` kullanmıyor.
 
-- [ ] **Step 3: `mobile.module.css`'te `.listRow` ve `.statGrid`'i güncelle**
+- [x] **Step 3: `mobile.module.css`'te `.listRow` ve `.statGrid`'i güncelle**
 
 `src/app/mobile/mobile.module.css:74-87` şu an:
 
@@ -252,12 +252,12 @@ Expected: FAIL — `.statGrid`/`.listRow` henüz `composes` kullanmıyor.
     }
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/homeMobile.scope.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: tsc + tam jest çalıştır**
+- [x] **Step 5: tsc + tam jest çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: 0 hata, tüm suite PASS.
@@ -280,7 +280,7 @@ git commit -m "refactor(mobile-home): listRow/statGrid paylasilan yuzey siniflar
 **Interfaces:**
 - Consumes: `.mStatSurface` (Task 1)
 
-- [ ] **Step 1: `reportsMobile.scope.test.ts`'teki mevcut assertion'ı güncelle (RED)**
+- [x] **Step 1: `reportsMobile.scope.test.ts`'teki mevcut assertion'ı güncelle (RED)**
 
 `src/app/dashboard/reports/reportsMobile.scope.test.ts:25-29` şu an:
 
@@ -305,12 +305,12 @@ git commit -m "refactor(mobile-home): listRow/statGrid paylasilan yuzey siniflar
     })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/dashboard/reports/reportsMobile.scope.test.ts`
 Expected: FAIL
 
-- [ ] **Step 3: `page.module.css`'i güncelle**
+- [x] **Step 3: `page.module.css`'i güncelle**
 
 `src/app/dashboard/reports/page.module.css:244-254` şu an:
 
@@ -340,12 +340,12 @@ Expected: FAIL
     }
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/dashboard/reports/reportsMobile.scope.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: tsc + tam jest çalıştır**
+- [x] **Step 5: tsc + tam jest çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: 0 hata, tüm suite PASS.
@@ -373,7 +373,7 @@ git commit -m "refactor(dashboard-reports): hero/rapor/bos/durum kartlari mStatS
 
 **ÖNEMLİ — dokunulmayacaklar:** `.sidebar`, `.chatHeader`, `.inputArea`, `.chatTopbar`, `.composerInner`, `.bubbleMine`, `.bubbleTheirs`, `.convItemActive` (`!important` override'ı KALIR, ayrı bir seçici) — bunlar sohbet chrome'u/mesaj balonları, kart deseni DEĞİL. Sadece aşağıda listelenenlere dokun.
 
-- [ ] **Step 1: `inbox.scope.test.ts`'teki `.convItem` assertion'ını güncelle (RED)**
+- [x] **Step 1: `inbox.scope.test.ts`'teki `.convItem` assertion'ını güncelle (RED)**
 
 `src/app/inbox/inbox.scope.test.ts:41-44` şu an:
 
@@ -394,7 +394,7 @@ git commit -m "refactor(dashboard-reports): hero/rapor/bos/durum kartlari mStatS
   });
 ```
 
-- [ ] **Step 2: `inboxMobile.scope.test.ts`'teki iki assertion'ı güncelle (RED)**
+- [x] **Step 2: `inboxMobile.scope.test.ts`'teki iki assertion'ı güncelle (RED)**
 
 `src/app/inbox/inboxMobile.scope.test.ts:9-16` şu an:
 
@@ -433,12 +433,12 @@ git commit -m "refactor(dashboard-reports): hero/rapor/bos/durum kartlari mStatS
   })
 ```
 
-- [ ] **Step 3: Testleri çalıştır, RED olduğunu doğrula**
+- [x] **Step 3: Testleri çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/inbox/inbox.scope.test.ts src/app/inbox/inboxMobile.scope.test.ts`
 Expected: FAIL (3 test)
 
-- [ ] **Step 4: `inbox.module.css`'i güncelle**
+- [x] **Step 4: `inbox.module.css`'i güncelle**
 
 `src/app/inbox/inbox.module.css:567-578` şu an (`.convItem.convItemActive` — satır 580-583 — AYRI bir selector, DOKUNULMAZ):
 
@@ -496,7 +496,7 @@ Expected: FAIL (3 test)
     }
 ```
 
-- [ ] **Step 5: `chatMobile.test.tsx`'e `.stateCard` için yeni bir test ekle (RED)**
+- [x] **Step 5: `chatMobile.test.tsx`'e `.stateCard` için yeni bir test ekle (RED)**
 
 `src/app/inbox/[userId]/chatMobile.test.tsx` sonuna (mevcut son `})`'dan sonra, aynı `describe` bloğu içinde veya yeni bir `describe` olarak) ekle:
 
@@ -511,12 +511,12 @@ describe('inbox sohbet detay — durum notu paylasilan yuzeye baglanir (2026-08-
 
 (Dosyanın en üstünde `mobile` adlı bir değişkenin zaten `@media (max-width: 768px)` bloğunu dilimlediğini doğrula — yoksa mevcut testlerin nasıl CSS okuduğuna bak ve aynı deseni kullan.)
 
-- [ ] **Step 6: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 6: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/inbox/[userId]/chatMobile.test.tsx`
 Expected: FAIL
 
-- [ ] **Step 7: `inbox/[userId]/page.module.css`'teki `.stateCard`'ı güncelle**
+- [x] **Step 7: `inbox/[userId]/page.module.css`'teki `.stateCard`'ı güncelle**
 
 `src/app/inbox/[userId]/page.module.css:112-122` şu an:
 
@@ -548,12 +548,12 @@ Expected: FAIL
     }
 ```
 
-- [ ] **Step 8: Tüm mesajlar testlerini çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 8: Tüm mesajlar testlerini çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/inbox`
 Expected: PASS (tüm inbox test dosyaları)
 
-- [ ] **Step 9: tsc + tam jest çalıştır**
+- [x] **Step 9: tsc + tam jest çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: 0 hata, tüm suite PASS.
@@ -578,11 +578,11 @@ git commit -m "refactor(inbox): konusma listesi mRowList'e, durum notlari mStatS
 
 **Bağlam:** `ListingCard` masaüstünde/genel olarak zaten iyi durumda (gerçek fotoğraf, `FizibiliteScoreBadge`, hover/tabular-nums). Mobil `@media(max-width:768px)` bloğundaki `.cardRoot` override'ı bu iyi tasarımı `!important` ile eziyor. Düzeltme YENİ bir sınıf eklemek değil, bu override'ı SİLMEK — kart mobilde masaüstüyle aynı (zaten onaylı) görünüme döner.
 
-- [ ] **Step 1: Önce mevcut/olası scope test dosyasını kontrol et**
+- [x] **Step 1: Önce mevcut/olası scope test dosyasını kontrol et**
 
 Run: `Glob "src/components/marketplace/ListingCard*.test*"` (veya proje kökünden `find`) — `ListingCard.module.css`'i test eden bir `*.scope.test.ts` dosyası var mı bak. Varsa `.cardRoot`'un mobil `--m-glass-*` kullanımını doğrulayan bir assertion olup olmadığını grep'le: `grep -n "cardRoot" <bulunan dosya>`.
 
-- [ ] **Step 2: Eğer mevcut bir assertion .cardRoot'un glass arka planını bekliyorsa, testi güncelle (RED)**
+- [x] **Step 2: Eğer mevcut bir assertion .cardRoot'un glass arka planını bekliyorsa, testi güncelle (RED)**
 
 Bulunursa, o assertion'ı "`.cardRoot` mobilde EK bir glass override TAŞIMAMALI" şeklinde tersine çevir, örnek:
 
@@ -610,12 +610,12 @@ describe('ListingCard mobil — glass override kaldirildi (2026-08-15)', () => {
 })
 ```
 
-- [ ] **Step 3: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 3: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest ListingCard`
 Expected: FAIL (yeni/güncellenmiş test, `.cardRoot` hâlâ glass override taşıyor)
 
-- [ ] **Step 4: `.cardRoot`'un mobil override'ını sil**
+- [x] **Step 4: `.cardRoot`'un mobil override'ını sil**
 
 `src/components/marketplace/ListingCard.module.css` içinde `@media (max-width: 768px)` bloğunda satır ~105-112 civarındaki:
 
@@ -632,16 +632,16 @@ Expected: FAIL (yeni/güncellenmiş test, `.cardRoot` hâlâ glass override taş
 
 bloğunun TAMAMINI SİL. `.dataNum` (aynı media query'de, satır ~101-104, `font-family`/`tabular-nums`) ZARARSIZ — SİLİNMEZ, kalır.
 
-- [ ] **Step 5: `.priceText`/`.typeBadge` mobil override'larını kontrol et**
+- [x] **Step 5: `.priceText`/`.typeBadge` mobil override'larını kontrol et**
 
 `.cardRoot` bloğundan hemen sonra (satır ~114'ten itibaren, `.photoFrame` ve devamı) gelen diğer mobil override'ları oku. Eğer aralarında `var(--m-glass-*)` kullanan BAŞKA bir kural varsa (ör. `.priceText`/`.typeBadge` üzerinde), onu da aynı gerekçeyle (masaüstü tasarımını gereksiz yere ezmesin diye) değerlendir — yalnızca `--m-glass-bg/--m-glass-border/--m-glass-blur` kullanan kısımları sil, `--m-mono`/`--m-ink` gibi zararsız token kullanımlarına DOKUNMA.
 
-- [ ] **Step 6: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 6: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest ListingCard`
 Expected: PASS
 
-- [ ] **Step 7: tsc + tam jest çalıştır**
+- [x] **Step 7: tsc + tam jest çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: 0 hata, tüm suite PASS.
@@ -670,7 +670,7 @@ git commit -m "fix(marketplace): ListingCard mobil glass override kaldirildi, ma
 
 **Not (test yaklaşımı gerekçesi):** Her iki sayfanın da (ne `dashboard/profile/page.tsx` ne `listings/new/page.tsx`) mevcut bir render-test altyapısı (mock session/router/fetch) yok — sadece CSS `*.scope.test.ts` dosyaları var. `listings/new` ayrıca 5 adımlı bir wizard (`WizardStep1Location` harita/`ParcelPicker` bileşeni gerektiriyor) — tam render+mock kurmak bu küçük düzeltme için orantısız karmaşıklık ve kırılganlık getirir. Bunun yerine bu projede ZATEN baskın olan desen kullanılıyor: ham `.tsx` kaynağını okuyup regex ile yapısal garanti veren `*.scope.test.ts`. Bu, "alert() kalmadı + state-tabanlı hata mesajı var" garantisini render etmeden de güvenilir şekilde verir.
 
-- [ ] **Step 1: `dashboard/profile/alertRemoval.scope.test.ts` dosyasını oluştur (RED)**
+- [x] **Step 1: `dashboard/profile/alertRemoval.scope.test.ts` dosyasını oluştur (RED)**
 
 ```ts
 import fs from 'fs'
@@ -693,12 +693,12 @@ describe('dashboard/profile — window.alert() kaldirildi (2026-08-15)', () => {
 })
 ```
 
-- [ ] **Step 2: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 2: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/dashboard/profile/alertRemoval.scope.test.ts`
 Expected: FAIL — `alert(` hâlâ var, `exportError` state yok.
 
-- [ ] **Step 3: `handleExportData`'yı güncelle**
+- [x] **Step 3: `handleExportData`'yı güncelle**
 
 `src/app/dashboard/profile/page.tsx:88` civarına (`deleteError` state'inin yanına) yeni bir state ekle:
 
@@ -786,12 +786,12 @@ HEMEN ALTINA (mevcut `deleteModalError` deseniyle AYNI class'ı kullanarak) ekle
                                     )}
 ```
 
-- [ ] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 4: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/dashboard/profile/alertRemoval.scope.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: `listings/new/alertRemoval.scope.test.ts` dosyasını oluştur (RED)**
+- [x] **Step 5: `listings/new/alertRemoval.scope.test.ts` dosyasını oluştur (RED)**
 
 `src/components/listing-wizard/WizardShell.tsx`'in `error`/`errorMessage` benzeri bir prop KABUL ETMEDİĞİ doğrulandı (yalnızca `pageTitle`/`stepTitle`/`step`/`onBack`/`onNext`/`nextDisabled`/`children`) — bu yüzden hata mesajı `<WizardShell>`'in DIŞINA, bir üst `<>...</>` fragment'i içine eklenecek.
 
@@ -817,12 +817,12 @@ describe('listings/new — window.alert() kaldirildi (2026-08-15)', () => {
 })
 ```
 
-- [ ] **Step 6: Testi çalıştır, RED olduğunu doğrula**
+- [x] **Step 6: Testi çalıştır, RED olduğunu doğrula**
 
 Run: `npx jest src/app/listings/new/alertRemoval.scope.test.ts`
 Expected: FAIL — `alert(` hâlâ var, `publishError` state yok.
 
-- [ ] **Step 7: `handlePublish`'i ve JSX'i güncelle**
+- [x] **Step 7: `handlePublish`'i ve JSX'i güncelle**
 
 `src/app/listings/new/page.tsx:28` civarına (`tempId` state'inin yanına) yeni bir state ekle:
 
@@ -932,12 +932,12 @@ Expected: FAIL — `alert(` hâlâ var, `publishError` state yok.
   )
 ```
 
-- [ ] **Step 8: Testi çalıştır, GREEN olduğunu doğrula**
+- [x] **Step 8: Testi çalıştır, GREEN olduğunu doğrula**
 
 Run: `npx jest src/app/listings/new/alertRemoval.scope.test.ts`
 Expected: PASS
 
-- [ ] **Step 9: tsc + tam jest çalıştır**
+- [x] **Step 9: tsc + tam jest çalıştır**
 
 Run: `npx tsc --noEmit && npx jest`
 Expected: 0 hata, tüm suite PASS.
@@ -956,3 +956,16 @@ git commit -m "fix(a11y): window.alert() yerine sayfa ici hata mesaji (disa akta
 - Tüm task'lar birleştikten sonra `finishing-a-development-branch` akışıyla merge.
 - Playwright ile gerçek dev server üzerinde ışık temada Ana sayfa/Dashboard raporları/Mesajlar/Pazar (ListingCard) mobil görünümü ekran görüntüsüyle doğrulanır (bu proje dark tema mobilde henüz desteklenmiyor — bkz. Global Constraints).
 - Kapsam dışı bırakılanlar (login/register/ilan detay/dashboard settings-profile edit/notifications/hesapla mobil/ScenarioCompare/FilterSidebar, `:focus-visible`'ın diğer sayfalara yayılması, skeleton loader, jenerik hata metinleri) için Faz 2 planı — kullanıcıyla ayrıca görüşülecek.
+
+## Validation Notes
+
+- Task 1 is already implemented: `src/app/globals.css` defines `--m-panel`, `.mStatSurface`, and `.mRowList`; `src/app/globalsMobile.scope.test.ts` verifies mobile-only surface contracts and no blur on shared stat/list surfaces.
+- Task 2 is implemented: `src/app/mobile/mobile.module.css` composes `.listRow` from `mRowList` and `.statGrid` from `mStatSurface`; `src/app/homeMobile.scope.test.ts` covers the shared-surface contract.
+- Task 3 is implemented: `src/app/dashboard/reports/page.module.css` composes hero/report/empty/state cards from `mStatSurface`; `src/app/dashboard/reports/reportsMobile.scope.test.ts` covers it.
+- Task 4 is implemented: inbox conversation rows compose `mRowList`, empty/loading/state cards compose `mStatSurface`, while chat chrome/bubbles keep their intentional glass styling; inbox tests cover the split.
+- Task 5 is implemented: `src/components/marketplace/ListingCard.module.css` no longer applies a mobile `.cardRoot` glass override; `src/components/marketplace/ListingCard.scope.test.ts` guards the absence of that override.
+- Task 6 is implemented: `dashboard/profile` and `listings/new` no longer use `window.alert()` for the covered paths; inline error state is guarded by `alertRemoval.scope.test.ts` files.
+- Targeted Faz 1 tests PASS: `npx jest src/app/globalsMobile.scope.test.ts src/app/homeMobile.scope.test.ts src/app/dashboard/reports/reportsMobile.scope.test.ts src/app/inbox src/components/marketplace/ListingCard.scope.test.ts src/app/dashboard/profile/alertRemoval.scope.test.ts src/app/listings/new/alertRemoval.scope.test.ts` -> 18 suites / 128 tests.
+- `npx tsc --noEmit` PASS.
+- `npx jest --no-coverage --roots "<rootDir>/src"` PASS: 173 suites / 1358 tests.
+- `npm run build` PASS.

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useKeyboardInset } from './useKeyboardInset';
 import styles from './StickyActionBar.module.css';
 
 interface StickyActionBarProps {
@@ -25,8 +26,16 @@ interface StickyActionBarProps {
  * ```
  */
 export function StickyActionBar({ children, aboveBottomNav = false }: StickyActionBarProps) {
+    // Klavye acikken bar'i klavyenin ustune kaydirir (bkz. useKeyboardInset.ts,
+    // BottomSheet/BottomNavbar'da zaten dogrulanan ayni desen) — kullanici
+    // bulgusu: ilan sihirbazi Ileri/Geri cubugu, hesapla mobil CTA ve ilan
+    // detayi "Teklif Ver" klavyenin altinda kalip gorunmuyordu.
+    const keyboardInset = useKeyboardInset();
     return (
-        <div className={`${styles.bar} ${aboveBottomNav ? styles.aboveNav : ''}`}>
+        <div
+            className={`${styles.bar} ${aboveBottomNav ? styles.aboveNav : ''}`}
+            style={{ '--keyboard-inset': `${keyboardInset}px` } as React.CSSProperties}
+        >
             {children}
         </div>
     );

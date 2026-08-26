@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { MobileState } from '@/components/mobile/MobileState';
 import styles from './page.module.css';
 
 type Favorite = {
@@ -67,12 +68,13 @@ export default function FavoritesPage() {
             </header>
 
             {favorites.length === 0 ? (
-                <section className={styles.emptyCard}>
-                    <span className={styles.emptyIcon}>F</span>
-                    <h2>Henüz favori ilan yok</h2>
-                    <p>Pazar yerinde beğendiğin ilanları kaydettiğinde burada görünecek.</p>
-                    <Link href="/marketplace" className={styles.primaryLink}>Pazar yerine git</Link>
-                </section>
+                <MobileState
+                    variant="empty"
+                    title="Henüz favori ilan yok"
+                    description="Pazar yerinde beğendiğin ilanları kaydettiğinde burada görünecek."
+                    action={<Link href="/marketplace" className={styles.primaryLink}>Pazar yerine git</Link>}
+                    className={styles.emptyCard}
+                />
             ) : (
                 <section className={styles.listStack} aria-label="Favori ilanlar">
                     {favorites.map(favorite => {
@@ -113,10 +115,13 @@ export default function FavoritesPage() {
 function StateCard({ label, text, alert = false }: { label: string; text: string; alert?: boolean }) {
     return (
         <main className={styles.portfolioShell}>
-            <section className={styles.stateCard} role={alert ? 'alert' : undefined} aria-live={alert ? undefined : 'polite'}>
-                <span className={styles.eyebrow}>{label}</span>
-                <p>{text}</p>
-            </section>
+            <MobileState
+                variant={alert ? 'error' : 'loading'}
+                title={label}
+                description={text}
+                className={styles.stateCard}
+            />
         </main>
     );
 }
+

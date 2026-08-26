@@ -28,9 +28,17 @@ describe('mobil sohbet detay Faz 4', () => {
 
   it('composer sticky ve klavye-safe alanda kalir', () => {
     expect(mobile).toMatch(/\.composer\s*\{[^}]*position:\s*fixed/)
-    expect(mobile).toMatch(/\.composer\s*\{[^}]*bottom:\s*var\(--safe-bottom\)/)
+    expect(mobile).toMatch(/\.composer\s*\{[^}]*bottom:\s*calc\(var\(--safe-bottom\)\s*\+\s*var\(--keyboard-inset,\s*0px\)\)/)
     expect(mobile).toMatch(/\.composerInner\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     expect(mobile).toMatch(/\.textarea\s*\{[^}]*font-size:\s*16px/)
+  })
+
+  // Kullanici bulgusu: klavye acilinca composer klavyenin altinda kalip
+  // "nereye ne yazdigimizi goremiyoruz" — ayni --keyboard-inset deseni
+  // (bkz. useKeyboardInset.ts, BottomSheet/BottomNavbar'da dogrulandi).
+  it('composer useKeyboardInset ile --keyboard-inset degiskenini besler', () => {
+    expect(page).toMatch(/useKeyboardInset/)
+    expect(page).toMatch(/'--keyboard-inset':\s*`\$\{keyboardInset\}px`/)
   })
 
   it('mesaj balonlari m gradient ve cam yuzey kullanir', () => {

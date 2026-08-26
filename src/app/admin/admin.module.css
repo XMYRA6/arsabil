@@ -669,3 +669,185 @@
     font-variant-numeric: tabular-nums;
 }
 
+
+/* Faz 8 — Admin mobile shell: compact, safe-area aware rail without changing desktop tables. */
+@media (max-width: 768px) {
+    .adminShell {
+        --topbar-height: 58px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: calc(100dvh - var(--topbar-height));
+        max-width: none;
+        margin: 0;
+        padding: calc(var(--mobile-safe-top) + 8px) 10px 0;
+        gap: 10px;
+        background: var(--m-mesh), var(--m-bg);
+    }
+
+    .sidebar {
+        position: sticky;
+        top: var(--topbar-height);
+        z-index: 20;
+        flex-direction: row;
+        width: 100%;
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        border: 1px solid var(--m-glass-border);
+        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+    }
+
+    .sidebarNav {
+        flex-direction: row;
+        gap: 6px;
+        padding: 8px;
+        min-width: max-content;
+    }
+
+    .sidebarHeader {
+        display: none;
+    }
+
+    .navItem {
+        min-height: var(--touch-target);
+        white-space: nowrap;
+        scroll-snap-align: start;
+        border-radius: 14px;
+        padding: 0 12px;
+        font-size: 0.82rem;
+        background: rgba(255, 255, 255, 0.52);
+        border: 1px solid rgba(15, 42, 67, 0.08);
+        color: var(--m-ink);
+    }
+
+    .navItem:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+    }
+
+    .navItem:active {
+        transform: scale(0.98);
+    }
+
+    .navItemActive {
+        background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-2) 100%) !important;
+        color: #fff !important;
+        box-shadow: 0 10px 24px rgba(var(--admin-accent-rgb), 0.24), inset 0 1px 0 rgba(255, 255, 255, .28);
+    }
+
+    .mainContent {
+        width: 100%;
+        min-width: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 8px 0 0;
+        padding-bottom: calc(var(--bottomnav-height) + var(--mobile-safe-bottom) + 18px);
+        overflow: visible;
+    }
+
+    .loading {
+        min-height: calc(100dvh - var(--topbar-height));
+        padding: calc(var(--mobile-safe-top) + 24px) 16px calc(var(--mobile-safe-bottom) + 24px);
+        font-size: 0.95rem;
+    }
+}
+
+/* Faz 8 — Admin mobile data/form surfaces: tables collapse to card lists without losing controls. */
+@media (max-width: 768px) {
+    .pageHeader {
+        margin-bottom: 14px;
+    }
+
+    .pageHeader h1 {
+        font-size: 1.45rem;
+    }
+
+    .settingsCard,
+    .toolbar {
+        border-radius: var(--m-r-card);
+        padding: 14px;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .searchBox {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        min-height: var(--touch-target);
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .formGroup input,
+    .formGroup select {
+        min-height: var(--touch-target);
+        font-size: 16px;
+    }
+
+    .profitLevelHeader {
+        display: none;
+    }
+
+    .profitLevelRow {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(86px, auto);
+        gap: 10px;
+        align-items: stretch;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid var(--m-glass-border);
+        border-radius: var(--m-r-card);
+        background: var(--m-glass-bg);
+        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+    }
+
+    .profitLevelRow > *:nth-child(3),
+    .profitLevelRow > *:nth-child(4) {
+        display: flex;
+    }
+
+    .profitLevelRow input {
+        min-height: var(--touch-target);
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .iconBtn,
+    .deleteBtn,
+    .defaultBadge {
+        min-width: var(--touch-target);
+        min-height: var(--touch-target);
+    }
+
+    .addLevelBtn,
+    .adminPrimaryBtn {
+        min-height: var(--touch-target);
+    }
+
+    .tableWrap {
+        display: none;
+    }
+
+    .mobileCardList {
+        display: block;
+    }
+}

@@ -17,6 +17,12 @@
         border-bottom: 1px solid var(--topbar-border);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
+        /* backdrop-filter + position:sticky mobil WebKit/Chromium'da ayri
+           compositing katmani olusturup elastic overscroll'da scroll'u gec
+           takip ediyor (bar ekranin ortasina suruklenip geri toparlaniyor,
+           bkz. Navbar.module.css .navbarContainer'daki ayni not). */
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
 
     .backBtn {

@@ -331,3 +331,213 @@
         min-height: 44px;
     }
 }
+
+@media (max-width: 768px) {
+  .stepContainer {
+    gap: 1rem;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .fieldGroup {
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .label {
+    color: var(--m-body);
+    font-size: 0.68rem;
+    letter-spacing: 0;
+  }
+
+  .input, .select, .textarea {
+    min-height: 44px;
+    border-radius: var(--m-r-input);
+    border: 1px solid var(--m-glass-border);
+    background: var(--m-fill);
+    color: var(--m-ink);
+    font-size: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72);
+  }
+
+  .textarea {
+    min-height: 128px;
+  }
+
+  .input:focus, .select:focus, .textarea:focus {
+    border-color: var(--m-link);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--m-link) 16%, transparent), inset 0 1px 0 rgba(255, 255, 255, .72);
+  }
+
+  .twoCol {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stepIntro, .stepNote, .hintText, .photoCount {
+    margin: 0;
+    color: var(--m-body);
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .dropZone {
+    min-height: 144px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    border-radius: var(--m-r-card);
+    border: 1px dashed var(--m-glass-border);
+    background: var(--m-fill);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72);
+  }
+
+  .dropZoneText {
+    color: var(--m-body);
+    font-size: 0.88rem;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.625rem;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .photoItem {
+    border-radius: var(--m-r-inner);
+    border: 1px solid var(--m-glass-border);
+  }
+
+  .photoRemove {
+    width: 44px;
+    height: 44px;
+    top: 6px;
+    right: 6px;
+    background: color-mix(in srgb, #041322 72%, transparent);
+  }
+
+  .reportList {
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .reportOption {
+    min-height: 64px;
+    border-radius: var(--m-r-inner);
+    border: 1px solid var(--m-glass-border);
+    background: var(--m-fill);
+  }
+
+  .reportOptionSelected {
+    border-color: var(--m-link);
+    background: color-mix(in srgb, var(--m-link) 12%, var(--m-fill));
+  }
+
+  .reportOptionTitle {
+    color: var(--m-ink);
+  }
+
+  .reportOptionMeta {
+    color: var(--m-body);
+    font-family: var(--m-mono);
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .radioCircle {
+    width: 22px;
+    height: 22px;
+    border-color: var(--m-glass-border);
+  }
+
+  .radioCircleSelected {
+    border-color: var(--m-link);
+    background: var(--m-grad-btn);
+  }
+
+  .skipBtn {
+    min-height: 44px;
+    color: var(--m-link);
+  }
+
+  .previewCard {
+    min-width: 0;
+    border-radius: var(--m-r-card);
+    border: 1px solid var(--m-glass-border);
+    background: var(--m-glass-bg);
+    backdrop-filter: var(--m-glass-blur);
+    -webkit-backdrop-filter: var(--m-glass-blur);
+    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+    overflow: hidden;
+  }
+
+  .previewImageWrap {
+    position: relative;
+    height: 180px;
+  }
+
+  .previewImgPlaceholder {
+    height: 180px;
+    background: var(--m-fill);
+    color: var(--m-body);
+  }
+
+  .previewBody {
+    padding: 1rem;
+  }
+
+  .previewTitle {
+    color: var(--m-ink);
+    overflow-wrap: anywhere;
+  }
+
+  .previewLocation, .previewMeta {
+    color: var(--m-body);
+    overflow-wrap: anywhere;
+  }
+
+  .previewPrice {
+    color: var(--m-link);
+    font-family: var(--m-mono);
+  }
+
+  .publishBtn {
+    min-height: 48px;
+    border-radius: var(--m-r-btn);
+    background: var(--m-grad-btn);
+    color: var(--m-on-glass);
+    box-shadow: var(--m-sh-grad-btn);
+  }
+
+  .parcelTriggerBtn, .parcelSummary {
+    min-height: 56px;
+    border-radius: var(--m-r-inner);
+    border: 1px solid var(--m-glass-border);
+    background: var(--m-fill);
+    color: var(--m-ink);
+  }
+
+  .parcelSummary {
+    align-items: flex-start;
+  }
+
+  .parcelSummaryText {
+    min-width: 0;
+    color: var(--m-body);
+    overflow-wrap: anywhere;
+  }
+
+  .parcelSummaryText strong {
+    color: var(--m-ink);
+  }
+
+  .parcelChangeBtn {
+    min-height: 44px;
+    border-radius: var(--m-r-btn);
+    border: 1px solid var(--m-glass-border);
+    background: var(--m-glass-bg);
+    color: var(--m-link);
+  }
+}

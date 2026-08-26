@@ -12,12 +12,17 @@ bakacağını hızlıca tarif eder.
 5. Task 1'in baslangic komutlarini calistir.
 6. Task kapsami disina cikma.
 
-Current recommended first dispatch:
+Current recommended first dispatch (guncel: 2026-08-22, bkz. `EXECUTION-QUEUE.md`/`NEXT-DISPATCH.md`):
 
 ```text
-2026-07-01-emsal-arsa-maliyeti.md
-Task 1: Veri modeli, API ve admin ekranina avgLandPricePerM2 ekle
+2026-08-19-arsabil-studio-faz3b-senaryo-taslagi-gecmis-ve-karsilastirma.md
+Task 1: plan dosyasindaki ilk acik uygulama gorevi
 ```
+
+Farkli bir AI modeline devir icin: `AGENT-HANDOFF-FAZ3B.md` (bu dizinde) —
+bu oturumun ogrendigi kritik dersleri (TDD, gercek build/Playwright
+dogrulama zorunlulugu, masaustu+mobil kablolama deseni, cakisma kontrolu)
+ozetler.
 
 ## I Want To Check Coverage
 
@@ -85,3 +90,9 @@ COMMIT-PREP-2026-08-15.md
 ```
 
 It lists the exact files to stage and the suggested commit message.
+
+
+
+
+
+

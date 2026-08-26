@@ -39,16 +39,21 @@
 - Modify: `src/components/listing-wizard/WizardStep5Preview.tsx`
 - Test: `src/components/listing-wizard/wizardSteps.mobile.test.tsx`
 
-- [ ] **Step 1: Failing tests for mobile field order and touch targets**
-- [ ] **Step 2: Her adimi cam kartlar ve cizgi ikonlarla tasima**
-- [ ] **Step 3: Upload/gallery ve preview yatay overflow guard'i**
-- [ ] **Step 4: Commit**
+- [x] **Step 1: Failing tests for mobile field order and touch targets**
+- [x] **Step 2: Her adimi cam kartlar ve cizgi ikonlarla tasima**
+- [x] **Step 3: Upload/gallery ve preview yatay overflow guard'i**
+- [x] **Step 4: Commit**
 
 ## Final Verification
 
-- [ ] `npx tsc --noEmit`
-- [ ] `npx jest`
-- [ ] `npm run build`
-- [ ] Playwright 390x844: `/listings/new`; alt nav gizli, action bar gorunur, tum adimlar tasmasiz.
+- [x] `npx tsc --noEmit` (PASS)
+- [x] `npx jest` (PASS: `npx jest --no-coverage --roots "<rootDir>/src"`, 168 suites / 1335 tests)
+- [x] `npm run build` (PASS)
+- [x] Playwright 390x844: `/listings/new`; alt nav gizli, action bar gorunur, tum adimlar tasmasiz.
+## Validation Notes
 
-
+- `npx tsc --noEmit` PASS after Studio massing contract fixtures were updated for `grossConstructionAreaSource`.
+- Faz 7 targeted Jest PASS: `npx jest --runTestsByPath ...` for `src/app/listings/new` and `src/components/listing-wizard` main-tree tests, 15 suites / 129 tests. A broad regex command also matched `.worktrees/...`; that was excluded using explicit paths.
+- Full main-tree Jest PASS: `npx jest --no-coverage --roots "<rootDir>/src"`, 168 suites / 1335 tests. Existing console warnings remain: React `act(...)` warnings in map/form tests and intentional mocked error logs.
+- `npm run build` PASS. Next emitted existing root-lockfile and middleware/proxy warnings only.
+- Playwright 390x844 smoke PASS: `output/playwright/phase7-mobile-smoke.json`, screenshot `output/playwright/phase7-listings-new-390x844.png`; `/listings/new` rendered wizard shell in dev session, BottomNavbar hidden, action controls present, no horizontal overflow.

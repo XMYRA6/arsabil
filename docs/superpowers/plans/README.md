@@ -23,6 +23,13 @@ Bu indeks, `docs/superpowers/specs/*-design.md` dosyalarinin hangi uygulama plan
 | `2026-07-03-mobile-ui-redesign-design.md` | `2026-07-03-mobile-ui-redesign.md` | Umbrella for mobile structural refactor phases. |
 | `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-premium-liquid-glass.md` | Umbrella for Liquid Glass mobile phases; Faz 0+1 and Faz 2-9 detailed plans are canonical sub-plans. |
 | `2026-07-29-hesapla-girdi-mimarisi-design.md` | `2026-07-29-hesapla-girdi-mimarisi.md` | Implemented via 2026-07-30 canonical plan + DURUM file. |
+| `2026-08-16-arsabil-studio-2d-3d-mvp-design.md` | `2026-08-16-arsabil-studio-2d-3d-mvp.md` | Closed via Studio execution sequence; concrete work lives in Faz 0/1/1A/1B plans. |
+| `2026-08-16-arsabil-studio-karma-program-ve-teklif-senaryolari-design.md` | `2026-08-16-arsabil-studio-karma-program-ve-teklif-senaryolari.md` | Closed via Studio execution sequence; concrete work lives in Faz 2/2A/2B plans. |
+| `2026-08-16-arsabil-studio-2d-editor-lite-design.md` | `2026-08-16-arsabil-studio-2d-editor-lite.md` | Closed via Studio execution sequence; concrete work lives in Faz 3/3A/3B plans. |
+| `2026-08-16-arsabil-studio-rapor-paylasim-design.md` | `2026-08-16-arsabil-studio-rapor-paylasim.md` | Closed via Studio execution sequence; concrete work lives in Faz 4/4A/4B plans. |
+| `2026-08-16-arsabil-studio-ar-ic-mimari-marketplace-karar-kapisi-design.md` | `2026-08-16-arsabil-studio-ar-ic-mimari-marketplace-karar-kapisi.md` | Closed via Studio execution sequence; concrete work lives in Faz 5/5A/5B plans. |
+| `2026-08-19-arsabil-studio-parsel-geometrisi-ve-emsal-contract-design.md` | `2026-08-19-arsabil-studio-parsel-geometrisi-ve-emsal-contract.md` | Closed via Studio execution sequence; concrete work lives in Faz 1A/1B plans. |
+| `2026-08-19-arsabil-studio-pilot-operasyon-design.md` | `2026-08-19-arsabil-studio-pilot-operasyon.md` | Closed via Studio execution sequence; concrete work lives in Faz 6A/6B plans. |
 
 ## Recently Added Detailed Plans
 
@@ -38,6 +45,28 @@ Bu indeks, `docs/superpowers/specs/*-design.md` dosyalarinin hangi uygulama plan
 | `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz7-ilan-sihirbazi.md` | Detailed Liquid Glass Faz 7 plan for listing wizard. |
 | `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz8-admin.md` | Detailed Liquid Glass Faz 8 plan for admin. |
 | `2026-07-28-mobil-premium-liquid-glass-design.md` | `2026-07-28-mobil-faz9-durum-ekranlari.md` | Detailed Liquid Glass Faz 9 plan for state/offline screens. |
+| `2026-08-15-mobil-kart-dili-revizyonu-design.md` | `2026-08-15-mobil-kart-dili-revizyonu.md` | Umbrella for mobile card-language revision; Faz 1 and Faz 2 detailed plans are canonical sub-plans. |
+| `2026-08-15-mobil-kart-dili-revizyonu-design.md` | `2026-08-15-mobil-kart-dili-revizyonu-faz1.md` | Detailed Faz 1 plan for shared stat/row surfaces, message/home/report migration and alert removal. |
+| `2026-08-15-mobil-kart-dili-revizyonu-design.md` | `2026-08-15-mobil-kart-dili-revizyonu-faz2.md` | Detailed Faz 2 plan for editorial listing surfaces and remaining profile/secondary mobile glass cleanup. |
+| `2026-08-16-arsabil-studio-2d-3d-mvp-design.md` | `2026-08-16-arsabil-studio-faz0-veri-ve-mimari-hazirlik.md` | Detailed Arsabil Studio data/geometry contract preparation plan. |
+| `2026-08-16-arsabil-studio-2d-3d-mvp-design.md` | `2026-08-16-arsabil-studio-faz1-3d-bina-kutlesi-mvp.md` | Detailed OpenMap3D-style 3D building mass MVP plan. |
+| `2026-08-19-arsabil-studio-parsel-geometrisi-ve-emsal-contract-design.md` | `2026-08-19-arsabil-studio-faz1a-gercek-parsel-geometrisi-ve-emsal-contract.md` | Detailed source-labelled parcel geometry and construction-area contract plan. |
+| `2026-08-19-arsabil-studio-parsel-geometrisi-ve-emsal-contract-design.md` | `2026-08-19-arsabil-studio-faz1b-3d-operasyonel-kalite.md` | Detailed 3D preview accessibility, performance and fallback plan. |
+| `2026-08-16-arsabil-studio-karma-program-ve-teklif-senaryolari-design.md` | `2026-08-16-arsabil-studio-faz2-karma-program-ve-teklif-senaryolari.md` | Detailed mixed residential/commercial program and landowner offer scenario plan. |
+| `2026-08-16-arsabil-studio-karma-program-ve-teklif-senaryolari-design.md` | `2026-08-19-arsabil-studio-faz2a-program-envanteri-ve-kat-bantlari.md` | Detailed program inventory, capacity and 3D floor-band plan. |
+| `2026-08-16-arsabil-studio-karma-program-ve-teklif-senaryolari-design.md` | `2026-08-19-arsabil-studio-faz2b-arsa-sahibi-teklif-ve-dengeleme.md` | Detailed landowner offer, valuation and fractional-share balancing plan. |
+| `2026-08-16-arsabil-studio-2d-editor-lite-design.md` | `2026-08-16-arsabil-studio-faz3-2d-editor-lite.md` | Detailed controlled 2D Studio planning board plan. |
+| `2026-08-16-arsabil-studio-2d-editor-lite-design.md` | `2026-08-19-arsabil-studio-faz3a-kontrollu-2d-yerlesim-tahtasi.md` | Detailed SVG-first controlled 2D proposal-board plan. |
+| `2026-08-16-arsabil-studio-2d-editor-lite-design.md` | `2026-08-19-arsabil-studio-faz3b-senaryo-taslagi-gecmis-ve-karsilastirma.md` | Detailed session draft, undo/redo and alternative comparison plan. |
+| `2026-08-16-arsabil-studio-rapor-paylasim-design.md` | `2026-08-16-arsabil-studio-faz4-rapor-paylasim.md` | Detailed Studio snapshot/report/share artifact plan. |
+| `2026-08-16-arsabil-studio-rapor-paylasim-design.md` | `2026-08-19-arsabil-studio-faz4a-kalici-senaryo-ve-versiyonlama.md` | Detailed immutable scenario persistence and versioning plan. |
+| `2026-08-16-arsabil-studio-rapor-paylasim-design.md` | `2026-08-19-arsabil-studio-faz4b-teklif-raporu-ve-guvenli-paylasim.md` | Detailed version-pinned proposal report and secure sharing plan. |
+| `2026-08-16-arsabil-studio-ar-ic-mimari-marketplace-karar-kapisi-design.md` | `2026-08-16-arsabil-studio-faz5-ar-ic-mimari-marketplace-karar-kapisi.md` | Detailed AR/interior/marketplace expansion decision-gate plan. |
+| `2026-08-16-arsabil-studio-ar-ic-mimari-marketplace-karar-kapisi-design.md` | `2026-08-19-arsabil-studio-faz5a-karar-metrikleri-ve-telemetri.md` | Detailed Studio decision metrics, privacy-safe telemetry and review cadence plan. |
+| `2026-08-16-arsabil-studio-ar-ic-mimari-marketplace-karar-kapisi-design.md` | `2026-08-19-arsabil-studio-faz5b-branch-spike-ve-yatirim-karari.md` | Detailed single-branch spike and evidence-based investment decision plan. |
+| `2026-08-19-arsabil-studio-pilot-operasyon-design.md` | `2026-08-19-arsabil-studio-faz6a-pilot-onboarding-ve-aktivasyon.md` | Detailed pilot access, onboarding and activation plan. |
+| `2026-08-19-arsabil-studio-pilot-operasyon-design.md` | `2026-08-19-arsabil-studio-faz6b-veri-kalitesi-ve-pilot-operasyon.md` | Detailed pilot data-quality and operations plan. |
+| `2026-08-16-arsabil-studio-2d-3d-mvp-design.md` | `2026-08-16-arsabil-studio-execution-sequence.md` | Canonical implementation sequence for the full Arsabil Studio plan series. |
 
 ## Coverage Check
 
@@ -50,3 +79,9 @@ Compare-Object $specs $plans | Where-Object SideIndicator -eq '<=' | Select-Obje
 ```
 
 Expected output after the coverage pass: no rows.
+
+
+
+
+
+

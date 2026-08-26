@@ -19,11 +19,11 @@ export function WizardStep5Preview({ data, publishing, onPublish }: Props) {
 
   return (
     <div className={styles.stepContainer}>
-      <p style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>İlanın marketplace&apos;te şu şekilde görünecek:</p>
+      <p className={styles.stepIntro}>İlanın marketplace&apos;te şu şekilde görünecek:</p>
 
       <div className={styles.previewCard}>
         {data.photos.length > 0 ? (
-          <div style={{ position: 'relative', height: 180 }}>
+          <div className={styles.previewImageWrap}>
             <Image fill unoptimized src={data.photos[0].url} alt={data.title} style={{ objectFit: 'cover' }} />
           </div>
         ) : (
@@ -53,3 +53,4 @@ export function WizardStep5Preview({ data, publishing, onPublish }: Props) {
     </div>
   )
 }
+

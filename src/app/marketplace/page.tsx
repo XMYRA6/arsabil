@@ -11,13 +11,14 @@ import { CitySearch } from '@/components/marketplace/CitySearch';
 import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
 import { SegmentedTabs } from '@/components/mobile/SegmentedTabs';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
+import { MobileState } from '@/components/mobile/MobileState';
 import { filterListings, sortListings, mergeDemoOverlay, type ListingFilters } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
 
 // SSR-safe map import — dynamic + forwardRef birlikte ForwardRefExoticComponent olarak tip verilmeli
 const MapView = dynamic<MapViewProps>(
     () => import('@/components/marketplace/MapView').then(m => m.MapView),
-    { ssr: false, loading: () => <div className={styles.mapLoading}>🗺 Harita yükleniyor…</div> }
+    { ssr: false, loading: () => <MobileState variant='loading' title='Harita yükleniyor' description='Konum katmanı hazırlanıyor.' className={styles.mapLoading} /> }
 ) as ForwardRefExoticComponent<MapViewProps & RefAttributes<MapViewHandle>>;
 
 type View = 'split' | 'map' | 'list';
@@ -235,10 +236,12 @@ function MarketplaceContent() {
                                 ))}
                             </div>
                         ) : paginated.length === 0 ? (
-                            <div className={styles.emptyState}>
-                                <div className={styles.emptyStateIcon}>🔍</div>
-                                Kriterlere uyan ilan bulunamadı.
-                            </div>
+                            <MobileState
+                                variant="empty"
+                                title="Kriterlere uyan ilan bulunamadı"
+                                description="Filtreleri genişleterek daha fazla arsayı görebilirsiniz."
+                                className={styles.emptyState}
+                            />
                         ) : (
                             <>
                                 {/* Count */}
@@ -296,3 +299,5 @@ function MarketplaceContent() {
         </div>
     );
 }
+
+

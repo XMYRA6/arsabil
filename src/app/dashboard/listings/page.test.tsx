@@ -23,15 +23,15 @@ describe('dashboard listings mobile page', () => {
         expect(page).toMatch(/filter === 'draft'/)
     })
 
-    it('mobil kabuk ve bos durum liquid glass tokenlarini kullanir', () => {
+    it('mobil kabuk ve bos durum stat yuzeylerini kullanir', () => {
         expect(mobile).toMatch(/\.portfolioShell\s*\{[^}]*background:\s*var\(--m-mesh\),\s*var\(--m-bg\)/)
-        expect(mobile).toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
-        expect(mobile).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
+        expect(mobile).toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*background:\s*var\(--m-panel\)/)
+        expect(mobile).not.toMatch(/\.heroCard,\s*\.emptyCard,\s*\.stateCard\s*\{[^}]*backdrop-filter/)
     })
 
     it('Listing tipi photos alanini tasir, .itemCard fotografli editorialListingCard yuzeyine baglanir', () => {
         expect(page).toMatch(/photos\?:\s*string\[\]\s*\|\s*null/)
-        expect(css).toMatch(/\.itemCard\s*\{[^}]*composes:\s*editorialListingCard from global/)
+        expect(css).toMatch(/\.itemCard\s*\{[^}]*composes:\s*mEditorialListingCard from global/)
         expect(mobile).not.toMatch(/\.itemCard\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
     })
 
@@ -48,3 +48,5 @@ describe('dashboard listings mobile page', () => {
         expect(mobile).toMatch(/\.primaryLink\s*\{[^}]*min-height:\s*var\(--touch-target\)/)
     })
 })
+
+

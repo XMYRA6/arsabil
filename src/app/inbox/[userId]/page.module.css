@@ -122,7 +122,9 @@
         position: fixed;
         left: 0;
         right: 0;
-        bottom: var(--safe-bottom);
+        /* Klavye acikken --keyboard-inset kadar yukari kayar (bkz. page.tsx,
+           useKeyboardInset.ts) — kapaliyken 0px, eski davranis degismez. */
+        bottom: calc(var(--safe-bottom) + var(--keyboard-inset, 0px));
         z-index: 5;
         padding: 10px 12px;
     }

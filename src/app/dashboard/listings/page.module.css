@@ -12,7 +12,7 @@
 }
 
 .itemCard {
-    composes: editorialListingCard from global;
+    composes: mEditorialListingCard from global;
 }
 
 @media (min-width: 769px) {
@@ -223,10 +223,8 @@
     .emptyCard,
     .stateCard {
         border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
+        border: 1px solid var(--m-divider);
+        background: var(--m-panel);
         box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
     }
 
@@ -275,7 +273,7 @@
     .itemTopline strong,
     .statusActive,
     .statusDraft {
-        border: 1px solid var(--m-glass-border);
+        border: 1px solid var(--m-divider);
         background: var(--m-fill);
     }
 
@@ -298,7 +296,7 @@
         width: 100%;
         min-height: 48px;
         border-radius: var(--m-r-input);
-        border: 1px solid var(--m-glass-border);
+        border: 1px solid var(--m-divider);
         background: var(--m-fill);
     }
 
@@ -319,3 +317,4 @@
         gap: 12px;
     }
 }
+

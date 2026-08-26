@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
+import { useKeyboardInset } from '@/components/mobile/useKeyboardInset'
 import styles from './page.module.css'
 
 type Message = {
@@ -28,6 +29,10 @@ export default function MobileChatPage() {
     const [sending, setSending] = useState(false)
     const bottomRef = useRef<HTMLDivElement>(null)
     const currentUserId = (session?.user as { id?: string })?.id
+    // Klavye acikken composer'i klavyenin ustune kaydirir — kullanici
+    // bulgusu: "nereye ne yazdigimizi goremiyoruz" (bkz. useKeyboardInset.ts,
+    // BottomSheet/BottomNavbar'da dogrulanan ayni desen).
+    const keyboardInset = useKeyboardInset()
 
     useEffect(() => {
         if (status === 'unauthenticated') router.push('/login')
@@ -112,7 +117,11 @@ export default function MobileChatPage() {
                 <div ref={bottomRef} />
             </section>
 
-            <form className={styles.composer} onSubmit={(event) => { event.preventDefault(); sendMessage() }}>
+            <form
+                className={styles.composer}
+                style={{ '--keyboard-inset': `${keyboardInset}px` } as CSSProperties}
+                onSubmit={(event) => { event.preventDefault(); sendMessage() }}
+            >
                 <div className={styles.composerInner}>
                     <textarea
                         className={styles.textarea}

@@ -27,14 +27,14 @@ export function WizardStep4Feasibility({ data, onChange }: Props) {
 
   return (
     <div className={styles.stepContainer}>
-      <p style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>
+      <p className={styles.stepIntro}>
         Kaydedilmiş bir hesaplama raporunu bu ilanla bağla. Marketplace&apos;te fizibilite skoru gösterilir.
       </p>
 
       {loading ? (
-        <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Raporlar yükleniyor...</p>
+        <p className={styles.stepNote}>Raporlar yükleniyor...</p>
       ) : reports.length === 0 ? (
-        <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Kaydedilmiş hesaplama yok. Bu adımı atlayabilirsin.</p>
+        <p className={styles.stepNote}>Kaydedilmiş hesaplama yok. Bu adımı atlayabilirsin.</p>
       ) : (
         <div className={styles.reportList}>
           {reports.map(r => (
@@ -61,3 +61,5 @@ export function WizardStep4Feasibility({ data, onChange }: Props) {
     </div>
   )
 }
+
+

@@ -8,6 +8,14 @@
     padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 14px;
     pointer-events: none;
     transition: all 0.3s ease;
+    /* `.navbar` icindeki backdrop-filter, `position: sticky` ile birlikte
+       mobil WebKit/Chromium'da ayri bir compositing katmani olusturuyor ve
+       elastic overscroll (sayfayi elle yukari/asagi cekme) sirasinda bu
+       katman scroll'u gec/yanlis takip edip navbar'i ekranin ortasina kadar
+       suruklenmis gibi gosteriyor (kullanici bulgusu). `translateZ(0)` sticky
+       elemani kendi GPU katmanina sabitleyip dogru scroll takibini zorlar. */
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 

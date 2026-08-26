@@ -379,12 +379,11 @@ a {
     box-shadow: var(--focus-ring);
   }
 
-  /* Faz 2 (2026-08-15): fotoğraf içeren ilan kartları için (Favoriler,
-     İlanlarım — onaylanan mockup: https://claude.ai/code/artifact/3b9656aa-
-     a9fa-4bdd-a778-1c9631f5c0e6). Üstte fotoğraf/gradyan alanı (tüketici
-     kendi .itemPhoto'sunu ekler), tüketicinin serif başlığı için --m-font-serif
-     kullanılır. Yalnızca mobilde (bu class'ın kendisi gibi) — dark tema
-     desteği bu fazda İCAT EDİLMEZ (bkz. plan Global Constraints). */
+  /* Faz 2 (2026-08-15): fotograf iceren ilan kartlari icin (Favoriler,
+     Ilanlarim — onaylanan mockup: https://claude.ai/code/artifact/3b9656aa-
+     a9fa-4bdd-a778-1c9631f5c0e6). Ustte fotograf/gradyan alani, altta
+     editorial govde vardir. Yalnizca mobilde; dark tema bu fazda icat edilmez. */
+  .mEditorialListingCard,
   .editorialListingCard {
     display: block;
     overflow: hidden;
@@ -395,12 +394,42 @@ a {
     color: inherit;
     transition: transform .15s ease;
   }
+  .mEditorialListingCard:active,
   .editorialListingCard:active {
     transform: scale(0.98);
   }
+  .mEditorialListingCard:focus-visible,
   .editorialListingCard:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
+  }
+
+  .mEditorialListingMedia {
+    display: block;
+    min-height: 120px;
+    background: linear-gradient(120deg, #8FAFD6 0%, #C9D8EC 55%, #EFE7D8 100%);
+    background-size: cover;
+    background-position: center;
+  }
+
+  .mEditorialListingBody {
+    display: grid;
+    gap: 10px;
+    padding: 14px 16px 16px;
+  }
+
+  .mEditorialListingTitle {
+    margin: 0;
+    color: var(--m-ink);
+    font-family: var(--m-font-serif);
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+
+  .mEditorialListingMeta {
+    color: var(--m-body);
+    font-family: var(--m-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   .page-container {
@@ -419,4 +448,6 @@ a {
     font-size: 1.25rem !important;
   }
 }
+
+
 

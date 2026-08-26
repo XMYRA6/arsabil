@@ -169,3 +169,4 @@ describe('Faz 2 — duz/ayracli liste yuzeyi (2026-08-15)', () => {
         expect(mobileBlock()).toMatch(/\.mFlatRow:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/)
     })
 })
+

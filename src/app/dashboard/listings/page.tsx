@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { MobileState } from '@/components/mobile/MobileState';
 import styles from './page.module.css';
 
 type Listing = {
@@ -91,12 +92,13 @@ export default function DashboardListingsPage() {
             </div>
 
             {filteredListings.length === 0 ? (
-                <section className={styles.emptyCard}>
-                    <span className={styles.emptyIcon}>İ</span>
-                    <h2>Bu filtrede ilan yok</h2>
-                    <p>Yeni ilan oluşturduğunda onay durumuyla birlikte burada listelenecek.</p>
-                    <Link href="/listings/new" className={styles.primaryLink}>İlan oluştur</Link>
-                </section>
+                <MobileState
+                    variant="empty"
+                    title="Bu filtrede ilan yok"
+                    description="Yeni ilan oluşturduğunda onay durumuyla birlikte burada listelenecek."
+                    action={<Link href="/listings/new" className={styles.primaryLink}>İlan oluştur</Link>}
+                    className={styles.emptyCard}
+                />
             ) : (
                 <section className={styles.listStack} aria-label="İlanlarım">
                     {filteredListings.map(listing => {
@@ -137,10 +139,13 @@ export default function DashboardListingsPage() {
 function StateCard({ label, text, alert = false }: { label: string; text: string; alert?: boolean }) {
     return (
         <main className={styles.portfolioShell}>
-            <section className={styles.stateCard} role={alert ? 'alert' : undefined} aria-live={alert ? undefined : 'polite'}>
-                <span className={styles.eyebrow}>{label}</span>
-                <p>{text}</p>
-            </section>
+            <MobileState
+                variant={alert ? 'error' : 'loading'}
+                title={label}
+                description={text}
+                className={styles.stateCard}
+            />
         </main>
     );
 }
+
