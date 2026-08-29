@@ -25,7 +25,7 @@ const config = {
   // test bulamaz. Ana checkout'ta worktree testlerinin toplanmasi sorunu
   // ignore pattern'iyle degil, dogru komutla cozulur:
   //   npx jest --no-coverage --roots "<rootDir>/src"
-  testPathIgnorePatterns: ['/node_modules/', '/e2e/', '/\\.next/'],
+  testPathIgnorePatterns: ['/node_modules/', '/e2e/', '/\\.next/', '/crawler/'],
   modulePathIgnorePatterns: ['<rootDir>/\\.next/'],
 }
 

@@ -31,7 +31,9 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx eslint .
-      - run: npx jest --silent
+      - run: npx jest --silent --roots src
+      - run: npx tsc -p crawler/tsconfig.json
+      - run: npm run test:crawler
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
         env:
