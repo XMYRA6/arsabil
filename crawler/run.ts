@@ -162,7 +162,11 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
       summary.listingsFound > 0 &&
       summary.unparseable / summary.listingsFound > cfg.unparseableAbortRatio
     ) {
-      summary.blockReason = `unparseable oranı ${cfg.unparseableAbortRatio} üstünde — parser körelmiş olabilir`
+      // Yarım/iptal tur: blocked=true ile işaretle — delisted + dedupe adımları
+      // ATLANMALI (seenIds eksik; aksi hâlde kitlesel yanlış delisting olur).
+      const pct = Math.round((summary.unparseable / summary.listingsFound) * 100)
+      summary.blocked = true
+      summary.blockReason = `parser körelmiş olabilir — unparseable oranı %${pct}, tur durduruldu (delisted/dedupe atlandı)`
       break
     }
   }
@@ -180,6 +184,9 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
   }
 
   if (!args.dryRun) {
+    // CrawlRun'da unparseable/delisted/dupes için kolon yok → notes string'ine katla.
+    const counters = ` · unparseable=${summary.unparseable} delisted=${summary.delisted} dupes=${summary.dupes}`
+    const notes = (summary.blockReason ?? 'ok') + counters
     await deps.client.crawlRun.update({
       where: { id: run.id },
       data: {
@@ -188,7 +195,7 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
         listingsFound: summary.listingsFound,
         listingsUpserted: summary.listingsUpserted,
         blocked: summary.blocked,
-        notes: summary.blockReason,
+        notes,
       },
     })
   }

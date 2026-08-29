@@ -27,9 +27,11 @@ const fakeAdapter: PortalAdapter = {
 
 function fakeClient(seed: any[] = []) {
   const rows: any[] = [...seed]
+  const spy = { delistFindMany: 0, updateMany: 0 }
   let seq = 0
   return {
     rows,
+    spy,
     client: {
       marketListing: {
         findUnique: async ({ where }: any) =>
@@ -56,6 +58,7 @@ function fakeClient(seed: any[] = []) {
             )
           }
           // markDelistedExcept: scope içi active + id notIn seenIds
+          spy.delistFindMany++
           return rows.filter(
             (r) =>
               r.source === where.source &&
@@ -66,6 +69,7 @@ function fakeClient(seed: any[] = []) {
           )
         },
         updateMany: async ({ where, data }: any) => {
+          spy.updateMany++
           let n = 0
           for (const r of rows) if (where.id.in.includes(r.id)) {
             Object.assign(r, data)
@@ -182,5 +186,41 @@ describe('runCrawl', () => {
     expect(rows.some((r) => r.sourceListingId === 'B')).toBe(true)
     // taze A'nın mevcut id'si seenIds'e girdiği için delisted OLMADI
     expect(rows.find((r) => r.id === 'existingA').status).toBe('active')
+  })
+
+  it('unparseable-abort tripince blocked=true, delisted + dedupe ATLANIR', async () => {
+    // parser körelmiş senaryosu: her detay parse hata veriyor → unparseable oranı 1.0
+    const rotAdapter: PortalAdapter = {
+      ...fakeAdapter,
+      parseSearchPage: () => [
+        { sourceListingId: 'X1', detailUrl: 'http://s/ilan/X1' },
+        { sourceListingId: 'X2', detailUrl: 'http://s/ilan/X2' },
+        { sourceListingId: 'X3', detailUrl: 'http://s/ilan/X3' },
+      ],
+      parseDetailPage: () => {
+        throw new Error('DOM değişmiş — parse edilemedi')
+      },
+    }
+    // scope içinde önceden active bir kayıt: yanlış delisting'e aday
+    const { client, rows, spy } = fakeClient([
+      { id: 'old1', source: 'sahibinden', sourceListingId: 'OLD', status: 'active', il: 'TRABZON', listingType: 'tarla', lastSeenAt: new Date('2000-01-01') },
+    ])
+    const deps: RunDeps = {
+      adapter: rotAdapter,
+      client: client as any,
+      fetcher: countingFetcher(),
+      geocodeDeps: { resolveMahalleCentroid: async () => null, isWithinTurkey: () => true },
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-30'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 1, dryRun: false }, deps)
+
+    expect(summary.blocked).toBe(true)
+    expect(summary.blockReason).toMatch(/parser|unparseable/i)
+    expect(summary.unparseable).toBe(3)
+    // KRİTİK: yarım tur → delisted + dedupe adımları çalışmadı
+    expect(spy.delistFindMany).toBe(0)
+    expect(spy.updateMany).toBe(0)
+    expect(rows.find((r) => r.id === 'old1').status).toBe('active')
   })
 })
