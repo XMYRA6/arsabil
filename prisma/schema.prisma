@@ -343,5 +343,63 @@ model StudioShareToken {
   @@index([versionId])
 }
 
+model MarketListing {
+  id              String   @id @default(cuid())
+  source          String
+  sourceListingId String
+  sourceUrl       String
+  title           String?
+  description     String?  @db.Text
+  price           Float?
+  currency        String   @default("TRY")
+  areaSqm         Float?
+  pricePerSqm     Float?
+  listingType     String
+  imarStatus      String?
+  il              String?
+  ilce            String?
+  mahalle         String?
+  adaNo           String?
+  parselNo        String?
+  lat             Float?
+  lng             Float?
+  geoPrecision    String?
+  photoUrls       String[] @default([])
+  listedAt        DateTime?
+  status          String   @default("active")
+  firstSeenAt     DateTime @default(now())
+  lastSeenAt      DateTime @default(now())
+  dupeOfId        String?
+  rawJson         Json?
+  priceHistory    MarketListingPricePoint[]
 
+  @@unique([source, sourceListingId])
+  @@index([il, ilce, mahalle])
+  @@index([listingType, status])
+  @@index([lat, lng])
+}
+
+model MarketListingPricePoint {
+  id         String        @id @default(cuid())
+  listingId  String
+  price      Float
+  observedAt DateTime      @default(now())
+  listing    MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}
+
+model CrawlRun {
+  id               String    @id @default(cuid())
+  source           String
+  il               String
+  category         String
+  startedAt        DateTime  @default(now())
+  finishedAt       DateTime?
+  pagesFetched     Int       @default(0)
+  listingsFound    Int       @default(0)
+  listingsUpserted Int       @default(0)
+  blocked          Boolean   @default(false)
+  notes            String?
+}
 

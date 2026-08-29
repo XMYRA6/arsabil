@@ -13,7 +13,9 @@
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "playwright test",
-    "db:seed:district-prices": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" prisma/seed-district-prices.ts"
+    "db:seed:district-prices": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" prisma/seed-district-prices.ts",
+    "crawl": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" crawler/run.ts",
+    "test:crawler": "jest --config crawler/jest.config.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
@@ -57,6 +59,7 @@
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cheerio": "^1.2.0",
     "concurrently": "^10.0.3",
     "dotenv": "^17.3.1",
     "eslint": "^9.39.4",
