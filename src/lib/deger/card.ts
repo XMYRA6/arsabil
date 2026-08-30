@@ -3,6 +3,7 @@ import { valuateParcel, type StatLike } from '@/lib/areaPrices/valuation'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 import { polygonCentroid } from '@/lib/geo/polygonCentroid'
 import { pointInPolygon } from '@/lib/geo/pointInPolygon'
+import { selectComparables, type Comparable, type ComparableListing } from '@/lib/deger/comparables'
 
 export type DegerCardInput =
   | { kind: 'point'; lat: number; lng: number }
@@ -27,6 +28,8 @@ export interface DegerCardDeps {
   fetchParcelByAdaParsel: (mahalleId: number, ada: string, parsel: string) => Promise<ParcelLookupResult>
   buildRiskSnapshot: (lat: number | null, lng: number | null) => Promise<RiskSnapshotLike>
   findAreaStats: (il: string, ilce: string, mahalle: string) => Promise<AreaStatRecord[]>
+  findListingsNear: (il: string, ilce: string) => Promise<ComparableListing[]>
+  findNeighborhood: (il: string, ilce: string, mahalle: string) => Promise<{ geojson: unknown } | null>
 }
 
 export interface DegerCardValue {
@@ -64,6 +67,8 @@ export interface DegerCardDTO {
     status: 'ok' | 'unavailable'
   }
   value: DegerCardValue
+  neighborhood: { geojson: unknown | null }
+  comparables: { count: number; items?: Comparable[] }
 }
 
 export type DegerCardResult =
@@ -111,14 +116,22 @@ export async function buildDegerCard(
       ? { lat: input.lat, lng: input.lng }
       : parcelCentroidLatLng(parcel.geometry)
 
-  const [snap, stats] = await Promise.all([
+  const nIl = normalizeAreaName(parcel.il)
+  const nIlce = normalizeAreaName(parcel.ilce)
+  const nMahalle = normalizeAreaName(parcel.mahalle)
+  const [snap, stats, listings, hood] = await Promise.all([
     deps.buildRiskSnapshot(center?.lat ?? null, center?.lng ?? null),
-    deps.findAreaStats(
-      normalizeAreaName(parcel.il),
-      normalizeAreaName(parcel.ilce),
-      normalizeAreaName(parcel.mahalle),
-    ),
+    deps.findAreaStats(nIl, nIlce, nMahalle),
+    deps.findListingsNear(nIl, nIlce),
+    deps.findNeighborhood(nIl, nIlce, nMahalle),
   ])
+
+  const comp = center
+    ? selectComparables({
+        parcel: { lat: center.lat, lng: center.lng, areaSqm: parcel.areaSqm },
+        listings,
+      })
+    : { items: [] as Comparable[], total: 0 }
 
   const bySlot: { mahalle?: StatLike; ilce?: StatLike; il?: StatLike } = {}
   for (const s of stats) {
@@ -176,6 +189,11 @@ export async function buildDegerCard(
         status: riskUnavailable ? 'unavailable' : 'ok',
       },
       value,
+      neighborhood: { geojson: hood?.geojson ?? null },
+      comparables: {
+        count: comp.total,
+        ...(opts.memberView ? { items: comp.items } : {}),
+      },
     },
   }
 }
