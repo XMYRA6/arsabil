@@ -24,26 +24,43 @@ function DegerPageContent() {
   const [card, setCard] = useState<DegerCardDTO | null>(null)
   const [parcelQuery, setParcelQuery] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
   const [picker, setPicker] = useState<ParcelPickerValue>({ lat: null, lng: null, parcel: null, status: 'idle' })
   const didInitFetch = useRef(false)
 
   const fetchCard = useCallback(
     async (lat: number, lng: number) => {
       setError(null)
+      setPending(true)
       const qs = `lat=${lat}&lng=${lng}`
-      const res = await fetch(`/api/deger/kart?${qs}`)
-      if (!res.ok) {
+      try {
+        const res = await fetch(`/api/deger/kart?${qs}`)
+        if (!res.ok) {
+          setCard(null)
+          setError(ERR[res.status] ?? 'Beklenmeyen bir hata oluştu.')
+          return
+        }
+        const json = (await res.json()) as DegerCardDTO
+        setCard(json)
+        setParcelQuery(qs)
+        router.replace(`/deger?${qs}`)
+      } catch {
         setCard(null)
-        setError(ERR[res.status] ?? 'Beklenmeyen bir hata oluştu.')
-        return
+        setError('Bağlantı hatası, tekrar deneyin.')
+      } finally {
+        setPending(false)
       }
-      const json = (await res.json()) as DegerCardDTO
-      setCard(json)
-      setParcelQuery(qs)
-      router.replace(`/deger?${qs}`)
     },
     [router],
   )
+
+  // Harita seçimi doğrulanınca kartı getir — yan etki setPicker updater'ının
+  // İÇİNDE değil; updater saf kalır.
+  useEffect(() => {
+    if (picker.status === 'verified' && picker.lat != null && picker.lng != null) {
+      void fetchCard(picker.lat, picker.lng)
+    }
+  }, [picker.status, picker.lat, picker.lng, fetchCard])
 
   // Paylaşılan URL ile ilk yükleme
   useEffect(() => {
@@ -59,10 +76,10 @@ function DegerPageContent() {
   return (
     <>
       <div className={styles.tabs} role="tablist">
-        <button role="tab" aria-selected={tab === 'adaParsel'} className={`${styles.tab} ${tab === 'adaParsel' ? styles.tabActive : ''}`} onClick={() => setTab('adaParsel')}>
+        <button type="button" role="tab" aria-selected={tab === 'adaParsel'} className={`${styles.tab} ${tab === 'adaParsel' ? styles.tabActive : ''}`} onClick={() => setTab('adaParsel')}>
           Ada / Parsel ile
         </button>
-        <button role="tab" aria-selected={tab === 'harita'} className={`${styles.tab} ${tab === 'harita' ? styles.tabActive : ''}`} onClick={() => setTab('harita')}>
+        <button type="button" role="tab" aria-selected={tab === 'harita'} className={`${styles.tab} ${tab === 'harita' ? styles.tabActive : ''}`} onClick={() => setTab('harita')}>
           Haritadan seç
         </button>
       </div>
@@ -79,21 +96,14 @@ function DegerPageContent() {
       {tab === 'harita' && (
         <ParcelPicker
           value={picker}
-          onChange={(patch) => {
-            setPicker((prev) => {
-              const next = { ...prev, ...patch }
-              if (next.status === 'verified' && next.lat != null && next.lng != null) {
-                void fetchCard(next.lat, next.lng)
-              }
-              return next
-            })
-          }}
+          onChange={(patch) => setPicker((prev) => ({ ...prev, ...patch }))}
           hint="Arsanızın bulunduğu noktaya haritadan tıklayın."
           notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın."
           unavailableText="TKGM servisi şu an yanıt vermiyor, biraz sonra tekrar deneyin."
         />
       )}
 
+      {pending && <p className={styles.loading}>Yükleniyor…</p>}
       {error && <p className={styles.error}>{error}</p>}
       {card && <DegerKarti card={card} isLoggedIn={card.value.tier === 'member'} parcelQuery={parcelQuery} />}
     </>

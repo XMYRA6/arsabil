@@ -68,6 +68,13 @@ it('sekme değiştirince harita bileşeni görünür', () => {
   expect(screen.getByText('harita-picker')).toBeInTheDocument()
 })
 
+it('fetch reject → bağlantı hatası mesajı', async () => {
+  ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network'))
+  render(<DegerPage />)
+  fireEvent.click(screen.getByText('manuel-bul'))
+  await waitFor(() => expect(screen.getByText(/Bağlantı hatası, tekrar deneyin/i)).toBeInTheDocument())
+})
+
 it('404 → parsel bulunamadı mesajı', async () => {
   ;(global.fetch as jest.Mock).mockResolvedValue({ ok: false, status: 404, json: async () => ({ error: 'parcel_not_found' }) })
   render(<DegerPage />)
