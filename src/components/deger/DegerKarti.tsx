@@ -1,7 +1,15 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import type { DegerCardDTO } from '@/lib/deger/card'
 import { formatFaultDistance } from '@/lib/risk/formatDistance'
+import { polygonCentroid } from '@/lib/geo/polygonCentroid'
+import { DegerMiniMap } from './DegerMiniMap'
 import styles from './DegerKarti.module.css'
+
+const EmsalMapLazy = dynamic(() => import('./EmsalMap').then((m) => m.EmsalMap), { ssr: false })
 
 export interface DegerKartiProps {
   card: DegerCardDTO
@@ -19,13 +27,19 @@ const CONFIDENCE_LABEL: Record<string, string> = {
 
 export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
   const { parcel, risk, value } = card
+  const isMember = isLoggedIn
+  const [showMap, setShowMap] = useState(false)
 
   return (
     <div className={styles.card}>
       <div className={styles.parcel}>
         {parcel.il} / {parcel.ilce} {parcel.mahalle} — Ada {parcel.ada}, Parsel {parcel.parsel} · {parcel.areaSqm.toLocaleString('tr-TR')} m²
       </div>
-      <div className={styles.map} data-testid="deger-map" />
+      {card.neighborhood.geojson ? (
+        <DegerMiniMap parcelGeometry={parcel.geometry} neighborhoodGeojson={card.neighborhood.geojson} />
+      ) : (
+        <div className={styles.map} data-testid="deger-map" />
+      )}
 
       {value.insufficientData ? (
         <p className={styles.insufficient}>Bu bölge için yeterli emsal verisi yok.</p>
@@ -60,6 +74,7 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
         <>
           <div className={styles.divider} />
           {isLoggedIn ? (
+            value.estimate != null && (
             <div>
               <div className={styles.label}>Net Tahmini Değer</div>
               <div className={styles.range}>{tl(value.estimate!)}</div>
@@ -82,6 +97,7 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
                 Bu parselle fizibilite hesapla →
               </Link>
             </div>
+            )
           ) : (
             <div className={styles.gatedWrap}>
               <div className={styles.blurred} aria-hidden="true">
@@ -105,8 +121,63 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
         </>
       )}
 
+      {card.comparables.count > 0 ? (
+        <div className={styles.emsalBlock}>
+          <div className={styles.divider} />
+          <div className={styles.label}>Bölgedeki Emsal İlanlar ({card.comparables.count})</div>
+          {isMember && card.comparables.items ? (
+            <>
+              {card.comparables.items.map((c, i) => (
+                <div key={i} className={styles.emsalRow}>
+                  <strong>{c.pricePerSqm != null ? `${c.pricePerSqm.toLocaleString('tr-TR')} ₺/m²` : '—'}</strong>
+                  {c.areaSqm != null && <span> · {c.areaSqm.toLocaleString('tr-TR')} m²</span>}
+                  {c.price != null && <span> · {c.price.toLocaleString('tr-TR')} ₺</span>}
+                  <span> · {c.approxDistance ? '~' : ''}{(c.distanceM / 1000).toFixed(1).replace('.', ',')} km</span>
+                  {c.listedAt && <span> · {new Date(c.listedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span>}
+                  {' '}
+                  <a href={c.sourceUrl} target="_blank" rel="noopener nofollow" className={styles.emsalLink}>Emlakjet ↗</a>
+                </div>
+              ))}
+              <button type="button" className={styles.mapToggle} onClick={() => setShowMap(true)}>
+                Emsalları haritada gör →
+              </button>
+            </>
+          ) : (
+            <div className={styles.gatedWrap}>
+              <div className={styles.blurred} aria-hidden="true">
+                <div className={styles.emsalRow}><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
+                <div className={styles.emsalRow}><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
+                <div className={styles.emsalRow}><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
+              </div>
+              <div className={styles.overlay}>
+                <strong>{card.comparables.count} emsal ilan</strong>
+                <span className={styles.sub}>Ücretsiz üyelikle aç</span>
+                <Link href={`/register?callbackUrl=${encodeURIComponent('/deger?' + parcelQuery)}`} className={styles.cta}>Üye Ol</Link>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : isMember ? (
+        <p className={styles.sub}>Bu bölgede aktif emsal ilan bulunamadı.</p>
+      ) : null}
+
+      {showMap && isMember && card.comparables.items && card.comparables.items.length > 0 && (
+        <EmsalMapLazy
+          parcelGeometry={parcel.geometry}
+          neighborhoodGeojson={card.neighborhood.geojson}
+          comparables={card.comparables.items}
+          center={
+            polygonCentroid(parcel.geometry) ?? {
+              lat: card.comparables.items[0].lat,
+              lng: card.comparables.items[0].lng,
+            }
+          }
+          onClose={() => setShowMap(false)}
+        />
+      )}
+
       <p className={styles.disclaimer}>v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç.</p>
-      <p className={styles.soon}>Yakında (üyelere): Emsal ilanlar · Fiyat trendi · Uzman görüşü</p>
+      <p className={styles.soon}>Yakında (üyelere): Fiyat trendi · Uzman görüşü</p>
     </div>
   )
 }
