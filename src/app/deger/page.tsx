@@ -58,6 +58,7 @@ function DegerPageContent() {
   // İÇİNDE değil; updater saf kalır.
   useEffect(() => {
     if (picker.status === 'verified' && picker.lat != null && picker.lng != null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- doğrulanmış harita seçiminden türetilen async kart getirme; setState promise içinde
       void fetchCard(picker.lat, picker.lng)
     }
   }, [picker.status, picker.lat, picker.lng, fetchCard])
@@ -69,6 +70,7 @@ function DegerPageContent() {
     const lat = Number(searchParams.get('lat'))
     const lng = Number(searchParams.get('lng'))
     if (Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- paylaşılan URL'den ilk kart getirme (bir kez); setState promise içinde
       void fetchCard(lat, lng)
     }
   }, [searchParams, fetchCard])
