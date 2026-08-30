@@ -13,19 +13,29 @@ npm run crawl -- --portal=sahibinden --il=trabzon --category=arsa --dry-run --li
 
 ## Delisting (ilan düşürme) ne zaman çalışır?
 
-`markDelistedExcept` + kopya-birleştirme YALNIZCA **tam (`complete`)** turda çalışır:
-tur, sonuçların gerçek tükenmesiyle bitmiş olmalı — yani sayfalamada bir sonraki
-sayfa **0 ilan** döndürmüş olmalı. Şu durumlarda delisting ATLANIR (güvenli taraf):
+`markDelistedExcept` + cross-portal kopya-birleştirme YALNIZCA aşağıdaki
+koşulların **HEPSİ** sağlandığında çalışır:
 
-- `--limit=N` verilmiş tur → asla delist etmez (kısmi `seenIds`)
-- `blocked` (anti-bot) veya parser-rot abort tetiklenmiş tur
-- `--max-pages` gerçek sayfa sayısından küçük → son sayfa hâlâ doluyken biten tur
-- `maxRequestsPerRun` capine takılan yarım tur
+1. `--dry-run` DEĞİL.
+2. Tur `blocked` değil — hiçbir sayfada anti-bot (HTTP 403/429/5xx veya challenge
+   kalıbı) görülmedi **ve** abort-oranı (gözlenemeyen ilan oranı > %30) tetiklenmedi.
+3. Tur `complete` — sayfalama döngüsü **temiz bir boş sayfaya** çarparak bitti:
+   sayfa index'i > 0, HTTP 200, challenge işareti yok, 0 ilan. Tüm `--max-pages`'i
+   dolaşıp son sayfa hâlâ doluysa bu `complete` SAYILMAZ.
+4. Tur `cleanRun` — sıfır ilan-başı contained fault (`failed`) **ve** sıfır parse
+   hatası (`parseFailed`).
 
-Sonuç: `--limit` artık **güvenli** (hiçbir zaman delist etmez), ama yine de
-inceleme için `--dry-run` ile birlikte kullanmak en iyisidir. Tam kapsamlı bir
-delisting turu için `--max-pages`'i gerçek sayfa sayısının üstünde tut (crawler
-boş sayfayı görünce turu `complete` işaretler).
+Yani: `--max-pages` gerçek sayfa sayısına eşit/altındaysa, ya da turda tek bir
+geçici hata bile olduysa, o tur delist etmez — delisting sonraki temiz + tam
+sayfalanmış turda olur. `--limit=N` verilen tur asla delist etmez (kısmi `seenIds`).
+
+`CrawlRun.notes` durumu taşır: `complete=<bool>`, ve atlandıysa
+`delistSkipped=<blocked|not-complete|not-clean>`. Operatör neden atlandığını
+buradan görür.
+
+Tam kapsamlı bir delisting turu için `--max-pages`'i gerçek sayfa sayısının
+belirgin şekilde üstünde tut (crawler temiz boş sayfayı görünce `complete` yapar).
+`--limit` inceleme için hâlâ `--dry-run` ile eşleştirilmeli.
 
 ## Test
 
@@ -116,7 +126,11 @@ edilir.
   dokunulan mahallelerdeki diğer portal aktif ilanları — `dupeOfId` yazılır, lokal merge değil
 - `blocked` bayrağı: anti-bot, parser-rot abort **ve** `maxRequestsPerRun` cap'ini
   kapsar — hepsinde delisting atlanır; ayrımı `CrawlRun.notes` verir
-- `CrawlRun.notes`: `<sebep> · unparseable=.. parseFailed=.. failed=.. delisted=.. dupes=.. complete=..`
+- `CrawlRun.notes`: `<sebep> · unparseable=.. parseFailed=.. failed=.. delisted=.. dupes=.. complete=.. [delistSkipped=..]`
+- **Kabul edilen artık risk:** sayfa index > 0'da HTTP 200 dönen ama tanınan
+  challenge işareti taşımayan bir "soft-block" sayfası, gerçek boş sayfadan
+  ayırt edilemez → tükenme (`complete`) sayılır. İlk canlı Sahibinden turunda
+  `CrawlRun` satır sayılarını (özellikle `delisted`) yakından izle.
 - UI gösterimi: v1 dışı
 
 Bkz. `docs/superpowers/specs/2026-08-29-ilan-crawler-veri-hatti-design.md` §6.

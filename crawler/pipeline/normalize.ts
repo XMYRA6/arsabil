@@ -19,9 +19,10 @@ export function parseTrArea(s?: string | null): number | null {
 const TYPE_RULES: Array<{ re: RegExp; type: ListingType }> = [
   { re: /zeytin/i, type: 'zeytinlik' },
   // `\b` ğ'den sonra sözcük sınırı üretmez → `/\bbağ\b/` KOŞULSUZ false idi (I6).
-  // Ama düz `/bağ/` çok geniş: 'bağımsız', 'bağlantı', 'bağlı' de yakalar ve bu
-  // kural 'ticari'/'konut'un üstünde → "Bağımsız Bölüm" yanlışlıkla 'bag' olurdu
-  // (G4). Sözcük-başı + tanınan sonekler ('bağ', 'bağlık', 'bağı' vb.).
+  // Düz `/bağ/` ise çok geniş (bu kural 'ticari'/'konut'un üstünde) → "Bağımsız
+  // Bölüm" yanlışlıkla 'bag' olurdu (G4). Kalıp yalnızca: sözcük olarak 'bağ'
+  // (başta ya da boşluktan sonra), sonrasında satır/boşluk/virgül/nokta ya da
+  // düz 'lık' eki ('bağlık'). 'bağı', 'bağımsız', 'bağlantı' EŞLEŞMEZ.
   { re: /(^|\s)bağ($|\s|lık|,|\.)/, type: 'bag' },
   { re: /bahçe/i, type: 'bahce' },
   { re: /tarla/i, type: 'tarla' },

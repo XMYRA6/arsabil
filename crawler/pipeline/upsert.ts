@@ -126,8 +126,9 @@ export async function markDelistedExcept(
   return res.count
 }
 
-export async function writeDupeLinks(client: UpsertClient, links: Map<string, string>): Promise<void> {
-  if (links.size === 0) return
+/** Gerçekten yazılan (yeni) dupeOfId sayısını döner. */
+export async function writeDupeLinks(client: UpsertClient, links: Map<string, string>): Promise<number> {
+  if (links.size === 0) return 0
   // G3 — mevcut dupeOfId durumunu oku: kendine link, döngü (Y.dupeOfId===X iken
   // X.dupeOfId=Y) ve zaten linklenmiş satırın üzerine yazma engellensin.
   const ids = new Set<string>()
@@ -139,11 +140,14 @@ export async function writeDupeLinks(client: UpsertClient, links: Map<string, st
   const dupeOfById = new Map<string, string | null | undefined>()
   for (const r of rows) dupeOfById.set(r.id, r.dupeOfId ?? null)
 
+  let written = 0
   for (const [dupId, canonicalId] of links) {
     if (dupId === canonicalId) continue
     if (dupeOfById.get(dupId)) continue // zaten linklenmiş — dokunma
     if (dupeOfById.get(canonicalId) === dupId) continue // döngü olurdu
     await client.marketListing.update({ where: { id: dupId }, data: { dupeOfId: canonicalId } })
     dupeOfById.set(dupId, canonicalId)
+    written++
   }
+  return written
 }

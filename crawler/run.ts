@@ -280,8 +280,9 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
         seenIds,
       )
       const links = findDupes(dedupeCands)
-      await writeDupeLinks(deps.client, links)
-      summary.dupes = links.size
+      // H2 — gerçekten yazılan link sayısı (writeDupeLinks self-link/döngü/zaten-linkli
+      // satırı atlar; stabil re-run'da 0 yazar).
+      summary.dupes = await writeDupeLinks(deps.client, links)
     }
   } catch (err) {
     if (isCapError(err)) {
