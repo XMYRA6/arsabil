@@ -77,6 +77,36 @@ function first<T>(...vals: (T | undefined | null | '')[]): T | undefined {
   return undefined
 }
 
+/**
+ * Emlakjet detay sayfası, mahalle sınır poligonunu + deprem risk skorunu
+ * kaçışlı JSON olarak bir JS blob'unun içinde taşıyor:
+ *   \"earthquakeRiskScore\":0.198, ... \"neighborhoodGeometry\":{\"type\":\"multipolygon\",\"coordinates\":[[[[lng,lat],...]]]}
+ * Hassas ilan koordinatı YOK — yalnızca mahalle geometrisi.
+ * Geometri objesinin içinde {} yok (sadece diziler) → \{[^{}]*\} güvenli.
+ */
+export function extractNeighborhood(
+  html: string,
+): { geojson: unknown; riskScore: number | null } | null {
+  const geoMatch = html.match(/\\+"neighborhoodGeometry\\+"\s*:\s*(\{[^{}]*\})/)
+  if (!geoMatch) return null
+  let geojson: unknown
+  try {
+    // herhangi bir kaçış seviyesini düz JSON'a indir: \\\" / \" → "
+    const jsonText = geoMatch[1].replace(/\\+"/g, '"')
+    const parsed = JSON.parse(jsonText) as { type?: string; coordinates?: unknown }
+    if (!parsed || typeof parsed !== 'object' || !parsed.coordinates) return null
+    // "multipolygon" → "MultiPolygon" (GeoJSON standardı); koordinat sırası dokunma
+    const type =
+      String(parsed.type ?? '').toLowerCase() === 'multipolygon' ? 'MultiPolygon' : 'Polygon'
+    geojson = { type, coordinates: parsed.coordinates }
+  } catch {
+    return null
+  }
+  const riskMatch = html.match(/\\+"earthquakeRiskScore\\+"\s*:\s*([0-9]+(?:\.[0-9]+)?)/)
+  const riskNum = riskMatch ? Number(riskMatch[1]) : null
+  return { geojson, riskScore: riskNum != null && Number.isFinite(riskNum) ? riskNum : null }
+}
+
 export const emlakjetAdapter: PortalAdapter = {
   source: 'emlakjet',
   searchResultHint: 'emlakjet.com/ilan/',
@@ -169,6 +199,8 @@ export const emlakjetAdapter: PortalAdapter = {
       ? (product!.image as unknown[]).map(String).filter(Boolean)
       : []
 
+    const nb = extractNeighborhood(html)
+
     return {
       source: 'emlakjet',
       sourceListingId,
@@ -189,6 +221,12 @@ export const emlakjetAdapter: PortalAdapter = {
         listing?.dateModified != null ? String(listing.dateModified) : undefined,
       ),
       photoUrls: images,
+      ...(nb
+        ? {
+            neighborhoodGeojson: nb.geojson,
+            ...(nb.riskScore != null ? { neighborhoodRiskScore: nb.riskScore } : {}),
+          }
+        : {}),
       extra: {
         source: 'json_ld',
         product: product ?? null,

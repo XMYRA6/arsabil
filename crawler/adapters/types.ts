@@ -36,6 +36,10 @@ export interface RawListing {
   rawListedAt?: string
   lat?: number
   lng?: number
+  /** Emlakjet: mahalle sınır poligonu (GeoJSON MultiPolygon, [lng,lat]). Hassas ilan koordinatı yok. */
+  neighborhoodGeojson?: unknown
+  /** Emlakjet: mahalle deprem risk skoru (0..1). */
+  neighborhoodRiskScore?: number
   photoUrls: string[]
   extra: Record<string, unknown>
 }

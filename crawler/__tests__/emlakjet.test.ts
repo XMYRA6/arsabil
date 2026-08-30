@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { emlakjetAdapter } from '../adapters/emlakjet'
+import { emlakjetAdapter, extractNeighborhood } from '../adapters/emlakjet'
 
 const fx = (n: string) => fs.readFileSync(path.join(__dirname, '..', 'fixtures', n), 'utf8')
 
@@ -50,6 +50,30 @@ describe('emlakjetAdapter', () => {
     expect(r.photoUrls.length).toBeGreaterThan(0)
     expect(r.rawAdaNo).toBeTruthy()
     expect(r.rawParselNo).toBeTruthy()
+  })
+
+  it('extractNeighborhood fixture\'dan multipolygon + risk skoru çıkarır', () => {
+    const n = extractNeighborhood(fx('emlakjet-arsa-detail-1.html'))
+    expect(n).not.toBeNull()
+    expect(n!.riskScore).toBeCloseTo(0.198)
+    const geo = n!.geojson as { type: string; coordinates: number[][][][] }
+    expect(geo.type).toBe('MultiPolygon') // küçük harf 'multipolygon' normalize edildi
+    expect(geo.coordinates[0][0][0]).toEqual([39.338743509, 41.067457401]) // [lng, lat] dokunulmadı
+  })
+
+  it('extractNeighborhood geometri yoksa null döner', () => {
+    expect(extractNeighborhood('<html>hiçbir şey</html>')).toBeNull()
+  })
+
+  it('parseDetailPage sonucu neighborhoodGeojson + neighborhoodRiskScore taşır', () => {
+    const raw = emlakjetAdapter.parseDetailPage(
+      fx('emlakjet-arsa-detail-1.html'),
+      'https://www.emlakjet.com/ilan/x-17976077',
+    )
+    expect(raw.neighborhoodGeojson).toBeTruthy()
+    expect(raw.neighborhoodRiskScore).toBeCloseTo(0.198)
+    // mevcut alanlar bozulmadı
+    expect(raw.sourceListingId).toBe('17976077')
   })
 
   it('parseDetailPage RawListing çıkarır (konut)', () => {
