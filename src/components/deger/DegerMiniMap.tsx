@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import { useRef } from 'react'
 import { useLeafletMap } from '@/lib/hooks/useLeafletMap'
 import { polygonCentroid } from '@/lib/geo/polygonCentroid'
+import type { GeoJSONPolygon } from '@/lib/tkgm/parcel'
 import styles from './DegerMiniMap.module.css'
 
 // MapView TILES.light ile aynı — statik, etkileşimsiz mini-harita.
@@ -12,13 +13,13 @@ const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png
 const ARSABIL_BLUE = '#0a5cff'
 
 interface Props {
-  parcelGeometry: unknown
+  parcelGeometry: GeoJSONPolygon
   neighborhoodGeojson: unknown | null
 }
 
 export function DegerMiniMap({ parcelGeometry, neighborhoodGeojson }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const centroid = polygonCentroid(parcelGeometry as Parameters<typeof polygonCentroid>[0])
+  const centroid = polygonCentroid(parcelGeometry)
 
   useLeafletMap(containerRef, {
     center: centroid ? [centroid.lat, centroid.lng] : [39, 35],
@@ -36,10 +37,15 @@ export function DegerMiniMap({ parcelGeometry, neighborhoodGeojson }: Props) {
       L.tileLayer(TILE_URL, { maxZoom: 19 }).addTo(map)
 
       // Mahalle sınırı önce çizilir (parselin altında kalsın): ince kesikli, dolgusuz.
+      // Bozuk bir crawled `geojson` satırı → "sınır yok"a düşsün, ASLA boş haritaya.
       if (neighborhoodGeojson) {
-        L.geoJSON(neighborhoodGeojson as Parameters<typeof L.geoJSON>[0], {
-          style: () => ({ color: ARSABIL_BLUE, weight: 1, dashArray: '3 3', fill: false }),
-        }).addTo(map)
+        try {
+          L.geoJSON(neighborhoodGeojson as Parameters<typeof L.geoJSON>[0], {
+            style: () => ({ color: ARSABIL_BLUE, weight: 1, dashArray: '3 3', fill: false }),
+          }).addTo(map)
+        } catch (e) {
+          console.error('mahalle sınırı çizilemedi (atlandı):', e)
+        }
       }
 
       // Parsel: dolu ArsaBil mavisi + haritayı ona sığdır.

@@ -15,7 +15,7 @@ import { EmsalMap } from './EmsalMap'
 const layer = () => ({ addTo: jest.fn().mockReturnThis(), addLayer: jest.fn(), bindPopup: jest.fn().mockReturnThis(), getBounds: () => ({}) })
 const L = {
   tileLayer: jest.fn(layer), geoJSON: jest.fn(layer), marker: jest.fn(layer),
-  markerClusterGroup: jest.fn(layer), featureGroup: jest.fn(layer),
+  markerClusterGroup: jest.fn(layer), layerGroup: jest.fn(layer), featureGroup: jest.fn(layer),
 }
 const map = { fitBounds: jest.fn() }
 const CMP = [
@@ -37,6 +37,31 @@ it('neighborhoodGeojson null → sınır katmanı eklenmez', async () => {
   render(<EmsalMap parcelGeometry={{ type: 'Polygon', coordinates: [] }} neighborhoodGeojson={null} comparables={CMP} center={{ lat: 41, lng: 39.7 }} onClose={jest.fn()} />)
   await onReadyCalls[0](map, L)
   expect(L.geoJSON).toHaveBeenCalledTimes(1)
+})
+
+it('markerClusterGroup yoksa layerGroup fallback — marker yine eklenir (M2)', async () => {
+  const { markerClusterGroup, ...noCluster } = L
+  void markerClusterGroup
+  render(<EmsalMap parcelGeometry={{ type: 'Polygon', coordinates: [] }} neighborhoodGeojson={null} comparables={CMP} center={{ lat: 41, lng: 39.7 }} onClose={jest.fn()} />)
+  await onReadyCalls[0](map, noCluster)
+  expect(noCluster.layerGroup).toHaveBeenCalled()
+  expect(noCluster.marker).toHaveBeenCalledTimes(1)
+})
+
+it('bozuk neighborhoodGeojson → atılmaz, parsel katmanı yine eklenir (M3)', async () => {
+  const throwingGeo = jest.fn((arg: unknown) => {
+    if (arg && (arg as { type?: string }).type === 'MultiPolygon' && !(arg as { coordinates?: unknown }).coordinates) {
+      throw new Error('Invalid GeoJSON object.')
+    }
+    return layer()
+  })
+  const Lbad = { ...L, geoJSON: throwingGeo }
+  const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  render(<EmsalMap parcelGeometry={{ type: 'Polygon', coordinates: [] }} neighborhoodGeojson={{ type: 'MultiPolygon' }} comparables={CMP} center={{ lat: 41, lng: 39.7 }} onClose={jest.fn()} />)
+  await expect(onReadyCalls[0](map, Lbad)).resolves.not.toThrow()
+  errSpy.mockRestore()
+  expect(throwingGeo).toHaveBeenCalledTimes(2) // parsel + (fırlatarak) sınır
+  expect(Lbad.markerClusterGroup).toHaveBeenCalled()
 })
 
 it('kapat butonu onClose çağırır', () => {

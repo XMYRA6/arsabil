@@ -7,6 +7,7 @@ import { useRef } from 'react'
 import type { GeoJSON as LeafletGeoJSON } from 'leaflet'
 import { useLeafletMap } from '@/lib/hooks/useLeafletMap'
 import type { Comparable } from '@/lib/deger/comparables'
+import type { GeoJSONPolygon } from '@/lib/tkgm/parcel'
 import styles from './EmsalMap.module.css'
 
 // Leaflet SVG/canvas render eder; CSS var() BURADA ÇÖZÜLMEZ — literal renkler.
@@ -16,7 +17,7 @@ const ARSABIL_BLUE = '#0a5cff'
 const BOUNDARY_GREY = '#6e6e73'
 
 export interface EmsalMapProps {
-  parcelGeometry: unknown
+  parcelGeometry: GeoJSONPolygon
   neighborhoodGeojson: unknown | null
   comparables: Comparable[]
   center: { lat: number; lng: number }
@@ -47,14 +48,25 @@ export function EmsalMap({
       }).addTo(map)
 
       if (neighborhoodGeojson) {
-        L.geoJSON(neighborhoodGeojson as Parameters<typeof L.geoJSON>[0], {
-          style: { color: BOUNDARY_GREY, weight: 1, dashArray: '4 3', fill: false },
-        }).addTo(map)
+        // Bozuk crawled `geojson` → "sınır yok"a düşsün, ASLA boş haritaya.
+        try {
+          L.geoJSON(neighborhoodGeojson as Parameters<typeof L.geoJSON>[0], {
+            style: { color: BOUNDARY_GREY, weight: 1, dashArray: '4 3', fill: false },
+          }).addTo(map)
+        } catch (e) {
+          console.error('mahalle sınırı çizilemedi (atlandı):', e)
+        }
       }
 
-      await import('leaflet.markercluster')
+      try {
+        await import('leaflet.markercluster')
+      } catch {
+        /* optional — markerClusterGroup yoksa layerGroup'a düşülür */
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- leaflet.markercluster dinamik import ile L namespace augmentation uygulanmıyor
-      const cluster = (L as any).markerClusterGroup()
+      const cluster = (L as any).markerClusterGroup
+        ? (L as any).markerClusterGroup()
+        : (L as any).layerGroup()
       for (const c of comparables) {
         const marker = L.marker(
           [c.lat, c.lng],

@@ -29,3 +29,23 @@ it('neighborhoodGeojson null → sadece parsel katmanı', () => {
   onReadyCalls[0](fakeMap, fakeL)
   expect(geoJSON).toHaveBeenCalledTimes(1)
 })
+
+it('bozuk neighborhoodGeojson → atılmaz, parsel katmanı yine eklenir (M3)', () => {
+  const badGeoJSON = jest.fn((arg: unknown) => {
+    if (arg && (arg as { type?: string }).type === 'MultiPolygon' && !(arg as { coordinates?: unknown }).coordinates) {
+      throw new Error('Invalid GeoJSON object.')
+    }
+    return { addTo: jest.fn(), getBounds: () => ({}) }
+  })
+  const badL = { tileLayer: jest.fn(() => ({ addTo: jest.fn() })), geoJSON: badGeoJSON }
+  const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+  render(
+    <DegerMiniMap
+      parcelGeometry={{ type: 'Polygon', coordinates: [[[39.7, 41], [39.71, 41], [39.71, 41.01], [39.7, 41]]] }}
+      neighborhoodGeojson={{ type: 'MultiPolygon' }}
+    />,
+  )
+  expect(() => onReadyCalls[0](fakeMap, badL)).not.toThrow()
+  expect(badGeoJSON).toHaveBeenCalledTimes(2) // sınır (fırlatır) + parsel
+  errSpy.mockRestore()
+})
