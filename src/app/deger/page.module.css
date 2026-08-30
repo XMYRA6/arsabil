@@ -1,0 +1,7 @@
+.wrap { max-width: 480px; margin: 0 auto; padding: 16px; }
+.title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.subtitle { font-size: 14px; color: #6e6e73; margin-bottom: 16px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.tab { flex: 1; padding: 8px; border: 1px solid #e5e5e7; background: #fff; border-radius: 8px; font-size: 13px; cursor: pointer; }
+.tabActive { background: #f0f0f2; font-weight: 600; }
+.error { color: #b3261e; font-size: 13px; margin: 12px 0; }
