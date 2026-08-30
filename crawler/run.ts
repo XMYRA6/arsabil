@@ -5,7 +5,7 @@ import type { PortalAdapter, PortalSource, ListingCategory, ListingType } from '
 import { normalizeRaw } from './pipeline/normalize'
 import { geocodeListing, defaultGeocodeDeps, type GeocodeDeps } from './pipeline/geocode'
 import { findDupes, type DedupeCandidate } from './pipeline/dedupe'
-import { upsertListing, markDelistedExcept, writeDupeLinks, type UpsertClient } from './pipeline/upsert'
+import { upsertListing, markDelistedExcept, writeDupeLinks, upsertNeighborhood, type UpsertClient } from './pipeline/upsert'
 import { detectBlock, detectHardBlock, type BlockCheckInput, type BlockResult } from './fetcher/blockDetector'
 import { createFetcher } from './fetcher/browser'
 
@@ -197,6 +197,27 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
           }
 
           const res = await upsertListing(deps.client, { normalized, geo })
+
+          // Emsal harita katmanı: mahalle sınır poligonu + risk skoru upsert'i.
+          // İlan akışını BLOKLAMAZ — delisting/dedupe güvenlik kilidinden bağımsız (yalnız upsert).
+          if (
+            normalized.il && normalized.ilce && normalized.mahalle &&
+            raw.neighborhoodGeojson
+          ) {
+            try {
+              await upsertNeighborhood(deps.client, {
+                il: normalized.il,
+                ilce: normalized.ilce,
+                mahalle: normalized.mahalle,
+                geojson: raw.neighborhoodGeojson,
+                riskScore: raw.neighborhoodRiskScore ?? null,
+                source: adapter.source,
+              })
+            } catch (e) {
+              console.error('neighborhood upsert atlandı:', e)
+            }
+          }
+
           seenIds.push(res.id)
           summary.listingsUpserted++
           if (normalized.ilce && normalized.mahalle) {

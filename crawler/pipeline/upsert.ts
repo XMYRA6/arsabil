@@ -1,4 +1,5 @@
 import type { NormalizedListing, GeoResult, PortalSource, ListingType } from '../adapters/types'
+import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 
 export interface UpsertableRecord {
   normalized: NormalizedListing
@@ -30,6 +31,13 @@ export interface UpsertClient {
   }
   marketListingPricePoint: {
     create(args: { data: { listingId: string; price: number } }): Promise<any>
+  }
+  neighborhood: {
+    upsert(args: {
+      where: { il_ilce_mahalle: { il: string; ilce: string; mahalle: string } }
+      create: Record<string, unknown>
+      update: Record<string, unknown>
+    }): Promise<unknown>
   }
 }
 
@@ -150,4 +158,28 @@ export async function writeDupeLinks(client: UpsertClient, links: Map<string, st
     written++
   }
   return written
+}
+
+/**
+ * İlan başına mahalle sınır poligonu + risk skoru upsert'i (Emlakjet detay sayfasından).
+ * Anahtar `AreaPriceStat` ile aynı key-space'te (normalizeAreaName il/ilçe/mahalle).
+ * SADECE upsert — asla silmez; delisting/dedupe güvenlik kilidinden bağımsızdır.
+ */
+export async function upsertNeighborhood(
+  client: UpsertClient,
+  args: { il: string; ilce: string; mahalle: string; geojson: unknown; riskScore: number | null; source: string },
+): Promise<void> {
+  const il = normalizeAreaName(args.il)
+  const ilce = normalizeAreaName(args.ilce)
+  const mahalle = normalizeAreaName(args.mahalle)
+  const data = {
+    geojson: args.geojson as never,
+    emlakjetRiskScore: args.riskScore,
+    source: args.source,
+  }
+  await client.neighborhood.upsert({
+    where: { il_ilce_mahalle: { il, ilce, mahalle } },
+    create: { il, ilce, mahalle, ...data },
+    update: data,
+  })
 }

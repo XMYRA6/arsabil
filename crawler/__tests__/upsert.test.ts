@@ -1,4 +1,4 @@
-import { upsertListing, markDelistedExcept, writeDupeLinks, type UpsertClient, type UpsertableRecord } from '../pipeline/upsert'
+import { upsertListing, markDelistedExcept, writeDupeLinks, upsertNeighborhood, type UpsertClient, type UpsertableRecord } from '../pipeline/upsert'
 import type { NormalizedListing, GeoResult } from '../adapters/types'
 
 function makeFakeClient() {
@@ -28,6 +28,9 @@ function makeFakeClient() {
     },
     marketListingPricePoint: {
       create: async ({ data }: any) => { pricePoints.push(data); return data },
+    },
+    neighborhood: {
+      upsert: async () => ({}),
     },
   }
   return { client, rows, pricePoints }
@@ -158,5 +161,56 @@ describe('writeDupeLinks', () => {
     await writeDupeLinks(client, new Map([[b.id, c.id], [a.id, a.id]]))
     expect(rows.find((r) => r.id === b.id).dupeOfId).toBe(a.id) // c.id ile ezilmedi
     expect(rows.find((r) => r.id === a.id).dupeOfId ?? null).toBeNull() // self-link yok
+  })
+})
+
+describe('upsertNeighborhood', () => {
+  function nbClient() {
+    return {
+      neighborhood: { upsert: jest.fn().mockResolvedValue({}) },
+    } as unknown as UpsertClient
+  }
+
+  it('normalize edilmiş anahtarla upsert eder (create + update şekli)', async () => {
+    const c = nbClient()
+    await upsertNeighborhood(c, {
+      il: 'Trabzon',
+      ilce: 'Ortahisar',
+      mahalle: 'Uğurlu',
+      geojson: { type: 'MultiPolygon', coordinates: [] },
+      riskScore: 0.2,
+      source: 'emlakjet',
+    })
+    const call = (c.neighborhood.upsert as jest.Mock).mock.calls[0][0]
+    expect(call.where.il_ilce_mahalle).toEqual({ il: 'TRABZON', ilce: 'ORTAHISAR', mahalle: 'UĞURLU' })
+    expect(call.create).toEqual({
+      il: 'TRABZON',
+      ilce: 'ORTAHISAR',
+      mahalle: 'UĞURLU',
+      geojson: { type: 'MultiPolygon', coordinates: [] },
+      emlakjetRiskScore: 0.2,
+      source: 'emlakjet',
+    })
+    expect(call.update).toEqual({
+      geojson: { type: 'MultiPolygon', coordinates: [] },
+      emlakjetRiskScore: 0.2,
+      source: 'emlakjet',
+    })
+  })
+
+  it('riskScore null olabilir', async () => {
+    const c = nbClient()
+    await upsertNeighborhood(c, {
+      il: 'İstanbul',
+      ilce: 'Şişli',
+      mahalle: 'Merkez',
+      geojson: { type: 'Polygon', coordinates: [] },
+      riskScore: null,
+      source: 'emlakjet',
+    })
+    const call = (c.neighborhood.upsert as jest.Mock).mock.calls[0][0]
+    expect(call.where.il_ilce_mahalle).toEqual({ il: 'ISTANBUL', ilce: 'ŞIŞLI', mahalle: 'MERKEZ' })
+    expect(call.create.emlakjetRiskScore).toBeNull()
+    expect(call.update.emlakjetRiskScore).toBeNull()
   })
 })
