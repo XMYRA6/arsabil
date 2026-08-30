@@ -14,7 +14,13 @@ jest.mock('@/lib/tkgm/parcel', () => ({
   fetchParcelByAdaParsel: jest.fn(),
 }))
 jest.mock('@/lib/risk/riskSnapshot', () => ({ buildRiskSnapshot: jest.fn() }))
-jest.mock('@/lib/prisma', () => ({ prisma: { areaPriceStat: { findMany: jest.fn() } } }))
+jest.mock('@/lib/prisma', () => ({
+  prisma: {
+    areaPriceStat: { findMany: jest.fn().mockResolvedValue([]) },
+    marketListing: { findMany: jest.fn().mockResolvedValue([]) },
+    neighborhood: { findUnique: jest.fn().mockResolvedValue(null) },
+  },
+}))
 jest.mock('@/lib/rate-limit', () => ({
   checkRateLimit: (...a: unknown[]) => checkRateLimitMock(...a),
   getClientIp: () => '203.0.113.9',
@@ -97,5 +103,36 @@ describe('GET /api/deger/kart', () => {
     buildDegerCardMock.mockResolvedValue({ ok: false, reason: 'parcel_unavailable' })
     const res = await GET(req('lat=41.0&lng=39.7'))
     expect(res.status).toBe(503)
+  })
+
+  it("buildDegerCard'a findListingsNear + findNeighborhood DI geçer", async () => {
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    expect(typeof deps.findListingsNear).toBe('function')
+    expect(typeof deps.findNeighborhood).toBe('function')
+  })
+
+  it('findListingsNear aktif + koordinatlı + arsa filtresiyle sorgular', async () => {
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.marketListing.findMany.mockResolvedValue([])
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    await deps.findListingsNear('TRABZON', 'ORTAHISAR')
+    const where = prisma.marketListing.findMany.mock.calls[0][0].where
+    expect(where).toMatchObject({ il: 'TRABZON', ilce: 'ORTAHISAR', status: 'active' })
+    expect(where.lat).toEqual({ not: null })
+    expect(where.lng).toEqual({ not: null })
+    expect(where.listingType.in).toEqual(expect.arrayContaining(['arsa', 'tarla']))
+  })
+
+  it('findNeighborhood compound key ile findUnique', async () => {
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.neighborhood.findUnique.mockResolvedValue({ geojson: { type: 'MultiPolygon' } })
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    const r = await deps.findNeighborhood('TRABZON', 'ORTAHISAR', 'UĞURLU')
+    expect(prisma.neighborhood.findUnique.mock.calls[0][0].where.il_ilce_mahalle)
+      .toEqual({ il: 'TRABZON', ilce: 'ORTAHISAR', mahalle: 'UĞURLU' })
+    expect(r).toEqual({ geojson: { type: 'MultiPolygon' } })
   })
 })

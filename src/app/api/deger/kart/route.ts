@@ -7,6 +7,8 @@ import { fetchParcelByPoint, fetchParcelByAdaParsel } from '@/lib/tkgm/parcel'
 import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
 import { prisma } from '@/lib/prisma'
 import { buildDegerCard, type DegerCardInput, type AreaStatRecord } from '@/lib/deger/card'
+import { ARSA_LISTING_TYPES } from '@/lib/areaPrices/aggregate'
+import type { ComparableListing } from '@/lib/deger/comparables'
 
 const NUM_PATTERN = /^\d{1,7}$/
 
@@ -68,6 +70,31 @@ export async function GET(req: Request) {
           select: { scope: true, medianPricePerSqm: true, p25: true, p75: true, sampleCount: true },
         })
         return rows as AreaStatRecord[]
+      },
+      findListingsNear: async (il, ilce): Promise<ComparableListing[]> => {
+        const rows = await prisma.marketListing.findMany({
+          where: {
+            il,
+            ilce,
+            status: 'active',
+            lat: { not: null },
+            lng: { not: null },
+            listingType: { in: [...ARSA_LISTING_TYPES] },
+          },
+          select: {
+            id: true, pricePerSqm: true, areaSqm: true, price: true,
+            lat: true, lng: true, geoPrecision: true, listedAt: true,
+            source: true, sourceUrl: true, listingType: true,
+          },
+        })
+        return rows as ComparableListing[]
+      },
+      findNeighborhood: async (il, ilce, mahalle) => {
+        const row = await prisma.neighborhood.findUnique({
+          where: { il_ilce_mahalle: { il, ilce, mahalle } },
+          select: { geojson: true },
+        })
+        return row ? { geojson: row.geojson as unknown } : null
       },
     },
     { memberView: !!userId },
