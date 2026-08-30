@@ -42,6 +42,26 @@ it('ücretsiz kısım her zaman render olur', () => {
   expect(screen.getByText(/Faya 1,8 km/)).toBeInTheDocument()
 })
 
+it('kalıcı v1 sorumluluk reddi her zaman görünür', () => {
+  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
+  expect(
+    screen.getByText(/v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç/i),
+  ).toBeInTheDocument()
+})
+
+it('fay menzil dışında (faultDistanceM null, status ok) → fay çipi chipOk', () => {
+  const card: DegerCardDTO = { ...baseCard, risk: { faultDistanceM: null, floodQ100: false, status: 'ok' } }
+  render(<DegerKarti card={card} isLoggedIn={false} parcelQuery="q=1" />)
+  const chip = screen.getByText(/Faya 25 km/i)
+  expect(chip.className).toMatch(/chipOk/)
+  expect(chip.className).not.toMatch(/chipWarn/)
+})
+
+it('fay yakın (faultDistanceM sayı) → fay çipi chipWarn', () => {
+  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
+  expect(screen.getByText(/Faya 1,8 km/).className).toMatch(/chipWarn/)
+})
+
 it('thinData → uyarı satırı', () => {
   render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
   expect(screen.getByText(/Sınırlı emsal verisine dayanıyor/i)).toBeInTheDocument()

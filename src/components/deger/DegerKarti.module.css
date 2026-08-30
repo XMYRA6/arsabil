@@ -16,5 +16,6 @@
 .cta { background: #0a5cff; color: #fff; border-radius: 10px; padding: 9px 18px; font-size: 14px; font-weight: 600; text-decoration: none; }
 .memberRow { font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f2; }
 .feasLink { display: inline-block; margin-top: 10px; font-size: 14px; color: #0a5cff; text-decoration: none; }
-.soon { font-size: 11px; color: #a1a1a6; margin-top: 14px; }
+.disclaimer { font-size: 11px; color: #8a8a8e; margin-top: 14px; }
+.soon { font-size: 11px; color: #a1a1a6; margin-top: 6px; }
 .insufficient { font-size: 14px; color: #6e6e73; margin: 10px 0; }

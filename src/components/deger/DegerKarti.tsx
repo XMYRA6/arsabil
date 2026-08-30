@@ -47,7 +47,7 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
           <span className={styles.chip}>Risk verisi alınamadı</span>
         ) : (
           <>
-            <span className={`${styles.chip} ${styles.chipWarn}`}>
+            <span className={`${styles.chip} ${risk.faultDistanceM === null ? styles.chipOk : styles.chipWarn}`}>
               Faya {formatFaultDistance(risk.faultDistanceM)}
             </span>
             {risk.floodQ100 === true && <span className={`${styles.chip} ${styles.chipWarn}`}>Q100 taşkın bölgesi</span>}
@@ -105,6 +105,7 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
         </>
       )}
 
+      <p className={styles.disclaimer}>v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç.</p>
       <p className={styles.soon}>Yakında (üyelere): Emsal ilanlar · Fiyat trendi · Uzman görüşü</p>
     </div>
   )
