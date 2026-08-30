@@ -379,6 +379,11 @@ model MarketListing {
   @@index([lat, lng])
 }
 
+// NOTE: il/ilçe kapsam satırlarındaki (ilce/mahalle NULL) benzersizlik DB'de
+// fonksiyonel bir unique index ile zorlanır — bkz.
+// prisma/migrations/20260830120000_add_area_price_stat/migration.sql
+// ("AreaPriceStat_scope_unique", COALESCE(ilce,'')/COALESCE(mahalle,'') üzerinde).
+// Prisma şeması bunu ifade edemez; el-yazımı migration'daki ekstra index'e izin verir.
 model AreaPriceStat {
   id                String   @id @default(cuid())
   il                String
@@ -392,7 +397,6 @@ model AreaPriceStat {
   computedAt        DateTime
 
   @@unique([il, ilce, mahalle])
-  @@index([il, ilce, mahalle])
 }
 
 model MarketListingPricePoint {

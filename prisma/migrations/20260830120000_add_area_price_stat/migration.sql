@@ -17,5 +17,7 @@ CREATE TABLE "AreaPriceStat" (
 -- CreateIndex
 CREATE UNIQUE INDEX "AreaPriceStat_il_ilce_mahalle_key" ON "AreaPriceStat"("il", "ilce", "mahalle");
 
--- CreateIndex
-CREATE INDEX "AreaPriceStat_il_ilce_mahalle_idx" ON "AreaPriceStat"("il", "ilce", "mahalle");
+-- CreateIndex (functional — @@unique([il,ilce,mahalle]) can't enforce uniqueness
+-- across NULL ilce/mahalle because Postgres treats NULLs as distinct)
+CREATE UNIQUE INDEX "AreaPriceStat_scope_unique"
+  ON "AreaPriceStat"("il", COALESCE("ilce", ''), COALESCE("mahalle", ''));
