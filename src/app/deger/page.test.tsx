@@ -8,10 +8,23 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(''),
 }))
 jest.mock('@/components/listing-wizard/ManualParcelEntryForm', () => ({
-  ManualParcelEntryForm: ({ onLocationFound }: { onLocationFound: (lat: number, lng: number, ref: unknown) => void }) => (
-    <button onClick={() => onLocationFound(41.0, 39.7, { il: 'T', ilce: 'O', mahalle: 'U', ada: '142', parsel: '7' })}>
-      manuel-bul
-    </button>
+  ManualParcelEntryForm: ({
+    onLocationFound,
+  }: {
+    onLocationFound: (lat: number, lng: number, ref: unknown, exactParcel?: unknown) => void
+  }) => (
+    <>
+      <button
+        onClick={() =>
+          onLocationFound(41.0, 39.7, { il: 'T', ilce: 'O', mahalle: 'U', ada: '142', parsel: '7' }, { adaNo: '142' })
+        }
+      >
+        manuel-bul
+      </button>
+      <button onClick={() => onLocationFound(41.0, 39.7, { il: 'T', ilce: 'O', mahalle: 'U', ada: '142', parsel: '7' })}>
+        manuel-bul-yaklasik
+      </button>
+    </>
   ),
 }))
 jest.mock('@/components/listing-wizard/ParcelPicker', () => ({
@@ -37,6 +50,16 @@ it('ada/parsel sekmesi: parsel çözülünce kart görünür + URL güncellenir'
   await waitFor(() => expect(screen.getByText(/Tahmini Değer Aralığı/i)).toBeInTheDocument())
   expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain('/api/deger/kart?lat=41&lng=39.7')
   expect(replaceMock).toHaveBeenCalledWith('/deger?lat=41&lng=39.7')
+})
+
+it('ada/parsel TKGM ile doğrulanmadıysa (4. arg yok) kart üretilmez, hata gösterilir', async () => {
+  render(<DegerPage />)
+  fireEvent.click(screen.getByText('manuel-bul-yaklasik'))
+  await waitFor(() =>
+    expect(screen.getByText(/Bu ada\/parsel için TKGM kaydı bulunamadı/i)).toBeInTheDocument(),
+  )
+  expect(global.fetch).not.toHaveBeenCalled()
+  expect(screen.queryByText(/Tahmini Değer Aralığı/i)).not.toBeInTheDocument()
 })
 
 it('sekme değiştirince harita bileşeni görünür', () => {

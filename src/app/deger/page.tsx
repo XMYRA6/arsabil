@@ -71,7 +71,13 @@ function DegerPageContent() {
       </div>
 
       {tab === 'adaParsel' && (
-        <ManualParcelEntryForm onLocationFound={(lat, lng) => void fetchCard(lat, lng)} />
+        <ManualParcelEntryForm
+          onLocationFound={(lat, lng, _ref, exactParcel) =>
+            exactParcel
+              ? void fetchCard(lat, lng)
+              : setError('Bu ada/parsel için TKGM kaydı bulunamadı. Haritadan seçmeyi deneyin.')
+          }
+        />
       )}
       {tab === 'harita' && (
         <ParcelPicker
