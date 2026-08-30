@@ -115,7 +115,7 @@ it('yakında metni her zaman var', () => {
 
 it('üye: emsal listesi render (₺/m², link, ~ approx)', () => {
   const card: DegerCardDTO = { ...baseCard, comparables: { count: 2, items: [
-    { pricePerSqm: 2500, areaSqm: 480, price: 1200000, distanceM: 1200, approxDistance: true, lat: 41, lng: 39.7, listedAt: new Date('2026-08-21'), source: 'emlakjet', sourceUrl: 'https://emlakjet.com/ilan/c1' },
+    { pricePerSqm: 2500, areaSqm: 480, price: 1200000, distanceM: 1200, approxDistance: true, lat: 41, lng: 39.7, listedAt: '2026-08-21T00:00:00.000Z', source: 'emlakjet', sourceUrl: 'https://emlakjet.com/ilan/c1' },
   ] } }
   render(<DegerKarti card={card} isLoggedIn parcelQuery="q=1" />)
   expect(screen.getByText(/Bölgedeki Emsal İlanlar \(2\)/)).toBeInTheDocument()

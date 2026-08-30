@@ -70,6 +70,28 @@ describe('selectComparables', () => {
     expect([...dists].sort((a, b) => a - b)).toEqual(dists)
   })
 
+  it('listedAt DTO için ISO string olarak çıkar (M1)', () => {
+    const r = selectComparables({ parcel: P, listings: [L({ id: 'a', listedAt: new Date('2026-08-20T00:00:00Z') })] })
+    expect(r.items[0].listedAt).toBe('2026-08-20T00:00:00.000Z')
+  })
+
+  it('listedAt null olan ilan → çıktıda null', () => {
+    const r = selectComparables({ parcel: P, listings: [L({ id: 'a', listedAt: null })] })
+    expect(r.items[0].listedAt).toBeNull()
+  })
+
+  it('I1/I2 — eşit mesafede yeni ilan önce sıralanır (deterministik top-N)', () => {
+    const r = selectComparables({
+      parcel: P,
+      listings: [
+        L({ id: 'old', lat: 41.001, lng: 39.7, listedAt: new Date('2026-01-01') }),
+        L({ id: 'new', lat: 41.001, lng: 39.7, listedAt: new Date('2026-08-01') }),
+      ],
+    })
+    expect(r.items.map((c) => c.distanceM)).toEqual([r.items[0].distanceM, r.items[0].distanceM]) // aynı mesafe
+    expect(r.items[0].listedAt).toBe('2026-08-01T00:00:00.000Z')
+  })
+
   it('parsel koordinatı geçersiz → boş', () => {
     const r = selectComparables({ parcel: { lat: NaN, lng: 39, areaSqm: 1000 }, listings: [L({})] })
     expect(r).toEqual({ items: [], total: 0 })

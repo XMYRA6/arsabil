@@ -28,7 +28,8 @@ export interface Comparable {
   approxDistance: boolean
   lat: number
   lng: number
-  listedAt: Date | null
+  /** DTO-facing: `NextResponse.json` üzerinden ISO string olur, Date değil (M1). */
+  listedAt: string | null
   source: string
   sourceUrl: string
 }
@@ -62,11 +63,14 @@ export function selectComparables(input: ComparableInput): { items: Comparable[]
       approxDistance: l.geoPrecision !== 'exact',
       lat: l.lat,
       lng: l.lng,
-      listedAt: l.listedAt,
+      listedAt: l.listedAt ? l.listedAt.toISOString() : null,
       source: l.source,
       sourceUrl: l.sourceUrl,
     })
   }
-  passed.sort((a, b) => a.distanceM - b.distanceM)
+  // I1/I2 — mesafe birincil; eşit mesafede (aynı lat/lng) yeni ilan önce gelsin
+  // ki top-8 dilimi deterministik olsun.
+  const dateVal = (d: string | null) => (d ? new Date(d).getTime() : 0)
+  passed.sort((a, b) => a.distanceM - b.distanceM || dateVal(b.listedAt) - dateVal(a.listedAt))
   return { items: passed.slice(0, MAX_ITEMS), total: passed.length }
 }
