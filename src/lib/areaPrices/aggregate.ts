@@ -55,6 +55,15 @@ export function aggregateAreaPrices(rows: AggregateInputRow[]): AreaPriceStatRow
   // Anahtar → orijinal (büyük harfli) il/ilçe/mahalle bileşenleri
   const meta = new Map<string, { il: string; ilce: string | null; mahalle: string | null }>()
 
+  const push = (map: Map<string, number[]>, key: string, value: number) => {
+    let arr = map.get(key)
+    if (!arr) {
+      arr = []
+      map.set(key, arr)
+    }
+    arr.push(value)
+  }
+
   for (const r of rows) {
     if (r.status !== 'active') continue
     if (!arsaTypes.has(r.listingType)) continue
@@ -66,17 +75,17 @@ export function aggregateAreaPrices(rows: AggregateInputRow[]): AreaPriceStatRow
     const mahalle = r.mahalle ? normalizeAreaName(r.mahalle) : null
 
     const ilKey = il
-    ilGroups.set(ilKey, [...(ilGroups.get(ilKey) ?? []), r.pricePerSqm])
+    push(ilGroups, ilKey, r.pricePerSqm)
     meta.set(`il|${ilKey}`, { il, ilce: null, mahalle: null })
 
     if (ilce) {
       const ilceKey = `${il}|${ilce}`
-      ilceGroups.set(ilceKey, [...(ilceGroups.get(ilceKey) ?? []), r.pricePerSqm])
+      push(ilceGroups, ilceKey, r.pricePerSqm)
       meta.set(`ilce|${ilceKey}`, { il, ilce, mahalle: null })
 
       if (mahalle) {
         const mahKey = `${il}|${ilce}|${mahalle}`
-        mahalleGroups.set(mahKey, [...(mahalleGroups.get(mahKey) ?? []), r.pricePerSqm])
+        push(mahalleGroups, mahKey, r.pricePerSqm)
         meta.set(`mahalle|${mahKey}`, { il, ilce, mahalle })
       }
     }
