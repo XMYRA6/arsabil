@@ -1,19 +1,15 @@
 'use client'
 
 import type { RiskMeasurement } from '@/lib/risk/types'
+import { formatFaultDistance } from '@/lib/risk/formatDistance'
 import styles from './RiskSuggestionCard.module.css'
 
 interface Props {
     risk: RiskMeasurement
-    /** Yüzde cinsinden risk seviyesi — /hesapla `riskLevel` state'i bu birimde. */
+    /** Yüzde cinsinden risk seviyesi — /hesapla `riskLevel` state’i bu birimde. */
     onApply: (riskLevelPercent: number) => void
     /** True iken Uygula butonu render edilmez (wizard baglaminda uygulanacak riskLevel yok). */
     hideApply?: boolean
-}
-
-function formatDistance(m: number | null): string {
-    if (m === null) return '25 km’den uzak'
-    return m >= 1000 ? `${(m / 1000).toFixed(1).replace('.', ',')} km` : `${m} m`
 }
 
 export function RiskSuggestionCard({ risk, onApply, hideApply = false }: Props) {
@@ -24,7 +20,7 @@ export function RiskSuggestionCard({ risk, onApply, hideApply = false }: Props) 
             <h4 className={styles.title}>Yakın fay etkisi</h4>
 
             <p className={styles.line}>
-                Parseliniz diri faya yaklaşık <strong>{formatDistance(risk.faultDistanceM)}</strong>.
+                Parseliniz diri faya yaklaşık <strong>{formatFaultDistance(risk.faultDistanceM)}</strong>.
                 {risk.floodQ100 && ' Parsel Q100 taşkın tehlike bölgesi içinde.'}
             </p>
 
