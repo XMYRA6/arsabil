@@ -51,7 +51,11 @@ export function createTkgmCentroidResolver(): GeocodeDeps['resolveMahalleCentroi
       if (!ilceId) { mahCache.set(key, null); return null }
 
       const mahList = await fetchMahalleListesi(ilceId)
-      const found = mahList.find((m) => up(m.text.replace(/\s*(mah(\.|allesi)?|köyü)\s*$/i, '').trim()) === mahalle)
+      // Sonek strip'i önce tr-TR küçük harfte yapılır: `/allesi/i` ALL-CAPS
+      // 'MAHALLESİ' ile eşleşmez ('İ'.toLowerCase() ≠ 'i') — aynı İ defekt sınıfı (M2).
+      const stripSuffix = (s: string) =>
+        up(s.toLocaleLowerCase('tr-TR').replace(/\s*(mah(\.|allesi)?|köyü)\s*$/i, '').trim())
+      const found = mahList.find((m) => stripSuffix(m.text) === mahalle)
       const centroid = found?.centroid ?? null
       mahCache.set(key, centroid)
       return centroid

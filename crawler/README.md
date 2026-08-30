@@ -11,6 +11,22 @@ npm run crawl -- --portal=sahibinden --il=trabzon --category=arsa --max-pages=5
 npm run crawl -- --portal=sahibinden --il=trabzon --category=arsa --dry-run --limit=1
 ```
 
+## Delisting (ilan düşürme) ne zaman çalışır?
+
+`markDelistedExcept` + kopya-birleştirme YALNIZCA **tam (`complete`)** turda çalışır:
+tur, sonuçların gerçek tükenmesiyle bitmiş olmalı — yani sayfalamada bir sonraki
+sayfa **0 ilan** döndürmüş olmalı. Şu durumlarda delisting ATLANIR (güvenli taraf):
+
+- `--limit=N` verilmiş tur → asla delist etmez (kısmi `seenIds`)
+- `blocked` (anti-bot) veya parser-rot abort tetiklenmiş tur
+- `--max-pages` gerçek sayfa sayısından küçük → son sayfa hâlâ doluyken biten tur
+- `maxRequestsPerRun` capine takılan yarım tur
+
+Sonuç: `--limit` artık **güvenli** (hiçbir zaman delist etmez), ama yine de
+inceleme için `--dry-run` ile birlikte kullanmak en iyisidir. Tam kapsamlı bir
+delisting turu için `--max-pages`'i gerçek sayfa sayısının üstünde tut (crawler
+boş sayfayı görünce turu `complete` işaretler).
+
 ## Test
 
 ```bash
@@ -96,8 +112,11 @@ edilir.
 
 - Otomasyon / cron: yok (elle `npm run crawl` ile tetiklenir)
 - Proxy: yok (Hepsiemlak gerekir, PerimeterX muhtemelen Sahibinden'i engeller)
-- Kopya birleştirme: çalışma içi dedupe (flag kontrol, lokal merge değil)
-- `blocked` bayrağı: anti-bot **ve** parser-rot abort'u kapsar — `CrawlRun.notes` kontrol et
+- Kopya birleştirme: tur içi adaylar + tur sonunda (yalnız `complete` turda)
+  dokunulan mahallelerdeki diğer portal aktif ilanları — `dupeOfId` yazılır, lokal merge değil
+- `blocked` bayrağı: anti-bot, parser-rot abort **ve** `maxRequestsPerRun` cap'ini
+  kapsar — hepsinde delisting atlanır; ayrımı `CrawlRun.notes` verir
+- `CrawlRun.notes`: `<sebep> · unparseable=.. parseFailed=.. failed=.. delisted=.. dupes=.. complete=..`
 - UI gösterimi: v1 dışı
 
 Bkz. `docs/superpowers/specs/2026-08-29-ilan-crawler-veri-hatti-design.md` §6.

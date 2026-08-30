@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import type { PortalAdapter, ListingStub, RawListing } from './types'
+import type { PortalAdapter, ListingStub } from './types'
 
 const BASE = 'https://www.emlakjet.com'
 
@@ -152,7 +152,9 @@ export const emlakjetAdapter: PortalAdapter = {
     if (!rawMahalle) {
       const lvl5 = crumbName(5)
       if (lvl5 && rawIlce) {
-        const stripped = lvl5.replace(new RegExp(`^${rawIlce}\\s+`, 'i'), '')
+        // M3: rawIlce regex'e gömülüyor — metakarakterleri escape et
+        const ilceRe = rawIlce.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const stripped = lvl5.replace(new RegExp(`^${ilceRe}\\s+`, 'i'), '')
         const mah = stripped.match(/^(.*?Mahallesi)/)?.[1]
         if (mah) rawMahalle = mah.trim()
       }

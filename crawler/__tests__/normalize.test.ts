@@ -26,6 +26,10 @@ describe('mapListingType', () => {
     expect(mapListingType('Konut İmarlı Arsa', 'İmarlı')).toEqual({ listingType: 'arsa', imarStatus: 'imarli' })
     expect(mapListingType('Tarla')).toEqual({ listingType: 'tarla', imarStatus: 'imarsiz' })
     expect(mapListingType('Zeytinlik')).toEqual({ listingType: 'zeytinlik', imarStatus: 'imarsiz' })
+    // I6: /\bbağ\b/ koşulsuz false idi — artık /bağ/ ile 'bag' erişilebilir
+    expect(mapListingType('Bağ')).toEqual({ listingType: 'bag', imarStatus: 'imarsiz' })
+    // regresyon: 'bahçe' hâlâ bahce'ye eşlenmeli ('bağ' kuralına takılmamalı)
+    expect(mapListingType('Satılık Bahçe')).toEqual({ listingType: 'bahce', imarStatus: 'imarsiz' })
     expect(mapListingType('Satılık Daire')).toEqual({ listingType: 'konut', imarStatus: 'bilinmiyor' })
     expect(mapListingType('Bilinmeyen Şey')).toEqual({ listingType: 'diger', imarStatus: 'bilinmiyor' })
   })
@@ -37,6 +41,8 @@ describe('cleanTrName', () => {
     expect(cleanTrName('Uzunkuyu Köyü')).toBe('UZUNKUYU')
     expect(cleanTrName('ORTAHISAR')).toBe('ORTAHISAR')
     expect(cleanTrName(undefined)).toBeNull()
+    // M2: ALL-CAPS 'MAHALLESİ' — /mahallesi/i eşleşmiyordu ('İ'.toLowerCase() ≠ 'i')
+    expect(cleanTrName('PELİTLİ MAHALLESİ')).toBe('PELİTLİ')
   })
 })
 

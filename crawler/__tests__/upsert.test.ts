@@ -62,11 +62,38 @@ describe('upsertListing', () => {
 
   it('fiyat değişince PricePoint eklenir ve priceChanged=true', async () => {
     const { client, pricePoints } = makeFakeClient()
-    await upsertListing(client, rec)
+    await upsertListing(client, rec) // I4: create → taban fiyat noktası (10M)
     const r = await upsertListing(client, { ...rec, normalized: { ...n, price: 12_000_000, pricePerSqm: 24000 } })
     expect(r.priceChanged).toBe(true)
+    expect(pricePoints).toHaveLength(2)
+    expect(pricePoints[0].price).toBe(10_000_000)
+    expect(pricePoints[1].price).toBe(12_000_000)
+  })
+
+  it('I4: create anında fiyat varsa tek bir taban PricePoint yazılır', async () => {
+    const { client, pricePoints } = makeFakeClient()
+    const r = await upsertListing(client, rec)
+    expect(r.created).toBe(true)
     expect(pricePoints).toHaveLength(1)
-    expect(pricePoints[0].price).toBe(12_000_000)
+    expect(pricePoints[0].price).toBe(10_000_000)
+  })
+
+  it('I3: kısmi re-parse null fiyatı iyi veriyi EZMEZ, lastSeenAt ilerler, yeni fiyat noktası yok', async () => {
+    const { client, rows, pricePoints } = makeFakeClient()
+    await upsertListing(client, rec) // price 10M, area 500
+    const before = rows[0].lastSeenAt
+    await new Promise((res) => setTimeout(res, 5))
+    const r = await upsertListing(client, {
+      ...rec,
+      normalized: { ...n, price: null, pricePerSqm: null },
+    })
+    expect(r.created).toBe(false)
+    expect(r.priceChanged).toBe(false)
+    expect(rows[0].price).toBe(10_000_000) // eski fiyat korundu
+    expect(rows[0].areaSqm).toBe(500)
+    expect(rows[0].status).toBe('active')
+    expect(rows[0].lastSeenAt.getTime()).toBeGreaterThan(before.getTime())
+    expect(pricePoints).toHaveLength(1) // yalnız create'teki taban nokta
   })
 })
 

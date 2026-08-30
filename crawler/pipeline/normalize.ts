@@ -18,7 +18,10 @@ export function parseTrArea(s?: string | null): number | null {
 
 const TYPE_RULES: Array<{ re: RegExp; type: ListingType }> = [
   { re: /zeytin/i, type: 'zeytinlik' },
-  { re: /\bbağ\b/i, type: 'bag' },
+  // `\b` ğ'den sonra sözcük sınırı üretmez → `/\bbağ\b/` KOŞULSUZ false idi (I6).
+  // Girdi zaten toLocaleLowerCase('tr-TR') edilmiş; `bahçe` kuralı sırada sonra
+  // ama 'bahçe' içinde 'bağ' geçmediğinden çakışma yok.
+  { re: /bağ/, type: 'bag' },
   { re: /bahçe/i, type: 'bahce' },
   { re: /tarla/i, type: 'tarla' },
   { re: /ticari|dükkan|işyeri|mağaza|ofis/i, type: 'ticari' },
@@ -44,7 +47,10 @@ const NAME_SUFFIXES = /\s*(mah(\.|allesi)?|köyü|belde(si)?)\s*$/i
 
 export function cleanTrName(s?: string | null): string | null {
   if (!s) return null
-  const trimmed = s.replace(NAME_SUFFIXES, '').replace(/\s+/g, ' ').trim()
+  // Önce tr-TR küçük harf: `/mahallesi/i` ALL-CAPS 'MAHALLESİ' ile eşleşmez
+  // ('İ'.toLowerCase() = 'i̇' ≠ 'i') — aynı İ defekt sınıfı (M2).
+  const lowered = s.toLocaleLowerCase('tr-TR')
+  const trimmed = lowered.replace(NAME_SUFFIXES, '').replace(/\s+/g, ' ').trim()
   if (!trimmed) return null
   return trimmed.toLocaleUpperCase('tr-TR')
 }

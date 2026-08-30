@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import { DEFAULT_CONFIG, type CrawlConfig } from './config'
 import { sahibindenAdapter } from './adapters/sahibinden'
 import { emlakjetAdapter } from './adapters/emlakjet'
@@ -16,7 +15,10 @@ const ADAPTERS: Partial<Record<PortalSource, PortalAdapter>> = {
   emlakjet: emlakjetAdapter,
 }
 const ARSA_TYPES: ListingType[] = ['arsa', 'tarla', 'bag', 'bahce', 'zeytinlik', 'arazi']
-const KONUT_TYPES: ListingType[] = ['konut', 'ticari', 'diger']
+// I5: 'diger' HİÇBİR kategori kapsamında değil. Sınıflandırılamayan bir ilan
+// HEM arsa HEM konut taraması tarafından delist edilebilir olmamalı — aksi hâlde
+// arsa/konut turları arasında status flip-flop olur.
+const KONUT_TYPES: ListingType[] = ['konut', 'ticari']
 
 export interface RunArgs {
   il: string
@@ -30,11 +32,18 @@ export interface RunSummary {
   pagesFetched: number
   listingsFound: number
   listingsUpserted: number
+  /** parse hatası + parse OK ama fiyat & alan yok — rapor içindir. */
   unparseable: number
+  /** yalnız gerçek parse hatası (ilan seenIds'e GİRMEDİ) — abort oranını bu sürer. */
+  parseFailed: number
+  /** ilan-başı beklenmeyen hata (fetch/DB/geo) — konteynıra alındı, tur devam etti. */
+  failed: number
   delisted: number
   dupes: number
   blocked: boolean
   blockReason: string | null
+  /** arama döngüsü sonuçların gerçek tükenmesiyle bitti mi? Sadece bu true iken delist + dedupe çalışır. */
+  complete: boolean
 }
 
 export interface RunDeps {
@@ -49,6 +58,10 @@ export interface RunDeps {
   cfg?: CrawlConfig
 }
 
+function isCapError(e: unknown): boolean {
+  return e instanceof Error && /maxRequestsPerRun/.test(e.message)
+}
+
 export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary> {
   const cfg = deps.cfg ?? DEFAULT_CONFIG
   const { adapter } = deps
@@ -58,10 +71,13 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
     listingsFound: 0,
     listingsUpserted: 0,
     unparseable: 0,
+    parseFailed: 0,
+    failed: 0,
     delisted: 0,
     dupes: 0,
     blocked: false,
     blockReason: null,
+    complete: false,
   }
 
   const run = args.dryRun
@@ -72,134 +88,214 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
 
   const seenIds: string[] = []
   const dedupeCands: DedupeCandidate[] = []
-  const searchUrls = adapter.searchUrls(args.il, args.category, args.maxPages)
+  // bu turda dokunulan (ilçe, mahalle) çiftleri — cross-portal dedupe sorgusu için (C2).
+  const touchedAreas = new Set<string>()
+  let rethrow: unknown = null
 
-  outer: for (const url of searchUrls) {
-    const { html, status } = await deps.fetcher.get(url)
-    summary.pagesFetched++
-    const stubs = adapter.parseSearchPage(html)
-    // Ruling B — engel göstergesi adapterden gelir
-    const block = deps.detectBlock({
-      html,
-      httpStatus: status,
-      expectedSelector: adapter.searchResultHint,
-      foundListingCount: stubs.length,
-    })
-    if (block.blocked) {
-      summary.blocked = true
-      summary.blockReason = block.reason
-      break
-    }
+  try {
+    const searchUrls = adapter.searchUrls(args.il, args.category, args.maxPages)
 
-    // Ruling C — bu sayfadaki stub'lardan DB'de olan + taze olanları detay-fetch'ten muaf tut
-    const stubIds = stubs.map((s) => s.sourceListingId)
-    const existing = await deps.client.marketListing.findMany({
-      where: { source: adapter.source, sourceListingId: { in: stubIds } },
-    })
-    const freshById = new Map<string, string>() // sourceListingId -> mevcut satır id'si (taze ise)
-    for (const row of existing as Array<{ id: string; sourceListingId: string; lastSeenAt: Date | string }>) {
-      const age = deps.now().getTime() - new Date(row.lastSeenAt).getTime()
-      if (age < cfg.detailRefreshDays * 86_400_000) freshById.set(row.sourceListingId, row.id)
-    }
+    outer: for (let pageIdx = 0; pageIdx < searchUrls.length; pageIdx++) {
+      const url = searchUrls[pageIdx]
+      const { html, status } = await deps.fetcher.get(url)
+      summary.pagesFetched++
+      const stubs = adapter.parseSearchPage(html)
 
-    for (const stub of stubs) {
-      if (args.limit && summary.listingsFound >= args.limit) break outer
-
-      // taze kayıt: detay çekme, ama delisted'tan muaf tutmak için mevcut id'yi seenIds'e ekle
-      if (freshById.has(stub.sourceListingId)) {
-        seenIds.push(freshById.get(stub.sourceListingId)!)
-        summary.listingsFound++
-        continue
+      // C3 — 1. sayfadan SONRA 0 stub = sayfalama tükendi (soft-block DEĞİL).
+      // detectBlock'u foundListingCount:0 ile ÇAĞIRMA; döngüyü temiz bitir.
+      if (stubs.length === 0 && pageIdx > 0) {
+        summary.complete = true
+        break
       }
 
-      summary.listingsFound++
-
-      const detail = await deps.fetcher.get(stub.detailUrl)
-      const db = deps.detectBlock({
-        html: detail.html,
-        httpStatus: detail.status,
-        expectedSelector: adapter.detailHint,
-        foundListingCount: -1,
+      // Ruling B — engel göstergesi adapterden gelir. (pageIdx 0 + 0 ilan → soft-block.)
+      const block = deps.detectBlock({
+        html,
+        httpStatus: status,
+        expectedSelector: adapter.searchResultHint,
+        foundListingCount: stubs.length,
       })
-      if (db.blocked) {
+      if (block.blocked) {
         summary.blocked = true
-        summary.blockReason = db.reason
-        break outer
+        summary.blockReason = block.reason
+        break
       }
 
-      let raw
-      try {
-        raw = adapter.parseDetailPage(detail.html, stub.detailUrl)
-      } catch {
-        summary.unparseable++
-        continue
-      }
-      const normalized = normalizeRaw(raw)
-      if (normalized.price === null && normalized.areaSqm === null) summary.unparseable++
-      const geo = await geocodeListing(normalized, deps.geocodeDeps)
-
-      if (args.dryRun) {
-        console.log(JSON.stringify({ normalized, geo }, null, 2))
-        continue
+      // Ruling C — bu sayfadaki stub'lardan DB'de olan + taze olanları detay-fetch'ten muaf tut
+      const stubIds = stubs.map((s) => s.sourceListingId)
+      const existing = await deps.client.marketListing.findMany({
+        where: { source: adapter.source, sourceListingId: { in: stubIds } },
+      })
+      const freshById = new Map<string, string>() // sourceListingId -> mevcut satır id'si (taze ise)
+      for (const row of existing) {
+        const age = deps.now().getTime() - new Date(row.lastSeenAt).getTime()
+        if (age < cfg.detailRefreshDays * 86_400_000) freshById.set(row.sourceListingId, row.id)
       }
 
-      const res = await upsertListing(deps.client, { normalized, geo })
-      seenIds.push(res.id)
-      summary.listingsUpserted++
-      dedupeCands.push({
-        id: res.id,
-        source: adapter.source,
-        ilce: normalized.ilce,
-        mahalle: normalized.mahalle,
-        areaSqm: normalized.areaSqm,
-        price: normalized.price,
-        listingType: normalized.listingType,
-        firstSeenAt: deps.now(),
+      for (const stub of stubs) {
+        if (args.limit && summary.listingsFound >= args.limit) break outer
+
+        // taze kayıt: detay çekme, ama delisted'tan muaf tutmak için mevcut id'yi seenIds'e ekle
+        if (freshById.has(stub.sourceListingId)) {
+          seenIds.push(freshById.get(stub.sourceListingId)!)
+          summary.listingsFound++
+          continue
+        }
+
+        summary.listingsFound++
+
+        // I1 — ilan-başı hata konteynırı: fetch→detectBlock→parse→normalize→geocode→upsert
+        // hepsi tek try içinde. Hata → failed++, continue. İSTİSNA: detectBlock "blocked"
+        // → break outer (yutulmaz); cap hatası → yeniden fırlat (dış catch yakalar).
+        try {
+          const detail = await deps.fetcher.get(stub.detailUrl)
+          const db = deps.detectBlock({
+            html: detail.html,
+            httpStatus: detail.status,
+            expectedSelector: adapter.detailHint,
+            foundListingCount: -1,
+          })
+          if (db.blocked) {
+            summary.blocked = true
+            summary.blockReason = db.reason
+            break outer
+          }
+
+          let raw
+          try {
+            raw = adapter.parseDetailPage(detail.html, stub.detailUrl)
+          } catch {
+            // gerçek parse hatası — ilan seenIds'e GİRMEDİ (abort oranını süren hazard).
+            summary.parseFailed++
+            summary.unparseable++
+            continue
+          }
+          // I7 — boş sourceListingId gerçek bir findUnique anahtarına dönüşüp
+          // farklı ilanları (source,'') üstünde çakıştırır.
+          if (!raw.sourceListingId) {
+            summary.parseFailed++
+            summary.unparseable++
+            continue
+          }
+
+          const normalized = normalizeRaw(raw)
+          // parse OK ama fiyat & alan yok: upsert'lenir, seenIds'te — hazard YOK, oranı sürmez.
+          if (normalized.price === null && normalized.areaSqm === null) summary.unparseable++
+          const geo = await geocodeListing(normalized, deps.geocodeDeps)
+
+          if (args.dryRun) {
+            console.log(JSON.stringify({ normalized, geo }, null, 2))
+            continue
+          }
+
+          const res = await upsertListing(deps.client, { normalized, geo })
+          seenIds.push(res.id)
+          summary.listingsUpserted++
+          if (normalized.ilce && normalized.mahalle) {
+            touchedAreas.add(JSON.stringify([normalized.ilce, normalized.mahalle]))
+          }
+          dedupeCands.push({
+            id: res.id,
+            source: adapter.source,
+            ilce: normalized.ilce,
+            mahalle: normalized.mahalle,
+            areaSqm: normalized.areaSqm,
+            price: normalized.price,
+            listingType: normalized.listingType,
+            firstSeenAt: deps.now(),
+          })
+        } catch (err) {
+          if (isCapError(err)) throw err
+          summary.failed++
+          continue
+        }
+      }
+
+      if (
+        summary.listingsFound > 0 &&
+        summary.parseFailed / summary.listingsFound > cfg.unparseableAbortRatio
+      ) {
+        // Yarım/iptal tur: blocked=true ile işaretle — delisted + dedupe adımları
+        // ATLANMALI (seenIds eksik; aksi hâlde kitlesel yanlış delisting olur).
+        const pct = Math.round((summary.parseFailed / summary.listingsFound) * 100)
+        summary.blocked = true
+        summary.blockReason = `parser körelmiş olabilir — parse hata oranı %${pct}, tur durduruldu (delisted/dedupe atlandı)`
+        break
+      }
+    }
+
+    // Delist + dedupe YALNIZCA kanıtlanmış-tam, engellenmemiş, limitsiz turda çalışır.
+    if (!args.dryRun && !summary.blocked && summary.complete) {
+      // C2 — cross-portal dedupe adayları: bu turda dokunulan (ilçe,mahalle)
+      // kümesinde, BAŞKA portaldan aktif satırları da aday havuzuna al.
+      if (touchedAreas.size > 0) {
+        const orClauses = [...touchedAreas].map((k) => {
+          const [ilce, mahalle] = JSON.parse(k) as [string, string]
+          return { ilce, mahalle }
+        })
+        const crossRows = await deps.client.marketListing.findMany({
+          where: { status: 'active', source: { not: adapter.source }, OR: orClauses },
+        })
+        for (const r of crossRows) {
+          dedupeCands.push({
+            id: r.id,
+            source: r.source,
+            ilce: r.ilce,
+            mahalle: r.mahalle,
+            areaSqm: r.areaSqm,
+            price: r.price,
+            listingType: r.listingType,
+            firstSeenAt: new Date(r.firstSeenAt),
+          })
+        }
+      }
+
+      summary.delisted = await markDelistedExcept(
+        deps.client,
+        { source: adapter.source, il: args.il.toLocaleUpperCase('tr-TR'), listingTypes: types },
+        seenIds,
+      )
+      const links = findDupes(dedupeCands)
+      await writeDupeLinks(deps.client, links)
+      summary.dupes = links.size
+    }
+  } catch (err) {
+    if (isCapError(err)) {
+      // yarım tur → delist/dedupe atlandı, CrawlRun kapatılır
+      summary.blocked = true
+      summary.blockReason = `maxRequestsPerRun (${cfg.maxRequestsPerRun}) aşıldı — tur durduruldu`
+      summary.complete = false
+    } else {
+      // gerçekten beklenmeyen hata: finally'de kaydet, sonra yeniden fırlat
+      summary.blocked = true
+      summary.blockReason =
+        (summary.blockReason ? summary.blockReason + ' · ' : '') +
+        `beklenmeyen hata: ${err instanceof Error ? err.message : String(err)}`
+      rethrow = err
+    }
+  } finally {
+    if (!args.dryRun) {
+      // CrawlRun'da unparseable/parseFailed/failed/complete için kolon yok → notes'a katla.
+      const counters =
+        ` · unparseable=${summary.unparseable} parseFailed=${summary.parseFailed}` +
+        ` failed=${summary.failed} delisted=${summary.delisted} dupes=${summary.dupes}` +
+        ` complete=${summary.complete}`
+      const notes = (summary.blockReason ?? 'ok') + counters
+      await deps.client.crawlRun.update({
+        where: { id: run.id },
+        data: {
+          finishedAt: deps.now(),
+          pagesFetched: summary.pagesFetched,
+          listingsFound: summary.listingsFound,
+          listingsUpserted: summary.listingsUpserted,
+          blocked: summary.blocked,
+          notes,
+        },
       })
     }
-
-    if (
-      summary.listingsFound > 0 &&
-      summary.unparseable / summary.listingsFound > cfg.unparseableAbortRatio
-    ) {
-      // Yarım/iptal tur: blocked=true ile işaretle — delisted + dedupe adımları
-      // ATLANMALI (seenIds eksik; aksi hâlde kitlesel yanlış delisting olur).
-      const pct = Math.round((summary.unparseable / summary.listingsFound) * 100)
-      summary.blocked = true
-      summary.blockReason = `parser körelmiş olabilir — unparseable oranı %${pct}, tur durduruldu (delisted/dedupe atlandı)`
-      break
-    }
   }
 
-  if (!args.dryRun && !summary.blocked) {
-    summary.delisted = await markDelistedExcept(
-      deps.client,
-      { source: adapter.source, il: args.il.toLocaleUpperCase('tr-TR'), listingTypes: types },
-      seenIds,
-    )
-    // v1: yalnızca bu turdaki kayıtlar arası kopya. Cross-tur dedupe sonraki iterasyon.
-    const links = findDupes(dedupeCands)
-    await writeDupeLinks(deps.client, links)
-    summary.dupes = links.size
-  }
-
-  if (!args.dryRun) {
-    // CrawlRun'da unparseable/delisted/dupes için kolon yok → notes string'ine katla.
-    const counters = ` · unparseable=${summary.unparseable} delisted=${summary.delisted} dupes=${summary.dupes}`
-    const notes = (summary.blockReason ?? 'ok') + counters
-    await deps.client.crawlRun.update({
-      where: { id: run.id },
-      data: {
-        finishedAt: deps.now(),
-        pagesFetched: summary.pagesFetched,
-        listingsFound: summary.listingsFound,
-        listingsUpserted: summary.listingsUpserted,
-        blocked: summary.blocked,
-        notes,
-      },
-    })
-  }
-
+  if (rethrow) throw rethrow
   return summary
 }
 
@@ -228,6 +324,8 @@ async function main() {
   console.log(
     `crawl: ${a.portal} / ${a.il} / ${a.category} / maxPages=${a.maxPages}${a.dryRun ? ' (dry-run)' : ''}`,
   )
+  // I10 — prisma yalnız gerçek çalıştırmada yüklensin (test import'u PrismaClient kurmasın).
+  const { prisma } = await import('@/lib/prisma')
   const fetcher = await createFetcher(DEFAULT_CONFIG, { headful: a.headful })
   try {
     const summary = await runCrawl(

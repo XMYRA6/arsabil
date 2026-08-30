@@ -17,16 +17,23 @@ function sleep(ms: number) {
 
 export async function createFetcher(cfg: CrawlConfig, opts: { headful?: boolean } = {}): Promise<Fetcher> {
   const browser: Browser = await chromium.launch({ headless: !opts.headful })
-  const context: BrowserContext = await browser.newContext({
-    userAgent: UA,
-    viewport: { width: 1440, height: 900 },
-    locale: 'tr-TR',
-    timezoneId: 'Europe/Istanbul',
-  })
-  // basit maskeleme
-  await context.addInitScript(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
-  })
+  let context: BrowserContext
+  try {
+    context = await browser.newContext({
+      userAgent: UA,
+      viewport: { width: 1440, height: 900 },
+      locale: 'tr-TR',
+      timezoneId: 'Europe/Istanbul',
+    })
+    // basit maskeleme
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
+    })
+  } catch (e) {
+    // kurulum hatası başlatılmış tarayıcıyı öksüz bırakmasın
+    await browser.close()
+    throw e
+  }
 
   let requestCount = 0
 
@@ -41,7 +48,7 @@ export async function createFetcher(cfg: CrawlConfig, opts: { headful?: boolean 
       // istekler arası insan-benzeri bekleme (ilk istekte de kısa bekle)
       await sleep(randDelayMs(cfg))
       // periyodik uzun mola
-      if (requestCount > 0 && requestCount % cfg.breakEveryN === 0) {
+      if (cfg.breakEveryN > 0 && requestCount > 0 && requestCount % cfg.breakEveryN === 0) {
         const brk = cfg.breakMinMs + Math.random() * (cfg.breakMaxMs - cfg.breakMinMs)
         console.log(`  … mola ${Math.round(brk / 1000)} sn`)
         await sleep(brk)
@@ -62,8 +69,11 @@ export async function createFetcher(cfg: CrawlConfig, opts: { headful?: boolean 
       }
     },
     async close() {
-      await context.close()
-      await browser.close()
+      try {
+        await context.close()
+      } finally {
+        await browser.close()
+      }
     },
   }
   return fetcher

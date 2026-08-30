@@ -16,7 +16,9 @@ export const DEFAULT_CONFIG: CrawlConfig = {
   breakEveryN: 15,
   breakMinMs: 180_000,
   breakMaxMs: 480_000,
-  maxRequestsPerRun: 300,
+  // 20 sayfa × ~20 ilan + 20 arama sayfası ≈ 420 istek gerekir; 300 tur ortasında
+  // patlıyordu (I2). maxPages:20 ile hizalı taban: 600.
+  maxRequestsPerRun: 600,
   detailRefreshDays: 7,
   perPortalCooldownHours: 12,
   unparseableAbortRatio: 0.3,
