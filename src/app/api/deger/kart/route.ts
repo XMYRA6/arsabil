@@ -10,6 +10,7 @@ import { buildDegerCard, type DegerCardInput, type AreaStatRecord } from '@/lib/
 import { ARSA_LISTING_TYPES } from '@/lib/areaPrices/aggregate'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 import type { ComparableListing } from '@/lib/deger/comparables'
+import type { TrendRow } from '@/lib/deger/priceTrend'
 
 const NUM_PATTERN = /^\d{1,7}$/
 
@@ -71,6 +72,24 @@ export async function GET(req: Request) {
           select: { scope: true, medianPricePerSqm: true, p25: true, p75: true, sampleCount: true },
         })
         return rows as AreaStatRecord[]
+      },
+      findAreaTrend: async (il, ilce, mahalle): Promise<TrendRow[]> => {
+        const windowStart = new Date()
+        windowStart.setUTCMonth(windowStart.getUTCMonth() - 11, 1)
+        windowStart.setUTCHours(0, 0, 0, 0)
+        const rows = await prisma.areaPriceTrend.findMany({
+          where: {
+            il,
+            monthBucket: { gte: windowStart },
+            OR: [
+              { ilce: null, mahalle: null },
+              { ilce, mahalle: null },
+              { ilce, mahalle },
+            ],
+          },
+          select: { scope: true, monthBucket: true, medianPricePerSqm: true, sampleCount: true },
+        })
+        return rows as TrendRow[]
       },
       findListingsNear: async (il, ilce): Promise<ComparableListing[]> => {
         // il/ilce anahtar-uzayı uyuşmazlığı: card.ts buraya `normalizeAreaName`

@@ -19,6 +19,7 @@ jest.mock('@/lib/prisma', () => ({
     areaPriceStat: { findMany: jest.fn().mockResolvedValue([]) },
     marketListing: { findMany: jest.fn().mockResolvedValue([]) },
     neighborhood: { findUnique: jest.fn().mockResolvedValue(null) },
+    areaPriceTrend: { findMany: jest.fn().mockResolvedValue([]) },
   },
 }))
 jest.mock('@/lib/rate-limit', () => ({
@@ -155,6 +156,23 @@ describe('GET /api/deger/kart', () => {
     const deps = buildDegerCardMock.mock.calls[0][1]
     const rows = await deps.findListingsNear('TRABZON', 'ORTAHISAR') // katlanmış, card.ts'in geçtiği gibi
     expect(rows.map((r: { id: string }) => r.id)).toEqual(['m1'])
+  })
+
+  it("buildDegerCard'a findAreaTrend DI geçer — 12 ay penceresi + 3-scope OR", async () => {
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.areaPriceTrend.findMany.mockResolvedValue([])
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    expect(typeof deps.findAreaTrend).toBe('function')
+    await deps.findAreaTrend('TRABZON', 'ORTAHISAR', 'UĞURLU')
+    const where = prisma.areaPriceTrend.findMany.mock.calls[0][0].where
+    expect(where.il).toBe('TRABZON')
+    expect(where.monthBucket.gte).toBeInstanceOf(Date)
+    expect(where.OR).toEqual([
+      { ilce: null, mahalle: null },
+      { ilce: 'ORTAHISAR', mahalle: null },
+      { ilce: 'ORTAHISAR', mahalle: 'UĞURLU' },
+    ])
   })
 
   it('findNeighborhood compound key ile findUnique', async () => {
