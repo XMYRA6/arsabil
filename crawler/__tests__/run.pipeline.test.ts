@@ -25,9 +25,9 @@ const fakeAdapter: PortalAdapter = {
   }),
 }
 
-function fakeClient(seed: any[] = []) {
+function fakeClient(seed: any[] = [], opts: { neighborhoodThrows?: boolean } = {}) {
   const rows: any[] = [...seed]
-  const spy = { delistFindMany: 0, updateMany: 0, crossFindMany: 0, crawlRunUpdate: null as any }
+  const spy = { delistFindMany: 0, updateMany: 0, crossFindMany: 0, crawlRunUpdate: null as any, neighborhoodUpsert: 0 }
   let seq = 0
   return {
     rows,
@@ -94,6 +94,13 @@ function fakeClient(seed: any[] = []) {
         },
       },
       marketListingPricePoint: { create: async () => ({}) },
+      neighborhood: {
+        upsert: async () => {
+          if (opts.neighborhoodThrows) throw new Error('neighborhood upsert DB hatası')
+          spy.neighborhoodUpsert++
+          return {}
+        },
+      },
       crawlRun: {
         create: async ({ data }: any) => ({ id: 'run1', ...data }),
         update: async (a: any) => {
@@ -649,5 +656,71 @@ describe('runCrawl', () => {
     expect(summary.unparseable).toBe(1)
     expect(summary.listingsUpserted).toBe(3)
     expect(rows.some((r) => r.sourceListingId === '')).toBe(false)
+  })
+
+  // ---- M6: neighborhood upsert görünürlüğü ----
+
+  function neighborhoodAdapter(): PortalAdapter {
+    return {
+      ...fakeAdapter,
+      searchUrls: () => ['http://s/1', 'http://s/2'],
+      parseSearchPage: (html: string) =>
+        html.includes('EMPTY') ? [] : [{ sourceListingId: 'A', detailUrl: 'http://s/ilan/A' }],
+      parseDetailPage: (_html, url) => ({
+        source: 'sahibinden',
+        sourceListingId: 'A',
+        sourceUrl: url,
+        rawPrice: '10.000.000 TL',
+        rawArea: '500 m²',
+        rawType: 'Tarla',
+        rawIl: 'Trabzon',
+        rawIlce: 'Akçaabat',
+        rawMahalle: 'Dürbinar',
+        photoUrls: [],
+        extra: {},
+        neighborhoodGeojson: { type: 'MultiPolygon', coordinates: [] },
+        neighborhoodRiskScore: 0.2,
+      }),
+    }
+  }
+
+  it('M6: neighborhoodGeojson taşıyan ilan → neighborhoodUpserted=1, CrawlRun notes\'a yazılır', async () => {
+    const { client, spy } = fakeClient()
+    const deps: RunDeps = {
+      adapter: neighborhoodAdapter(),
+      client: client as any,
+      fetcher: twoPageFetcher(),
+      geocodeDeps: geoOk,
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 2, dryRun: false }, deps)
+    expect(summary.neighborhoodUpserted).toBe(1)
+    expect(summary.neighborhoodFailed).toBe(0)
+    expect(spy.neighborhoodUpsert).toBe(1)
+    expect(spy.crawlRunUpdate.notes).toMatch(/neighborhoodUpserted=1 neighborhoodFailed=0/)
+  })
+
+  it('M6: upsertNeighborhood fırlatırsa neighborhoodFailed=1, tur tamamlanır, delist yine değerlendirilir', async () => {
+    const { client, rows, spy } = fakeClient(
+      [{ id: 'stale9', source: 'sahibinden', sourceListingId: 'GONE9', status: 'active', il: 'TRABZON', listingType: 'tarla', lastSeenAt: new Date('2000-01-01') }],
+      { neighborhoodThrows: true },
+    )
+    const deps: RunDeps = {
+      adapter: neighborhoodAdapter(),
+      client: client as any,
+      fetcher: twoPageFetcher(),
+      geocodeDeps: geoOk,
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 2, dryRun: false }, deps)
+    expect(summary.neighborhoodFailed).toBe(1)
+    expect(summary.neighborhoodUpserted).toBe(0)
+    expect(summary.complete).toBe(true)
+    expect(summary.failed).toBe(0) // neighborhood hatası ilan akışını bozmaz → tur clean
+    expect(spy.delistFindMany).toBe(1) // delist yine değerlendirildi
+    expect(summary.delisted).toBe(1)
+    expect(rows.find((r) => r.id === 'stale9').status).toBe('delisted')
   })
 })

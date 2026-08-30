@@ -40,6 +40,10 @@ export interface RunSummary {
   failed: number
   delisted: number
   dupes: number
+  /** mahalle sınır poligonu upsert'i başarılı — rapor içindir. */
+  neighborhoodUpserted: number
+  /** mahalle sınır upsert'i hata verdi (ilan akışı yine devam etti). */
+  neighborhoodFailed: number
   blocked: boolean
   blockReason: string | null
   /** arama döngüsü sonuçların gerçek tükenmesiyle bitti mi? Sadece bu true iken delist + dedupe çalışır. */
@@ -75,6 +79,8 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
     failed: 0,
     delisted: 0,
     dupes: 0,
+    neighborhoodUpserted: 0,
+    neighborhoodFailed: 0,
     blocked: false,
     blockReason: null,
     complete: false,
@@ -213,7 +219,9 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
                 riskScore: raw.neighborhoodRiskScore ?? null,
                 source: adapter.source,
               })
+              summary.neighborhoodUpserted++
             } catch (e) {
+              summary.neighborhoodFailed++
               console.error('neighborhood upsert atlandı:', e)
             }
           }
@@ -332,6 +340,7 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
       const counters =
         ` · unparseable=${summary.unparseable} parseFailed=${summary.parseFailed}` +
         ` failed=${summary.failed} delisted=${summary.delisted} dupes=${summary.dupes}` +
+        ` neighborhoodUpserted=${summary.neighborhoodUpserted} neighborhoodFailed=${summary.neighborhoodFailed}` +
         ` complete=${summary.complete}` +
         (delistSkipReason ? ` delistSkipped=${delistSkipReason}` : '')
       const notes = (summary.blockReason ?? 'ok') + counters
