@@ -119,6 +119,17 @@ describe('buildDegerCard', () => {
     expect(res.card.neighborhood.geojson).toBeNull()
   })
 
+  it('T6 — emsal + sınır, değerleme verisinden BAĞIMSIZ (insufficientData olsa bile)', async () => {
+    const d = deps({ findAreaStats: jest.fn().mockResolvedValue([]) })
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card.value.insufficientData).toBe(true)
+    expect(res.card.comparables.count).toBeGreaterThan(0)
+    expect(res.card.comparables.items).toBeDefined()
+    expect(res.card.comparables.items!.length).toBeGreaterThan(0)
+    expect(res.card.neighborhood.geojson).toEqual({ type: 'MultiPolygon', coordinates: [] })
+  })
+
   it('findListingsNear normalize edilmiş il/ilçe alır', async () => {
     const d = deps()
     await buildDegerCard({ kind: 'adaParsel', mahalleId: 1, ada: '1', parsel: '2' }, d, { memberView: false })
