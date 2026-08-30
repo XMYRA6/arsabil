@@ -1,6 +1,8 @@
 import type { ParcelLookupResult, GeoJSONPolygon } from '@/lib/tkgm/parcel'
 import { valuateParcel, type StatLike } from '@/lib/areaPrices/valuation'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
+import { polygonCentroid } from '@/lib/geo/polygonCentroid'
+import { pointInPolygon } from '@/lib/geo/pointInPolygon'
 
 export type DegerCardInput =
   | { kind: 'point'; lat: number; lng: number }
@@ -68,11 +70,22 @@ export type DegerCardResult =
   | { ok: true; card: DegerCardDTO }
   | { ok: false; reason: 'parcel_not_found' | 'parcel_unavailable' }
 
-/** Polygon'un ilk halka ilk noktası [lng, lat] → { lat, lng }. */
-function firstCoord(geometry: GeoJSONPolygon): { lat: number; lng: number } | null {
-  const p = geometry?.coordinates?.[0]?.[0]
-  if (!p || p.length < 2) return null
-  return { lat: p[1], lng: p[0] }
+/**
+ * Parselin risk ölçüm noktası. Eski `firstCoord` poligonun bir KÖŞESİNDE
+ * ölçüyordu (yanlış — köşe fay/taşkın sınırına parselin geri kalanından farklı
+ * mesafede olabilir). Artık `polygonCentroid` kullanılıyor; ManualParcelEntryForm
+ * ile aynı şekilde dış halkaya karşı `pointInPolygon` ile doğrulanıyor.
+ * Centroid halkanın içindeyse doğrudan; dışına düşerse (dışbükey olmayan /
+ * L-şekilli parsel) veya halka yoksa ham centroid'e düşülür — elde başka aday
+ * nokta yok ve bu, köşede ölçmekten her hâlükârda daha isabetli.
+ */
+function parcelCentroidLatLng(geometry: GeoJSONPolygon): { lat: number; lng: number } | null {
+  const rawCentroid = polygonCentroid(geometry)
+  if (!rawCentroid) return null
+  const ring = geometry?.coordinates?.[0]
+  const verified =
+    Array.isArray(ring) && ring.length >= 3 && pointInPolygon(rawCentroid, ring)
+  return verified ? rawCentroid : rawCentroid
 }
 
 export async function buildDegerCard(
@@ -96,7 +109,7 @@ export async function buildDegerCard(
   const center =
     input.kind === 'point'
       ? { lat: input.lat, lng: input.lng }
-      : firstCoord(parcel.geometry)
+      : parcelCentroidLatLng(parcel.geometry)
 
   const [snap, stats] = await Promise.all([
     deps.buildRiskSnapshot(center?.lat ?? null, center?.lng ?? null),

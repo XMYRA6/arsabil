@@ -79,5 +79,8 @@ describe('buildDegerCard', () => {
     await buildDegerCard({ kind: 'adaParsel', mahalleId: 123, ada: '142', parsel: '7' }, d, { memberView: false })
     expect(d.fetchParcelByAdaParsel).toHaveBeenCalledWith(123, '142', '7')
     expect(d.findAreaStats).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR', 'UĞURLU')
+    // Risk, poligonun KÖŞESİNDE değil centroid'inde ölçülür (Important 5).
+    // Halka [[39.7,41.0],[39.71,41.0],[39.71,41.01],[39.7,41.0]] → centroid (41.0025, 39.705)
+    expect(d.buildRiskSnapshot).toHaveBeenCalledWith(41.0025, 39.705)
   })
 })
