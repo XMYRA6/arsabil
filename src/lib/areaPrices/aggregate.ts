@@ -1,4 +1,5 @@
 import { median, percentile } from './stats'
+import { normalizeAreaName } from './normalizeAreaName'
 
 export const ARSA_LISTING_TYPES = [
   'arsa',
@@ -30,7 +31,6 @@ export interface AreaPriceStatRow {
 }
 
 const MIN_SAMPLE = 3
-const UP = (s: string) => s.toLocaleUpperCase('tr-TR')
 
 function statRow(
   scope: AreaPriceStatRow['scope'],
@@ -61,9 +61,9 @@ export function aggregateAreaPrices(rows: AggregateInputRow[]): AreaPriceStatRow
     if (r.pricePerSqm == null || !Number.isFinite(r.pricePerSqm) || r.pricePerSqm <= 0) continue
     if (!r.il) continue
 
-    const il = UP(r.il)
-    const ilce = r.ilce ? UP(r.ilce) : null
-    const mahalle = r.mahalle ? UP(r.mahalle) : null
+    const il = normalizeAreaName(r.il)
+    const ilce = r.ilce ? normalizeAreaName(r.ilce) : null
+    const mahalle = r.mahalle ? normalizeAreaName(r.mahalle) : null
 
     const ilKey = il
     ilGroups.set(ilKey, [...(ilGroups.get(ilKey) ?? []), r.pricePerSqm])

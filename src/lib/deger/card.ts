@@ -1,7 +1,6 @@
 import type { ParcelLookupResult, GeoJSONPolygon } from '@/lib/tkgm/parcel'
 import { valuateParcel, type StatLike } from '@/lib/areaPrices/valuation'
-
-const UP = (s: string) => s.toLocaleUpperCase('tr-TR')
+import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 
 export type DegerCardInput =
   | { kind: 'point'; lat: number; lng: number }
@@ -101,7 +100,11 @@ export async function buildDegerCard(
 
   const [snap, stats] = await Promise.all([
     deps.buildRiskSnapshot(center?.lat ?? null, center?.lng ?? null),
-    deps.findAreaStats(UP(parcel.il), UP(parcel.ilce), UP(parcel.mahalle)),
+    deps.findAreaStats(
+      normalizeAreaName(parcel.il),
+      normalizeAreaName(parcel.ilce),
+      normalizeAreaName(parcel.mahalle),
+    ),
   ])
 
   const bySlot: { mahalle?: StatLike; ilce?: StatLike; il?: StatLike } = {}

@@ -78,6 +78,6 @@ describe('buildDegerCard', () => {
     const d = deps()
     await buildDegerCard({ kind: 'adaParsel', mahalleId: 123, ada: '142', parsel: '7' }, d, { memberView: false })
     expect(d.fetchParcelByAdaParsel).toHaveBeenCalledWith(123, '142', '7')
-    expect(d.findAreaStats).toHaveBeenCalledWith('TRABZON', 'ORTAHİSAR', 'UĞURLU')
+    expect(d.findAreaStats).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR', 'UĞURLU')
   })
 })

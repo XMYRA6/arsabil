@@ -25,7 +25,7 @@ describe('aggregateAreaPrices', () => {
     const mah = out.find((r) => r.scope === 'mahalle')!
     expect(mah).toMatchObject({
       il: 'TRABZON',
-      ilce: 'ORTAHİSAR',
+      ilce: 'ORTAHISAR',
       mahalle: 'UĞURLU',
       medianPricePerSqm: 2000,
       sampleCount: 3,
