@@ -12,10 +12,14 @@ function makeFakeClient() {
       // Prisma @default'ları (status/firstSeenAt/lastSeenAt) fake tarafında modellenir; impl gerçek Prisma semantiğine göre bunları create data'sına koymaz.
       create: async ({ data }: any) => { const row = { id: `id${++seq}`, status: 'active', firstSeenAt: new Date(), lastSeenAt: new Date(), ...data }; rows.push(row); return row },
       update: async ({ where, data }: any) => { const row = rows.find((r) => r.id === where.id); Object.assign(row, data); return row },
-      findMany: async ({ where }: any) =>
-        rows.filter((r) =>
+      findMany: async ({ where }: any) => {
+        // writeDupeLinks: id in [...]
+        if (where.id?.in) return rows.filter((r) => where.id.in.includes(r.id))
+        // markDelistedExcept: scope + id notIn seenIds
+        return rows.filter((r) =>
           r.source === where.source && r.il === where.il && r.status === 'active' &&
-          where.listingType.in.includes(r.listingType) && !where.id.notIn.includes(r.id)),
+          where.listingType.in.includes(r.listingType) && !where.id.notIn.includes(r.id))
+      },
       updateMany: async ({ where, data }: any) => {
         let n = 0
         for (const r of rows) if (where.id.in.includes(r.id)) { Object.assign(r, data); n++ }
@@ -111,6 +115,19 @@ describe('markDelistedExcept', () => {
     expect(rows.find((r) => r.id === b.id).status).toBe('delisted')
     expect(rows.find((r) => r.id === a.id).status).toBe('active')
   })
+
+  it('G2: seenIds boşsa 0 döner, hiçbir satır delist edilmez', async () => {
+    const { client, rows } = makeFakeClient()
+    await upsertListing(client, rec)
+    await upsertListing(client, { ...rec, normalized: { ...n, sourceListingId: '200' } })
+    const count = await markDelistedExcept(
+      client,
+      { source: 'sahibinden', il: 'TRABZON', listingTypes: ['arsa'] },
+      [],
+    )
+    expect(count).toBe(0)
+    expect(rows.every((r) => r.status === 'active')).toBe(true)
+  })
 })
 
 describe('writeDupeLinks', () => {
@@ -120,5 +137,26 @@ describe('writeDupeLinks', () => {
     const b = await upsertListing(client, { ...rec, normalized: { ...n, sourceListingId: '201' } })
     await writeDupeLinks(client, new Map([[b.id, a.id]]))
     expect(rows.find((r) => r.id === b.id).dupeOfId).toBe(a.id)
+  })
+
+  it('G3: mevcut ters link varken döngü yazmaz', async () => {
+    const { client, rows } = makeFakeClient()
+    const a = await upsertListing(client, rec)
+    const b = await upsertListing(client, { ...rec, normalized: { ...n, sourceListingId: '201' } })
+    await writeDupeLinks(client, new Map([[b.id, a.id]])) // b -> a
+    await writeDupeLinks(client, new Map([[a.id, b.id]])) // a -> b DENENMEZ (döngü)
+    expect(rows.find((r) => r.id === a.id).dupeOfId ?? null).toBeNull()
+    expect(rows.find((r) => r.id === b.id).dupeOfId).toBe(a.id)
+  })
+
+  it('G3: zaten linklenmiş satırın üzerine yazmaz + kendine link atlanır', async () => {
+    const { client, rows } = makeFakeClient()
+    const a = await upsertListing(client, rec)
+    const b = await upsertListing(client, { ...rec, normalized: { ...n, sourceListingId: '201' } })
+    const c = await upsertListing(client, { ...rec, normalized: { ...n, sourceListingId: '202' } })
+    await writeDupeLinks(client, new Map([[b.id, a.id]]))
+    await writeDupeLinks(client, new Map([[b.id, c.id], [a.id, a.id]]))
+    expect(rows.find((r) => r.id === b.id).dupeOfId).toBe(a.id) // c.id ile ezilmedi
+    expect(rows.find((r) => r.id === a.id).dupeOfId ?? null).toBeNull() // self-link yok
   })
 })

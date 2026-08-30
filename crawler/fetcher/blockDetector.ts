@@ -20,6 +20,22 @@ const CHALLENGE_PATTERNS: Array<{ re: RegExp; reason: string }> = [
   { re: /robot olmad[ıi]ğ[ıi]n[ıi]z[ıi] doğrula|robot musunuz|güvenlik doğrulaması/i, reason: 'tr bot doğrulama metni' },
 ]
 
+/**
+ * Yalnız "sert" engel sinyalleri: HTTP durum kodu + challenge kalıpları.
+ * Konteyner varlığı ve 0-ilan kuralı KONTROL EDİLMEZ — sayfalama tükenmiş
+ * (0 stub'lu, sayfa>0) bir sayfada bile "gerçekten engellendik mi?" ayrımı için
+ * kullanılır (G1). detectBlock'un davranışını değiştirmez.
+ */
+export function detectHardBlock(html: string, httpStatus: number): BlockResult {
+  if (httpStatus === 403 || httpStatus === 429 || httpStatus >= 500) {
+    return { blocked: true, reason: `http ${httpStatus}` }
+  }
+  for (const p of CHALLENGE_PATTERNS) {
+    if (p.re.test(html)) return { blocked: true, reason: p.reason }
+  }
+  return { blocked: false, reason: null }
+}
+
 export function detectBlock(input: BlockCheckInput): BlockResult {
   if (input.httpStatus === 403 || input.httpStatus === 429 || input.httpStatus >= 500) {
     return { blocked: true, reason: `http ${input.httpStatus}` }

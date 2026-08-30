@@ -17,12 +17,13 @@ export interface MarketListingRow {
   listingType: ListingType
   firstSeenAt: Date | string
   lastSeenAt: Date | string
+  dupeOfId?: string | null
 }
 
 export interface UpsertClient {
   marketListing: {
     findUnique(args: { where: { source_sourceListingId: { source: string; sourceListingId: string } } }): Promise<any | null>
-    create(args: { data: any }): Promise<{ id: string }>
+    create(args: { data: any }): Promise<{ id: string; firstSeenAt?: Date | string }>
     update(args: { where: { id: string }; data: any }): Promise<any>
     findMany(args: { where: any }): Promise<MarketListingRow[]>
     updateMany(args: { where: any; data: any }): Promise<{ count: number }>
@@ -64,7 +65,7 @@ function toData(rec: UpsertableRecord) {
 export async function upsertListing(
   client: UpsertClient,
   rec: UpsertableRecord,
-): Promise<{ id: string; created: boolean; priceChanged: boolean }> {
+): Promise<{ id: string; created: boolean; priceChanged: boolean; firstSeenAt: Date }> {
   const n = rec.normalized
   const existing = await client.marketListing.findUnique({
     where: { source_sourceListingId: { source: n.source, sourceListingId: n.sourceListingId } },
@@ -77,7 +78,9 @@ export async function upsertListing(
     if (n.price !== null) {
       await client.marketListingPricePoint.create({ data: { listingId: created.id, price: n.price } })
     }
-    return { id: created.id, created: true, priceChanged: false }
+    // G3 — satırın gerçek firstSeenAt'i (dedupe yön kararı için)
+    const firstSeenAt = created.firstSeenAt ? new Date(created.firstSeenAt) : new Date()
+    return { id: created.id, created: true, priceChanged: false, firstSeenAt }
   }
 
   const priceChanged = n.price !== null && existing.price !== n.price
@@ -94,7 +97,8 @@ export async function upsertListing(
   if (priceChanged) {
     await client.marketListingPricePoint.create({ data: { listingId: existing.id, price: n.price! } })
   }
-  return { id: existing.id, created: false, priceChanged }
+  const firstSeenAt = existing.firstSeenAt ? new Date(existing.firstSeenAt) : new Date()
+  return { id: existing.id, created: false, priceChanged, firstSeenAt }
 }
 
 export async function markDelistedExcept(
@@ -102,6 +106,9 @@ export async function markDelistedExcept(
   scope: { source: PortalSource; il: string; listingTypes: ListingType[] },
   seenIds: string[],
 ): Promise<number> {
+  // G2 — asla boş seenIds ile çağırma: Prisma `notIn: []` TÜM scope'u eşler →
+  // kitlesel yanlış delisting. Çağıran tarafın kontrolü var ama burada da kilitle.
+  if (seenIds.length === 0) return 0
   const stale = await client.marketListing.findMany({
     where: {
       source: scope.source,
@@ -120,7 +127,23 @@ export async function markDelistedExcept(
 }
 
 export async function writeDupeLinks(client: UpsertClient, links: Map<string, string>): Promise<void> {
+  if (links.size === 0) return
+  // G3 — mevcut dupeOfId durumunu oku: kendine link, döngü (Y.dupeOfId===X iken
+  // X.dupeOfId=Y) ve zaten linklenmiş satırın üzerine yazma engellensin.
+  const ids = new Set<string>()
+  for (const [d, c] of links) {
+    ids.add(d)
+    ids.add(c)
+  }
+  const rows = await client.marketListing.findMany({ where: { id: { in: [...ids] } } })
+  const dupeOfById = new Map<string, string | null | undefined>()
+  for (const r of rows) dupeOfById.set(r.id, r.dupeOfId ?? null)
+
   for (const [dupId, canonicalId] of links) {
+    if (dupId === canonicalId) continue
+    if (dupeOfById.get(dupId)) continue // zaten linklenmiş — dokunma
+    if (dupeOfById.get(canonicalId) === dupId) continue // döngü olurdu
     await client.marketListing.update({ where: { id: dupId }, data: { dupeOfId: canonicalId } })
+    dupeOfById.set(dupId, canonicalId)
   }
 }

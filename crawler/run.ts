@@ -6,7 +6,7 @@ import { normalizeRaw } from './pipeline/normalize'
 import { geocodeListing, defaultGeocodeDeps, type GeocodeDeps } from './pipeline/geocode'
 import { findDupes, type DedupeCandidate } from './pipeline/dedupe'
 import { upsertListing, markDelistedExcept, writeDupeLinks, type UpsertClient } from './pipeline/upsert'
-import { detectBlock, type BlockCheckInput, type BlockResult } from './fetcher/blockDetector'
+import { detectBlock, detectHardBlock, type BlockCheckInput, type BlockResult } from './fetcher/blockDetector'
 import { createFetcher } from './fetcher/browser'
 
 // Ruling A — v1 kapsamı: yalnızca sahibinden + emlakjet. hepsiemlak adapteri yok (ertelendi).
@@ -101,9 +101,17 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
       summary.pagesFetched++
       const stubs = adapter.parseSearchPage(html)
 
-      // C3 — 1. sayfadan SONRA 0 stub = sayfalama tükendi (soft-block DEĞİL).
-      // detectBlock'u foundListingCount:0 ile ÇAĞIRMA; döngüyü temiz bitir.
+      // C3 — 1. sayfadan SONRA 0 stub = sayfalama tükenmiş OLABİLİR. Ama önce
+      // "sert" engeli (HTTP 403/429/5xx + challenge kalıpları) ele — 0 stub'lu bir
+      // challenge/403 sayfasını "tükendi" sanıp complete=true yapmak kitlesel yanlış
+      // delisting'e yol açardı (G1). Sadece temiz 200 + challenge yok = gerçek tükenme.
       if (stubs.length === 0 && pageIdx > 0) {
+        const hard = detectHardBlock(html, status)
+        if (hard.blocked) {
+          summary.blocked = true
+          summary.blockReason = hard.reason
+          break
+        }
         summary.complete = true
         break
       }
@@ -202,7 +210,10 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
             areaSqm: normalized.areaSqm,
             price: normalized.price,
             listingType: normalized.listingType,
-            firstSeenAt: deps.now(),
+            // G3 — satırın GERÇEK firstSeenAt'i (yeni kayıtta ~now, mevcut kayıtta
+            // eski değer); deps.now() vermek her taze taramayı "yeni" sayıp
+            // dupeOfId yönünü ters çeviriyordu.
+            firstSeenAt: res.firstSeenAt,
           })
         } catch (err) {
           if (isCapError(err)) throw err
@@ -211,21 +222,27 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
         }
       }
 
+      // G2 — hem parse hataları HEM contained fault'lar oranı sürer (ikisinde de
+      // ilan seenIds'e girmedi → gözlem eksik).
+      const notObserved = summary.parseFailed + summary.failed
       if (
         summary.listingsFound > 0 &&
-        summary.parseFailed / summary.listingsFound > cfg.unparseableAbortRatio
+        notObserved / summary.listingsFound > cfg.unparseableAbortRatio
       ) {
         // Yarım/iptal tur: blocked=true ile işaretle — delisted + dedupe adımları
         // ATLANMALI (seenIds eksik; aksi hâlde kitlesel yanlış delisting olur).
-        const pct = Math.round((summary.parseFailed / summary.listingsFound) * 100)
+        const pct = Math.round((notObserved / summary.listingsFound) * 100)
         summary.blocked = true
-        summary.blockReason = `parser körelmiş olabilir — parse hata oranı %${pct}, tur durduruldu (delisted/dedupe atlandı)`
+        summary.blockReason = `parser/fetch körelmiş olabilir — gözlenemeyen oran %${pct}, tur durduruldu (delisted/dedupe atlandı)`
         break
       }
     }
 
-    // Delist + dedupe YALNIZCA kanıtlanmış-tam, engellenmemiş, limitsiz turda çalışır.
-    if (!args.dryRun && !summary.blocked && summary.complete) {
+    // Delist + dedupe YALNIZCA kanıtlanmış-tam, engellenmemiş, limitsiz VE
+    // tamamen temiz (hiç fault/parse hatası olmayan) turda çalışır (G2). Herhangi
+    // bir fault → scope'u eksik gözledik → hiçbir şey delist edilmemeli.
+    const cleanRun = summary.failed === 0 && summary.parseFailed === 0
+    if (!args.dryRun && !summary.blocked && summary.complete && cleanRun) {
       // C2 — cross-portal dedupe adayları: bu turda dokunulan (ilçe,mahalle)
       // kümesinde, BAŞKA portaldan aktif satırları da aday havuzuna al.
       if (touchedAreas.size > 0) {
@@ -234,7 +251,14 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
           return { ilce, mahalle }
         })
         const crossRows = await deps.client.marketListing.findMany({
-          where: { status: 'active', source: { not: adapter.source }, OR: orClauses },
+          // G5 — il-scope şart: başka ildeki aynı adlı mahalleleri (MERKEZ,
+          // CUMHURİYET …) eşleştirmesin.
+          where: {
+            status: 'active',
+            il: args.il.toLocaleUpperCase('tr-TR'),
+            source: { not: adapter.source },
+            OR: orClauses,
+          },
         })
         for (const r of crossRows) {
           dedupeCands.push({
@@ -276,22 +300,35 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
   } finally {
     if (!args.dryRun) {
       // CrawlRun'da unparseable/parseFailed/failed/complete için kolon yok → notes'a katla.
+      const delistSkipReason = summary.blocked
+        ? 'blocked'
+        : !summary.complete
+          ? 'not-complete'
+          : summary.failed > 0 || summary.parseFailed > 0
+            ? 'not-clean'
+            : null
       const counters =
         ` · unparseable=${summary.unparseable} parseFailed=${summary.parseFailed}` +
         ` failed=${summary.failed} delisted=${summary.delisted} dupes=${summary.dupes}` +
-        ` complete=${summary.complete}`
+        ` complete=${summary.complete}` +
+        (delistSkipReason ? ` delistSkipped=${delistSkipReason}` : '')
       const notes = (summary.blockReason ?? 'ok') + counters
-      await deps.client.crawlRun.update({
-        where: { id: run.id },
-        data: {
-          finishedAt: deps.now(),
-          pagesFetched: summary.pagesFetched,
-          listingsFound: summary.listingsFound,
-          listingsUpserted: summary.listingsUpserted,
-          blocked: summary.blocked,
-          notes,
-        },
-      })
+      // G6 — CrawlRun.update DB hatası orijinal hatayı/summary'yi maskelemesin.
+      try {
+        await deps.client.crawlRun.update({
+          where: { id: run.id },
+          data: {
+            finishedAt: deps.now(),
+            pagesFetched: summary.pagesFetched,
+            listingsFound: summary.listingsFound,
+            listingsUpserted: summary.listingsUpserted,
+            blocked: summary.blocked,
+            notes,
+          },
+        })
+      } catch (updErr) {
+        console.error('crawlRun.update başarısız (yok sayıldı):', updErr)
+      }
     }
   }
 

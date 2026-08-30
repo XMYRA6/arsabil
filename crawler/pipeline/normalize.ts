@@ -19,9 +19,10 @@ export function parseTrArea(s?: string | null): number | null {
 const TYPE_RULES: Array<{ re: RegExp; type: ListingType }> = [
   { re: /zeytin/i, type: 'zeytinlik' },
   // `\b` ğ'den sonra sözcük sınırı üretmez → `/\bbağ\b/` KOŞULSUZ false idi (I6).
-  // Girdi zaten toLocaleLowerCase('tr-TR') edilmiş; `bahçe` kuralı sırada sonra
-  // ama 'bahçe' içinde 'bağ' geçmediğinden çakışma yok.
-  { re: /bağ/, type: 'bag' },
+  // Ama düz `/bağ/` çok geniş: 'bağımsız', 'bağlantı', 'bağlı' de yakalar ve bu
+  // kural 'ticari'/'konut'un üstünde → "Bağımsız Bölüm" yanlışlıkla 'bag' olurdu
+  // (G4). Sözcük-başı + tanınan sonekler ('bağ', 'bağlık', 'bağı' vb.).
+  { re: /(^|\s)bağ($|\s|lık|,|\.)/, type: 'bag' },
   { re: /bahçe/i, type: 'bahce' },
   { re: /tarla/i, type: 'tarla' },
   { re: /ticari|dükkan|işyeri|mağaza|ofis/i, type: 'ticari' },

@@ -30,6 +30,9 @@ describe('mapListingType', () => {
     expect(mapListingType('Bağ')).toEqual({ listingType: 'bag', imarStatus: 'imarsiz' })
     // regresyon: 'bahçe' hâlâ bahce'ye eşlenmeli ('bağ' kuralına takılmamalı)
     expect(mapListingType('Satılık Bahçe')).toEqual({ listingType: 'bahce', imarStatus: 'imarsiz' })
+    // G4: /bağ/ çok genişti — 'bağımsız' artık 'bag' DEĞİL
+    expect(mapListingType('Bağımsız Bölüm 3+1').listingType).not.toBe('bag')
+    expect(mapListingType('Satılık Bağ').listingType).toBe('bag')
     expect(mapListingType('Satılık Daire')).toEqual({ listingType: 'konut', imarStatus: 'bilinmiyor' })
     expect(mapListingType('Bilinmeyen Şey')).toEqual({ listingType: 'diger', imarStatus: 'bilinmiyor' })
   })

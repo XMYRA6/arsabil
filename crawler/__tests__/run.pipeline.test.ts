@@ -57,13 +57,18 @@ function fakeClient(seed: any[] = []) {
               (r) => r.source === where.source && where.sourceListingId.in.includes(r.sourceListingId),
             )
           }
-          // C2: cross-portal dedupe adayları — source.not + OR[{ilce,mahalle}]
+          // writeDupeLinks: id in [...]
+          if (where.id?.in) {
+            return rows.filter((r) => where.id.in.includes(r.id))
+          }
+          // C2: cross-portal dedupe adayları — source.not + OR[{ilce,mahalle}] + il
           if (where.OR && where.source?.not !== undefined) {
             spy.crossFindMany++
             return rows.filter(
               (r) =>
                 r.status === 'active' &&
                 r.source !== where.source.not &&
+                r.il === where.il &&
                 where.OR.some((o: any) => o.ilce === r.ilce && o.mahalle === r.mahalle),
             )
           }
@@ -312,6 +317,93 @@ describe('runCrawl', () => {
     expect(spy.delistFindMany).toBe(0)
   })
 
+  it('G1: sayfa 2 challenge dönerse tükenme SANILMAZ — blocked=true, complete=false, delist YOK', async () => {
+    const { client, rows, spy } = fakeClient([
+      { id: 'live1', source: 'sahibinden', sourceListingId: 'LIVE', status: 'active', il: 'TRABZON', listingType: 'tarla', lastSeenAt: new Date('2000-01-01') },
+    ])
+    const g1Adapter: PortalAdapter = {
+      ...fakeAdapter,
+      searchUrls: () => ['http://s/1', 'http://s/2'],
+      // challenge sayfasında searchResultsItem yok → 0 stub
+      parseSearchPage: (html: string) =>
+        html.includes('searchResultsItem') ? [{ sourceListingId: 'A', detailUrl: 'http://s/ilan/A' }] : [],
+    }
+    const g1Fetcher = {
+      calls: 0,
+      requestCount: 0,
+      get: async (url: string) => {
+        g1Fetcher.calls++
+        return url === 'http://s/2'
+          ? { html: '<html><body>Just a moment... checking your browser</body></html>', status: 200 }
+          : { html: '<div class="searchResultsItem"></div>', status: 200 }
+      },
+      close: async () => {},
+    }
+    const deps: RunDeps = {
+      adapter: g1Adapter,
+      client: client as any,
+      fetcher: g1Fetcher,
+      geocodeDeps: geoOk,
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 2, dryRun: false }, deps)
+    expect(summary.blocked).toBe(true)
+    expect(summary.complete).toBe(false)
+    expect(spy.delistFindMany).toBe(0)
+    expect(rows.find((r) => r.id === 'live1').status).toBe('active')
+  })
+
+  it('G2: contained fault olan tur clean değil — complete=true olsa bile delist YAPILMAZ', async () => {
+    const { client, rows, spy } = fakeClient([
+      { id: 'stale2', source: 'sahibinden', sourceListingId: 'GONE2', status: 'active', il: 'TRABZON', listingType: 'tarla', lastSeenAt: new Date('2000-01-01') },
+    ])
+    const g2Adapter: PortalAdapter = {
+      ...fakeAdapter,
+      searchUrls: () => ['http://s/1', 'http://s/2'],
+      parseSearchPage: (html: string) =>
+        html.includes('EMPTY')
+          ? []
+          : ['A', 'B', 'C', 'D', 'BOOM'].map((id) => ({ sourceListingId: id, detailUrl: `http://s/ilan/${id}` })),
+      parseDetailPage: (_html, url) => {
+        const id = url.split('/').pop()!
+        return {
+          source: 'sahibinden',
+          sourceListingId: id,
+          sourceUrl: url,
+          rawPrice: '10.000.000 TL',
+          rawArea: '500 m²',
+          rawType: 'Tarla',
+          rawIl: 'Trabzon',
+          rawIlce: 'Akçaabat',
+          rawMahalle: id === 'BOOM' ? 'BOOM' : 'Dürbinar',
+          photoUrls: [],
+          extra: {},
+        } as RawListing
+      },
+    }
+    const deps: RunDeps = {
+      adapter: g2Adapter,
+      client: client as any,
+      fetcher: twoPageFetcher(),
+      geocodeDeps: {
+        resolveMahalleCentroid: async (_il: string, _ilce: string, mah: string) => {
+          if (mah === 'BOOM') throw new Error('geocode çöktü')
+          return { lat: 41, lng: 39.6 }
+        },
+        isWithinTurkey: () => true,
+      },
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 2, dryRun: false }, deps)
+    expect(summary.complete).toBe(true)
+    expect(summary.blocked).toBe(false) // 1/5 = %20 < %30
+    expect(summary.failed).toBe(1)
+    expect(spy.delistFindMany).toBe(0) // clean değil → delist atlandı
+    expect(rows.find((r) => r.id === 'stale2').status).toBe('active')
+  })
+
   // ---- F2: cross-portal dedupe ----
 
   it('F2: başka portaldaki eşleşen aktif satır dedupe adayına katılır, dupes=1', async () => {
@@ -347,15 +439,67 @@ describe('runCrawl', () => {
     expect(scraped.dupeOfId).toBe('ej1') // yeni olan (sahibinden) eski olana (emlakjet) işaret eder
   })
 
+  it('G3: yön kararı satırın GERÇEK firstSeenAt\'ine göre — eski scraped satır dupe olmaz', async () => {
+    // s1: DB'de 2024'ten beri var (re-scrape → update). e1: 2025'ten beri, seed.
+    // Doğru sonuç: e1 (yeni) → s1 (eski). s1.dupeOfId null kalmalı.
+    const { client, rows } = fakeClient([
+      {
+        id: 's1', source: 'sahibinden', sourceListingId: 'S1', status: 'active',
+        il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: 'DÜRBİNAR', listingType: 'tarla',
+        areaSqm: 500, price: 10_000_000,
+        firstSeenAt: new Date('2024-01-01'), lastSeenAt: new Date('2024-01-01'),
+      },
+      {
+        id: 'e1', source: 'emlakjet', sourceListingId: 'E1', status: 'active',
+        il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: 'DÜRBİNAR', listingType: 'tarla',
+        areaSqm: 500, price: 10_000_000,
+        firstSeenAt: new Date('2025-01-01'), lastSeenAt: new Date('2025-01-01'),
+      },
+    ])
+    const g3Adapter: PortalAdapter = {
+      ...fakeAdapter,
+      searchUrls: () => ['http://s/1', 'http://s/2'],
+      parseSearchPage: (html: string) =>
+        html.includes('EMPTY') ? [] : [{ sourceListingId: 'S1', detailUrl: 'http://s/ilan/S1' }],
+      parseDetailPage: (_html, url) => ({
+        source: 'sahibinden',
+        sourceListingId: 'S1',
+        sourceUrl: url,
+        rawPrice: '10.000.000 TL',
+        rawArea: '500 m²',
+        rawType: 'Tarla',
+        rawIl: 'Trabzon',
+        rawIlce: 'Akçaabat',
+        rawMahalle: 'Dürbinar',
+        photoUrls: [],
+        extra: {},
+      }),
+    }
+    const deps: RunDeps = {
+      adapter: g3Adapter,
+      client: client as any,
+      fetcher: twoPageFetcher(),
+      geocodeDeps: geoOk,
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 2, dryRun: false }, deps)
+    expect(summary.complete).toBe(true)
+    expect(summary.dupes).toBe(1)
+    expect(rows.find((r) => r.id === 'e1').dupeOfId).toBe('s1') // yeni → eski
+    expect(rows.find((r) => r.id === 's1').dupeOfId ?? null).toBeNull() // eski scraped satır kanonik
+  })
+
   // ---- F3: per-listing error containment ----
 
-  it('F3: bir stub için geocode fırlatır → tur biter, failed=1, diğer ikisi upsert, blocked=false', async () => {
+  it('F3: bir stub için geocode fırlatır → tur biter, failed=1, diğerleri upsert, blocked=false', async () => {
     const threeStub: PortalAdapter = {
       ...fakeAdapter,
       parseSearchPage: () => [
         { sourceListingId: 'A', detailUrl: 'http://s/ilan/A' },
         { sourceListingId: 'BOOM', detailUrl: 'http://s/ilan/BOOM' },
         { sourceListingId: 'C', detailUrl: 'http://s/ilan/C' },
+        { sourceListingId: 'D', detailUrl: 'http://s/ilan/D' },
       ],
       parseDetailPage: (_html, url) => {
         const id = url.split('/').pop()!
@@ -391,9 +535,9 @@ describe('runCrawl', () => {
     }
     const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 1, dryRun: false }, deps)
     expect(summary.failed).toBe(1)
-    expect(summary.listingsUpserted).toBe(2)
-    expect(summary.blocked).toBe(false)
-    expect(rows.filter((r) => r.source === 'sahibinden')).toHaveLength(2)
+    expect(summary.listingsUpserted).toBe(3)
+    expect(summary.blocked).toBe(false) // 1/4 = %25 < %30 abort eşiği
+    expect(rows.filter((r) => r.source === 'sahibinden')).toHaveLength(3)
   })
 
   // ---- F4: cap reached → CrawlRun always closed ----
