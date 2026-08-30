@@ -399,6 +399,19 @@ model AreaPriceStat {
   @@unique([il, ilce, mahalle])
 }
 
+model Neighborhood {
+  id                String   @id @default(cuid())
+  il                String
+  ilce              String
+  mahalle           String
+  geojson           Json?
+  emlakjetRiskScore Float?
+  source            String
+  updatedAt         DateTime @updatedAt
+
+  @@unique([il, ilce, mahalle])
+}
+
 model MarketListingPricePoint {
   id         String        @id @default(cuid())
   listingId  String
