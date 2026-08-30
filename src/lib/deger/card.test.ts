@@ -30,6 +30,11 @@ function deps(over: Partial<DegerCardDeps> = {}): DegerCardDeps {
       },
     ]),
     findNeighborhood: jest.fn().mockResolvedValue({ geojson: { type: 'MultiPolygon', coordinates: [] } }),
+    findAreaTrend: jest.fn().mockResolvedValue([
+      { scope: 'mahalle', monthBucket: new Date('2026-06-01T00:00:00Z'), medianPricePerSqm: 1000, sampleCount: 10 },
+      { scope: 'mahalle', monthBucket: new Date('2026-07-01T00:00:00Z'), medianPricePerSqm: 1100, sampleCount: 10 },
+      { scope: 'mahalle', monthBucket: new Date('2026-08-01T00:00:00Z'), medianPricePerSqm: 1200, sampleCount: 10 },
+    ]),
     ...over,
   }
 }
@@ -134,5 +139,34 @@ describe('buildDegerCard', () => {
     const d = deps()
     await buildDegerCard({ kind: 'adaParsel', mahalleId: 1, ada: '1', parsel: '2' }, d, { memberView: false })
     expect(d.findListingsNear).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR')
+  })
+
+  it('üye: priceTrend var (points + basis)', async () => {
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: true })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card.priceTrend).toBeDefined()
+    expect(res.card.priceTrend!.basis).toBe('mahalle')
+    expect(res.card.priceTrend!.points).toHaveLength(3)
+  })
+
+  it('anonim: priceTrend YOK', async () => {
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: false })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card).not.toHaveProperty('priceTrend')
+  })
+
+  it('yetersiz trend (tek kova) → priceTrend YOK (üye olsa bile)', async () => {
+    const d = deps({ findAreaTrend: jest.fn().mockResolvedValue([
+      { scope: 'mahalle', monthBucket: new Date('2026-08-01T00:00:00Z'), medianPricePerSqm: 1000, sampleCount: 5 },
+    ]) })
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card).not.toHaveProperty('priceTrend')
+  })
+
+  it('findAreaTrend normalize edilmiş args alır', async () => {
+    const d = deps()
+    await buildDegerCard({ kind: 'adaParsel', mahalleId: 1, ada: '1', parsel: '2' }, d, { memberView: true })
+    expect(d.findAreaTrend).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR', 'UĞURLU')
   })
 })

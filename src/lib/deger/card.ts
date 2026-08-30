@@ -4,6 +4,7 @@ import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 import { polygonCentroid } from '@/lib/geo/polygonCentroid'
 import { pointInPolygon } from '@/lib/geo/pointInPolygon'
 import { selectComparables, type Comparable, type ComparableListing } from '@/lib/deger/comparables'
+import { priceTrend, type TrendRow, type PriceTrendPoint } from '@/lib/deger/priceTrend'
 
 export type DegerCardInput =
   | { kind: 'point'; lat: number; lng: number }
@@ -30,6 +31,7 @@ export interface DegerCardDeps {
   findAreaStats: (il: string, ilce: string, mahalle: string) => Promise<AreaStatRecord[]>
   findListingsNear: (il: string, ilce: string) => Promise<ComparableListing[]>
   findNeighborhood: (il: string, ilce: string, mahalle: string) => Promise<{ geojson: unknown } | null>
+  findAreaTrend: (il: string, ilce: string, mahalle: string) => Promise<TrendRow[]>
 }
 
 export interface DegerCardValue {
@@ -69,6 +71,12 @@ export interface DegerCardDTO {
   value: DegerCardValue
   neighborhood: { geojson: unknown | null }
   comparables: { count: number; items?: Comparable[] }
+  priceTrend?: {
+    basis: 'mahalle' | 'ilce' | 'il'
+    points: PriceTrendPoint[]
+    changePct3m: number | null
+    thinTrend: boolean
+  }
 }
 
 export type DegerCardResult =
@@ -119,12 +127,15 @@ export async function buildDegerCard(
   const nIl = normalizeAreaName(parcel.il)
   const nIlce = normalizeAreaName(parcel.ilce)
   const nMahalle = normalizeAreaName(parcel.mahalle)
-  const [snap, stats, listings, hood] = await Promise.all([
+  const [snap, stats, listings, hood, trendRows] = await Promise.all([
     deps.buildRiskSnapshot(center?.lat ?? null, center?.lng ?? null),
     deps.findAreaStats(nIl, nIlce, nMahalle),
     deps.findListingsNear(nIl, nIlce),
     deps.findNeighborhood(nIl, nIlce, nMahalle),
+    deps.findAreaTrend(nIl, nIlce, nMahalle),
   ])
+
+  const trend = priceTrend(trendRows, { now: new Date() })
 
   const comp = center
     ? selectComparables({
@@ -194,6 +205,16 @@ export async function buildDegerCard(
         count: comp.total,
         ...(opts.memberView ? { items: comp.items } : {}),
       },
+      ...(opts.memberView && !trend.insufficientTrend
+        ? {
+            priceTrend: {
+              basis: trend.basis!,
+              points: trend.points!,
+              changePct3m: trend.changePct3m ?? null,
+              thinTrend: trend.thinTrend ?? false,
+            },
+          }
+        : {}),
     },
   }
 }
