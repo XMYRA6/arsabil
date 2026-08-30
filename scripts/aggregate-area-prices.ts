@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/prisma'
-import { aggregateAreaPrices, type AggregateInputRow } from '@/lib/areaPrices/aggregate'
+import { prisma } from '../src/lib/prisma'
+import { aggregateAreaPrices, type AggregateInputRow } from '../src/lib/areaPrices/aggregate'
 
 async function main() {
   const rows = await prisma.marketListing.findMany({
