@@ -8,6 +8,7 @@ import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
 import { prisma } from '@/lib/prisma'
 import { buildDegerCard, type DegerCardInput, type AreaStatRecord } from '@/lib/deger/card'
 import { ARSA_LISTING_TYPES } from '@/lib/areaPrices/aggregate'
+import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 import type { ComparableListing } from '@/lib/deger/comparables'
 
 const NUM_PATTERN = /^\d{1,7}$/
@@ -72,10 +73,13 @@ export async function GET(req: Request) {
         return rows as AreaStatRecord[]
       },
       findListingsNear: async (il, ilce): Promise<ComparableListing[]> => {
+        // il/ilce anahtar-uzayı uyuşmazlığı: card.ts buraya `normalizeAreaName`
+        // ile katlanmış anahtar geçirir ('ORTAHISAR', noktasız I) ama crawler
+        // `cleanTrName` ile `.toLocaleUpperCase('tr-TR')` yazar ('ORTAHİSAR',
+        // noktalı İ). SQL eşitliği i/İ içeren her ilçede sessizce ıskalar →
+        // uygulama katmanında katlanmış değere göre filtrele.
         const rows = await prisma.marketListing.findMany({
           where: {
-            il,
-            ilce,
             status: 'active',
             lat: { not: null },
             lng: { not: null },
@@ -85,9 +89,16 @@ export async function GET(req: Request) {
             id: true, pricePerSqm: true, areaSqm: true, price: true,
             lat: true, lng: true, geoPrecision: true, listedAt: true,
             source: true, sourceUrl: true, listingType: true,
+            il: true, ilce: true,
           },
+          orderBy: [{ listedAt: 'desc' }, { id: 'asc' }],
+          take: 2000,
         })
-        return rows as ComparableListing[]
+        return rows.filter(
+          (r) =>
+            r.il != null && r.ilce != null &&
+            normalizeAreaName(r.il) === il && normalizeAreaName(r.ilce) === ilce,
+        ) as unknown as ComparableListing[]
       },
       findNeighborhood: async (il, ilce, mahalle) => {
         const row = await prisma.neighborhood.findUnique({

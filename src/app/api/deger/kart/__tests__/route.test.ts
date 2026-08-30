@@ -31,6 +31,7 @@ jest.mock('@/lib/rate-limit', () => ({
 }))
 
 import { GET } from '../route'
+import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 
 const CARD = {
   parcel: { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu', ada: '142', parsel: '7', areaSqm: 500, geometry: { type: 'Polygon', coordinates: [] } },
@@ -112,17 +113,48 @@ describe('GET /api/deger/kart', () => {
     expect(typeof deps.findNeighborhood).toBe('function')
   })
 
-  it('findListingsNear aktif + koordinatlı + arsa filtresiyle sorgular', async () => {
+  it('findListingsNear aktif + koordinatlı + arsa filtresiyle sorgular (il/ilçe SQL\'de DEĞİL)', async () => {
     const prisma = jest.requireMock('@/lib/prisma').prisma
     prisma.marketListing.findMany.mockResolvedValue([])
     await GET(req('lat=41.0&lng=39.7'))
     const deps = buildDegerCardMock.mock.calls[0][1]
     await deps.findListingsNear('TRABZON', 'ORTAHISAR')
     const where = prisma.marketListing.findMany.mock.calls[0][0].where
-    expect(where).toMatchObject({ il: 'TRABZON', ilce: 'ORTAHISAR', status: 'active' })
+    expect(where).toMatchObject({ status: 'active' })
+    // C1 — il/ilçe SQL eşitliğiyle DEĞİL, uygulama katmanında katlanmış değere göre filtrelenir.
+    expect(where).not.toHaveProperty('il')
+    expect(where).not.toHaveProperty('ilce')
     expect(where.lat).toEqual({ not: null })
     expect(where.lng).toEqual({ not: null })
     expect(where.listingType.in).toEqual(expect.arrayContaining(['arsa', 'tarla']))
+  })
+
+  it('C1 — findListingsNear crawler tr-upper anahtarını (noktalı İ) katlanmış anahtarla eşler', async () => {
+    // Anahtar-uzayı sabiti: crawler cleanTrName tr-upper form ('ORTAHİSAR') üretir,
+    // card.ts normalizeAreaName katlanmış form ('ORTAHISAR') geçirir. Bir SQL
+    // eşitlik filtresi katlanmış anahtarda depolanan formu ıskalar.
+    expect(normalizeAreaName('ORTAHİSAR')).toBe(normalizeAreaName('Ortahisar'))
+    expect('ORTAHİSAR').not.toBe(normalizeAreaName('Ortahisar'))
+
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.marketListing.findMany.mockResolvedValue([
+      {
+        id: 'm1', pricePerSqm: 2500, areaSqm: 480, price: 1_200_000,
+        lat: 41.0, lng: 39.7, geoPrecision: 'neighborhood', listedAt: new Date('2026-08-21'),
+        source: 'emlakjet', sourceUrl: 'https://emlakjet.com/ilan/m1', listingType: 'arsa',
+        il: 'TRABZON', ilce: 'ORTAHİSAR', // depolandığı gibi: noktalı İ
+      },
+      {
+        id: 'm2', pricePerSqm: 3000, areaSqm: 500, price: 1_500_000,
+        lat: 41.01, lng: 39.71, geoPrecision: 'exact', listedAt: new Date('2026-08-10'),
+        source: 'emlakjet', sourceUrl: 'https://emlakjet.com/ilan/m2', listingType: 'arsa',
+        il: 'TRABZON', ilce: 'AKÇAABAT',
+      },
+    ])
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    const rows = await deps.findListingsNear('TRABZON', 'ORTAHISAR') // katlanmış, card.ts'in geçtiği gibi
+    expect(rows.map((r: { id: string }) => r.id)).toEqual(['m1'])
   })
 
   it('findNeighborhood compound key ile findUnique', async () => {
