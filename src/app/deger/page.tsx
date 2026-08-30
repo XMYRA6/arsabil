@@ -57,10 +57,7 @@ function DegerPageContent() {
   }, [searchParams, fetchCard])
 
   return (
-    <div className={styles.wrap}>
-      <h1 className={styles.title}>Arsanın tahmini değerini öğren</h1>
-      <p className={styles.subtitle}>Ada/parsel gir veya haritadan seç — tahmini değer, ₺/m² ve deprem/taşkın riski.</p>
-
+    <>
       <div className={styles.tabs} role="tablist">
         <button role="tab" aria-selected={tab === 'adaParsel'} className={`${styles.tab} ${tab === 'adaParsel' ? styles.tabActive : ''}`} onClick={() => setTab('adaParsel')}>
           Ada / Parsel ile
@@ -99,14 +96,18 @@ function DegerPageContent() {
 
       {error && <p className={styles.error}>{error}</p>}
       {card && <DegerKarti card={card} isLoggedIn={card.value.tier === 'member'} parcelQuery={parcelQuery} />}
-    </div>
+    </>
   )
 }
 
 export default function DegerPage() {
   return (
-    <Suspense fallback={null}>
-      <DegerPageContent />
-    </Suspense>
+    <div className={styles.wrap}>
+      <h1 className={styles.title}>Arsanın tahmini değerini öğren</h1>
+      <p className={styles.subtitle}>Ada/parsel gir veya haritadan seç — tahmini değer, ₺/m² ve deprem/taşkın riski.</p>
+      <Suspense fallback={null}>
+        <DegerPageContent />
+      </Suspense>
+    </div>
   )
 }
