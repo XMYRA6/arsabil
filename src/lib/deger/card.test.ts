@@ -33,9 +33,11 @@ describe('buildDegerCard', () => {
     expect(res.card.value.tier).toBe('free')
     expect(res.card.value.freeRangeLow).toBeGreaterThan(0)
     expect(res.card.value.pricePerSqmCoarse).toBe(2000)
-    expect(res.card.value).not.toHaveProperty('estimate')
-    expect(res.card.value).not.toHaveProperty('pricePerSqm')
-    expect(res.card.value).not.toHaveProperty('feasibilityHref')
+    // Exhaustive: anonim non-insufficient yol TAM olarak bu alanları set eder.
+    // Herhangi bir üye alanı (estimate/pricePerSqm/feasibilityHref/...) sızarsa kırılır.
+    expect(Object.keys(res.card.value).sort()).toEqual(
+      ['basis', 'freeRangeHigh', 'freeRangeLow', 'insufficientData', 'pricePerSqmCoarse', 'thinData', 'tier'].sort(),
+    )
   })
 
   it('üye görünüm: net değer + kırılım + fizibilite köprüsü', async () => {
