@@ -379,6 +379,22 @@ model MarketListing {
   @@index([lat, lng])
 }
 
+model AreaPriceStat {
+  id                String   @id @default(cuid())
+  il                String
+  ilce              String?
+  mahalle           String?
+  scope             String // "il" | "ilce" | "mahalle"
+  medianPricePerSqm Float
+  p25               Float
+  p75               Float
+  sampleCount       Int
+  computedAt        DateTime
+
+  @@unique([il, ilce, mahalle])
+  @@index([il, ilce, mahalle])
+}
+
 model MarketListingPricePoint {
   id         String        @id @default(cuid())
   listingId  String
