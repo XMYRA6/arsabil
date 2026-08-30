@@ -399,6 +399,21 @@ model AreaPriceStat {
   @@unique([il, ilce, mahalle])
 }
 
+model AreaPriceTrend {
+  id                String   @id @default(cuid())
+  il                String
+  ilce              String?
+  mahalle           String?
+  scope             String
+  monthBucket       DateTime
+  medianPricePerSqm Float
+  sampleCount       Int
+  computedAt        DateTime
+
+  @@unique([il, ilce, mahalle, monthBucket])
+  @@index([il, ilce, mahalle])
+}
+
 model Neighborhood {
   id                String   @id @default(cuid())
   il                String
