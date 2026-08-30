@@ -107,7 +107,14 @@ function DegerPageContent() {
 
       {pending && <p className={styles.loading}>Yükleniyor…</p>}
       {error && <p className={styles.error}>{error}</p>}
-      {card && <DegerKarti card={card} isLoggedIn={card.value.tier === 'member'} parcelQuery={parcelQuery} />}
+      {card && (
+        <DegerKarti
+          key={parcelQuery}
+          card={card}
+          isLoggedIn={card.value.tier === 'member'}
+          parcelQuery={parcelQuery}
+        />
+      )}
     </>
   )
 }
