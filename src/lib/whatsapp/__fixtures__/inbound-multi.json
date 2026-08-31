@@ -1,0 +1,39 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "WABA_ID",
+    "changes": [{
+      "field": "messages",
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "905550001122", "phone_number_id": "PNID" },
+        "contacts": [{ "profile": { "name": "User1" }, "wa_id": "905321111111" }],
+        "messages": [{
+          "from": "905321111111",
+          "id": "wamid.M1",
+          "timestamp": "1717000000",
+          "text": { "body": "merhaba" },
+          "type": "text"
+        }]
+      }
+    }]
+  },
+  {
+    "id": "WABA_ID",
+    "changes": [{
+      "field": "messages",
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": { "display_phone_number": "905550001122", "phone_number_id": "PNID" },
+        "contacts": [{ "profile": { "name": "User2" }, "wa_id": "905322222222" }],
+        "messages": [{
+          "from": "+905322222222",
+          "id": "wamid.M2",
+          "timestamp": "1717000001",
+          "text": { "body": "123/45" },
+          "type": "text"
+        }]
+      }
+    }]
+  }]
+}
