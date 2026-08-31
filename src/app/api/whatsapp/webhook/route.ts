@@ -79,6 +79,11 @@ function buildHandleDeps(): HandleDeps {
       return row ? { geojson: row.geojson as unknown } : null
     },
   }
+  const nk = (il: string, ilce: string, mahalle: string) => ({
+    il: normalizeAreaName(il),
+    ilce: normalizeAreaName(ilce),
+    mahalle: normalizeAreaName(mahalle),
+  })
   return {
     store: createPrismaConversationStore(prisma),
     understanding: ruleBasedUnderstanding,
@@ -88,10 +93,26 @@ function buildHandleDeps(): HandleDeps {
     sendText: createSendText({ fetch, config }),
     siteUrlFor: (f) =>
       `https://www.arsabil.com/deger?mahalleId=${f.mahalleId}&ada=${encodeURIComponent(f.ada)}&parsel=${encodeURIComponent(f.parsel)}`,
-    // TODO(Task 10): canlı Prisma-destekli abonelik dep'leri ile değiştir.
-    hasSubscription: async () => false,
-    upsertSubscription: async () => {},
-    deleteSubscriptions: async () => 0,
+    hasSubscription: async (phone, il, ilce, mahalle) => {
+      const k = nk(il, ilce, mahalle)
+      const row = await prisma.whatsappSubscription.findUnique({
+        where: { phone_il_ilce_mahalle: { phone, ...k } },
+        select: { id: true },
+      })
+      return !!row
+    },
+    upsertSubscription: async (phone, area) => {
+      const k = nk(area.il, area.ilce, area.mahalle)
+      await prisma.whatsappSubscription.upsert({
+        where: { phone_il_ilce_mahalle: { phone, ...k } },
+        create: { phone, ...k },
+        update: {},
+      })
+    },
+    deleteSubscriptions: async (phone) => {
+      const r = await prisma.whatsappSubscription.deleteMany({ where: { phone } })
+      return r.count
+    },
   }
 }
 

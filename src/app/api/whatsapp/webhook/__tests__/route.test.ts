@@ -8,7 +8,15 @@ jest.mock('@/lib/whatsapp/config', () => ({
 }))
 jest.mock('@/lib/whatsapp/verifySignature', () => ({ verifySignature: (...a: unknown[]) => verifySignatureMock(...a) }))
 jest.mock('@/lib/whatsapp/handleMessage', () => ({ handleMessage: (...a: unknown[]) => handleMessageMock(...a) }))
-jest.mock('@/lib/prisma', () => ({ prisma: {} }))
+jest.mock('@/lib/prisma', () => ({
+  prisma: {
+    whatsappSubscription: {
+      findUnique: jest.fn().mockResolvedValue(null),
+      upsert: jest.fn(),
+      deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+    },
+  },
+}))
 jest.mock('@/lib/deger/card', () => ({ buildDegerCard: jest.fn() }))
 jest.mock('@/lib/tkgm/parcel', () => ({ fetchParcelByAdaParsel: jest.fn(), fetchParcelByPoint: jest.fn() }))
 jest.mock('@/lib/tkgm/idariYapi', () => ({ fetchIlListesi: jest.fn(), fetchIlceListesi: jest.fn(), fetchMahalleListesi: jest.fn() }))
