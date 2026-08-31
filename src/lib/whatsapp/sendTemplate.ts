@@ -12,7 +12,7 @@ function mask(phone: string): string {
 
 export function createSendTemplate(
   deps: SendTemplateDeps,
-): (to: string, template: string, params: string[]) => Promise<void> {
+): (to: string, template: string, params: string[]) => Promise<boolean> {
   const { fetch: f, config } = deps
   const url = `https://graph.facebook.com/${config.graphVersion}/${config.phoneNumberId}/messages`
 
@@ -56,9 +56,12 @@ export function createSendTemplate(
           // gövde JSON değil → sadece status logla
         }
         console.error(`[wa] template failed ${res.status} to ${mask(to)}${detail}`)
+        return false
       }
+      return true
     } catch (e) {
       console.error(`[wa] template error to ${mask(to)}:`, e)
+      return false
     }
   }
 }
@@ -68,15 +71,14 @@ export function createSendDigest(
 ): (
   to: string,
   a: { mahalle: string; current: number; pctText: string; href: string },
-) => Promise<void> {
-  return async (to, a) => {
-    await send(to, 'arsabil_aylik_ozet', [
+) => Promise<boolean> {
+  return (to, a) =>
+    send(to, 'arsabil_aylik_ozet', [
       a.mahalle,
       formatTl(a.current) + ' ₺/m²',
       a.pctText,
       a.href,
     ])
-  }
 }
 
 export function createSendAlert(
@@ -84,14 +86,13 @@ export function createSendAlert(
 ): (
   to: string,
   a: { mahalle: string; pctText: string; baseline: number; current: number; href: string },
-) => Promise<void> {
-  return async (to, a) => {
-    await send(to, 'arsabil_fiyat_uyarisi', [
+) => Promise<boolean> {
+  return (to, a) =>
+    send(to, 'arsabil_fiyat_uyarisi', [
       a.mahalle,
       a.pctText,
       formatTl(a.baseline) + ' ₺/m²',
       formatTl(a.current) + ' ₺/m²',
       a.href,
     ])
-  }
 }

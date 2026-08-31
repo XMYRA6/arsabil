@@ -14,14 +14,15 @@ export interface NotifyConfig {
 export interface NotifyDeps {
   listSubscriptions: () => Promise<SubLike[]>
   findTrendRows: (il: string, ilce: string, mahalle: string) => Promise<TrendBucket[]>
+  /** true = Meta'ya iletildi (mark et); false = gönderim başarısız (mark ETME → sonraki koşu tekrar dener) */
   sendDigest: (
     to: string,
     a: { mahalle: string; current: number; pctText: string; href: string }
-  ) => Promise<void>
+  ) => Promise<boolean>
   sendAlert: (
     to: string,
     a: { mahalle: string; pctText: string; baseline: number; current: number; href: string }
-  ) => Promise<void>
+  ) => Promise<boolean>
   markDigestSent: (subId: string, month: string) => Promise<void>
   markAlertSent: (subId: string, at: Date, direction: 'up' | 'down') => Promise<void>
   now: () => Date
@@ -59,14 +60,16 @@ export async function runNotify(deps: NotifyDeps): Promise<NotifySummary> {
           const prev = at.buckets[at.buckets.length - 2]
           const last = at.buckets[at.buckets.length - 1]
           const pctText = formatPctChange(prev.medianPricePerSqm, last.medianPricePerSqm)
-          await deps.sendDigest(sub.phone, {
+          const sent = await deps.sendDigest(sub.phone, {
             mahalle: sub.mahalle,
             current: last.medianPricePerSqm,
             pctText,
             href: deps.config.siteBase + '/deger',
           })
-          await deps.markDigestSent(sub.id, ymKey(now))
-          digests++
+          if (sent) {
+            await deps.markDigestSent(sub.id, ymKey(now))
+            digests++
+          }
         }
       }
 
@@ -82,15 +85,17 @@ export async function runNotify(deps: NotifyDeps): Promise<NotifySummary> {
           sub.lastAlertDirection !== res.direction
         if (dedupOk) {
           const pctText = formatPctChange(res.baseline!, res.current!)
-          await deps.sendAlert(sub.phone, {
+          const sent = await deps.sendAlert(sub.phone, {
             mahalle: sub.mahalle,
             pctText,
             baseline: res.baseline!,
             current: res.current!,
             href: deps.config.siteBase + '/deger',
           })
-          await deps.markAlertSent(sub.id, now, res.direction!)
-          alerts++
+          if (sent) {
+            await deps.markAlertSent(sub.id, now, res.direction!)
+            alerts++
+          }
         }
       }
     } catch (err) {

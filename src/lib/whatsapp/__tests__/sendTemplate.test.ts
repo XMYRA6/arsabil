@@ -5,11 +5,12 @@ const cfg = { verifyToken: 'v', appSecret: 's', accessToken: 'TOK', phoneNumberI
 describe('createSendTemplate', () => {
   it('Graph API template gövdesi', async () => {
     const f = jest.fn().mockResolvedValue({ ok: true, status: 200, text: async () => '' })
-    await createSendTemplate({ fetch: f as never, config: cfg })(
+    const ok = await createSendTemplate({ fetch: f as never, config: cfg })(
       '905321234567',
       'arsabil_aylik_ozet',
       ['Uğurlu', '4.900 ₺/m²', '%4,2 artış', 'https://x'],
     )
+    expect(ok).toBe(true)
     const body = JSON.parse(f.mock.calls[0][1].body)
     expect(body).toMatchObject({
       type: 'template',
@@ -35,7 +36,7 @@ describe('createSendTemplate', () => {
     const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
     await expect(
       createSendTemplate({ fetch: f as never, config: cfg })('905321234567', 't', []),
-    ).resolves.toBeUndefined()
+    ).resolves.toBe(false)
     const logged = spy.mock.calls[0].join(' ')
     expect(logged).toContain('131030')
     expect(logged).not.toContain('905321234567')
@@ -50,7 +51,7 @@ describe('createSendTemplate', () => {
         fetch: jest.fn().mockRejectedValue(new Error('net')) as never,
         config: cfg,
       })('9', 't', []),
-    ).resolves.toBeUndefined()
+    ).resolves.toBe(false)
     spy.mockRestore()
   })
 })

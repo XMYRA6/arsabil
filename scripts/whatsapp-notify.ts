@@ -42,8 +42,8 @@ async function main() {
       })
       return rows as TrendBucket[]
     },
-    sendDigest: async (to, a) => { await sendDigestRaw(to, a); await sleep(200) },
-    sendAlert: async (to, a) => { await sendAlertRaw(to, a); await sleep(200) },
+    sendDigest: async (to, a) => { const ok = await sendDigestRaw(to, a); await sleep(200); return ok },
+    sendAlert: async (to, a) => { const ok = await sendAlertRaw(to, a); await sleep(200); return ok },
     markDigestSent: (id, month) => prisma.whatsappSubscription.update({ where: { id }, data: { lastDigestMonth: month } }).then(() => {}),
     markAlertSent: (id, at, direction) => prisma.whatsappSubscription.update({ where: { id }, data: { lastAlertAt: at, lastAlertDirection: direction } }).then(() => {}),
   })

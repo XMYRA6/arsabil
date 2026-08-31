@@ -41,6 +41,5 @@ export function renderCard(dto: DegerCardDTO, siteUrl: string): string {
   lines.push('')
   lines.push('Detaylı kart, net değer tahmini ve kat karşılığı fizibilitesi için:')
   lines.push(siteUrl)
-  lines.push('')
   return lines.join('\n')
 }

@@ -7,7 +7,7 @@ export interface AreaTrend {
 
 export function resolveAreaTrend(
   rows: TrendBucket[],
-  sub: Pick<SubLike, 'il' | 'ilce' | 'mahalle'>
+  _sub: Pick<SubLike, 'il' | 'ilce' | 'mahalle'>,
 ): AreaTrend | null {
   // Count buckets by scope
   const mahalleCount = rows.filter(r => r.scope === 'mahalle').length

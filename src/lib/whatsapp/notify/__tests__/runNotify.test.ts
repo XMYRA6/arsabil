@@ -49,8 +49,8 @@ const mkDeps = (over: Partial<NotifyDeps> = {}): {
   markDigestSent: jest.Mock
   markAlertSent: jest.Mock
 } => {
-  const sendDigest = jest.fn().mockResolvedValue(undefined)
-  const sendAlert = jest.fn().mockResolvedValue(undefined)
+  const sendDigest = jest.fn().mockResolvedValue(true)
+  const sendAlert = jest.fn().mockResolvedValue(true)
   const markDigestSent = jest.fn().mockResolvedValue(undefined)
   const markAlertSent = jest.fn().mockResolvedValue(undefined)
   const deps: NotifyDeps = {
@@ -163,5 +163,18 @@ describe('runNotify', () => {
     expect(sendAlert).toHaveBeenCalledTimes(1)
     expect(markAlertSent).toHaveBeenCalledWith('sub-1', NOW, 'up')
     expect(summary).toEqual({ subs: 1, digests: 0, alerts: 1, skipped: 0, errors: 0 })
+  })
+
+  it('(f) gönderim başarısız (sendDigest/sendAlert false) → mark ETMEZ, sayaç artmaz', async () => {
+    const { deps, markDigestSent, markAlertSent } = mkDeps({
+      sendDigest: jest.fn().mockResolvedValue(false),
+      sendAlert: jest.fn().mockResolvedValue(false),
+    })
+
+    const summary = await runNotify(deps)
+
+    expect(markDigestSent).not.toHaveBeenCalled()
+    expect(markAlertSent).not.toHaveBeenCalled()
+    expect(summary).toEqual({ subs: 1, digests: 0, alerts: 0, skipped: 0, errors: 0 })
   })
 })
