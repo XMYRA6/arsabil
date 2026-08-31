@@ -35,19 +35,24 @@ export interface ApartmentSizesArgs {
 function baseInput(args: {
   x: number;
   apartmentSize: number;
+  totalApartments: number;
   birimMaliyet: number | undefined;
   kaliteSinifi: 'standart' | 'orta' | 'luks' | undefined;
   arsaAlani: number;
   defaults: EngineDefaults;
 }): CalculationInput {
+  // emsal MOTORA girmiyor — toplam daire sayısı sarmalayıcıda önceden
+  // hesaplanıp motora `Sd` olarak verilir (bkz. FIX 1 / spec §12 tadili).
+  // Guard: türetilen sayı < 1 ise sayaç kapalı (Sdx/FA null kabul edilir).
+  const countEnabled = args.totalApartments >= 1;
   return buildCalculationInput({
     x: args.x,
     luxLevel: lValue(args.kaliteSinifi ?? 'orta', args.defaults.qualityLevels),
     apartmentSize: args.apartmentSize,
     globalUnitPrice: args.birimMaliyet ?? args.defaults.P,
     builderProfit: args.defaults.K,
-    isApartmentCountEnabled: false,
-    totalApartments: 0,
+    isApartmentCountEnabled: countEnabled,
+    totalApartments: countEnabled ? args.totalApartments : 0,
     isAaEnabled: true,
     arsaAlani: args.arsaAlani,
     riskLevel: 0,
@@ -77,12 +82,17 @@ export function compareContractorOffers(
   args: ContractorOffersArgs,
   defaults: EngineDefaults,
 ): ScenarioCard {
+  const effDaire = args.daireBuyuklugu ?? 100;
+  // Toplam daire sayısı satırlar arası SABİT — yalnız x değişir.
+  const totalApartments = Math.floor((args.arsaAlani * args.emsal) / effDaire);
+
   const rows: ScenarioRow[] = args.muteahhitPaylari.map((p) => {
     const x = 1 - p / 100;
     const out = CalculatorEngineV2.calculate(
       baseInput({
         x,
-        apartmentSize: args.daireBuyuklugu ?? 100,
+        apartmentSize: effDaire,
+        totalApartments,
         birimMaliyet: args.birimMaliyet,
         kaliteSinifi: args.kaliteSinifi,
         arsaAlani: args.arsaAlani,
@@ -113,7 +123,10 @@ export function compareContractorOffers(
     kind: 'contractor_offers',
     rows,
     defaultsUsed,
-    assumptions: assumptions(defaults),
+    assumptions: [
+      ...assumptions(defaults),
+      'Toplam daire ≈ yapılaşma alanı ÷ ortalama daire = ' + totalApartments + ' adet',
+    ],
     emsalNote: emsalNote(args.arsaAlani, args.emsal),
   };
 }
@@ -125,10 +138,13 @@ export function compareApartmentSizes(
   const x = 1 - args.muteahhitPayi / 100;
 
   const rows: ScenarioRow[] = args.daireBuyuklukleri.map((d) => {
+    // Toplam daire sayısı PER-ROW — daire büyüklüğü değiştikçe değişir.
+    const totalApartments = Math.floor((args.arsaAlani * args.emsal) / d);
     const out = CalculatorEngineV2.calculate(
       baseInput({
         x,
         apartmentSize: d,
+        totalApartments,
         birimMaliyet: args.birimMaliyet,
         kaliteSinifi: args.kaliteSinifi,
         arsaAlani: args.arsaAlani,
@@ -156,7 +172,10 @@ export function compareApartmentSizes(
     kind: 'apartment_sizes',
     rows,
     defaultsUsed,
-    assumptions: assumptions(defaults),
+    assumptions: [
+      ...assumptions(defaults),
+      'Toplam daire, ortalama daire büyüklüğüne göre yapılaşma alanından türetildi',
+    ],
     emsalNote: emsalNote(args.arsaAlani, args.emsal),
   };
 }

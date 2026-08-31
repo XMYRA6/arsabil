@@ -10,6 +10,14 @@ describe('compareContractorOffers', () => {
     expect(card.rows[0].arsaPayiX).toBeCloseTo(0.55)
     expect(card.rows.every(r => r.daireSatisFiyatiTL > 0)).toBe(true)
   })
+  it('arsa sahibine düşen daire sayısı + değer emsalden türetilip dolduruluyor', () => {
+    const card = compareContractorOffers({ arsaAlani: 900, emsal: 1.5, muteahhitPaylari: [45, 50, 55] }, defaults)
+    expect(typeof card.rows[0].arsaSahibiDaireSayisi).toBe('number')
+    expect(card.rows[0].arsaSahibiDaireSayisi as number).toBeGreaterThan(0)
+    expect(typeof card.rows[0].arsaSahibiDegeriTL).toBe('number')
+    expect(card.rows[0].arsaSahibiDegeriTL as number).toBeGreaterThan(0)
+    expect(card.assumptions.join(' ')).toMatch(/Toplam daire/)
+  })
   it('varsayılanlar defaultsUsed + emsalNote', () => {
     const card = compareContractorOffers({ arsaAlani: 900, emsal: 1.5, muteahhitPaylari: [50] }, defaults)
     expect(card.defaultsUsed.join(' ')).toMatch(/varsayılan/)
@@ -24,5 +32,10 @@ describe('compareApartmentSizes', () => {
   it('daire boyutu varyasyonu → satırlar', () => {
     const card = compareApartmentSizes({ arsaAlani: 900, emsal: 1.5, muteahhitPayi: 50, daireBuyuklukleri: [80, 100, 120] }, defaults)
     expect(card.rows.map(r => r.label)).toEqual(['80 m²', '100 m²', '120 m²'])
+  })
+  it('arsa sahibine düşen daire sayısı per-row dolduruluyor', () => {
+    const card = compareApartmentSizes({ arsaAlani: 900, emsal: 1.5, muteahhitPayi: 50, daireBuyuklukleri: [80, 100, 120] }, defaults)
+    expect(card.rows[0].arsaSahibiDaireSayisi as number).toBeGreaterThan(0)
+    expect(card.rows[0].arsaSahibiDegeriTL as number).toBeGreaterThan(0)
   })
 })
