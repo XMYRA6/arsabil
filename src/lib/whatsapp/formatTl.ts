@@ -3,7 +3,8 @@ export function formatTl(n: number): string {
 }
 
 export function formatTlShort(n: number): string {
-  if (n >= 1_000_000) {
+  if (n >= 999_500) {
+    // 999.500+ → "1M" (yoksa Math.round(n/1000) = 1000 olur, "1000 B" saçmalığı çıkar)
     const s = (n / 1_000_000).toFixed(1)
     return (s.endsWith('.0') ? s.slice(0, -2) : s.replace('.', ',')) + 'M'
   }

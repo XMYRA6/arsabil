@@ -31,6 +31,15 @@ describe('renderCard', () => {
     expect(t).toContain('123/45')
     expect(t).toContain(URL)
   })
+  it('range bound null/undefined/NaN → "NaN – NaN ₺" yerine "yeterli ilan verisi yok"', () => {
+    const t = renderCard({ ...base, value: { ...base.value, freeRangeLow: undefined } }, URL)
+    expect(t).not.toContain('NaN')
+    expect(t).not.toContain('Tahmini değer')
+    expect(t).toContain('yeterli ilan verisi yok')
+    const t2 = renderCard({ ...base, value: { ...base.value, freeRangeLow: NaN, freeRangeHigh: NaN } }, URL)
+    expect(t2).not.toContain('NaN')
+    expect(t2).toContain('yeterli ilan verisi yok')
+  })
   it('thinData: değer satırına "(sınırlı veri)" eklenir', () => {
     const t = renderCard({ ...base, value: { ...base.value, thinData: true } }, URL)
     expect(t).toContain('(sınırlı veri)')

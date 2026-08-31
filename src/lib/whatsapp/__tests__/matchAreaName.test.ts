@@ -28,8 +28,8 @@ describe('matchAreaName', () => {
   it('eşleşme yoksa boş dizi', () => {
     expect(matchAreaName('bambaşka', ILCE)).toEqual([])
   })
-  it('tam eşitlik varsa prefix adaylarını ELEMEZ ama tam olanı başa alır', () => {
-    const r = matchAreaName('of', ILCE)
-    expect(r[0]).toEqual({ id: 3, text: 'Of' })
+  it('tam eşitlik varsa prefix adayları elenir, sadece tam eşleşen döner', () => {
+    const r = matchAreaName('of', [{ id: 1, text: 'Of' }, { id: 2, text: 'Ofça' }])
+    expect(r).toEqual([{ id: 1, text: 'Of' }])
   })
 })

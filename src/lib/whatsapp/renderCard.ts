@@ -22,7 +22,12 @@ export function renderCard(dto: DegerCardDTO, siteUrl: string): string {
   lines.push(`Ada/Parsel: ${p.ada}/${p.parsel} · ${formatTl(p.areaSqm)} m²`)
   lines.push('')
 
-  if (v.insufficientData || v.freeRangeLow == null) {
+  const rangeBroken =
+    v.freeRangeLow == null ||
+    v.freeRangeHigh == null ||
+    Number.isNaN(v.freeRangeLow) ||
+    Number.isNaN(v.freeRangeHigh)
+  if (v.insufficientData || rangeBroken) {
     lines.push('Bu bölgede yeterli ilan verisi yok — risk ve parsel bilgisi yine de aşağıda.')
   } else {
     const suffix = v.thinData ? ' _(sınırlı veri)_' : ''

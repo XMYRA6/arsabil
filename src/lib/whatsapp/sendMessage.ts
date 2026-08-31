@@ -28,7 +28,20 @@ export function createSendText(deps: SendDeps): (to: string, body: string) => Pr
         }),
       })
       if (!res.ok) {
-        console.error(`[wa] send failed ${res.status} to ${mask(to)}: ${await res.text()}`)
+        // Meta hata gövdesi alıcı numarasını / istek detayını yankılayabilir — ham gövdeyi ASLA loglama (spec §8).
+        let detail = ''
+        try {
+          const parsed = JSON.parse(await res.text()) as {
+            error?: { code?: number; type?: string; message?: string }
+          }
+          const err = parsed?.error
+          if (err) {
+            detail = ` code=${err.code ?? '?'} type=${err.type ?? '?'} message=${err.message ?? '?'}`
+          }
+        } catch {
+          // gövde JSON değil → sadece status logla
+        }
+        console.error(`[wa] send failed ${res.status} to ${mask(to)}${detail}`)
       }
     } catch (e) {
       console.error(`[wa] send error to ${mask(to)}:`, e)

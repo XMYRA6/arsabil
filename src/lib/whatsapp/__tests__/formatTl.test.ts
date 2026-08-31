@@ -14,6 +14,11 @@ describe('formatTlShort', () => {
   it('bin kısaltması', () => {
     expect(formatTlShort(48000)).toBe('48 B')
   })
+  it('999.999 → "1000 B" değil "1M"', () => {
+    expect(formatTlShort(999999)).toBe('1M')
+    expect(formatTlShort(999500)).toBe('1M')
+    expect(formatTlShort(950000)).toBe('950 B')
+  })
   it('küçük sayı tam', () => {
     expect(formatTlShort(4900)).toBe('4.900')
   })
