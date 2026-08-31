@@ -159,8 +159,9 @@ describe('GET /api/deger/kart', () => {
   })
 
   it("buildDegerCard'a findAreaTrend DI geçer — 12 ay penceresi + 3-scope OR", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
     const prisma = jest.requireMock('@/lib/prisma').prisma
-    prisma.areaPriceTrend.findMany.mockResolvedValue([])
+    prisma.areaPriceTrend.findMany.mockReset().mockResolvedValue([])
     await GET(req('lat=41.0&lng=39.7'))
     const deps = buildDegerCardMock.mock.calls[0][1]
     expect(typeof deps.findAreaTrend).toBe('function')
@@ -173,6 +174,17 @@ describe('GET /api/deger/kart', () => {
       { ilce: 'ORTAHISAR', mahalle: null },
       { ilce: 'ORTAHISAR', mahalle: 'UĞURLU' },
     ])
+  })
+
+  it('anonim → findAreaTrend [] döner, areaPriceTrend.findMany hiç çağrılmaz', async () => {
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.areaPriceTrend.findMany.mockReset().mockResolvedValue([])
+    // beforeEach zaten session=null
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    const rows = await deps.findAreaTrend('TRABZON', 'ORTAHISAR', 'UĞURLU')
+    expect(rows).toEqual([])
+    expect(prisma.areaPriceTrend.findMany).not.toHaveBeenCalled()
   })
 
   it('findNeighborhood compound key ile findUnique', async () => {

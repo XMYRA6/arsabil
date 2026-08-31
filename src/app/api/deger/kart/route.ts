@@ -74,22 +74,29 @@ export async function GET(req: Request) {
         return rows as AreaStatRecord[]
       },
       findAreaTrend: async (il, ilce, mahalle): Promise<TrendRow[]> => {
-        const windowStart = new Date()
-        windowStart.setUTCMonth(windowStart.getUTCMonth() - 11, 1)
-        windowStart.setUTCHours(0, 0, 0, 0)
-        const rows = await prisma.areaPriceTrend.findMany({
-          where: {
-            il,
-            monthBucket: { gte: windowStart },
-            OR: [
-              { ilce: null, mahalle: null },
-              { ilce, mahalle: null },
-              { ilce, mahalle },
-            ],
-          },
-          select: { scope: true, monthBucket: true, medianPricePerSqm: true, sampleCount: true },
-        })
-        return rows as TrendRow[]
+        // Trend yalnızca üyeye gösterilir; anonim çağrıda sorguyu hiç açma.
+        if (!userId) return []
+        try {
+          const windowStart = new Date()
+          windowStart.setUTCMonth(windowStart.getUTCMonth() - 11, 1)
+          windowStart.setUTCHours(0, 0, 0, 0)
+          const rows = await prisma.areaPriceTrend.findMany({
+            where: {
+              il,
+              monthBucket: { gte: windowStart },
+              OR: [
+                { ilce: null, mahalle: null },
+                { ilce, mahalle: null },
+                { ilce, mahalle },
+              ],
+            },
+            select: { scope: true, monthBucket: true, medianPricePerSqm: true, sampleCount: true },
+          })
+          return rows as TrendRow[]
+        } catch {
+          // AreaPriceTrend tablosu henüz migrate edilmemişse /deger'i düşürme.
+          return []
+        }
       },
       findListingsNear: async (il, ilce): Promise<ComparableListing[]> => {
         // il/ilce anahtar-uzayı uyuşmazlığı: card.ts buraya `normalizeAreaName`
