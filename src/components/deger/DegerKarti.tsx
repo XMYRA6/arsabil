@@ -7,6 +7,7 @@ import type { DegerCardDTO } from '@/lib/deger/card'
 import { formatFaultDistance } from '@/lib/risk/formatDistance'
 import { polygonCentroid } from '@/lib/geo/polygonCentroid'
 import { DegerMiniMap } from './DegerMiniMap'
+import { PriceTrendChart } from '@/components/charts/PriceTrendChart'
 import styles from './DegerKarti.module.css'
 
 const EmsalMapLazy = dynamic(() => import('./EmsalMap').then((m) => m.EmsalMap), { ssr: false })
@@ -176,8 +177,20 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
         />
       )}
 
+      {isMember && card.priceTrend && (
+        <div className={styles.trendBlock}>
+          <div className={styles.divider} />
+          <div className={styles.label}>Bölge Fiyat Eğilimi</div>
+          <PriceTrendChart
+            points={card.priceTrend.points}
+            changePct3m={card.priceTrend.changePct3m}
+            thinTrend={card.priceTrend.thinTrend}
+          />
+        </div>
+      )}
+
       <p className={styles.disclaimer}>v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç.</p>
-      <p className={styles.soon}>Yakında (üyelere): Fiyat trendi · Uzman görüşü</p>
+      <p className={styles.soon}>Yakında (üyelere): Uzman görüşü</p>
     </div>
   )
 }

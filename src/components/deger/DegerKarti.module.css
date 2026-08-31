@@ -20,6 +20,7 @@
 .soon { font-size: 11px; color: #a1a1a6; margin-top: 6px; }
 .insufficient { font-size: 14px; color: #6e6e73; margin: 10px 0; }
 .emsalBlock { margin-top: 4px; }
+.trendBlock { margin-top: 4px; }
 .emsalRow { font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f0f0f2; color: #1d1d1f; }
 .emsalRow strong { font-variant-numeric: tabular-nums; }
 .emsalLink { color: #0a5cff; text-decoration: none; font-size: 12px; white-space: nowrap; }

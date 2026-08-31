@@ -7,6 +7,7 @@ import type { DegerCardDTO } from '@/lib/deger/card'
 // DegerMiniMap'i ve EmsalMap lazy import'unu mock'la ki DegerKarti testi leaflet'e girmesin.
 jest.mock('./DegerMiniMap', () => ({ DegerMiniMap: () => <div data-testid="mini-map" /> }))
 jest.mock('next/dynamic', () => () => () => <div data-testid="emsal-map" />)
+jest.mock('@/components/charts/PriceTrendChart', () => ({ PriceTrendChart: () => <div data-testid="trend-chart" /> }))
 
 const baseCard: DegerCardDTO = {
   parcel: { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu', ada: '142', parsel: '7', areaSqm: 500, geometry: { type: 'Polygon', coordinates: [] } },
@@ -153,4 +154,33 @@ it('"haritada gör" → EmsalMap lazy mount', () => {
 it('".soon" artık "Emsal ilanlar" içermiyor', () => {
   render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
   expect(screen.getByText(/Yakında/)).not.toHaveTextContent('Emsal ilanlar')
+})
+
+it('üye + priceTrend → trend bloğu render', () => {
+  const card: DegerCardDTO = { ...baseCard, priceTrend: {
+    basis: 'mahalle' as const,
+    points: [{ month: '2026-06', medianPricePerSqm: 1000, sampleCount: 10 }],
+    changePct3m: 5, thinTrend: false,
+  } }
+  render(<DegerKarti card={card} isLoggedIn parcelQuery="q=1" />)
+  expect(screen.getByText(/Bölge Fiyat Eğilimi/)).toBeInTheDocument()
+  expect(screen.getByTestId('trend-chart')).toBeInTheDocument()
+})
+
+it('priceTrend yoksa trend bloğu YOK', () => {
+  render(<DegerKarti card={baseCard} isLoggedIn parcelQuery="q=1" />)
+  expect(screen.queryByText(/Bölge Fiyat Eğilimi/)).not.toBeInTheDocument()
+})
+
+it('anonim + priceTrend (imkânsız ama) → trend bloğu YOK', () => {
+  const card: DegerCardDTO = { ...baseCard, priceTrend: { basis: 'il' as const, points: [], changePct3m: null, thinTrend: true } }
+  render(<DegerKarti card={card} isLoggedIn={false} parcelQuery="q=1" />)
+  expect(screen.queryByText(/Bölge Fiyat Eğilimi/)).not.toBeInTheDocument()
+})
+
+it('.soon artık "Fiyat trendi" içermiyor, "Uzman görüşü" içeriyor', () => {
+  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
+  const soon = screen.getByText(/Yakında/)
+  expect(soon).not.toHaveTextContent('Fiyat trendi')
+  expect(soon).toHaveTextContent('Uzman görüşü')
 })
