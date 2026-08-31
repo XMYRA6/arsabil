@@ -28,11 +28,10 @@ function DegerPageContent() {
   const [picker, setPicker] = useState<ParcelPickerValue>({ lat: null, lng: null, parcel: null, status: 'idle' })
   const didInitFetch = useRef(false)
 
-  const fetchCard = useCallback(
-    async (lat: number, lng: number) => {
+  const fetchCardQs = useCallback(
+    async (qs: string) => {
       setError(null)
       setPending(true)
-      const qs = `lat=${lat}&lng=${lng}`
       try {
         const res = await fetch(`/api/deger/kart?${qs}`)
         if (!res.ok) {
@@ -54,6 +53,11 @@ function DegerPageContent() {
     [router],
   )
 
+  const fetchCard = useCallback(
+    (lat: number, lng: number) => fetchCardQs(`lat=${lat}&lng=${lng}`),
+    [fetchCardQs],
+  )
+
   // Harita seçimi doğrulanınca kartı getir — yan etki setPicker updater'ının
   // İÇİNDE değil; updater saf kalır.
   useEffect(() => {
@@ -67,13 +71,23 @@ function DegerPageContent() {
   useEffect(() => {
     if (didInitFetch.current) return
     didInitFetch.current = true
+    const mahalleId = searchParams.get('mahalleId')
+    const ada = searchParams.get('ada')
+    const parsel = searchParams.get('parsel')
+    if (mahalleId && ada && parsel && /^\d+$/.test(mahalleId)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- paylaşılan/deep-link URL'den ilk kart getirme (bir kez); setState promise içinde
+      void fetchCardQs(
+        `mahalleId=${mahalleId}&ada=${encodeURIComponent(ada)}&parsel=${encodeURIComponent(parsel)}`,
+      )
+      return
+    }
     const lat = Number(searchParams.get('lat'))
     const lng = Number(searchParams.get('lng'))
     if (Number.isFinite(lat) && Number.isFinite(lng) && lat !== 0 && lng !== 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- paylaşılan URL'den ilk kart getirme (bir kez); setState promise içinde
       void fetchCard(lat, lng)
     }
-  }, [searchParams, fetchCard])
+  }, [searchParams, fetchCard, fetchCardQs])
 
   return (
     <>

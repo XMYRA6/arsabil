@@ -3,9 +3,10 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 const replaceMock = jest.fn()
+let searchParamsValue = new URLSearchParams('')
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace: replaceMock, push: jest.fn() }),
-  useSearchParams: () => new URLSearchParams(''),
+  useSearchParams: () => searchParamsValue,
 }))
 jest.mock('@/components/listing-wizard/ManualParcelEntryForm', () => ({
   ManualParcelEntryForm: ({
@@ -53,6 +54,7 @@ const CARD = {
 
 beforeEach(() => {
   replaceMock.mockReset()
+  searchParamsValue = new URLSearchParams('')
   global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200, json: async () => CARD }) as jest.Mock
 })
 
@@ -127,4 +129,21 @@ it('parsel değişince DegerKarti remount olur — aç-kapa state ve mini-harita
   // key={parcelQuery}: yeni parsel = taze DegerKarti alt ağacı → showMap=false, EmsalMap kapalı.
   // key olmadan showMap true kalır ve B'nin item'ları olduğu için harita açık kalırdı.
   expect(screen.queryByTestId('emsal-map')).not.toBeInTheDocument()
+})
+
+it('?mahalleId&ada&parsel ile açılınca kartı otomatik getirir', async () => {
+  searchParamsValue = new URLSearchParams('mahalleId=5000&ada=12&parsel=3')
+  render(<DegerPage />)
+  await waitFor(() => expect(screen.getByText(/Tahmini Değer Aralığı/i)).toBeInTheDocument())
+  expect((global.fetch as jest.Mock).mock.calls[0][0]).toContain(
+    '/api/deger/kart?mahalleId=5000&ada=12&parsel=3',
+  )
+  expect(replaceMock).toHaveBeenCalledWith('/deger?mahalleId=5000&ada=12&parsel=3')
+})
+
+it('mahalleId sayı değilse deep-link tetiklenmez', async () => {
+  searchParamsValue = new URLSearchParams('mahalleId=abc&ada=12&parsel=3')
+  render(<DegerPage />)
+  await new Promise((r) => setTimeout(r, 0))
+  expect(global.fetch as jest.Mock).not.toHaveBeenCalled()
 })
