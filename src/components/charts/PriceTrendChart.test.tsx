@@ -31,6 +31,12 @@ it('changePct3m pozitif → yeşil özet', () => {
   expect(screen.getByText(/Son 3 ay/)).toHaveTextContent('+%12,5')
 })
 
+it('changePct3m negatif → kırmızı -%X özet', () => {
+  render(<PriceTrendChart points={POINTS} changePct3m={-12.5} />)
+  expect(screen.getByText(/Son 3 ay/)).toHaveTextContent('-%12,5')
+  expect(screen.getByText('-%12,5')).toHaveStyle({ color: '#b3261e' })
+})
+
 it('changePct3m null → özet gizli', () => {
   render(<PriceTrendChart points={POINTS} changePct3m={null} />)
   expect(screen.queryByText(/Son 3 ay/)).not.toBeInTheDocument()

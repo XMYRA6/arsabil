@@ -8,9 +8,10 @@ import {
   PointElement,
   LineElement,
   Tooltip,
+  Filler,
 } from 'chart.js'
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler)
 
 const AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara']
 
@@ -44,7 +45,15 @@ export function PriceTrendChart({ points, changePct3m, thinTrend }: PriceTrendCh
   const options = {
     responsive: true,
     maintainAspectRatio: true,
-    plugins: { legend: { display: false } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          footer: (items: Array<{ dataIndex: number }>) =>
+            items[0] ? `${points[items[0].dataIndex].sampleCount} ilan` : '',
+        },
+      },
+    },
     scales: {
       y: {
         ticks: {
