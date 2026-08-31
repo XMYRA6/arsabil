@@ -2,9 +2,13 @@
  * numberSafety — Türkçe serbest metinden sayı / yüzde / sözlü-sayı çıkarımı ve
  * aralık güvenliği. Saf modül, I/O yok.
  *
- * İki tüketici:
- *  - orchestrator: şüpheli / düşük güvenli sayıları kullanıcıya onaylatır
- *  - toolRegistry: deterministik motoru çağırmadan önce tool argümanlarını doğrular
+ * Tüketiciler:
+ *  - toolRegistry: deterministik motoru çağırmadan önce tool argümanlarını
+ *    doğrular (`validateRange` — şu an TEK aktif tüketici).
+ *  - orchestrator: `extractNumbers` / `isOutOfRange` spec §5 adım 2'ye
+ *    (kullanıcı mesajından aday sayı ön-çıkarımı → needs_confirmation döngüsü)
+ *    ait; HENÜZ orchestrator'a bağlanmadı — sonraki bir turda bağlanacak
+ *    (final review I3). Kod test edilmiş, hazır bekliyor; silinmemeli.
  *
  * `src/app/hesapla/trNumberFormat.ts` yalnızca formatlama yardımcıları içerir
  * (parse eden bir helper yok), bu yüzden küçük TR parse mantığı burada taşınır

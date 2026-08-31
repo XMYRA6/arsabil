@@ -45,14 +45,26 @@ export interface AkifEnvConfig {
 
 type EnvLike = Record<string, string | undefined>
 
+/**
+ * Sayısal env okuma. `??` yalnız null/undefined yakalar; container UI'ları
+ * (Coolify vb.) set edilmemiş değişkeni `''` olarak verir ve `Number('') === 0`
+ * — bu, `maxTurnTokens=0` ("her tur çok uzun") veya `monthlyBudgetUsd=0`
+ * ("her istek 503") ile özelliği SESSİZCE kapatırdı (final review I2). Boş /
+ * NaN / pozitif-olmayan → fallback.
+ */
+function numEnv(v: string | undefined, fallback: number): number {
+  const n = Number(v)
+  return v != null && v !== '' && Number.isFinite(n) && n > 0 ? n : fallback
+}
+
 export function readAkifEnv(env: EnvLike = process.env): AkifEnvConfig {
   const apiKey = env.OPENAI_API_KEY
   if (!apiKey) throw new Error('akif_unavailable')
   return {
     apiKey,
     model: env.AKIF_MODEL || 'gpt-4o-mini',
-    maxTurnTokens: Number(env.AKIF_MAX_TURN_TOKENS ?? 6000),
-    monthlyBudgetUsd: Number(env.AKIF_MONTHLY_BUDGET_USD ?? 20),
+    maxTurnTokens: numEnv(env.AKIF_MAX_TURN_TOKENS, 6000),
+    monthlyBudgetUsd: numEnv(env.AKIF_MONTHLY_BUDGET_USD, 20),
   }
 }
 

@@ -145,6 +145,14 @@ describe('readAkifEnv', () => {
     expect(cfg.maxTurnTokens).toBe(9000)
     expect(cfg.monthlyBudgetUsd).toBe(50)
   })
+
+  it('empty-string / NaN / non-positive numeric env → fallback (final review I2)', () => {
+    expect(readAkifEnv({ OPENAI_API_KEY: 'k', AKIF_MAX_TURN_TOKENS: '' }).maxTurnTokens).toBe(6000)
+    expect(readAkifEnv({ OPENAI_API_KEY: 'k', AKIF_MAX_TURN_TOKENS: 'abc' }).maxTurnTokens).toBe(6000)
+    expect(readAkifEnv({ OPENAI_API_KEY: 'k', AKIF_MAX_TURN_TOKENS: '-5' }).maxTurnTokens).toBe(6000)
+    expect(readAkifEnv({ OPENAI_API_KEY: 'k', AKIF_MONTHLY_BUDGET_USD: '' }).monthlyBudgetUsd).toBe(20)
+    expect(readAkifEnv({ OPENAI_API_KEY: 'k', AKIF_MAX_TURN_TOKENS: '3000' }).maxTurnTokens).toBe(3000)
+  })
 })
 
 describe('estimateCostUsd', () => {

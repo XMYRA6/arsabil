@@ -39,7 +39,7 @@ export const GLOSSARY: Record<AkifTerm, { shortDef: string; example: string }> =
   },
   arsa_payi: {
     shortDef:
-      'Arsa payı (kat karşılığı bağlamında), inşa edilen bağımsız bölümlerin arsa sahibine düşen oranıdır. Müteahhidin arsa sahibine verdiği payı ifade eder.',
+      'Arsa payı (kat karşılığı bağlamında), inşa edilen bağımsız bölümlerin arsa sahibine düşen oranıdır. Müteahhidin arsa sahibine verdiği payı ifade eder. Tapudaki "arsa payı" ise ayrı bir kavramdır — her bağımsız bölüme kayıtlı, ortak giderlere ve oy hakkına esas arsa hissesidir.',
     example:
       'Arsa payı %50 ise ve binadan 10 daire çıkıyorsa arsa sahibine 5 daire, müteahhide 5 daire düşer.',
   },

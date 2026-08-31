@@ -178,7 +178,7 @@ DI: `{ model, toolRegistry, numberSafety, prompts, audit, costGuard, now }`.
 - Gövde: `{ conversationId: string, history: AkifMessage[] (max 40), userMessage: string (max 2000) }`.
 - `runAkifTurn(...)` → `AkifTurn` JSON. `export const runtime = 'nodejs'`.
 - `OPENAI_API_KEY` yoksa route modül seviyesinde THROW ETMEZ — çağrı anında
-  `500 { error: 'akif_unavailable' }`.
+  `503 { error: 'akif_unavailable' }`.
 
 `src/app/akif/page.tsx` — `'use client'`:
 - Metin sohbet: mesaj listesi + input. `conversationId` = client'ta üretilen
@@ -237,7 +237,7 @@ elle yazılmış JSON schema sabiti.
 | `costGuard` | token tavanı; aylık bütçe aşımı |
 | `contract` | `parseAkifTurn` (geçerli / eksik alan / yanlış enum → null) |
 | `orchestrator` | model + tüm bağımlılıklar sahte: (a) explain niyet → glossary tool → AkifTurn; (b) eksik alan → `collect_info` + `missing_fields`; (c) sıra-dışı sayı → tool çalışmaz + `needs_confirmation`; (d) tam sorgu → compare tool → `tool_result` orchestrator sonucuyla değiştirilir; (e) bütçe aşımı → out_of_scope |
-| `api/akif/turn/route` | POST şema; `OPENAI_API_KEY` yok → 500 `akif_unavailable`; rate limit; `runAkifTurn` çağrıldı (mock) |
+| `api/akif/turn/route` | POST şema; `OPENAI_API_KEY` yok → 503 `akif_unavailable`; rate limit; `runAkifTurn` çağrıldı (mock) |
 
 **Model kalite eval'i (`src/lib/ai/akif/__evals__/` + `npm run akif:eval`):**
 GERÇEK API'ye vurur (ücretli, ELLE çalıştırılır, `AKIF_EVAL_BUDGET_USD` guard).
