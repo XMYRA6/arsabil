@@ -71,4 +71,5 @@ export const RATE_LIMITS = {
     TKGM_IDARI_YAPI_ANON: { limit: 50, windowMs: 60_000 }, // IP basina 50/dk (10/dk cok siki cikti — bkz. final fix raporu)
     DEGER_KART: { limit: 15, windowMs: 60_000 },      // kullanıcı başına 15/dk (tek çağrı = TKGM + WMS + DB)
     DEGER_KART_ANON: { limit: 4, windowMs: 60_000 },  // IP başına 4/dk (PARCEL_LOOKUP_ANON'dan sıkı)
+    WHATSAPP_INBOUND: { limit: 10, windowMs: 60_000 }, // telefon başına 10/dk
 } as const
