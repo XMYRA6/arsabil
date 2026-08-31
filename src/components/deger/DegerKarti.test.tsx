@@ -158,12 +158,13 @@ it('".soon" artık "Emsal ilanlar" içermiyor', () => {
 
 it('üye + priceTrend → trend bloğu render', () => {
   const card: DegerCardDTO = { ...baseCard, priceTrend: {
-    basis: 'mahalle' as const,
+    basis: 'il' as const,
     points: [{ month: '2026-06', medianPricePerSqm: 1000, sampleCount: 10 }],
     changePct3m: 5, thinTrend: false,
   } }
   render(<DegerKarti card={card} isLoggedIn parcelQuery="q=1" />)
   expect(screen.getByText(/Bölge Fiyat Eğilimi/)).toBeInTheDocument()
+  expect(screen.getByText(/İl geneli/)).toBeInTheDocument()
   expect(screen.getByTestId('trend-chart')).toBeInTheDocument()
 })
 

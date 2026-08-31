@@ -180,7 +180,12 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
       {isMember && card.priceTrend && (
         <div className={styles.trendBlock}>
           <div className={styles.divider} />
-          <div className={styles.label}>Bölge Fiyat Eğilimi</div>
+          <div className={styles.label}>
+            Bölge Fiyat Eğilimi{' '}
+            <span className={styles.trendScope}>
+              · {card.priceTrend.basis === 'mahalle' ? 'Mahalle' : card.priceTrend.basis === 'ilce' ? 'İlçe geneli' : 'İl geneli'}
+            </span>
+          </div>
           <PriceTrendChart
             points={card.priceTrend.points}
             changePct3m={card.priceTrend.changePct3m}
