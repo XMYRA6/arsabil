@@ -93,6 +93,9 @@ const RISK_LEVELS: readonly AkifTurn['risk_level'][] = ['low', 'medium', 'high']
 export const AKIF_TURN_JSON_SCHEMA: Record<string, unknown> = {
   type: 'object',
   additionalProperties: false,
+  // OpenAI strict:true → properties'teki HER anahtar required olmalı.
+  // needs_confirmation type'ı ['object','null'] kalır: onay gerekmediğinde model
+  // `null` üretir; parseAkifTurn `null`/eksik/geçerli-nesne üçünü de kabul eder.
   required: [
     'intent',
     'speech',
@@ -101,6 +104,7 @@ export const AKIF_TURN_JSON_SCHEMA: Record<string, unknown> = {
     'assumptions',
     'missing_fields',
     'risk_level',
+    'needs_confirmation',
   ],
   properties: {
     intent: { type: 'string', enum: [...INTENTS] },

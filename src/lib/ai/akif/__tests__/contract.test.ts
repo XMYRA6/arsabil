@@ -37,8 +37,17 @@ describe('AKIF_TURN_JSON_SCHEMA', () => {
   it('tool_result alanı içermez (model üretmesin)', () => {
     const props = (AKIF_TURN_JSON_SCHEMA as any).properties
     expect(props.tool_result).toBeUndefined()
+    // strict:true → properties'teki her anahtar (needs_confirmation dahil) required.
     expect((AKIF_TURN_JSON_SCHEMA as any).required).toEqual(
-      expect.arrayContaining(['intent', 'speech', 'state', 'risk_level']),
+      expect.arrayContaining([
+        'intent',
+        'speech',
+        'state',
+        'risk_level',
+        'needs_confirmation',
+      ]),
     )
+    const req: string[] = (AKIF_TURN_JSON_SCHEMA as any).required
+    expect([...req].sort()).toEqual(Object.keys(props).sort())
   })
 })
