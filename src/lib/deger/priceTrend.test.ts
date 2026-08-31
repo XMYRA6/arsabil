@@ -17,7 +17,7 @@ describe('priceTrend', () => {
     expect(res.insufficientTrend).toBe(false)
     expect(res.basis).toBe('mahalle')
     expect(res.points!.map((p) => p.month)).toEqual(['2026-06', '2026-07', '2026-08'])
-    expect(res.changePct3m).toBeNull() // <4 kova
+    expect(res.changePct3m).toBeNull() // hedef takvim ayı (2026-05) yok
   })
 
   it('mahalle <3 kova ama ilçe ≥3 → basis ilçe', () => {
@@ -32,19 +32,38 @@ describe('priceTrend', () => {
     expect(res.points).toHaveLength(3)
   })
 
-  it('4+ kova → changePct3m hesaplanır', () => {
+  it('changePct3m: son ayın 3 TAKVİM ay öncesine göre (bitişik kovalar)', () => {
     const res = priceTrend(['2026-05', '2026-06', '2026-07', '2026-08'].map((m, i) =>
       r({ monthBucket: bucket(m), medianPricePerSqm: 1000 + i * 100, sampleCount: 10 }),
     ), { now: NOW })
-    // last=1300, last-3=1000 → +30.0
+    // last=2026-08 (1300), hedef ay=2026-05 (1000) → +30.0
     expect(res.changePct3m).toBe(30)
   })
 
-  it('negatif değişim', () => {
+  it('negatif değişim (bitişik kovalar, 3 takvim ay önce)', () => {
     const res = priceTrend(['2026-05', '2026-06', '2026-07', '2026-08'].map((m, i) =>
       r({ monthBucket: bucket(m), medianPricePerSqm: 2000 - i * 100, sampleCount: 10 }),
     ), { now: NOW })
-    expect(res.changePct3m).toBe(-15) // 1700 vs 2000
+    expect(res.changePct3m).toBe(-15) // 2026-08 1700 vs 2026-05 2000
+  })
+
+  it('changePct3m: kovalar bitişik değil, hedef takvim ayı yoksa → null', () => {
+    // 4 nokta ama boşluklu: last=2026-08, hedef ay 2026-05 YOK → dizi indeksine
+    // düşmez, null döner.
+    const res = priceTrend(['2026-03', '2026-06', '2026-07', '2026-08'].map((m, i) =>
+      r({ monthBucket: bucket(m), medianPricePerSqm: 1000 + i * 100, sampleCount: 10 }),
+    ), { now: NOW })
+    expect(res.points).toHaveLength(4)
+    expect(res.changePct3m).toBeNull()
+  })
+
+  it('changePct3m: 3 takvim ay önceki nokta MEVCUT → sayı hesaplanır', () => {
+    // 3 nokta yeter: last=2026-08, hedef ay=2026-05 var.
+    const res = priceTrend(['2026-05', '2026-06', '2026-07', '2026-08'].map((m, i) =>
+      r({ monthBucket: bucket(m), medianPricePerSqm: 1000 + i * 50, sampleCount: 10 }),
+    ), { now: NOW })
+    // 2026-08 = 1150, 2026-05 = 1000 → +15.0
+    expect(res.changePct3m).toBe(15)
   })
 
   it('12 ay penceresi: 13 ay önceki kova elenir', () => {

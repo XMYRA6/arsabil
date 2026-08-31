@@ -47,10 +47,16 @@ export function priceTrend(rows: TrendRow[], opts: { now: Date }): PriceTrendRes
   }))
 
   let changePct3m: number | null = null
-  if (points.length >= 4) {
-    const last = points[points.length - 1].medianPricePerSqm
-    const prev = points[points.length - 4].medianPricePerSqm
-    changePct3m = prev > 0 ? round1(((last - prev) / prev) * 100) : null
+  if (points.length >= 2) {
+    const last = points[points.length - 1]
+    const [ly, lm] = last.month.split('-').map(Number)
+    // `last.month`'tan 3 TAKVİM ayı önce (dizi indeksi değil)
+    const targetDate = new Date(Date.UTC(ly, lm - 1 - 3, 1))
+    const targetMonth = `${targetDate.getUTCFullYear()}-${String(targetDate.getUTCMonth() + 1).padStart(2, '0')}`
+    const prevPoint = points.find((p) => p.month === targetMonth)
+    if (prevPoint && prevPoint.medianPricePerSqm > 0) {
+      changePct3m = round1(((last.medianPricePerSqm - prevPoint.medianPricePerSqm) / prevPoint.medianPricePerSqm) * 100)
+    }
   }
 
   const totalSamples = points.reduce((s, p) => s + p.sampleCount, 0)
