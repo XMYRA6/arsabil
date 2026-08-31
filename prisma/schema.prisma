@@ -460,3 +460,18 @@ model WhatsappConversation {
   createdAt     DateTime @default(now())
 }
 
+model WhatsappSubscription {
+  id                 String   @id @default(cuid())
+  phone              String
+  il                 String
+  ilce               String
+  mahalle            String
+  createdAt          DateTime @default(now())
+  lastDigestMonth    String?
+  lastAlertAt        DateTime?
+  lastAlertDirection String?
+
+  @@unique([phone, il, ilce, mahalle])
+  @@index([il, ilce, mahalle])
+}
+
