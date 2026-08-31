@@ -26,6 +26,9 @@ function makeDeps(over: Partial<HandleDeps> = {}): { deps: HandleDeps; sent: str
     sendText: jest.fn().mockImplementation(async (_to: string, b: string) => { sent.push(b) }),
     siteUrlFor: () => 'https://www.arsabil.com/deger?x=1',
     checkRateLimit: jest.fn().mockReturnValue({ ok: true }),
+    hasSubscription: jest.fn().mockResolvedValue(false),
+    upsertSubscription: jest.fn().mockResolvedValue(undefined),
+    deleteSubscriptions: jest.fn().mockResolvedValue(0),
     ...over,
   }
   // resolveLocation gerçek modül; resolveDeps'i onun beklediği şekilde sahle
@@ -144,6 +147,43 @@ describe('handleMessage', () => {
     expect(sent[0]).toContain('Trabzon Ortahisar Uğurlu 123/45')
     expect(saveMock).toHaveBeenCalledWith('905321234567', { fields: {} }, 'wamid.cancel')
     expect(deps.buildCard).not.toHaveBeenCalled()
+  })
+
+  it('DURDUR → tüm abonelikleri siler + onay, state korunur', async () => {
+    const { deps, sent } = makeDeps({ deleteSubscriptions: jest.fn().mockResolvedValue(2) })
+    await handleMessage(msg({ text: 'DURDUR' }), deps)
+    expect(deps.deleteSubscriptions).toHaveBeenCalledWith('905321234567')
+    expect(sent[0]).toContain('durduruldu')
+    expect(deps.buildCard).not.toHaveBeenCalled()
+  })
+  it('DURDUR ama abonelik yok → "zaten abone değilsin"', async () => {
+    const { deps, sent } = makeDeps({ deleteSubscriptions: jest.fn().mockResolvedValue(0) })
+    await handleMessage(msg({ text: 'durdur' }), deps)
+    expect(sent[0].toLowerCase()).toContain('abone')
+  })
+  it('kart sonrası: abone değilse takip sorusu gönderilir + awaitingFollowup kaydedilir', async () => {
+    const { deps, sent, saved } = makeDeps({ hasSubscription: jest.fn().mockResolvedValue(false) })
+    await handleMessage(msg(), deps)
+    expect(sent[sent.length - 1]).toContain('takip edeyim mi')
+    expect(saved[saved.length - 1]).toMatchObject({ awaitingFollowup: { mahalle: 'Uğurlu' } })
+  })
+  it('zaten abone → takip sorusu YOK', async () => {
+    const { deps, sent } = makeDeps({ hasSubscription: jest.fn().mockResolvedValue(true) })
+    await handleMessage(msg(), deps)
+    expect(sent.join('')).not.toContain('takip edeyim mi')
+  })
+  it('awaitingFollowup + "Evet" → upsertSubscription + onay', async () => {
+    const load = jest.fn().mockResolvedValue({ state: { fields: {}, awaitingFollowup: { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu' } }, lastMessageId: 'wamid.0' })
+    const { deps, sent } = makeDeps({ store: { loadConversation: load, saveConversation: jest.fn() }, upsertSubscription: jest.fn().mockResolvedValue(undefined) })
+    await handleMessage(msg({ text: 'evet', messageId: 'wamid.1' }), deps)
+    expect(deps.upsertSubscription).toHaveBeenCalledWith('905321234567', { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu' })
+    expect(sent[0]).toContain('takibe alındı')
+  })
+  it('awaitingFollowup + başka metin → flag temizlenir, mesaj normal işlenir', async () => {
+    const load = jest.fn().mockResolvedValue({ state: { fields: {}, awaitingFollowup: { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu' } }, lastMessageId: 'wamid.0' })
+    const { deps } = makeDeps({ store: { loadConversation: load, saveConversation: jest.fn() } })
+    await handleMessage(msg({ text: 'Trabzon Of 5/6', messageId: 'wamid.2' }), deps)
+    expect(deps.understanding.understand).toHaveBeenCalled()
   })
 
   it('parcel_not_found → ada/parsel sıfırlar, pending ada', async () => {

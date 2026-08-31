@@ -1,8 +1,6 @@
 import type { DegerCardDTO } from '@/lib/deger/card'
 import { formatTl, formatTlShort } from './formatTl'
 
-const PLACEHOLDER = 'Yakında: bu mahalledeki fiyat değişimlerini WhatsApp’tan takip edebileceksin.'
-
 function riskLine(risk: DegerCardDTO['risk']): string | null {
   if (risk.status === 'unavailable') return null
   const fault =
@@ -44,6 +42,5 @@ export function renderCard(dto: DegerCardDTO, siteUrl: string): string {
   lines.push('Detaylı kart, net değer tahmini ve kat karşılığı fizibilitesi için:')
   lines.push(siteUrl)
   lines.push('')
-  lines.push(PLACEHOLDER)
   return lines.join('\n')
 }

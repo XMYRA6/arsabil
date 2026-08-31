@@ -28,6 +28,7 @@ export interface ConvState {
   candidates?: AreaOption[]
   candidateLevel?: AreaLevel
   fields: ConvFields
+  awaitingFollowup?: { il: string; ilce: string; mahalle: string }
 }
 
 export type ResolveResult =

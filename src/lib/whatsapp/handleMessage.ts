@@ -6,6 +6,7 @@ import { resolveLocation, type ResolveLocationDeps } from './resolveLocation'
 import { matchAreaName } from './matchAreaName'
 import { renderCard } from './renderCard'
 import { renderError } from './renderError'
+import { renderFollowup } from './renderFollowup'
 import type { DegerCardResult } from '@/lib/deger/card'
 import { checkRateLimit as defaultCheckRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
@@ -17,6 +18,9 @@ export interface HandleDeps {
   sendText: (to: string, body: string) => Promise<void>
   siteUrlFor: (f: { il: string; ilce: string; mahalle: string; mahalleId: number; ada: string; parsel: string }) => string
   checkRateLimit?: typeof defaultCheckRateLimit
+  hasSubscription: (phone: string, il: string, ilce: string, mahalle: string) => Promise<boolean>
+  upsertSubscription: (phone: string, area: { il: string; ilce: string; mahalle: string }) => Promise<void>
+  deleteSubscriptions: (phone: string) => Promise<number>
 }
 
 const ORDER: { level: ConvLevel; key: keyof ConvFields }[] = [
@@ -63,6 +67,33 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
   if (!text) {
     await deps.sendText(msg.from, renderError.help())
     return
+  }
+
+  const low = text.toLocaleLowerCase('tr')
+
+  // 5c. DURDUR — opt-out: telefonun tüm fiyat takip aboneliklerini sil, state'e dokunma.
+  if (['durdur', 'stop', 'aboneliği iptal', 'abonelikten çık'].includes(low)) {
+    const n = await deps.deleteSubscriptions(msg.from)
+    await deps.sendText(
+      msg.from,
+      n > 0 ? renderFollowup.unsubscribedAll() : renderFollowup.noSubscription(),
+    )
+    await save(state)
+    return
+  }
+
+  // 5d. Follow-up cevabı — kart sonrası "takip edeyim mi?" sorusuna yanıt.
+  if (state.awaitingFollowup) {
+    const yes = ['evet', 'e', 'olur', 'tamam', 'takip et', 'takip'].includes(low)
+    const area = state.awaitingFollowup
+    state.awaitingFollowup = undefined
+    if (yes) {
+      await deps.upsertSubscription(msg.from, area)
+      await deps.sendText(msg.from, renderFollowup.subscribed(area.mahalle))
+      await save(state)
+      return
+    }
+    // "evet" değil → flag temizlendi, aşağı düş, mesaj normal işlensin.
   }
 
   let fields: ConvFields = { ...state.fields }
@@ -258,6 +289,12 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
     ),
   )
 
+  // 11b. Kart sonrası opt-in — abone değilse takip sorusu gönder, flag'i state'e yaz.
+  if (!(await deps.hasSubscription(msg.from, fields.ilText!, fields.ilceText!, fields.mahalleText!))) {
+    await deps.sendText(msg.from, renderFollowup.prompt(fields.mahalleText!))
+    state.awaitingFollowup = { il: fields.ilText!, ilce: fields.ilceText!, mahalle: fields.mahalleText! }
+  }
+
   // 12. Save final state
-  await save({ fields })
+  await save(state.awaitingFollowup ? { fields, awaitingFollowup: state.awaitingFollowup } : { fields })
 }

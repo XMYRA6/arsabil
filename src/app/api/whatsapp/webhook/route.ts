@@ -88,6 +88,10 @@ function buildHandleDeps(): HandleDeps {
     sendText: createSendText({ fetch, config }),
     siteUrlFor: (f) =>
       `https://www.arsabil.com/deger?mahalleId=${f.mahalleId}&ada=${encodeURIComponent(f.ada)}&parsel=${encodeURIComponent(f.parsel)}`,
+    // TODO(Task 10): canlı Prisma-destekli abonelik dep'leri ile değiştir.
+    hasSubscription: async () => false,
+    upsertSubscription: async () => {},
+    deleteSubscriptions: async () => 0,
   }
 }
 

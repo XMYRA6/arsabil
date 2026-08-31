@@ -22,7 +22,6 @@ describe('renderCard', () => {
     expect(t).toContain('Taşkın (Q100): risk yok')
     expect(t).toContain('emsal ilan: 6')
     expect(t).toContain(URL)
-    expect(t).toContain('Yakında:')
   })
   it('insufficientData: değer/₺m² satırı yok, açıklama var', () => {
     const t = renderCard({ ...base, value: { tier: 'free', insufficientData: true } }, URL)
