@@ -51,5 +51,8 @@ export async function resolveEngineDefaults(db: EngineDefaultsDb): Promise<Engin
 }
 
 export function lValue(tier: QualityTier, levels: EngineDefaults['qualityLevels']): number {
-  return levels[tier];
+  // Savunmacı: geçersiz bir tier sızarsa (validateArgs artık engelliyor ama
+  // ikinci kat güvenlik — final review C2) `undefined` → NaN cascade yerine
+  // orta kademeye düş.
+  return levels[tier] ?? levels.orta;
 }

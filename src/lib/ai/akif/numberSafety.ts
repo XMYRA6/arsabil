@@ -19,14 +19,18 @@ export interface ExtractedNumber {
 }
 
 export const RANGES = {
-  percent: { min: 0, max: 100 },
+  // Tool-arg doğrulaması: %0 veya %100 müteahhit payı bir kat-karşılığı
+  // senaryosu DEĞİLDİR ve x=1'de motor sıfıra bölmeyi kelepçeleyerek
+  // ~1000× şişik değer üretir (final review C1). Yüzde 1–99 ile sınırlı.
+  percent: { min: 1, max: 99 },
   area: { min: 100, max: 50_000 }, // arsa alanı m²
   emsal: { min: 0.1, max: 5 },
   daire: { min: 30, max: 500 },
+  birimMaliyet: { min: 1_000, max: 200_000 }, // TL/m² (final review I7)
 } as const
 
 export function validateRange(
-  field: 'percent' | 'area' | 'emsal' | 'daire',
+  field: 'percent' | 'area' | 'emsal' | 'daire' | 'birimMaliyet',
   value: number,
 ): boolean {
   const r = RANGES[field]

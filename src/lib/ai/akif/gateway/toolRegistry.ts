@@ -116,7 +116,27 @@ function isNum(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v)
 }
 
-type RangeField = 'percent' | 'area' | 'emsal' | 'daire'
+type RangeField = 'percent' | 'area' | 'emsal' | 'daire' | 'birimMaliyet'
+
+/** Opsiyonel kalite sınıfı: verilmişse enum'da olmalı (final review C2 —
+ * hallüsine bir değer `lValue`'da undefined → NaN cascade üretiyordu). */
+function checkKaliteSinifi(obj: Record<string, unknown>): ValidateResult | null {
+  const v = obj.kaliteSinifi
+  if (v === undefined || v === null) return null
+  if (typeof v !== 'string' || !KALITE_ENUM.includes(v as (typeof KALITE_ENUM)[number])) {
+    return fail('kaliteSinifi', 'geçersiz kalite sınıfı')
+  }
+  return null
+}
+
+/** Opsiyonel birim maliyet: verilmişse makul aralıkta olmalı (final review I7). */
+function checkBirimMaliyet(obj: Record<string, unknown>): ValidateResult | null {
+  const v = obj.birimMaliyet
+  if (v === undefined || v === null) return null
+  if (!isNum(v)) return fail('birimMaliyet', 'sayı olmalı')
+  if (!validateRange('birimMaliyet', v)) return fail('birimMaliyet', 'geçersiz birim maliyet')
+  return null
+}
 
 /** Zorunlu tekil sayı alanı: eksik / sayı-değil / aralık dışı kontrolleri. */
 function checkNumberField(
@@ -170,6 +190,8 @@ export function validateArgs(name: ToolName, args: unknown): ValidateResult {
       (obj.daireBuyuklugu !== undefined && obj.daireBuyuklugu !== null
         ? checkNumberField(obj, 'daireBuyuklugu', 'daire')
         : null) ??
+      checkBirimMaliyet(obj) ??
+      checkKaliteSinifi(obj) ??
       OK
     )
   }
@@ -180,6 +202,8 @@ export function validateArgs(name: ToolName, args: unknown): ValidateResult {
       checkNumberField(obj, 'emsal', 'emsal') ??
       checkNumberField(obj, 'muteahhitPayi', 'percent') ??
       checkNumberArray(obj, 'daireBuyuklukleri', 'daire') ??
+      checkBirimMaliyet(obj) ??
+      checkKaliteSinifi(obj) ??
       OK
     )
   }
