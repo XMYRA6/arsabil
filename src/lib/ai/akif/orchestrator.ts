@@ -81,6 +81,7 @@ export async function runAkifTurn(
 
   let promptTokens = 0
   let completionTokens = 0
+  let toolName: string | null = null
 
   // 2. Sohbet mesajları.
   const chatMsgs: ChatMsg[] = [
@@ -97,20 +98,21 @@ export async function runAkifTurn(
     { role: 'user', content: userMessage },
   ]
 
-  // 3. OpenAI çağrı 1 — araç çağırma.
-  const r1 = await deps.model.chatWithTools(chatMsgs)
-  promptTokens += r1.usage.promptTokens
-  completionTokens += r1.usage.completionTokens
-
-  // 4. Araç çağrısı → doğrula + dispatch; düz metin → asistan mesajı ekle.
   let toolResult: ToolResultCard | undefined
-  let toolName: string | null = null
+  let turnRaw: unknown
 
-  if (r1.kind === 'tool_call') {
-    const v = deps.validateArgs(r1.toolName as ToolName, r1.toolArgs)
-    if (v.ok) {
-      toolResult = await deps.dispatch(r1.toolName as ToolName, r1.toolArgs)
-      toolName = r1.toolName ?? null
+  // OpenAI çağrıları + aradaki dispatch: hata → audit + fallback tur (throw yok).
+  try {
+    // 3. OpenAI çağrı 1 — araç çağırma.
+    const r1 = await deps.model.chatWithTools(chatMsgs)
+    promptTokens += r1.usage.promptTokens
+    completionTokens += r1.usage.completionTokens
+
+    // 4. Araç çağrısı → doğrula + dispatch; düz metin → asistan mesajı ekle.
+    if (r1.kind === 'tool_call') {
+      const v = deps.validateArgs(r1.toolName as ToolName, r1.toolArgs)
+      // OpenAI kuralı: role:'tool' mesajı MUTLAKA bir tool_calls'lu asistan
+      // mesajını takip etmeli — geçersiz argümanda bile önce onu push et.
       chatMsgs.push({
         role: 'assistant',
         content: '',
@@ -125,38 +127,69 @@ export async function runAkifTurn(
           },
         ],
       })
-      chatMsgs.push({
-        role: 'tool',
-        tool_call_id: r1.toolCallId,
-        content: JSON.stringify(toolResult),
-      })
+      if (v.ok) {
+        toolResult = await deps.dispatch(r1.toolName as ToolName, r1.toolArgs)
+        toolName = r1.toolName ?? null
+        chatMsgs.push({
+          role: 'tool',
+          tool_call_id: r1.toolCallId,
+          content: JSON.stringify(toolResult),
+        })
+      } else {
+        chatMsgs.push({
+          role: 'tool',
+          tool_call_id: r1.toolCallId,
+          content: JSON.stringify({
+            error: 'invalid_args',
+            field: v.field,
+            reason: v.reason,
+          }),
+        })
+      }
     } else {
-      chatMsgs.push({
-        role: 'tool',
-        tool_call_id: r1.toolCallId,
-        content: JSON.stringify({
-          error: 'invalid_args',
-          field: v.field,
-          reason: v.reason,
-        }),
-      })
+      chatMsgs.push({ role: 'assistant', content: r1.text ?? '' })
     }
-  } else {
-    chatMsgs.push({ role: 'assistant', content: r1.text ?? '' })
+
+    // 5. OpenAI çağrı 2 — yapılandırılmış JSON.
+    const r2 = await deps.model.finalStructured(chatMsgs)
+    promptTokens += r2.usage.promptTokens
+    completionTokens += r2.usage.completionTokens
+    turnRaw = r2.turnRaw
+  } catch (err) {
+    console.error('[akif] orchestrator model error', err)
+    await deps.audit.logTurn({
+      conversationId: input.conversationId,
+      turn: turnNumber,
+      model: deps.modelName,
+      promptTokens,
+      completionTokens,
+      estCostUsd: estimateCostUsd(
+        deps.modelName,
+        promptTokens,
+        completionTokens,
+      ),
+      intent: 'out_of_scope',
+      tool: toolName,
+    })
+    return {
+      intent: 'out_of_scope',
+      speech: 'Şu an sana yardımcı olamıyorum, birazdan tekrar dener misin?',
+      state: 'NEUTRAL',
+      facts_used: [],
+      assumptions: [],
+      missing_fields: [],
+      risk_level: 'low',
+    }
   }
 
-  // 5. OpenAI çağrı 2 — yapılandırılmış JSON.
-  const r2 = await deps.model.finalStructured(chatMsgs)
-  promptTokens += r2.usage.promptTokens
-  completionTokens += r2.usage.completionTokens
-
   // 6. Parse — başarısızsa fallback tur.
-  const turn = parseAkifTurn(r2.turnRaw) ?? parseFallbackTurn()
+  const turn = parseAkifTurn(turnRaw) ?? parseFallbackTurn()
 
   // 7. Sonuç enjeksiyonu — modelin kendi tool_result'ı parseAkifTurn'de atıldı.
   if (toolResult) {
-    turn.tool_result = toolResult
-    if (toolResult.kind !== 'term') {
+    if (toolResult.kind === 'term') {
+      turn.tool_result = toolResult
+    } else {
       turn.assumptions = [
         ...new Set([
           ...turn.assumptions,
@@ -164,12 +197,16 @@ export async function runAkifTurn(
           ...toolResult.defaultsUsed,
         ]),
       ]
-      // Kesirli daire sayılarını gösterim için 1 ondalığa yuvarla.
-      for (const row of toolResult.rows) {
-        if (typeof row.arsaSahibiDaireSayisi === 'number') {
-          row.arsaSahibiDaireSayisi =
-            Math.round(row.arsaSahibiDaireSayisi * 10) / 10
-        }
+      // Kesirli daire sayılarını gösterim için 1 ondalığa yuvarla (kopya üzerinde).
+      turn.tool_result = {
+        ...toolResult,
+        rows: toolResult.rows.map((r) => ({
+          ...r,
+          arsaSahibiDaireSayisi:
+            typeof r.arsaSahibiDaireSayisi === 'number'
+              ? Math.round(r.arsaSahibiDaireSayisi * 10) / 10
+              : r.arsaSahibiDaireSayisi,
+        })),
       }
     }
   }

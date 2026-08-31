@@ -190,9 +190,35 @@ describe('runAkifTurn', () => {
     })
     const turn = await runAkifTurn(INPUT, deps)
     expect(turn.assumptions).toEqual(
-      expect.arrayContaining(['mevcut', 'Birim maliyet: 18000 TL/m²', 'Kalite: orta']),
+      expect.arrayContaining([
+        'mevcut',
+        'Birim maliyet: 18000 TL/m²',
+        'Kalite: orta',
+        'Yapılaşma alanı = arsa alanı × emsal',
+      ]),
     )
     const card = turn.tool_result as ScenarioCard
     expect(card.rows[0].arsaSahibiDaireSayisi).toBe(6.3)
+    // dispatch result must NOT be mutated in place
+    expect(SCENARIO_CARD.rows[0].arsaSahibiDaireSayisi).toBe(6.333333)
+  })
+
+  it('(g) chatWithTools rejects → fallback turn, audit written once, no throw', async () => {
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const { deps, finalStructured, logTurn } = makeDeps()
+    ;(deps.model.chatWithTools as jest.Mock).mockRejectedValueOnce(
+      new Error('rate_limited'),
+    )
+    const turn = await runAkifTurn(INPUT, deps)
+    expect(turn.intent).toBe('out_of_scope')
+    expect(turn.speech).toBe(
+      'Şu an sana yardımcı olamıyorum, birazdan tekrar dener misin?',
+    )
+    expect(finalStructured).not.toHaveBeenCalled()
+    expect(logTurn).toHaveBeenCalledTimes(1)
+    expect(logTurn).toHaveBeenCalledWith(
+      expect.objectContaining({ intent: 'out_of_scope', conversationId: 'c1' }),
+    )
+    errSpy.mockRestore()
   })
 })
