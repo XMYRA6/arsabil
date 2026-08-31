@@ -451,3 +451,12 @@ model CrawlRun {
   notes            String?
 }
 
+model WhatsappConversation {
+  id            String   @id @default(cuid())
+  phone         String   @unique
+  state         Json
+  lastMessageId String?
+  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
+}
+
