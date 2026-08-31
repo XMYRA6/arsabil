@@ -475,3 +475,19 @@ model WhatsappSubscription {
   @@index([il, ilce, mahalle])
 }
 
+model AkifTurnLog {
+  id               String   @id @default(cuid())
+  conversationId   String
+  turn             Int
+  model            String
+  promptTokens     Int
+  completionTokens Int
+  estCostUsd       Float
+  intent           String
+  tool             String?
+  createdAt        DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
