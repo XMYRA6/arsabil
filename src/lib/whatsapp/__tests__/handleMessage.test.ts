@@ -105,6 +105,47 @@ describe('handleMessage', () => {
     expect(deps.understanding.understand).not.toHaveBeenCalled()
   })
 
+  it('F1: ilk temas "merhaba nasılsın" → tek help mesajı, pending kaydı yok', async () => {
+    ;(resolveLocation as jest.Mock).mockResolvedValue({ kind: 'notfound', level: 'il', term: 'merhaba' })
+    const { deps, sent, saved } = makeDeps({
+      understanding: { understand: jest.fn().mockResolvedValue({ ilText: 'merhaba', ilceText: 'nasılsın' }) },
+    })
+    await handleMessage(msg({ text: 'merhaba nasılsın', messageId: 'wamid.h1' }), deps)
+    expect(sent).toHaveLength(1)
+    expect(sent[0]).toContain('Trabzon Ortahisar Uğurlu 123/45')
+    expect(saved.some((s) => (s as { pending?: string }).pending != null)).toBe(false)
+    expect(deps.buildCard).not.toHaveBeenCalled()
+  })
+
+  it('F2: belirsizlik ortasında yeni sorgu "Rize Merkez İslampaşa 1/2" → eski adaylar düşer', async () => {
+    ;(resolveLocation as jest.Mock).mockResolvedValue({ kind: 'resolved', mahalleId: 7000, il: 'Rize', ilce: 'Merkez', mahalle: 'İslampaşa' })
+    const load = jest.fn().mockResolvedValue({
+      state: { candidates: [{ id: 1, text: 'Uğurlu' }, { id: 2, text: 'Uğurluoğlu' }], candidateLevel: 'mahalle', fields: { ilText: 'Trabzon', ilceText: 'Ortahisar', mahalleText: 'uğur' } },
+      lastMessageId: 'wamid.prev',
+    })
+    const { deps, sent } = makeDeps({
+      store: { loadConversation: load, saveConversation: jest.fn() },
+      understanding: { understand: jest.fn().mockResolvedValue({ ilText: 'Rize', ilceText: 'Merkez', mahalleText: 'İslampaşa', ada: '1', parsel: '2' }) },
+    })
+    await handleMessage(msg({ text: 'Rize Merkez İslampaşa 1/2', messageId: 'wamid.new' }), deps)
+    expect(deps.buildCard).toHaveBeenCalledWith(7000, '1', '2')
+    expect(sent.join('')).not.toContain('birden fazla eşleşme')
+  })
+
+  it('F2: pending-ada ortasında "iptal" → help() gönderir, state temizlenir', async () => {
+    const load = jest.fn().mockResolvedValue({
+      state: { pending: 'ada', fields: { ilText: 'Trabzon', ilceText: 'Ortahisar', mahalleText: 'Uğurlu', ilId: 1, ilceId: 2, mahalleId: 3 } },
+      lastMessageId: 'wamid.prev',
+    })
+    const saveMock = jest.fn()
+    const { deps, sent } = makeDeps({ store: { loadConversation: load, saveConversation: saveMock } })
+    await handleMessage(msg({ text: 'iptal', messageId: 'wamid.cancel' }), deps)
+    expect(sent).toHaveLength(1)
+    expect(sent[0]).toContain('Trabzon Ortahisar Uğurlu 123/45')
+    expect(saveMock).toHaveBeenCalledWith('905321234567', { fields: {} }, 'wamid.cancel')
+    expect(deps.buildCard).not.toHaveBeenCalled()
+  })
+
   it('parcel_not_found → ada/parsel sıfırlar, pending ada', async () => {
     const { deps, sent, saved } = makeDeps({
       buildCard: jest.fn().mockResolvedValue({ ok: false, reason: 'parcel_not_found' }),

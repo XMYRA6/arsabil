@@ -33,6 +33,7 @@ export function createPrismaConversationStore(db: Db, now: () => number = Date.n
       return { state: row.state as ConvState, lastMessageId: row.lastMessageId }
     },
     async saveConversation(phone, state, lastMessageId) {
+      // Aynı telefondan eşzamanlı mesajlarda last-write-wins — v1 hacminde kabul; 5b'de atomik merge / SELECT FOR UPDATE.
       await db.whatsappConversation.upsert({
         where: { phone },
         create: { phone, state: state as unknown, lastMessageId },

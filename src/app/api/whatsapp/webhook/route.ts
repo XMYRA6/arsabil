@@ -1,4 +1,5 @@
 import { after } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { readWhatsappConfig } from '@/lib/whatsapp/config'
 import { verifySignature } from '@/lib/whatsapp/verifySignature'
 import { parseInbound } from '@/lib/whatsapp/parseInbound'
@@ -17,12 +18,19 @@ import type { ComparableListing } from '@/lib/deger/comparables'
 
 export const runtime = 'nodejs'
 
+function safeEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ba.length !== bb.length) return false
+  return timingSafeEqual(ba, bb)
+}
+
 export async function GET(req: Request): Promise<Response> {
   const config = readWhatsappConfig()
   const u = new URL(req.url)
   if (
     u.searchParams.get('hub.mode') === 'subscribe' &&
-    u.searchParams.get('hub.verify_token') === config.verifyToken
+    safeEqual(u.searchParams.get('hub.verify_token') ?? '', config.verifyToken)
   ) {
     return new Response(u.searchParams.get('hub.challenge') ?? '', { status: 200 })
   }

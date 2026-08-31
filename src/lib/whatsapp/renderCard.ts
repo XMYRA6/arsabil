@@ -31,7 +31,7 @@ export function renderCard(dto: DegerCardDTO, siteUrl: string): string {
     lines.push('Bu bölgede yeterli ilan verisi yok — risk ve parsel bilgisi yine de aşağıda.')
   } else {
     const suffix = v.thinData ? ' _(sınırlı veri)_' : ''
-    lines.push(`💰 Tahmini değer: *${formatTlShort(v.freeRangeLow)} – ${formatTlShort(v.freeRangeHigh!)} ₺*${suffix}`)
+    lines.push(`💰 Tahmini değer: *${formatTlShort(v.freeRangeLow!)} – ${formatTlShort(v.freeRangeHigh!)} ₺*${suffix}`)
     if (v.pricePerSqmCoarse != null) {
       lines.push(`📍 ~${formatTl(v.pricePerSqmCoarse)} ₺/m² (${v.basis ?? 'bölge'} geneli)`)
     }

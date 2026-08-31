@@ -1,4 +1,4 @@
-import type { InboundMessage, ConvState, ConvFields, ConvLevel, AreaOption } from './types'
+import type { InboundMessage, ConvState, ConvFields, ConvLevel, AreaOption, ResolveResult } from './types'
 import type { ConversationStore } from './conversation'
 import { mergeFields } from './conversation'
 import type { QueryUnderstanding } from './understanding'
@@ -31,18 +31,26 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
   const check = deps.checkRateLimit ?? defaultCheckRateLimit
   const save = (state: ConvState) => deps.store.saveConversation(msg.from, state, msg.messageId)
 
-  // 1. Rate limit
+  // 1. Load state
+  const loaded = await deps.store.loadConversation(msg.from)
+  const state: ConvState = loaded?.state ?? { fields: {} }
+
+  // 2. Idempotency — Meta'nın aynı mesajı retry'ları rate-limit token'ı yakmasın
+  //    ve sahte "Çok fazla sorgu" cevabı üretmesin diye rate-limit'ten ÖNCE.
+  if (loaded && loaded.lastMessageId === msg.messageId) return
+
+  // 3. Rate limit
   if (!check('wa:' + msg.from, RATE_LIMITS.WHATSAPP_INBOUND).ok) {
     await deps.sendText(msg.from, renderError.rateLimited())
     return
   }
 
-  // 2. Load state
-  const loaded = await deps.store.loadConversation(msg.from)
-  const state: ConvState = loaded?.state ?? { fields: {} }
-
-  // 3. Idempotency
-  if (loaded && loaded.lastMessageId === msg.messageId) return
+  const hadPriorState = !!(
+    loaded &&
+    (loaded.state.pending ||
+      loaded.state.candidates?.length ||
+      Object.keys(loaded.state.fields ?? {}).length > 0)
+  )
 
   // 4. Non-text guard
   if (msg.type !== 'text') {
@@ -61,6 +69,27 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
   let skipToResolve = false
   let skipUnderstand = false
 
+  // 5b. Çıkış kapısı — belirsizlik/pending kilidinde kullanıcı yeni sorgu ya da
+  //     iptal yazabilsin; yoksa 30 dk TTL dolana kadar aynı soruya hapsolur.
+  if (state.candidates?.length || state.pending) {
+    const lc = text.toLocaleLowerCase('tr')
+    if (lc === 'iptal' || lc === 'baştan' || lc === 'yeni' || lc === 'vazgeç') {
+      await deps.sendText(msg.from, renderError.help())
+      await save({ fields: {} })
+      return
+    }
+    const slashPattern = /\d{1,7}\s*[/\-]\s*\d{1,7}/.test(text)
+    const wordCount = text.split(/\s+/).filter((w) => /^\D+$/.test(w)).length
+    const looksLikeNewQuery = slashPattern || (/\d/.test(text) && wordCount >= 2)
+    if (looksLikeNewQuery) {
+      state.pending = undefined
+      state.candidates = undefined
+      state.candidateLevel = undefined
+      state.fields = {}
+      fields = {}
+    }
+  }
+
   // 6. Disambiguation answer
   if (state.candidates?.length) {
     const cands = state.candidates
@@ -76,9 +105,16 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
       if (level === 'il') {
         fields.ilId = matched.id
         fields.ilText = matched.text
+        // adım 7/8 ile simetri: üst seviye seçilince alt alanları temizle
+        fields.ilceId = undefined
+        fields.ilceText = undefined
+        fields.mahalleId = undefined
+        fields.mahalleText = undefined
       } else if (level === 'ilce') {
         fields.ilceId = matched.id
         fields.ilceText = matched.text
+        fields.mahalleId = undefined
+        fields.mahalleText = undefined
       } else {
         fields.mahalleId = matched.id
         fields.mahalleText = matched.text
@@ -136,6 +172,18 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
     }
   }
 
+  // 8b. İlk temas + ada/parsel yok + il çözülemiyor → sorgulama değil, yardım.
+  //     "merhaba nasılsın" → extractParcelQuery {ilText:'merhaba', ilceText:'nasılsın'};
+  //     eksik-alan döngüsü bunu "hangi mahalle?" sorusuna sokmasın.
+  let preResolved: ResolveResult | undefined
+  if (!skipToResolve && !hadPriorState && !fields.ada && !fields.parsel) {
+    preResolved = await resolveLocation(fields, deps.resolveDeps)
+    if (preResolved.kind === 'notfound' && preResolved.level === 'il') {
+      await deps.sendText(msg.from, renderError.help())
+      return
+    }
+  }
+
   // 9. Missing field prompt
   if (!skipToResolve) {
     for (const { level, key } of ORDER) {
@@ -148,8 +196,8 @@ export async function handleMessage(msg: InboundMessage, deps: HandleDeps): Prom
     }
   }
 
-  // 10. Resolve location
-  const r = await resolveLocation(fields, deps.resolveDeps)
+  // 10. Resolve location (8b'de zaten çözdüysek tekrar çağırma)
+  const r = preResolved ?? (await resolveLocation(fields, deps.resolveDeps))
   if (r.kind === 'ambiguous') {
     await save({ candidates: r.candidates, candidateLevel: r.level, fields })
     await deps.sendText(msg.from, renderError.chooseFrom(r.level, r.candidates))
