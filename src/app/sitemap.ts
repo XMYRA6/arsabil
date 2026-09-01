@@ -9,7 +9,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const staticRoutes: MetadataRoute.Sitemap = [
         { url: `${baseUrl}/`, changeFrequency: "daily", priority: 1 },
         { url: `${baseUrl}/hesapla`, changeFrequency: "weekly", priority: 0.9 },
+        { url: `${baseUrl}/deger`, changeFrequency: "weekly", priority: 0.9 },
         { url: `${baseUrl}/marketplace`, changeFrequency: "daily", priority: 0.9 },
+        { url: `${baseUrl}/akif`, changeFrequency: "weekly", priority: 0.7 },
+        { url: `${baseUrl}/contact`, changeFrequency: "yearly", priority: 0.3 },
+        { url: `${baseUrl}/terms`, changeFrequency: "yearly", priority: 0.3 },
+        { url: `${baseUrl}/privacy`, changeFrequency: "yearly", priority: 0.3 },
     ];
 
     const listings = await prisma.listing.findMany({
