@@ -76,6 +76,30 @@ describe('AnalizSekmesi', () => {
         render(<AnalizSekmesi result={RESULT} baseInput={BASE_INPUT} marketPrice={10000000} />)
         expect(screen.getByRole('group', { name: 'Finansal özet' })).toBeInTheDocument()
     })
+
+    describe('maks. surdurulebilir arsa payi (x_max)', () => {
+        it('x_max null -> kart hic render edilmez', () => {
+            render(<AnalizSekmesi result={{ ...RESULT, x_max: null }} baseInput={BASE_INPUT} marketPrice={0} />)
+            expect(
+                screen.queryByRole('group', { name: 'Maksimum sürdürülebilir arsa payı' }),
+            ).toBeNull()
+        })
+
+        it('x_max >= 0 -> yuzde deger + aciklama', () => {
+            render(<AnalizSekmesi result={{ ...RESULT, x_max: 0.732 }} baseInput={BASE_INPUT} marketPrice={12000000} />)
+            expect(
+                screen.getByRole('group', { name: 'Maksimum sürdürülebilir arsa payı' }),
+            ).toBeInTheDocument()
+            expect(screen.getByText('%73.2')).toBeInTheDocument()
+            expect(screen.getByText(/en yüksek pay/)).toBeInTheDocument()
+        })
+
+        it('x_max negatif -> proje mumkun degil mesaji, yuzde YOK', () => {
+            render(<AnalizSekmesi result={{ ...RESULT, x_max: -0.15 }} baseInput={BASE_INPUT} marketPrice={2000000} />)
+            expect(screen.getByText(/proje mümkün değil/)).toBeInTheDocument()
+            expect(screen.queryByText(/%-/)).toBeNull()
+        })
+    })
 })
 
 // Sekme secici bileseninin testleri Task 6'da kaldirildi: bilesenin kendisi

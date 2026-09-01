@@ -1283,6 +1283,20 @@
         color: var(--m-ink);
     }
 
+    .xmaxDeger {
+        font: 800 22px Inter, sans-serif;
+        color: var(--m-ink);
+        font-variant-numeric: tabular-nums;
+        margin-bottom: 4px;
+    }
+
+    .xmaxAlt {
+        margin: 0;
+        font: 600 12px Inter, sans-serif;
+        line-height: 1.5;
+        color: var(--m-body);
+    }
+
     .analizBos {
         margin: 0 14px;
         padding: 22px 15px;

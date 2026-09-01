@@ -52,6 +52,28 @@ export function AnalizSekmesi({ result, baseInput, marketPrice }: AnalizSekmesiP
                 <BreakEvenChart baseInput={baseInput} marketPrice={marketPrice} />
             </section>
 
+            {/* Maks. sürdürülebilir arsa payı — yalnız piyasa fiyatı girilmişse
+                motor `x_max` döndürür (masaüstüyle aynı; denetim bulgusu C6'nın
+                mobil karşılığı). */}
+            {result.x_max != null && (
+                <section className={styles.analizKart} role="group" aria-label="Maksimum sürdürülebilir arsa payı">
+                    <h3 className={styles.analizBaslik}>Maks. Sürdürülebilir Arsa Payı</h3>
+                    {result.x_max >= 0 ? (
+                        <>
+                            <div className={styles.xmaxDeger}>%{(result.x_max * 100).toFixed(1)}</div>
+                            <p className={styles.xmaxAlt}>
+                                Kâr hedefini koruyarak verilebilecek en yüksek pay
+                            </p>
+                        </>
+                    ) : (
+                        <p className={styles.xmaxAlt}>
+                            Bu birim maliyet ve kâr hedefiyle, girilen piyasa fiyatında proje mümkün
+                            değil (maliyet piyasa fiyatını aşıyor).
+                        </p>
+                    )}
+                </section>
+            )}
+
             <section className={styles.analizKart} role="group" aria-label="Finansal özet">
                 <h3 className={styles.analizBaslik}>Finansal özet</h3>
                 <FinancialDashboard totalInvestment={result.M} totalRevenue={result.FD_total} />
