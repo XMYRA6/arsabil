@@ -7,14 +7,11 @@ import { handleMessage, type HandleDeps } from '@/lib/whatsapp/handleMessage'
 import { createPrismaConversationStore } from '@/lib/whatsapp/conversation'
 import { ruleBasedUnderstanding } from '@/lib/whatsapp/understanding'
 import { createSendText } from '@/lib/whatsapp/sendMessage'
-import { buildDegerCard, type AreaStatRecord } from '@/lib/deger/card'
-import { fetchParcelByAdaParsel, fetchParcelByPoint } from '@/lib/tkgm/parcel'
-import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
+import { buildDegerCard } from '@/lib/deger/card'
+import { createAnonCardDeps } from '@/lib/deger/anonCardDeps'
 import { fetchIlListesi, fetchIlceListesi, fetchMahalleListesi } from '@/lib/tkgm/idariYapi'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
-import { ARSA_LISTING_TYPES } from '@/lib/areaPrices/aggregate'
 import { prisma } from '@/lib/prisma'
-import type { ComparableListing } from '@/lib/deger/comparables'
 
 export const runtime = 'nodejs'
 
@@ -39,45 +36,11 @@ export async function GET(req: Request): Promise<Response> {
 
 function buildHandleDeps(): HandleDeps {
   const config = readWhatsappConfig()
-  // NOTE: /api/deger/kart ile paralel deps — 5b'de ortak modüle çıkarılabilir.
+  // Paylaşılan `DegerCardDeps` çekirdeği (/api/deger/kart ile ortak modül).
+  // Bot trend göstermez → `findAreaTrend` her zaman boş.
   const cardDeps = {
-    fetchParcelByPoint,
-    fetchParcelByAdaParsel,
-    buildRiskSnapshot,
-    findAreaStats: async (il: string, ilce: string, mahalle: string): Promise<AreaStatRecord[]> => {
-      const rows = await prisma.areaPriceStat.findMany({
-        where: { il, OR: [{ ilce: null, mahalle: null }, { ilce, mahalle: null }, { ilce, mahalle }] },
-        select: { scope: true, medianPricePerSqm: true, p25: true, p75: true, sampleCount: true },
-      })
-      return rows as AreaStatRecord[]
-    },
+    ...createAnonCardDeps(),
     findAreaTrend: async () => [],
-    findListingsNear: async (il: string, ilce: string): Promise<ComparableListing[]> => {
-      const rows = await prisma.marketListing.findMany({
-        where: {
-          status: 'active',
-          lat: { not: null },
-          lng: { not: null },
-          listingType: { in: [...ARSA_LISTING_TYPES] },
-        },
-        select: {
-          id: true, pricePerSqm: true, areaSqm: true, price: true, lat: true, lng: true,
-          geoPrecision: true, listedAt: true, source: true, sourceUrl: true, listingType: true, il: true, ilce: true,
-        },
-        orderBy: [{ listedAt: 'desc' }, { id: 'asc' }],
-        take: 2000,
-      })
-      return rows.filter(
-        (r) => r.il != null && r.ilce != null && normalizeAreaName(r.il) === il && normalizeAreaName(r.ilce) === ilce,
-      ) as unknown as ComparableListing[]
-    },
-    findNeighborhood: async (il: string, ilce: string, mahalle: string) => {
-      const row = await prisma.neighborhood.findUnique({
-        where: { il_ilce_mahalle: { il, ilce, mahalle } },
-        select: { geojson: true },
-      })
-      return row ? { geojson: row.geojson as unknown } : null
-    },
   }
   const nk = (il: string, ilce: string, mahalle: string) => ({
     il: normalizeAreaName(il),
