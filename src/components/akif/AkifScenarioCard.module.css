@@ -1,0 +1,7 @@
+.card { border: 1px solid #e5e5e7; border-radius: 12px; padding: 12px; margin: 8px 0; background: #fff; }
+.title { font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #1d1d1f; }
+.scroll { overflow-x: auto; }
+.table { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.table th { text-align: left; color: #6e6e73; font-weight: 500; padding: 4px 10px 4px 0; border-bottom: 1px solid #e5e5e7; }
+.table td { padding: 6px 10px 6px 0; border-bottom: 1px solid #f0f0f2; }
+.note { font-size: 11px; color: #8a8a8e; margin-top: 8px; }
