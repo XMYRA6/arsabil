@@ -608,6 +608,11 @@
 .summaryPanel {
     display: flex;
     flex-direction: column;
+    /* `.rightGrid`in `align-items: stretch`i bu paneli mainPanel'in yuksekligine
+       kadar geriyordu → icerigin altinda ~265px bos alan. Panel dogal
+       yuksekligini alsin (mainPanel'den kisa kalabilir; alttaki advancedPanel
+       zaten iki sutunu birden kapladigi icin hizalama bozulmaz). */
+    align-self: start;
 }
 
 .summaryPanelTitle {

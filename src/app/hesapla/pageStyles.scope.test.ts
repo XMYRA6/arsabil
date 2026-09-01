@@ -370,5 +370,11 @@ describe('hesapla profesyonel desktop token kullanimi', () => {
     expect(match).not.toBeNull();
     expect(match![1]).toMatch(/border-left:\s*4px solid var\(--primary\)/);
   });
+
+  it('summaryPanel align-self: start — rightGrid stretch nedenli alt boslugu onler', () => {
+    const match = pageCss.match(/\.summaryPanel\s*\{([^}]*)\}/);
+    expect(match).not.toBeNull();
+    expect(match![1]).toMatch(/align-self:\s*start/);
+  });
 });
 
