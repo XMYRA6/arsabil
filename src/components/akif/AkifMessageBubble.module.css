@@ -1,0 +1,6 @@
+.row { display: flex; margin: 6px 0; }
+.row[data-role='user'] { justify-content: flex-end; }
+.row[data-role='akif'] { justify-content: flex-start; }
+.bubble { max-width: 82%; padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+.user { background: #0a5cff; color: #fff; border-bottom-right-radius: 5px; }
+.akif { background: #f0f0f2; color: #1d1d1f; border-bottom-left-radius: 5px; }
