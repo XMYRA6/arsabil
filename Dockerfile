@@ -1,5 +1,5 @@
 # ---- Bağımlılıklar ----
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 # INSECURE_BUILD=1: YALNIZ TLS-intercepting proxy arkasindaki lokal build'ler icin
 # (orn. gelistirici makinesi). Production/Coolify build'inde KULLANMA.
@@ -10,7 +10,7 @@ RUN if [ "$INSECURE_BUILD" = "1" ]; then npm config set strict-ssl false; fi \
     && npm ci --ignore-scripts
 
 # ---- Build ----
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 ARG INSECURE_BUILD=0
 COPY --from=deps /app/node_modules ./node_modules
@@ -29,7 +29,7 @@ RUN if [ "$INSECURE_BUILD" = "1" ]; then export NODE_TLS_REJECT_UNAUTHORIZED=0 W
     && npx next build --webpack
 
 # ---- Runner ----
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 # Prisma engine binary yollarini dogrudan belirt (platform auto-detection atla)
