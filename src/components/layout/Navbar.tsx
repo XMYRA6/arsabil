@@ -88,6 +88,12 @@ export function Navbar() {
                         <Link href="/hesapla" className={pathname === "/hesapla" ? styles.activeLink : ""}>
                             Hesapla
                         </Link>
+                        <Link href="/deger" className={pathname === "/deger" ? styles.activeLink : ""}>
+                            Değer
+                        </Link>
+                        <Link href="/akif" className={pathname === "/akif" ? styles.activeLink : ""}>
+                            Akif
+                        </Link>
                         <Link href="/marketplace" className={pathname.startsWith("/marketplace") || pathname.startsWith("/listing") ? styles.activeLink : ""}>
                             Pazar Yeri
                         </Link>
@@ -353,6 +359,8 @@ export function Navbar() {
                         </div>
                         <div style={{ borderTop: '1px solid var(--topbar-border)', marginBottom: 4 }} />
                         <Link href="/" onClick={() => setIsMenuOpen(false)} className={pathname === "/" ? styles.activeLink : ""}>Hesap Makinesi</Link>
+                        <Link href="/deger" onClick={() => setIsMenuOpen(false)} className={pathname === "/deger" ? styles.activeLink : ""}>Değer Kartı</Link>
+                        <Link href="/akif" onClick={() => setIsMenuOpen(false)} className={pathname === "/akif" ? styles.activeLink : ""}>Akif Usta</Link>
                         <Link href="/marketplace" onClick={() => setIsMenuOpen(false)} className={pathname.startsWith("/marketplace") || pathname.startsWith("/listing") ? styles.activeLink : ""}>Pazar Yeri</Link>
 
                         {session ? (

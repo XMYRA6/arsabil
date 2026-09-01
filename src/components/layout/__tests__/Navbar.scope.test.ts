@@ -2,6 +2,18 @@ import fs from 'fs'
 import path from 'path'
 
 const css = fs.readFileSync(path.join(__dirname, '../Navbar.module.css'), 'utf8')
+const tsx = fs.readFileSync(path.join(__dirname, '../Navbar.tsx'), 'utf8')
+
+describe('Navbar ana keşif linkleri', () => {
+  it('masaüstü + mobil menü /deger ve /akif linklerini içerir', () => {
+    for (const href of ['/hesapla', '/deger', '/akif', '/marketplace']) {
+      expect(tsx.includes(`href="${href}"`)).toBe(true)
+    }
+    // hem masaüstü (Değer) hem mobil menü (Değer Kartı) etiketi
+    expect(tsx).toMatch(/>\s*Değer\s*</)
+    expect(tsx).toMatch(/>\s*Akif\s*</)
+  })
+})
 
 describe('Navbar profesyonel token hizalamasi', () => {
   it('topbar yuksekligi global topbar tokenini kullanir', () => {
