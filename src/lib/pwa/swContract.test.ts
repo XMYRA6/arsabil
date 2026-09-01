@@ -35,5 +35,12 @@ describe('public/sw.js — güncelleme sözleşmesi', () => {
         expect(activateMatch).not.toBeNull()
         expect(activateMatch![1]).toMatch(/caches\.delete\(name\)/)
     })
+
+    it('CACHE_NAME + SW_VERSION satırları build-time damga script`iyle (scripts/stamp-sw.mjs) uyumlu şekilde', () => {
+        // Bu regex`ler stamp-sw.mjs`nin kullandıklarıyla birebir aynı — sw.js`te
+        // bu satırların biçimi değişirse damgalama sessizce çalışmaz olurdu.
+        expect(sw).toMatch(/const CACHE_NAME = '[^']*';/)
+        expect(sw).toMatch(/const SW_VERSION = '[^']*';[^\n]*/)
+    })
 })
 
