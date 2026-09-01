@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import type { AkifMessage, AkifTurn } from '@/lib/ai/akif/contract'
 import { AkifChat, type AkifChatEntry } from '@/components/akif/AkifChat'
 import styles from './page.module.css'
@@ -25,9 +25,16 @@ function toHistory(entries: AkifChatEntry[]): AkifMessage[] {
 }
 
 export default function AkifPage() {
-  const conversationId = useRef(makeId()).current
+  // Sohbet kimliği state'te — "Yeni sohbet" sıfırlamada yenilenir.
+  const [conversationId, setConversationId] = useState(makeId)
   const [entries, setEntries] = useState<AkifChatEntry[]>([])
   const [pending, setPending] = useState(false)
+
+  const resetConversation = () => {
+    if (pending) return
+    setEntries([])
+    setConversationId(makeId())
+  }
 
   const send = async (text: string) => {
     if (pending) return
@@ -65,7 +72,19 @@ export default function AkifPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Akif Usta&apos;ya Sor</h1>
+      <div className={styles.head}>
+        <h1 className={styles.title}>Akif Usta&apos;ya Sor</h1>
+        {entries.length > 0 && (
+          <button
+            type="button"
+            className={styles.reset}
+            onClick={resetConversation}
+            disabled={pending}
+          >
+            Yeni sohbet
+          </button>
+        )}
+      </div>
       <p className={styles.sub}>
         Arsanı, emsali ve müteahhit payını yaz — iki senaryoyu hesaplayıp anlatayım. Sayılar
         deterministik motordan gelir, uydurma yok.

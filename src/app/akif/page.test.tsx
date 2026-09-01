@@ -65,6 +65,27 @@ it('fetch reject → bağlantı hatası', async () => {
   await waitFor(() => expect(screen.getByText(/Bağlantı hatası/)).toBeInTheDocument())
 })
 
+it('Yeni sohbet: transkripti temizler + yeni conversationId üretir', async () => {
+  render(<AkifPage />)
+  // Başlangıçta buton yok
+  expect(screen.queryByRole('button', { name: 'Yeni sohbet' })).toBeNull()
+  sendText('bir')
+  await waitFor(() =>
+    expect(screen.getByText('Merhaba, nasıl yardımcı olayım?')).toBeInTheDocument(),
+  )
+  const idBefore = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body).conversationId
+
+  fireEvent.click(screen.getByRole('button', { name: 'Yeni sohbet' }))
+  expect(screen.queryByText('bir')).not.toBeInTheDocument()
+  expect(screen.queryByText('Merhaba, nasıl yardımcı olayım?')).not.toBeInTheDocument()
+
+  sendText('iki')
+  await waitFor(() => expect((global.fetch as jest.Mock).mock.calls.length).toBe(2))
+  const body2 = JSON.parse((global.fetch as jest.Mock).mock.calls[1][1].body)
+  expect(body2.conversationId).not.toBe(idBefore)
+  expect(body2.history).toEqual([]) // temizlendikten sonra geçmiş boş
+})
+
 it('pending sırasında ikinci gönderim engellenir', async () => {
   let resolve: (v: unknown) => void = () => {}
   ;(global.fetch as jest.Mock).mockReturnValue(
