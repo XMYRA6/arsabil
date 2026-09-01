@@ -157,6 +157,10 @@ export function createAkifModel(deps: AkifModelDeps): {
       const resp = await create({
         model: deps.model,
         messages,
+        // Araç şeması bağlamda kalsın ama 2. çağrıda YENİ araç çağrısı YASAK —
+        // bu çağrının tek görevi yapılandırılmış JSON üretmek (final review I5).
+        tools: AKIF_TOOL_DEFS,
+        tool_choice: 'none',
         response_format: {
           type: 'json_schema',
           json_schema: {

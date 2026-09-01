@@ -59,8 +59,14 @@ export async function runAkifTurn(
   const { conversationId, history, userMessage } = input
   const turnNumber = Math.floor(history.length / 2) + 1
 
+  // Sistem prompt'u bir kez kur — hem bütçe kontrolü hem sohbet mesajları
+  // aynı metni kullanır (final review I8: ~3k token'lık sistem prompt'u
+  // bütçe hesabına dahil edilmezse tur bütçesi ~2× az sayılıyordu).
+  const systemPrompt = assembleSystemPrompt({ hasHistory: history.length > 0 })
+
   // 1. Bütçe kontrolü — aşıldıysa model HİÇ çağrılmaz.
   const budget = deps.checkConversationBudget([
+    { content: systemPrompt },
     ...history.map((m) => ({ content: m.content })),
     { content: userMessage },
   ])
@@ -85,10 +91,7 @@ export async function runAkifTurn(
 
   // 2. Sohbet mesajları.
   const chatMsgs: ChatMsg[] = [
-    {
-      role: 'system',
-      content: assembleSystemPrompt({ hasHistory: history.length > 0 }),
-    },
+    { role: 'system', content: systemPrompt },
     ...history.map(
       (m): ChatMsg => ({
         role: m.role === 'user' ? 'user' : 'assistant',
@@ -128,8 +131,9 @@ export async function runAkifTurn(
         ],
       })
       if (v.ok) {
-        toolResult = await deps.dispatch(r1.toolName as ToolName, r1.toolArgs)
+        // Dispatch'ten ÖNCE ata — dispatch fırlarsa bile audit doğru aracı yazsın.
         toolName = r1.toolName ?? null
+        toolResult = await deps.dispatch(r1.toolName as ToolName, r1.toolArgs)
         chatMsgs.push({
           role: 'tool',
           tool_call_id: r1.toolCallId,
@@ -156,7 +160,11 @@ export async function runAkifTurn(
     completionTokens += r2.usage.completionTokens
     turnRaw = r2.turnRaw
   } catch (err) {
-    console.error('[akif] orchestrator model error', err)
+    // Ham hata nesnesini loglama — yalnız ad + mesaj (PII / gizli anahtar sızıntısı olmasın).
+    console.error(
+      '[akif] orchestrator model error',
+      err instanceof Error ? { name: err.name, message: err.message } : err,
+    )
     await deps.audit.logTurn({
       conversationId: input.conversationId,
       turn: turnNumber,

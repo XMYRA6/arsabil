@@ -109,6 +109,10 @@ describe('createAkifModel.finalStructured', () => {
     expect(arg.response_format.type).toBe('json_schema')
     expect(arg.response_format.json_schema.strict).toBe(true)
     expect(arg.response_format.json_schema.name).toBe('akif_turn')
+    // I5-hardening: 2. çağrıda araç şeması bağlamda ama yeni çağrı yasak.
+    const raw = calls[0][0] as { tool_choice?: unknown; tools?: unknown }
+    expect(raw.tool_choice).toBe('none')
+    expect(Array.isArray(raw.tools)).toBe(true)
   })
 
   it('empty content → parses to {}', async () => {

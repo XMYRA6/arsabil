@@ -35,9 +35,16 @@ describe('prompt katmanları', () => {
     expect(DOMAIN_PROMPT).toMatch(/doğrulanmış/i)
   })
 
-  it('toolPolicy hesabı kendin yapma / aracı çağır talimatı içerir', () => {
+  it('toolPolicy hesabı kendin yapma / aracını çağır talimatı içerir', () => {
     const t = TOOL_POLICY_PROMPT.toLocaleLowerCase('tr')
-    expect(t.includes('aracı çağır') || t.includes('hesabı asla kendin yapma')).toBe(true)
+    expect(t).toContain('hesabı asla kendin yapma')
+    expect(t).toContain('aracını çağır')
+  })
+
+  it('toolPolicy invalid_args → clarify_number + needs_confirmation talimatı içerir', () => {
+    expect(TOOL_POLICY_PROMPT).toContain('invalid_args')
+    expect(TOOL_POLICY_PROMPT).toContain('clarify_number')
+    expect(TOOL_POLICY_PROMPT).toContain('needs_confirmation')
   })
 
   it('safetyPolicy kesinlik dili yasağı içerir', () => {
@@ -70,7 +77,7 @@ describe('assembleSystemPrompt', () => {
   it('anahtar cümleleri içerir', () => {
     const out = assembleSystemPrompt({ hasHistory: false })
     expect(out).toContain('Akif Usta')
-    expect(out).toMatch(/aracı çağır|hesabı asla kendin yapma/i)
+    expect(out).toMatch(/aracını çağır|hesabı asla kendin yapma/i)
     expect(out).toMatch(/kesinlikle şu kadar eder/i)
   })
 

@@ -111,7 +111,7 @@ describe('runAkifTurn', () => {
   })
 
   it('(c) invalid args → dispatch NOT called, returned turn has no tool_result', async () => {
-    const { deps, dispatch } = makeDeps()
+    const { deps, dispatch, finalStructured } = makeDeps()
     ;(deps.model.chatWithTools as jest.Mock).mockResolvedValueOnce({
       kind: 'tool_call',
       toolName: 'compareContractorOffers',
@@ -132,6 +132,34 @@ describe('runAkifTurn', () => {
     expect(dispatch).not.toHaveBeenCalled()
     expect(turn.intent).toBe('clarify_number')
     expect(turn.tool_result).toBeUndefined()
+    // OpenAI kuralı: role:'tool' mesajı MUTLAKA bir tool_calls'lu asistan
+    // mesajını takip etmeli — geçersiz argümanda bile.
+    const sentMsgs = finalStructured.mock.calls[0][0] as Array<{
+      role: string
+      tool_calls?: unknown[]
+    }>
+    const toolIdx = sentMsgs.findIndex((m) => m.role === 'tool')
+    expect(toolIdx).toBeGreaterThan(0)
+    const prev = sentMsgs[toolIdx - 1]
+    expect(prev.role).toBe('assistant')
+    expect(Array.isArray(prev.tool_calls)).toBe(true)
+  })
+
+  it('(h) budget check includes the assembled system prompt (final review I8)', async () => {
+    const seen: { content: string }[][] = []
+    const { deps } = makeDeps({
+      checkConversationBudget: (m) => {
+        seen.push(m)
+        return { ok: true }
+      },
+    })
+    await runAkifTurn(INPUT, deps)
+    expect(seen).toHaveLength(1)
+    // Sistem prompt'u ilk sırada ve gerçekten Akif sistem metni olmalı.
+    expect(seen[0][0].content).toContain('Akif Usta')
+    expect(seen[0][0].content.length).toBeGreaterThan(800)
+    // Kullanıcı mesajı da hâlâ dahil.
+    expect(seen[0].some((x) => x.content === INPUT.userMessage)).toBe(true)
   })
 
   it('(d) budget not ok → out_of_scope, model never called, audit written', async () => {
