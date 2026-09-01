@@ -18,7 +18,8 @@
     "prices:trend": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/aggregate-trend.ts",
     "notify:run": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/whatsapp-notify.ts",
     "crawl": "cross-env TS_NODE_PROJECT=crawler/tsconfig.json ts-node --transpile-only -r tsconfig-paths/register crawler/run.ts",
-    "test:crawler": "jest --config crawler/jest.config.js"
+    "test:crawler": "jest --config crawler/jest.config.js",
+    "akif:eval": "cross-env TS_NODE_PROJECT=scripts/tsconfig.akif-eval.json ts-node --transpile-only -r tsconfig-paths/register scripts/akif-eval.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

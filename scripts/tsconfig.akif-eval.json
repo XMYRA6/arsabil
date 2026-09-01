@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["ES2021", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "baseUrl": "..",
+    "paths": { "@/*": ["src/*"] }
+  },
+  "include": ["akif-eval.ts"]
+}
