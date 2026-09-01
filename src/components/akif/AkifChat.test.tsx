@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import type { AkifTurn } from '@/lib/ai/akif/contract'
 import { AkifChat, type AkifChatEntry } from './AkifChat'
@@ -104,4 +104,44 @@ it('term tool_result → terim kutusu', () => {
 it('error entry → hata metni', () => {
   render(<AkifChat entries={[{ id: 'e', role: 'error', content: 'Bağlantı hatası' }]} pending={false} onSend={jest.fn()} />)
   expect(screen.getByText('Bağlantı hatası')).toBeInTheDocument()
+})
+
+describe('mobil klavye inset', () => {
+  const ORIGINAL_INNER_HEIGHT = window.innerHeight
+  class FakeVV extends EventTarget {
+    height: number
+    offsetTop = 0
+    constructor(h: number) {
+      super()
+      this.height = h
+    }
+    resizeTo(h: number) {
+      this.height = h
+      this.dispatchEvent(new Event('resize'))
+    }
+  }
+  let vv: FakeVV
+  beforeEach(() => {
+    Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
+    vv = new FakeVV(844)
+    Object.defineProperty(window, 'visualViewport', { value: vv, configurable: true })
+  })
+  afterEach(() => {
+    Object.defineProperty(window, 'innerHeight', { value: ORIGINAL_INNER_HEIGHT, configurable: true })
+  })
+
+  it('klavye kapalıyken --keyboard-inset 0px', () => {
+    const { container } = render(<AkifChat entries={[]} pending={false} onSend={jest.fn()} />)
+    const wrap = container.firstChild as HTMLElement
+    expect(wrap.style.getPropertyValue('--keyboard-inset')).toBe('0px')
+  })
+
+  it('klavye açılınca --keyboard-inset güncellenir', () => {
+    const { container } = render(<AkifChat entries={[]} pending={false} onSend={jest.fn()} />)
+    const wrap = container.firstChild as HTMLElement
+    act(() => {
+      vv.resizeTo(844 - 300)
+    })
+    expect(wrap.style.getPropertyValue('--keyboard-inset')).toBe('300px')
+  })
 })

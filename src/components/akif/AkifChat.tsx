@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { AkifTurn, ScenarioCard } from '@/lib/ai/akif/contract'
+import { useKeyboardInset } from '@/components/mobile/useKeyboardInset'
 import { AkifMessageBubble } from './AkifMessageBubble'
 import { AkifAssumptionsBar } from './AkifAssumptionsBar'
 import { AkifScenarioCard } from './AkifScenarioCard'
@@ -23,10 +24,14 @@ const EXAMPLES = ['900 m² arsa, emsal 1.5, müteahhit %50', 'emsal nedir?']
 export function AkifChat({ entries, pending, onSend }: AkifChatProps) {
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  // Mobil sanal klavye açılınca `100dvh` küçülmez; besteci klavyenin altında
+  // kalırdı. `useKeyboardInset` (BottomSheet ile aynı) pozitif inset döndürür,
+  // `.wrap` yüksekliğinden düşülür → besteci klavyenin üstüne çıkar.
+  const keyboardInset = useKeyboardInset()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' })
-  }, [entries.length, pending])
+  }, [entries.length, pending, keyboardInset])
 
   const submit = (e?: React.FormEvent) => {
     e?.preventDefault()
@@ -37,7 +42,10 @@ export function AkifChat({ entries, pending, onSend }: AkifChatProps) {
   }
 
   return (
-    <div className={styles.wrap}>
+    <div
+      className={styles.wrap}
+      style={{ '--keyboard-inset': `${keyboardInset}px` } as React.CSSProperties}
+    >
       <div className={styles.transcript}>
         {entries.length === 0 && (
           <div className={styles.intro}>
