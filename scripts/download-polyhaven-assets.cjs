@@ -47,6 +47,13 @@ async function main() {
   const tree2Out = path.join(publicDir, 'trees', 'tree-02.glb');
   execSync(`npx -y gltf-pipeline -i "${path.join(tree2Dir, 'model.gltf')}" -o "${tree2Out}" -b -d`, { stdio: 'inherit' });
 
+  // Poly Haven'in 1k glTF varyanti wild_rooibos_bush icin BOZUK: yaprak/dal
+  // materyalleri alphaMode:BLEND ama base-color dokusu alfasiz JPEG -> kartlar
+  // opak siyah render olur. Alfa maskesini luminance'tan yeniden uretip
+  // materyalleri MASK'e cevir. Detay: scripts/rebuild-tree-02-alpha.cjs
+  console.log('--- Step 2b: Repairing tree-02 alpha (Poly Haven 1k glTF bug) ---');
+  execSync(`node "${path.join(__dirname, 'rebuild-tree-02-alpha.cjs')}"`, { stdio: 'inherit' });
+
   console.log('--- Step 3: Downloading Road Asphalt PBR Textures (asphalt_01) ---');
   const asphaltDir = path.join(publicDir, 'materials', 'road-asphalt');
   await downloadFile('https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_01/asphalt_01_diff_1k.jpg', path.join(asphaltDir, 'diffuse.jpg'));
