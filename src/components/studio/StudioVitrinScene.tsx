@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect, Suspense } from 'react';
+import React, { useMemo, useState, useEffect, Suspense, forwardRef } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, useTexture } from '@react-three/drei';
@@ -12,6 +12,7 @@ import { createMassGeometry, resolveEffectiveMass } from './buildMassGeometry';
 import { computeInitialCameraView } from './studioCamera';
 import { deriveFootprintPolygon } from '@/lib/studio/geometry2d';
 import { STUDIO_SCENE_COLORS } from './studioVisualTokens';
+import { StudioVitrinCapture, type VitrinCaptureHandle } from './StudioVitrinCapture';
 import type { StudioSnapshotDraft, StudioPoint, BuildingMass, StudioPolygon } from '@/lib/studio/types';
 
 export interface StudioVitrinSceneProps {
@@ -236,7 +237,8 @@ function VitrinMassMesh({ mass }: { mass: BuildingMass }) {
   );
 }
 
-export function StudioVitrinScene({ snapshot }: StudioVitrinSceneProps) {
+export const StudioVitrinScene = forwardRef<VitrinCaptureHandle, StudioVitrinSceneProps>(
+  function StudioVitrinScene({ snapshot }, ref) {
   const mass = snapshot.buildingMass;
   const parcelPolygon = snapshot.massingInput.parcelPolygon;
 
@@ -330,6 +332,10 @@ export function StudioVitrinScene({ snapshot }: StudioVitrinSceneProps) {
         target={cameraView.target}
         enableDamping
       />
+
+      {/* 5. Yakalama Köprüsü — Canvas dışına capture API sunar (Task 8 tüketir) */}
+      <StudioVitrinCapture ref={ref} />
     </Canvas>
   );
 }
+);

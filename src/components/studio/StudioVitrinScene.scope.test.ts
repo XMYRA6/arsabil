@@ -50,5 +50,13 @@ describe('StudioVitrinScene — kaynak dogrulama', () => {
     expect(source).toMatch(/import\s*\{[^}]*useTexture[^}]*\}\s*from\s*'@react-three\/drei'/);
     expect(source).not.toMatch(/new\s+THREE\.TextureLoader/);
     expect(source).toMatch(/<Suspense[^>]*>\s*<RoadMesh/);
+
+    // 9. forwardRef ile capture handle disari sunulmali (Task 6/8 —
+    // ust bilesenin StudioVitrinCapture.captureFrame'e erisebilmesi icin).
+    expect(source).toMatch(/forwardRef\s*<\s*VitrinCaptureHandle/);
+    expect(source).toMatch(
+      /import\s*\{[^}]*StudioVitrinCapture[^}]*\}\s*from\s*'\.\/StudioVitrinCapture'/
+    );
+    expect(source).toMatch(/<StudioVitrinCapture\s+ref=\{ref\}\s*\/>/);
   });
 });
