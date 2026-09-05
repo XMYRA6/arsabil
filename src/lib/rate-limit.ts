@@ -73,4 +73,5 @@ export const RATE_LIMITS = {
     DEGER_KART_ANON: { limit: 4, windowMs: 60_000 },  // IP başına 4/dk (PARCEL_LOOKUP_ANON'dan sıkı)
     WHATSAPP_INBOUND: { limit: 10, windowMs: 60_000 }, // telefon başına 10/dk
     AKIF_TURN: { limit: 8, windowMs: 60_000 }, // kullanıcı/IP başına 8/dk — LLM turu pahalı
+    STUDIO_RENDER: { limit: 5, windowMs: 60_000 }, // kullanıcı başına 5/dk — pahalı üretim, cache çoğu tekrarı zaten önler
 } as const
