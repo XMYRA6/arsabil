@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import { HomeMobile } from './mobile/HomeMobile';
 import { DegerHookBox } from '@/components/home/DegerHookBox';
 import { AkifHookBox } from '@/components/home/AkifHookBox';
+import { StudioRenderHookBox } from '@/components/home/StudioRenderHookBox';
 
 /* ── Animated counter hook ── */
 function useCounter(end: number, duration = 1600, active = false) {
@@ -650,6 +651,8 @@ function MarketingHomePage() {
       <DegerHookBox />
 
       <AkifHookBox />
+
+      <StudioRenderHookBox />
 
       {/* Stats Strip */}
       <StatsStrip />
