@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { getStudioScenarioVersionDetail } from '@/lib/studio/studioScenarioRepository';
 import { StudioVitrinPreview } from '@/components/studio/StudioVitrinPreview';
 import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
 
 /**
  * Geliştirme ve doğrulama amaçlı Vitrin 3D sahne sayfası (Owner-only).
@@ -30,6 +31,7 @@ export default async function StudioVitrinPage({
 
   const userId = session.user.id as string;
   const versionRecord = await getStudioScenarioVersionDetail(scenarioId, versionNum, userId);
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { plan: true } });
 
   if (!versionRecord) {
     notFound();
@@ -56,7 +58,12 @@ export default async function StudioVitrinPage({
         </div>
 
         <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '24px' }}>
-          <StudioVitrinPreview snapshot={versionRecord.snapshot} />
+          <StudioVitrinPreview
+            snapshot={versionRecord.snapshot}
+            scenarioId={scenarioId}
+            versionNumber={versionNum}
+            isPro={user?.plan === 'PRO'}
+          />
         </div>
       </div>
     </main>
