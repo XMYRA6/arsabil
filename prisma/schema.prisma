@@ -9,33 +9,33 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  name             String?
-  email            String?   @unique
-  emailVerified    DateTime?
-  image            String?
-  password         String?
-  role             String    @default("USER")
-  createdAt        DateTime  @default(now())
-  accounts         Account[]
-  listings         Listing[]
-  receivedMessages Message[] @relation("ReceivedMessages")
-  sentMessages     Message[] @relation("SentMessages")
-  offers           Offer[]
-  projects         Project[]
-  reports          Report[]
-  sessions         Session[]
-  bio           String?
-  linkedin      String?
-  website       String?
-  isVerified    Boolean        @default(false)
-  isBanned      Boolean        @default(false)
-  plan        String   @default("FREE")
-  emailPrefs  String   @default("{}")
-  notifications Notification[]
-  compareShares CompareShare[]
-  favorites     Favorite[]
-  studioScenarios StudioScenario[]
+  id                String             @id @default(cuid())
+  name              String?
+  email             String?            @unique
+  emailVerified     DateTime?
+  image             String?
+  password          String?
+  role              String             @default("USER")
+  createdAt         DateTime           @default(now())
+  accounts          Account[]
+  listings          Listing[]
+  receivedMessages  Message[]          @relation("ReceivedMessages")
+  sentMessages      Message[]          @relation("SentMessages")
+  offers            Offer[]
+  projects          Project[]
+  reports           Report[]
+  sessions          Session[]
+  bio               String?
+  linkedin          String?
+  website           String?
+  isVerified        Boolean            @default(false)
+  isBanned          Boolean            @default(false)
+  plan              String             @default("FREE")
+  emailPrefs        String             @default("{}")
+  notifications     Notification[]
+  compareShares     CompareShare[]
+  favorites         Favorite[]
+  studioScenarios   StudioScenario[]
   studioShareTokens StudioShareToken[]
 }
 
@@ -154,42 +154,42 @@ model RiskLevel {
 }
 
 model Listing {
-  id          String   @id @default(cuid())
-  reportId    String?  @unique
-  userId      String
-  city        String?
-  district    String?
-  notes       String?
-  isActive    Boolean  @default(true)
-  status      String   @default("PENDING")
-  title       String?
-  address     String?
-  phone       String?
-  description String?
-  price       Float?
-  landSizeSqm Float?
-  zoning      String?
-  type        String   @default("KAT_KARSILIGI")
-  titleDeed   String?
-  photos      String[] @default([])
-  lat                 Float?
-  lng                 Float?
-  neighborhood        String?
-  adaNo               String?
-  parselNo            String?
-  parcelAreaSqm       Float?
-  parcelQuality       String?
-  parcelGeometry      Json?
-  parcelVerifiedAt    DateTime?
-  parcelLookupStatus  String?
-  faultDistanceM      Int?
-  floodQ100           Boolean?
-  riskSnapshotAt      DateTime?
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  report      Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  offers      Offer[]
-  favorites   Favorite[]
+  id                 String     @id @default(cuid())
+  reportId           String?    @unique
+  userId             String
+  city               String?
+  district           String?
+  notes              String?
+  isActive           Boolean    @default(true)
+  status             String     @default("PENDING")
+  title              String?
+  address            String?
+  phone              String?
+  description        String?
+  price              Float?
+  landSizeSqm        Float?
+  zoning             String?
+  type               String     @default("KAT_KARSILIGI")
+  titleDeed          String?
+  photos             String[]   @default([])
+  lat                Float?
+  lng                Float?
+  neighborhood       String?
+  adaNo              String?
+  parselNo           String?
+  parcelAreaSqm      Float?
+  parcelQuality      String?
+  parcelGeometry     Json?
+  parcelVerifiedAt   DateTime?
+  parcelLookupStatus String?
+  faultDistanceM     Int?
+  floodQ100          Boolean?
+  riskSnapshotAt     DateTime?
+  createdAt          DateTime   @default(now())
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  report             Report?    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  offers             Offer[]
+  favorites          Favorite[]
 }
 
 model Favorite {
@@ -343,15 +343,33 @@ model StudioShareToken {
   @@index([versionId])
 }
 
+// SP1 — fotogerçekçi render cache + harcama denetim izi. Her satır bir
+// GERÇEK üretilen (cache miss) render'ı temsil eder; cache hit yeni
+// satır YAZMAZ — bu yüzden aylık harcama toplamı bu tablonun estCostUsd
+// toplamından güvenle hesaplanabilir (StudioScenarioAuditLog ile aynı
+// gevşek/FK'siz desen — userId'ye referans verir ama Cascade bağlamaz).
+model StudioRenderCache {
+  id         String   @id @default(cuid())
+  userId     String
+  cacheKey   String
+  imageUrl   String
+  estCostUsd Float
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, cacheKey])
+  @@index([userId])
+  @@index([createdAt])
+}
+
 model MarketListing {
-  id              String   @id @default(cuid())
+  id              String                    @id @default(cuid())
   source          String
   sourceListingId String
   sourceUrl       String
   title           String?
-  description     String?  @db.Text
+  description     String?                   @db.Text
   price           Float?
-  currency        String   @default("TRY")
+  currency        String                    @default("TRY")
   areaSqm         Float?
   pricePerSqm     Float?
   listingType     String
@@ -364,11 +382,11 @@ model MarketListing {
   lat             Float?
   lng             Float?
   geoPrecision    String?
-  photoUrls       String[] @default([])
+  photoUrls       String[]                  @default([])
   listedAt        DateTime?
-  status          String   @default("active")
-  firstSeenAt     DateTime @default(now())
-  lastSeenAt      DateTime @default(now())
+  status          String                    @default("active")
+  firstSeenAt     DateTime                  @default(now())
+  lastSeenAt      DateTime                  @default(now())
   dupeOfId        String?
   rawJson         Json?
   priceHistory    MarketListingPricePoint[]
@@ -461,12 +479,12 @@ model WhatsappConversation {
 }
 
 model WhatsappSubscription {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   phone              String
   il                 String
   ilce               String
   mahalle            String
-  createdAt          DateTime @default(now())
+  createdAt          DateTime  @default(now())
   lastDigestMonth    String?
   lastAlertAt        DateTime?
   lastAlertDirection String?
@@ -490,4 +508,3 @@ model AkifTurnLog {
   @@index([conversationId])
   @@index([createdAt])
 }
-
