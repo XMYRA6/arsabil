@@ -51,12 +51,18 @@ describe('StudioVitrinScene — kaynak dogrulama', () => {
     expect(source).not.toMatch(/new\s+THREE\.TextureLoader/);
     expect(source).toMatch(/<Suspense[^>]*>\s*<RoadMesh/);
 
-    // 9. forwardRef ile capture handle disari sunulmali (Task 6/8 —
+    // 9. Capture handle callback-prop deseniyle disari sunulmali (Task 6/7/8 —
     // ust bilesenin StudioVitrinCapture.captureFrame'e erisebilmesi icin).
-    expect(source).toMatch(/forwardRef\s*<\s*VitrinCaptureHandle/);
+    // NOT: forwardRef/useImperativeHandle DEGIL — next/dynamic({ssr:false})
+    // bu kod tabanindaki Next/React surum kombinasyonunda ref'i cozumlenmis
+    // forwardRef bilesenine iletmiyor (ampirik olarak dogrulandi), duz
+    // prop'lar next/dynamic uzerinden sorunsuz gectigi icin callback prop'a
+    // gecildi.
     expect(source).toMatch(
       /import\s*\{[^}]*StudioVitrinCapture[^}]*\}\s*from\s*'\.\/StudioVitrinCapture'/
     );
-    expect(source).toMatch(/<StudioVitrinCapture\s+ref=\{ref\}\s*\/>/);
+    expect(source).toMatch(/onCaptureReady/);
+    expect(source).toMatch(/<StudioVitrinCapture\s+onCaptureReady=\{onCaptureReady\}\s*\/>/);
+    expect(source).not.toMatch(/forwardRef/);
   });
 });

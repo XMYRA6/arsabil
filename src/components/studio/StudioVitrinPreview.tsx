@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { isWebGLAvailable } from './webglSupport';
 import { StudioSceneBoundary } from './StudioSceneBoundary';
@@ -32,7 +32,7 @@ type RenderState =
 export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro }: StudioVitrinPreviewProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [renderState, setRenderState] = useState<RenderState>({ status: 'idle' });
-  const captureRef = useRef<VitrinCaptureHandle>(null);
+  const [captureHandle, setCaptureHandle] = useState<VitrinCaptureHandle | null>(null);
 
   if (!snapshot || !snapshot.buildingMass) {
     return (
@@ -46,7 +46,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
   const canGenerateRender = Boolean(isPro && scenarioId && versionNumber);
 
   async function handleGenerateRender() {
-    const handle = captureRef.current;
+    const handle = captureHandle;
     if (!handle) {
       setRenderState({ status: 'error', message: 'Sahne henüz hazır değil, tekrar deneyin.' });
       return;
@@ -117,7 +117,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
           </div>
 
           <StudioSceneBoundary fallback={<div className={styles.canvasLoading}>3D vitrin sahnesi yüklenemedi.</div>}>
-            <StudioVitrinScene ref={captureRef} snapshot={snapshot} />
+            <StudioVitrinScene snapshot={snapshot} onCaptureReady={setCaptureHandle} />
           </StudioSceneBoundary>
         </div>
       )}

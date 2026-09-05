@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect, Suspense, forwardRef } from 'react';
+import React, { useMemo, useState, useEffect, Suspense } from 'react';
 import * as THREE from 'three';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, useTexture } from '@react-three/drei';
@@ -17,6 +17,7 @@ import type { StudioSnapshotDraft, StudioPoint, BuildingMass, StudioPolygon } fr
 
 export interface StudioVitrinSceneProps {
   snapshot: StudioSnapshotDraft;
+  onCaptureReady?: (handle: VitrinCaptureHandle) => void;
 }
 
 /**
@@ -237,8 +238,7 @@ function VitrinMassMesh({ mass }: { mass: BuildingMass }) {
   );
 }
 
-export const StudioVitrinScene = forwardRef<VitrinCaptureHandle, StudioVitrinSceneProps>(
-  function StudioVitrinScene({ snapshot }, ref) {
+export function StudioVitrinScene({ snapshot, onCaptureReady }: StudioVitrinSceneProps) {
   const mass = snapshot.buildingMass;
   const parcelPolygon = snapshot.massingInput.parcelPolygon;
 
@@ -334,8 +334,7 @@ export const StudioVitrinScene = forwardRef<VitrinCaptureHandle, StudioVitrinSce
       />
 
       {/* 5. Yakalama Köprüsü — Canvas dışına capture API sunar (Task 8 tüketir) */}
-      <StudioVitrinCapture ref={ref} />
+      <StudioVitrinCapture onCaptureReady={onCaptureReady} />
     </Canvas>
   );
 }
-);

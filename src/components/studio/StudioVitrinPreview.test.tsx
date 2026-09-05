@@ -16,47 +16,25 @@ let mockCaptureHandle: VitrinCaptureHandle | null = {
 
 const sceneMock = jest.fn((_props?: unknown) => <div data-testid="vitrin-scene" />);
 jest.mock('./StudioVitrinScene', () => ({
-  StudioVitrinScene: React.forwardRef((props: unknown, ref: React.Ref<VitrinCaptureHandle>) => {
-    React.useImperativeHandle(ref, () => mockCaptureHandle as VitrinCaptureHandle, [mockCaptureHandle]);
+  StudioVitrinScene: (props: { onCaptureReady?: (handle: VitrinCaptureHandle) => void }) => {
+    // Callback-prop deseni: forwardRef/useImperativeHandle DEĞİL — next/dynamic
+    // ({ssr:false}) bu kod tabanındaki Next/React sürüm kombinasyonunda ref'i
+    // çözümlenmiş forwardRef bileşenine iletmiyor (ampirik olarak doğrulandı,
+    // bkz. StudioVitrinCapture.tsx'teki not), bu yüzden capture handle bir
+    // callback prop ile yukarı taşınıyor — düz prop'lar next/dynamic üzerinden
+    // sorunsuz geçtiği için burada gerçek next/dynamic'i mock'lamaya gerek yok.
+    React.useEffect(() => {
+      if (mockCaptureHandle) {
+        props.onCaptureReady?.(mockCaptureHandle);
+      }
+    }, [props.onCaptureReady]);
     return sceneMock(props);
-  }),
+  },
 }));
 
 const isWebGLAvailableMock = jest.fn(() => true);
 jest.mock('./webglSupport', () => ({
   isWebGLAvailable: () => isWebGLAvailableMock(),
-}));
-
-/**
- * next/dynamic'in gerçek Loadable/Lazy/Suspense zinciri, Next 16.2.1 + React 19
- * kombinasyonunda ssr:false ile ref'i forwardRef bileşenine iletmiyor (ref.current
- * next/dynamic'in dahili "retry" nesnesine sabitleniyor, bileşenin
- * useImperativeHandle degerine değil). Bu, Task 9'un gerçek tarayıcı testinde
- * ayrıca doğrulanması gereken ayrı bir risk (next/dynamic ref-forwarding);
- * burada next/dynamic'i basit bir forwardRef+lazy-state sarmalayıcısıyla mock'luyoruz
- * ki bu test suiti StudioVitrinPreview'ın kendi mantığını (buton kapısı, fetch,
- * hata/başarı yolları) next/dynamic'in bu iç kısıtından bağımsız doğrulayabilsin.
- */
-jest.mock('next/dynamic', () => ({
-  __esModule: true,
-  default: (loader: () => Promise<unknown>) =>
-    React.forwardRef((props: unknown, ref: React.Ref<unknown>) => {
-      const [Comp, setComp] = React.useState<React.ComponentType<unknown> | null>(null);
-      React.useEffect(() => {
-        let active = true;
-        loader().then((resolved) => {
-          if (active) setComp(() => resolved as React.ComponentType<unknown>);
-        });
-        return () => {
-          active = false;
-        };
-      }, []);
-      if (!Comp) return null;
-      return React.createElement(Comp as React.ComponentType<Record<string, unknown>>, {
-        ...(props as object),
-        ref,
-      } as unknown as Record<string, unknown>);
-    }),
 }));
 
 const snapshot: StudioSnapshotDraft = {

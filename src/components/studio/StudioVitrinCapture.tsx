@@ -1,7 +1,7 @@
 'use client';
 
 import * as THREE from 'three';
-import { forwardRef, useImperativeHandle } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
 
 export interface VitrinCaptureResult {
@@ -14,9 +14,20 @@ export interface VitrinCaptureHandle {
   captureFrame(): VitrinCaptureResult;
 }
 
+export interface StudioVitrinCaptureProps {
+  onCaptureReady?: (handle: VitrinCaptureHandle) => void;
+}
+
 /**
- * Canvas prop almaz — Canvas içine <StudioVitrinCapture ref={...} /> olarak
- * eklenir, useThree() ile aktif gl/scene/camera'ya erişir.
+ * Canvas prop almaz — Canvas içine <StudioVitrinCapture onCaptureReady={...} />
+ * olarak eklenir, useThree() ile aktif gl/scene/camera'ya erişir.
+ *
+ * NOT: forwardRef/useImperativeHandle DEĞİL, callback-prop deseni kullanılıyor —
+ * next/dynamic({ssr:false})'in bu kod tabanındaki Next/React sürüm
+ * kombinasyonunda ref'i çözümlenmiş forwardRef bileşenine iletmediği
+ * (ref.current yerine dahili bir Suspense/Lazy "retry" nesnesine sabitlendiği)
+ * ampirik olarak doğrulandı; düz prop'lar next/dynamic üzerinden sorunsuz
+ * geçtiği için capture handle bir callback prop ile yukarı taşınıyor.
  *
  * Derinlik haritası ControlNet'in en sadık koşullama sinyali (spec §Mimari):
  * ayrı bir 3D modelleme adımı GEREKMEZ — sahne zaten gerçek 3D olduğu için
@@ -24,11 +35,10 @@ export interface VitrinCaptureHandle {
  * doğrudan derinlik görüntüsü üretiyoruz, sonra kullanıcının gördüğü renkli
  * kareyi geri çiziyoruz (sahne capture sonrası bozuk/siyah kalmasın).
  */
-export const StudioVitrinCapture = forwardRef<VitrinCaptureHandle>(function StudioVitrinCapture(_props, ref) {
+export function StudioVitrinCapture({ onCaptureReady }: StudioVitrinCaptureProps) {
   const { gl, scene, camera } = useThree();
 
-  useImperativeHandle(
-    ref,
+  const handle = useMemo<VitrinCaptureHandle>(
     () => ({
       captureFrame: () => {
         gl.render(scene, camera);
@@ -53,5 +63,9 @@ export const StudioVitrinCapture = forwardRef<VitrinCaptureHandle>(function Stud
     [gl, scene, camera]
   );
 
+  useEffect(() => {
+    onCaptureReady?.(handle);
+  }, [handle, onCaptureReady]);
+
   return null;
-});
+}
