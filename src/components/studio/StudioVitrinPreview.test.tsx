@@ -101,6 +101,15 @@ describe('StudioVitrinPreview', () => {
     expect(await screen.findByText('3D Sahne Desteklenmiyor')).toBeInTheDocument();
   });
 
+  it('WebGL desteklenmiyorsa isPro=true olsa da render butonu gösterilmez', async () => {
+    isWebGLAvailableMock.mockReturnValue(false);
+    const user = userEvent.setup();
+    render(<StudioVitrinPreview snapshot={snapshot} scenarioId="s1" versionNumber={1} isPro={true} />);
+    await user.click(screen.getByRole('button', { name: /göster|goster/i }));
+    expect(screen.queryByTestId('vitrin-scene')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Fotogerçekçi/i })).not.toBeInTheDocument();
+  });
+
   it('isPro=false ise render butonu gösterilmez', async () => {
     const user = userEvent.setup();
     render(<StudioVitrinPreview snapshot={snapshot} scenarioId="s1" versionNumber={1} isPro={false} />);

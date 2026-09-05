@@ -43,7 +43,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
   }
 
   const webglSupported = isWebGLAvailable();
-  const canGenerateRender = Boolean(isPro && scenarioId && versionNumber);
+  const canGenerateRender = Boolean(isPro && scenarioId && versionNumber && webglSupported);
 
   async function handleGenerateRender() {
     const handle = captureHandle;
