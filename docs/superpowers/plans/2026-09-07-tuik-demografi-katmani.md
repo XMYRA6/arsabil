@@ -2,221 +2,270 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Değer Kartı'na (`/deger`), üye kullanıcılara açık, ilçe seviyesinde TÜİK demografi bloğu (çekirdek 5 metrik + tek kural-tabanlı özet cümle) eklemek; veriyi `crawler/tuik/` altında Playwright ile TÜİK portalından export yakalayarak toplamak.
+**Goal:** Değer Kartı'na (`/deger`), üye kullanıcılara açık, TÜİK ilçe demografi bloğu (çekirdek 4 metrik + tek kural-tabanlı özet cümle) eklemek; veriyi `crawler/tuik/` altında TÜİK SDMX REST API'sinden auth'lu `fetch` ile toplamak.
 
-**Architecture:** Yeni `DistrictDemographics` Prisma modeli (il/ilçe katlanmış anahtar). `crawler/tuik/` ayrı bir crawler giriş noktası — `crawler/fetcher` context kurulumunu ve `CrawlRun`'ı yeniden kullanır, `run.ts` liste pipeline'ını kullanmaz. Saf `src/lib/demografi/` yorum üretir. Değer Kartı entegrasyonu 6a Fiyat Trendi'nin (`priceTrend`) DI + üye-gate + DTO deseninin birebir kopyasıdır.
+**Architecture:** Yeni `DistrictDemographics` Prisma modeli (il/ilçe katlanmış anahtar). `crawler/tuik/` ayrı bir crawler giriş noktası — `CrawlRun` takibini + izole tsconfig/jest'i yeniden kullanır, `fetcher/`/Playwright kullanmaz. TÜİK SDMX API'sinden SDMX-CSV çeker, parse eder, il-seviyesi 2 metriği ilin tüm ilçelerine yayar, upsert eder. Saf `src/lib/demografi/` yorum üretir. Değer Kartı entegrasyonu 6a Fiyat Trendi'nin (`priceTrend`) DI + üye-gate + DTO deseninin birebir kopyasıdır.
 
-**Tech Stack:** Next.js 16, Prisma 5 + PostgreSQL, `@playwright/test` (crawler), ts-node, Jest + ts-jest. CSV parse elle (bağımlılık yok) — yalnız xlsx çıkarsa `exceljs`.
+**Tech Stack:** Next.js 16, Prisma 5 + PostgreSQL, ts-node, Jest + ts-jest. Yeni npm bağımlılığı YOK (SDMX-CSV düz metin, token isteği `fetch` + `URLSearchParams`).
 
-**Spec:** `docs/superpowers/specs/2026-09-07-tuik-demografi-katmani-design.md`
+**Spec:** `docs/superpowers/specs/2026-09-07-tuik-demografi-katmani-design.md` (rev 2)
 
 ## Global Constraints
 
-- **Granülerlik:** yalnız ilçe seviyesi. Mahalle/il fallback zinciri YOK.
-- **Metrikler (çekirdek 5):** `population` (Int), `populationGrowthPerMille` (Float, ‰), `medianAge` (Float), `avgHouseholdSize` (Float), `netMigrationPerMille` (Float, ‰). Hepsi nullable.
+- **Metrikler (çekirdek 4):** `population` (Int, ilçe), `populationGrowthPerMille` (Float ‰, ilçe), `medianAge` (Float, İL değeri — ilin tüm ilçelerine kopyalanır), `avgHouseholdSize` (Float, İL değeri). Hepsi nullable. **Net göç YOK.**
 - **Erişim:** üye-gated. `findDistrictDemographics` ve DTO `demographics` alanı anonim payload'a HİÇBİR koşulda konmaz. `anonCardDeps.ts`'e eklenmez.
-- **Anahtar normalizasyonu:** her il/ilçe anahtarı `normalizeAreaName` (`src/lib/areaPrices/normalizeAreaName.ts`) ile katlanır — `.replace(/İ/g,'I').replace(/ı/g,'i').toUpperCase()`. Yazma yolu (crawler upsert) ve okuma yolu (route query) ikisi de aynı fonksiyonu kullanır.
-- **Veri disiplini:** yarım veri hiç veriden kötü. Bir crawl turunda HİÇBİR metrik çekilemezse hiçbir satır yazılmaz (`districtPrices/data.ts` disiplini). Upsert asla satır SİLMEZ.
-- **Migration:** elle yazılır, önce dev DB'ye `prisma migrate deploy`, prod'a batch deploy'da (diğer bekleyen migration'larla).
-- **Test:** her saf fonksiyon TDD (RED→GREEN). Regresyon: `npx tsc --noEmit` + `npx tsc -p crawler/tsconfig.json` + `npx jest --no-coverage --roots "$(pwd)/src"` + `npm run test:crawler` + `npm run build` — hepsi temiz.
-- **Dal:** `codex/professional-ui-and-land-cost` üzerinde doğrudan çalışılır (origin'de yok, worktree kurulmaz — bkz. `feedback_agent_tool_isolation_worktree`).
+- **Anahtar normalizasyonu:** her il/ilçe anahtarı `normalizeAreaName` (`src/lib/areaPrices/normalizeAreaName.ts`) ile katlanır — `.replace(/İ/g,'I').replace(/ı/g,'i').toUpperCase()`.
+- **Veri disiplini:** yarım veri hiç veriden kötü. Bir turda HİÇBİR dataflow çekilemezse (ya da token alınamazsa) hiçbir satır yazılmaz (`districtPrices/data.ts` disiplini). Upsert asla satır SİLMEZ.
+- **SDMX API tabanı:** `https://nsiws.tuik.gov.tr/rest`. Token uç noktası: `https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token` (`grant_type=password`, `client_id=nsi-ws-consumer`, `api_key=<TUIK_API_KEY>`). Veri: `GET /rest/data/TR,<DATAFLOW>,<VER>?format=SDMX-CSV&startPeriod=<yıl>&endPeriod=<yıl>` + `Authorization: Bearer <token>`.
+- **API Key:** `TUIK_API_KEY` env değişkeni. **KULLANICI sağlar** (Veri Portalı → Kullanıcı Bilgileri → SMS doğrulama → API Key). Task 1, 6, 9 ve gerçek crawl bunu gerektirir; diğer task'lar gerektirmez.
+- **Dal:** `codex/professional-ui-and-land-cost` üzerinde doğrudan (origin'de yok, worktree yok — `feedback_agent_tool_isolation_worktree`).
 - **Commit:** her task sonunda. Mesaj sonu:
   `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` +
   `Claude-Session: https://claude.ai/code/session_012nxvgsmnSrESr8pDggxUBi`
-- **Jest komutu:** `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "<pattern>"` (proje `--testPathPatterns` çoğul kullanır; `--roots` worktree kalıntısı taramasını önler).
+- **Jest (app):** `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "<pattern>"`
+- **Jest (crawler):** `npm run test:crawler -- --testPathPatterns "<pattern>"`
+- **Regresyon:** `npx tsc --noEmit` + `npx tsc -p crawler/tsconfig.json` + app jest + `npm run test:crawler` + `npm run build` — hepsi temiz.
 
 ---
 
-## Task 1: TÜİK portal keşfi → `datasets.ts` + FINDINGS
+## Task 1: API Key + SDMX introspection → `datasets.ts` + `areaCodesData.ts` + FINDINGS
 
-**Bu task interaktif tarayıcı erişimi gerektirir — dispatch edilen bir subagent'la DEĞİL, controller (veya kullanıcı) tarafından doğrudan yapılır.** Çıktısı olmadan Task 5 ve Task 7 yazılamaz.
+**API Key gerektirir. Dispatch edilen subagent'la DEĞİL — controller (kullanıcı `TUIK_API_KEY`'i verdikten sonra) veya kullanıcı doğrudan yapar.** Çıktısı olmadan Task 6 ve Task 9 tamamlanamaz.
 
 **Files:**
 - Create: `crawler/tuik/datasets.ts`
+- Create: `crawler/tuik/areaCodesData.ts` (üretilmiş ham harita — REF_AREA kodu → il/ilçe adı)
 - Create: `crawler/tuik/FINDINGS.md`
-- Create: `crawler/tuik/fixtures/` (indirilen örnek export dosyaları, PII yok — TÜİK verisi zaten kamuya açık toplu istatistik)
+- Create: `crawler/tuik/fixtures/` (bir gerçek SDMX-CSV örneği, PII yok — kamuya açık toplam istatistik)
 
 **Interfaces:**
-- Produces: `DATASETS` — `DemographicDataset[]`; her metriğin TÜİK tablosunu, sorgu adımlarını ve export→model alan eşlemesini tanımlar. Task 5 (`parse.ts`) ve Task 7 (`extract.ts`) bunu tüketir.
+- Produces:
+  - `DATAFLOWS: DataflowRef[]` — 4 dataflow'un id + versiyon + `field` (model alanı) + `level` (`'il'` | `'ilce'`) + `keyTemplate` (gösterge/cinsiyet boyutları için sabit değerler)
+  - `DATA_YEAR: number`
+  - `TOKEN_URL`, `DATA_BASE` sabitleri
+  - `AREA_CODES: Record<string, { il: string; ilce: string | null }>` (areaCodesData.ts) — Task 6 tüketir
+  - Task 5 (`parse.ts`), Task 6 (`areaCodes.ts`), Task 9 (`run.ts`) tüketir
 
-- [ ] **Step 1: TÜİK portalını aç ve çekirdek-5'i ara**
+- [ ] **Step 1: Token al ve sakla (elle, curl)**
 
-`data.tuik.gov.tr` → "İstatistiksel Tablolar" → "Nüfus ve Demografi". Şu tabloları/verileri bul ve **ilçe kırılımında** mevcut mu doğrula:
-1. İlçelere göre il/ilçe merkezi nüfusu (ADNKS) → `population`
-2. Yıllık nüfus artış hızı (‰), ilçe → `populationGrowthPerMille` (doğrudan var mı, yoksa ardışık iki yıl nüfustan mı türetilecek?)
-3. İlçelere göre ortanca yaş → `medianAge` (ilçe yoksa il seviyesi → alan null bırakılır)
-4. İlçelere göre ortalama hane halkı büyüklüğü → `avgHouseholdSize`
-5. İlçelere göre net göç hızı (‰) → `netMigrationPerMille`
+```bash
+curl -s -X POST "https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token" \
+  --header "Content-Type: application/x-www-form-urlencoded" \
+  --data "grant_type=password" --data "client_id=nsi-ws-consumer" \
+  --data "api_key=$TUIK_API_KEY" | python -c "import sys,json;print(json.load(sys.stdin)['access_token'])"
+```
+Dönen `access_token`'ı bir kabuk değişkenine al: `TOKEN=<...>`.
 
-- [ ] **Step 2: Her tablo için export yolunu belirle**
+- [ ] **Step 2: 4 dataflow'un versiyon + DSD yapısını doğrula**
 
-Her tablonun sorgu arayüzünde: İlçe kırılımı nasıl seçiliyor (dropdown/checkbox/selektör), yıl nasıl seçiliyor, "İndir" düğmesi hangi formatları sunuyor (CSV / XLSX / XLS). **CSV varsa CSV tercih edilir** (sıfır bağımlılık). Bir örnek dosyayı indirip `crawler/tuik/fixtures/`'e koy.
+Her biri için (`DF_ADNKS_T22`, `DF_ADNKS_T38`, `DF_ADNKS_T23`, `DF_ADNKS_T25`):
 
-- [ ] **Step 3: `FINDINGS.md` yaz**
+```bash
+curl -s "https://nsiws.tuik.gov.tr/rest/dataflow/TR/DF_ADNKS_T22/latest?references=descendants" \
+  --header "Authorization: Bearer $TOKEN" > /tmp/t22.xml
+```
+XML'den not et: `Dataflow version` (ör. `1.1`), bağlı `DSD` id + versiyon, DSD'nin **boyut sırası** (seri anahtarı şablonu — hangi pozisyon `REF_AREA`, hangisi gösterge/`CINSIYET`/`YAS_GRUBU` vb.), ve `REF_AREA` boyutunun bağlı olduğu **kod listesi** adı+versiyonu.
 
-Her metrik için: TÜİK tablo adı + URL, ilçe kırılımı seçme adımları (Playwright'ta tıklanacak selektörler/metinler), export formatı, indirilen dosyanın sütun düzeni (hangi sütun il, hangisi ilçe, hangisi değer; başlık satırı kaç satır; ondalık ayıracı `,` mı `.` mı; ilçe adı formatı — "Ortahisar" mı "ORTAHİSAR" mı). Türetme gerekiyorsa (artış hızı) formülü yaz. Bir metrik ilçe kırılımında YOKSA bunu açıkça yaz — o alan kalıcı `null` kalır.
+- [ ] **Step 3: REF_AREA kod listesini indir**
 
-- [ ] **Step 4: `datasets.ts` yaz**
+Step 2'de bulunan kod listesi adıyla (ör. `CL_ADRESSEL_KONUM` / `CL_IL_ILCE`):
+
+```bash
+curl -s "https://nsiws.tuik.gov.tr/rest/codelist/TR/<CL_ADI>/<VER>" \
+  --header "Authorization: Bearer $TOKEN" > /tmp/areas.xml
+```
+Bu XML'de her kod için `id` + Türkçe `Name` + parent ilişkisi var. İl kodları (81) ve ilçe kodları (~970) ile bunların Türkçe adları buradan çıkar.
+
+- [ ] **Step 4: Bir gerçek veri örneği çek (fixture)**
+
+```bash
+curl -s "https://nsiws.tuik.gov.tr/rest/data/TR,DF_ADNKS_T22,1.1?format=SDMX-CSV&startPeriod=2024&endPeriod=2024" \
+  --header "Authorization: Bearer $TOKEN" > crawler/tuik/fixtures/adnks-t22-2024.csv
+```
+Dosyanın ilk ~15 satırını incele: sütun başlıkları (`DATAFLOW`, `REF_AREA`, `TIME_PERIOD`, `OBS_VALUE`, …), ondalık ayıracı, `REF_AREA` değer formatı, il-toplamı satırları nasıl ayırt ediliyor (REF_AREA kodunun uzunluğu / seviye).
+
+- [ ] **Step 5: `FINDINGS.md` yaz**
+
+Her dataflow için: doğrulanmış versiyon, DSD id+ver, seri anahtarı şablonu (boyut sırası), `REF_AREA` dışı boyutlar için seçilecek sabit değer (`medianAge` T23'te `CINSIYET=_T` toplam), `level` (T22/T38 ilçe, T23/T25 il). SDMX-CSV sütun düzeni + ondalık ayıracı. Kod listesi adı/versiyonu. Token TTL gözlemi.
+
+- [ ] **Step 6: `areaCodesData.ts` yaz (üretilmiş harita)**
+
+Step 3 XML'inden türet — script veya elle:
+
+```typescript
+// crawler/tuik/areaCodesData.ts
+// TÜİK CL_<...>/<ver> kod listesinden üretildi (Task 1). Yıllık tazelemede
+// yeni ilçe eklenirse burası güncellenir (areaCodes.ts'in resolveArea'sı
+// bilinmeyen kodu null döndürüp CrawlRun.notes'a sayar).
+export const AREA_CODES: Record<string, { il: string; ilce: string | null }> = {
+  // "TR_IL_34": { il: "İstanbul", ilce: null },
+  // "TR_ILCE_3401": { il: "İstanbul", ilce: "Adalar" },
+  // ... Step 3'ten doldur
+}
+```
+
+- [ ] **Step 7: `datasets.ts` yaz**
 
 ```typescript
 // crawler/tuik/datasets.ts
-export interface DemographicColumnMap {
-  /** export dosyasında il adını taşıyan sütun başlığı veya 0-tabanlı index */
-  ilColumn: string | number
-  ilceColumn: string | number
-  /** model alanı → export sütunu (başlık veya index). Alan bu tabloda yoksa hiç eklenmez. */
-  fields: Partial<Record<'population' | 'populationGrowthPerMille' | 'medianAge' | 'avgHouseholdSize' | 'netMigrationPerMille', string | number>>
+export const TOKEN_URL = 'https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token'
+export const DATA_BASE = 'https://nsiws.tuik.gov.tr/rest/data/TR'
+
+export type DemographicField =
+  | 'population'
+  | 'populationGrowthPerMille'
+  | 'medianAge'
+  | 'avgHouseholdSize'
+
+export interface DataflowRef {
+  key: string            // kısa ad — log / CrawlRun.notes
+  dataflow: string       // "DF_ADNKS_T22"
+  version: string        // Task 1 Step 2'den doğrulanmış — ör. "1.1"
+  field: DemographicField
+  level: 'il' | 'ilce'
+  /** REF_AREA dışı boyutlar için sabit filtre (seri anahtarı sırasına göre,
+   *  REF_AREA ve TIME_PERIOD hariç). Ör. medyan yaş T23 için { CINSIYET: '_T' }.
+   *  Task 1 Step 2 DSD sırasına göre doldurulur. */
+  keyDimensions: Record<string, string>
 }
 
-export interface DemographicDataset {
-  key: string                    // "population" | "growth" | "medianAge" | "household" | "migration"
-  label: string                  // insan-okur, log/CrawlRun.notes için
-  tableUrl: string               // TÜİK sorgu sayfası
-  /** Playwright extract.ts'in izleyeceği adımlar — FINDINGS.md'den. */
-  querySteps: Array<{ action: 'click' | 'selectOption' | 'fill' | 'waitForSelector'; selector: string; value?: string }>
-  exportFormat: 'csv' | 'xlsx'
-  headerRows: number             // atlanacak başlık satırı sayısı
-  decimalSeparator: ',' | '.'
-  columns: DemographicColumnMap
-  /** artış hızı gibi ham sütundan türetilen alanlar için; yoksa undefined */
-  derive?: (row: Record<string, string>) => Partial<Record<string, number>>
-}
+export const DATA_YEAR = 2024  // Task 1'de en güncel tam yıl doğrulanır
 
-export const DATASETS: DemographicDataset[] = [
-  // Step 3'teki FINDINGS.md'ye göre BURAYI DOLDUR. Her satır bir TÜİK tablosu.
-  // Örnek iskelet (gerçek değerler FINDINGS.md'den gelir):
-  // {
-  //   key: 'population',
-  //   label: 'İlçe nüfusu (ADNKS)',
-  //   tableUrl: 'https://data.tuik.gov.tr/...',
-  //   querySteps: [
-  //     { action: 'click', selector: 'text=İlçe' },
-  //     { action: 'selectOption', selector: '#yil', value: '2024' },
-  //   ],
-  //   exportFormat: 'csv',
-  //   headerRows: 3,
-  //   decimalSeparator: ',',
-  //   columns: { ilColumn: 'İl', ilceColumn: 'İlçe', fields: { population: 'Toplam' } },
-  // },
+export const DATAFLOWS: DataflowRef[] = [
+  // Task 1 Step 2/5 FINDINGS'e göre doldur. İskelet:
+  // { key: 'population', dataflow: 'DF_ADNKS_T22', version: '1.1',
+  //   field: 'population', level: 'ilce', keyDimensions: {} },
+  // { key: 'growth', dataflow: 'DF_ADNKS_T38', version: '1.1',
+  //   field: 'populationGrowthPerMille', level: 'ilce', keyDimensions: {} },
+  // { key: 'medianAge', dataflow: 'DF_ADNKS_T23', version: '1.1',
+  //   field: 'medianAge', level: 'il', keyDimensions: { CINSIYET: '_T' } },
+  // { key: 'household', dataflow: 'DF_ADNKS_T25', version: '1.1',
+  //   field: 'avgHouseholdSize', level: 'il', keyDimensions: {} },
 ]
-
-/** DATASETS'in en güncel yılı — CrawlRun.notes ve DistrictDemographics.dataYear için. */
-export const DATA_YEAR = 2024  // FINDINGS.md'ye göre güncelle
 ```
 
-- [ ] **Step 5: Doğrula ve commit**
+- [ ] **Step 8: Doğrula + commit**
 
-`npx tsc -p crawler/tsconfig.json` temiz olmalı (DATASETS boş olsa da tip geçerli). `crawler/tuik/FINDINGS.md` her metrik için Step 3'teki tüm soruları yanıtlıyor mu kontrol et.
+`npx tsc -p crawler/tsconfig.json` temiz (DATAFLOWS boş olsa da tip geçerli). FINDINGS.md tüm Step 2/5 sorularını yanıtlıyor mu kontrol et.
 
 ```bash
-git add crawler/tuik/datasets.ts crawler/tuik/FINDINGS.md crawler/tuik/fixtures/
-git commit -m "feat(tuik): portal keşfi — datasets.ts config + FINDINGS"
+git add crawler/tuik/datasets.ts crawler/tuik/areaCodesData.ts crawler/tuik/FINDINGS.md crawler/tuik/fixtures/
+git commit -m "feat(tuik): SDMX introspection — datasets.ts + areaCodesData.ts + FINDINGS"
 ```
 
 ---
 
-## Task 2: Ortak tarayıcı context helper
+## Task 2: `crawler/tuik/auth.ts` — access token
+
+**API Key GEREKMEZ (mock'lu test).**
 
 **Files:**
-- Create: `crawler/fetcher/context.ts`
-- Modify: `crawler/fetcher/browser.ts` (context kurulumunu helper'a devret)
-- Test: `crawler/__tests__/fetcher/context.test.ts`
+- Create: `crawler/tuik/auth.ts`
+- Test: `crawler/__tests__/tuik/auth.test.ts`
 
 **Interfaces:**
-- Produces: `launchContext(cfg: CrawlConfig, opts?: { headful?: boolean }) => Promise<{ browser: Browser; context: BrowserContext }>` — Task 7 (`extract.ts`) bunu kullanır.
+- Consumes: `TOKEN_URL` (Task 1)
+- Produces: `getAccessToken(deps: { fetch: typeof fetch; apiKey: string }) => Promise<string>` — Task 9 tüketir
 
 - [ ] **Step 1: Failing test yaz**
 
 ```typescript
-// crawler/__tests__/fetcher/context.test.ts
-import { launchContext } from '../../fetcher/context'
-import { DEFAULT_CONFIG } from '../../config'
+// crawler/__tests__/tuik/auth.test.ts
+import { getAccessToken } from '../../tuik/auth'
 
-describe('launchContext', () => {
-  it('tr-TR locale ve Istanbul timezone ile bir context döndürür, sonra kapanır', async () => {
-    const { browser, context } = await launchContext(DEFAULT_CONFIG, { headful: false })
-    const page = await context.newPage()
-    const locale = await page.evaluate(() => navigator.language)
-    const webdriver = await page.evaluate(() => navigator.webdriver)
-    await page.close()
-    await context.close()
-    await browser.close()
-    expect(locale).toBe('tr-TR')
-    expect(webdriver).toBeUndefined()
-  }, 30_000)
+function jsonResponse(body: unknown, ok = true, status = 200) {
+  return { ok, status, json: async () => body, text: async () => JSON.stringify(body) } as Response
+}
+
+describe('getAccessToken', () => {
+  it('token uç noktasına password grant + api_key gönderir, access_token döner', async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    const fakeFetch = (async (url: string, init?: RequestInit) => {
+      calls.push({ url, init })
+      return jsonResponse({ access_token: 'tok-123', expires_in: 300 })
+    }) as unknown as typeof fetch
+
+    const token = await getAccessToken({ fetch: fakeFetch, apiKey: 'KEY-abc' })
+
+    expect(token).toBe('tok-123')
+    expect(calls[0].url).toContain('/realms/web/protocol/openid-connect/token')
+    const body = String(calls[0].init?.body)
+    expect(body).toContain('grant_type=password')
+    expect(body).toContain('client_id=nsi-ws-consumer')
+    expect(body).toContain('api_key=KEY-abc')
+  })
+
+  it('non-200 → anlamlı hata fırlatır', async () => {
+    const fakeFetch = (async () => jsonResponse({ error: 'invalid_grant' }, false, 401)) as unknown as typeof fetch
+    await expect(getAccessToken({ fetch: fakeFetch, apiKey: 'bad' })).rejects.toThrow(/token alınamadı|401/i)
+  })
+
+  it('yanıtta access_token yoksa → hata fırlatır', async () => {
+    const fakeFetch = (async () => jsonResponse({ expires_in: 300 })) as unknown as typeof fetch
+    await expect(getAccessToken({ fetch: fakeFetch, apiKey: 'x' })).rejects.toThrow(/access_token/i)
+  })
 })
 ```
 
 - [ ] **Step 2: Test'i çalıştır, FAIL gör**
 
-Run: `npm run test:crawler -- --testPathPatterns context`
-Expected: FAIL — `Cannot find module '../../fetcher/context'`
+Run: `npm run test:crawler -- --testPathPatterns "tuik/auth"`
+Expected: FAIL — modül yok.
 
-- [ ] **Step 3: `context.ts` yaz**
-
-`browser.ts`'deki context kurulumunu (satır 19-31: `chromium.launch`, `newContext` ile UA/viewport/locale/timezone, `addInitScript` webdriver maskesi) buraya taşı:
+- [ ] **Step 3: `auth.ts` yaz**
 
 ```typescript
-// crawler/fetcher/context.ts
-import { chromium, type Browser, type BrowserContext } from '@playwright/test'
-import type { CrawlConfig } from '../config'
+// crawler/tuik/auth.ts
+import { TOKEN_URL } from './datasets'
 
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-
-export async function launchContext(
-  _cfg: CrawlConfig,
-  opts: { headful?: boolean } = {},
-): Promise<{ browser: Browser; context: BrowserContext }> {
-  const browser = await chromium.launch({ headless: !opts.headful })
-  try {
-    const context = await browser.newContext({
-      userAgent: UA,
-      viewport: { width: 1440, height: 900 },
-      locale: 'tr-TR',
-      timezoneId: 'Europe/Istanbul',
-    })
-    await context.addInitScript(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
-    })
-    return { browser, context }
-  } catch (e) {
-    await browser.close()
-    throw e
+export async function getAccessToken(deps: { fetch: typeof fetch; apiKey: string }): Promise<string> {
+  const body = new URLSearchParams({
+    grant_type: 'password',
+    client_id: 'nsi-ws-consumer',
+    api_key: deps.apiKey,
+  })
+  const res = await deps.fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  if (!res.ok) {
+    throw new Error(`TÜİK token alınamadı (HTTP ${res.status})`)
   }
+  const json = (await res.json()) as { access_token?: string }
+  if (!json.access_token) {
+    throw new Error('TÜİK token yanıtında access_token yok')
+  }
+  return json.access_token
 }
 ```
 
-- [ ] **Step 4: `browser.ts`'i helper'ı kullanacak şekilde düzenle**
+- [ ] **Step 4: Test'i çalıştır, PASS gör**
 
-`browser.ts` içinde satır 19-36'daki inline kurulumu `const { browser, context } = await launchContext(cfg, opts)` ile değiştir. `UA` sabitini ve `chromium`/`Browser`/`BrowserContext` importlarını `browser.ts`'den kaldır (artık `context.ts`'de). `randDelayMs`, `Fetcher` arayüzü, `get()`/`close()` mantığı DEĞİŞMEZ.
+Run: `npm run test:crawler -- --testPathPatterns "tuik/auth"` → 3 test PASS.
+`npx tsc -p crawler/tsconfig.json` temiz.
 
-- [ ] **Step 5: Testleri çalıştır**
-
-Run: `npm run test:crawler` (tümü) + `npx tsc -p crawler/tsconfig.json`
-Expected: context testi PASS; mevcut crawler testleri (emlakjet/sahibinden/pipeline) hâlâ PASS; tsc temiz.
-
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add crawler/fetcher/context.ts crawler/fetcher/browser.ts crawler/__tests__/fetcher/context.test.ts
-git commit -m "refactor(crawler): tarayıcı context kurulumunu launchContext helper'ına çıkar"
+git add crawler/tuik/auth.ts crawler/__tests__/tuik/auth.test.ts
+git commit -m "feat(tuik): SDMX access token (getAccessToken)"
 ```
 
 ---
 
 ## Task 3: `DistrictDemographics` modeli + migration
 
+**API Key GEREKMEZ.**
+
 **Files:**
-- Modify: `prisma/schema.prisma` (yeni model, dosya sonuna — diğer crawler modellerinin yanına)
-- Create: `prisma/migrations/20260907120000_add_district_demographics/migration.sql`
+- Modify: `prisma/schema.prisma` (yeni model, `AkifTurnLog` sonrası)
+- Create: `prisma/migrations/20260907130000_add_district_demographics/migration.sql`
 
 **Interfaces:**
-- Produces: `prisma.districtDemographics` Prisma Client modeli; `il_ilce` compound unique. Task 6, 8, 9 tüketir.
+- Produces: `prisma.districtDemographics` modeli; `il_ilce` compound unique. Task 8, 10, 11 tüketir.
 
 - [ ] **Step 1: Modeli `schema.prisma`'ya ekle**
-
-`AkifTurnLog` modelinden sonra:
 
 ```prisma
 model DistrictDemographics {
@@ -228,7 +277,6 @@ model DistrictDemographics {
   populationGrowthPerMille Float?
   medianAge                Float?
   avgHouseholdSize         Float?
-  netMigrationPerMille     Float?
   source                   String
   fetchedAt                DateTime
   updatedAt                DateTime @updatedAt
@@ -241,7 +289,7 @@ model DistrictDemographics {
 - [ ] **Step 2: Migration SQL yaz**
 
 ```sql
--- prisma/migrations/20260907120000_add_district_demographics/migration.sql
+-- prisma/migrations/20260907130000_add_district_demographics/migration.sql
 -- CreateTable
 CREATE TABLE "DistrictDemographics" (
     "id" TEXT NOT NULL,
@@ -252,7 +300,6 @@ CREATE TABLE "DistrictDemographics" (
     "populationGrowthPerMille" DOUBLE PRECISION,
     "medianAge" DOUBLE PRECISION,
     "avgHouseholdSize" DOUBLE PRECISION,
-    "netMigrationPerMille" DOUBLE PRECISION,
     "source" TEXT NOT NULL,
     "fetchedAt" TIMESTAMP(3) NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -269,27 +316,25 @@ CREATE INDEX "DistrictDemographics_il_idx" ON "DistrictDemographics"("il");
 
 - [ ] **Step 3: Migration'ı dev DB'ye uygula**
 
-Run: `npx prisma migrate deploy` (dev DB `arsabil_dev` çalışıyor olmalı — `npm run dev:db`)
-Sonra: `npx prisma migrate status` → "Database schema is up to date"
-Sonra: `npx prisma generate`
+Run: `npm run dev:db` (container ayakta olmalı) → `npx prisma migrate deploy` → `npx prisma migrate status` ("up to date") → `npx prisma generate`.
+Windows'ta `generate` EPERM verirse kilitleyen süreçleri kapat, tekrar dene.
 
-Windows'ta `prisma generate` EPERM verirse (`.prisma/client` DLL kilidi — jest/TS server): kilitleyen süreçleri kapat, tekrar dene. Şema değişikliği olduğu için generate ZORUNLU.
+- [ ] **Step 4: tsc**
 
-- [ ] **Step 4: tsc + regresyon**
-
-Run: `npx tsc --noEmit`
-Expected: temiz (yeni model henüz kullanılmıyor).
+Run: `npx tsc --noEmit` → temiz (model henüz kullanılmıyor).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add prisma/schema.prisma prisma/migrations/20260907120000_add_district_demographics/
-git commit -m "feat(db): DistrictDemographics modeli + migration (ilçe demografi)"
+git add prisma/schema.prisma prisma/migrations/20260907130000_add_district_demographics/
+git commit -m "feat(db): DistrictDemographics modeli + migration (ilçe demografi, 4 metrik)"
 ```
 
 ---
 
 ## Task 4: `src/lib/demografi/` — types + summarize
+
+**API Key GEREKMEZ.**
 
 **Files:**
 - Create: `src/lib/demografi/types.ts`
@@ -298,10 +343,10 @@ git commit -m "feat(db): DistrictDemographics modeli + migration (ilçe demograf
 
 **Interfaces:**
 - Produces:
-  - `DistrictDemographicsRecord` — `{ dataYear: number; population: number | null; populationGrowthPerMille: number | null; medianAge: number | null; avgHouseholdSize: number | null; netMigrationPerMille: number | null }`
+  - `DistrictDemographicsRecord` — `{ dataYear: number; population: number | null; populationGrowthPerMille: number | null; medianAge: number | null; avgHouseholdSize: number | null }`
   - `DemographicsSummary` — `{ sentence: string | null }`
   - `summarizeDemographics(rec: DistrictDemographicsRecord) => DemographicsSummary`
-  - Task 8 (`card.ts`) hepsini tüketir.
+  - Task 10 (`card.ts`) tüketir.
 
 - [ ] **Step 1: `types.ts` yaz**
 
@@ -313,7 +358,6 @@ export interface DistrictDemographicsRecord {
   populationGrowthPerMille: number | null
   medianAge: number | null
   avgHouseholdSize: number | null
-  netMigrationPerMille: number | null
 }
 
 export interface DemographicsSummary {
@@ -330,52 +374,46 @@ import type { DistrictDemographicsRecord } from './types'
 
 const base: DistrictDemographicsRecord = {
   dataYear: 2024,
-  population: 400_000,
+  population: 300_000,
   populationGrowthPerMille: 0,
   medianAge: 35,
   avgHouseholdSize: 3.2,
-  netMigrationPerMille: 0,
 }
 
 describe('summarizeDemographics', () => {
-  it('artış ≥ +5‰ ve net göç > 0 → talep destekleniyor', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 12, netMigrationPerMille: 8 })
-    expect(r.sentence).toBe('Bu ilçede nüfus büyüyor ve net göç pozitif — konut talebi destekleniyor.')
+  it('artış ≥ +10‰ → nüfus belirgin büyüyor', () => {
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 14 })
+    expect(r.sentence).toBe('Bu ilçede nüfus belirgin şekilde büyüyor — konut talebi güçlü.')
   })
 
-  it('artış ≤ −5‰ → talep zayıf olabilir', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: -9, netMigrationPerMille: -2 })
-    expect(r.sentence).toBe('Nüfus geriliyor ya da ilçe net göç veriyor — konut talebi zayıf olabilir.')
+  it('artış ≤ −10‰ → nüfus hızla azalıyor', () => {
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: -12 })
+    expect(r.sentence).toBe('Nüfus hızla azalıyor — konut talebi zayıf olabilir.')
   })
 
-  it('net göç ≤ −10‰ (artış nötr olsa da) → talep zayıf olabilir', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 1, netMigrationPerMille: -15 })
-    expect(r.sentence).toBe('Nüfus geriliyor ya da ilçe net göç veriyor — konut talebi zayıf olabilir.')
+  it('−10‰ < artış < +10‰ → durağan', () => {
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 3 })
+    expect(r.sentence).toBe('Nüfus görece durağan; belirgin bir demografik baskı yok.')
   })
 
-  it('iki sinyal arası → dengeli', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 2, netMigrationPerMille: 1 })
-    expect(r.sentence).toBe('Nüfus ve göç dengeli; belirgin bir demografik baskı yok.')
-  })
-
-  it('medyan yaş ≤ 30 → genç nüfus eki', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 2, netMigrationPerMille: 1, medianAge: 27 })
-    expect(r.sentence).toBe('Nüfus ve göç dengeli; belirgin bir demografik baskı yok. Genç nüfus yapısı.')
+  it('medyan yaş ≤ 32 → genç nüfus eki', () => {
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 3, medianAge: 29 })
+    expect(r.sentence).toBe('Nüfus görece durağan; belirgin bir demografik baskı yok. Genç nüfus yapısı.')
   })
 
   it('medyan yaş ≥ 40 → yaşlanan nüfus eki', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 12, netMigrationPerMille: 8, medianAge: 44 })
-    expect(r.sentence).toBe('Bu ilçede nüfus büyüyor ve net göç pozitif — konut talebi destekleniyor. Yaşlanan nüfus.')
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 14, medianAge: 43 })
+    expect(r.sentence).toBe('Bu ilçede nüfus belirgin şekilde büyüyor — konut talebi güçlü. Yaşlanan nüfus.')
   })
 
-  it('artış ve net göç ikisi de null → sentence null', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: null, netMigrationPerMille: null })
+  it('medyan yaş null → yaş eki yok', () => {
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: 3, medianAge: null })
+    expect(r.sentence).toBe('Nüfus görece durağan; belirgin bir demografik baskı yok.')
+  })
+
+  it('artış null → sentence null', () => {
+    const r = summarizeDemographics({ ...base, populationGrowthPerMille: null })
     expect(r.sentence).toBeNull()
-  })
-
-  it('artış null ama net göç var → cümle üretilir (null dalına düşmez)', () => {
-    const r = summarizeDemographics({ ...base, populationGrowthPerMille: null, netMigrationPerMille: 3 })
-    expect(r.sentence).not.toBeNull()
   })
 })
 ```
@@ -383,7 +421,7 @@ describe('summarizeDemographics', () => {
 - [ ] **Step 3: Test'i çalıştır, FAIL gör**
 
 Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "demografi/summarize"`
-Expected: FAIL — `Cannot find module './summarize'`
+Expected: FAIL — modül yok.
 
 - [ ] **Step 4: `summarize.ts` yaz**
 
@@ -393,25 +431,19 @@ import type { DistrictDemographicsRecord, DemographicsSummary } from './types'
 
 export function summarizeDemographics(rec: DistrictDemographicsRecord): DemographicsSummary {
   const g = rec.populationGrowthPerMille
-  const m = rec.netMigrationPerMille
-
-  if (g == null && m == null) return { sentence: null }
-
-  const growing = g != null && g >= 5
-  const migPositive = m != null && m > 0
-  const shrinking = (g != null && g <= -5) || (m != null && m <= -10)
+  if (g == null) return { sentence: null }
 
   let sentence: string
-  if (growing && migPositive) {
-    sentence = 'Bu ilçede nüfus büyüyor ve net göç pozitif — konut talebi destekleniyor.'
-  } else if (shrinking) {
-    sentence = 'Nüfus geriliyor ya da ilçe net göç veriyor — konut talebi zayıf olabilir.'
+  if (g >= 10) {
+    sentence = 'Bu ilçede nüfus belirgin şekilde büyüyor — konut talebi güçlü.'
+  } else if (g <= -10) {
+    sentence = 'Nüfus hızla azalıyor — konut talebi zayıf olabilir.'
   } else {
-    sentence = 'Nüfus ve göç dengeli; belirgin bir demografik baskı yok.'
+    sentence = 'Nüfus görece durağan; belirgin bir demografik baskı yok.'
   }
 
   const age = rec.medianAge
-  if (age != null && age <= 30) sentence += ' Genç nüfus yapısı.'
+  if (age != null && age <= 32) sentence += ' Genç nüfus yapısı.'
   else if (age != null && age >= 40) sentence += ' Yaşlanan nüfus.'
 
   return { sentence }
@@ -420,8 +452,7 @@ export function summarizeDemographics(rec: DistrictDemographicsRecord): Demograp
 
 - [ ] **Step 5: Test'i çalıştır, PASS gör**
 
-Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "demografi/summarize"`
-Expected: 8 test PASS.
+Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "demografi/summarize"` → 7 test PASS.
 
 - [ ] **Step 6: Commit**
 
@@ -432,106 +463,81 @@ git commit -m "feat(demografi): DistrictDemographicsRecord tipi + summarizeDemog
 
 ---
 
-## Task 5: `crawler/tuik/parse.ts`
+## Task 5: `crawler/tuik/parse.ts` — SDMX-CSV parser
+
+**API Key GEREKMEZ (fixture'lı test). Task 1'e bağlı DEĞİL — SDMX-CSV formatı standart.**
 
 **Files:**
 - Create: `crawler/tuik/parse.ts`
 - Test: `crawler/__tests__/tuik/parse.test.ts`
-- Create/kullan: `crawler/tuik/fixtures/*.csv` (Task 1'de indirilen örnek; yoksa Task 1 FINDINGS'e göre elle temsilî bir tane oluştur)
 
 **Interfaces:**
-- Consumes: `DemographicDataset` (Task 1, `crawler/tuik/datasets.ts`)
 - Produces:
-  - `ParsedDemographicRow` — `{ il: string; ilce: string } & Partial<Record<'population'|'populationGrowthPerMille'|'medianAge'|'avgHouseholdSize'|'netMigrationPerMille', number>>`
-  - `parseDatasetFile(fileText: string, dataset: DemographicDataset) => ParsedDemographicRow[]`
-  - Task 7 (`run.ts`) tüketir.
+  - `SdmxObservation` — `{ refArea: string; timePeriod: string; value: number }`
+  - `parseSdmxCsv(csvText: string) => SdmxObservation[]`
+  - Task 9 (`run.ts`) tüketir.
 
-- [ ] **Step 1: Fixture hazırla**
+- [ ] **Step 1: Failing test yaz**
 
-`crawler/tuik/fixtures/population-sample.csv` — Task 1'de gerçek indirilen dosya varsa onu kısalt (5-10 satır, birkaç il). Yoksa FINDINGS.md'nin tarif ettiği sütun düzeniyle temsilî bir CSV yaz. İçinde en az bir "İ/ı" içeren ilçe adı olsun (Ortahisar / Şişli gibi) ve bir eksik hücre.
-
-- [ ] **Step 2: Failing test yaz**
+SDMX-CSV standardı: ilk satır başlık, `REF_AREA` / `TIME_PERIOD` / `OBS_VALUE` sütunları (artı boyut sütunları). Değerler tırnak içinde olabilir, ondalık `.`.
 
 ```typescript
 // crawler/__tests__/tuik/parse.test.ts
-import { parseDatasetFile, type ParsedDemographicRow } from '../../tuik/parse'
-import type { DemographicDataset } from '../../tuik/datasets'
-import fs from 'fs'
-import path from 'path'
+import { parseSdmxCsv, type SdmxObservation } from '../../tuik/parse'
 
-const DS: DemographicDataset = {
-  key: 'population',
-  label: 'test',
-  tableUrl: 'x',
-  querySteps: [],
-  exportFormat: 'csv',
-  headerRows: 1,
-  decimalSeparator: ',',
-  columns: { ilColumn: 'Il', ilceColumn: 'Ilce', fields: { population: 'Toplam' } },
-}
-
-describe('parseDatasetFile', () => {
-  it('CSV satırlarını il/ilçe + alan değerlerine çevirir, ondalık ayıracını normalize eder', () => {
-    const csv = ['Il,Ilce,Toplam', 'Trabzon,Ortahisar,"320.000"', 'İstanbul,Şişli,"274.420"'].join('\n')
-    const rows = parseDatasetFile(csv, DS)
-    expect(rows).toEqual<ParsedDemographicRow[]>([
-      { il: 'Trabzon', ilce: 'Ortahisar', population: 320000 },
-      { il: 'İstanbul', ilce: 'Şişli', population: 274420 },
+describe('parseSdmxCsv', () => {
+  it('REF_AREA / TIME_PERIOD / OBS_VALUE sütunlarını çıkarır', () => {
+    const csv = [
+      'DATAFLOW,REF_AREA,TIME_PERIOD,OBS_VALUE,UNIT_MULT',
+      'TR:DF_ADNKS_T22(1.1),TR_ILCE_3401,2024,17550,0',
+      'TR:DF_ADNKS_T22(1.1),TR_ILCE_3402,2024,742102,0',
+    ].join('\n')
+    expect(parseSdmxCsv(csv)).toEqual<SdmxObservation[]>([
+      { refArea: 'TR_ILCE_3401', timePeriod: '2024', value: 17550 },
+      { refArea: 'TR_ILCE_3402', timePeriod: '2024', value: 742102 },
     ])
   })
 
-  it('eksik/boş hücre → o alan atlanır (undefined), satır yine döner', () => {
-    const csv = ['Il,Ilce,Toplam', 'Ordu,Altınordu,'].join('\n')
-    const rows = parseDatasetFile(csv, DS)
-    expect(rows).toEqual([{ il: 'Ordu', ilce: 'Altınordu' }])
+  it('ondalık OBS_VALUE parse eder (medyan yaş / hane)', () => {
+    const csv = ['REF_AREA,TIME_PERIOD,OBS_VALUE', 'TR_IL_61,2024,"36.4"'].join('\n')
+    expect(parseSdmxCsv(csv)).toEqual([{ refArea: 'TR_IL_61', timePeriod: '2024', value: 36.4 }])
   })
 
-  it('decimalSeparator "," olan ondalık değeri parse eder (medyan yaş)', () => {
-    const ds2: DemographicDataset = { ...DS, columns: { ...DS.columns, fields: { medianAge: 'Toplam' } } }
-    const csv = ['Il,Ilce,Toplam', 'Trabzon,Ortahisar,"36,4"'].join('\n')
-    expect(parseDatasetFile(csv, ds2)).toEqual([{ il: 'Trabzon', ilce: 'Ortahisar', medianAge: 36.4 }])
+  it('boş / sayısal olmayan OBS_VALUE satırını atlar', () => {
+    const csv = [
+      'REF_AREA,TIME_PERIOD,OBS_VALUE',
+      'TR_ILCE_3401,2024,',
+      'TR_ILCE_3402,2024,NaN',
+      'TR_ILCE_3403,2024,123',
+    ].join('\n')
+    expect(parseSdmxCsv(csv)).toEqual([{ refArea: 'TR_ILCE_3403', timePeriod: '2024', value: 123 }])
   })
 
-  it('il toplamı / "Toplam" özet satırlarını atlar (ilçe adı boş veya "Toplam")', () => {
-    const csv = ['Il,Ilce,Toplam', 'Trabzon,,"800.000"', 'Trabzon,Toplam,"800.000"', 'Trabzon,Ortahisar,"320.000"'].join('\n')
-    expect(parseDatasetFile(csv, DS)).toEqual([{ il: 'Trabzon', ilce: 'Ortahisar', population: 320000 }])
+  it('sütun sırası farklıysa başlığa göre çözer', () => {
+    const csv = ['OBS_VALUE,TIME_PERIOD,REF_AREA', '999,2024,TR_ILCE_0101'].join('\n')
+    expect(parseSdmxCsv(csv)).toEqual([{ refArea: 'TR_ILCE_0101', timePeriod: '2024', value: 999 }])
+  })
+
+  it('boş gövde → boş dizi', () => {
+    expect(parseSdmxCsv('REF_AREA,TIME_PERIOD,OBS_VALUE\n')).toEqual([])
   })
 })
 ```
 
-- [ ] **Step 3: Test'i çalıştır, FAIL gör**
+- [ ] **Step 2: Test'i çalıştır, FAIL gör**
 
-Run: `npm run test:crawler -- --testPathPatterns "tuik/parse"`
-Expected: FAIL — modül yok.
+Run: `npm run test:crawler -- --testPathPatterns "tuik/parse"` → FAIL, modül yok.
 
-- [ ] **Step 4: `parse.ts` yaz**
+- [ ] **Step 3: `parse.ts` yaz**
 
 ```typescript
 // crawler/tuik/parse.ts
-import type { DemographicDataset } from './datasets'
-
-const NUMERIC_FIELDS = [
-  'population',
-  'populationGrowthPerMille',
-  'medianAge',
-  'avgHouseholdSize',
-  'netMigrationPerMille',
-] as const
-type NumericField = (typeof NUMERIC_FIELDS)[number]
-
-export type ParsedDemographicRow = { il: string; ilce: string } & Partial<Record<NumericField, number>>
-
-/** "320.000" veya "36,4" → number. Binlik ayıracını (decimalSeparator'ın TERSİ) siler. */
-function parseNumber(raw: string, decimalSeparator: ',' | '.'): number | undefined {
-  const s = raw.trim().replace(/^"|"$/g, '')
-  if (!s) return undefined
-  const thousands = decimalSeparator === ',' ? '.' : ','
-  const cleaned = s.split(thousands).join('').replace(decimalSeparator, '.')
-  const n = Number(cleaned)
-  return Number.isFinite(n) ? n : undefined
+export interface SdmxObservation {
+  refArea: string
+  timePeriod: string
+  value: number
 }
 
-/** Basit CSV satır ayrıştırıcı — tırnak içi virgülü korur. TÜİK export'ları basit yapıdadır. */
 function splitCsvLine(line: string): string[] {
   const out: string[] = []
   let cur = ''
@@ -546,160 +552,403 @@ function splitCsvLine(line: string): string[] {
   return out
 }
 
-function resolveIndex(col: string | number, header: string[]): number {
-  if (typeof col === 'number') return col
-  return header.findIndex((h) => h.trim() === col)
-}
+const unquote = (s: string) => s.trim().replace(/^"|"$/g, '').trim()
 
-export function parseDatasetFile(fileText: string, dataset: DemographicDataset): ParsedDemographicRow[] {
-  const lines = fileText.split(/\r?\n/).filter((l) => l.trim().length > 0)
-  const header = splitCsvLine(lines[0] ?? '')
-  const body = lines.slice(Math.max(1, dataset.headerRows))
+export function parseSdmxCsv(csvText: string): SdmxObservation[] {
+  const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0)
+  if (lines.length < 2) return []
 
-  const ilIdx = resolveIndex(dataset.columns.ilColumn, header)
-  const ilceIdx = resolveIndex(dataset.columns.ilceColumn, header)
-
-  const rows: ParsedDemographicRow[] = []
-  for (const line of body) {
-    const cells = splitCsvLine(line)
-    const il = (cells[ilIdx] ?? '').trim().replace(/^"|"$/g, '')
-    const ilce = (cells[ilceIdx] ?? '').trim().replace(/^"|"$/g, '')
-    // il toplamı / özet satırlarını atla
-    if (!il || !ilce || /^toplam$/i.test(ilce)) continue
-
-    const row: ParsedDemographicRow = { il, ilce }
-    for (const [field, col] of Object.entries(dataset.columns.fields) as [NumericField, string | number][]) {
-      const idx = resolveIndex(col, header)
-      const val = parseNumber(cells[idx] ?? '', dataset.decimalSeparator)
-      if (val !== undefined) row[field] = val
-    }
-    if (dataset.derive) {
-      const asRecord: Record<string, string> = {}
-      header.forEach((h, i) => { asRecord[h.trim()] = (cells[i] ?? '').trim() })
-      for (const [k, v] of Object.entries(dataset.derive(asRecord))) {
-        if (typeof v === 'number' && Number.isFinite(v)) row[k as NumericField] = v
-      }
-    }
-    rows.push(row)
+  const header = splitCsvLine(lines[0]).map(unquote)
+  const iArea = header.indexOf('REF_AREA')
+  const iTime = header.indexOf('TIME_PERIOD')
+  const iVal = header.indexOf('OBS_VALUE')
+  if (iArea < 0 || iTime < 0 || iVal < 0) {
+    throw new Error(`SDMX-CSV başlığında REF_AREA/TIME_PERIOD/OBS_VALUE eksik: ${header.join(',')}`)
   }
-  return rows
+
+  const out: SdmxObservation[] = []
+  for (const line of lines.slice(1)) {
+    const cells = splitCsvLine(line)
+    const refArea = unquote(cells[iArea] ?? '')
+    const timePeriod = unquote(cells[iTime] ?? '')
+    const raw = unquote(cells[iVal] ?? '')
+    if (!refArea || !raw) continue
+    const value = Number(raw)
+    if (!Number.isFinite(value)) continue
+    out.push({ refArea, timePeriod, value })
+  }
+  return out
 }
 ```
 
-- [ ] **Step 5: Test'i çalıştır, PASS gör**
+- [ ] **Step 4: Test'i çalıştır, PASS gör**
 
-Run: `npm run test:crawler -- --testPathPatterns "tuik/parse"`
-Expected: 4 test PASS.
+Run: `npm run test:crawler -- --testPathPatterns "tuik/parse"` → 5 test PASS.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add crawler/tuik/parse.ts crawler/__tests__/tuik/parse.test.ts crawler/tuik/fixtures/
-git commit -m "feat(tuik): export dosyası parse — parseDatasetFile"
+git add crawler/tuik/parse.ts crawler/__tests__/tuik/parse.test.ts
+git commit -m "feat(tuik): SDMX-CSV parser (parseSdmxCsv)"
 ```
 
 ---
 
-## Task 6: `crawler/tuik/upsert.ts`
+## Task 6: `crawler/tuik/areaCodes.ts` — resolveArea
+
+**Task 1'in `areaCodesData.ts`'ine bağlı. API Key gerektirmez ama Task 1 tamamlanmış olmalı.**
 
 **Files:**
-- Create: `crawler/tuik/upsert.ts`
-- Test: `crawler/__tests__/tuik/upsert.test.ts`
+- Create: `crawler/tuik/areaCodes.ts`
+- Test: `crawler/__tests__/tuik/areaCodes.test.ts`
 
 **Interfaces:**
-- Consumes: `ParsedDemographicRow` (Task 5); `normalizeAreaName` (`@/lib/areaPrices/normalizeAreaName`)
+- Consumes: `AREA_CODES` (Task 1, `areaCodesData.ts`)
 - Produces:
-  - `MergedDistrictRow` — `{ il: string; ilce: string } & Partial<Record<NumericField, number>>` (normalize edilmiş anahtar, birden çok dataset birleştirilmiş)
-  - `mergeRows(perDataset: ParsedDemographicRow[][]) => MergedDistrictRow[]`
-  - `DemographicsUpsertClient` — `{ districtDemographics: { upsert(args: unknown): Promise<unknown> } }`
-  - `upsertDistrictDemographics(client: DemographicsUpsertClient, rows: MergedDistrictRow[], meta: { dataYear: number; source: string; fetchedAt: Date }) => Promise<number>` (yazılan satır sayısı döner)
-  - Task 7 (`run.ts`) tüketir.
+  - `ResolvedArea` — `{ il: string; ilce: string | null }`
+  - `resolveArea(refAreaCode: string) => ResolvedArea | null`
+  - Task 7 (`merge.ts`) tüketir.
 
 - [ ] **Step 1: Failing test yaz**
 
 ```typescript
-// crawler/__tests__/tuik/upsert.test.ts
-import { mergeRows, upsertDistrictDemographics, type DemographicsUpsertClient } from '../../tuik/upsert'
+// crawler/__tests__/tuik/areaCodes.test.ts
+import { resolveArea } from '../../tuik/areaCodes'
+import { AREA_CODES } from '../../tuik/areaCodesData'
 
-describe('mergeRows', () => {
-  it('birden çok dataset satırını il/ilçe anahtarında birleştirir, anahtarı normalize eder', () => {
-    const merged = mergeRows([
-      [{ il: 'Trabzon', ilce: 'Ortahisar', population: 320000 }],
-      [{ il: 'Trabzon', ilce: 'ORTAHİSAR', medianAge: 36.4 }],
-    ])
-    expect(merged).toEqual([
-      { il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000, medianAge: 36.4 },
-    ])
+describe('resolveArea', () => {
+  it('bilinen ilçe kodu → il + ilçe', () => {
+    // areaCodesData.ts gerçek doldurulduğunda ilk gerçek koddan birini kullan.
+    // Test dosyası AREA_CODES'tan bilinen bir kayıt çeker (kırılganlık önlenir).
+    const [code, expected] = Object.entries(AREA_CODES).find(([, v]) => v.ilce != null)!
+    expect(resolveArea(code)).toEqual(expected)
+  })
+
+  it('bilinen il kodu → il, ilce null', () => {
+    const [code, expected] = Object.entries(AREA_CODES).find(([, v]) => v.ilce == null)!
+    expect(resolveArea(code)).toEqual(expected)
+  })
+
+  it('bilinmeyen kod → null', () => {
+    expect(resolveArea('TR_ILCE_ZZZZ')).toBeNull()
+  })
+
+  it('boş / whitespace kod → null', () => {
+    expect(resolveArea('')).toBeNull()
+    expect(resolveArea('  ')).toBeNull()
   })
 })
+```
 
-describe('upsertDistrictDemographics', () => {
-  it('her satır için upsert çağırır (create + update aynı alanlar), SİLME yapmaz, sayı döner', async () => {
-    const calls: any[] = []
-    const client: DemographicsUpsertClient = {
-      districtDemographics: {
-        upsert: async (args: any) => { calls.push(args); return {} },
-      },
-    }
-    const n = await upsertDistrictDemographics(
-      client,
-      [{ il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000, medianAge: 36.4 }],
-      { dataYear: 2024, source: 'tuik-adnks', fetchedAt: new Date('2026-09-07T00:00:00Z') },
-    )
-    expect(n).toBe(1)
-    expect(calls[0].where).toEqual({ il_ilce: { il: 'TRABZON', ilce: 'ORTAHISAR' } })
-    expect(calls[0].create).toMatchObject({ il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000, medianAge: 36.4, dataYear: 2024, source: 'tuik-adnks' })
-    expect(calls[0].update).toMatchObject({ population: 320000, medianAge: 36.4, dataYear: 2024 })
-    // update il/ilce'yi yeniden yazmaz (anahtar sabit)
-    expect(calls[0].update.il).toBeUndefined()
+> **NOT:** Task 1 `areaCodesData.ts`'i doldurmadıysa (`AREA_CODES` boş), ilk iki
+> test `undefined` destructuring'de patlar. Bu, Task 1'in tamamlanması gereken
+> bir bağımlılık — Task 1 boşsa bu task'ı başlatma.
+
+- [ ] **Step 2: Test'i çalıştır, FAIL gör**
+
+Run: `npm run test:crawler -- --testPathPatterns "tuik/areaCodes"` → FAIL, modül yok.
+
+- [ ] **Step 3: `areaCodes.ts` yaz**
+
+```typescript
+// crawler/tuik/areaCodes.ts
+import { AREA_CODES } from './areaCodesData'
+
+export interface ResolvedArea {
+  il: string
+  ilce: string | null
+}
+
+export function resolveArea(refAreaCode: string): ResolvedArea | null {
+  const code = refAreaCode.trim()
+  if (!code) return null
+  return AREA_CODES[code] ?? null
+}
+```
+
+- [ ] **Step 4: Test'i çalıştır, PASS gör**
+
+Run: `npm run test:crawler -- --testPathPatterns "tuik/areaCodes"` → 4 test PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add crawler/tuik/areaCodes.ts crawler/__tests__/tuik/areaCodes.test.ts
+git commit -m "feat(tuik): REF_AREA kodu → il/ilçe çözümleme (resolveArea)"
+```
+
+---
+
+## Task 7: `crawler/tuik/merge.ts` — gözlemleri birleştir + il-yayılımı
+
+**API Key GEREKMEZ.**
+
+**Files:**
+- Create: `crawler/tuik/merge.ts`
+- Test: `crawler/__tests__/tuik/merge.test.ts`
+
+**Interfaces:**
+- Consumes: `SdmxObservation` (Task 5); `resolveArea`, `ResolvedArea` (Task 6); `DataflowRef`, `DemographicField` (Task 1); `normalizeAreaName` (`@/lib/areaPrices/normalizeAreaName`)
+- Produces:
+  - `MergedDistrictRow` — `{ il: string; ilce: string } & Partial<Record<DemographicField, number>>`
+  - `DataflowResult` — `{ ref: DataflowRef; observations: SdmxObservation[] }`
+  - `mergeDemographics(results: DataflowResult[], resolve: (code: string) => ResolvedArea | null) => MergedDistrictRow[]`
+  - Task 9 (`run.ts`) tüketir.
+
+- [ ] **Step 1: Failing test yaz**
+
+```typescript
+// crawler/__tests__/tuik/merge.test.ts
+import { mergeDemographics, type DataflowResult } from '../../tuik/merge'
+import type { ResolvedArea } from '../../tuik/areaCodes'
+
+const RES: Record<string, ResolvedArea> = {
+  IL_TRABZON: { il: 'Trabzon', ilce: null },
+  ILCE_ORTAHISAR: { il: 'Trabzon', ilce: 'Ortahisar' },
+  ILCE_AKCAABAT: { il: 'Trabzon', ilce: 'Akçaabat' },
+  ILCE_ISTANBUL_SISLI: { il: 'İstanbul', ilce: 'Şişli' },
+}
+const resolve = (code: string) => RES[code] ?? null
+
+const dfRef = (key: string, field: any, level: 'il' | 'ilce') => ({
+  key, dataflow: key, version: '1.1', field, level, keyDimensions: {},
+})
+
+describe('mergeDemographics', () => {
+  it('ilçe-seviyesi gözlemler ilçe satırına yazılır', () => {
+    const results: DataflowResult[] = [{
+      ref: dfRef('population', 'population', 'ilce'),
+      observations: [
+        { refArea: 'ILCE_ORTAHISAR', timePeriod: '2024', value: 320000 },
+        { refArea: 'ILCE_AKCAABAT', timePeriod: '2024', value: 130000 },
+      ],
+    }]
+    expect(mergeDemographics(results, resolve)).toEqual([
+      { il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000 },
+      { il: 'TRABZON', ilce: 'AKÇAABAT', population: 130000 },
+    ])
   })
 
-  it('boş satır listesi → 0, hiç upsert yok', async () => {
-    const client: DemographicsUpsertClient = { districtDemographics: { upsert: async () => { throw new Error('çağrılmamalı') } } }
-    expect(await upsertDistrictDemographics(client, [], { dataYear: 2024, source: 'x', fetchedAt: new Date() })).toBe(0)
+  it('il-seviyesi gözlem, o ilin TÜM (mevcut) ilçelerine yayılır', () => {
+    const results: DataflowResult[] = [
+      {
+        ref: dfRef('population', 'population', 'ilce'),
+        observations: [
+          { refArea: 'ILCE_ORTAHISAR', timePeriod: '2024', value: 320000 },
+          { refArea: 'ILCE_AKCAABAT', timePeriod: '2024', value: 130000 },
+        ],
+      },
+      {
+        ref: dfRef('medianAge', 'medianAge', 'il'),
+        observations: [{ refArea: 'IL_TRABZON', timePeriod: '2024', value: 36.4 }],
+      },
+    ]
+    expect(mergeDemographics(results, resolve)).toEqual([
+      { il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000, medianAge: 36.4 },
+      { il: 'TRABZON', ilce: 'AKÇAABAT', population: 130000, medianAge: 36.4 },
+    ])
+  })
+
+  it('il-seviyesi gözlem, o ilde HİÇ ilçe satırı yoksa satır üretmez (sızıntı yok)', () => {
+    const results: DataflowResult[] = [{
+      ref: dfRef('medianAge', 'medianAge', 'il'),
+      observations: [{ refArea: 'IL_TRABZON', timePeriod: '2024', value: 36.4 }],
+    }]
+    expect(mergeDemographics(results, resolve)).toEqual([])
+  })
+
+  it('çözülemeyen REF_AREA kodu atlanır', () => {
+    const results: DataflowResult[] = [{
+      ref: dfRef('population', 'population', 'ilce'),
+      observations: [
+        { refArea: 'ILCE_ORTAHISAR', timePeriod: '2024', value: 320000 },
+        { refArea: 'BILINMEYEN', timePeriod: '2024', value: 999 },
+      ],
+    }]
+    expect(mergeDemographics(results, resolve)).toEqual([
+      { il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000 },
+    ])
+  })
+
+  it('il-seviyesi gözlem yalnızca kendi ilinin ilçelerine yayılır', () => {
+    const results: DataflowResult[] = [
+      {
+        ref: dfRef('population', 'population', 'ilce'),
+        observations: [
+          { refArea: 'ILCE_ORTAHISAR', timePeriod: '2024', value: 320000 },
+          { refArea: 'ILCE_ISTANBUL_SISLI', timePeriod: '2024', value: 270000 },
+        ],
+      },
+      {
+        ref: dfRef('medianAge', 'medianAge', 'il'),
+        observations: [{ refArea: 'IL_TRABZON', timePeriod: '2024', value: 36.4 }],
+      },
+    ]
+    const rows = mergeDemographics(results, resolve)
+    expect(rows.find((r) => r.ilce === 'ORTAHISAR')!.medianAge).toBe(36.4)
+    expect(rows.find((r) => r.ilce === 'ŞİŞLİ')!.medianAge).toBeUndefined()
   })
 })
 ```
 
 - [ ] **Step 2: Test'i çalıştır, FAIL gör**
 
-Run: `npm run test:crawler -- --testPathPatterns "tuik/upsert"`
-Expected: FAIL — modül yok.
+Run: `npm run test:crawler -- --testPathPatterns "tuik/merge"` → FAIL, modül yok.
+
+- [ ] **Step 3: `merge.ts` yaz**
+
+```typescript
+// crawler/tuik/merge.ts
+import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
+import type { SdmxObservation } from './parse'
+import type { ResolvedArea } from './areaCodes'
+import type { DataflowRef, DemographicField } from './datasets'
+
+export type MergedDistrictRow = { il: string; ilce: string } & Partial<Record<DemographicField, number>>
+
+export interface DataflowResult {
+  ref: DataflowRef
+  observations: SdmxObservation[]
+}
+
+export function mergeDemographics(
+  results: DataflowResult[],
+  resolve: (code: string) => ResolvedArea | null,
+): MergedDistrictRow[] {
+  const rows = new Map<string, MergedDistrictRow>()
+  const key = (il: string, ilce: string) => `${il} ${ilce}`
+
+  // 1. Önce tüm ilçe-seviyesi gözlemler — ilçe satırlarını oluşturur.
+  for (const { ref, observations } of results) {
+    if (ref.level !== 'ilce') continue
+    for (const obs of observations) {
+      const area = resolve(obs.refArea)
+      if (!area || area.ilce == null) continue
+      const il = normalizeAreaName(area.il)
+      const ilce = normalizeAreaName(area.ilce)
+      const row = rows.get(key(il, ilce)) ?? { il, ilce }
+      row[ref.field] = obs.value
+      rows.set(key(il, ilce), row)
+    }
+  }
+
+  // 2. İl-seviyesi gözlemler — o ilin MEVCUT ilçe satırlarına yayılır (yeni satır AÇMAZ).
+  for (const { ref, observations } of results) {
+    if (ref.level !== 'il') continue
+    const byIl = new Map<string, number>()
+    for (const obs of observations) {
+      const area = resolve(obs.refArea)
+      if (!area) continue
+      byIl.set(normalizeAreaName(area.il), obs.value)
+    }
+    for (const row of rows.values()) {
+      const v = byIl.get(row.il)
+      if (v !== undefined) row[ref.field] = v
+    }
+  }
+
+  return [...rows.values()]
+}
+```
+
+- [ ] **Step 4: Test'i çalıştır, PASS gör**
+
+Run: `npm run test:crawler -- --testPathPatterns "tuik/merge"` → 5 test PASS.
+`npx tsc -p crawler/tsconfig.json` temiz.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add crawler/tuik/merge.ts crawler/__tests__/tuik/merge.test.ts
+git commit -m "feat(tuik): gözlem birleştirme + il-seviyesi metrik yayılımı (mergeDemographics)"
+```
+
+---
+
+## Task 8: `crawler/tuik/upsert.ts` — DistrictDemographics upsert
+
+**API Key GEREKMEZ (mock client). Task 3 (model) tamamlanmış olmalı.**
+
+**Files:**
+- Create: `crawler/tuik/upsert.ts`
+- Test: `crawler/__tests__/tuik/upsert.test.ts`
+
+**Interfaces:**
+- Consumes: `MergedDistrictRow` (Task 7); `DemographicField` (Task 1)
+- Produces:
+  - `DemographicsUpsertClient` — `{ districtDemographics: { upsert(args: unknown): Promise<unknown> } }`
+  - `upsertDistrictDemographics(client, rows: MergedDistrictRow[], meta: { dataYear: number; source: string; fetchedAt: Date }) => Promise<number>` (yazılan satır sayısı)
+  - Task 9 (`run.ts`) tüketir.
+
+- [ ] **Step 1: Failing test yaz**
+
+```typescript
+// crawler/__tests__/tuik/upsert.test.ts
+import { upsertDistrictDemographics, type DemographicsUpsertClient } from '../../tuik/upsert'
+
+describe('upsertDistrictDemographics', () => {
+  const meta = { dataYear: 2024, source: 'tuik-adnks-sdmx', fetchedAt: new Date('2026-09-07T00:00:00Z') }
+
+  it('her satır için upsert çağırır; create ve update aynı metrik alanlarını yazar; sayı döner', async () => {
+    const calls: any[] = []
+    const client: DemographicsUpsertClient = {
+      districtDemographics: { upsert: async (a: any) => { calls.push(a); return {} } },
+    }
+    const n = await upsertDistrictDemographics(
+      client,
+      [{ il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000, medianAge: 36.4 }],
+      meta,
+    )
+    expect(n).toBe(1)
+    expect(calls[0].where).toEqual({ il_ilce: { il: 'TRABZON', ilce: 'ORTAHISAR' } })
+    expect(calls[0].create).toMatchObject({
+      il: 'TRABZON', ilce: 'ORTAHISAR', population: 320000, medianAge: 36.4,
+      populationGrowthPerMille: null, avgHouseholdSize: null,
+      dataYear: 2024, source: 'tuik-adnks-sdmx',
+    })
+    expect(calls[0].update).toMatchObject({
+      population: 320000, medianAge: 36.4, populationGrowthPerMille: null, avgHouseholdSize: null, dataYear: 2024,
+    })
+    expect(calls[0].update.il).toBeUndefined()  // anahtar sabit
+  })
+
+  it('eksik metrik → null yazılır (eski değeri temizler)', async () => {
+    const calls: any[] = []
+    const client: DemographicsUpsertClient = {
+      districtDemographics: { upsert: async (a: any) => { calls.push(a); return {} } },
+    }
+    await upsertDistrictDemographics(client, [{ il: 'X', ilce: 'Y', population: 5 }], meta)
+    expect(calls[0].update.medianAge).toBeNull()
+    expect(calls[0].update.avgHouseholdSize).toBeNull()
+    expect(calls[0].update.populationGrowthPerMille).toBeNull()
+  })
+
+  it('boş liste → 0, hiç upsert yok', async () => {
+    const client: DemographicsUpsertClient = {
+      districtDemographics: { upsert: async () => { throw new Error('çağrılmamalı') } },
+    }
+    expect(await upsertDistrictDemographics(client, [], meta)).toBe(0)
+  })
+})
+```
+
+- [ ] **Step 2: Test'i çalıştır, FAIL gör**
+
+Run: `npm run test:crawler -- --testPathPatterns "tuik/upsert"` → FAIL, modül yok.
 
 - [ ] **Step 3: `upsert.ts` yaz**
 
 ```typescript
 // crawler/tuik/upsert.ts
-import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
-import type { ParsedDemographicRow } from './parse'
+import type { MergedDistrictRow } from './merge'
+import type { DemographicField } from './datasets'
 
-const NUMERIC_FIELDS = [
+const FIELDS: DemographicField[] = [
   'population',
   'populationGrowthPerMille',
   'medianAge',
   'avgHouseholdSize',
-  'netMigrationPerMille',
-] as const
-type NumericField = (typeof NUMERIC_FIELDS)[number]
-
-export type MergedDistrictRow = { il: string; ilce: string } & Partial<Record<NumericField, number>>
-
-export function mergeRows(perDataset: ParsedDemographicRow[][]): MergedDistrictRow[] {
-  const map = new Map<string, MergedDistrictRow>()
-  for (const rows of perDataset) {
-    for (const r of rows) {
-      const il = normalizeAreaName(r.il)
-      const ilce = normalizeAreaName(r.ilce)
-      const key = `${il} ${ilce}`
-      const existing = map.get(key) ?? { il, ilce }
-      for (const f of NUMERIC_FIELDS) {
-        if (typeof r[f] === 'number') existing[f] = r[f]
-      }
-      map.set(key, existing)
-    }
-  }
-  return [...map.values()]
-}
+]
 
 export interface DemographicsUpsertClient {
   districtDemographics: { upsert(args: unknown): Promise<unknown> }
@@ -712,8 +961,8 @@ export async function upsertDistrictDemographics(
 ): Promise<number> {
   let written = 0
   for (const row of rows) {
-    const metrics: Partial<Record<NumericField, number | null>> = {}
-    for (const f of NUMERIC_FIELDS) metrics[f] = typeof row[f] === 'number' ? row[f]! : null
+    const metrics: Record<string, number | null> = {}
+    for (const f of FIELDS) metrics[f] = typeof row[f] === 'number' ? (row[f] as number) : null
 
     await client.districtDemographics.upsert({
       where: { il_ilce: { il: row.il, ilce: row.ilce } },
@@ -741,128 +990,175 @@ export async function upsertDistrictDemographics(
 - [ ] **Step 4: Test'i çalıştır, PASS gör**
 
 Run: `npm run test:crawler -- --testPathPatterns "tuik/upsert"` → 3 test PASS.
-Ayrıca: `npx tsc -p crawler/tsconfig.json` temiz.
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add crawler/tuik/upsert.ts crawler/__tests__/tuik/upsert.test.ts
-git commit -m "feat(tuik): mergeRows + upsertDistrictDemographics (UPSERT, silme yok)"
+git commit -m "feat(tuik): DistrictDemographics upsert (UPSERT, silme yok, eksik metrik→null)"
 ```
 
 ---
 
-## Task 7: `crawler/tuik/extract.ts` + `run.ts` + script + README
+## Task 9: `crawler/tuik/fetchData.ts` + `run.ts` + `crawl:tuik` scripti + README
+
+**API Key gerçek turda gerekir. `run.ts` orchestration testi mock'lu (key gerekmez). Task 1, 2, 5, 6, 7, 8 tamamlanmış olmalı.**
 
 **Files:**
-- Create: `crawler/tuik/extract.ts`
+- Create: `crawler/tuik/fetchData.ts`
 - Create: `crawler/tuik/run.ts`
 - Create: `crawler/tuik/README.md`
 - Modify: `package.json` (`crawl:tuik` scripti)
 - Test: `crawler/__tests__/tuik/run.test.ts`
 
 **Interfaces:**
-- Consumes: `launchContext` (Task 2); `DATASETS`, `DATA_YEAR` (Task 1); `parseDatasetFile` (Task 5); `mergeRows`, `upsertDistrictDemographics`, `DemographicsUpsertClient` (Task 6)
+- Consumes: `getAccessToken` (Task 2); `DATAFLOWS`, `DATA_YEAR`, `DATA_BASE` (Task 1); `parseSdmxCsv` (Task 5); `resolveArea` (Task 6); `mergeDemographics`, `DataflowResult` (Task 7); `upsertDistrictDemographics`, `DemographicsUpsertClient` (Task 8)
 - Produces:
-  - `extractDataset(context: BrowserContext, dataset: DemographicDataset, downloadDir: string) => Promise<string>` (indirilen dosya yolu)
-  - `runTuikCrawl(deps: RunDeps, opts: { dryRun: boolean }) => Promise<RunSummary>` — `RunDeps = { extract, parseFn, client, crawlRunClient, datasets, dataYear }`; DI ile test edilir
-  - `RunSummary` — `{ datasetsOk: number; datasetsFailed: string[]; rowsWritten: number; aborted: boolean }`
+  - `fetchDataflowCsv(deps: { fetch: typeof fetch; token: string }, ref: DataflowRef, year: number) => Promise<string>`
+  - `runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean }) => Promise<RunSummary>`
+  - `RunSummary` — `{ dataflowsOk: number; dataflowsFailed: string[]; rowsWritten: number; aborted: boolean }`
 
-- [ ] **Step 1: Failing test yaz (run.ts orchestration — DI, tarayıcı YOK)**
+- [ ] **Step 1: Failing test yaz (run.ts orchestration — DI, ağ YOK)**
 
 ```typescript
 // crawler/__tests__/tuik/run.test.ts
-import { runTuikCrawl, type RunDeps } from '../../tuik/run'
-import type { DemographicDataset } from '../../tuik/datasets'
+import { runTuikDemographics, type RunDeps } from '../../tuik/run'
+import type { DataflowRef } from '../../tuik/datasets'
 
-const ds = (key: string): DemographicDataset => ({
-  key, label: key, tableUrl: 'x', querySteps: [], exportFormat: 'csv',
-  headerRows: 1, decimalSeparator: ',', columns: { ilColumn: 'Il', ilceColumn: 'Ilce', fields: {} },
+const ref = (key: string, field: any, level: 'il' | 'ilce'): DataflowRef => ({
+  key, dataflow: `DF_${key}`, version: '1.1', field, level, keyDimensions: {},
 })
 
-function makeDeps(over: Partial<RunDeps> = {}): RunDeps {
-  const upserts: any[] = []
+function makeDeps(over: Partial<RunDeps> = {}): RunDeps & { _upserts: any[] } {
+  const _upserts: any[] = []
   return {
-    datasets: [ds('population'), ds('migration')],
+    dataflows: [ref('population', 'population', 'ilce'), ref('medianAge', 'medianAge', 'il')],
     dataYear: 2024,
-    extract: jest.fn(async (dsArg: DemographicDataset) => `/tmp/${dsArg.key}.csv`),
-    readFile: jest.fn(async () => 'Il,Ilce,Toplam\nTrabzon,Ortahisar,"1"'),
-    parseFn: jest.fn(() => [{ il: 'Trabzon', ilce: 'Ortahisar', population: 1 }]),
-    client: { districtDemographics: { upsert: async (a: any) => { upserts.push(a) } } } as any,
-    crawlRunClient: { crawlRun: { create: jest.fn(async () => ({ id: 'run-1' })), update: jest.fn(async () => ({})) } } as any,
-    _upserts: upserts,
+    getToken: jest.fn(async () => 'tok'),
+    fetchCsv: jest.fn(async (r: DataflowRef) => `REF_AREA,TIME_PERIOD,OBS_VALUE\nA_${r.key},2024,1`),
+    parse: jest.fn((csv: string) => [{ refArea: csv.split('\n')[1].split(',')[0], timePeriod: '2024', value: 1 }]),
+    resolve: jest.fn((code: string) =>
+      code === 'A_population' ? { il: 'Trabzon', ilce: 'Ortahisar' }
+      : code === 'A_medianAge' ? { il: 'Trabzon', ilce: null } : null),
+    client: { districtDemographics: { upsert: async (a: any) => { _upserts.push(a) } } } as any,
+    crawlRunClient: { crawlRun: { create: jest.fn(async () => ({ id: 'r1' })), update: jest.fn(async () => ({})) } } as any,
+    _upserts,
     ...over,
   } as RunDeps & { _upserts: any[] }
 }
 
-describe('runTuikCrawl', () => {
-  it('tüm dataset başarılı → satır yazar, CrawlRun kapatır', async () => {
+describe('runTuikDemographics', () => {
+  it('tüm dataflow OK → token alır, satır yazar, CrawlRun kapatır', async () => {
     const deps = makeDeps()
-    const summary = await runTuikCrawl(deps, { dryRun: false })
-    expect(summary.datasetsOk).toBe(2)
-    expect(summary.datasetsFailed).toEqual([])
-    expect(summary.rowsWritten).toBe(1)
-    expect(summary.aborted).toBe(false)
-    expect((deps as any).crawlRunClient.crawlRun.update).toHaveBeenCalled()
+    const s = await runTuikDemographics(deps, { dryRun: false })
+    expect(deps.getToken).toHaveBeenCalled()
+    expect(s.dataflowsOk).toBe(2)
+    expect(s.dataflowsFailed).toEqual([])
+    expect(s.rowsWritten).toBe(1)               // 1 ilçe satırı (medianAge il→ilçe yayıldı)
+    expect(s.aborted).toBe(false)
+    expect(deps.crawlRunClient.crawlRun.update).toHaveBeenCalled()
   })
 
-  it('bir dataset extract hata verir → o metrik atlanır, diğerleri yazılır, notes\'a düşer', async () => {
+  it('token alınamazsa → abort, hiç fetch/upsert yok', async () => {
+    const deps = makeDeps({ getToken: jest.fn(async () => { throw new Error('auth failed') }) })
+    const s = await runTuikDemographics(deps, { dryRun: false })
+    expect(s.aborted).toBe(true)
+    expect(s.rowsWritten).toBe(0)
+    expect(deps.fetchCsv).not.toHaveBeenCalled()
+    expect(deps._upserts).toHaveLength(0)
+  })
+
+  it('bir dataflow fetch hata verir → o metrik atlanır, diğerleri yazılır', async () => {
     const deps = makeDeps({
-      extract: jest.fn(async (d: DemographicDataset) => {
-        if (d.key === 'migration') throw new Error('export indirilemedi')
-        return `/tmp/${d.key}.csv`
+      fetchCsv: jest.fn(async (r: DataflowRef) => {
+        if (r.key === 'medianAge') throw new Error('HTTP 500')
+        return `REF_AREA,TIME_PERIOD,OBS_VALUE\nA_${r.key},2024,1`
       }),
     })
-    const summary = await runTuikCrawl(deps, { dryRun: false })
-    expect(summary.datasetsOk).toBe(1)
-    expect(summary.datasetsFailed).toEqual(['migration'])
-    expect(summary.rowsWritten).toBe(1)
-    expect(summary.aborted).toBe(false)
+    const s = await runTuikDemographics(deps, { dryRun: false })
+    expect(s.dataflowsOk).toBe(1)
+    expect(s.dataflowsFailed).toEqual(['medianAge'])
+    expect(s.rowsWritten).toBe(1)
+    expect(s.aborted).toBe(false)
   })
 
-  it('HİÇBİR dataset çekilemez → aborted, 0 satır, hiç upsert yok', async () => {
-    const deps = makeDeps({ extract: jest.fn(async () => { throw new Error('portal down') }) })
-    const summary = await runTuikCrawl(deps, { dryRun: false })
-    expect(summary.aborted).toBe(true)
-    expect(summary.rowsWritten).toBe(0)
-    expect((deps as any)._upserts).toHaveLength(0)
+  it('HİÇBİR dataflow çekilemez → abort, 0 satır, hiç upsert yok', async () => {
+    const deps = makeDeps({ fetchCsv: jest.fn(async () => { throw new Error('down') }) })
+    const s = await runTuikDemographics(deps, { dryRun: false })
+    expect(s.aborted).toBe(true)
+    expect(deps._upserts).toHaveLength(0)
   })
 
-  it('dryRun: parse eder ama upsert ETMEZ', async () => {
+  it('dryRun → parse+merge eder ama upsert ETMEZ', async () => {
     const deps = makeDeps()
-    const summary = await runTuikCrawl(deps, { dryRun: true })
-    expect(summary.datasetsOk).toBe(2)
-    expect((deps as any)._upserts).toHaveLength(0)
+    const s = await runTuikDemographics(deps, { dryRun: true })
+    expect(s.dataflowsOk).toBe(2)
+    expect(deps._upserts).toHaveLength(0)
   })
 })
 ```
 
 - [ ] **Step 2: Test'i çalıştır, FAIL gör**
 
-Run: `npm run test:crawler -- --testPathPatterns "tuik/run"`
-Expected: FAIL — modül yok.
+Run: `npm run test:crawler -- --testPathPatterns "tuik/run"` → FAIL, modül yok.
 
-- [ ] **Step 3: `run.ts` yaz (orchestration)**
+- [ ] **Step 3: `fetchData.ts` yaz**
+
+```typescript
+// crawler/tuik/fetchData.ts
+import { DATA_BASE, type DataflowRef } from './datasets'
+
+/** Bir dataflow'u SDMX-CSV metni olarak çeker. keyDimensions seri anahtarına
+ *  gömülür (REF_AREA ve TIME_PERIOD boş bırakılır → tüm alanlar / tüm dönem-yıl). */
+export async function fetchDataflowCsv(
+  deps: { fetch: typeof fetch; token: string },
+  ref: DataflowRef,
+  year: number,
+): Promise<string> {
+  // Seri anahtarı: keyDimensions varsa "?" ile filtrelenir; yoksa tümü.
+  const keyPart = Object.keys(ref.keyDimensions).length
+    ? '/' + Object.values(ref.keyDimensions).join('.')  // DSD sırasına göre — Task 1 doğrular
+    : ''
+  const url =
+    `${DATA_BASE},${ref.dataflow},${ref.version}${keyPart}` +
+    `?format=SDMX-CSV&startPeriod=${year}&endPeriod=${year}`
+  const res = await deps.fetch(url, { headers: { Authorization: `Bearer ${deps.token}` } })
+  if (!res.ok) {
+    throw new Error(`TÜİK ${ref.dataflow} çekilemedi (HTTP ${res.status})`)
+  }
+  return await res.text()
+}
+```
+
+> **NOT:** `keyPart` oluşumu Task 1'in DSD boyut sırası bulgusuna göre kesinleşir.
+> `keyDimensions` boşsa (tüm örnekler) bu kod olduğu gibi çalışır; dolu bir ref
+> için (medyan yaş `CINSIYET=_T`) Task 1 boyut pozisyonunu doğrular, gerekirse
+> `keyPart` boyut sırasına göre `.` konumlaması düzeltilir.
+
+- [ ] **Step 4: `run.ts` yaz (orchestration + CLI)**
 
 ```typescript
 // crawler/tuik/run.ts
-import type { DemographicDataset } from './datasets'
-import type { ParsedDemographicRow } from './parse'
-import { mergeRows, upsertDistrictDemographics, type DemographicsUpsertClient } from './upsert'
+import type { DataflowRef } from './datasets'
+import type { SdmxObservation } from './parse'
+import type { ResolvedArea } from './areaCodes'
+import { mergeDemographics, type DataflowResult } from './merge'
+import { upsertDistrictDemographics, type DemographicsUpsertClient } from './upsert'
 
 export interface RunSummary {
-  datasetsOk: number
-  datasetsFailed: string[]
+  dataflowsOk: number
+  dataflowsFailed: string[]
   rowsWritten: number
   aborted: boolean
 }
 
 export interface RunDeps {
-  datasets: DemographicDataset[]
+  dataflows: DataflowRef[]
   dataYear: number
-  extract: (dataset: DemographicDataset) => Promise<string>
-  readFile: (path: string) => Promise<string>
-  parseFn: (fileText: string, dataset: DemographicDataset) => ParsedDemographicRow[]
+  getToken: () => Promise<string>
+  fetchCsv: (ref: DataflowRef, token: string, year: number) => Promise<string>
+  parse: (csv: string) => SdmxObservation[]
+  resolve: (code: string) => ResolvedArea | null
   client: DemographicsUpsertClient
   crawlRunClient: {
     crawlRun: {
@@ -872,42 +1168,45 @@ export interface RunDeps {
   }
 }
 
-export async function runTuikCrawl(deps: RunDeps, opts: { dryRun: boolean }): Promise<RunSummary> {
+export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean }): Promise<RunSummary> {
   const run = await deps.crawlRunClient.crawlRun.create({
     data: { source: 'tuik', il: 'ALL', category: 'demografi' },
   })
 
-  const perDataset: ParsedDemographicRow[][] = []
-  const failed: string[] = []
+  let token: string
+  try {
+    token = await deps.getToken()
+  } catch (err) {
+    await deps.crawlRunClient.crawlRun.update({
+      where: { id: run.id },
+      data: { finishedAt: new Date(), blocked: true, notes: `auth failed: ${(err as Error).message}` },
+    })
+    return { dataflowsOk: 0, dataflowsFailed: deps.dataflows.map((d) => d.key), rowsWritten: 0, aborted: true }
+  }
 
-  for (const dataset of deps.datasets) {
+  const results: DataflowResult[] = []
+  const failed: string[] = []
+  for (const ref of deps.dataflows) {
     try {
-      const filePath = await deps.extract(dataset)
-      const text = await deps.readFile(filePath)
-      perDataset.push(deps.parseFn(text, dataset))
+      const csv = await deps.fetchCsv(ref, token, deps.dataYear)
+      results.push({ ref, observations: deps.parse(csv) })
     } catch (err) {
-      failed.push(dataset.key)
-      console.error(`[tuik] ${dataset.key} çekilemedi:`, (err as Error).message)
+      failed.push(ref.key)
+      console.error(`[tuik] ${ref.key} çekilemedi:`, (err as Error).message)
     }
   }
 
-  const aborted = perDataset.length === 0
+  const aborted = results.length === 0
   let rowsWritten = 0
-
   if (!aborted && !opts.dryRun) {
-    const merged = mergeRows(perDataset)
+    const merged = mergeDemographics(results, deps.resolve)
     rowsWritten = await upsertDistrictDemographics(deps.client, merged, {
       dataYear: deps.dataYear,
-      source: 'tuik-adnks',
+      source: 'tuik-adnks-sdmx',
       fetchedAt: new Date(),
     })
-  }
-
-  const summary: RunSummary = {
-    datasetsOk: deps.datasets.length - failed.length,
-    datasetsFailed: failed,
-    rowsWritten,
-    aborted,
+  } else if (!aborted && opts.dryRun) {
+    mergeDemographics(results, deps.resolve)  // parse/merge yolunu doğrula, yazma
   }
 
   await deps.crawlRunClient.crawlRun.update({
@@ -915,110 +1214,52 @@ export async function runTuikCrawl(deps: RunDeps, opts: { dryRun: boolean }): Pr
     data: {
       finishedAt: new Date(),
       blocked: aborted,
-      listingsFound: perDataset.reduce((n, r) => n + r.length, 0),
+      listingsFound: results.reduce((n, r) => n + r.observations.length, 0),
       listingsUpserted: rowsWritten,
-      notes: JSON.stringify({ dryRun: opts.dryRun, datasetsFailed: failed, dataYear: deps.dataYear }),
+      notes: JSON.stringify({ dryRun: opts.dryRun, dataflowsFailed: failed, dataYear: deps.dataYear }),
     },
   })
 
-  return summary
-}
-```
-
-- [ ] **Step 4: Test'i çalıştır, PASS gör**
-
-Run: `npm run test:crawler -- --testPathPatterns "tuik/run"` → 4 test PASS.
-
-- [ ] **Step 5: `extract.ts` yaz (Playwright sürücü — birim testi YOK, gerçek turda doğrulanır)**
-
-```typescript
-// crawler/tuik/extract.ts
-import path from 'path'
-import type { BrowserContext } from '@playwright/test'
-import type { DemographicDataset } from './datasets'
-
-/**
- * TÜİK sorgu arayüzünü sürer, İlçe kırılımı + yıl seçer, export'u indirir.
- * querySteps ve exportFormat crawler/tuik/datasets.ts'ten (Task 1 FINDINGS) gelir.
- * Bu fonksiyonun birim testi yoktur — gerçek portal davranışına bağlıdır;
- * `npm run crawl:tuik -- --headful --dry-run` ile elle doğrulanır (README).
- */
-export async function extractDataset(
-  context: BrowserContext,
-  dataset: DemographicDataset,
-  downloadDir: string,
-): Promise<string> {
-  const page = await context.newPage()
-  try {
-    await page.goto(dataset.tableUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 })
-
-    for (const step of dataset.querySteps) {
-      if (step.action === 'waitForSelector') await page.waitForSelector(step.selector, { timeout: 20_000 })
-      else if (step.action === 'click') await page.click(step.selector)
-      else if (step.action === 'fill') await page.fill(step.selector, step.value ?? '')
-      else if (step.action === 'selectOption') await page.selectOption(step.selector, step.value ?? '')
-      await page.waitForTimeout(1500 + Math.random() * 2000)
-    }
-
-    const [download] = await Promise.all([
-      page.waitForEvent('download', { timeout: 30_000 }),
-      // İndir düğmesi querySteps'in SON adımıdır (Task 1'de öyle tanımlanır) —
-      // ya da burada dataset'e özel bir "downloadTrigger" selektörü eklenir.
-      // FINDINGS.md'ye göre son querySteps adımı indirmeyi tetiklemiyorsa,
-      // datasets.ts'e `downloadTrigger: string` alanı ekle ve burada tıkla.
-    ])
-    const suggested = download.suggestedFilename()
-    const ext = dataset.exportFormat === 'csv' ? 'csv' : 'xlsx'
-    const filePath = path.join(downloadDir, `${dataset.key}.${suggested.endsWith(ext) ? suggested.split('.').pop() : ext}`)
-    await download.saveAs(filePath)
-    return filePath
-  } finally {
-    await page.close()
+  return {
+    dataflowsOk: deps.dataflows.length - failed.length,
+    dataflowsFailed: failed,
+    rowsWritten,
+    aborted,
   }
 }
-```
 
-**NOT:** Step 5 kodundaki `Promise.all` içindeki indirme-tetikleyici, Task 1 FINDINGS'e göre netleşir. Son `querySteps` adımı indirmeyi tetikliyorsa döngüyü indirmeden ÖNCE bir adım kısa bırak ve son adımı `Promise.all` içine al; değilse `datasets.ts`'e `downloadTrigger: string` alanı ekleyip burada `page.click(dataset.downloadTrigger)` yap. Bu, Task 1 çıktısına bağlı bilinçli bir esneklik noktası.
-
-- [ ] **Step 6: `run.ts`'e gerçek CLI girişini ekle (I10 deseni — prisma yalnız gerçek çalıştırmada)**
-
-`run.ts` sonuna ekle:
-
-```typescript
-// crawler/tuik/run.ts (devam) — CLI girişi
 async function main() {
-  const argv = process.argv.slice(2)
-  const dryRun = argv.includes('--dry-run')
-  const headful = argv.includes('--headful')
-
-  const { DATASETS, DATA_YEAR } = await import('./datasets')
-  const { launchContext } = await import('../fetcher/context')
-  const { DEFAULT_CONFIG } = await import('../config')
-  const { parseDatasetFile } = await import('./parse')
-  const { extractDataset } = await import('./extract')
-  const fs = await import('fs/promises')
-  const os = await import('os')
-  const path = await import('path')
-  const { PrismaClient } = await import('@prisma/client')
-
-  if (DATASETS.length === 0) {
-    console.error('crawler/tuik/datasets.ts boş — Task 1 (portal keşfi) tamamlanmadı.')
+  const dryRun = process.argv.slice(2).includes('--dry-run')
+  const apiKey = process.env.TUIK_API_KEY
+  if (!apiKey) {
+    console.error('TUIK_API_KEY env değişkeni yok — Task 1 ön koşulu.')
     process.exitCode = 1
     return
   }
 
-  const downloadDir = await fs.mkdtemp(path.join(os.tmpdir(), 'tuik-'))
-  const { browser, context } = await launchContext(DEFAULT_CONFIG, { headful })
-  const prisma = new PrismaClient()
+  const { DATAFLOWS, DATA_YEAR } = await import('./datasets')
+  const { getAccessToken } = await import('./auth')
+  const { parseSdmxCsv } = await import('./parse')
+  const { resolveArea } = await import('./areaCodes')
+  const { fetchDataflowCsv } = await import('./fetchData')
+  const { PrismaClient } = await import('@prisma/client')
 
+  if (DATAFLOWS.length === 0) {
+    console.error('crawler/tuik/datasets.ts boş — Task 1 tamamlanmadı.')
+    process.exitCode = 1
+    return
+  }
+
+  const prisma = new PrismaClient()
   try {
-    const summary = await runTuikCrawl(
+    const summary = await runTuikDemographics(
       {
-        datasets: DATASETS,
+        dataflows: DATAFLOWS,
         dataYear: DATA_YEAR,
-        extract: (ds) => extractDataset(context, ds, downloadDir),
-        readFile: (p) => fs.readFile(p, 'utf8'),
-        parseFn: parseDatasetFile,
+        getToken: () => getAccessToken({ fetch, apiKey }),
+        fetchCsv: (ref, token, year) => fetchDataflowCsv({ fetch, token }, ref, year),
+        parse: parseSdmxCsv,
+        resolve: resolveArea,
         client: prisma as unknown as DemographicsUpsertClient,
         crawlRunClient: prisma as unknown as RunDeps['crawlRunClient'],
       },
@@ -1026,10 +1267,7 @@ async function main() {
     )
     console.log('[tuik] özet:', summary)
   } finally {
-    await context.close()
-    await browser.close()
     await prisma.$disconnect()
-    await fs.rm(downloadDir, { recursive: true, force: true })
   }
 }
 
@@ -1041,7 +1279,12 @@ if (require.main === module) {
 }
 ```
 
-- [ ] **Step 7: `package.json`'a script ekle**
+- [ ] **Step 5: Test'i çalıştır, PASS gör**
+
+Run: `npm run test:crawler -- --testPathPatterns "tuik/run"` → 5 test PASS.
+`npx tsc -p crawler/tsconfig.json` temiz.
+
+- [ ] **Step 6: `package.json`'a script ekle**
 
 `"crawl"` satırının altına:
 
@@ -1049,85 +1292,101 @@ if (require.main === module) {
 "crawl:tuik": "cross-env TS_NODE_PROJECT=crawler/tsconfig.json ts-node --transpile-only -r tsconfig-paths/register crawler/tuik/run.ts",
 ```
 
-- [ ] **Step 8: `README.md` yaz**
+- [ ] **Step 7: `README.md` yaz**
 
 ```markdown
-# crawler/tuik — TÜİK İlçe Demografi Toplama
+# crawler/tuik — TÜİK İlçe Demografi (SDMX API)
 
-Değer Kartı'nın üye demografi bloğunu besleyen ilçe seviyesi TÜİK verisini toplar.
+Değer Kartı'nın üye demografi bloğunu besleyen ilçe seviyesi TÜİK verisini
+TÜİK SDMX REST API'sinden çeker.
+
+## Ön koşul: API Key
+
+1. `veriportali.tuik.gov.tr` → giriş → "Kullanıcı Bilgileri" → SMS ile telefon
+   doğrula → **API Key** üret. (Türk telefonu yoksa `info@tuik.gov.tr`'ye talep.)
+2. `TUIK_API_KEY=<key>` → yerel `.env` (crawl için) ve prod deploy anında Coolify env.
 
 ## Çalıştırma
 
 1. Migration uygulanmış olmalı: `npx prisma migrate status` → up to date.
-2. Kuru koşu (parse eder, DB'ye yazMAZ, tarayıcıyı gösterir):
-   `npm run crawl:tuik -- --dry-run --headful`
+2. Kuru koşu: `npm run crawl:tuik -- --dry-run`
 3. Gerçek koşu: `npm run crawl:tuik`
+
+## Metrikler ve seviye
+
+| Alan | Dataflow | Seviye |
+|---|---|---|
+| population | DF_ADNKS_T22 | ilçe |
+| populationGrowthPerMille (‰) | DF_ADNKS_T38 | ilçe |
+| medianAge | DF_ADNKS_T23 | **il** (ilin tüm ilçelerine kopyalanır) |
+| avgHouseholdSize | DF_ADNKS_T25 | **il** (ilin tüm ilçelerine kopyalanır) |
 
 ## Tazeleme kadansı
 
-Yılda bir — TÜİK ADNKS sonuçları genelde Şubat'ta yayınlanır. `datasets.ts`'teki
-`DATA_YEAR`'ı güncelle, gerekiyorsa `querySteps`'teki yıl değerini değiştir, koş.
+Yılda bir — ADNKS Şubat'ta yayınlanır. `datasets.ts`'te `DATA_YEAR`'ı güncelle,
+gerekirse dataflow `version`'larını `GET /rest/dataflow/TR/<DF>/latest` ile doğrula, koş.
 
-## Bir metrik çekilemezse
+## Bir dataflow çekilemezse
 
-`CrawlRun.notes` (`datasetsFailed`) hangi metriğin düştüğünü söyler. O metrik
-sütunu bir sonraki başarılı turda güncellenir; eski değer korunur (UPSERT, silme yok).
-TÜİK arayüzü değiştiyse `datasets.ts`'teki `querySteps`/selektörleri güncelle.
+`CrawlRun.notes` (`dataflowsFailed`) hangi metriğin düştüğünü söyler. O sütun bir
+sonraki başarılı turda güncellenir; eski değer korunur (UPSERT, silme yok).
+Yeni ilçe kodu görülürse `areaCodesData.ts` güncellenir.
 ```
 
-- [ ] **Step 9: Regresyon + commit**
+- [ ] **Step 8: Regresyon + commit**
 
-Run: `npx tsc -p crawler/tsconfig.json` + `npm run test:crawler`
-Expected: temiz, tüm crawler testleri PASS.
+Run: `npx tsc -p crawler/tsconfig.json` + `npm run test:crawler` → tümü PASS.
 
 ```bash
-git add crawler/tuik/ crawler/__tests__/tuik/run.test.ts package.json
-git commit -m "feat(tuik): extract Playwright sürücüsü + runTuikCrawl orchestration + crawl:tuik scripti"
+git add crawler/tuik/fetchData.ts crawler/tuik/run.ts crawler/tuik/README.md crawler/__tests__/tuik/run.test.ts package.json
+git commit -m "feat(tuik): fetchDataflowCsv + runTuikDemographics orchestration + crawl:tuik scripti"
 ```
 
 ---
 
-## Task 8: `card.ts` — deps + DTO + buildDegerCard wiring
+## Task 10: `card.ts` — deps + DTO + buildDegerCard wiring
+
+**API Key GEREKMEZ. Task 3 (model) + Task 4 (summarize) tamamlanmış olmalı.**
 
 **Files:**
 - Modify: `src/lib/deger/card.ts`
-- Modify: `src/lib/deger/anonCardDeps.ts` (Omit tipini genişlet)
-- Test: `src/lib/deger/card.test.ts` (yeni testler + mevcut `deps()` fabrikasına alan ekle)
+- Modify: `src/lib/deger/anonCardDeps.ts`
+- Test: `src/lib/deger/card.test.ts`
 
 **Interfaces:**
 - Consumes: `DistrictDemographicsRecord`, `summarizeDemographics` (Task 4)
 - Produces:
   - `DegerCardDeps.findDistrictDemographics: (il: string, ilce: string) => Promise<DistrictDemographicsRecord | null>` (zorunlu)
-  - `DegerCardDTO.demographics?` — `{ dataYear; population; populationGrowthPerMille; medianAge; avgHouseholdSize; netMigrationPerMille; summary: string | null }` (tüm sayısal alanlar `number | null`)
-  - Task 9 (route'lar) ve Task 10 (`DegerKarti`) tüketir.
+  - `DegerCardDTO.demographics?` — `{ dataYear; population; populationGrowthPerMille; medianAge; avgHouseholdSize; summary: string | null }` (sayısal alanlar `number | null`)
+  - Task 11, 12 tüketir.
 
 - [ ] **Step 1: Mevcut `deps()` fabrikasına alan ekle (kırık testleri önlemek için ÖNCE)**
 
-`card.test.ts` içindeki `deps()` fabrikasına (yaklaşık satır 14-40), `findAreaTrend`'in yanına:
+`card.test.ts` `deps()` fabrikasına, `findAreaTrend`'in yanına:
 
 ```typescript
     findDistrictDemographics: jest.fn().mockResolvedValue({
       dataYear: 2024,
       population: 320_000,
-      populationGrowthPerMille: 12,
+      populationGrowthPerMille: 14,
       medianAge: 36,
       avgHouseholdSize: 3.1,
-      netMigrationPerMille: 5,
     }),
 ```
 
 - [ ] **Step 2: Failing testler yaz**
 
-`card.test.ts` sonuna (priceTrend testlerinin yanına):
+`card.test.ts` sonuna:
 
 ```typescript
-  it('üye: demographics var (5 metrik + summary)', async () => {
+  it('üye: demographics var (4 metrik + summary)', async () => {
     const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: true })
     if (!res.ok) throw new Error('ok bekleniyordu')
     expect(res.card.demographics).toBeDefined()
     expect(res.card.demographics!.population).toBe(320_000)
     expect(res.card.demographics!.dataYear).toBe(2024)
-    expect(res.card.demographics!.summary).toContain('konut talebi destekleniyor')
+    expect(res.card.demographics!.summary).toContain('konut talebi güçlü')
+    expect(res.card.demographics).not.toHaveProperty('netMigrationPerMille')
   })
 
   it('anonim: demographics YOK', async () => {
@@ -1159,22 +1418,22 @@ git commit -m "feat(tuik): extract Playwright sürücüsü + runTuikCrawl orches
 - [ ] **Step 3: Test'i çalıştır, FAIL gör**
 
 Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "deger/card"`
-Expected: yeni testler FAIL (`demographics` undefined); mevcut testler PASS (fabrika alanı eklendi).
+Expected: yeni testler FAIL; mevcut testler PASS.
 
 - [ ] **Step 4: `card.ts`'i düzenle**
 
-İmport ekle:
+İmport:
 ```typescript
 import { summarizeDemographics } from '@/lib/demografi/summarize'
 import type { DistrictDemographicsRecord } from '@/lib/demografi/types'
 ```
 
-`DegerCardDeps` arayüzüne ekle:
+`DegerCardDeps` + :
 ```typescript
   findDistrictDemographics: (il: string, ilce: string) => Promise<DistrictDemographicsRecord | null>
 ```
 
-`DegerCardDTO`'ya ekle:
+`DegerCardDTO` + :
 ```typescript
   demographics?: {
     dataYear: number
@@ -1182,24 +1441,17 @@ import type { DistrictDemographicsRecord } from '@/lib/demografi/types'
     populationGrowthPerMille: number | null
     medianAge: number | null
     avgHouseholdSize: number | null
-    netMigrationPerMille: number | null
     summary: string | null
   }
 ```
 
-`buildDegerCard` içinde `Promise.all` dizisine `deps.findDistrictDemographics(nIl, nIlce)` ekle (trendRows'un yanına), destructuring'e `demo` ekle:
+`buildDegerCard` `Promise.all` dizisine ekle:
 ```typescript
-  const [snap, stats, listings, hood, trendRows, demo] = await Promise.all([
-    deps.buildRiskSnapshot(center?.lat ?? null, center?.lng ?? null),
-    deps.findAreaStats(nIl, nIlce, nMahalle),
-    deps.findListingsNear(nIl, nIlce),
-    deps.findNeighborhood(nIl, nIlce, nMahalle),
-    deps.findAreaTrend(nIl, nIlce, nMahalle),
     deps.findDistrictDemographics(nIl, nIlce),
-  ])
 ```
+destructuring'e `demo` ekle (trendRows'un yanına).
 
-DTO oluşturma bloğunda, `priceTrend` spread'inin yanına:
+DTO oluşturmada, `priceTrend` spread'inin yanına:
 ```typescript
       ...(opts.memberView && demo
         ? {
@@ -1209,7 +1461,6 @@ DTO oluşturma bloğunda, `priceTrend` spread'inin yanına:
               populationGrowthPerMille: demo.populationGrowthPerMille,
               medianAge: demo.medianAge,
               avgHouseholdSize: demo.avgHouseholdSize,
-              netMigrationPerMille: demo.netMigrationPerMille,
               summary: summarizeDemographics(demo).sentence,
             },
           }
@@ -1218,18 +1469,16 @@ DTO oluşturma bloğunda, `priceTrend` spread'inin yanına:
 
 - [ ] **Step 5: `anonCardDeps.ts` — Omit tipini genişlet**
 
-`createAnonCardDeps` dönüş tipini değiştir:
 ```typescript
 export function createAnonCardDeps(): Omit<DegerCardDeps, 'findAreaTrend' | 'findDistrictDemographics'> {
 ```
-Docstring'e bir satır ekle: `findDistrictDemographics` da bilinçli olarak dışarıda — üye-özel (route'ta `if (!userId) return null`).
+Docstring'e: `findDistrictDemographics` de üye-özel — route'ta `if (!userId) return null`.
 
 - [ ] **Step 6: Test'i çalıştır, PASS gör**
 
-Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "deger/card"`
-Expected: tüm testler PASS.
+Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "deger/card"` → tümü PASS.
 
-`npx tsc --noEmit` → **`/api/deger/kart/route.ts` ve `whatsapp/webhook/route.ts`'te `findDistrictDemographics` eksik hatası BEKLENİYOR** (Task 9'da düzeltilecek). Başka tsc hatası olmamalı.
+`npx tsc --noEmit` → **`/api/deger/kart/route.ts` ve `whatsapp/webhook/route.ts`'te `findDistrictDemographics` eksik hatası BEKLENİYOR** (Task 11'de düzeltilecek). Başka hata olmamalı.
 
 - [ ] **Step 7: Commit**
 
@@ -1240,20 +1489,19 @@ git commit -m "feat(deger): card.ts demographics DTO + findDistrictDemographics 
 
 ---
 
-## Task 9: Route wiring — `/api/deger/kart` + WhatsApp webhook
+## Task 11: Route wiring — `/api/deger/kart` + WhatsApp webhook
+
+**API Key GEREKMEZ. Task 10 tamamlanmış olmalı (bıraktığı tsc hatalarını çözer).**
 
 **Files:**
 - Modify: `src/app/api/deger/kart/route.ts`
 - Modify: `src/app/api/whatsapp/webhook/route.ts`
-- Test: `src/app/api/deger/kart/route.test.ts` (varsa; yoksa `card.ts` testleri yeterli — bu durumda route'a bir odak testi ekle)
 
-**Interfaces:**
-- Consumes: `DegerCardDeps.findDistrictDemographics` (Task 8)
-- Produces: yok (uçlar)
+**Interfaces:** Consumes `DegerCardDeps.findDistrictDemographics` (Task 10). Produces: yok.
 
-- [ ] **Step 1: `/api/deger/kart/route.ts` — deps'e `findDistrictDemographics` ekle**
+- [ ] **Step 1: `/api/deger/kart/route.ts` — deps'e ekle**
 
-`findAreaTrend` dep'inin yanına (aynı `if (!userId)` + `try/catch` savunması):
+`findAreaTrend` dep'inin yanına:
 
 ```typescript
       findDistrictDemographics: async (il, ilce) => {
@@ -1267,49 +1515,29 @@ git commit -m "feat(deger): card.ts demographics DTO + findDistrictDemographics 
               populationGrowthPerMille: true,
               medianAge: true,
               avgHouseholdSize: true,
-              netMigrationPerMille: true,
             },
           })
         } catch {
-          // DistrictDemographics tablosu henüz migrate edilmemişse /deger'i düşürme.
-          return null
+          return null   // DistrictDemographics tablosu henüz migrate edilmemişse /deger'i düşürme
         }
       },
 ```
 
 - [ ] **Step 2: `whatsapp/webhook/route.ts` — `cardDeps`'e ekle**
 
-`findAreaTrend: async () => [],` satırının yanına:
+`findAreaTrend: async () => [],` yanına:
 
 ```typescript
     findDistrictDemographics: async () => null,
 ```
-
 Yorumu güncelle: `// Bot trend/demografi göstermez → ikisi de boş/null.`
 
-- [ ] **Step 3: Route odak testi (mevcut kart route testi yoksa ekle)**
+- [ ] **Step 3: tsc + hedefli suite**
 
-`src/app/api/deger/kart/route.test.ts` yoksa oluştur; varsa şu testi ekle:
+Run: `npx tsc --noEmit` → **temiz** (Task 10'un bıraktığı 2 hata çözüldü).
+Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "deger|whatsapp"` → tümü PASS.
 
-```typescript
-it('anonim istek: findDistrictDemographics null döner (DTO\'da demographics yok)', async () => {
-  // route'un buildDegerCard'a geçtiği deps'te findDistrictDemographics var ve
-  // userId yokken null döndürüyor — buildDegerCard mock'lanmışsa deps şeklini doğrula.
-  // (Mevcut kart route testinin mock desenini izle.)
-})
-```
-
-Not: mevcut route testi `buildDegerCard`'ı mock'luyorsa (whatsapp testi öyle yapıyor), bu testi `card.test.ts`'in kapsamı zaten karşılar — o zaman bu adımı atla ve yalnızca tsc temizliğine güven.
-
-- [ ] **Step 4: tsc + tüm suite**
-
-Run: `npx tsc --noEmit`
-Expected: **temiz** (Task 8'in bıraktığı iki hata çözüldü).
-
-Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "deger|whatsapp"`
-Expected: tüm testler PASS.
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add src/app/api/deger/kart/route.ts src/app/api/whatsapp/webhook/route.ts
@@ -1318,45 +1546,44 @@ git commit -m "feat(deger): findDistrictDemographics route wiring (/deger üye +
 
 ---
 
-## Task 10: `DegerKarti.tsx` — demografi bloğu + CSS
+## Task 12: `DegerKarti.tsx` — demografi bloğu + CSS
+
+**API Key GEREKMEZ. Task 10 tamamlanmış olmalı.**
 
 **Files:**
 - Modify: `src/components/deger/DegerKarti.tsx`
 - Modify: `src/components/deger/DegerKarti.module.css`
 - Test: `src/components/deger/DegerKarti.test.tsx`
 
-**Interfaces:**
-- Consumes: `DegerCardDTO.demographics` (Task 8)
+- [ ] **Step 1: Fixture + failing testler yaz**
 
-- [ ] **Step 1: Test fixture'ına demographics ekle + failing testler yaz**
-
-`DegerKarti.test.tsx`'te bir `memberCardWithDemographics` DTO'su kur (mevcut `baseCard` + `value: memberValue` + `demographics`):
+`DegerKarti.test.tsx`'te:
 
 ```typescript
 const demographics = {
   dataYear: 2024,
   population: 320000,
-  populationGrowthPerMille: 12,
+  populationGrowthPerMille: 14,
   medianAge: 36,
   avgHouseholdSize: 3.1,
-  netMigrationPerMille: 5,
-  summary: 'Bu ilçede nüfus büyüyor ve net göç pozitif — konut talebi destekleniyor.',
+  summary: 'Bu ilçede nüfus belirgin şekilde büyüyor — konut talebi güçlü.',
 }
 ```
 
 Testler:
 
 ```typescript
-it('üye + demographics: özet cümle ve 5 metrik render edilir', () => {
+it('üye + demographics: özet cümle + metrikler + il-geneli etiketi render edilir', () => {
   render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics }} isLoggedIn={true} parcelQuery="x" />)
-  expect(screen.getByText(/konut talebi destekleniyor/)).toBeInTheDocument()
-  expect(screen.getByText(/320\.000/)).toBeInTheDocument()          // nüfus tr-TR
+  expect(screen.getByText(/konut talebi güçlü/)).toBeInTheDocument()
+  expect(screen.getByText(/320\.000/)).toBeInTheDocument()
+  expect(screen.getByText(/\+14/)).toBeInTheDocument()            // ‰ işaretli artış
+  expect(screen.getAllByText(/il geneli/i).length).toBeGreaterThanOrEqual(1)  // medyan yaş/hane etiketi
   expect(screen.getByText(/Kaynak: TÜİK 2024/)).toBeInTheDocument()
 })
 
-it('anonim + demographics undefined: blur overlay + Üye Ol gösterilir, metrik değerleri yok', () => {
+it('anonim + demographics undefined: blur overlay + Üye Ol, gerçek sayı yok', () => {
   render(<DegerKarti card={{ ...baseCard }} isLoggedIn={false} parcelQuery="x" />)
-  // demografi bloğu başlığı görünür ama gerçek sayı yok
   expect(screen.getByText(/Bölge Demografisi/)).toBeInTheDocument()
   expect(screen.queryByText(/320\.000/)).not.toBeInTheDocument()
 })
@@ -1368,16 +1595,20 @@ it('demografi bloğu hiçbir fetch tetiklemez', () => {
   spy.mockRestore()
 })
 
-it('summary null ise özet cümle render edilmez ama metrikler render edilir', () => {
+it('summary null → cümle yok ama metrikler var', () => {
   render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { ...demographics, summary: null } }} isLoggedIn={true} parcelQuery="x" />)
   expect(screen.getByText(/320\.000/)).toBeInTheDocument()
+})
+
+it('null metrik satırı render edilmez', () => {
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { ...demographics, avgHouseholdSize: null } }} isLoggedIn={true} parcelQuery="x" />)
+  expect(screen.queryByText(/Ortalama hane/)).not.toBeInTheDocument()
 })
 ```
 
 - [ ] **Step 2: Test'i çalıştır, FAIL gör**
 
-Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "DegerKarti"`
-Expected: yeni testler FAIL.
+Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "DegerKarti"` → yeni testler FAIL.
 
 - [ ] **Step 3: `DegerKarti.tsx`'e blok ekle**
 
@@ -1400,14 +1631,17 @@ Expected: yeni testler FAIL.
             {card.demographics.populationGrowthPerMille != null && (
               <div className={styles.memberRow}>Yıllık nüfus artışı: {fmtPerMille(card.demographics.populationGrowthPerMille)}</div>
             )}
-            {card.demographics.netMigrationPerMille != null && (
-              <div className={styles.memberRow}>Net göç hızı: {fmtPerMille(card.demographics.netMigrationPerMille)}</div>
-            )}
             {card.demographics.medianAge != null && (
-              <div className={styles.memberRow}>Medyan yaş: {card.demographics.medianAge.toLocaleString('tr-TR')}</div>
+              <div className={styles.memberRow}>
+                Medyan yaş: {card.demographics.medianAge.toLocaleString('tr-TR')}{' '}
+                <span className={styles.demografiScope}>(il geneli)</span>
+              </div>
             )}
             {card.demographics.avgHouseholdSize != null && (
-              <div className={styles.memberRow}>Ortalama hane: {card.demographics.avgHouseholdSize.toLocaleString('tr-TR')} kişi</div>
+              <div className={styles.memberRow}>
+                Ortalama hane: {card.demographics.avgHouseholdSize.toLocaleString('tr-TR')} kişi{' '}
+                <span className={styles.demografiScope}>(il geneli)</span>
+              </div>
             )}
           </div>
           <p className={styles.demografiSource}>Kaynak: TÜİK {card.demographics.dataYear}</p>
@@ -1422,7 +1656,7 @@ Expected: yeni testler FAIL.
             <div className={styles.blurred} aria-hidden="true">
               <div className={styles.memberRow}>Nüfus: ••••••</div>
               <div className={styles.memberRow}>Yıllık nüfus artışı: ••••</div>
-              <div className={styles.memberRow}>Net göç hızı: ••••</div>
+              <div className={styles.memberRow}>Medyan yaş: ••••</div>
             </div>
             <div className={styles.overlay}>
               <strong>İlçe demografik profili</strong>
@@ -1434,7 +1668,7 @@ Expected: yeni testler FAIL.
       ) : null}
 ```
 
-Dosyanın üstüne, `tl` sabitinin yanına yardımcı ekle:
+Dosya üstüne, `tl` sabitinin yanına:
 
 ```typescript
 const fmtPerMille = (n: number) => {
@@ -1445,7 +1679,7 @@ const fmtPerMille = (n: number) => {
 
 - [ ] **Step 4: CSS ekle**
 
-`DegerKarti.module.css` sonuna (`trendBlock` stilleriyle tutarlı):
+`DegerKarti.module.css` sonuna:
 
 ```css
 .demografiBlock {
@@ -1465,6 +1699,11 @@ const fmtPerMille = (n: number) => {
   gap: 4px;
 }
 
+.demografiScope {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
 .demografiSource {
   font-size: 11px;
   color: #94a3b8;
@@ -1472,25 +1711,25 @@ const fmtPerMille = (n: number) => {
 }
 ```
 
-Not: `.memberRow`, `.divider`, `.label`, `.trendScope`, `.gatedWrap`, `.blurred`, `.overlay`, `.sub`, `.cta` zaten `DegerKarti.module.css`'te tanımlı — yeniden tanımlama.
+`.memberRow`, `.divider`, `.label`, `.trendScope`, `.gatedWrap`, `.blurred`,
+`.overlay`, `.sub`, `.cta` zaten tanımlı — yeniden tanımlama.
 
 - [ ] **Step 5: Test'i çalıştır, PASS gör**
 
-Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "DegerKarti"`
-Expected: tüm testler PASS.
+Run: `npx jest --no-coverage --roots "$(pwd)/src" --testPathPatterns "DegerKarti"` → tümü PASS.
 
 - [ ] **Step 6: Commit**
 
 ```bash
 git add src/components/deger/DegerKarti.tsx src/components/deger/DegerKarti.module.css src/components/deger/DegerKarti.test.tsx
-git commit -m "feat(deger): DegerKarti üye demografi bloğu + anonim blur overlay"
+git commit -m "feat(deger): DegerKarti üye demografi bloğu (il-geneli etiketli) + anonim blur overlay"
 ```
 
 ---
 
-## Task 11: Final regresyon + doğrulama
+## Task 13: Final regresyon + doğrulama
 
-**Files:** yok (doğrulama)
+**Files:** yok (doğrulama).
 
 - [ ] **Step 1: Tam tsc**
 
@@ -1504,46 +1743,52 @@ Run: `npm run test:crawler` → tüm crawler testleri yeşil
 
 - [ ] **Step 3: Production build**
 
-Run: `npm run build` → temiz (memory: `composes`/lightningcss tuzağı — bu planda `composes` YOK ama build yine de zorunlu). Build sonrası `public/sw.js` dirty olursa `git checkout public/sw.js`.
+Run: `npm run build` → temiz. Build sonrası `public/sw.js` dirty olursa `git checkout public/sw.js`.
 
 - [ ] **Step 4: eslint (değişen dosyalar)**
 
-Run: `npx eslint src/lib/demografi/ src/lib/deger/card.ts src/components/deger/DegerKarti.tsx src/app/api/deger/kart/route.ts` → yeni ihlal yok
+Run: `npx eslint src/lib/demografi/ src/lib/deger/card.ts src/components/deger/DegerKarti.tsx src/app/api/deger/kart/route.ts` → yeni ihlal yok.
 
 - [ ] **Step 5: Bulguları not et**
 
-`crawl:tuik` gerçek turu ve prod migration'ı BATCH DEPLOY'a bırakıldı (spec §Ön Koşul). `DistrictDemographics` migration'ı bekleyen migration listesine eklenir. `crawler/tuik/datasets.ts` doldurulmadıysa (Task 1 eksikse) demografi bloğu canlıda hiç görünmez (tablo boş) — bu güvenli bir başlangıç durumu, kart geri kalanı etkilenmez.
+- `crawl:tuik` gerçek turu + prod migration BATCH DEPLOY'a bırakıldı. `DistrictDemographics` migration'ı bekleyen migration listesine eklenir.
+- `TUIK_API_KEY` prod deploy anında Coolify env'e eklenir.
+- `datasets.ts`/`areaCodesData.ts` Task 1'de doldurulmadıysa demografi bloğu canlıda hiç görünmez (tablo boş) — güvenli başlangıç, kart geri kalanı etkilenmez.
+- Gerçek SDMX yanıt şekli (`keyPart` boyut sırası, SDMX-CSV sütun adları) prod'da ilk `crawl:tuik --dry-run` turuyla doğrulanmalı.
 
-- [ ] **Step 6: Final commit (varsa)**
+- [ ] **Step 6: Final commit**
 
 ```bash
-git add -A
-git commit -m "chore(tuik): final regresyon doğrulaması" --allow-empty
+git commit --allow-empty -m "chore(tuik): final regresyon doğrulaması"
 ```
 
 ---
 
 ## Self-Review
 
-**Spec coverage:**
-- §Veri modeli → Task 3 ✓
-- §Crawler `crawler/tuik/` → Task 1 (datasets), Task 5 (parse), Task 6 (upsert), Task 7 (extract+run) ✓
-- §Hedeflenen küçük iyileştirme (context helper) → Task 2 ✓
-- §Saf lib `src/lib/demografi/` → Task 4 ✓
-- §Değer Kartı entegrasyonu (card.ts + anonCardDeps + route'lar + DegerKarti) → Task 8, 9, 10 ✓
-- §Hata Yönetimi → Task 7 (dataset fail / hepsi fail), Task 9 (tablo yok → catch null), Task 10 (summary null / eksik metrik) ✓
-- §Test Stratejisi → her task'ın TDD adımları + Task 11 regresyon ✓
-- §Kapsam dışı → planda hiçbir task mahalle/geçmiş/API/cron/Akif eklemiyor ✓
-- §Ön koşul → Task 11 Step 5 ✓
-- §Açık teknik kararlar → Task 1 spike bunları kapatır; Task 7 Step 5 NOT'u indirme-tetikleyici esnekliğini adresliyor ✓
+**Spec coverage (rev 2):**
+- §Task 1 Bulguları / Kararlar (rev 2) — SDMX yönü → Task 1 (`datasets.ts`/`areaCodesData.ts`) + Task 2 (`auth.ts`) ✓
+- §Veri modeli (4 metrik, net göç yok) → Task 3 ✓
+- §Crawler `crawler/tuik/` (auth/fetchData/parse/areaCodes/merge/upsert/run) → Task 1,2,5,6,7,8,9 ✓
+- §il-yayılımı (medyan yaş/hane il→ilçe) → Task 7 `mergeDemographics` + testleri ✓
+- §Saf lib `src/lib/demografi/` (summarize: artış + yaş) → Task 4 ✓
+- §Değer Kartı entegrasyonu → Task 10,11,12 ✓
+- §"(il geneli)" etiketi → Task 12 Step 3 + test ✓
+- §Hata Yönetimi (token fail / dataflow fail / hepsi fail / bilinmeyen kod / tablo yok / hepsi null) → Task 9 (run) + Task 11 (route catch) + Task 12 (null metrik/summary) ✓
+- §Test Stratejisi → her task TDD + Task 13 ✓
+- §Non-Goals → hiçbir task mahalle/geçmiş/net-göç/MEDAS/cron/Akif eklemiyor ✓
+- §Ön Koşul (API Key, batch deploy) → Global Constraints + Task 9 README + Task 13 Step 5 ✓
+- §Açık teknik kararlar → Task 1 Step 2/3/5 (versiyon, DSD sırası, kod listesi) + Task 9 Step 3 NOT'u (`keyPart`) ✓
 
-**Placeholder scan:** Task 1'in `datasets.ts` iskeleti bilinçli — spike çıktısı doldurur, tip geçerli. Task 9 Step 3 koşullu (mevcut route testi desenine bağlı) — net talimatla. Başka placeholder yok.
+**Placeholder scan:** Task 1'in `datasets.ts`/`areaCodesData.ts` iskeletleri bilinçli — API Key gerektiren keşif çıktısı doldurur, tip geçerli, `tsc` geçer. Task 9 `keyPart` oluşumu Task 1 DSD bulgusuna bağlı — NOT ile işaretli, `keyDimensions` boşken kod çalışır. Başka placeholder yok.
 
 **Type consistency:**
-- `ParsedDemographicRow` (Task 5) → `mergeRows` girdi tipi (Task 6) → tutarlı `{ il; ilce } & Partial<Record<NumericField, number>>`
-- `NumericField` union üç dosyada tekrar tanımlı (parse.ts, upsert.ts) — küçük tekrar, kasıtlı (crawler modülleri izole; paylaşılan tip için `datasets.ts`'e koymak da olurdu ama parse/upsert bağımsız kalsın). Değerler birebir aynı.
-- `DistrictDemographicsRecord` (Task 4) alanları = `card.ts` DTO `demographics` sayısal alanları = route `select` alanları — hepsi `population, populationGrowthPerMille, medianAge, avgHouseholdSize, netMigrationPerMille` + `dataYear`. Tutarlı.
-- `findDistrictDemographics(il, ilce)` imzası: card.ts arayüzü, route impl, whatsapp impl, card.test fabrikası — hepsi `(il: string, ilce: string) => Promise<DistrictDemographicsRecord | null>`. Tutarlı.
-- `runTuikCrawl(deps, opts)` / `RunDeps` / `RunSummary` — Task 7 içinde tanımlı ve tüketiliyor. Tutarlı.
+- `SdmxObservation` (Task 5) → `DataflowResult.observations` (Task 7) — birebir
+- `MergedDistrictRow` (Task 7) = `{ il; ilce } & Partial<Record<DemographicField, number>>` → `upsertDistrictDemographics` girdisi (Task 8) — birebir
+- `DemographicField` union: `datasets.ts`'te (Task 1) tanımlı, `merge.ts` (Task 7) + `upsert.ts` (Task 8) import eder — tek kaynak
+- `DistrictDemographicsRecord` (Task 4) alanları = `card.ts` DTO `demographics` sayısal alanları (Task 10) = route `select` (Task 11) — hepsi `population, populationGrowthPerMille, medianAge, avgHouseholdSize` + `dataYear`. Net göç HİÇBİRİNDE yok. Tutarlı.
+- `findDistrictDemographics(il, ilce)` imzası: card arayüzü (Task 10), route impl (Task 11), whatsapp impl (Task 11), card.test fabrikası (Task 10) — hepsi `(il: string, ilce: string) => Promise<DistrictDemographicsRecord | null>`
+- `getAccessToken({fetch, apiKey})` (Task 2) ← `run.ts` main (Task 9) `getToken: () => getAccessToken({ fetch, apiKey })` — uyumlu
+- `RunDeps.fetchCsv(ref, token, year)` (Task 9) ← `fetchDataflowCsv({fetch, token}, ref, year)` (Task 9 Step 3) — main'de `(ref, token, year) => fetchDataflowCsv({fetch, token}, ref, year)` ile köprüleniyor, uyumlu
 
 Gap yok. Plan uygulanmaya hazır.
