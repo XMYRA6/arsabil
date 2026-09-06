@@ -286,3 +286,33 @@
 .versionOpenBtn:hover {
   background: #eff6ff;
 }
+
+.versionActions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.vitrinLink {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b21a8;
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.vitrinLink:hover {
+  background: #f3e8ff;
+}
+
+.versionActions .vitrinLink {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}

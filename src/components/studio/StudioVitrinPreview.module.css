@@ -159,6 +159,45 @@
   gap: 8px;
 }
 
+.renderLockedCta {
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.lockedTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #6b21a8;
+  margin: 0;
+}
+
+.lockedText {
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 420px;
+}
+
+.lockedLink {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7c3aed;
+  text-decoration: none;
+}
+
+.lockedLink:hover {
+  text-decoration: underline;
+}
+
 .renderButton {
   background: #7c3aed;
   color: #ffffff;

@@ -118,6 +118,51 @@ describe('StudioVitrinPreview', () => {
     expect(screen.queryByRole('button', { name: /Fotogerçekçi/i })).not.toBeInTheDocument();
   });
 
+  it('isPro=false, sahne açık, senaryo+versiyon var: PRO kilit CTA\'sı ve /contact linki gösterilir', async () => {
+    const user = userEvent.setup();
+    render(<StudioVitrinPreview snapshot={snapshot} scenarioId="s1" versionNumber={1} isPro={false} />);
+    await user.click(screen.getByRole('button', { name: /göster|goster/i }));
+    await screen.findByTestId('vitrin-scene');
+
+    const cta = screen.getByTestId('studio-render-locked-cta');
+    expect(cta).toHaveTextContent(/PRO plana özel/i);
+    expect(screen.getByRole('link', { name: /Bilgi al/i })).toHaveAttribute('href', '/contact');
+  });
+
+  it('isPro=false ise kilit CTA hiçbir fetch çağırmaz', async () => {
+    global.fetch = jest.fn();
+    const user = userEvent.setup();
+    render(<StudioVitrinPreview snapshot={snapshot} scenarioId="s1" versionNumber={1} isPro={false} />);
+    await user.click(screen.getByRole('button', { name: /göster|goster/i }));
+    await screen.findByTestId('vitrin-scene');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('isPro=false ama WebGL yoksa kilit CTA da gösterilmez', async () => {
+    isWebGLAvailableMock.mockReturnValue(false);
+    const user = userEvent.setup();
+    render(<StudioVitrinPreview snapshot={snapshot} scenarioId="s1" versionNumber={1} isPro={false} />);
+    await user.click(screen.getByRole('button', { name: /göster|goster/i }));
+    expect(screen.queryByTestId('studio-render-locked-cta')).not.toBeInTheDocument();
+  });
+
+  it('isPro=false ama scenarioId yoksa kilit CTA gösterilmez', async () => {
+    const user = userEvent.setup();
+    render(<StudioVitrinPreview snapshot={snapshot} isPro={false} />);
+    await user.click(screen.getByRole('button', { name: /göster|goster/i }));
+    await screen.findByTestId('vitrin-scene');
+    expect(screen.queryByTestId('studio-render-locked-cta')).not.toBeInTheDocument();
+  });
+
+  it('isPro=true ise kilit CTA gösterilmez (gerçek buton gösterilir)', async () => {
+    const user = userEvent.setup();
+    render(<StudioVitrinPreview snapshot={snapshot} scenarioId="s1" versionNumber={1} isPro={true} />);
+    await user.click(screen.getByRole('button', { name: /göster|goster/i }));
+    await screen.findByTestId('vitrin-scene');
+    expect(screen.queryByTestId('studio-render-locked-cta')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Fotogerçekçi/i })).toBeInTheDocument();
+  });
+
   it('isPro=true, sahne hazır: buton tıklanınca fetch çağrılır ve sonuç görseli gösterilir', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,

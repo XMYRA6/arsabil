@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from './StudioScenarioLibrary.module.css';
 import type {
   StudioScenarioRecord,
@@ -199,6 +200,13 @@ export function StudioScenarioLibrary({
                     >
                       {isExpanded ? 'Versiyonları Gizle' : `Tüm Versiyonlar (${scenario.currentVersionNumber})`}
                     </button>
+
+                    <Link
+                      href={`/studio/scenarios/${scenario.id}/versions/${scenario.currentVersionNumber}/vitrin`}
+                      className={styles.vitrinLink}
+                    >
+                      3D Vitrin
+                    </Link>
                   </div>
 
                   {isExpanded && (
@@ -217,16 +225,24 @@ export function StudioScenarioLibrary({
                                 <span className={styles.versionNotes}>"{ver.summaryNotes}"</span>
                               )}
                             </div>
-                            <button
-                              type="button"
-                              className={styles.versionOpenBtn}
-                              disabled={loadingVersionId === `${scenario.id}-${ver.versionNumber}`}
-                              onClick={() => handleOpenVersion(scenario, ver.versionNumber)}
-                            >
-                              {loadingVersionId === `${scenario.id}-${ver.versionNumber}`
-                                ? '...'
-                                : 'Bu Versiyonu Aç'}
-                            </button>
+                            <div className={styles.versionActions}>
+                              <button
+                                type="button"
+                                className={styles.versionOpenBtn}
+                                disabled={loadingVersionId === `${scenario.id}-${ver.versionNumber}`}
+                                onClick={() => handleOpenVersion(scenario, ver.versionNumber)}
+                              >
+                                {loadingVersionId === `${scenario.id}-${ver.versionNumber}`
+                                  ? '...'
+                                  : 'Bu Versiyonu Aç'}
+                              </button>
+                              <Link
+                                href={`/studio/scenarios/${scenario.id}/versions/${ver.versionNumber}/vitrin`}
+                                className={styles.vitrinLink}
+                              >
+                                3D Vitrin
+                              </Link>
+                            </div>
                           </div>
                         ))
                       )}

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { isWebGLAvailable } from './webglSupport';
 import { StudioSceneBoundary } from './StudioSceneBoundary';
 import type { StudioSnapshotDraft } from '@/lib/studio/types';
@@ -43,7 +44,8 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
   }
 
   const webglSupported = isWebGLAvailable();
-  const canGenerateRender = Boolean(isPro && scenarioId && versionNumber && webglSupported);
+  const hasRenderTarget = Boolean(scenarioId && versionNumber && webglSupported);
+  const canGenerateRender = Boolean(isPro && hasRenderTarget);
 
   async function handleGenerateRender() {
     const handle = captureHandle;
@@ -119,6 +121,19 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
           <StudioSceneBoundary fallback={<div className={styles.canvasLoading}>3D vitrin sahnesi yüklenemedi.</div>}>
             <StudioVitrinScene snapshot={snapshot} onCaptureReady={setCaptureHandle} />
           </StudioSceneBoundary>
+        </div>
+      )}
+
+      {isOpen && hasRenderTarget && !isPro && (
+        <div className={styles.renderLockedCta} data-testid="studio-render-locked-cta">
+          <p className={styles.lockedTitle}>✨ Fotogerçekçi Görsel — PRO plana özel</p>
+          <p className={styles.lockedText}>
+            Kütlenizin arsanızdaki fotogerçekçi görselini saniyeler içinde üretin — ortağınıza
+            ve arsa sahibine göstermek için.
+          </p>
+          <Link href="/contact" className={styles.lockedLink}>
+            Bilgi al →
+          </Link>
         </div>
       )}
 

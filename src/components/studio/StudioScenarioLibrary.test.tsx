@@ -111,4 +111,74 @@ describe('StudioScenarioLibrary', () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  it('kart basliginda gecerli versiyon icin "3D Vitrin" linki verir', async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        scenarios: [
+          {
+            id: 'sc-1',
+            name: 'Proje A',
+            parcelSourceStatus: 'verified_tkgm',
+            currentVersionNumber: 3,
+            updatedAt: '2026-08-22T12:00:00.000Z',
+          },
+        ],
+      }),
+    });
+
+    render(
+      <StudioScenarioLibrary isOpen={true} onClose={jest.fn()} onLoadScenarioVersion={jest.fn()} />
+    );
+
+    await waitFor(() => expect(screen.getByText('Proje A')).toBeInTheDocument());
+
+    expect(screen.getByRole('link', { name: /3D Vitrin/i })).toHaveAttribute(
+      'href',
+      '/studio/scenarios/sc-1/versions/3/vitrin'
+    );
+  });
+
+  it('genisletilmis versiyon listesinde her versiyon icin "3D Vitrin" linki verir', async () => {
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          scenarios: [
+            {
+              id: 'sc-1',
+              name: 'Proje A',
+              parcelSourceStatus: 'demo',
+              currentVersionNumber: 2,
+              updatedAt: '2026-08-22T12:00:00.000Z',
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          versions: [
+            { id: 'v1', versionNumber: 1, createdAt: '2026-08-20T10:00:00.000Z' },
+            { id: 'v2', versionNumber: 2, createdAt: '2026-08-22T10:00:00.000Z' },
+          ],
+        }),
+      });
+
+    render(
+      <StudioScenarioLibrary isOpen={true} onClose={jest.fn()} onLoadScenarioVersion={jest.fn()} />
+    );
+
+    await waitFor(() => expect(screen.getByText('Proje A')).toBeInTheDocument());
+    fireEvent.click(screen.getByText(/Tüm Versiyonlar/));
+
+    await waitFor(() => expect(screen.getByText('Versiyon 1')).toBeInTheDocument());
+
+    const vitrinLinks = screen
+      .getAllByRole('link', { name: /3D Vitrin/i })
+      .map((el) => el.getAttribute('href'));
+    expect(vitrinLinks).toContain('/studio/scenarios/sc-1/versions/1/vitrin');
+    expect(vitrinLinks).toContain('/studio/scenarios/sc-1/versions/2/vitrin');
+  });
 });
