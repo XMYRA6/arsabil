@@ -36,6 +36,13 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
   const isMember = isLoggedIn
   const [showMap, setShowMap] = useState(false)
 
+  const hasDemografiMetric =
+    !!card.demographics &&
+    (card.demographics.population != null ||
+      card.demographics.populationGrowthPerMille != null ||
+      card.demographics.medianAge != null ||
+      card.demographics.avgHouseholdSize != null)
+
   return (
     <div className={styles.card}>
       <div className={styles.parcel}>
@@ -199,7 +206,7 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
         </div>
       )}
 
-      {isMember && card.demographics ? (
+      {isMember && card.demographics && hasDemografiMetric ? (
         <div className={styles.demografiBlock}>
           <div className={styles.divider} />
           <div className={styles.label}>

@@ -234,3 +234,8 @@ it('null metrik satırı render edilmez', () => {
   render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { ...demographics, avgHouseholdSize: null } }} isLoggedIn={true} parcelQuery="x" />)
   expect(screen.queryByText(/Ortalama hane/)).not.toBeInTheDocument()
 })
+
+it('üye + demographics ama tüm metrikler null → blok hiç render edilmez', () => {
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { dataYear: 2024, population: null, populationGrowthPerMille: null, medianAge: null, avgHouseholdSize: null, summary: null } }} isLoggedIn={true} parcelQuery="x" />)
+  expect(screen.queryByText(/Bölge Demografisi/)).not.toBeInTheDocument()
+})
