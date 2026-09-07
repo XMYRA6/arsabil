@@ -508,3 +508,20 @@ model AkifTurnLog {
   @@index([conversationId])
   @@index([createdAt])
 }
+
+model DistrictDemographics {
+  id                       String   @id @default(cuid())
+  il                       String
+  ilce                     String
+  dataYear                 Int
+  population               Int?
+  populationGrowthPerMille Float?
+  medianAge                Float?
+  avgHouseholdSize         Float?
+  source                   String
+  fetchedAt                DateTime
+  updatedAt                DateTime @updatedAt
+
+  @@unique([il, ilce])
+  @@index([il])
+}
