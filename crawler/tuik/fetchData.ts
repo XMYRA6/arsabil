@@ -4,10 +4,15 @@ import { DATA_BASE, type DataflowRef } from './datasets'
  *  birkaç kez dene. Kısa sabit gecikme (sunucu genelde saniyeler içinde toparlıyor). */
 const MAX_ATTEMPTS = 3
 const RETRY_DELAY_MS = 2000
-
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 class ClientError extends Error {}
+
+export interface FetchDeps {
+  fetch: typeof fetch
+  /** Geçerli erişim token'ı. `force` ile taze token istenir (401 sonrası). */
+  getToken: (force?: boolean) => Promise<string>
+}
 
 /**
  * Bir dataflow'un tek bir yılını SDMX-CSV metni olarak çeker.
@@ -17,12 +22,14 @@ class ClientError extends Error {}
  * kırılım satırları `parseSdmxCsv`'de `ref.rowFilter` ile elenir.
  *
  * SDMX-CSV yalnız `Accept` başlığıyla döner; `?format=SDMX-CSV` query parametresi
- * TÜİK NSI servisinde yok sayılır (XML döner) — bkz. crawler/tuik/FINDINGS.md.
+ * TÜİK NSI servisinde yok sayılır. `Accept-Language: tr` de şart — yoksa bazı
+ * istemciler (undici fetch) HTTP 500 "languageTag" alıyor. Bkz. FINDINGS.md.
  *
- * 5xx ve ağ hatalarında `MAX_ATTEMPTS` kez denenir; 4xx anında fırlatılır.
+ * 401 → bir kez taze token alıp yeniden dener (token TTL 300 sn, yavaş sunucuda
+ * dolabiliyor). 5xx / ağ hatası → `MAX_ATTEMPTS` kez. 4xx (401 hariç) → anında.
  */
 export async function fetchDataflowCsv(
-  deps: { fetch: typeof fetch; token: string },
+  deps: FetchDeps,
   ref: DataflowRef,
   year: number,
 ): Promise<string> {
@@ -30,21 +37,28 @@ export async function fetchDataflowCsv(
     `${DATA_BASE},${ref.dataflow},${ref.version}/` +
     `?startPeriod=${year}&endPeriod=${year}`
 
+  let refreshedOn401 = false
   let lastErr: Error | undefined
+
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
+      const token = await deps.getToken()
       const res = await deps.fetch(url, {
         headers: {
-          Authorization: `Bearer ${deps.token}`,
+          Authorization: `Bearer ${token}`,
           Accept: 'application/vnd.sdmx.data+csv;version=1.0.0',
-          // TÜİK NSI servisi Accept-Language yoksa bazı istemcilere (undici fetch)
-          // HTTP 500 "languageTag" hatası veriyor — bkz. FINDINGS.md. curl'de sorun yok.
           'Accept-Language': 'tr',
         },
       })
       if (res.ok) return await res.text()
+
       const msg = `TÜİK ${ref.dataflow} çekilemedi (HTTP ${res.status})`
-      // 4xx istemci hatası — tekrar denemek anlamsız.
+      if (res.status === 401 && !refreshedOn401) {
+        refreshedOn401 = true
+        await deps.getToken(true) // taze token, sonra tekrar dene
+        lastErr = new Error(msg)
+        continue // gecikmesiz tekrar
+      }
       if (res.status < 500) throw new ClientError(msg)
       lastErr = new Error(msg)
     } catch (err) {

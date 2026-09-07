@@ -14,17 +14,23 @@ function textResponse(body: string, ok = true, status = 200) {
   return { ok, status, text: async () => body } as Response
 }
 
+const CSV = 'IKAMET_YERI,TIME_PERIOD,OBS_VALUE\n1421,2025,1'
+
 describe('fetchDataflowCsv', () => {
-  it('anahtarsız URL + Bearer token + SDMX-CSV Accept başlığı', async () => {
+  it('anahtarsız URL + Bearer token + SDMX-CSV Accept + Accept-Language: tr', async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = []
     const fakeFetch = (async (url: string, init?: RequestInit) => {
       calls.push({ url, init })
-      return textResponse('IKAMET_YERI,TIME_PERIOD,OBS_VALUE\n1421,2025,1')
+      return textResponse(CSV)
     }) as unknown as typeof fetch
 
-    const csv = await fetchDataflowCsv({ fetch: fakeFetch, token: 'tok-123' }, ref, 2025)
+    const csv = await fetchDataflowCsv(
+      { fetch: fakeFetch, getToken: async () => 'tok-123' },
+      ref,
+      2025,
+    )
 
-    expect(csv).toContain('OBS_VALUE')
+    expect(csv).toBe(CSV)
     expect(calls).toHaveLength(1)
     expect(calls[0].url).toBe(
       'https://nsiws.tuik.gov.tr/rest/data/TR,DF_ADNKS_T22,1.1/?startPeriod=2025&endPeriod=2025',
@@ -35,10 +41,25 @@ describe('fetchDataflowCsv', () => {
     expect(headers['Accept-Language']).toBe('tr')
   })
 
-  it('4xx → anında fırlatır, tekrar denemez', async () => {
+  it('401 → bir kez taze token alıp yeniden dener', async () => {
+    let n = 0
+    const fakeFetch = (async () => {
+      n++
+      return n === 1 ? textResponse('', false, 401) : textResponse(CSV)
+    }) as unknown as typeof fetch
+    const getToken = jest.fn(async (force?: boolean) => (force ? 'fresh' : 'stale'))
+
+    const csv = await fetchDataflowCsv({ fetch: fakeFetch, getToken }, ref, 2025)
+
+    expect(csv).toBe(CSV)
+    expect(getToken).toHaveBeenCalledWith(true) // force refresh yapıldı
+    expect(n).toBe(2)
+  })
+
+  it('4xx (401 hariç) → anında fırlatır, tekrar denemez', async () => {
     const fakeFetch = jest.fn(async () => textResponse('', false, 404)) as unknown as typeof fetch
     await expect(
-      fetchDataflowCsv({ fetch: fakeFetch, token: 't' }, ref, 2025),
+      fetchDataflowCsv({ fetch: fakeFetch, getToken: async () => 't' }, ref, 2025),
     ).rejects.toThrow(/DF_ADNKS_T22.*404/)
     expect(fakeFetch).toHaveBeenCalledTimes(1)
   })
@@ -51,20 +72,18 @@ describe('fetchDataflowCsv', () => {
       let n = 0
       const fakeFetch = (async () => {
         n++
-        return n === 1
-          ? textResponse('', false, 502)
-          : textResponse('IKAMET_YERI,TIME_PERIOD,OBS_VALUE\n1421,2025,1')
+        return n === 1 ? textResponse('', false, 502) : textResponse(CSV)
       }) as unknown as typeof fetch
 
-      const p = fetchDataflowCsv({ fetch: fakeFetch, token: 't' }, ref, 2025)
+      const p = fetchDataflowCsv({ fetch: fakeFetch, getToken: async () => 't' }, ref, 2025)
       await jest.advanceTimersByTimeAsync(2000)
-      await expect(p).resolves.toContain('OBS_VALUE')
+      await expect(p).resolves.toBe(CSV)
       expect(n).toBe(2)
     })
 
     it('sürekli 5xx → 3 denemeden sonra fırlatır', async () => {
       const fakeFetch = jest.fn(async () => textResponse('', false, 500)) as unknown as typeof fetch
-      const p = fetchDataflowCsv({ fetch: fakeFetch, token: 't' }, ref, 2025)
+      const p = fetchDataflowCsv({ fetch: fakeFetch, getToken: async () => 't' }, ref, 2025)
       const assertion = expect(p).rejects.toThrow(/HTTP 500/)
       await jest.advanceTimersByTimeAsync(2000)
       await jest.advanceTimersByTimeAsync(2000)

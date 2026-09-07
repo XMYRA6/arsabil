@@ -18,8 +18,10 @@ export interface RunSummary {
 export interface RunDeps {
   dataflows: DataflowRef[]
   dataYear: number
+  /** auth kapısı — başarısızsa tur bloklanır. Token yenileme/önbellek `fetchCsv`
+   *  içinde (fetchDataflowCsv 401'de taze token alır). */
   getToken: () => Promise<string>
-  fetchCsv: (ref: DataflowRef, token: string, year: number) => Promise<string>
+  fetchCsv: (ref: DataflowRef, year: number) => Promise<string>
   parse: (csv: string, ref: DataflowRef) => SdmxObservation[]
   resolve: (code: string) => ResolvedArea | null
   client: DemographicsUpsertClient
@@ -36,9 +38,9 @@ export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean
     data: { source: 'tuik', il: 'ALL', category: 'demografi' },
   })
 
-  // İlk token = auth kapısı (başarısızsa tur bloklanır). Döngüde her dataflow için
-  // TAZE token alınır: TÜİK token TTL'i 300 sn ve yavaş sunucuda 4 dataflow bunu
-  // aşabiliyor (bkz. FINDINGS.md) — tek token ile sonraki dataflow'lar 401 alırdı.
+  // Auth kapısı: token alınamıyorsa tur bloklanır. Token TTL'i 300 sn ve yavaş
+  // sunucuda 4 dataflow bunu aşabiliyor — süresi dolan token'ı fetchDataflowCsv
+  // 401'de taze token alarak yeniliyor (bkz. FINDINGS.md).
   try {
     await deps.getToken()
   } catch (err) {
@@ -60,8 +62,7 @@ export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean
   const failed: string[] = []
   for (const ref of deps.dataflows) {
     try {
-      const token = await deps.getToken()
-      const csv = await deps.fetchCsv(ref, token, deps.dataYear)
+      const csv = await deps.fetchCsv(ref, deps.dataYear)
       if (csv.trim().length === 0) {
         // HTTP 200 ama boş gövde — 4xx/5xx ile aynı kategori (spec design 245).
         failed.push(ref.key)
@@ -142,14 +143,21 @@ async function main() {
     return
   }
 
+  // Token önbelleği: normalde 1 token; fetchDataflowCsv 401'de force=true ile yeniler.
+  let cachedToken: string | null = null
+  const tokenManager = async (force = false): Promise<string> => {
+    if (force || !cachedToken) cachedToken = await getAccessToken({ fetch, apiKey })
+    return cachedToken
+  }
+
   const prisma = new PrismaClient()
   try {
     const summary = await runTuikDemographics(
       {
         dataflows: DATAFLOWS,
         dataYear: DATA_YEAR,
-        getToken: () => getAccessToken({ fetch, apiKey }),
-        fetchCsv: (ref, token, year) => fetchDataflowCsv({ fetch, token }, ref, year),
+        getToken: () => tokenManager(),
+        fetchCsv: (ref, year) => fetchDataflowCsv({ fetch, getToken: tokenManager }, ref, year),
         parse: (csv, ref) =>
           parseSdmxCsv(csv, {
             filter: { ...ref.rowFilter, TIME_PERIOD: String(DATA_YEAR) },

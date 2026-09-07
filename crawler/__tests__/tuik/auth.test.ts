@@ -31,4 +31,44 @@ describe('getAccessToken', () => {
     const fakeFetch = (async () => jsonResponse({ expires_in: 300 })) as unknown as typeof fetch
     await expect(getAccessToken({ fetch: fakeFetch, apiKey: 'x' })).rejects.toThrow(/access_token/i)
   })
+
+  it('4xx → anında fırlatır, tekrar denemez', async () => {
+    const fakeFetch = jest.fn(async () =>
+      jsonResponse({ error: 'invalid' }, false, 400),
+    ) as unknown as typeof fetch
+    await expect(getAccessToken({ fetch: fakeFetch, apiKey: 'bad' })).rejects.toThrow(/HTTP 400/)
+    expect(fakeFetch).toHaveBeenCalledTimes(1)
+  })
+
+  describe('retry (sahte zamanlayıcı)', () => {
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => jest.useRealTimers())
+
+    it('HTML hata sayfası sonra geçerli JSON → başarılı', async () => {
+      let n = 0
+      const fakeFetch = (async () => {
+        n++
+        return n === 1
+          ? ({ ok: true, status: 200, text: async () => '<!DOCTYPE html><html>502</html>' } as Response)
+          : jsonResponse({ access_token: 'tok-ok' })
+      }) as unknown as typeof fetch
+
+      const p = getAccessToken({ fetch: fakeFetch, apiKey: 'k' })
+      await jest.advanceTimersByTimeAsync(2000)
+      await expect(p).resolves.toBe('tok-ok')
+      expect(n).toBe(2)
+    })
+
+    it('sürekli 5xx → 3 denemeden sonra fırlatır', async () => {
+      const fakeFetch = jest.fn(async () =>
+        jsonResponse({ error: 'busy' }, false, 503),
+      ) as unknown as typeof fetch
+      const p = getAccessToken({ fetch: fakeFetch, apiKey: 'k' })
+      const assertion = expect(p).rejects.toThrow(/HTTP 503/)
+      await jest.advanceTimersByTimeAsync(2000)
+      await jest.advanceTimersByTimeAsync(2000)
+      await assertion
+      expect(fakeFetch).toHaveBeenCalledTimes(3)
+    })
+  })
 })
