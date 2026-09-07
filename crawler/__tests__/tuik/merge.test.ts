@@ -101,6 +101,7 @@ describe('mergeDemographics', () => {
         { refArea: 'BILINMEYEN_1', timePeriod: '2025', value: 1 },
         { refArea: 'BILINMEYEN_2', timePeriod: '2025', value: 2 },
         { refArea: '_T', timePeriod: '2025', value: 86000000 },
+        { refArea: 'TR', timePeriod: '2025', value: 86000000 },
       ],
     }]
     mergeDemographics(results, resolve, stats)

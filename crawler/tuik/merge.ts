@@ -40,8 +40,8 @@ export function mergeDemographics(
 
   const countUnresolved = (code: string) => {
     if (!stats) return
-    // "_T" = ulusal toplam, bilerek çözülmez — anomali değil.
-    if (!code || code === '_T') return
+    // "_T" / "TR" = ulusal toplam (IKAMET_YERI), bilerek çözülmez — anomali değil.
+    if (!code || code === '_T' || code === 'TR') return
     stats.unresolvedCodes++
     if (
       stats.unresolvedSamples.length < SAMPLE_CAP &&
