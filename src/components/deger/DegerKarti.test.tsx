@@ -76,11 +76,15 @@ it('thinData → uyarı satırı', () => {
 
 it('oturumsuz → bulanık blok + Üye Ol linki callbackUrl ile', () => {
   render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="mahalleId=1&ada=142&parsel=7" />)
-  const link = screen.getByRole('link', { name: /Üye Ol/i })
-  expect(link).toHaveAttribute(
-    'href',
-    '/register?callbackUrl=' + encodeURIComponent('/deger?mahalleId=1&ada=142&parsel=7'),
-  )
+  // Net değer + demografi iki ayrı "Üye Ol" CTA'sı üretir; ikisi de doğru callbackUrl taşımalı.
+  const links = screen.getAllByRole('link', { name: /Üye Ol/i })
+  expect(links.length).toBeGreaterThanOrEqual(1)
+  for (const link of links) {
+    expect(link).toHaveAttribute(
+      'href',
+      '/register?callbackUrl=' + encodeURIComponent('/deger?mahalleId=1&ada=142&parsel=7'),
+    )
+  }
   expect(screen.queryByText(/Net Tahmini Değer/i)).not.toBeInTheDocument()
 })
 
@@ -99,7 +103,8 @@ it('insufficientData → yeterli veri yok metni, üye kısmı yok, risk yine gö
   expect(screen.getByText(/yeterli emsal verisi yok/i)).toBeInTheDocument()
   expect(screen.queryByText(/Tahmini Değer Aralığı/i)).not.toBeInTheDocument()
   expect(screen.getByText(/Faya 1,8 km/)).toBeInTheDocument()
-  expect(screen.queryByRole('link', { name: /Üye Ol/i })).not.toBeInTheDocument()
+  // Değerleme (net değer) üye kırılımı gösterilmez; demografi teaser'ı ayrı bir bloktur.
+  expect(screen.queryByText(/Net değer \+ mahalle kırılımı/i)).not.toBeInTheDocument()
 })
 
 it('risk unavailable → tek çip "risk verisi alınamadı"', () => {
@@ -184,4 +189,48 @@ it('.soon artık "Fiyat trendi" içermiyor, "Uzman görüşü" içeriyor', () =>
   const soon = screen.getByText(/Yakında/)
   expect(soon).not.toHaveTextContent('Fiyat trendi')
   expect(soon).toHaveTextContent('Uzman görüşü')
+})
+
+const demographics = {
+  dataYear: 2024,
+  population: 320000,
+  populationGrowthPerMille: 14,
+  medianAge: 36,
+  avgHouseholdSize: 3.1,
+  summary: 'Bu ilçede nüfus belirgin şekilde büyüyor — konut talebi güçlü.',
+}
+
+it('üye + demographics: özet cümle + metrikler + il-geneli etiketi render edilir', () => {
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics }} isLoggedIn={true} parcelQuery="x" />)
+  expect(screen.getByText(/konut talebi güçlü/)).toBeInTheDocument()
+  expect(screen.getByText(/320\.000/)).toBeInTheDocument()
+  expect(screen.getByText(/\+14/)).toBeInTheDocument()            // ‰ işaretli artış
+  expect(screen.getAllByText(/il geneli/i).length).toBeGreaterThanOrEqual(1)  // medyan yaş/hane etiketi
+  expect(screen.getByText(/Kaynak: TÜİK 2024/)).toBeInTheDocument()
+})
+
+it('anonim + demographics undefined: blur overlay + Üye Ol, gerçek sayı yok', () => {
+  render(<DegerKarti card={{ ...baseCard }} isLoggedIn={false} parcelQuery="x" />)
+  expect(screen.getByText(/Bölge Demografisi/)).toBeInTheDocument()
+  expect(screen.queryByText(/320\.000/)).not.toBeInTheDocument()
+})
+
+it('demografi bloğu hiçbir fetch tetiklemez', () => {
+  // jsdom/Node ortamında global.fetch tanımsız; spyOn yerine mock atayıp geri alıyoruz.
+  const fetchMock = jest.fn()
+  const orig = (global as { fetch?: unknown }).fetch
+  ;(global as { fetch?: unknown }).fetch = fetchMock
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics }} isLoggedIn={true} parcelQuery="x" />)
+  expect(fetchMock).not.toHaveBeenCalled()
+  ;(global as { fetch?: unknown }).fetch = orig
+})
+
+it('summary null → cümle yok ama metrikler var', () => {
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { ...demographics, summary: null } }} isLoggedIn={true} parcelQuery="x" />)
+  expect(screen.getByText(/320\.000/)).toBeInTheDocument()
+})
+
+it('null metrik satırı render edilmez', () => {
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { ...demographics, avgHouseholdSize: null } }} isLoggedIn={true} parcelQuery="x" />)
+  expect(screen.queryByText(/Ortalama hane/)).not.toBeInTheDocument()
 })

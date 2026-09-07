@@ -20,6 +20,11 @@ export interface DegerKartiProps {
 
 const tl = (n: number) => `${n.toLocaleString('tr-TR')} ₺`
 
+const fmtPerMille = (n: number) => {
+  const sign = n > 0 ? '+' : n < 0 ? '−' : ''
+  return `${sign}${Math.abs(n).toLocaleString('tr-TR')}‰`
+}
+
 const CONFIDENCE_LABEL: Record<string, string> = {
   yuksek: 'Yüksek',
   orta: 'Orta',
@@ -193,6 +198,58 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
           />
         </div>
       )}
+
+      {isMember && card.demographics ? (
+        <div className={styles.demografiBlock}>
+          <div className={styles.divider} />
+          <div className={styles.label}>
+            Bölge Demografisi <span className={styles.trendScope}>· İlçe geneli</span>
+          </div>
+          {card.demographics.summary && (
+            <p className={styles.demografiSummary}>{card.demographics.summary}</p>
+          )}
+          <div className={styles.demografiGrid}>
+            {card.demographics.population != null && (
+              <div className={styles.memberRow}>Nüfus: {card.demographics.population.toLocaleString('tr-TR')}</div>
+            )}
+            {card.demographics.populationGrowthPerMille != null && (
+              <div className={styles.memberRow}>Yıllık nüfus artışı: {fmtPerMille(card.demographics.populationGrowthPerMille)}</div>
+            )}
+            {card.demographics.medianAge != null && (
+              <div className={styles.memberRow}>
+                Medyan yaş: {card.demographics.medianAge.toLocaleString('tr-TR')}{' '}
+                <span className={styles.demografiScope}>(il geneli)</span>
+              </div>
+            )}
+            {card.demographics.avgHouseholdSize != null && (
+              <div className={styles.memberRow}>
+                Ortalama hane: {card.demographics.avgHouseholdSize.toLocaleString('tr-TR')} kişi{' '}
+                <span className={styles.demografiScope}>(il geneli)</span>
+              </div>
+            )}
+          </div>
+          <p className={styles.demografiSource}>Kaynak: TÜİK {card.demographics.dataYear}</p>
+        </div>
+      ) : !isMember ? (
+        <div className={styles.demografiBlock}>
+          <div className={styles.divider} />
+          <div className={styles.label}>
+            Bölge Demografisi <span className={styles.trendScope}>· İlçe geneli</span>
+          </div>
+          <div className={styles.gatedWrap}>
+            <div className={styles.blurred} aria-hidden="true">
+              <div className={styles.memberRow}>Nüfus: ••••••</div>
+              <div className={styles.memberRow}>Yıllık nüfus artışı: ••••</div>
+              <div className={styles.memberRow}>Medyan yaş: ••••</div>
+            </div>
+            <div className={styles.overlay}>
+              <strong>İlçe demografik profili</strong>
+              <span className={styles.sub}>Ücretsiz üyelikle aç</span>
+              <Link href={`/register?callbackUrl=${encodeURIComponent('/deger?' + parcelQuery)}`} className={styles.cta}>Üye Ol</Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <p className={styles.disclaimer}>v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç.</p>
       <p className={styles.soon}>Yakında (üyelere): Uzman görüşü</p>

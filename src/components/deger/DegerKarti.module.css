@@ -26,3 +26,31 @@
 .emsalRow strong { font-variant-numeric: tabular-nums; }
 .emsalLink { color: #0a5cff; text-decoration: none; font-size: 12px; white-space: nowrap; }
 .mapToggle { margin-top: 10px; background: none; border: none; padding: 0; color: #0a5cff; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+.demografiBlock {
+  margin-top: 4px;
+}
+
+.demografiSummary {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text, #1d1d1f);
+  margin: 8px 0;
+}
+
+.demografiGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demografiScope {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.demografiSource {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 8px 0 0;
+}
