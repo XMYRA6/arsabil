@@ -35,6 +35,13 @@ function deps(over: Partial<DegerCardDeps> = {}): DegerCardDeps {
       { scope: 'mahalle', monthBucket: new Date('2026-07-01T00:00:00Z'), medianPricePerSqm: 1100, sampleCount: 10 },
       { scope: 'mahalle', monthBucket: new Date('2026-08-01T00:00:00Z'), medianPricePerSqm: 1200, sampleCount: 10 },
     ]),
+    findDistrictDemographics: jest.fn().mockResolvedValue({
+      dataYear: 2024,
+      population: 320_000,
+      populationGrowthPerMille: 14,
+      medianAge: 36,
+      avgHouseholdSize: 3.1,
+    }),
     ...over,
   }
 }
@@ -168,5 +175,40 @@ describe('buildDegerCard', () => {
     const d = deps()
     await buildDegerCard({ kind: 'adaParsel', mahalleId: 1, ada: '1', parsel: '2' }, d, { memberView: true })
     expect(d.findAreaTrend).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR', 'UĞURLU')
+  })
+
+  it('üye: demographics var (4 metrik + summary)', async () => {
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: true })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card.demographics).toBeDefined()
+    expect(res.card.demographics!.population).toBe(320_000)
+    expect(res.card.demographics!.dataYear).toBe(2024)
+    expect(res.card.demographics!.summary).toContain('konut talebi güçlü')
+    expect(res.card.demographics).not.toHaveProperty('netMigrationPerMille')
+  })
+
+  it('anonim: demographics YOK', async () => {
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: false })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card).not.toHaveProperty('demographics')
+  })
+
+  it('demografi kaydı yok → demographics alanı hiç eklenmez (üye olsa bile)', async () => {
+    const d = deps({ findDistrictDemographics: jest.fn().mockResolvedValue(null) })
+    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })
+    if (!res.ok) throw new Error('ok bekleniyordu')
+    expect(res.card).not.toHaveProperty('demographics')
+  })
+
+  it('findDistrictDemographics normalize edilmiş args alır', async () => {
+    const d = deps()
+    await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })
+    expect(d.findDistrictDemographics).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR')
+  })
+
+  it('parsel bulunamadı → findDistrictDemographics çağrılmaz', async () => {
+    const d = deps({ fetchParcelByPoint: jest.fn().mockResolvedValue({ ok: false, reason: 'not_found' }) })
+    await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })
+    expect(d.findDistrictDemographics).not.toHaveBeenCalled()
   })
 })

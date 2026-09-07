@@ -5,6 +5,8 @@ import { polygonCentroid } from '@/lib/geo/polygonCentroid'
 import { pointInPolygon } from '@/lib/geo/pointInPolygon'
 import { selectComparables, type Comparable, type ComparableListing } from '@/lib/deger/comparables'
 import { priceTrend, type TrendRow, type PriceTrendPoint } from '@/lib/deger/priceTrend'
+import { summarizeDemographics } from '@/lib/demografi/summarize'
+import type { DistrictDemographicsRecord } from '@/lib/demografi/types'
 
 export type DegerCardInput =
   | { kind: 'point'; lat: number; lng: number }
@@ -32,6 +34,7 @@ export interface DegerCardDeps {
   findListingsNear: (il: string, ilce: string) => Promise<ComparableListing[]>
   findNeighborhood: (il: string, ilce: string, mahalle: string) => Promise<{ geojson: unknown } | null>
   findAreaTrend: (il: string, ilce: string, mahalle: string) => Promise<TrendRow[]>
+  findDistrictDemographics: (il: string, ilce: string) => Promise<DistrictDemographicsRecord | null>
 }
 
 export interface DegerCardValue {
@@ -76,6 +79,14 @@ export interface DegerCardDTO {
     points: PriceTrendPoint[]
     changePct3m: number | null
     thinTrend: boolean
+  }
+  demographics?: {
+    dataYear: number
+    population: number | null
+    populationGrowthPerMille: number | null
+    medianAge: number | null
+    avgHouseholdSize: number | null
+    summary: string | null
   }
 }
 
@@ -127,12 +138,13 @@ export async function buildDegerCard(
   const nIl = normalizeAreaName(parcel.il)
   const nIlce = normalizeAreaName(parcel.ilce)
   const nMahalle = normalizeAreaName(parcel.mahalle)
-  const [snap, stats, listings, hood, trendRows] = await Promise.all([
+  const [snap, stats, listings, hood, trendRows, demo] = await Promise.all([
     deps.buildRiskSnapshot(center?.lat ?? null, center?.lng ?? null),
     deps.findAreaStats(nIl, nIlce, nMahalle),
     deps.findListingsNear(nIl, nIlce),
     deps.findNeighborhood(nIl, nIlce, nMahalle),
     deps.findAreaTrend(nIl, nIlce, nMahalle),
+    deps.findDistrictDemographics(nIl, nIlce),
   ])
 
   const trend = priceTrend(trendRows, { now: new Date() })
@@ -212,6 +224,18 @@ export async function buildDegerCard(
               points: trend.points!,
               changePct3m: trend.changePct3m ?? null,
               thinTrend: trend.thinTrend ?? false,
+            },
+          }
+        : {}),
+      ...(opts.memberView && demo
+        ? {
+            demographics: {
+              dataYear: demo.dataYear,
+              population: demo.population,
+              populationGrowthPerMille: demo.populationGrowthPerMille,
+              medianAge: demo.medianAge,
+              avgHouseholdSize: demo.avgHouseholdSize,
+              summary: summarizeDemographics(demo).sentence,
             },
           }
         : {}),

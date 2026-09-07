@@ -14,8 +14,11 @@ import type { ComparableListing } from '@/lib/deger/comparables'
  *  - `/api/deger/kart`: gerçek sorgu, yalnız üyeye açılır (`if (!userId) return []`)
  *  - WhatsApp botu: her zaman `[]` (bot trend göstermez)
  * Her tüketici kendi `findAreaTrend`'ini ekleyerek tam `DegerCardDeps`'i tamamlar.
+ *
+ * `findDistrictDemographics` de aynı nedenle dışarıda: demografi bloğu üye-özel —
+ * route'ta `if (!userId) return null`, WhatsApp botunda her zaman `() => null`.
  */
-export function createAnonCardDeps(): Omit<DegerCardDeps, 'findAreaTrend'> {
+export function createAnonCardDeps(): Omit<DegerCardDeps, 'findAreaTrend' | 'findDistrictDemographics'> {
   return {
     fetchParcelByPoint,
     fetchParcelByAdaParsel,
