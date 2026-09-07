@@ -17,7 +17,7 @@ function textResponse(body: string, ok = true, status = 200) {
 const CSV = 'IKAMET_YERI,TIME_PERIOD,OBS_VALUE\n1421,2025,1'
 
 describe('fetchDataflowCsv', () => {
-  it('anahtarsız URL + Bearer token + SDMX-CSV Accept + Accept-Language: tr', async () => {
+  it('anahtarsız URL + Bearer token + SDMX-CSV Accept + Accept-Language: tr + timeout signal', async () => {
     const calls: Array<{ url: string; init?: RequestInit }> = []
     const fakeFetch = (async (url: string, init?: RequestInit) => {
       calls.push({ url, init })
@@ -39,21 +39,7 @@ describe('fetchDataflowCsv', () => {
     expect(headers.Authorization).toBe('Bearer tok-123')
     expect(headers.Accept).toBe('application/vnd.sdmx.data+csv;version=1.0.0')
     expect(headers['Accept-Language']).toBe('tr')
-  })
-
-  it('401 → bir kez taze token alıp yeniden dener', async () => {
-    let n = 0
-    const fakeFetch = (async () => {
-      n++
-      return n === 1 ? textResponse('', false, 401) : textResponse(CSV)
-    }) as unknown as typeof fetch
-    const getToken = jest.fn(async (force?: boolean) => (force ? 'fresh' : 'stale'))
-
-    const csv = await fetchDataflowCsv({ fetch: fakeFetch, getToken }, ref, 2025)
-
-    expect(csv).toBe(CSV)
-    expect(getToken).toHaveBeenCalledWith(true) // force refresh yapıldı
-    expect(n).toBe(2)
+    expect(calls[0].init?.signal).toBeInstanceOf(AbortSignal)
   })
 
   it('4xx (401 hariç) → anında fırlatır, tekrar denemez', async () => {
@@ -67,6 +53,34 @@ describe('fetchDataflowCsv', () => {
   describe('retry (sahte zamanlayıcı)', () => {
     beforeEach(() => jest.useFakeTimers())
     afterEach(() => jest.useRealTimers())
+
+    it('401 → sonraki denemede taze token ile Bearer yeniden gönderilir', async () => {
+      const sentTokens: string[] = []
+      const fakeFetch = (async (_url: string, init?: RequestInit) => {
+        const auth = (init?.headers as Record<string, string>).Authorization
+        sentTokens.push(auth)
+        return sentTokens.length === 1 ? textResponse('', false, 401) : textResponse(CSV)
+      }) as unknown as typeof fetch
+      const getToken = jest.fn(async (force?: boolean) => (force ? 'fresh' : 'stale'))
+
+      const p = fetchDataflowCsv({ fetch: fakeFetch, getToken }, ref, 2025)
+      await jest.advanceTimersByTimeAsync(2000)
+      await expect(p).resolves.toBe(CSV)
+
+      expect(sentTokens).toEqual(['Bearer stale', 'Bearer fresh'])
+      expect(getToken).toHaveBeenNthCalledWith(2, true) // 2. çağrı force
+    })
+
+    it('ikinci kez 401 → kalıcı hata (sonsuz döngü yok)', async () => {
+      const fakeFetch = jest.fn(async () => textResponse('', false, 401)) as unknown as typeof fetch
+      const getToken = jest.fn(async () => 't')
+      const p = fetchDataflowCsv({ fetch: fakeFetch, getToken }, ref, 2025)
+      const assertion = expect(p).rejects.toThrow(/HTTP 401/)
+      await jest.advanceTimersByTimeAsync(2000)
+      await jest.advanceTimersByTimeAsync(2000)
+      await assertion
+      expect(fakeFetch).toHaveBeenCalledTimes(2) // 1. 401 (retry) + 2. 401 (fatal)
+    })
 
     it('5xx sonra 200 → başarılı, 2 çağrı', async () => {
       let n = 0

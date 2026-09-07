@@ -1,4 +1,5 @@
-import { runTuikDemographics, type RunDeps } from '../../tuik/run'
+import { runTuikDemographics, rowFilterForYear, type RunDeps } from '../../tuik/run'
+import { parseSdmxCsv } from '../../tuik/parse'
 import type { DataflowRef } from '../../tuik/datasets'
 
 const ref = (key: string, field: any, level: 'il' | 'ilce'): DataflowRef => ({
@@ -12,9 +13,11 @@ function makeDeps(over: Partial<RunDeps> = {}): RunDeps & { _upserts: any[] } {
     dataYear: 2024,
     getToken: jest.fn(async () => 'tok'),
     fetchCsv: jest.fn(async (r: DataflowRef) => `REF_AREA,TIME_PERIOD,OBS_VALUE\nA_${r.key},2024,1`),
-    parse: jest.fn((csv: string, _ref: DataflowRef) => [
-      { refArea: csv.split('\n')[1].split(',')[0], timePeriod: '2024', value: 1 },
-    ]),
+    parse: jest.fn((csv: string, _ref: DataflowRef) => {
+      const dataLine = csv.split('\n')[1]?.trim()
+      if (!dataLine) return [] // başlık-yok / boş gövde → 0 gözlem
+      return [{ refArea: dataLine.split(',')[0], timePeriod: '2024', value: 1 }]
+    }),
     resolve: jest.fn((code: string) =>
       code === 'A_population' ? { il: 'Trabzon', ilce: 'Ortahisar' }
       : code === 'A_medianAge' ? { il: 'Trabzon', ilce: null } : null),
@@ -26,6 +29,18 @@ function makeDeps(over: Partial<RunDeps> = {}): RunDeps & { _upserts: any[] } {
 }
 
 describe('runTuikDemographics', () => {
+  // Hata yollarını sınayan testler bilerek console.error/warn üretiyor — sustur.
+  let errSpy: jest.SpyInstance
+  let warnSpy: jest.SpyInstance
+  beforeEach(() => {
+    errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+  })
+  afterEach(() => {
+    errSpy.mockRestore()
+    warnSpy.mockRestore()
+  })
+
   it('tüm dataflow OK → token alır, satır yazar, CrawlRun kapatır', async () => {
     const deps = makeDeps()
     const s = await runTuikDemographics(deps, { dryRun: false })
@@ -54,16 +69,31 @@ describe('runTuikDemographics', () => {
     )
   })
 
-  it('bir dataflow HTTP 200 + boş gövde → o key dataflowsFailed', async () => {
+  it('bir dataflow HTTP 200 ama 0 gözlem (boş gövde / filtre eşleşmedi) → o key dataflowsFailed', async () => {
     const deps = makeDeps({
+      // medianAge: 200 döner ama içinde veri satırı yok → parse [] verir
       fetchCsv: jest.fn(async (r: DataflowRef) =>
-        r.key === 'medianAge' ? '   ' : `REF_AREA,TIME_PERIOD,OBS_VALUE\nA_${r.key},2024,1`,
+        r.key === 'medianAge'
+          ? 'REF_AREA,TIME_PERIOD,OBS_VALUE\n'
+          : `REF_AREA,TIME_PERIOD,OBS_VALUE\nA_${r.key},2024,1`,
       ),
     })
     const s = await runTuikDemographics(deps, { dryRun: false })
     expect(s.dataflowsFailed).toEqual(['medianAge'])
     expect(s.dataflowsOk).toBe(1)
     expect(s.aborted).toBe(false)
+  })
+
+  it('parse 0 gözlem verirse dataflow OK sayılmaz (yarım-veri deliği)', async () => {
+    // fetch başarılı, gövde dolu görünüyor ama parse hiçbir satır tutmuyor
+    const deps = makeDeps({
+      parse: jest.fn(() => []),
+    })
+    const s = await runTuikDemographics(deps, { dryRun: false })
+    expect(s.dataflowsOk).toBe(0)
+    expect(s.dataflowsFailed).toEqual(['population', 'medianAge'])
+    expect(s.aborted).toBe(true)
+    expect(deps._upserts).toHaveLength(0)
   })
 
   it('çözülemeyen kod → RunSummary.unresolved sayar', async () => {
@@ -101,5 +131,38 @@ describe('runTuikDemographics', () => {
     const s = await runTuikDemographics(deps, { dryRun: true })
     expect(s.dataflowsOk).toBe(2)
     expect(deps._upserts).toHaveLength(0)
+  })
+
+  it('gerçek parse ile: TIME_PERIOD filtresi yanlış yıl satırını eler (I5)', async () => {
+    const dfRef = ref('population', 'population', 'ilce')
+    const csv = [
+      'IKAMET_YERI,ADNKS_GOSTERGE,YERLESIM_YERI_TUR,TIME_PERIOD,OBS_VALUE',
+      '1421,NUFUS,_T,2025,458573', // istenen yıl
+      '1421,NUFUS,_T,2024,470000', // eski yıl — elenmeli
+    ].join('\n')
+    const deps = makeDeps({
+      dataflows: [{ ...dfRef, rowFilter: { ADNKS_GOSTERGE: 'NUFUS', YERLESIM_YERI_TUR: '_T' } }],
+      dataYear: 2025,
+      fetchCsv: jest.fn(async () => csv),
+      parse: (c, r) => parseSdmxCsv(c, { filter: rowFilterForYear(r, 2025) }),
+      resolve: jest.fn((code: string) =>
+        code === '1421' ? { il: 'İstanbul', ilce: 'Kadıköy' } : null),
+    })
+    const s = await runTuikDemographics(deps, { dryRun: true })
+    // tek satır 2025 → tek ilçe satırı; 2024 satırı sayaçlara girmemeli
+    expect(s.mergedRows).toBe(1)
+    expect(s.unresolved).toBe(0)
+  })
+})
+
+describe('rowFilterForYear', () => {
+  it('rowFilter + TIME_PERIOD birleşir', () => {
+    const r = ref('medianAge', 'medianAge', 'il')
+    r.rowFilter = { ADNKS_GOSTERGE: 'ORTANCA_YAS', SEX: '_T' }
+    expect(rowFilterForYear(r, 2025)).toEqual({
+      ADNKS_GOSTERGE: 'ORTANCA_YAS',
+      SEX: '_T',
+      TIME_PERIOD: '2025',
+    })
   })
 })

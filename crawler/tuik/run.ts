@@ -15,6 +15,16 @@ export interface RunSummary {
   aborted: boolean
 }
 
+/**
+ * Bir dataflow'un satır filtresi + istenen yıl. `parseSdmxCsv`'e `filter` olarak
+ * geçer — `TIME_PERIOD` de bir sütun eşleşmesi olduğu için startPeriod/endPeriod
+ * kaçsa bile yanlış yıl satırı kartın "Kaynak: TÜİK {yıl}" etiketini yalanlamaz
+ * (review I5).
+ */
+export function rowFilterForYear(ref: DataflowRef, year: number): Record<string, string> {
+  return { ...ref.rowFilter, TIME_PERIOD: String(year) }
+}
+
 export interface RunDeps {
   dataflows: DataflowRef[]
   dataYear: number
@@ -63,13 +73,16 @@ export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean
   for (const ref of deps.dataflows) {
     try {
       const csv = await deps.fetchCsv(ref, deps.dataYear)
-      if (csv.trim().length === 0) {
-        // HTTP 200 ama boş gövde — 4xx/5xx ile aynı kategori (spec design 245).
+      const observations = deps.parse(csv, ref)
+      if (observations.length === 0) {
+        // HTTP 200 ama iş yok: boş gövde, sadece başlık, VEYA rowFilter kimseyi
+        // tutmadı (TÜİK bir boyut kodunu değiştirmiş olabilir). "Yarım veri hiç
+        // veriden kötü" — bu dataflow'u başarısız say (spec design 245).
         failed.push(ref.key)
-        console.error(`[tuik] ${ref.key} boş gövde döndürdü`)
+        console.error(`[tuik] ${ref.key}: 0 gözlem (boş gövde / filtre eşleşmedi / TÜİK kodlaması değişti?)`)
         continue
       }
-      results.push({ ref, observations: deps.parse(csv, ref) })
+      results.push({ ref, observations })
     } catch (err) {
       failed.push(ref.key)
       console.error(`[tuik] ${ref.key} çekilemedi:`, (err as Error).message)
@@ -158,10 +171,7 @@ async function main() {
         dataYear: DATA_YEAR,
         getToken: () => tokenManager(),
         fetchCsv: (ref, year) => fetchDataflowCsv({ fetch, getToken: tokenManager }, ref, year),
-        parse: (csv, ref) =>
-          parseSdmxCsv(csv, {
-            filter: { ...ref.rowFilter, TIME_PERIOD: String(DATA_YEAR) },
-          }),
+        parse: (csv, ref) => parseSdmxCsv(csv, { filter: rowFilterForYear(ref, DATA_YEAR) }),
         resolve: resolveArea,
         client: prisma as unknown as DemographicsUpsertClient,
         crawlRunClient: prisma as unknown as RunDeps['crawlRunClient'],
