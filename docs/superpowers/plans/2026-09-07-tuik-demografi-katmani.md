@@ -155,6 +155,70 @@ git commit -m "feat(tuik): SDMX introspection — datasets.ts + areaCodesData.ts
 
 ---
 
+## Task 1b: API-Key sonrası doldurma + crawl sertleştirme
+
+> **Bağlam:** Tasks 2–13 API Key'siz tamamlandı ve merge edildi. `datasets.ts`
+> `DATAFLOWS: []`, `areaCodesData.ts` `AREA_CODES: {}` — iskele. `crawl:tuik` bu
+> hâlde `main()`'de erken çıkar (kod inert). Bu task, `TUIK_API_KEY` geldikten
+> sonra crawler'ı gerçekten çalışabilir hâle getirir. Final whole-branch
+> review'un (2026-09-07) crawl-öncesi zorunlulukları da buraya toplandı.
+
+**API Key GEREKİR.** Öncesinde Task 1 Step 1–7 (SDMX introspection) yapılmış olmalı.
+
+- [ ] **1b.1 — `DATAFLOWS` + `AREA_CODES` doldur** (Task 1 Step 6/7 çıktısı).
+  `npx tsc -p crawler/tsconfig.json` temiz.
+
+- [ ] **1b.2 — `crawler/__tests__/tuik/areaCodes.test.ts`'e "bilinen kod" testlerini ekle.**
+  Task 6'da `AREA_CODES` boş olduğu için ertelenen 2 test (bilinen ilçe kodu →
+  il+ilçe; bilinen il kodu → il, ilce null). Artık gerçek koddan biriyle yazılır.
+
+- [ ] **1b.3 — `fetchData.ts` `keyPart` birleştirmesini gerçek DSD'ye karşı doğrula
+  (review I7).** Bir gerçek filtreli seri anahtarını elle curl et
+  (`{CINSIYET:'_T'}` → DSD `(REF_AREA, CINSIYET)` ise `/._T` olmalı, `/_T` değil).
+  Gerekiyorsa `keyPart` birleştirmesini DSD boyut sırasına göre düzelt (obje anahtar
+  sırası DEĞİL). `crawler/__tests__/tuik/fetchData.test.ts` ekle: URL şekli,
+  `Authorization: Bearer`, non-ok → throw.
+
+- [ ] **1b.4 — Çözülemeyen REF_AREA sayacı (review I1).** `mergeDemographics` bir
+  `unresolvedCodes: number` (+ birkaç örnek kod) döndürsün ya da out-param'la yazsın.
+  `run.ts` `RunSummary`'ye `unresolved` + `mergedRows` ekle; `CrawlRun.notes` JSON'una
+  koy. **Gerekçe:** `AREA_CODES` eksik/bozuksa tur "sağlıklı" görünür
+  (`blocked:false`, `listingsFound` dolu, `upserted:0`) — sayaç bunu görünür yapar.
+
+- [ ] **1b.5 — Dry-run gözlemlenebilirliği (review I2).** `RunSummary.mergedRows`
+  (1b.4) `main()`'de loglanır. Dry-run çıktısı, hiçbir kod çözülmeyen bir turla
+  çözülen bir turu ayırt edebilmeli.
+
+- [ ] **1b.6 — `timePeriod === DATA_YEAR` filtresi (review I5).** `mergeDemographics`
+  her iki fazda `obs.timePeriod` yılını `DATA_YEAR` ile karşılaştırıp eşleşmeyeni
+  atsın (yılı parametre olarak geçir ya da `run.ts`'te merge öncesi filtrele).
+  Ayrıca `byIl` üzerine yazma çakışmasını say (`if (byIl.has(k)) { conflicts++; ... }`)
+  ve `notes`'a koy. **Gerekçe:** kart her değeri "Kaynak: TÜİK {dataYear}" diye
+  etiketliyor — startPeriod/endPeriod filtresi kaçarsa etiket yalan olur.
+
+- [ ] **1b.7 — Token-fail testinde `blocked:true` yazımını doğrula (Task 9 ertelenen
+  minor).** `run.test.ts`'te token-fail senaryosu `crawlRunClient.crawlRun.update`'in
+  `blocked:true` + `notes: auth failed…` ile çağrıldığını assert etsin (spec design
+  satır 242-243).
+
+- [ ] **1b.8 — Boş-gövde dataflow → `dataflowsFailed` (review Minor).** `run.ts`
+  HTTP 200 + boş gövde döndüren dataflow'u da `failed`/`empty` listesine alsın (spec
+  satır 245 "4xx/5xx / boş döndü" ikisini birlikte istiyor).
+
+- [ ] **1b.9 — Prod migration + ilk gerçek crawl.**
+  `npx prisma migrate deploy` (prod DB), `npx prisma migrate status` → up to date.
+  Coolify env'e `TUIK_API_KEY` ekle. `npm run crawl:tuik -- --dry-run` → yeni sayaçları
+  OKU (1b.4/1b.5). Temizse `npm run crawl:tuik`. `CrawlRun.notes`'u doğrula.
+
+- [ ] **1b.10 — I8: anonim demografi teaser'ı vs boş tablo.** `DegerKarti.tsx`'in
+  anonim demografi teaser'ı (`Bölge Demografisi` blur + "Üye Ol") HER anonim
+  ziyaretçiye görünüyor — tablo boşken kayıt olan kullanıcı hiçbir şey görmez.
+  **Ya** deploy sırasını garanti et (migration + ilk `crawl:tuik` başarılı → SONRA
+  teaser prod'a) **ya da** teaser'ı ucuz bir "herhangi bir satır var mı" sinyaline /
+  build flag'e bağla. Prod deploy'dan önce KARAR verilmeli.
+
+---
+
 ## Task 2: `crawler/tuik/auth.ts` — access token
 
 **API Key GEREKMEZ (mock'lu test).**
