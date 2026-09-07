@@ -165,52 +165,83 @@ git commit -m "feat(tuik): SDMX introspection — datasets.ts + areaCodesData.ts
 
 **API Key GEREKİR.** Öncesinde Task 1 Step 1–7 (SDMX introspection) yapılmış olmalı.
 
-- [ ] **1b.1 — `DATAFLOWS` + `AREA_CODES` doldur** (Task 1 Step 6/7 çıktısı).
+### SDMX introspection sonuçları (2026-09-07, canlı API — bkz. `crawler/tuik/FINDINGS.md`)
+
+Spec rev 2'nin veri modeli varsayımları kısmen yanlış çıktı. Doğrulanan gerçekler:
+
+- **Coğrafya `REF_AREA`'da DEĞİL `IKAMET_YERI` boyutunda** (`REF_AREA` hep `"TR"`).
+- Dört dataflow tek `DSD_ADNKS` v1.7 paylaşır (21 boyut), hepsi dataflow v1.1.
+- SDMX-CSV yalnız `Accept: application/vnd.sdmx.data+csv;version=1.0.0` başlığıyla
+  gelir; `?format=SDMX-CSV` yok sayılır (XML döner).
+- **`DATA_YEAR = 2025`** (2025 ADNKS dördünde de var).
+- Anahtarsız sorgu çalışır, yanıt küçük (≤281 KB) → istemci tarafında satır süz.
+- Dataflow'a özel satır filtreleri: T22 `{ADNKS_GOSTERGE:'NUFUS', YERLESIM_YERI_TUR:'_T'}`,
+  T38 `{ADNKS_GOSTERGE:'NUFUS_ARTIS_HIZ_YIL'}`, T23 `{ADNKS_GOSTERGE:'ORTANCA_YAS', SEX:'_T'}`,
+  T25 `{ADNKS_GOSTERGE:'ORT_HH_BUYUKLUK'}`.
+- `areaCodesData.ts` dolduruldu (81 il + 973 ilçe, `CL_IBBS`'ten) — commit `4aaae8b`.
+- 51 "merkez ilçe" TÜİK'te `"<İl> Merkez"` — TKGM JOIN riski, 1b.10'da dry-run'da bak.
+
+- [x] **1b.1 — SDMX introspection + `areaCodesData.ts` + `FINDINGS.md` + fixtures**
+  (controller, commit `4aaae8b`).
+
+- [ ] **1b.2 — `parse.ts`: coğrafya `IKAMET_YERI` + satır filtresi (TDD).**
+  `SdmxObservation.refArea` → `area` (IKAMET_YERI'yi tutar). `parseSdmxCsv(csv, opts?)`
+  — `opts.filter?: Record<string,string>` her girdi için `row[col] === val` şartı,
+  sağlanmayan satır atlanır. Boş/`_T` alan + sonsuz değer atlanır (merge zaten eler).
+  Ondalık-virgül normalizasyonu KALIR. `parse.test.ts` yeni sütun adına + filtre
+  senaryolarına güncellenir; fixture'lardan gerçek CSV kullan.
+
+- [ ] **1b.3 — `datasets.ts`: `DataflowRef` şekli + `DATAFLOWS` + `DATA_YEAR`.**
+  `keyDimensions` → `rowFilter: Record<string,string>` (yukarıdaki 4 filtre).
+  `DATA_YEAR = 2025`. `DATAFLOWS` 4 kayıt: key/dataflow/version(`1.1`)/field/level/rowFilter.
   `npx tsc -p crawler/tsconfig.json` temiz.
 
-- [ ] **1b.2 — `crawler/__tests__/tuik/areaCodes.test.ts`'e "bilinen kod" testlerini ekle.**
-  Task 6'da `AREA_CODES` boş olduğu için ertelenen 2 test (bilinen ilçe kodu →
-  il+ilçe; bilinen il kodu → il, ilce null). Artık gerçek koddan biriyle yazılır.
+- [ ] **1b.4 — `fetchData.ts`: `Accept` başlığı + anahtarsız sorgu (TDD).**
+  `keyPart` mantığı SİLİNİR. URL: `${DATA_BASE},${ref.dataflow},${ref.version}/?startPeriod=${year}&endPeriod=${year}`.
+  Header: `Authorization: Bearer …` + `Accept: application/vnd.sdmx.data+csv;version=1.0.0`.
+  non-ok → throw. `crawler/__tests__/tuik/fetchData.test.ts` (fix wave E'nin ertelediği):
+  URL şekli, iki başlık, non-ok throw.
 
-- [ ] **1b.3 — `fetchData.ts` `keyPart` birleştirmesini gerçek DSD'ye karşı doğrula
-  (review I7).** Bir gerçek filtreli seri anahtarını elle curl et
-  (`{CINSIYET:'_T'}` → DSD `(REF_AREA, CINSIYET)` ise `/._T` olmalı, `/_T` değil).
-  Gerekiyorsa `keyPart` birleştirmesini DSD boyut sırasına göre düzelt (obje anahtar
-  sırası DEĞİL). `crawler/__tests__/tuik/fetchData.test.ts` ekle: URL şekli,
-  `Authorization: Bearer`, non-ok → throw.
+- [ ] **1b.5 — `merge.ts` + `run.ts` uyarlama.** `merge.ts` `obs.refArea` → `obs.area`
+  (2 nokta), 2-fazlı mantık + guard'lar korunur. `merge.test.ts` yeni alan adına
+  güncellenir. `run.ts`: `RunDeps.parse` imzası `(csv, ref) => …`; `main()`'de
+  `parse: (csv, ref) => parseSdmxCsv(csv, { filter: { ...ref.rowFilter, TIME_PERIOD: String(DATA_YEAR) } })`
+  (I5'in yıl filtresi buradan bedava gelir). Döngü `deps.parse(csv, ref)`.
 
-- [ ] **1b.4 — Çözülemeyen REF_AREA sayacı (review I1).** `mergeDemographics` bir
+- [ ] **1b.6 — `areaCodes.test.ts`'e "bilinen kod" testleri (Task 6'dan ertelenen).**
+  Gerçek koddan: bilinen ilçe kodu (`"1421"` → İstanbul/Kadıköy), bilinen il kodu
+  (`"TR100"` → İstanbul, ilce null). Bilinmeyen/boş → null zaten var.
+
+- [ ] **1b.7 — Çözülemeyen kod sayacı (review I1).** `mergeDemographics` bir
   `unresolvedCodes: number` (+ birkaç örnek kod) döndürsün ya da out-param'la yazsın.
   `run.ts` `RunSummary`'ye `unresolved` + `mergedRows` ekle; `CrawlRun.notes` JSON'una
   koy. **Gerekçe:** `AREA_CODES` eksik/bozuksa tur "sağlıklı" görünür
   (`blocked:false`, `listingsFound` dolu, `upserted:0`) — sayaç bunu görünür yapar.
 
-- [ ] **1b.5 — Dry-run gözlemlenebilirliği (review I2).** `RunSummary.mergedRows`
-  (1b.4) `main()`'de loglanır. Dry-run çıktısı, hiçbir kod çözülmeyen bir turla
+- [ ] **1b.8 — Dry-run gözlemlenebilirliği (review I2).** `RunSummary.mergedRows`
+  (1b.7) `main()`'de loglanır. Dry-run çıktısı, hiçbir kod çözülmeyen bir turla
   çözülen bir turu ayırt edebilmeli.
 
-- [ ] **1b.6 — `timePeriod === DATA_YEAR` filtresi (review I5).** `mergeDemographics`
-  her iki fazda `obs.timePeriod` yılını `DATA_YEAR` ile karşılaştırıp eşleşmeyeni
-  atsın (yılı parametre olarak geçir ya da `run.ts`'te merge öncesi filtrele).
-  Ayrıca `byIl` üzerine yazma çakışmasını say (`if (byIl.has(k)) { conflicts++; ... }`)
-  ve `notes`'a koy. **Gerekçe:** kart her değeri "Kaynak: TÜİK {dataYear}" diye
-  etiketliyor — startPeriod/endPeriod filtresi kaçarsa etiket yalan olur.
+- [ ] **1b.9 — `byIl` çakışma sayacı (review I5).** (`timePeriod === DATA_YEAR`
+  filtresi 1b.5'te `run.ts` üzerinden zaten uygulanıyor.) `mergeDemographics` faz-2'de
+  `byIl` üzerine yazma çakışmasını say (`if (byIl.has(k)) { conflicts++ }`) ve
+  `run.ts` `notes`'a koy.
 
-- [ ] **1b.7 — Token-fail testinde `blocked:true` yazımını doğrula (Task 9 ertelenen
+- [ ] **1b.10 — Token-fail testinde `blocked:true` yazımını doğrula (Task 9 ertelenen
   minor).** `run.test.ts`'te token-fail senaryosu `crawlRunClient.crawlRun.update`'in
   `blocked:true` + `notes: auth failed…` ile çağrıldığını assert etsin (spec design
   satır 242-243).
 
-- [ ] **1b.8 — Boş-gövde dataflow → `dataflowsFailed` (review Minor).** `run.ts`
+- [ ] **1b.11 — Boş-gövde dataflow → `dataflowsFailed` (review Minor).** `run.ts`
   HTTP 200 + boş gövde döndüren dataflow'u da `failed`/`empty` listesine alsın (spec
   satır 245 "4xx/5xx / boş döndü" ikisini birlikte istiyor).
 
-- [ ] **1b.9 — Prod migration + ilk gerçek crawl.**
+- [ ] **1b.12 — Prod migration + ilk gerçek crawl.**
   `npx prisma migrate deploy` (prod DB), `npx prisma migrate status` → up to date.
   Coolify env'e `TUIK_API_KEY` ekle. `npm run crawl:tuik -- --dry-run` → yeni sayaçları
-  OKU (1b.4/1b.5). Temizse `npm run crawl:tuik`. `CrawlRun.notes`'u doğrula.
+  OKU (1b.7/1b.8). Temizse `npm run crawl:tuik`. `CrawlRun.notes`'u doğrula.
 
-- [ ] **1b.10 — I8: anonim demografi teaser'ı vs boş tablo.** `DegerKarti.tsx`'in
+- [ ] **1b.13 — I8: anonim demografi teaser'ı vs boş tablo.** `DegerKarti.tsx`'in
   anonim demografi teaser'ı (`Bölge Demografisi` blur + "Üye Ol") HER anonim
   ziyaretçiye görünüyor — tablo boşken kayıt olan kullanıcı hiçbir şey görmez.
   **Ya** deploy sırasını garanti et (migration + ilk `crawl:tuik` başarılı → SONRA
@@ -880,7 +911,7 @@ export function mergeDemographics(
   resolve: (code: string) => ResolvedArea | null,
 ): MergedDistrictRow[] {
   const rows = new Map<string, MergedDistrictRow>()
-  const key = (il: string, ilce: string) => `${il} ${ilce}`
+  const key = (il: string, ilce: string) => `${il} ${ilce}`
 
   // 1. Önce tüm ilçe-seviyesi gözlemler — ilçe satırlarını oluşturur.
   for (const { ref, observations } of results) {
