@@ -36,9 +36,11 @@ export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean
     data: { source: 'tuik', il: 'ALL', category: 'demografi' },
   })
 
-  let token: string
+  // İlk token = auth kapısı (başarısızsa tur bloklanır). Döngüde her dataflow için
+  // TAZE token alınır: TÜİK token TTL'i 300 sn ve yavaş sunucuda 4 dataflow bunu
+  // aşabiliyor (bkz. FINDINGS.md) — tek token ile sonraki dataflow'lar 401 alırdı.
   try {
-    token = await deps.getToken()
+    await deps.getToken()
   } catch (err) {
     await deps.crawlRunClient.crawlRun.update({
       where: { id: run.id },
@@ -58,6 +60,7 @@ export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean
   const failed: string[] = []
   for (const ref of deps.dataflows) {
     try {
+      const token = await deps.getToken()
       const csv = await deps.fetchCsv(ref, token, deps.dataYear)
       if (csv.trim().length === 0) {
         // HTTP 200 ama boş gövde — 4xx/5xx ile aynı kategori (spec design 245).

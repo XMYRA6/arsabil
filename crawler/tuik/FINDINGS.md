@@ -55,6 +55,11 @@ kalan 18 boyut dönen satırlarda `_Z` (uygulanamaz) — tek istisnalar tabloda.
 
 - `?format=SDMX-CSV` **query parametresi YOK SAYILIYOR** → sunucu GenericData XML döndürür.
   Doğru yol: **`Accept: application/vnd.sdmx.data+csv;version=1.0.0`** başlığı.
+- **`Accept-Language: tr` ŞART (bazı istemciler için).** Node `undici` `fetch`
+  Accept-Language göndermeden çağırınca sunucu **HTTP 500** + gövde `"languageTag1"`
+  döndürüyor. `curl` (Accept-Language göndermez) sorunsuz — istemciye özgü bir NSI
+  hatası. `Accept-Language: tr` eklenince `fetch` de 200 alıyor. `fetchData.ts` bu
+  başlığı gönderiyor.
 - Sütun düzeni: `DATAFLOW, REF_AREA, FREQ, INDICATOR, …(21 boyut)…, TIME_PERIOD,
   OBS_VALUE, OBS_STATUS, TIME_FORMAT, DECIMAL, UNIT_MEASURE, UNIT_MULT`.
 - Ondalık ayırıcı: **nokta** (`34.8984734235134`, `-7.85440448180391`). Virgül görülmedi
