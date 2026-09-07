@@ -18,6 +18,11 @@ describe('parseSdmxCsv', () => {
     expect(parseSdmxCsv(csv)).toEqual([{ refArea: 'TR_IL_61', timePeriod: '2024', value: 36.4 }])
   })
 
+  it('ondalık virgüllü OBS_VALUE parse eder', () => {
+    const csv = ['REF_AREA,TIME_PERIOD,OBS_VALUE', 'TR_IL_61,2024,"36,4"'].join('\n')
+    expect(parseSdmxCsv(csv)).toEqual([{ refArea: 'TR_IL_61', timePeriod: '2024', value: 36.4 }])
+  })
+
   it('boş / sayısal olmayan OBS_VALUE satırını atlar', () => {
     const csv = [
       'REF_AREA,TIME_PERIOD,OBS_VALUE',

@@ -37,7 +37,9 @@ export function mergeDemographics(
     const byIl = new Map<string, number>()
     for (const obs of observations) {
       const area = resolve(obs.refArea)
-      if (!area) continue
+      // Simetrik koruma: il-seviyesi dataflow'da yanlış etiketli bir ilçe satırı
+      // her ilçeye yayılamasın.
+      if (!area || area.ilce != null) continue
       byIl.set(normalizeAreaName(area.il), obs.value)
     }
     for (const row of rows.values()) {

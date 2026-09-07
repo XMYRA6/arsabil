@@ -20,6 +20,7 @@ jest.mock('@/lib/prisma', () => ({
     marketListing: { findMany: jest.fn().mockResolvedValue([]) },
     neighborhood: { findUnique: jest.fn().mockResolvedValue(null) },
     areaPriceTrend: { findMany: jest.fn().mockResolvedValue([]) },
+    districtDemographics: { findUnique: jest.fn().mockResolvedValue(null) },
   },
 }))
 jest.mock('@/lib/rate-limit', () => ({
@@ -185,6 +186,36 @@ describe('GET /api/deger/kart', () => {
     const rows = await deps.findAreaTrend('TRABZON', 'ORTAHISAR', 'UĞURLU')
     expect(rows).toEqual([])
     expect(prisma.areaPriceTrend.findMany).not.toHaveBeenCalled()
+  })
+
+  it("buildDegerCard'a findDistrictDemographics DI geçer — il_ilce compound + 5-alan select", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.districtDemographics.findUnique.mockReset().mockResolvedValue(null)
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    expect(typeof deps.findDistrictDemographics).toBe('function')
+    await deps.findDistrictDemographics('TRABZON', 'ORTAHISAR')
+    const arg = prisma.districtDemographics.findUnique.mock.calls[0][0]
+    expect(arg.where).toEqual({ il_ilce: { il: 'TRABZON', ilce: 'ORTAHISAR' } })
+    expect(arg.select).toEqual({
+      dataYear: true,
+      population: true,
+      populationGrowthPerMille: true,
+      medianAge: true,
+      avgHouseholdSize: true,
+    })
+  })
+
+  it('anonim → findDistrictDemographics null döner, districtDemographics.findUnique hiç çağrılmaz', async () => {
+    const prisma = jest.requireMock('@/lib/prisma').prisma
+    prisma.districtDemographics.findUnique.mockReset().mockResolvedValue(null)
+    // beforeEach zaten session=null
+    await GET(req('lat=41.0&lng=39.7'))
+    const deps = buildDegerCardMock.mock.calls[0][1]
+    const row = await deps.findDistrictDemographics('TRABZON', 'ORTAHISAR')
+    expect(row).toBeNull()
+    expect(prisma.districtDemographics.findUnique).not.toHaveBeenCalled()
   })
 
   it('findNeighborhood compound key ile findUnique', async () => {

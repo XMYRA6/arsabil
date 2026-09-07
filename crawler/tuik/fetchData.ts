@@ -7,9 +7,13 @@ export async function fetchDataflowCsv(
   ref: DataflowRef,
   year: number,
 ): Promise<string> {
-  // Seri anahtarı: keyDimensions varsa "?" ile filtrelenir; yoksa tümü.
+  // SDMX seri anahtarı: DSD'nin HER boyut pozisyonu verilmeli (REF_AREA ve
+  // TIME_PERIOD boş bırakılır = wildcard). Sıralama = DSD boyut sırası, obje
+  // anahtar sırası DEĞİL. Ör. DSD (REF_AREA, CINSIYET) + {CINSIYET:'_T'} → "/._T"
+  // (mevcut kod "/_T" üretir — server bunu REF_AREA=_T sanar). Task 1b: gerçek
+  // DSD'ye karşı bir curl ile doğrula ve gerekiyorsa bu birleştirmeyi düzelt.
   const keyPart = Object.keys(ref.keyDimensions).length
-    ? '/' + Object.values(ref.keyDimensions).join('.')  // DSD sırasına göre — Task 1 doğrular
+    ? '/' + Object.values(ref.keyDimensions).join('.')
     : ''
   const url =
     `${DATA_BASE},${ref.dataflow},${ref.version}${keyPart}` +

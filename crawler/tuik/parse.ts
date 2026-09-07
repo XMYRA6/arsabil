@@ -39,7 +39,9 @@ export function parseSdmxCsv(csvText: string): SdmxObservation[] {
     const timePeriod = unquote(cells[iTime] ?? '')
     const raw = unquote(cells[iVal] ?? '')
     if (!refArea || !raw) continue
-    const value = Number(raw)
+    // Saf ondalık-virgül ("36,4") → nokta. Binlik ayırıcı YUTULMAZ: yalnız digits,digits.
+    const norm = /^-?\d+,\d+$/.test(raw) ? raw.replace(',', '.') : raw
+    const value = Number(norm)
     if (!Number.isFinite(value)) continue
     out.push({ refArea, timePeriod, value })
   }

@@ -31,6 +31,6 @@ gerekirse dataflow `version`'larını `GET /rest/dataflow/TR/<DF>/latest` ile do
 
 ## Bir dataflow çekilemezse
 
-`CrawlRun.notes` (`dataflowsFailed`) hangi metriğin düştüğünü söyler. O sütun bir
-sonraki başarılı turda güncellenir; eski değer korunur (UPSERT, silme yok).
+`CrawlRun.notes` (`dataflowsFailed`) hangi metriğin düştüğünü söyler. O sütun bu
+turda `null`'a çekilir (satır silinmez); bir sonraki başarılı tur değeri geri yazar.
 Yeni ilçe kodu görülürse `areaCodesData.ts` güncellenir.

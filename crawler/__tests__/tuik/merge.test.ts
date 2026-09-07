@@ -69,6 +69,29 @@ describe('mergeDemographics', () => {
     ])
   })
 
+  it("il-seviyesi dataflow'da ilçeye çözülen (yanlış etiketli) kod yayılmaz", () => {
+    const results: DataflowResult[] = [
+      {
+        ref: dfRef('population', 'population', 'ilce'),
+        observations: [
+          { refArea: 'ILCE_ORTAHISAR', timePeriod: '2024', value: 320000 },
+          { refArea: 'ILCE_AKCAABAT', timePeriod: '2024', value: 130000 },
+        ],
+      },
+      {
+        ref: dfRef('medianAge', 'medianAge', 'il'),
+        observations: [
+          { refArea: 'IL_TRABZON', timePeriod: '2024', value: 36.4 },
+          // il-seviyesi dataflow ama kod ilçeye çözülüyor → dikkate ALINMAMALI
+          { refArea: 'ILCE_ORTAHISAR', timePeriod: '2024', value: 99 },
+        ],
+      },
+    ]
+    const rows = mergeDemographics(results, resolve)
+    expect(rows.find((r) => r.ilce === 'ORTAHISAR')!.medianAge).toBe(36.4)
+    expect(rows.find((r) => r.ilce === 'AKÇAABAT')!.medianAge).toBe(36.4)
+  })
+
   it('il-seviyesi gözlem yalnızca kendi ilinin ilçelerine yayılır', () => {
     const results: DataflowResult[] = [
       {
