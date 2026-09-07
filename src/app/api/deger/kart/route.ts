@@ -78,6 +78,23 @@ export async function GET(req: Request) {
           return []
         }
       },
+      findDistrictDemographics: async (il, ilce) => {
+        if (!userId) return null
+        try {
+          return await prisma.districtDemographics.findUnique({
+            where: { il_ilce: { il, ilce } },
+            select: {
+              dataYear: true,
+              population: true,
+              populationGrowthPerMille: true,
+              medianAge: true,
+              avgHouseholdSize: true,
+            },
+          })
+        } catch {
+          return null   // DistrictDemographics tablosu henüz migrate edilmemişse /deger'i düşürme
+        }
+      },
     },
     { memberView: !!userId },
   )

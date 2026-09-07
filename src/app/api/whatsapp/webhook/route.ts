@@ -37,10 +37,11 @@ export async function GET(req: Request): Promise<Response> {
 function buildHandleDeps(): HandleDeps {
   const config = readWhatsappConfig()
   // Paylaşılan `DegerCardDeps` çekirdeği (/api/deger/kart ile ortak modül).
-  // Bot trend göstermez → `findAreaTrend` her zaman boş.
+  // Bot trend/demografi göstermez → ikisi de boş/null.
   const cardDeps = {
     ...createAnonCardDeps(),
     findAreaTrend: async () => [],
+    findDistrictDemographics: async () => null,
   }
   const nk = (il: string, ilce: string, mahalle: string) => ({
     il: normalizeAreaName(il),
