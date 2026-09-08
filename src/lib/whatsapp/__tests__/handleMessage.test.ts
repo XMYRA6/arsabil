@@ -9,6 +9,7 @@ const CARD_OK = {
     value: { tier: 'free' as const, insufficientData: false, basis: 'mahalle' as const, thinData: false, freeRangeLow: 2000000, freeRangeHigh: 2500000, pricePerSqmCoarse: 4000 },
     neighborhood: { geojson: null },
     comparables: { count: 3 },
+    demographicsAvailable: false,
   },
 }
 

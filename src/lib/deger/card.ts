@@ -74,6 +74,12 @@ export interface DegerCardDTO {
   value: DegerCardValue
   neighborhood: { geojson: unknown | null }
   comparables: { count: number; items?: Comparable[] }
+  /**
+   * Bu ilçede TÜİK demografi satırı var mı — anonim payload'a değer sızdırmadan
+   * verilen tek sinyal. Anonim demografi teaser'ı yalnızca bu true iken gösterilir
+   * (boş tablo / "Merkez" ilçe eşleşme boşluğu → yanıltıcı "üyelikle aç" sözü verilmez).
+   */
+  demographicsAvailable: boolean
   priceTrend?: {
     basis: 'mahalle' | 'ilce' | 'il'
     points: PriceTrendPoint[]
@@ -217,6 +223,7 @@ export async function buildDegerCard(
         count: comp.total,
         ...(opts.memberView ? { items: comp.items } : {}),
       },
+      demographicsAvailable: !!demo,
       ...(opts.memberView && !trend.insufficientTrend
         ? {
             priceTrend: {

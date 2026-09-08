@@ -79,7 +79,9 @@ export async function GET(req: Request) {
         }
       },
       findDistrictDemographics: async (il, ilce) => {
-        if (!userId) return null
+        // Anonim çağrıda da sorgulanır: card.ts yalnızca `demographicsAvailable`
+        // sinyalini (satır var mı) anonim payload'a koyar, metrik değerlerini DEĞİL
+        // — comparables.items ile aynı desen (route hep çeker, card üye-dışı süzer).
         try {
           return await prisma.districtDemographics.findUnique({
             where: { il_ilce: { il, ilce } },

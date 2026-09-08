@@ -50,6 +50,7 @@ const CARD = {
   value: { tier: 'free', insufficientData: false, basis: 'ilce', thinData: false, freeRangeLow: 750000, freeRangeHigh: 1250000, pricePerSqmCoarse: 2000 },
   neighborhood: { geojson: null },
   comparables: { count: 0 },
+  demographicsAvailable: true,
 }
 
 beforeEach(() => {

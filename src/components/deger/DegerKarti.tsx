@@ -237,7 +237,7 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
           </div>
           <p className={styles.demografiSource}>Kaynak: TÜİK {card.demographics.dataYear}</p>
         </div>
-      ) : !isMember ? (
+      ) : !isMember && card.demographicsAvailable ? (
         <div className={styles.demografiBlock}>
           <div className={styles.divider} />
           <div className={styles.label}>

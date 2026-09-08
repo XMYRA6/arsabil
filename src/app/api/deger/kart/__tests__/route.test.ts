@@ -207,15 +207,18 @@ describe('GET /api/deger/kart', () => {
     })
   })
 
-  it('anonim → findDistrictDemographics null döner, districtDemographics.findUnique hiç çağrılmaz', async () => {
+  it('anonim → findDistrictDemographics YİNE sorgular (findAreaTrend gibi gate DEĞİL) — varlık sinyali için', async () => {
+    // findAreaTrend anonimde hiç sorgulanmaz (değer yalnızca üyeye); demografi FARKLI:
+    // anonim teaser'ı boş tabloya karşı korumak için `demographicsAvailable` gerekir,
+    // o da satır varlığını okumayı gerektirir. Değerler card.ts'te anon payload'a girmez.
     const prisma = jest.requireMock('@/lib/prisma').prisma
     prisma.districtDemographics.findUnique.mockReset().mockResolvedValue(null)
     // beforeEach zaten session=null
     await GET(req('lat=41.0&lng=39.7'))
     const deps = buildDegerCardMock.mock.calls[0][1]
-    const row = await deps.findDistrictDemographics('TRABZON', 'ORTAHISAR')
-    expect(row).toBeNull()
-    expect(prisma.districtDemographics.findUnique).not.toHaveBeenCalled()
+    await deps.findDistrictDemographics('TRABZON', 'ORTAHISAR')
+    const arg = prisma.districtDemographics.findUnique.mock.calls[0][0]
+    expect(arg.where).toEqual({ il_ilce: { il: 'TRABZON', ilce: 'ORTAHISAR' } })
   })
 
   it('findNeighborhood compound key ile findUnique', async () => {

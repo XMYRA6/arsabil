@@ -7,6 +7,7 @@ const base: DegerCardDTO = {
   value: { tier: 'free', insufficientData: false, basis: 'mahalle', thinData: false, freeRangeLow: 2100000, freeRangeHigh: 2800000, pricePerSqmCoarse: 4900 },
   neighborhood: { geojson: null },
   comparables: { count: 6 },
+  demographicsAvailable: false,
 }
 const URL = 'https://www.arsabil.com/deger?mahalleId=1&ada=123&parsel=45'
 

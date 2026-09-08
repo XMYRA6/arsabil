@@ -23,6 +23,7 @@ const baseCard: DegerCardDTO = {
   },
   neighborhood: { geojson: null },
   comparables: { count: 0 },
+  demographicsAvailable: true,
 }
 
 const memberValue = {
@@ -209,10 +210,22 @@ it('üye + demographics: özet cümle + metrikler + il-geneli etiketi render edi
   expect(screen.getByText(/Kaynak: TÜİK 2024/)).toBeInTheDocument()
 })
 
-it('anonim + demographics undefined: blur overlay + Üye Ol, gerçek sayı yok', () => {
+it('anonim + demographicsAvailable true: blur overlay + Üye Ol, gerçek sayı yok', () => {
   render(<DegerKarti card={{ ...baseCard }} isLoggedIn={false} parcelQuery="x" />)
   expect(screen.getByText(/Bölge Demografisi/)).toBeInTheDocument()
   expect(screen.queryByText(/320\.000/)).not.toBeInTheDocument()
+})
+
+it('anonim + demographicsAvailable false: demografi teaser hiç render edilmez (boş tablo / Merkez boşluğu)', () => {
+  render(<DegerKarti card={{ ...baseCard, demographicsAvailable: false }} isLoggedIn={false} parcelQuery="x" />)
+  expect(screen.queryByText(/Bölge Demografisi/)).not.toBeInTheDocument()
+  expect(screen.queryByText(/demografik profili/i)).not.toBeInTheDocument()
+})
+
+it('üye + demographicsAvailable false + demographics undefined: demografi bloğu yok, kart geri kalanı sağlam', () => {
+  render(<DegerKarti card={{ ...baseCard, value: memberValue, demographicsAvailable: false }} isLoggedIn={true} parcelQuery="x" />)
+  expect(screen.queryByText(/Bölge Demografisi/)).not.toBeInTheDocument()
+  expect(screen.getByText(/Net Tahmini Değer/i)).toBeInTheDocument()
 })
 
 it('demografi bloğu hiçbir fetch tetiklemez', () => {

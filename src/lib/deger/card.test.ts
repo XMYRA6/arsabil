@@ -177,7 +177,7 @@ describe('buildDegerCard', () => {
     expect(d.findAreaTrend).toHaveBeenCalledWith('TRABZON', 'ORTAHISAR', 'UĞURLU')
   })
 
-  it('üye: demographics var (4 metrik + summary)', async () => {
+  it('üye: demographics var (4 metrik + summary) + demographicsAvailable true', async () => {
     const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: true })
     if (!res.ok) throw new Error('ok bekleniyordu')
     expect(res.card.demographics).toBeDefined()
@@ -185,19 +185,25 @@ describe('buildDegerCard', () => {
     expect(res.card.demographics!.dataYear).toBe(2024)
     expect(res.card.demographics!.summary).toContain('konut talebi güçlü')
     expect(res.card.demographics).not.toHaveProperty('netMigrationPerMille')
+    expect(res.card.demographicsAvailable).toBe(true)
   })
 
-  it('anonim: demographics YOK', async () => {
+  it('anonim: demographics metrikleri YOK ama demographicsAvailable satır varlığını yansıtır', async () => {
     const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(), { memberView: false })
     if (!res.ok) throw new Error('ok bekleniyordu')
+    // Değerler anonim payload'a asla girmez; yalnızca "satır var mı" sinyali verilir.
     expect(res.card).not.toHaveProperty('demographics')
+    expect(res.card.demographicsAvailable).toBe(true)
   })
 
-  it('demografi kaydı yok → demographics alanı hiç eklenmez (üye olsa bile)', async () => {
-    const d = deps({ findDistrictDemographics: jest.fn().mockResolvedValue(null) })
-    const res = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })
-    if (!res.ok) throw new Error('ok bekleniyordu')
-    expect(res.card).not.toHaveProperty('demographics')
+  it('demografi kaydı yok → demographics alanı yok + demographicsAvailable false (üye/anonim)', async () => {
+    const noRow = { findDistrictDemographics: jest.fn().mockResolvedValue(null) }
+    const asMember = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(noRow), { memberView: true })
+    const asAnon = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(noRow), { memberView: false })
+    if (!asMember.ok || !asAnon.ok) throw new Error('ok bekleniyordu')
+    expect(asMember.card).not.toHaveProperty('demographics')
+    expect(asMember.card.demographicsAvailable).toBe(false)
+    expect(asAnon.card.demographicsAvailable).toBe(false)
   })
 
   it('findDistrictDemographics normalize edilmiş args alır', async () => {
