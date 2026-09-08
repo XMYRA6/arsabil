@@ -3,7 +3,7 @@ import { upsertDistrictDemographics, type DemographicsUpsertClient } from '../..
 describe('upsertDistrictDemographics', () => {
   const meta = { dataYear: 2024, source: 'tuik-adnks-sdmx', fetchedAt: new Date('2026-09-07T00:00:00Z') }
 
-  it('her satır için upsert çağırır; create ve update aynı metrik alanlarını yazar; sayı döner', async () => {
+  it('her satır için upsert çağırır; create eksik metriği null yazar, update yalnız gelen metriği yazar; sayı döner', async () => {
     const calls: any[] = []
     const client: DemographicsUpsertClient = {
       districtDemographics: { upsert: async (a: any) => { calls.push(a); return {} } },
@@ -20,21 +20,21 @@ describe('upsertDistrictDemographics', () => {
       populationGrowthPerMille: null, avgHouseholdSize: null,
       dataYear: 2024, source: 'tuik-adnks-sdmx',
     })
-    expect(calls[0].update).toMatchObject({
-      population: 320000, medianAge: 36.4, populationGrowthPerMille: null, avgHouseholdSize: null, dataYear: 2024,
-    })
+    expect(calls[0].update).toMatchObject({ population: 320000, medianAge: 36.4, dataYear: 2024 })
     expect(calls[0].update.il).toBeUndefined()  // anahtar sabit
   })
 
-  it('eksik metrik → null yazılır (eski değeri temizler)', async () => {
+  it('eksik metrik → update BRANCHINDE hiç yer almaz (geçen yılki değer korunur), create null yazar', async () => {
     const calls: any[] = []
     const client: DemographicsUpsertClient = {
       districtDemographics: { upsert: async (a: any) => { calls.push(a); return {} } },
     }
     await upsertDistrictDemographics(client, [{ il: 'X', ilce: 'Y', population: 5 }], meta)
-    expect(calls[0].update.medianAge).toBeNull()
-    expect(calls[0].update.avgHouseholdSize).toBeNull()
-    expect(calls[0].update.populationGrowthPerMille).toBeNull()
+    expect(calls[0].update).not.toHaveProperty('medianAge')
+    expect(calls[0].update).not.toHaveProperty('avgHouseholdSize')
+    expect(calls[0].update).not.toHaveProperty('populationGrowthPerMille')
+    expect(calls[0].update.population).toBe(5)
+    expect(calls[0].create.medianAge).toBeNull()
   })
 
   it('boş liste → 0, hiç upsert yok', async () => {

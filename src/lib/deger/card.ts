@@ -155,6 +155,16 @@ export async function buildDegerCard(
 
   const trend = priceTrend(trendRows, { now: new Date() })
 
+  // Satır var + en az bir metrik dolu — DegerKarti'nin üye bloğu render koşuluyla
+  // birebir aynı. Böylece anonim teaser, üyenin gerçekte hiçbir şey görmeyeceği
+  // "hepsi null" satırda "üyelikle aç" sözü vermez.
+  const demographicsAvailable =
+    !!demo &&
+    (demo.population != null ||
+      demo.populationGrowthPerMille != null ||
+      demo.medianAge != null ||
+      demo.avgHouseholdSize != null)
+
   const comp = center
     ? selectComparables({
         parcel: { lat: center.lat, lng: center.lng, areaSqm: parcel.areaSqm },
@@ -223,7 +233,7 @@ export async function buildDegerCard(
         count: comp.total,
         ...(opts.memberView ? { items: comp.items } : {}),
       },
-      demographicsAvailable: !!demo,
+      demographicsAvailable,
       ...(opts.memberView && !trend.insufficientTrend
         ? {
             priceTrend: {

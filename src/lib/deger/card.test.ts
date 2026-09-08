@@ -206,6 +206,19 @@ describe('buildDegerCard', () => {
     expect(asAnon.card.demographicsAvailable).toBe(false)
   })
 
+  it('demografi satırı var ama TÜM metrikler null → demographicsAvailable false (üyenin de göreceği bir şey yok)', async () => {
+    const allNull = {
+      findDistrictDemographics: jest.fn().mockResolvedValue({
+        dataYear: 2024, population: null, populationGrowthPerMille: null, medianAge: null, avgHouseholdSize: null,
+      }),
+    }
+    const asAnon = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(allNull), { memberView: false })
+    const asMember = await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, deps(allNull), { memberView: true })
+    if (!asAnon.ok || !asMember.ok) throw new Error('ok bekleniyordu')
+    expect(asAnon.card.demographicsAvailable).toBe(false)
+    expect(asMember.card.demographicsAvailable).toBe(false)
+  })
+
   it('findDistrictDemographics normalize edilmiş args alır', async () => {
     const d = deps()
     await buildDegerCard({ kind: 'point', lat: 41, lng: 39.7 }, d, { memberView: true })

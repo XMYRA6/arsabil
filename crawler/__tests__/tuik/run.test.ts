@@ -126,6 +126,38 @@ describe('runTuikDemographics', () => {
     expect(deps._upserts).toHaveLength(0)
   })
 
+  it('upsert ortasında DB düşerse → CrawlRun blocked:true + partialRowsWritten ile kapatılır, hata yeniden fırlatılır', async () => {
+    // İki ilçe satırı üret (population + il→ilçe yayılan medianAge zaten 1 satır;
+    // ikinci bir ilçe için ayrı bir population kodu ekle).
+    let n = 0
+    const deps = makeDeps({
+      dataflows: [ref('population', 'population', 'ilce'), ref('medianAge', 'medianAge', 'il')],
+      fetchCsv: jest.fn(async (r: DataflowRef) =>
+        r.key === 'population'
+          ? 'REF_AREA,TIME_PERIOD,OBS_VALUE\nA_population,2024,1\nB_population,2024,2'
+          : 'REF_AREA,TIME_PERIOD,OBS_VALUE\nA_medianAge,2024,3',
+      ),
+      parse: jest.fn((csv: string) =>
+        csv.split('\n').slice(1).filter(Boolean).map((l) => {
+          const [refArea, , value] = l.split(',')
+          return { refArea, timePeriod: '2024', value: Number(value) }
+        }),
+      ),
+      resolve: jest.fn((code: string) =>
+        code === 'A_population' ? { il: 'Trabzon', ilce: 'Ortahisar' }
+        : code === 'B_population' ? { il: 'Trabzon', ilce: 'Akçaabat' }
+        : code === 'A_medianAge' ? { il: 'Trabzon', ilce: null } : null),
+      client: { districtDemographics: { upsert: async () => { n++; if (n === 2) throw new Error('db connection lost') } } } as any,
+    })
+    await expect(runTuikDemographics(deps, { dryRun: false })).rejects.toThrow('db connection lost')
+    const updateArg = (deps.crawlRunClient.crawlRun.update as jest.Mock).mock.calls.at(-1)![0]
+    expect(updateArg.data.blocked).toBe(true)
+    expect(updateArg.data.finishedAt).toBeInstanceOf(Date)
+    const notes = JSON.parse(updateArg.data.notes)
+    expect(notes.error).toContain('merge/upsert failed')
+    expect(notes.partialRowsWritten).toBe(1)
+  })
+
   it('dryRun → parse+merge eder ama upsert ETMEZ', async () => {
     const deps = makeDeps()
     const s = await runTuikDemographics(deps, { dryRun: true })

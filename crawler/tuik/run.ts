@@ -94,14 +94,35 @@ export async function runTuikDemographics(deps: RunDeps, opts: { dryRun: boolean
   let rowsWritten = 0
   let mergedRows = 0
   if (!aborted) {
-    const merged = mergeDemographics(results, deps.resolve, stats)
-    mergedRows = merged.length
-    if (!opts.dryRun) {
-      rowsWritten = await upsertDistrictDemographics(deps.client, merged, {
-        dataYear: deps.dataYear,
-        source: 'tuik-adnks-sdmx',
-        fetchedAt: new Date(),
+    try {
+      const merged = mergeDemographics(results, deps.resolve, stats)
+      mergedRows = merged.length
+      if (!opts.dryRun) {
+        rowsWritten = await upsertDistrictDemographics(deps.client, merged, {
+          dataYear: deps.dataYear,
+          source: 'tuik-adnks-sdmx',
+          fetchedAt: new Date(),
+        })
+      }
+    } catch (err) {
+      // merge/upsert ortasında DB düşerse: CrawlRun zombi kalmasın (finishedAt null,
+      // blocked false görünüp "hâlâ çalışıyor" sanılır). Tablo kısmen güncellenmiş
+      // olabilir — upsert idempotent olduğu için turu tekrar çalıştırmak tam iyileştirir.
+      await deps.crawlRunClient.crawlRun.update({
+        where: { id: run.id },
+        data: {
+          finishedAt: new Date(),
+          blocked: true,
+          notes: JSON.stringify({
+            dryRun: opts.dryRun,
+            error: `merge/upsert failed: ${(err as Error).message}`,
+            partialRowsWritten: (err as Error & { written?: number }).written ?? rowsWritten,
+            dataflowsFailed: failed,
+            dataYear: deps.dataYear,
+          }),
+        },
       })
+      throw err
     }
   }
 
