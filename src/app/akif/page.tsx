@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { AkifMessage, AkifTurn } from '@/lib/ai/akif/contract'
 import { AkifChat, type AkifChatEntry } from '@/components/akif/AkifChat'
+import { AkifVoicePanel } from '@/components/akif/voice/AkifVoicePanel'
 import styles from './page.module.css'
 
 const makeId = () =>
@@ -29,6 +30,7 @@ export default function AkifPage() {
   const [conversationId, setConversationId] = useState(makeId)
   const [entries, setEntries] = useState<AkifChatEntry[]>([])
   const [pending, setPending] = useState(false)
+  const [mode, setMode] = useState<'text' | 'voice'>('text')
 
   const resetConversation = () => {
     if (pending) return
@@ -74,22 +76,37 @@ export default function AkifPage() {
     <div className={styles.page}>
       <div className={styles.head}>
         <h1 className={styles.title}>Akif Usta&apos;ya Sor</h1>
-        {entries.length > 0 && (
-          <button
-            type="button"
-            className={styles.reset}
-            onClick={resetConversation}
-            disabled={pending}
-          >
-            Yeni sohbet
-          </button>
-        )}
+        <div className={styles.headActions}>
+          {mode === 'text' && (
+            <button
+              type="button"
+              className={styles.voiceToggle}
+              onClick={() => setMode('voice')}
+            >
+              🎙 Sesli konuş
+            </button>
+          )}
+          {mode === 'text' && entries.length > 0 && (
+            <button
+              type="button"
+              className={styles.reset}
+              onClick={resetConversation}
+              disabled={pending}
+            >
+              Yeni sohbet
+            </button>
+          )}
+        </div>
       </div>
       <p className={styles.sub}>
-        Arsanı, emsali ve müteahhit payını yaz — iki senaryoyu hesaplayıp anlatayım. Sayılar
-        deterministik motordan gelir, uydurma yok.
+        Arsanı, emsali ve müteahhit payını {mode === 'voice' ? 'söyle' : 'yaz'} — iki senaryoyu
+        hesaplayıp anlatayım. Sayılar deterministik motordan gelir, uydurma yok.
       </p>
-      <AkifChat entries={entries} pending={pending} onSend={send} />
+      {mode === 'text' ? (
+        <AkifChat entries={entries} pending={pending} onSend={send} />
+      ) : (
+        <AkifVoicePanel onExit={() => setMode('text')} />
+      )}
     </div>
   )
 }

@@ -1,6 +1,16 @@
 /** @jest-environment jsdom */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
+
+jest.mock('@/components/akif/voice/AkifVoicePanel', () => ({
+  AkifVoicePanel: ({ onExit }: { onExit: () => void }) => (
+    <div>
+      <span>SESLI PANEL</span>
+      <button onClick={onExit}>panel-exit</button>
+    </div>
+  ),
+}))
+
 import AkifPage from './page'
 
 const turn = {
@@ -101,4 +111,25 @@ it('pending sırasında ikinci gönderim engellenir', async () => {
   await waitFor(() =>
     expect(screen.getByText('Merhaba, nasıl yardımcı olayım?')).toBeInTheDocument(),
   )
+})
+
+it('varsayılan metin modu — sesli konuş butonu görünür', () => {
+  render(<AkifPage />)
+  expect(screen.getByRole('button', { name: /sesli konuş/i })).toBeInTheDocument()
+  expect(screen.queryByText('SESLI PANEL')).not.toBeInTheDocument()
+})
+
+it('sesli konuş → panel açılır, metin composer gizlenir', () => {
+  render(<AkifPage />)
+  fireEvent.click(screen.getByRole('button', { name: /sesli konuş/i }))
+  expect(screen.getByText('SESLI PANEL')).toBeInTheDocument()
+  expect(screen.queryByPlaceholderText(/Arsanı ve payı yaz/i)).not.toBeInTheDocument()
+})
+
+it('panelden çık → metin moduna döner', () => {
+  render(<AkifPage />)
+  fireEvent.click(screen.getByRole('button', { name: /sesli konuş/i }))
+  fireEvent.click(screen.getByText('panel-exit'))
+  expect(screen.queryByText('SESLI PANEL')).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /sesli konuş/i })).toBeInTheDocument()
 })
