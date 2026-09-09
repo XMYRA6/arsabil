@@ -1,0 +1,12 @@
+.panel { display: flex; flex-direction: column; gap: 12px; }
+.transcript { flex: 1; overflow-y: auto; min-height: 200px; }
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 0; }
+.start { padding: 12px 20px; border-radius: 999px; border: none; background: var(--accent, #1a73e8); color: #fff; font-size: 15px; cursor: pointer; }
+.stop { padding: 8px 16px; border-radius: 999px; border: 1px solid var(--panel-border, #ddd); background: transparent; cursor: pointer; }
+.exit { margin-left: auto; background: none; border: none; color: var(--muted, #666); font-size: 13px; cursor: pointer; text-decoration: underline; }
+.orb { width: 14px; height: 14px; border-radius: 50%; background: var(--muted, #999); }
+.listening { background: #34a853; }
+.speaking { background: #1a73e8; }
+.timer { font-variant-numeric: tabular-nums; color: var(--muted, #666); }
+.hint { color: var(--muted, #666); }
+.error { color: #c5221f; font-size: 14px; margin: 0; }
