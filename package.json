@@ -21,6 +21,7 @@
     "crawl:tuik": "cross-env TS_NODE_PROJECT=crawler/tsconfig.json ts-node --transpile-only -r tsconfig-paths/register crawler/tuik/run.ts",
     "test:crawler": "jest --config crawler/jest.config.js",
     "akif:eval": "cross-env TS_NODE_PROJECT=scripts/tsconfig.akif-eval.json ts-node --transpile-only -r tsconfig-paths/register scripts/akif-eval.ts",
+    "akif:voice-smoke": "cross-env TS_NODE_PROJECT=scripts/tsconfig.akif-eval.json ts-node --transpile-only -r tsconfig-paths/register scripts/akif-voice-smoke.ts",
     "prebuild": "node scripts/stamp-sw.mjs"
   },
   "dependencies": {
