@@ -30,6 +30,7 @@ const OK_ENV = {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  jest.spyOn(console, 'error').mockImplementation(() => {})
   global.fetch = fetchMock as never
   checkRateLimitMock.mockReturnValue({ ok: true })
   getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
@@ -76,13 +77,28 @@ it('kullanıcı kotası aşıldı → 429 user_quota', async () => {
   expect((await res.json()).reason).toBe('user_quota')
 })
 
-it('OpenAI token çağrısı başarısız → 502', async () => {
+it('OpenAI token çağrısı başarısız (!ok) → 502', async () => {
   fetchMock.mockResolvedValue({ ok: false, status: 400, text: async () => 'bad' })
   const res = await POST(req())
   expect(res.status).toBe(502)
+  expect(await res.json()).toEqual({ error: 'upstream' })
 })
 
-it('mutlu yol → 200 token + sessionId + model', async () => {
+it('fetch throw eder → 502 upstream', async () => {
+  fetchMock.mockRejectedValue(new Error('net'))
+  const res = await POST(req())
+  expect(res.status).toBe(502)
+  expect(await res.json()).toEqual({ error: 'upstream' })
+})
+
+it('OpenAI 200 ama value yok → 502 upstream', async () => {
+  fetchMock.mockResolvedValue({ ok: true, json: async () => ({}) })
+  const res = await POST(req())
+  expect(res.status).toBe(502)
+  expect(await res.json()).toEqual({ error: 'upstream' })
+})
+
+it('mutlu yol → 200 token + sessionId + model + OpenAI isteği', async () => {
   const res = await POST(req())
   expect(res.status).toBe(200)
   const body = await res.json()
@@ -90,9 +106,14 @@ it('mutlu yol → 200 token + sessionId + model', async () => {
   expect(body.model).toBe('gpt-realtime-mini')
   expect(body.sessionMaxSec).toBe(600)
   expect(typeof body.sessionId).toBe('string')
-  // OpenAI'ye doğru endpoint + body
-  expect(fetchMock).toHaveBeenCalledWith(
-    'https://api.openai.com/v1/realtime/client_secrets',
-    expect.objectContaining({ method: 'POST' }),
-  )
+
+  // OpenAI'ye giden isteğin tamamı — ham anahtar YALNIZ header'da olmalı.
+  const call = fetchMock.mock.calls[0]
+  expect(call[0]).toBe('https://api.openai.com/v1/realtime/client_secrets')
+  expect(call[1].method).toBe('POST')
+  expect(call[1].headers.Authorization).toBe('Bearer sk-x')
+  expect(call[1].headers['Content-Type']).toBe('application/json')
+  const sent = JSON.parse(call[1].body)
+  expect(sent.expires_after.ttl).toBe('2m')
+  expect(sent.session.type).toBe('realtime')
 })
