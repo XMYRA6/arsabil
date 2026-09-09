@@ -525,3 +525,28 @@ model DistrictDemographics {
   @@unique([il, ilce])
   @@index([il])
 }
+
+model AkifVoiceSessionLog {
+  id          String   @id @default(cuid())
+  userId      String
+  startedAt   DateTime
+  endedAt     DateTime @default(now())
+  durationSec Int
+  toolCalls   Int      @default(0)
+  estCostUsd  Float    @default(0)
+  endReason   String
+
+  @@index([userId, startedAt])
+  @@index([startedAt])
+}
+
+model AkifVoiceTurnLog {
+  id         String   @id @default(cuid())
+  sessionId  String
+  createdAt  DateTime @default(now())
+  tool       String?
+  intent     String?
+  estCostUsd Float    @default(0)
+
+  @@index([sessionId])
+}
