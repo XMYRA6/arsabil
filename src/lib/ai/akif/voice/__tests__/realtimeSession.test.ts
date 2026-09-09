@@ -1,0 +1,30 @@
+import { buildRealtimeSessionConfig } from '../realtimeSession'
+import { AKIF_TOOL_DEFS } from '../../gateway/toolRegistry'
+
+describe('buildRealtimeSessionConfig', () => {
+  const cfg = buildRealtimeSessionConfig({ model: 'gpt-realtime-mini', voiceName: 'marin' })
+
+  it('model ve ses adını yerleştirir', () => {
+    expect(cfg.model).toBe('gpt-realtime-mini')
+    expect(cfg.audio.output.voice).toBe('marin')
+  })
+
+  it('semantic_vad kullanır', () => {
+    expect(cfg.audio.input.turn_detection).toEqual({ type: 'semantic_vad' })
+  })
+
+  it('instructions Akif sistem prompt + ses ritmi ekini içerir', () => {
+    expect(cfg.instructions).toMatch(/SES PERFORMANSI/)
+    // Akif personası: sistem prompt'tan bir çapa kelime
+    expect(cfg.instructions.length).toBeGreaterThan(500)
+  })
+
+  it('AKIF_TOOL_DEFS birebir aktarılır', () => {
+    expect(cfg.tools).toEqual(AKIF_TOOL_DEFS)
+    expect(cfg.tool_choice).toBe('auto')
+  })
+
+  it('type realtime', () => {
+    expect(cfg.type).toBe('realtime')
+  })
+})
