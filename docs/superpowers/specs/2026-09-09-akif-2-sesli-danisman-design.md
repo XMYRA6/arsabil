@@ -32,7 +32,7 @@
 - **Görsel senkron:** Akif-1'in mevcut kartları (`AkifScenarioCard`, `AkifAssumptionsBar`, `AkifMessageBubble`) yeniden kullanılır. Yeni animasyonlu görsel sistem YOK (vizyon §29'un "1.350 m² animasyonla belirir" sineması sonraki cila).
 - **Canlı transkript:** iki taraf da yazıyla gösterilir — sayı doğrulama şartı (vizyon §30) + erişilebilirlik için zorunlu.
 - **Auth:** sesli mod **giriş şart**. Metin Akif anonim kalır (değişmez).
-- **Sıra algılama:** Realtime'ın **sunucu-taraflı `semantic_vad`**'ı. Kendi VAD'ımız yok.
+- **Sıra algılama:** Realtime'ın **sunucu-taraflı `semantic_vad`**'ı. Kendi VAD'ımız yok. (GA API'de `turn_detection` config'de `session.audio.input.turn_detection` altında; efemeral token `POST /v1/realtime/client_secrets` ile basılır, SDP değişimi tarayıcıda `POST /v1/realtime/calls` ile.)
 - **Barge-in:** `input_audio_buffer.speech_started` → yerel `<audio>` durur + `response.cancel`.
 - **Taşıma:** WebRTC (OpenAI'nin tarayıcı önerisi). Backend efemeral token basar; gerçek `OPENAI_API_KEY` tarayıcıya hiç inmez.
 - **Tool yürütme:** tarayıcı tool çağrısını `/api/akif/voice/tool`'a iletir; backend `validateArgs` + `dispatchTool` + audit → doğrulanmış `ToolResultCard`. Motor mantığı tarayıcıya inmez.
