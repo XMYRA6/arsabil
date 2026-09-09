@@ -74,5 +74,6 @@ export const RATE_LIMITS = {
     WHATSAPP_INBOUND: { limit: 10, windowMs: 60_000 }, // telefon başına 10/dk
     AKIF_TURN: { limit: 8, windowMs: 60_000 }, // kullanıcı/IP başına 8/dk — LLM turu pahalı
     AKIF_VOICE_SESSION: { limit: 5, windowMs: 3_600_000 }, // kullanıcı başına 5/saat — pahalı Realtime oturumu
+    AKIF_VOICE_USAGE: { limit: 10, windowMs: 3_600_000 }, // kullanıcı başına 10/saat — /usage maliyet kaydı, forge griefing'e karşı
     STUDIO_RENDER: { limit: 5, windowMs: 60_000 }, // kullanıcı başına 5/dk — pahalı üretim, cache çoğu tekrarı zaten önler
 } as const

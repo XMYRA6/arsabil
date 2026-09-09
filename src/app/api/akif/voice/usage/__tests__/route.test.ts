@@ -1,10 +1,15 @@
 const getServerSessionMock = jest.fn()
 const logVoiceSessionMock = jest.fn()
 const readVoiceEnvMock = jest.fn()
+const checkRateLimitMock = jest.fn()
 
 jest.mock('next-auth/next', () => ({ getServerSession: (...a: unknown[]) => getServerSessionMock(...a) }))
 jest.mock('@/lib/auth', () => ({ authOptions: {} }))
 jest.mock('@/lib/prisma', () => ({ prisma: { __brand: 'prisma' } }))
+jest.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: (...a: unknown[]) => checkRateLimitMock(...a),
+  RATE_LIMITS: { AKIF_VOICE_USAGE: { limit: 10, windowMs: 3_600_000 } },
+}))
 jest.mock('@/lib/ai/akif/voice/voiceEnv', () => ({ readVoiceEnv: (...a: unknown[]) => readVoiceEnvMock(...a) }))
 jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
   createVoiceAuditLogger: () => ({ logVoiceSession: (...a: unknown[]) => logVoiceSessionMock(...a) }),
@@ -12,12 +17,16 @@ jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
 
 import { POST } from '../route'
 
+// startedAtMs artık 24 saatlik sağduyu penceresine tabi — sabit geçmiş damga yerine dinamik.
+const START = Date.now() - 180_000
+
 beforeEach(() => {
   jest.clearAllMocks()
   jest.spyOn(console, 'error').mockImplementation(() => {})
   getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
-  readVoiceEnvMock.mockReturnValue({ model: 'gpt-realtime-mini' })
+  readVoiceEnvMock.mockReturnValue({ model: 'gpt-realtime-mini', sessionMaxSec: 600 })
   logVoiceSessionMock.mockResolvedValue(undefined)
+  checkRateLimitMock.mockReturnValue({ ok: true })
 })
 
 const body = (o: Record<string, unknown>) =>
@@ -26,7 +35,7 @@ const body = (o: Record<string, unknown>) =>
     headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
     body: JSON.stringify({
       sessionId: 'sess-1',
-      startedAtMs: Date.parse('2026-09-09T10:00:00Z'),
+      startedAtMs: START,
       durationSec: 180,
       toolCalls: 1,
       realtimeUsage: null,
@@ -75,7 +84,7 @@ it('mutlu yol → logVoiceSession çağrılır, maliyet hesaplanır', async () =
     }),
   )
   expect(arg.startedAt instanceof Date).toBe(true)
-  expect(arg.startedAt.getTime()).toBe(Date.parse('2026-09-09T10:00:00Z'))
+  expect(arg.startedAt.getTime()).toBe(START)
   expect(arg.estCostUsd).toBeGreaterThan(0)
 })
 
@@ -104,4 +113,43 @@ it('readVoiceEnv patlar (anahtar yok) → yine de fallback model ile kayıt yaz�
   const res = await POST(body({}))
   expect(res.status).toBe(200)
   expect(logVoiceSessionMock.mock.calls[0][0].estCostUsd).toBeGreaterThan(0)
+})
+
+// --- I2: forge / griefing koruması ---
+
+it('forge edilmiş devasa realtimeUsage → null a düşer (süre-bazlı maliyet, dev sayı değil)', async () => {
+  await POST(
+    body({
+      durationSec: 120,
+      realtimeUsage: { inputAudioTokens: 5_000_000_000, outputAudioTokens: 5_000_000_000 },
+    }),
+  )
+  const cost = logVoiceSessionMock.mock.calls[0][0].estCostUsd
+  // token-bazlı olsaydı milyarlarca $ ; süre-bazlı 2 dk mini ~ $0.05
+  expect(cost).toBeLessThan(1)
+  expect(cost).toBeGreaterThan(0)
+})
+
+it('durationSec tavanın çok üstünde → clamp (sessionMaxSec + 30)', async () => {
+  await POST(body({ durationSec: 999_999, realtimeUsage: null }))
+  expect(logVoiceSessionMock.mock.calls[0][0].durationSec).toBe(630)
+})
+
+it('startedAtMs gelecekte → 400', async () => {
+  const res = await POST(body({ startedAtMs: Date.now() + 5 * 60 * 60 * 1000 }))
+  expect(res.status).toBe(400)
+  expect(logVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+it('startedAtMs 24 saatten eski → 400', async () => {
+  const res = await POST(body({ startedAtMs: Date.now() - 48 * 60 * 60 * 1000 }))
+  expect(res.status).toBe(400)
+  expect(logVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+it('rate-limit aşıldı → 429, kayıt yazılmaz', async () => {
+  checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 60 })
+  const res = await POST(body({}))
+  expect(res.status).toBe(429)
+  expect(logVoiceSessionMock).not.toHaveBeenCalled()
 })
