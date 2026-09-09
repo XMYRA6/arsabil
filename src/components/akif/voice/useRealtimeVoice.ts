@@ -295,7 +295,9 @@ export function useRealtimeVoice(opts?: {
     pc.onconnectionstatechange = () => {
       if (stoppedRef.current) return
       const st = pc.connectionState
-      if (st === 'connected' || st === 'completed') {
+      // 'completed' RTCPeerConnectionState'te yok (o iceConnectionState'e ait) —
+      // burada kurtarma sinyali 'connected'.
+      if (st === 'connected') {
         clearGrace()
         return
       }
@@ -309,8 +311,7 @@ export function useRealtimeVoice(opts?: {
         if (graceTimerRef.current) return
         graceTimerRef.current = setTimeout(() => {
           graceTimerRef.current = null
-          const cur = pcRef.current?.connectionState
-          if (!stoppedRef.current && cur !== 'connected' && cur !== 'completed') {
+          if (!stoppedRef.current && pcRef.current?.connectionState !== 'connected') {
             setErrorText('Bağlantı koptu.')
             stop('disconnect')
           }
