@@ -24,10 +24,26 @@ describe('estimateVoiceCostUsd', () => {
     expect(full).toBeGreaterThan(mini)
   })
 
-  it('bilinmeyen model mini tarifesine düşer', () => {
+  it('bilinmeyen model TAM (pahalı) tarifeye düşer — para guard fail-closed', () => {
     const unknown = estimateVoiceCostUsd({ model: 'gpt-99', durationSec: 300, usage: null })
+    const full = estimateVoiceCostUsd({ model: 'gpt-realtime', durationSec: 300, usage: null })
     const mini = estimateVoiceCostUsd({ model: 'gpt-realtime-mini', durationSec: 300, usage: null })
-    expect(unknown).toBe(mini)
+    expect(unknown).toBe(full)
+    expect(unknown).toBeGreaterThan(mini)
+  })
+
+  it('gpt-realtime-2.1 (key değil) → TAM tarife, mini değil', () => {
+    const v21 = estimateVoiceCostUsd({ model: 'gpt-realtime-2.1', durationSec: 300, usage: null })
+    const full = estimateVoiceCostUsd({ model: 'gpt-realtime', durationSec: 300, usage: null })
+    const mini = estimateVoiceCostUsd({ model: 'gpt-realtime-mini', durationSec: 300, usage: null })
+    expect(v21).toBe(full)
+    expect(v21).toBeGreaterThan(mini)
+  })
+
+  it('gpt-realtime-mini-2 → mini tarife (prefix)', () => {
+    const m2 = estimateVoiceCostUsd({ model: 'gpt-realtime-mini-2', durationSec: 300, usage: null })
+    const mini = estimateVoiceCostUsd({ model: 'gpt-realtime-mini', durationSec: 300, usage: null })
+    expect(m2).toBe(mini)
   })
 
   it('sıfır süre + usage yok → 0', () => {

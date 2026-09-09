@@ -1,5 +1,7 @@
 // Akif-2 — Realtime maliyet tahmini. Kaynak: OpenAI Realtime tarifesi (2026-07).
-// gpt-realtime-2.1: $32/$64 per Mtok audio ; gpt-realtime-mini: $10/$20 per Mtok.
+// `gpt-realtime*` (tam, ör. gpt-realtime / gpt-realtime-2.x): $32/$64 per Mtok audio.
+// `gpt-realtime-mini*`: $10/$20 per Mtok audio.
+// Para guard'ı: bilinmeyen model = TAM (pahalı) tarife — fail closed.
 // Süre-bazlı yaklaşık: ~600 input tok/dk + ~1200 output tok/dk (tipik ajan).
 
 export interface RealtimeUsage {
@@ -12,17 +14,19 @@ interface Rate {
   outPerMTok: number
 }
 
-export const VOICE_RATES: Record<string, Rate> = {
-  'gpt-realtime': { inPerMTok: 32, outPerMTok: 64 },
-  'gpt-realtime-mini': { inPerMTok: 10, outPerMTok: 20 },
+export const VOICE_RATES: Record<'full' | 'mini', Rate> = {
+  full: { inPerMTok: 32, outPerMTok: 64 },
+  mini: { inPerMTok: 10, outPerMTok: 20 },
 }
 
-const FALLBACK_MODEL = 'gpt-realtime-mini'
 const APPROX_IN_TOK_PER_MIN = 600
 const APPROX_OUT_TOK_PER_MIN = 1200
 
+// Prefix eşleşmesi: `gpt-realtime-mini*` → mini; diğer `gpt-realtime*` → full;
+// tanınmayan → full (pahalı) — para guard'ı fail-closed olmalı.
 function rateFor(model: string): Rate {
-  return VOICE_RATES[model] ?? VOICE_RATES[FALLBACK_MODEL]
+  if (model.startsWith('gpt-realtime-mini')) return VOICE_RATES.mini
+  return VOICE_RATES.full
 }
 
 export function estimateVoiceCostUsd(args: {
