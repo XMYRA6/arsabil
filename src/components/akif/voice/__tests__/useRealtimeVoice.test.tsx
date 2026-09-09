@@ -184,3 +184,75 @@ it('stop: sendBeacon usage POST', async () => {
   const body = JSON.parse(sendBeaconMock.mock.calls[0][1])
   expect(body).toMatchObject({ sessionId: 'sess-1', endReason: 'user_ended' })
 })
+
+it('timer: wrap-up at sessionMaxSec-60, timeout at sessionMaxSec', async () => {
+  jest.useFakeTimers()
+  try {
+    let pc!: FakePC
+    const { result } = renderHook(() =>
+      useRealtimeVoice({
+        rtcFactory: () => {
+          pc = new FakePC()
+          return pc as unknown as RTCPeerConnection
+        },
+        fetchFn: (async (url: RequestInfo | URL, init?: RequestInit) => {
+          if (String(url).includes('/api/akif/voice/session')) {
+            return {
+              ok: true,
+              json: async () => ({
+                token: 'ek_1',
+                sessionId: 'sess-1',
+                model: 'gpt-realtime-mini',
+                sessionMaxSec: 120, // 120 seconds for this test
+              }),
+            } as never
+          }
+          if (String(url).includes('/api/akif/voice/tool')) {
+            return {
+              ok: true,
+              json: async () => ({ kind: 'term', term: 'emsal', shortDef: 'a', example: 'b' }),
+            } as never
+          }
+          return { ok: true, text: async () => 'answer-sdp' } as never
+        }) as typeof fetch,
+      }),
+    )
+    await act(async () => {
+      await result.current.start()
+    })
+    await waitFor(() => expect(result.current.status).toBe('listening'))
+
+    // Advance 61s (should trigger wrap-up at 60s)
+    await act(async () => {
+      jest.advanceTimersByTime(61_000)
+    })
+    const wrapUpMessages = pc.dc.sent.filter((s) =>
+      s.includes('conversation.item.create') && s.includes('Süremiz doluyor'),
+    )
+    expect(wrapUpMessages).toHaveLength(1)
+
+    // Advance 30s more (total 91s, should NOT trigger second wrap-up)
+    await act(async () => {
+      jest.advanceTimersByTime(30_000)
+    })
+    const wrapUpMessagesAfter30s = pc.dc.sent.filter((s) =>
+      s.includes('conversation.item.create') && s.includes('Süremiz doluyor'),
+    )
+    expect(wrapUpMessagesAfter30s).toHaveLength(1)
+
+    // Advance 30s more (total 121s ≥ 120, should trigger timeout)
+    await act(async () => {
+      jest.advanceTimersByTime(30_000)
+    })
+    await waitFor(() => expect(result.current.status).toBe('idle'))
+    expect(pc.closed).toBe(true)
+    const beaconCall = sendBeaconMock.mock.calls.find((call) =>
+      String(call[0]).includes('/api/akif/voice/usage'),
+    )
+    expect(beaconCall).toBeDefined()
+    const beaconBody = JSON.parse(beaconCall![1] as string)
+    expect(beaconBody).toMatchObject({ endReason: 'timeout' })
+  } finally {
+    jest.useRealTimers()
+  }
+})

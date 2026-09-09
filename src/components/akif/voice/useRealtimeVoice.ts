@@ -48,7 +48,6 @@ export function useRealtimeVoice(opts?: {
   const stoppedRef = useRef(false)
 
   const sessionIdRef = useRef<string>('')
-  const modelRef = useRef<string>('gpt-realtime-mini')
   const startedAtRef = useRef<number>(0)
   const maxSecRef = useRef<number>(600)
   const toolCallsRef = useRef(0)
@@ -83,6 +82,10 @@ export function useRealtimeVoice(opts?: {
   const stop = useCallback((reason = 'user_ended') => {
     if (stoppedRef.current) return
     stoppedRef.current = true
+    if (!sessionIdRef.current) {
+      setStatus('idle')
+      return
+    }
     if (timerRef.current) clearInterval(timerRef.current)
     try {
       pcRef.current?.close()
@@ -186,12 +189,19 @@ export function useRealtimeVoice(opts?: {
       setErrorText('Sesli sohbet için mikrofon izni lazım.')
       return
     }
+    if (stoppedRef.current) return
     micStreamRef.current = mic
 
     let sess: { token: string; sessionId: string; model: string; sessionMaxSec: number }
     try {
       const res = await fetchFn('/api/akif/voice/session', { method: 'POST' })
       if (!res.ok) {
+        if (res.status === 401) {
+          setStatus('error')
+          setErrorText('Sesli sohbet için giriş yapmalısın.')
+          mic.getTracks().forEach((t) => t.stop())
+          return
+        }
         const errBody = (await res.json().catch(() => ({}))) as { reason?: string }
         setStatus('error')
         setErrorText(
@@ -211,9 +221,9 @@ export function useRealtimeVoice(opts?: {
       mic.getTracks().forEach((t) => t.stop())
       return
     }
+    if (stoppedRef.current) return
 
     sessionIdRef.current = sess.sessionId
-    modelRef.current = sess.model
     maxSecRef.current = sess.sessionMaxSec
     startedAtRef.current = Date.now()
 
@@ -267,6 +277,7 @@ export function useRealtimeVoice(opts?: {
       stop('error')
       return
     }
+    if (stoppedRef.current) return
 
     setStatus('listening')
     timerRef.current = setInterval(() => {
