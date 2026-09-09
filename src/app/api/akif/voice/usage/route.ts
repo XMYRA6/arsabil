@@ -104,9 +104,10 @@ export async function POST(req: Request) {
   )
 
   // realtimeUsage: şekil doğru olsa bile forge edilebilir. Sonlu değilse VEYA
-  // makul üst sınırı (sessionMaxSec * 4000 tok) aşıyorsa → null'a düşür,
-  // süre-bazlı tahmin kullanılır.
-  const usageCap = sessionMaxSec * 4000
+  // makul üst sınırı aşıyorsa → null'a düşür, süre-bazlı tahmin kullanılır.
+  // Cap: sessionMaxSec * 200 ≈ 10× tipik per-second rate (~30 tok/s from voiceCost.ts).
+  // Forged value at cap → ~$3–6/session, well under monthly budget.
+  const usageCap = sessionMaxSec * 200
   let usage: { inputAudioTokens: number; outputAudioTokens: number } | null = null
   if (
     realtimeUsage != null &&

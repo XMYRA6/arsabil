@@ -130,6 +130,21 @@ it('forge edilmiş devasa realtimeUsage → null a düşer (süre-bazlı maliyet
   expect(cost).toBeGreaterThan(0)
 })
 
+it('forge just under cap (sessionMaxSec * 200) → kabul edilir, cost sınırlı kalır', async () => {
+  // sessionMaxSec = 600 → cap = 120000. Just under:
+  const justUnderCap = 119_999
+  await POST(
+    body({
+      durationSec: 600,
+      realtimeUsage: { inputAudioTokens: justUnderCap, outputAudioTokens: justUnderCap },
+    }),
+  )
+  const cost = logVoiceSessionMock.mock.calls[0][0].estCostUsd
+  // Token-based for mini: (119999/1e6)*10 + (119999/1e6)*20 ≈ $3.60
+  expect(cost).toBeLessThan(5)
+  expect(cost).toBeGreaterThan(0)
+})
+
 it('durationSec tavanın çok üstünde → clamp (sessionMaxSec + 30)', async () => {
   await POST(body({ durationSec: 999_999, realtimeUsage: null }))
   expect(logVoiceSessionMock.mock.calls[0][0].durationSec).toBe(630)
