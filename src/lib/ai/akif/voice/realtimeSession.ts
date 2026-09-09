@@ -11,7 +11,12 @@ export interface RealtimeSessionConfig {
   tools: unknown[]
   tool_choice: 'auto'
   audio: {
-    input: { turn_detection: { type: 'semantic_vad' } }
+    input: {
+      turn_detection: { type: 'semantic_vad' }
+      // GA Realtime yalnız input transcription açıkça istenirse
+      // `conversation.item.input_audio_transcription.completed` yayar.
+      transcription: { model: string }
+    }
     output: { voice: string }
   }
 }
@@ -28,7 +33,10 @@ export function buildRealtimeSessionConfig(args: {
     tools: AKIF_TOOL_DEFS,
     tool_choice: 'auto',
     audio: {
-      input: { turn_detection: { type: 'semantic_vad' } },
+      input: {
+        turn_detection: { type: 'semantic_vad' },
+        transcription: { model: 'gpt-4o-mini-transcribe' },
+      },
       output: { voice: args.voiceName },
     },
   }

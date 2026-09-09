@@ -13,6 +13,11 @@ describe('buildRealtimeSessionConfig', () => {
     expect(cfg.audio.input.turn_detection).toEqual({ type: 'semantic_vad' })
   })
 
+  it('input transcription açık — kullanıcı transkripti için şart', () => {
+    expect(cfg.audio.input.transcription.model).toBeTruthy()
+    expect(typeof cfg.audio.input.transcription.model).toBe('string')
+  })
+
   it('instructions Akif sistem prompt + ses ritmi ekini içerir', () => {
     expect(cfg.instructions).toMatch(/SES PERFORMANSI/)
     // Akif personası: sistem prompt'tan bir çapa kelime
