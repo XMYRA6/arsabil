@@ -15,6 +15,14 @@ function makeDb() {
   }
 }
 
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+})
+
+afterEach(() => {
+  jest.restoreAllMocks()
+})
+
 describe('createVoiceAuditLogger', () => {
   it('logVoiceTurn tur satırı yazar', async () => {
     const { db, turnCreate } = makeDb()
