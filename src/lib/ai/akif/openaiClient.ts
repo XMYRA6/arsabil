@@ -52,7 +52,7 @@ type EnvLike = Record<string, string | undefined>
  * ("her istek 503") ile özelliği SESSİZCE kapatırdı (final review I2). Boş /
  * NaN / pozitif-olmayan → fallback.
  */
-function numEnv(v: string | undefined, fallback: number): number {
+export function numEnv(v: string | undefined, fallback: number): number {
   const n = Number(v)
   return v != null && v !== '' && Number.isFinite(n) && n > 0 ? n : fallback
 }
