@@ -6,7 +6,9 @@ describe("VOICE_RHYTHM_PROMPT", () => {
   });
 
   it("fonetik taklit YASAĞINI açıkça söyler", () => {
-    expect(VOICE_RHYTHM_PROMPT).toMatch(/taklit|karikatür|fonetik/i);
+    // Polarity-sensitive: "asla/yapma/yok" must be near the ban words
+    // Fails if negation is removed or inverted to "hafif fonetik...olabilir"
+    expect(VOICE_RHYTHM_PROMPT).toMatch(/asla[^.]*(?:fonetik|taklit|karikatür)/i);
   });
 
   it("sayıları net telaffuz kuralını içerir", () => {
