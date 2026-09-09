@@ -17,7 +17,7 @@ const nextConfig = {
                     { key: 'X-Frame-Options', value: 'DENY' },
                     { key: 'X-Content-Type-Options', value: 'nosniff' },
                     { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-                    { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+                    { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=(self)' },
                     {
                         key: 'Content-Security-Policy',
                         value: "default-src 'self'; img-src 'self' data: blob: https://res.cloudinary.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org https://server.arcgisonline.com; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' blob: https://*.ingest.sentry.io https://*.sentry.io https://nominatim.openstreetmap.org https://api.openai.com; worker-src 'self' blob:; font-src 'self' data: https://fonts.gstatic.com; frame-ancestors 'none'",
