@@ -24,11 +24,20 @@ export interface UseRealtimeVoice {
 }
 
 const CALLS_URL = 'https://api.openai.com/v1/realtime/calls'
+const SESSION_URL = '/api/akif/voice/session'
 const WARN_BEFORE_SEC = 60
 const MAX_ERRORS = 3
+const ICE_GRACE_MS = 5000
 
 const rid = () =>
   globalThis.crypto?.randomUUID?.() ?? `v_${Date.now()}_${Math.random().toString(36).slice(2)}`
+
+interface SessionInfo {
+  token: string
+  sessionId: string
+  model: string
+  sessionMaxSec: number
+}
 
 export function useRealtimeVoice(opts?: {
   rtcFactory?: () => RTCPeerConnection
@@ -45,6 +54,7 @@ export function useRealtimeVoice(opts?: {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const micStreamRef = useRef<MediaStream | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const stoppedRef = useRef(false)
 
   const sessionIdRef = useRef<string>('')
@@ -58,6 +68,30 @@ export function useRealtimeVoice(opts?: {
   const errCountRef = useRef(0)
   const akifDraftRef = useRef<{ id: string; text: string } | null>(null)
   const warnedRef = useRef(false)
+
+  const stopMicTracks = useCallback(() => {
+    micStreamRef.current?.getTracks().forEach((t) => t.stop())
+    micStreamRef.current = null
+  }, [])
+
+  const clearGrace = useCallback(() => {
+    if (graceTimerRef.current) {
+      clearTimeout(graceTimerRef.current)
+      graceTimerRef.current = null
+    }
+  }, [])
+
+  // Data-channel'a yalnız kanal açıkken yaz — kapalıyken .send() fırlatır.
+  const safeSend = useCallback((obj: unknown) => {
+    const dc = dcRef.current
+    if (dc && dc.readyState === 'open') {
+      try {
+        dc.send(JSON.stringify(obj))
+      } catch {
+        /* noop */
+      }
+    }
+  }, [])
 
   const appendUser = useCallback((text: string) => {
     setTranscript((t) => [...t, { id: rid(), role: 'user', text }])
@@ -79,41 +113,49 @@ export function useRealtimeVoice(opts?: {
     setTranscript((t) => [...t, { id: rid(), role: 'akif', text: '', card }])
   }, [])
 
-  const stop = useCallback((reason = 'user_ended') => {
-    if (stoppedRef.current) return
-    stoppedRef.current = true
-    if (!sessionIdRef.current) {
+  const stop = useCallback(
+    (reason = 'user_ended') => {
+      if (stoppedRef.current) {
+        stopMicTracks()
+        return
+      }
+      stoppedRef.current = true
+      clearGrace()
+      if (!sessionIdRef.current) {
+        stopMicTracks()
+        setStatus('idle')
+        return
+      }
+      if (timerRef.current) clearInterval(timerRef.current)
+      try {
+        pcRef.current?.close()
+      } catch {
+        /* noop */
+      }
+      stopMicTracks()
+      const durationSec = startedAtRef.current
+        ? Math.round((Date.now() - startedAtRef.current) / 1000)
+        : 0
+      const body = JSON.stringify({
+        sessionId: sessionIdRef.current,
+        startedAtMs: startedAtRef.current,
+        durationSec,
+        toolCalls: toolCallsRef.current,
+        realtimeUsage:
+          usageRef.current.inputAudioTokens || usageRef.current.outputAudioTokens
+            ? usageRef.current
+            : null,
+        endReason: reason,
+      })
+      try {
+        navigator.sendBeacon?.('/api/akif/voice/usage', body)
+      } catch {
+        /* noop */
+      }
       setStatus('idle')
-      return
-    }
-    if (timerRef.current) clearInterval(timerRef.current)
-    try {
-      pcRef.current?.close()
-    } catch {
-      /* noop */
-    }
-    micStreamRef.current?.getTracks().forEach((tr) => tr.stop())
-    const durationSec = startedAtRef.current
-      ? Math.round((Date.now() - startedAtRef.current) / 1000)
-      : 0
-    const body = JSON.stringify({
-      sessionId: sessionIdRef.current,
-      startedAtMs: startedAtRef.current,
-      durationSec,
-      toolCalls: toolCallsRef.current,
-      realtimeUsage:
-        usageRef.current.inputAudioTokens || usageRef.current.outputAudioTokens
-          ? usageRef.current
-          : null,
-      endReason: reason,
-    })
-    try {
-      navigator.sendBeacon?.('/api/akif/voice/usage', body)
-    } catch {
-      /* noop */
-    }
-    setStatus('idle')
-  }, [])
+    },
+    [clearGrace, stopMicTracks],
+  )
 
   const handleEvent = useCallback(
     async (raw: unknown) => {
@@ -126,6 +168,9 @@ export function useRealtimeVoice(opts?: {
           break
         case 'akif_transcript_delta':
           setStatus('speaking')
+          // İlk barge-in'den sonra <audio> duraklatılmış kalır; Akif yeniden
+          // konuşmaya başlarken oynatmayı tekrar aç.
+          void audioRef.current?.play?.().catch(() => {})
           appendAkifDelta(ev.text)
           break
         case 'akif_transcript_done':
@@ -138,7 +183,7 @@ export function useRealtimeVoice(opts?: {
           } catch {
             /* noop */
           }
-          dcRef.current?.send(JSON.stringify({ type: 'response.cancel' }))
+          safeSend({ type: 'response.cancel' })
           akifDraftRef.current = null
           setStatus('listening')
           break
@@ -150,7 +195,7 @@ export function useRealtimeVoice(opts?: {
           )
           if (r.card) attachCard(r.card)
           for (const m of buildFunctionCallOutputMessages(ev.callId, r.outputForModel)) {
-            dcRef.current?.send(JSON.stringify(m))
+            safeSend(m)
           }
           break
         }
@@ -168,38 +213,36 @@ export function useRealtimeVoice(opts?: {
           break
       }
     },
-    [appendUser, appendAkifDelta, attachCard, fetchFn, stop],
+    [appendUser, appendAkifDelta, attachCard, fetchFn, safeSend, stop],
   )
 
   const start = useCallback(async () => {
-    if (status !== 'idle') return
+    // 'error' durumundan da yeniden başlanabilmeli ("Tekrar dene").
+    if (status !== 'idle' && status !== 'error') return
+
+    // Tüm geçici ref'leri sıfırla — 'error' sonrası temiz bir başlangıç şart.
     stoppedRef.current = false
     errCountRef.current = 0
     warnedRef.current = false
+    toolCallsRef.current = 0
+    usageRef.current = { inputAudioTokens: 0, outputAudioTokens: 0 }
+    akifDraftRef.current = null
+    sessionIdRef.current = ''
+    startedAtRef.current = 0
+    clearGrace()
     setErrorText(null)
     setTranscript([])
     setElapsedSec(0)
     setStatus('connecting')
 
-    let mic: MediaStream
+    // 1) Önce auth/kota — anonim kullanıcı mikrofon istemi görmeden "giriş yap" alsın.
+    let sess: SessionInfo
     try {
-      mic = await navigator.mediaDevices.getUserMedia({ audio: true })
-    } catch {
-      setStatus('error')
-      setErrorText('Sesli sohbet için mikrofon izni lazım.')
-      return
-    }
-    if (stoppedRef.current) return
-    micStreamRef.current = mic
-
-    let sess: { token: string; sessionId: string; model: string; sessionMaxSec: number }
-    try {
-      const res = await fetchFn('/api/akif/voice/session', { method: 'POST' })
+      const res = await fetchFn(SESSION_URL, { method: 'POST' })
       if (!res.ok) {
         if (res.status === 401) {
           setStatus('error')
           setErrorText('Sesli sohbet için giriş yapmalısın.')
-          mic.getTracks().forEach((t) => t.stop())
           return
         }
         const errBody = (await res.json().catch(() => ({}))) as { reason?: string }
@@ -211,17 +254,29 @@ export function useRealtimeVoice(opts?: {
               ? 'Sesli sohbet şu an kapalı, sonra tekrar dene.'
               : 'Sesli sohbet başlatılamadı.',
         )
-        mic.getTracks().forEach((t) => t.stop())
         return
       }
-      sess = (await res.json()) as typeof sess
+      sess = (await res.json()) as SessionInfo
     } catch {
       setStatus('error')
       setErrorText('Bağlantı kurulamadı.')
+      return
+    }
+
+    // 2) Mikrofon izni.
+    let mic: MediaStream
+    try {
+      mic = await navigator.mediaDevices.getUserMedia({ audio: true })
+    } catch {
+      setStatus('error')
+      setErrorText('Sesli sohbet için mikrofon izni lazım.')
+      return
+    }
+    if (stoppedRef.current) {
       mic.getTracks().forEach((t) => t.stop())
       return
     }
-    if (stoppedRef.current) return
+    micStreamRef.current = mic
 
     sessionIdRef.current = sess.sessionId
     maxSecRef.current = sess.sessionMaxSec
@@ -238,12 +293,28 @@ export function useRealtimeVoice(opts?: {
       void audioRef.current.play?.().catch(() => {})
     }
     pc.onconnectionstatechange = () => {
-      if (
-        (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') &&
-        !stoppedRef.current
-      ) {
+      if (stoppedRef.current) return
+      const st = pc.connectionState
+      if (st === 'connected' || st === 'completed') {
+        clearGrace()
+        return
+      }
+      if (st === 'failed') {
         setErrorText('Bağlantı koptu.')
         stop('disconnect')
+        return
+      }
+      if (st === 'disconnected') {
+        // Geçici olabilir — hemen kapatma, ~5 sn tolerans tanı.
+        if (graceTimerRef.current) return
+        graceTimerRef.current = setTimeout(() => {
+          graceTimerRef.current = null
+          const cur = pcRef.current?.connectionState
+          if (!stoppedRef.current && cur !== 'connected' && cur !== 'completed') {
+            setErrorText('Bağlantı koptu.')
+            stop('disconnect')
+          }
+        }, ICE_GRACE_MS)
       }
     }
     mic.getTracks().forEach((tr) => pc.addTrack(tr, mic))
@@ -260,18 +331,52 @@ export function useRealtimeVoice(opts?: {
       void handleEvent(parsed)
     })
 
+    // 3) SDP değişimi — ilk deneme başarısızsa TEK sefer taze token ile yeniden dene.
+    let offerSdp: string | undefined
     try {
       const offer = await pc.createOffer()
       await pc.setLocalDescription(offer)
-      const sdpRes = await fetchFn(`${CALLS_URL}?model=${encodeURIComponent(sess.model)}`, {
-        method: 'POST',
-        body: offer.sdp,
-        headers: { Authorization: `Bearer ${sess.token}`, 'Content-Type': 'application/sdp' },
-      })
-      if (!sdpRes.ok) throw new Error('sdp')
-      const answer = await sdpRes.text()
-      await pc.setRemoteDescription({ type: 'answer', sdp: answer })
+      offerSdp = offer.sdp
     } catch {
+      setStatus('error')
+      setErrorText('Bağlantı kurulamadı, tekrar dene.')
+      stop('error')
+      return
+    }
+
+    let connected = false
+    let curToken = sess.token
+    let curModel = sess.model
+    for (let attempt = 0; attempt < 2 && !connected && !stoppedRef.current; attempt++) {
+      if (attempt > 0) {
+        try {
+          const r = await fetchFn(SESSION_URL, { method: 'POST' })
+          if (!r.ok) break
+          const j = (await r.json()) as SessionInfo
+          curToken = j.token
+          curModel = j.model
+          sessionIdRef.current = j.sessionId
+        } catch {
+          break
+        }
+        if (stoppedRef.current) break
+      }
+      try {
+        const sdpRes = await fetchFn(`${CALLS_URL}?model=${encodeURIComponent(curModel)}`, {
+          method: 'POST',
+          body: pc.localDescription?.sdp ?? offerSdp,
+          headers: { Authorization: `Bearer ${curToken}`, 'Content-Type': 'application/sdp' },
+        })
+        if (!sdpRes.ok) throw new Error('sdp')
+        const answer = await sdpRes.text()
+        await pc.setRemoteDescription({ type: 'answer', sdp: answer })
+        connected = true
+      } catch {
+        /* sonraki deneme veya vazgeç */
+      }
+    }
+
+    if (!connected) {
       setStatus('error')
       setErrorText('Bağlantı kurulamadı, tekrar dene.')
       stop('error')
@@ -285,20 +390,18 @@ export function useRealtimeVoice(opts?: {
       setElapsedSec(sec)
       if (!warnedRef.current && sec >= maxSecRef.current - WARN_BEFORE_SEC) {
         warnedRef.current = true
-        dcRef.current?.send(
-          JSON.stringify({
-            type: 'conversation.item.create',
-            item: {
-              type: 'message',
-              role: 'system',
-              content: [{ type: 'input_text', text: 'Süremiz doluyor, kısa bir kapanış yap.' }],
-            },
-          }),
-        )
+        safeSend({
+          type: 'conversation.item.create',
+          item: {
+            type: 'message',
+            role: 'system',
+            content: [{ type: 'input_text', text: 'Süremiz doluyor, kısa bir kapanış yap.' }],
+          },
+        })
       }
       if (sec >= maxSecRef.current) stop('timeout')
     }, 1000)
-  }, [status, opts, fetchFn, handleEvent, stop])
+  }, [status, opts, fetchFn, handleEvent, safeSend, stop, clearGrace])
 
   useEffect(() => {
     return () => {

@@ -21,6 +21,7 @@ class FakePC {
   dc = new FakeDC()
   onconnectionstatechange: (() => void) | null = null
   ontrack: ((e: unknown) => void) | null = null
+  connectionState: string | undefined = undefined
   createDataChannel() {
     return this.dc
   }
@@ -34,6 +35,10 @@ class FakePC {
     this.closed = true
   }
   closed = false
+  setConnState(s: string) {
+    this.connectionState = s
+    this.onconnectionstatechange?.()
+  }
 }
 
 const sendBeaconMock = jest.fn()
@@ -163,6 +168,176 @@ it('3 ardışık error → stop', async () => {
   await waitFor(() => expect(result.current.status).toBe('idle'))
   expect(pc.closed).toBe(true)
   expect(sendBeaconMock).toHaveBeenCalledWith('/api/akif/voice/usage', expect.any(String))
+})
+
+it('I5: error durumundan start() yeniden ilerler', async () => {
+  const fetchSpy = jest.fn(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return { ok: false, status: 401, json: async () => ({}) } as never
+    }
+    return { ok: true, text: async () => 'answer-sdp' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => new FakePC() as unknown as RTCPeerConnection,
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('error'))
+
+  // Artık session 200 dönüyor — "Tekrar dene"
+  fetchSpy.mockImplementation(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return {
+        ok: true,
+        json: async () => ({
+          token: 'ek_1',
+          sessionId: 'sess-2',
+          model: 'gpt-realtime-mini',
+          sessionMaxSec: 600,
+        }),
+      } as never
+    }
+    return { ok: true, text: async () => 'answer-sdp' } as never
+  })
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+})
+
+it('I6: SDP ilk deneme fail → taze token ile bir kez retry, sonra bağlanır', async () => {
+  let sdpCalls = 0
+  let sessionCalls = 0
+  const fetchSpy = jest.fn(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      sessionCalls++
+      return {
+        ok: true,
+        json: async () => ({
+          token: `ek_${sessionCalls}`,
+          sessionId: `sess-${sessionCalls}`,
+          model: 'gpt-realtime-mini',
+          sessionMaxSec: 600,
+        }),
+      } as never
+    }
+    // realtime/calls
+    sdpCalls++
+    if (sdpCalls === 1) return { ok: false, status: 401, text: async () => 'expired' } as never
+    return { ok: true, text: async () => 'answer-sdp' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => new FakePC() as unknown as RTCPeerConnection,
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  expect(sdpCalls).toBe(2)
+  expect(sessionCalls).toBe(2)
+})
+
+it('I6: ICE disconnected → grace içinde connected → oturum yaşar', async () => {
+  jest.useFakeTimers()
+  try {
+    let pc!: FakePC
+    const { result } = renderHook(() =>
+      useRealtimeVoice({
+        rtcFactory: () => {
+          pc = new FakePC()
+          return pc as unknown as RTCPeerConnection
+        },
+        fetchFn: (async (url: RequestInfo | URL) => {
+          if (String(url).includes('/api/akif/voice/session')) {
+            return {
+              ok: true,
+              json: async () => ({
+                token: 'ek_1',
+                sessionId: 'sess-1',
+                model: 'gpt-realtime-mini',
+                sessionMaxSec: 600,
+              }),
+            } as never
+          }
+          return { ok: true, text: async () => 'answer-sdp' } as never
+        }) as typeof fetch,
+      }),
+    )
+    await act(async () => {
+      await result.current.start()
+    })
+    await waitFor(() => expect(result.current.status).toBe('listening'))
+
+    act(() => {
+      pc.setConnState('disconnected')
+    })
+    act(() => {
+      jest.advanceTimersByTime(3000)
+      pc.setConnState('connected')
+    })
+    act(() => {
+      jest.advanceTimersByTime(5000)
+    })
+    expect(pc.closed).toBe(false)
+    expect(result.current.status).not.toBe('idle')
+  } finally {
+    jest.useRealTimers()
+  }
+})
+
+it('I6: ICE disconnected → grace geçti → stop(disconnect)', async () => {
+  jest.useFakeTimers()
+  try {
+    let pc!: FakePC
+    const { result } = renderHook(() =>
+      useRealtimeVoice({
+        rtcFactory: () => {
+          pc = new FakePC()
+          return pc as unknown as RTCPeerConnection
+        },
+        fetchFn: (async (url: RequestInfo | URL) => {
+          if (String(url).includes('/api/akif/voice/session')) {
+            return {
+              ok: true,
+              json: async () => ({
+                token: 'ek_1',
+                sessionId: 'sess-1',
+                model: 'gpt-realtime-mini',
+                sessionMaxSec: 600,
+              }),
+            } as never
+          }
+          return { ok: true, text: async () => 'answer-sdp' } as never
+        }) as typeof fetch,
+      }),
+    )
+    await act(async () => {
+      await result.current.start()
+    })
+    await waitFor(() => expect(result.current.status).toBe('listening'))
+
+    act(() => {
+      pc.setConnState('disconnected')
+    })
+    act(() => {
+      jest.advanceTimersByTime(6000)
+    })
+    await waitFor(() => expect(result.current.status).toBe('idle'))
+    expect(pc.closed).toBe(true)
+    const beaconCall = sendBeaconMock.mock.calls.find((c) =>
+      String(c[0]).includes('/api/akif/voice/usage'),
+    )
+    expect(JSON.parse(beaconCall![1] as string)).toMatchObject({ endReason: 'disconnect' })
+  } finally {
+    jest.useRealTimers()
+  }
 })
 
 it('stop: sendBeacon usage POST', async () => {
