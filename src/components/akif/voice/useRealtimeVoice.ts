@@ -424,7 +424,7 @@ export function useRealtimeVoice(opts?: {
     }
 
     const ok = await establishConnection(sess, { resume: false, refetch })
-    if (!ok) {
+    if (!ok && !stoppedRef.current) {
       setStatus('error')
       setErrorText('Bağlantı kurulamadı, tekrar dene.')
       stop('error')
