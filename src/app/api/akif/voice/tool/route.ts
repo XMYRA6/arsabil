@@ -15,6 +15,7 @@ import {
   type DispatchDeps,
 } from '@/lib/ai/akif/gateway/toolRegistry'
 import { createVoiceAuditLogger, type VoiceAuditDb } from '@/lib/ai/akif/voice/voiceAudit'
+import { checkVoiceSessionOwner, type VoiceSessionDb } from '@/lib/ai/akif/voice/voiceSession'
 
 export const runtime = 'nodejs'
 
@@ -52,6 +53,19 @@ export async function POST(req: Request) {
     return Response.json({ error: 'bad_request' }, { status: 400 })
   }
 
+  // Prisma client, audit/gateway'in dar DI arayüzlerine yapısal olarak uyar;
+  // Prisma imzalarındaki opsiyonel alanlar yüzünden tsc eşleşmiyor — tek
+  // noktada daraltıyoruz (bkz. /api/akif/turn).
+  const db = prisma as unknown as VoiceAuditDb & DispatchDeps['db'] & VoiceSessionDb
+
+  const owner = await checkVoiceSessionOwner(db, sessionId, userId)
+  if (!owner.ok) {
+    return Response.json({ error: owner.code }, { status: 403 })
+  }
+  if (owner.status === 'ended') {
+    return Response.json({ error: 'session_over' }, { status: 403 })
+  }
+
   // Bilinmeyen araç: HTTP hatası değil — Realtime'a geri beslenir.
   if (!TOOL_NAMES.includes(toolName as ToolName)) {
     return Response.json({ error: 'invalid_args', field: 'name', reason: 'bilinmeyen araç' })
@@ -62,11 +76,6 @@ export async function POST(req: Request) {
   if (!v.ok) {
     return Response.json({ error: 'invalid_args', field: v.field, reason: v.reason })
   }
-
-  // Prisma client, audit/gateway'in dar DI arayüzlerine yapısal olarak uyar;
-  // Prisma imzalarındaki opsiyonel alanlar yüzünden tsc eşleşmiyor — tek
-  // noktada daraltıyoruz (bkz. /api/akif/turn).
-  const db = prisma as unknown as VoiceAuditDb & DispatchDeps['db']
   const audit = createVoiceAuditLogger(db)
 
   let card

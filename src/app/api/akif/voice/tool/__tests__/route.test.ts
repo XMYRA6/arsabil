@@ -3,6 +3,7 @@ const checkRateLimitMock = jest.fn()
 const validateArgsMock = jest.fn()
 const dispatchToolMock = jest.fn()
 const logVoiceTurnMock = jest.fn()
+const checkVoiceSessionOwnerMock = jest.fn()
 
 jest.mock('next-auth/next', () => ({ getServerSession: (...a: unknown[]) => getServerSessionMock(...a) }))
 jest.mock('@/lib/auth', () => ({ authOptions: {} }))
@@ -19,6 +20,9 @@ jest.mock('@/lib/ai/akif/gateway/toolRegistry', () => ({
 jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
   createVoiceAuditLogger: () => ({ logVoiceTurn: (...a: unknown[]) => logVoiceTurnMock(...a) }),
 }))
+jest.mock('@/lib/ai/akif/voice/voiceSession', () => ({
+  checkVoiceSessionOwner: (...a: unknown[]) => checkVoiceSessionOwnerMock(...a),
+}))
 
 import { POST } from '../route'
 
@@ -28,6 +32,8 @@ beforeEach(() => {
   checkRateLimitMock.mockReturnValue({ ok: true })
   getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
   validateArgsMock.mockReturnValue({ ok: true })
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: true, status: 'active' })
+  dispatchToolMock.mockResolvedValue({ kind: 'term', term: 'emsal', shortDef: 'x', example: 'y' })
 })
 
 const req = (body: unknown) =>
@@ -76,6 +82,30 @@ it('bilinmeyen toolName → 200 invalid_args field=name', async () => {
     reason: 'bilinmeyen araç',
   })
   expect(validateArgsMock).not.toHaveBeenCalled()
+  expect(dispatchToolMock).not.toHaveBeenCalled()
+})
+
+it('bilinmeyen session → 403 unknown_session', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: false, code: 'unknown_session' })
+  const res = await POST(req({ sessionId: 'sess-1', toolName: 'explainTerm', args: { term: 'emsal' } }))
+  expect(res.status).toBe(403)
+  expect(await res.json()).toEqual({ error: 'unknown_session' })
+  expect(dispatchToolMock).not.toHaveBeenCalled()
+})
+
+it('başkasının session → 403 forbidden_session', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: false, code: 'forbidden_session' })
+  const res = await POST(req({ sessionId: 'sess-1', toolName: 'explainTerm', args: { term: 'emsal' } }))
+  expect(res.status).toBe(403)
+  expect(await res.json()).toEqual({ error: 'forbidden_session' })
+  expect(dispatchToolMock).not.toHaveBeenCalled()
+})
+
+it('bitmiş session → 403 session_over', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: true, status: 'ended' })
+  const res = await POST(req({ sessionId: 'sess-1', toolName: 'explainTerm', args: { term: 'emsal' } }))
+  expect(res.status).toBe(403)
+  expect(await res.json()).toEqual({ error: 'session_over' })
   expect(dispatchToolMock).not.toHaveBeenCalled()
 })
 
