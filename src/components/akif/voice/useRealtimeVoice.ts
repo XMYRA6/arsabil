@@ -39,6 +39,8 @@ interface SessionInfo {
   sessionMaxSec: number
 }
 
+type RefetchSession = () => Promise<SessionInfo | null>
+
 export function useRealtimeVoice(opts?: {
   rtcFactory?: () => RTCPeerConnection
   fetchFn?: typeof fetch
@@ -59,6 +61,7 @@ export function useRealtimeVoice(opts?: {
 
   const sessionIdRef = useRef<string>('')
   const startedAtRef = useRef<number>(0)
+  const resumeContextRef = useRef<string | null>(null)
   const maxSecRef = useRef<number>(600)
   const toolCallsRef = useRef(0)
   const usageRef = useRef<{ inputAudioTokens: number; outputAudioTokens: number }>({
@@ -216,6 +219,134 @@ export function useRealtimeVoice(opts?: {
     [appendUser, appendAkifDelta, attachCard, fetchFn, safeSend, stop],
   )
 
+  // start() içinden çıkarıldı: PC kurulumu + SDP döngüsü + geçen-süre timer'ı.
+  // Davranış korunur; başarıda 'listening' + timer, başarısızlıkta stop() ÇAĞIRMADAN false.
+  const establishConnection = useCallback(
+    async (sess: SessionInfo, cfg: { resume: boolean; refetch: RefetchSession }): Promise<boolean> => {
+      maxSecRef.current = sess.sessionMaxSec
+
+      const pc = opts?.rtcFactory ? opts.rtcFactory() : new RTCPeerConnection()
+      pcRef.current = pc
+      pc.ontrack = (e: RTCTrackEvent) => {
+        if (!audioRef.current) {
+          audioRef.current = new Audio()
+          audioRef.current.autoplay = true
+        }
+        audioRef.current.srcObject = (e.streams && e.streams[0]) || null
+        void audioRef.current.play?.().catch(() => {})
+      }
+      pc.onconnectionstatechange = () => {
+        if (stoppedRef.current) return
+        const st = pc.connectionState
+        // 'completed' RTCPeerConnectionState'te yok (o iceConnectionState'e ait) —
+        // burada kurtarma sinyali 'connected'.
+        if (st === 'connected') {
+          clearGrace()
+          return
+        }
+        if (st === 'failed') {
+          setErrorText('Bağlantı koptu.')
+          stop('disconnect')
+          return
+        }
+        if (st === 'disconnected') {
+          // Geçici olabilir — hemen kapatma, ~5 sn tolerans tanı.
+          if (graceTimerRef.current) return
+          graceTimerRef.current = setTimeout(() => {
+            graceTimerRef.current = null
+            if (!stoppedRef.current && pcRef.current?.connectionState !== 'connected') {
+              setErrorText('Bağlantı koptu.')
+              stop('disconnect')
+            }
+          }, ICE_GRACE_MS)
+        }
+      }
+      micStreamRef.current?.getTracks().forEach((tr) => pc.addTrack(tr, micStreamRef.current!))
+
+      const dc = pc.createDataChannel('oai-events')
+      dcRef.current = dc
+      dc.addEventListener('message', (e: MessageEvent) => {
+        let parsed: unknown
+        try {
+          parsed = JSON.parse(e.data)
+        } catch {
+          return
+        }
+        void handleEvent(parsed)
+      })
+
+      let offerSdp: string | undefined
+      try {
+        const offer = await pc.createOffer()
+        await pc.setLocalDescription(offer)
+        offerSdp = offer.sdp
+      } catch {
+        return false
+      }
+
+      let connected = false
+      let curToken = sess.token
+      let curModel = sess.model
+      for (let attempt = 0; attempt < 2 && !connected && !stoppedRef.current; attempt++) {
+        if (attempt > 0) {
+          const j = await cfg.refetch()
+          if (!j) break
+          curToken = j.token
+          curModel = j.model
+          sessionIdRef.current = j.sessionId
+          if (stoppedRef.current) break
+        }
+        try {
+          const sdpRes = await fetchFn(`${CALLS_URL}?model=${encodeURIComponent(curModel)}`, {
+            method: 'POST',
+            body: pc.localDescription?.sdp ?? offerSdp,
+            headers: { Authorization: `Bearer ${curToken}`, 'Content-Type': 'application/sdp' },
+          })
+          if (!sdpRes.ok) throw new Error('sdp')
+          const answer = await sdpRes.text()
+          await pc.setRemoteDescription({ type: 'answer', sdp: answer })
+          connected = true
+        } catch {
+          /* sonraki deneme veya vazgeç */
+        }
+      }
+
+      if (!connected || stoppedRef.current) return false
+
+      if (cfg.resume) {
+        safeSend({
+          type: 'conversation.item.create',
+          item: {
+            type: 'message',
+            role: 'system',
+            content: [{ type: 'input_text', text: resumeContextRef.current ?? '' }],
+          },
+        })
+      }
+
+      setStatus('listening')
+      if (timerRef.current) clearInterval(timerRef.current)
+      timerRef.current = setInterval(() => {
+        const sec = Math.round((Date.now() - startedAtRef.current) / 1000)
+        setElapsedSec(sec)
+        if (!warnedRef.current && sec >= maxSecRef.current - WARN_BEFORE_SEC) {
+          warnedRef.current = true
+          safeSend({
+            type: 'conversation.item.create',
+            item: {
+              type: 'message',
+              role: 'system',
+              content: [{ type: 'input_text', text: 'Süremiz doluyor, kısa bir kapanış yap.' }],
+            },
+          })
+        }
+        if (sec >= maxSecRef.current) stop('timeout')
+      }, 1000)
+      return true
+    },
+    [opts, fetchFn, handleEvent, safeSend, stop, clearGrace],
+  )
+
   const start = useCallback(async () => {
     // 'error' durumundan da yeniden başlanabilmeli ("Tekrar dene").
     if (status !== 'idle' && status !== 'error') return
@@ -279,130 +410,26 @@ export function useRealtimeVoice(opts?: {
     micStreamRef.current = mic
 
     sessionIdRef.current = sess.sessionId
-    maxSecRef.current = sess.sessionMaxSec
     startedAtRef.current = Date.now()
 
-    const pc = opts?.rtcFactory ? opts.rtcFactory() : new RTCPeerConnection()
-    pcRef.current = pc
-    pc.ontrack = (e: RTCTrackEvent) => {
-      if (!audioRef.current) {
-        audioRef.current = new Audio()
-        audioRef.current.autoplay = true
-      }
-      audioRef.current.srcObject = (e.streams && e.streams[0]) || null
-      void audioRef.current.play?.().catch(() => {})
-    }
-    pc.onconnectionstatechange = () => {
-      if (stoppedRef.current) return
-      const st = pc.connectionState
-      // 'completed' RTCPeerConnectionState'te yok (o iceConnectionState'e ait) —
-      // burada kurtarma sinyali 'connected'.
-      if (st === 'connected') {
-        clearGrace()
-        return
-      }
-      if (st === 'failed') {
-        setErrorText('Bağlantı koptu.')
-        stop('disconnect')
-        return
-      }
-      if (st === 'disconnected') {
-        // Geçici olabilir — hemen kapatma, ~5 sn tolerans tanı.
-        if (graceTimerRef.current) return
-        graceTimerRef.current = setTimeout(() => {
-          graceTimerRef.current = null
-          if (!stoppedRef.current && pcRef.current?.connectionState !== 'connected') {
-            setErrorText('Bağlantı koptu.')
-            stop('disconnect')
-          }
-        }, ICE_GRACE_MS)
-      }
-    }
-    mic.getTracks().forEach((tr) => pc.addTrack(tr, mic))
-
-    const dc = pc.createDataChannel('oai-events')
-    dcRef.current = dc
-    dc.addEventListener('message', (e: MessageEvent) => {
-      let parsed: unknown
-      try {
-        parsed = JSON.parse(e.data)
-      } catch {
-        return
-      }
-      void handleEvent(parsed)
-    })
-
     // 3) SDP değişimi — ilk deneme başarısızsa TEK sefer taze token ile yeniden dene.
-    let offerSdp: string | undefined
-    try {
-      const offer = await pc.createOffer()
-      await pc.setLocalDescription(offer)
-      offerSdp = offer.sdp
-    } catch {
-      setStatus('error')
-      setErrorText('Bağlantı kurulamadı, tekrar dene.')
-      stop('error')
-      return
-    }
-
-    let connected = false
-    let curToken = sess.token
-    let curModel = sess.model
-    for (let attempt = 0; attempt < 2 && !connected && !stoppedRef.current; attempt++) {
-      if (attempt > 0) {
-        try {
-          const r = await fetchFn(SESSION_URL, { method: 'POST' })
-          if (!r.ok) break
-          const j = (await r.json()) as SessionInfo
-          curToken = j.token
-          curModel = j.model
-          sessionIdRef.current = j.sessionId
-        } catch {
-          break
-        }
-        if (stoppedRef.current) break
-      }
+    const refetch: RefetchSession = async () => {
       try {
-        const sdpRes = await fetchFn(`${CALLS_URL}?model=${encodeURIComponent(curModel)}`, {
-          method: 'POST',
-          body: pc.localDescription?.sdp ?? offerSdp,
-          headers: { Authorization: `Bearer ${curToken}`, 'Content-Type': 'application/sdp' },
-        })
-        if (!sdpRes.ok) throw new Error('sdp')
-        const answer = await sdpRes.text()
-        await pc.setRemoteDescription({ type: 'answer', sdp: answer })
-        connected = true
+        const r = await fetchFn(SESSION_URL, { method: 'POST' })
+        if (!r.ok) return null
+        return (await r.json()) as SessionInfo
       } catch {
-        /* sonraki deneme veya vazgeç */
+        return null
       }
     }
 
-    if (!connected) {
+    const ok = await establishConnection(sess, { resume: false, refetch })
+    if (!ok) {
       setStatus('error')
       setErrorText('Bağlantı kurulamadı, tekrar dene.')
       stop('error')
-      return
     }
-    if (stoppedRef.current) return
-
-    setStatus('listening')
-    timerRef.current = setInterval(() => {
-      const sec = Math.round((Date.now() - startedAtRef.current) / 1000)
-      setElapsedSec(sec)
-      if (!warnedRef.current && sec >= maxSecRef.current - WARN_BEFORE_SEC) {
-        warnedRef.current = true
-        safeSend({
-          type: 'conversation.item.create',
-          item: {
-            type: 'message',
-            role: 'system',
-            content: [{ type: 'input_text', text: 'Süremiz doluyor, kısa bir kapanış yap.' }],
-          },
-        })
-      }
-      if (sec >= maxSecRef.current) stop('timeout')
-    }, 1000)
-  }, [status, opts, fetchFn, handleEvent, safeSend, stop, clearGrace])
+  }, [status, opts, fetchFn, establishConnection, stop, clearGrace])
 
   useEffect(() => {
     return () => {
