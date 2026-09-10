@@ -551,6 +551,22 @@ model AkifVoiceSession {
   @@index([userId, createdAt])
 }
 
+model AkifPendingAction {
+  id                String    @id @default(cuid())
+  userId            String
+  sessionId         String
+  kind              String
+  payload           Json
+  createdAt         DateTime  @default(now())
+  consumedAt        DateTime?
+  undoToken         String?   @unique
+  undoUntil         DateTime?
+  createdScenarioId String?
+  createdProjectId  String?
+
+  @@index([userId, createdAt])
+}
+
 model AkifVoiceTurnLog {
   id         String   @id @default(cuid())
   sessionId  String
