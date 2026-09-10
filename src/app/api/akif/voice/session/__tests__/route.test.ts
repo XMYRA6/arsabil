@@ -5,8 +5,7 @@ const checkVoiceQuotaMock = jest.fn()
 const fetchMock = jest.fn()
 const createVoiceSessionMock = jest.fn()
 const endStaleCallerSessionsMock = jest.fn()
-const resolveResumableSessionMock = jest.fn()
-const bumpReconnectCountMock = jest.fn()
+const claimReconnectMock = jest.fn()
 const voiceMonthSpendUsdMock = jest.fn().mockResolvedValue(0)
 const voiceUserMonthSecondsMock = jest.fn()
 
@@ -29,8 +28,7 @@ jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
 jest.mock('@/lib/ai/akif/voice/voiceSession', () => ({
   createVoiceSession: (...a: unknown[]) => createVoiceSessionMock(...a),
   endStaleCallerSessions: (...a: unknown[]) => endStaleCallerSessionsMock(...a),
-  resolveResumableSession: (...a: unknown[]) => resolveResumableSessionMock(...a),
-  bumpReconnectCount: (...a: unknown[]) => bumpReconnectCountMock(...a),
+  claimReconnect: (...a: unknown[]) => claimReconnectMock(...a),
 }))
 jest.mock('@/lib/ai/akif/voice/realtimeSession', () => ({
   buildRealtimeSessionConfig: () => ({ type: 'realtime', model: 'gpt-realtime-mini' }),
@@ -51,7 +49,7 @@ beforeEach(() => {
   getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
   readVoiceEnvMock.mockReturnValue(OK_ENV)
   checkVoiceQuotaMock.mockResolvedValue({ ok: true })
-  resolveResumableSessionMock.mockResolvedValue({ ok: true })
+  claimReconnectMock.mockResolvedValue({ ok: true })
   voiceMonthSpendUsdMock.mockResolvedValue(0)
   fetchMock.mockResolvedValue({
     ok: true,
@@ -150,21 +148,38 @@ it('mint: kayıt satırı create edilir + bayat sweep çağrılır', async () =>
   expect(endStaleCallerSessionsMock).toHaveBeenCalled()
 })
 
-it('resume: geçerli → aynı sessionId + reconnect bump, quota kontrol edilmez', async () => {
+it('resume: geçerli → aynı sessionId + atomik reconnect claim, quota kontrol edilmez', async () => {
   const res = await POST(resumeReq('sess-abc'))
   expect(res.status).toBe(200)
   const body = await res.json()
   expect(body.sessionId).toBe('sess-abc')
-  expect(bumpReconnectCountMock).toHaveBeenCalledWith(expect.anything(), 'sess-abc')
+  expect(claimReconnectMock).toHaveBeenCalledWith(
+    expect.anything(),
+    'sess-abc',
+    'u1',
+    expect.any(Date),
+    600,
+  )
   expect(checkVoiceQuotaMock).not.toHaveBeenCalled()
   expect(createVoiceSessionMock).not.toHaveBeenCalled()
 })
 
-it('resume: resolveResumableSession reddeder → 409 resume_denied', async () => {
-  resolveResumableSessionMock.mockResolvedValue({ ok: false, reason: 'already_reconnected' })
+it('resume: claimReconnect ön-kontrolde reddeder (stale) → 409 resume_denied', async () => {
+  claimReconnectMock.mockResolvedValue({ ok: false, reason: 'stale' })
   const res = await POST(resumeReq('sess-abc'))
   expect(res.status).toBe(409)
-  expect((await res.json()).error).toBe('resume_denied')
+  const j = await res.json()
+  expect(j.error).toBe('resume_denied')
+  expect(j.reason).toBe('stale')
+})
+
+it('resume: eşzamanlı yarışı kaybeden (claimReconnect already_reconnected) → 409', async () => {
+  claimReconnectMock.mockResolvedValue({ ok: false, reason: 'already_reconnected' })
+  const res = await POST(resumeReq('sess-abc'))
+  expect(res.status).toBe(409)
+  const j = await res.json()
+  expect(j.error).toBe('resume_denied')
+  expect(j.reason).toBe('already_reconnected')
 })
 
 it('resume: global bütçe aşıldı → 503, kullanıcı kotası aşıksa bile 200', async () => {

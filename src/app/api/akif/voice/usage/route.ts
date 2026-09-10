@@ -94,9 +94,11 @@ export async function POST(req: Request) {
   if (!owner.ok) {
     return Response.json({ error: owner.code }, { status: 403 })
   }
-  if (owner.status === 'ended') {
-    return Response.json({ ok: true })
-  }
+  // FR-I2: owner.status === 'ended' olabilir çünkü endStaleCallerSessions bayat 'active'
+  // satırları /session mint yolunda 'ended'e çevirir. Böyle bir oturum için de kayıt YAZILIR
+  // (aşağıda) ki dakikaları faturalanabilsin; yalnız endVoiceSession atlanır (satır zaten
+  // ended). Gerçek çift-beacon (meşru finalize sonrası) logVoiceSession'da P2002 ile
+  // idempotent olarak sessizce no-op'a düşer — bkz. voiceAudit.ts.
 
   // env yoksa (anahtar yok) bile kaydı yaz — fallback model/limit tarifesiyle.
   let model = FALLBACK_MODEL
@@ -152,7 +154,9 @@ export async function POST(req: Request) {
     estCostUsd,
     endReason: END_REASONS.has(String(endReason)) ? String(endReason) : 'error',
   })
-  await endVoiceSession(db, sessionId, new Date())
+  if (owner.status !== 'ended') {
+    await endVoiceSession(db, sessionId, new Date())
+  }
 
   return Response.json({ ok: true })
 }

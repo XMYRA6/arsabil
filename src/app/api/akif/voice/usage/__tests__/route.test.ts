@@ -198,12 +198,17 @@ it('başkasının session → 403', async () => {
   expect(endVoiceSessionMock).not.toHaveBeenCalled()
 })
 
-it('zaten ended session → 200, ikinci kez yazılmaz', async () => {
+it('stale-swept ended session → 200, logVoiceSession YAZILIR (faturalama), endVoiceSession çağrılmaz', async () => {
+  // FR-I2: endStaleCallerSessions bayat 'active' satırı 'ended'e çevirmiş olabilir.
+  // O oturum yine de faturalanmalı → logVoiceSession çağrılır. Gerçek çift-beacon
+  // (meşru finalize sonrası) voiceAudit.logVoiceSession içinde P2002 ile idempotent
+  // no-op'a düşer; unit test bunu kolay simüle edemez, bu yüzden burada yalnız
+  // "ended satırda da yazılır" davranışı doğrulanır.
   checkVoiceSessionOwnerMock.mockResolvedValue({ ok: true, status: 'ended' })
   const res = await POST(body({}))
   expect(res.status).toBe(200)
   expect(await res.json()).toEqual({ ok: true })
-  expect(logVoiceSessionMock).not.toHaveBeenCalled()
+  expect(logVoiceSessionMock).toHaveBeenCalled()
   expect(endVoiceSessionMock).not.toHaveBeenCalled()
 })
 

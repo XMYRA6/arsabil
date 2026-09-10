@@ -108,11 +108,10 @@ Bugünkü sıra + guard:
 1. auth (401) → rate-limit `AKIF_VOICE_USAGE` (429)
 2. gövde `req.text()` + `JSON.parse` + alan doğrulama (bugünkü — `sessionId`/`startedAtMs`/`durationSec`/`toolCalls` tipleri, `startedAtMs` 24 saat penceresi)
 3. **`checkVoiceSessionOwner`** → `!ok` ise **403** `{ error: <code> }`, DB'ye dokunma
-4. `status === 'ended'` → `Response.json({ ok: true })` — idempotent, ikinci yazma yok
-5. aksi halde (bugünkü mantık, DEĞİŞMEZ): model/`sessionMaxSec` fallback → `roundedDuration` clamp → **`realtimeUsage` F-C clamp'i (`usageCap = sessionMaxSec * 200`) aynen** → `estimateVoiceCostUsd`
-6. `createVoiceAuditLogger(db).logVoiceSession(...)` (P2002 idempotent — DEĞİŞMEZ)
-7. `prisma.akifVoiceSession.update({ where: { id: sessionId }, data: { status: 'ended', endedAt: now } })`
-8. `Response.json({ ok: true })`
+4. cost mantığı (bugünkü, DEĞİŞMEZ): model/`sessionMaxSec` fallback → `roundedDuration` clamp → **`realtimeUsage` F-C clamp'i (`usageCap = sessionMaxSec * 200`) aynen** → `estimateVoiceCostUsd`
+5. `createVoiceAuditLogger(db).logVoiceSession(...)` (P2002 idempotent — DEĞİŞMEZ). **FR-I1 fix'i sonrası `status === 'ended'` satır için de çağrılır** — bayat-sweep'lenmiş (`endStaleCallerSessions`) oturumlar aksi halde hiç faturalanmaz. Gerçek çift-beacon P2002 ile sessiz no-op.
+6. `status !== 'ended'` ise `prisma.akifVoiceSession.update({ where: { id: sessionId }, data: { status: 'ended', endedAt: now } })` — zaten `ended` satırda atlanır
+7. `Response.json({ ok: true })`
 
 **Griefing matematiği (bu fix'ten sonra):** kullanıcı yalnız kendi gerçekten mint ettiği oturumları finalize edebilir. Mint, `AKIF_VOICE_SESSION` 5/saat rate-limit'i **ve** aylık dakika kotasıyla (varsayılan 30 dk/ay) sınırlı. Zorlanabilecek maksimum harcama ≈ kota-sınırlı (~5 kısa oturum × ~$3.60 F-C clamp) — bugünkü "saatte $36" yerine. Saldırı kapandı.
 
@@ -256,4 +255,6 @@ Akif-2 §9 deploy kapısına eklenir:
 - Kopma öncesi dakikalar `/usage`'a ayrı akmıyor → aynı `sessionId` sonda tek sefer raporlandığı için kopma anında sayaç kesilmiş olabilir (Akif-2 §10 kayıp-usage kabulüyle tutarlı, düşük risk — `sessionMaxSec` üst sınır)
 - `AkifVoiceSession` bayat `active` satırları yalnızca çağıranın sonraki mint'inde temizlenir → hiç geri gelmeyen kullanıcının satırları `active` kalır (küçük, indeksli tablo; gelecekte istenirse haftalık sweep)
 - `reconnecting` sırasında kullanıcının konuşması kısa pencerede kaybolur (yeni PC henüz yok) — kabul
+- **FR-I1 (final review):** resume yolu `resolveResumableSession` + `bumpReconnectCount` yerine tek atomik `claimReconnect` kullanır — `updateMany({where:{reconnectCount:0,...}, data:{reconnectCount:1}})` kilit görevi görür, eşzamanlı iki resume isteğinden yalnız biri geçer (check-then-act yarışı kapandı). Yan etki: token mint başarısız olursa (502) reconnect yine de "harcanmış" sayılır — kabul, düşük olasılık.
+- **FR-I2 (final review):** `/usage` `status === 'ended'` dalı artık erken `{ok:true}` dönmez; `logVoiceSession` çağrılır (P2002-korumalı) ki `endStaleCallerSessions` ile `ended`'e çevrilmiş bayat oturumlar faturalanabilsin. Yalnız `endVoiceSession` atlanır.
 - Kullanıcı başına eşzamanlı oturum kilidi hâlâ client-side (Akif-2 §10) — bu kayıt onu sunucuya taşımayı kolaylaştırır ama bu spec zorlamaz

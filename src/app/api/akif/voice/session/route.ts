@@ -12,8 +12,7 @@ import { buildRealtimeSessionConfig } from '@/lib/ai/akif/voice/realtimeSession'
 import {
   createVoiceSession,
   endStaleCallerSessions,
-  resolveResumableSession,
-  bumpReconnectCount,
+  claimReconnect,
   type VoiceSessionDb,
 } from '@/lib/ai/akif/voice/voiceSession'
 
@@ -91,7 +90,9 @@ export async function POST(req: Request) {
 
   // --- resume yolu ---
   if (resumeSessionId) {
-    const r = await resolveResumableSession(db, resumeSessionId, userId, now, env.sessionMaxSec)
+    // FR-I1: atomik reconnect kilidi — increment'in kendisi kapı. Eşzamanlı iki resume
+    // isteği artık ikisi birden reconnectCount 0 görüp geçemez; yarışı kaybeden 409 alır.
+    const r = await claimReconnect(db, resumeSessionId, userId, now, env.sessionMaxSec)
     if (!r.ok) {
       return Response.json({ error: 'resume_denied', reason: r.reason }, { status: 409 })
     }
@@ -101,7 +102,6 @@ export async function POST(req: Request) {
     }
     const token = await mintRealtimeToken(env)
     if (!token) return Response.json({ error: 'upstream' }, { status: 502 })
-    await bumpReconnectCount(db, resumeSessionId)
     return Response.json({
       token: token.value,
       expiresAt: token.expiresAt,

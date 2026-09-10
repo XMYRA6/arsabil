@@ -175,6 +175,17 @@ export function useRealtimeVoice(opts?: {
     [clearGrace, stopMicTracks],
   )
 
+  // Bağlantı kopması ortak davranışı: ilk kopmada tek sefer yeniden bağlan,
+  // ikinci kopmada gerçekten kapat. 'failed' branch'i ve grace-timer callback'i paylaşır.
+  const handleDrop = useCallback(() => {
+    if (!reconnectedRef.current) {
+      reconnectRef.current?.()
+    } else {
+      setErrorText('Bağlantı koptu.')
+      stop('disconnect')
+    }
+  }, [stop])
+
   const handleEvent = useCallback(
     async (raw: unknown) => {
       const ev = parseRealtimeEvent(raw)
@@ -260,13 +271,7 @@ export function useRealtimeVoice(opts?: {
           return
         }
         if (st === 'failed') {
-          // İlk kopmada tek sefer yeniden bağlan; ikinci kopmada gerçekten kapat.
-          if (!reconnectedRef.current) {
-            reconnectRef.current?.()
-          } else {
-            setErrorText('Bağlantı koptu.')
-            stop('disconnect')
-          }
+          handleDrop()
           return
         }
         if (st === 'disconnected') {
@@ -275,12 +280,7 @@ export function useRealtimeVoice(opts?: {
           graceTimerRef.current = setTimeout(() => {
             graceTimerRef.current = null
             if (!stoppedRef.current && pcRef.current?.connectionState !== 'connected') {
-              if (!reconnectedRef.current) {
-                reconnectRef.current?.()
-              } else {
-                setErrorText('Bağlantı koptu.')
-                stop('disconnect')
-              }
+              handleDrop()
             }
           }, ICE_GRACE_MS)
         }
@@ -373,7 +373,7 @@ export function useRealtimeVoice(opts?: {
       }, 1000)
       return true
     },
-    [opts, fetchFn, handleEvent, safeSend, stop, clearGrace],
+    [opts, fetchFn, handleEvent, safeSend, stop, clearGrace, handleDrop],
   )
 
   // Oturum başına TEK otomatik yeniden bağlanma. Ölü pc'yi kapatır, resume oturumu

@@ -18,7 +18,7 @@ export interface VoiceSessionDb {
     updateMany(a: {
       where: Record<string, unknown>
       data: Record<string, unknown>
-    }): Promise<unknown>
+    }): Promise<{ count: number }>
   }
 }
 
@@ -86,6 +86,29 @@ export async function resolveResumableSession(
     return { ok: false, reason: 'stale' }
   }
   return { ok: true }
+}
+
+/**
+ * Atomik reconnect kilidi: yalnız (active, reconnectCount 0, taze) satırda
+ * reconnectCount'u 1'e çeker. Etkilenen satır sayısı 0 ise resume reddedilir.
+ * Check-then-act yarışını kapatır (FR-I1).
+ */
+export async function claimReconnect(
+  db: VoiceSessionDb,
+  sessionId: string,
+  userId: string,
+  now: Date,
+  sessionMaxSec: number,
+): Promise<ResumeResolution> {
+  // Önce sahiplik/durum/bayatlık — yanlış nedeni doğru raporlamak için.
+  const pre = await resolveResumableSession(db, sessionId, userId, now, sessionMaxSec)
+  if (!pre.ok) return pre
+  const res = await db.akifVoiceSession.updateMany({
+    where: { id: sessionId, userId, status: 'active', reconnectCount: 0 },
+    data: { reconnectCount: 1 },
+  })
+  const count = (res as { count?: number })?.count ?? 0
+  return count === 1 ? { ok: true } : { ok: false, reason: 'already_reconnected' }
 }
 
 export async function bumpReconnectCount(db: VoiceSessionDb, sessionId: string): Promise<void> {

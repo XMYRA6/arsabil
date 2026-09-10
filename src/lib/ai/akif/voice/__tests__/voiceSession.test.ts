@@ -3,6 +3,7 @@ import {
   endStaleCallerSessions,
   checkVoiceSessionOwner,
   resolveResumableSession,
+  claimReconnect,
   bumpReconnectCount,
   endVoiceSession,
   STALE_SLACK_SEC,
@@ -96,6 +97,34 @@ it('resolveResumableSession: not found / forbidden / not_active / already_reconn
     ok: false,
     reason: 'stale',
   })
+})
+
+it('claimReconnect: ön-kontrol ok + updateMany count 1 → {ok:true}', async () => {
+  const m = makeDb(base)
+  m.updateMany.mockResolvedValue({ count: 1 })
+  expect(await claimReconnect(wrap(m), 's1', 'u1', now, 600)).toEqual({ ok: true })
+  expect(m.updateMany).toHaveBeenCalledWith({
+    where: { id: 's1', userId: 'u1', status: 'active', reconnectCount: 0 },
+    data: { reconnectCount: 1 },
+  })
+})
+
+it('claimReconnect: ön-kontrol ok ama updateMany count 0 (yarış kaybı) → already_reconnected', async () => {
+  const m = makeDb(base)
+  m.updateMany.mockResolvedValue({ count: 0 })
+  expect(await claimReconnect(wrap(m), 's1', 'u1', now, 600)).toEqual({
+    ok: false,
+    reason: 'already_reconnected',
+  })
+})
+
+it('claimReconnect: ön-kontrol reddi propagate edilir, updateMany çağrılmaz', async () => {
+  const m = makeDb({ ...base, status: 'ended' })
+  expect(await claimReconnect(wrap(m), 's1', 'u1', now, 600)).toEqual({
+    ok: false,
+    reason: 'not_active',
+  })
+  expect(m.updateMany).not.toHaveBeenCalled()
 })
 
 it('bumpReconnectCount → update increment', async () => {
