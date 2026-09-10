@@ -7,14 +7,26 @@ class FakeDC {
   listeners: Record<string, ((e: unknown) => void)[]> = {}
   readyState = 'open'
   sent: string[] = []
-  addEventListener(t: string, cb: (e: unknown) => void) {
-    ;(this.listeners[t] ??= []).push(cb)
+  addEventListener(t: string, cb: (e: unknown) => void, opts?: { once?: boolean }) {
+    const wrapped = opts?.once
+      ? (e: unknown) => {
+          this.listeners[t] = (this.listeners[t] ?? []).filter((f) => f !== wrapped)
+          cb(e)
+        }
+      : cb
+    ;(this.listeners[t] ??= []).push(wrapped)
   }
   send(s: string) {
     this.sent.push(s)
   }
   emit(t: string, e: unknown) {
-    ;(this.listeners[t] ?? []).forEach((cb) => cb(e))
+    ;(this.listeners[t] ?? []).slice().forEach((cb) => cb(e))
+  }
+  // Gerçek RTCDataChannel gibi: setRemoteDescription sonrası bir süre 'connecting',
+  // sonra DTLS/SCTP kurulunca 'open' + 'open' olayı.
+  emitOpen() {
+    this.readyState = 'open'
+    this.emit('open', {})
   }
 }
 class FakePC {
@@ -22,6 +34,9 @@ class FakePC {
   onconnectionstatechange: (() => void) | null = null
   ontrack: ((e: unknown) => void) | null = null
   connectionState: string | undefined = undefined
+  constructor(opts?: { dcConnecting?: boolean }) {
+    if (opts?.dcConnecting) this.dc.readyState = 'connecting'
+  }
   createDataChannel() {
     return this.dc
   }
@@ -436,6 +451,7 @@ it('timer: wrap-up at sessionMaxSec-60, timeout at sessionMaxSec', async () => {
 it('reconnect: connectionState=failed bir kez → reconnecting → listening, transkript korunur, aynı sessionId', async () => {
   const sessionBodies: (string | undefined)[] = []
   let pc!: FakePC
+  let pcCount = 0
   const fetchSpy = jest.fn(async (url: string, init?: RequestInit) => {
     if (String(url).includes('/api/akif/voice/session')) {
       sessionBodies.push(init?.body as string | undefined)
@@ -454,7 +470,9 @@ it('reconnect: connectionState=failed bir kez → reconnecting → listening, tr
   const { result } = renderHook(() =>
     useRealtimeVoice({
       rtcFactory: () => {
-        pc = new FakePC()
+        pcCount++
+        // İlk bağlantı normal (kanal açık); reconnect'teki kanal 'connecting' başlar.
+        pc = new FakePC(pcCount === 2 ? { dcConnecting: true } : undefined)
         return pc as unknown as RTCPeerConnection
       },
       fetchFn: fetchSpy as never,
@@ -484,7 +502,13 @@ it('reconnect: connectionState=failed bir kez → reconnecting → listening, tr
   expect(JSON.parse(resumeBody as string)).toEqual({ resumeSessionId: 'sess-1' })
   // transcript preserved
   expect(result.current.transcript.some((t) => t.text.includes('1200 metrekare'))).toBe(true)
-  // resume context injected on the new data channel
+  // resume context NOT sent yet — reconnected channel is still 'connecting'
+  expect(pc.dc.readyState).toBe('connecting')
+  expect(pc.dc.sent.some((s) => s.includes('Bağlantı koptu ve yeniden kuruldu'))).toBe(false)
+  // channel opens → resume context injected on the new data channel
+  await act(async () => {
+    pc.dc.emitOpen()
+  })
   expect(pc.dc.sent.some((s) => s.includes('Bağlantı koptu ve yeniden kuruldu'))).toBe(true)
 })
 
@@ -525,6 +549,7 @@ it('reconnect: ikinci kopma → error + stop(disconnect)', async () => {
     pc.setConnState('failed')
   })
   await waitFor(() => expect(result.current.status).toBe('idle'))
+  expect(result.current.errorText).toBe('Bağlantı koptu.')
   const beaconCall = sendBeaconMock.mock.calls.find((c) =>
     String(c[0]).includes('/api/akif/voice/usage'),
   )
@@ -567,4 +592,5 @@ it('reconnect: resume 409 → error', async () => {
     pc.setConnState('failed')
   })
   await waitFor(() => expect(result.current.status).toBe('idle'))
+  expect(result.current.errorText).toBe('Bağlantı koptu.')
 })

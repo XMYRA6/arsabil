@@ -145,6 +145,7 @@ export function useRealtimeVoice(opts?: {
       }
       if (timerRef.current) clearInterval(timerRef.current)
       try {
+        if (pcRef.current) pcRef.current.onconnectionstatechange = null
         pcRef.current?.close()
       } catch {
         /* noop */
@@ -337,14 +338,19 @@ export function useRealtimeVoice(opts?: {
       if (!connected || stoppedRef.current) return false
 
       if (cfg.resume) {
-        safeSend({
-          type: 'conversation.item.create',
-          item: {
-            type: 'message',
-            role: 'system',
-            content: [{ type: 'input_text', text: resumeContextRef.current ?? '' }],
-          },
-        })
+        // Data-channel setRemoteDescription sonrası hâlâ 'connecting' olabilir; kanal
+        // gerçekten açılınca gönder (açıksa hemen). Aksi halde safeSend sessizce yutar.
+        const sendResumeCtx = () =>
+          safeSend({
+            type: 'conversation.item.create',
+            item: {
+              type: 'message',
+              role: 'system',
+              content: [{ type: 'input_text', text: resumeContextRef.current ?? '' }],
+            },
+          })
+        if (dc.readyState === 'open') sendResumeCtx()
+        else dc.addEventListener('open', sendResumeCtx, { once: true })
       }
 
       setStatus('listening')
@@ -377,6 +383,8 @@ export function useRealtimeVoice(opts?: {
     reconnectedRef.current = true
     clearGrace()
     try {
+      // Ölü pc'nin geç gelen state olayı yeni sağlıklı oturumu öldürmesin.
+      if (pcRef.current) pcRef.current.onconnectionstatechange = null
       pcRef.current?.close()
     } catch {
       /* noop */
