@@ -540,6 +540,17 @@ model AkifVoiceSessionLog {
   @@index([startedAt])
 }
 
+model AkifVoiceSession {
+  id             String    @id
+  userId         String
+  status         String    @default("active")
+  reconnectCount Int       @default(0)
+  createdAt      DateTime  @default(now())
+  endedAt        DateTime?
+
+  @@index([userId, createdAt])
+}
+
 model AkifVoiceTurnLog {
   id         String   @id @default(cuid())
   sessionId  String
