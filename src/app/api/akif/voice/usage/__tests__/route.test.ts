@@ -15,6 +15,13 @@ jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
   createVoiceAuditLogger: () => ({ logVoiceSession: (...a: unknown[]) => logVoiceSessionMock(...a) }),
 }))
 
+const checkVoiceSessionOwnerMock = jest.fn()
+const endVoiceSessionMock = jest.fn()
+jest.mock('@/lib/ai/akif/voice/voiceSession', () => ({
+  checkVoiceSessionOwner: (...a: unknown[]) => checkVoiceSessionOwnerMock(...a),
+  endVoiceSession: (...a: unknown[]) => endVoiceSessionMock(...a),
+}))
+
 import { POST } from '../route'
 
 // startedAtMs artık 24 saatlik sağduyu penceresine tabi — sabit geçmiş damga yerine dinamik.
@@ -27,6 +34,8 @@ beforeEach(() => {
   readVoiceEnvMock.mockReturnValue({ model: 'gpt-realtime-mini', sessionMaxSec: 600 })
   logVoiceSessionMock.mockResolvedValue(undefined)
   checkRateLimitMock.mockReturnValue({ ok: true })
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: true, status: 'active' })
+  endVoiceSessionMock.mockResolvedValue(undefined)
 })
 
 const body = (o: Record<string, unknown>) =>
@@ -167,4 +176,40 @@ it('rate-limit aşıldı → 429, kayıt yazılmaz', async () => {
   const res = await POST(body({}))
   expect(res.status).toBe(429)
   expect(logVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+// --- Task 4: sahiplik guard + idempotent finalize ---
+
+it('bilinmeyen session → 403, kayıt yazılmaz', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: false, code: 'unknown_session' })
+  const res = await POST(body({}))
+  expect(res.status).toBe(403)
+  expect(await res.json()).toEqual({ error: 'unknown_session' })
+  expect(logVoiceSessionMock).not.toHaveBeenCalled()
+  expect(endVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+it('başkasının session → 403', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: false, code: 'forbidden_session' })
+  const res = await POST(body({}))
+  expect(res.status).toBe(403)
+  expect(await res.json()).toEqual({ error: 'forbidden_session' })
+  expect(logVoiceSessionMock).not.toHaveBeenCalled()
+  expect(endVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+it('zaten ended session → 200, ikinci kez yazılmaz', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: true, status: 'ended' })
+  const res = await POST(body({}))
+  expect(res.status).toBe(200)
+  expect(await res.json()).toEqual({ ok: true })
+  expect(logVoiceSessionMock).not.toHaveBeenCalled()
+  expect(endVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+it('mutlu yol → logVoiceSession + endVoiceSession(status ended)', async () => {
+  const res = await POST(body({}))
+  expect(res.status).toBe(200)
+  expect(logVoiceSessionMock).toHaveBeenCalled()
+  expect(endVoiceSessionMock).toHaveBeenCalledWith(expect.anything(), 'sess-1', expect.any(Date))
 })

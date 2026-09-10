@@ -15,6 +15,11 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { readVoiceEnv } from '@/lib/ai/akif/voice/voiceEnv'
 import { estimateVoiceCostUsd } from '@/lib/ai/akif/voice/voiceCost'
 import { createVoiceAuditLogger, type VoiceAuditDb } from '@/lib/ai/akif/voice/voiceAudit'
+import {
+  checkVoiceSessionOwner,
+  endVoiceSession,
+  type VoiceSessionDb,
+} from '@/lib/ai/akif/voice/voiceSession'
 
 export const runtime = 'nodejs'
 
@@ -84,6 +89,15 @@ export async function POST(req: Request) {
     return Response.json({ error: 'bad_request' }, { status: 400 })
   }
 
+  const db = prisma as unknown as VoiceAuditDb & VoiceSessionDb
+  const owner = await checkVoiceSessionOwner(db, sessionId, userId)
+  if (!owner.ok) {
+    return Response.json({ error: owner.code }, { status: 403 })
+  }
+  if (owner.status === 'ended') {
+    return Response.json({ ok: true })
+  }
+
   // env yoksa (anahtar yok) bile kaydı yaz — fallback model/limit tarifesiyle.
   let model = FALLBACK_MODEL
   let sessionMaxSec = FALLBACK_SESSION_MAX_SEC
@@ -129,7 +143,6 @@ export async function POST(req: Request) {
 
   const estCostUsd = estimateVoiceCostUsd({ model, durationSec: roundedDuration, usage })
 
-  const db = prisma as unknown as VoiceAuditDb
   await createVoiceAuditLogger(db).logVoiceSession({
     sessionId,
     userId,
@@ -139,6 +152,7 @@ export async function POST(req: Request) {
     estCostUsd,
     endReason: END_REASONS.has(String(endReason)) ? String(endReason) : 'error',
   })
+  await endVoiceSession(db, sessionId, new Date())
 
   return Response.json({ ok: true })
 }
