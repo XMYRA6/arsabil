@@ -4,8 +4,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ToolResultCard } from '@/lib/ai/akif/contract'
 import { parseRealtimeEvent } from './voiceEvents'
 import { runVoiceToolCall, buildFunctionCallOutputMessages } from './voiceToolBridge'
+import { buildResumeContext } from './voiceResume'
+import type { ResumeTranscriptItem } from './voiceResume'
 
-export type VoiceStatus = 'idle' | 'connecting' | 'listening' | 'speaking' | 'error'
+export type VoiceStatus =
+  | 'idle'
+  | 'connecting'
+  | 'listening'
+  | 'speaking'
+  | 'error'
+  | 'reconnecting'
 
 export interface VoiceTranscriptItem {
   id: string
@@ -58,6 +66,12 @@ export function useRealtimeVoice(opts?: {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const stoppedRef = useRef(false)
+  // Oturum başına TEK otomatik yeniden bağlanma.
+  const reconnectedRef = useRef(false)
+  // establishConnection ↔ attemptReconnect kapanış döngüsünü kırar (dep dizisi yerine ref).
+  const reconnectRef = useRef<null | (() => void)>(null)
+  // attemptReconnect'in kapanışı bayat 'transcript' görmesin diye ref'te güncel tutulur.
+  const transcriptRef = useRef<VoiceTranscriptItem[]>([])
 
   const sessionIdRef = useRef<string>('')
   const startedAtRef = useRef<number>(0)
@@ -245,8 +259,13 @@ export function useRealtimeVoice(opts?: {
           return
         }
         if (st === 'failed') {
-          setErrorText('Bağlantı koptu.')
-          stop('disconnect')
+          // İlk kopmada tek sefer yeniden bağlan; ikinci kopmada gerçekten kapat.
+          if (!reconnectedRef.current) {
+            reconnectRef.current?.()
+          } else {
+            setErrorText('Bağlantı koptu.')
+            stop('disconnect')
+          }
           return
         }
         if (st === 'disconnected') {
@@ -255,8 +274,12 @@ export function useRealtimeVoice(opts?: {
           graceTimerRef.current = setTimeout(() => {
             graceTimerRef.current = null
             if (!stoppedRef.current && pcRef.current?.connectionState !== 'connected') {
-              setErrorText('Bağlantı koptu.')
-              stop('disconnect')
+              if (!reconnectedRef.current) {
+                reconnectRef.current?.()
+              } else {
+                setErrorText('Bağlantı koptu.')
+                stop('disconnect')
+              }
             }
           }, ICE_GRACE_MS)
         }
@@ -347,6 +370,66 @@ export function useRealtimeVoice(opts?: {
     [opts, fetchFn, handleEvent, safeSend, stop, clearGrace],
   )
 
+  // Oturum başına TEK otomatik yeniden bağlanma. Ölü pc'yi kapatır, resume oturumu
+  // ister ve establishConnection'ı resume moduyla çağırır. Başarısızlıkta stop('disconnect').
+  const attemptReconnect = useCallback(async () => {
+    if (stoppedRef.current || reconnectedRef.current) return
+    reconnectedRef.current = true
+    clearGrace()
+    try {
+      pcRef.current?.close()
+    } catch {
+      /* noop */
+    }
+    dcRef.current = null
+    setStatus('reconnecting')
+
+    // İstemcideki transkriptten kompakt bağlam kur (state closure yerine ref'ten en güncel).
+    resumeContextRef.current = buildResumeContext(
+      transcriptRef.current as ResumeTranscriptItem[],
+    )
+
+    let sess: SessionInfo
+    try {
+      const res = await fetchFn(SESSION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeSessionId: sessionIdRef.current }),
+      })
+      if (!res.ok) {
+        setErrorText('Bağlantı koptu.')
+        stop('disconnect')
+        return
+      }
+      sess = (await res.json()) as SessionInfo
+    } catch {
+      setErrorText('Bağlantı koptu.')
+      stop('disconnect')
+      return
+    }
+    if (stoppedRef.current) return
+
+    const refetch: RefetchSession = async () => {
+      try {
+        const r = await fetchFn(SESSION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resumeSessionId: sessionIdRef.current }),
+        })
+        if (!r.ok) return null
+        return (await r.json()) as SessionInfo
+      } catch {
+        return null
+      }
+    }
+
+    const ok = await establishConnection(sess, { resume: true, refetch })
+    if (!ok && !stoppedRef.current) {
+      setErrorText('Bağlantı koptu.')
+      stop('disconnect')
+    }
+  }, [clearGrace, fetchFn, establishConnection, stop])
+
   const start = useCallback(async () => {
     // 'error' durumundan da yeniden başlanabilmeli ("Tekrar dene").
     if (status !== 'idle' && status !== 'error') return
@@ -360,6 +443,8 @@ export function useRealtimeVoice(opts?: {
     akifDraftRef.current = null
     sessionIdRef.current = ''
     startedAtRef.current = 0
+    reconnectedRef.current = false
+    resumeContextRef.current = null
     clearGrace()
     setErrorText(null)
     setTranscript([])
@@ -430,6 +515,14 @@ export function useRealtimeVoice(opts?: {
       stop('error')
     }
   }, [status, opts, fetchFn, establishConnection, stop, clearGrace])
+
+  useEffect(() => {
+    transcriptRef.current = transcript
+  }, [transcript])
+
+  useEffect(() => {
+    reconnectRef.current = () => void attemptReconnect()
+  }, [attemptReconnect])
 
   useEffect(() => {
     return () => {
