@@ -50,3 +50,11 @@ it('metne dön: onExit + stop', () => {
   expect(stopMock).toHaveBeenCalled()
   expect(onExit).toHaveBeenCalled()
 })
+
+it('reconnecting: yeniden bağlanma ipucu, hata bandı yok', () => {
+  hookState.status = 'reconnecting'
+  hookState.errorText = null
+  render(<AkifVoicePanel onExit={jest.fn()} />)
+  expect(screen.getByText(/yeniden kuruluyor/i)).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /tekrar dene/i })).not.toBeInTheDocument()
+})

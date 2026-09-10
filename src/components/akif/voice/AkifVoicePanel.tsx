@@ -33,9 +33,14 @@ export function AkifVoicePanel({ onExit }: { onExit: () => void }) {
           </button>
         )}
         {v.status === 'connecting' && <span className={styles.hint}>Bağlanıyor…</span>}
-        {(v.status === 'listening' || v.status === 'speaking') && (
+        {v.status === 'reconnecting' && (
+          <span className={styles.hint}>Bağlantı yeniden kuruluyor…</span>
+        )}
+        {(v.status === 'listening' || v.status === 'speaking' || v.status === 'reconnecting') && (
           <>
-            <span className={`${styles.orb} ${styles[v.status]}`} aria-hidden />
+            {v.status !== 'reconnecting' && (
+              <span className={`${styles.orb} ${styles[v.status]}`} aria-hidden />
+            )}
             <span className={styles.timer}>{fmt(v.elapsedSec)}</span>
             <button type="button" className={styles.stop} onClick={() => v.stop('user_ended')}>
               Bitir
