@@ -3,6 +3,12 @@ const checkRateLimitMock = jest.fn()
 const readVoiceEnvMock = jest.fn()
 const checkVoiceQuotaMock = jest.fn()
 const fetchMock = jest.fn()
+const createVoiceSessionMock = jest.fn()
+const endStaleCallerSessionsMock = jest.fn()
+const resolveResumableSessionMock = jest.fn()
+const bumpReconnectCountMock = jest.fn()
+const voiceMonthSpendUsdMock = jest.fn().mockResolvedValue(0)
+const voiceUserMonthSecondsMock = jest.fn()
 
 jest.mock('next-auth/next', () => ({ getServerSession: (...a: unknown[]) => getServerSessionMock(...a) }))
 jest.mock('@/lib/auth', () => ({ authOptions: {} }))
@@ -15,7 +21,16 @@ jest.mock('@/lib/rate-limit', () => ({
 jest.mock('@/lib/ai/akif/voice/voiceEnv', () => ({ readVoiceEnv: (...a: unknown[]) => readVoiceEnvMock(...a) }))
 jest.mock('@/lib/ai/akif/voice/voiceQuota', () => ({ checkVoiceQuota: (...a: unknown[]) => checkVoiceQuotaMock(...a) }))
 jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
-  createVoiceAuditLogger: () => ({ voiceMonthSpendUsd: jest.fn(), voiceUserMonthSeconds: jest.fn() }),
+  createVoiceAuditLogger: () => ({
+    voiceMonthSpendUsd: voiceMonthSpendUsdMock,
+    voiceUserMonthSeconds: voiceUserMonthSecondsMock,
+  }),
+}))
+jest.mock('@/lib/ai/akif/voice/voiceSession', () => ({
+  createVoiceSession: (...a: unknown[]) => createVoiceSessionMock(...a),
+  endStaleCallerSessions: (...a: unknown[]) => endStaleCallerSessionsMock(...a),
+  resolveResumableSession: (...a: unknown[]) => resolveResumableSessionMock(...a),
+  bumpReconnectCount: (...a: unknown[]) => bumpReconnectCountMock(...a),
 }))
 jest.mock('@/lib/ai/akif/voice/realtimeSession', () => ({
   buildRealtimeSessionConfig: () => ({ type: 'realtime', model: 'gpt-realtime-mini' }),
@@ -36,6 +51,8 @@ beforeEach(() => {
   getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
   readVoiceEnvMock.mockReturnValue(OK_ENV)
   checkVoiceQuotaMock.mockResolvedValue({ ok: true })
+  resolveResumableSessionMock.mockResolvedValue({ ok: true })
+  voiceMonthSpendUsdMock.mockResolvedValue(0)
   fetchMock.mockResolvedValue({
     ok: true,
     json: async () => ({ value: 'ek_abc', expires_at: 1756310470 }),
@@ -43,6 +60,13 @@ beforeEach(() => {
 })
 
 const req = () => new Request('http://x/api/akif/voice/session', { method: 'POST' })
+
+const resumeReq = (id: string) =>
+  new Request('http://x/api/akif/voice/session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ resumeSessionId: id }),
+  })
 
 it('rate-limit aşılınca 429', async () => {
   checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 120 })
@@ -116,4 +140,35 @@ it('mutlu yol → 200 token + sessionId + model + OpenAI isteği', async () => {
   const sent = JSON.parse(call[1].body)
   expect(sent.expires_after.ttl).toBe('2m')
   expect(sent.session.type).toBe('realtime')
+})
+
+it('mint: kayıt satırı create edilir + bayat sweep çağrılır', async () => {
+  const res = await POST(req())
+  expect(res.status).toBe(200)
+  const body = await res.json()
+  expect(createVoiceSessionMock).toHaveBeenCalledWith(expect.anything(), body.sessionId, 'u1')
+  expect(endStaleCallerSessionsMock).toHaveBeenCalled()
+})
+
+it('resume: geçerli → aynı sessionId + reconnect bump, quota kontrol edilmez', async () => {
+  const res = await POST(resumeReq('sess-abc'))
+  expect(res.status).toBe(200)
+  const body = await res.json()
+  expect(body.sessionId).toBe('sess-abc')
+  expect(bumpReconnectCountMock).toHaveBeenCalledWith(expect.anything(), 'sess-abc')
+  expect(checkVoiceQuotaMock).not.toHaveBeenCalled()
+  expect(createVoiceSessionMock).not.toHaveBeenCalled()
+})
+
+it('resume: resolveResumableSession reddeder → 409 resume_denied', async () => {
+  resolveResumableSessionMock.mockResolvedValue({ ok: false, reason: 'already_reconnected' })
+  const res = await POST(resumeReq('sess-abc'))
+  expect(res.status).toBe(409)
+  expect((await res.json()).error).toBe('resume_denied')
+})
+
+it('resume: global bütçe aşıldı → 503, kullanıcı kotası aşıksa bile 200', async () => {
+  voiceMonthSpendUsdMock.mockResolvedValueOnce(999)
+  const res = await POST(resumeReq('sess-abc'))
+  expect(res.status).toBe(503)
 })
