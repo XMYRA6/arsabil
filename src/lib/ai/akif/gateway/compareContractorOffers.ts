@@ -8,9 +8,7 @@
 // `assumptions` içinde bilgilendirme amaçlı görünür.
 
 import { CalculatorEngineV2 } from '@/lib/calculator/engine_v2';
-import type { CalculationInput } from '@/lib/calculator/engine_v2';
-import { buildCalculationInput } from '@/app/hesapla/calculatorUiHelpers';
-import { lValue } from './engineDefaults';
+import { buildScenarioEngineInput } from './scenarioEngine';
 import type { EngineDefaults } from './engineDefaults';
 import type { ScenarioCard, ScenarioRow } from '../contract';
 
@@ -30,36 +28,6 @@ export interface ApartmentSizesArgs {
   daireBuyuklukleri: number[];
   birimMaliyet?: number;
   kaliteSinifi?: 'standart' | 'orta' | 'luks';
-}
-
-function baseInput(args: {
-  x: number;
-  apartmentSize: number;
-  totalApartments: number;
-  birimMaliyet: number | undefined;
-  kaliteSinifi: 'standart' | 'orta' | 'luks' | undefined;
-  arsaAlani: number;
-  defaults: EngineDefaults;
-}): CalculationInput {
-  // emsal MOTORA girmiyor — toplam daire sayısı sarmalayıcıda önceden
-  // hesaplanıp motora `Sd` olarak verilir (bkz. FIX 1 / spec §12 tadili).
-  // Guard: türetilen sayı < 1 ise sayaç kapalı (Sdx/FA null kabul edilir).
-  const countEnabled = args.totalApartments >= 1;
-  return buildCalculationInput({
-    x: args.x,
-    luxLevel: lValue(args.kaliteSinifi ?? 'orta', args.defaults.qualityLevels),
-    apartmentSize: args.apartmentSize,
-    globalUnitPrice: args.birimMaliyet ?? args.defaults.P,
-    builderProfit: args.defaults.K,
-    isApartmentCountEnabled: countEnabled,
-    totalApartments: countEnabled ? args.totalApartments : 0,
-    isAaEnabled: true,
-    arsaAlani: args.arsaAlani,
-    riskLevel: 0,
-    iksaMode: 'off',
-    iksaPercentage: 0,
-    iksaManualTL: 0,
-  });
 }
 
 function assumptions(defaults: EngineDefaults): string[] {
@@ -89,7 +57,7 @@ export function compareContractorOffers(
   const rows: ScenarioRow[] = args.muteahhitPaylari.map((p) => {
     const x = 1 - p / 100;
     const out = CalculatorEngineV2.calculate(
-      baseInput({
+      buildScenarioEngineInput({
         x,
         apartmentSize: effDaire,
         totalApartments,
@@ -141,7 +109,7 @@ export function compareApartmentSizes(
     // Toplam daire sayısı PER-ROW — daire büyüklüğü değiştikçe değişir.
     const totalApartments = Math.floor((args.arsaAlani * args.emsal) / d);
     const out = CalculatorEngineV2.calculate(
-      baseInput({
+      buildScenarioEngineInput({
         x,
         apartmentSize: d,
         totalApartments,
