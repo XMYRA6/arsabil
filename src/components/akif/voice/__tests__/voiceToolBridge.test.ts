@@ -45,3 +45,36 @@ it('buildFunctionCallOutputMessages iki mesaj üretir', () => {
     { type: 'response.create' },
   ])
 })
+
+it('prepareScenarioSave result → pendingAction proposal, not a card', async () => {
+  const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: { scenarioName: 'x', display: {}, projectRef: { newName: null } } }) })
+  const r = await runVoiceToolCall({ callId: 'c', name: 'prepareScenarioSave', args: {} }, { sessionId: 's', fetchFn })
+  expect(r.card).toBeNull()
+  expect(r.pendingAction).toMatchObject({ type: 'proposal', pendingActionId: 'pa_1' })
+  expect(r.outputForModel).toContain('pending_action')
+})
+
+it('needs_project_choice → proposal with candidates', async () => {
+  const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ kind: 'needs_project_choice', pendingActionId: 'pa_1', candidates: [{ id: 'p1', name: 'A' }], scenarioName: 'x', display: {} }) })
+  const r = await runVoiceToolCall({ callId: 'c', name: 'prepareScenarioSave', args: {} }, { sessionId: 's', fetchFn })
+  expect(r.pendingAction).toMatchObject({ type: 'proposal', candidates: [{ id: 'p1', name: 'A' }] })
+})
+
+it('blocked plan_limit → pendingAction blocked', async () => {
+  const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ kind: 'blocked', reason: 'plan_limit', message: 'dolu' }) })
+  const r = await runVoiceToolCall({ callId: 'c', name: 'prepareScenarioSave', args: {} }, { sessionId: 's', fetchFn })
+  expect(r.pendingAction).toEqual({ type: 'blocked', message: 'dolu' })
+})
+
+it('action_committed → pendingAction committed', async () => {
+  const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ kind: 'action_committed', ok: true, scenarioId: 'sc', projectId: 'p', projectName: 'T', undoToken: 'ut', undoUntil: 'z' }) })
+  const r = await runVoiceToolCall({ callId: 'c', name: 'commitPendingAction', args: {} }, { sessionId: 's', fetchFn })
+  expect(r.pendingAction).toMatchObject({ type: 'committed', undoToken: 'ut' })
+})
+
+it('ordinary ScenarioCard still works', async () => {
+  const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ kind: 'contractor_offers', rows: [], defaultsUsed: [], assumptions: [], emsalNote: '' }) })
+  const r = await runVoiceToolCall({ callId: 'c', name: 'compareContractorOffers', args: {} }, { sessionId: 's', fetchFn })
+  expect(r.card).not.toBeNull()
+  expect(r.pendingAction).toBeUndefined()
+})

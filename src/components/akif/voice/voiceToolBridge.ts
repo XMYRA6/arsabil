@@ -1,9 +1,15 @@
 // Akif-2 — Realtime tool çağrısını backend'e köprüler, modele geri beslenecek mesajları üretir. Saf.
 import type { ToolResultCard } from '@/lib/ai/akif/contract'
 
+export type PendingActionSignal =
+  | { type: 'proposal'; pendingActionId: string; confirmCard: unknown; candidates?: { id: string; name: string }[] }
+  | { type: 'committed'; scenarioId: string; projectId: string; projectName: string; undoToken: string; undoUntil: string }
+  | { type: 'blocked' | 'error'; message: string }
+
 export interface ToolBridgeResult {
   card: ToolResultCard | null
   outputForModel: string
+  pendingAction?: PendingActionSignal
 }
 
 export async function runVoiceToolCall(
@@ -21,6 +27,18 @@ export async function runVoiceToolCall(
       return { card: null, outputForModel: JSON.stringify({ error: 'tool_unavailable' }) }
     }
     const data = (await res.json()) as Record<string, unknown>
+    if (data && data.kind === 'pending_action') {
+      return { card: null, pendingAction: { type: 'proposal', pendingActionId: data.pendingActionId as string, confirmCard: data.confirmCard }, outputForModel: JSON.stringify(data) }
+    }
+    if (data && data.kind === 'needs_project_choice') {
+      return { card: null, pendingAction: { type: 'proposal', pendingActionId: data.pendingActionId as string, confirmCard: { scenarioName: data.scenarioName, display: data.display, projectRef: { newName: null } }, candidates: data.candidates as { id: string; name: string }[] }, outputForModel: JSON.stringify(data) }
+    }
+    if (data && data.kind === 'blocked') {
+      return { card: null, pendingAction: { type: 'blocked', message: String(data.message ?? '') }, outputForModel: JSON.stringify(data) }
+    }
+    if (data && data.kind === 'action_committed') {
+      return { card: null, pendingAction: { type: 'committed', scenarioId: data.scenarioId as string, projectId: data.projectId as string, projectName: data.projectName as string, undoToken: data.undoToken as string, undoUntil: data.undoUntil as string }, outputForModel: JSON.stringify(data) }
+    }
     if (data && typeof data.kind === 'string') {
       return { card: data as unknown as ToolResultCard, outputForModel: JSON.stringify(data) }
     }
