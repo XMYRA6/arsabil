@@ -1,0 +1,35 @@
+const getServerSessionMock = jest.fn()
+const checkRateLimitMock = jest.fn()
+const undoMock = jest.fn()
+jest.mock('next-auth/next', () => ({ getServerSession: (...a: unknown[]) => getServerSessionMock(...a) }))
+jest.mock('@/lib/auth', () => ({ authOptions: {} }))
+jest.mock('@/lib/prisma', () => ({ prisma: { __brand: 'prisma' } }))
+jest.mock('@/lib/rate-limit', () => ({ checkRateLimit: (...a: unknown[]) => checkRateLimitMock(...a), RATE_LIMITS: { AKIF_TURN: { limit: 8, windowMs: 60000 } } }))
+jest.mock('@/lib/ai/akif/voice/pendingAction', () => ({ undoAction: (...a: unknown[]) => undoMock(...a) }))
+import { POST } from '../route'
+
+const req = (b: unknown) => new Request('http://x', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
+beforeEach(() => {
+  jest.clearAllMocks()
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+  getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+  checkRateLimitMock.mockReturnValue({ ok: true })
+  undoMock.mockResolvedValue({ ok: true, undid: { scenario: true, project: false } })
+})
+
+it('401 no auth', async () => { getServerSessionMock.mockResolvedValue(null); expect((await POST(req({ undoToken: 'ut' }))).status).toBe(401) })
+it('429 rate limited', async () => { checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 60 }); expect((await POST(req({ undoToken: 'ut' }))).status).toBe(429) })
+it('400 missing undoToken', async () => { expect((await POST(req({}))).status).toBe(400) })
+it('happy → 200 ok + undid', async () => {
+  const res = await POST(req({ undoToken: 'ut' }))
+  expect(res.status).toBe(200)
+  const body = await res.json()
+  expect(body.ok).toBe(true)
+  expect(body.undid).toEqual({ scenario: true, project: false })
+})
+it('typed failure → 409', async () => {
+  undoMock.mockResolvedValue({ ok: false, reason: 'window_closed', message: 'Geri alma süresi doldu.' })
+  const res = await POST(req({ undoToken: 'ut' }))
+  expect(res.status).toBe(409)
+  expect((await res.json()).error).toBe('window_closed')
+})

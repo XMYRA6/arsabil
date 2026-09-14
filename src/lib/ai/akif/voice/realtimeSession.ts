@@ -11,6 +11,7 @@
 // + `AKIF_VOICE_SESSION` rate limit bu riski sınırlar. Bkz. insan duman kontrol listesi.
 import { assembleSystemPrompt } from '../prompts/assemble'
 import { AKIF_TOOL_DEFS } from '../gateway/toolRegistry'
+import { ACTION_TOOL_DEFS } from '../gateway/actionTools'
 import { VOICE_RHYTHM_PROMPT } from './voiceRhythm'
 
 export interface RealtimeSessionConfig {
@@ -39,7 +40,7 @@ export function buildRealtimeSessionConfig(args: {
     type: 'realtime',
     model: args.model,
     instructions: `${base}\n\n${VOICE_RHYTHM_PROMPT}`,
-    tools: AKIF_TOOL_DEFS,
+    tools: [...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS],
     tool_choice: 'auto',
     audio: {
       input: {

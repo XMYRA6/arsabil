@@ -4,6 +4,8 @@ const validateArgsMock = jest.fn()
 const dispatchToolMock = jest.fn()
 const logVoiceTurnMock = jest.fn()
 const checkVoiceSessionOwnerMock = jest.fn()
+const prepareScenarioSaveMock = jest.fn()
+const commitPendingActionMock = jest.fn()
 
 jest.mock('next-auth/next', () => ({ getServerSession: (...a: unknown[]) => getServerSessionMock(...a) }))
 jest.mock('@/lib/auth', () => ({ authOptions: {} }))
@@ -23,6 +25,12 @@ jest.mock('@/lib/ai/akif/voice/voiceAudit', () => ({
 jest.mock('@/lib/ai/akif/voice/voiceSession', () => ({
   checkVoiceSessionOwner: (...a: unknown[]) => checkVoiceSessionOwnerMock(...a),
 }))
+jest.mock('@/lib/ai/akif/gateway/prepareScenarioSave', () => ({
+  prepareScenarioSave: (...a: unknown[]) => prepareScenarioSaveMock(...a),
+}))
+jest.mock('@/lib/ai/akif/voice/pendingAction', () => ({
+  commitPendingAction: (...a: unknown[]) => commitPendingActionMock(...a),
+}))
 
 import { POST } from '../route'
 
@@ -34,6 +42,8 @@ beforeEach(() => {
   validateArgsMock.mockReturnValue({ ok: true })
   checkVoiceSessionOwnerMock.mockResolvedValue({ ok: true, status: 'active' })
   dispatchToolMock.mockResolvedValue({ kind: 'term', term: 'emsal', shortDef: 'x', example: 'y' })
+  prepareScenarioSaveMock.mockResolvedValue({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: {} })
+  commitPendingActionMock.mockResolvedValue({ ok: true, scenarioId: 'sc_1', projectId: 'p1', projectName: 'Trabzon', undoToken: 'ut', undoUntil: '2026-01-01T00:00:00Z' })
 })
 
 const req = (body: unknown) =>
@@ -132,4 +142,61 @@ it('rate-limit aşıldı → 429', async () => {
   checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 30 })
   const res = await POST(req({ sessionId: 's', toolName: 'explainTerm', args: { term: 'emsal' } }))
   expect(res.status).toBe(429)
+})
+
+// Akif-2-Aksiyon — aksiyon araçları (prepareScenarioSave / commitPendingAction)
+it('prepareScenarioSave geçerli argümanla → prepareScenarioSave çağrılır, sonucu birebir döner', async () => {
+  const args = { arsaAlani: 1000, emsal: 1.5, muteahhitPayi: 30 }
+  const res = await POST(req({ sessionId: 's1', toolName: 'prepareScenarioSave', args }))
+  expect(res.status).toBe(200)
+  expect(await res.json()).toEqual({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: {} })
+  expect(prepareScenarioSaveMock).toHaveBeenCalledWith(
+    args,
+    expect.objectContaining({
+      userId: 'u1',
+      sessionId: 's1',
+      plan: { checkPlanLimit: expect.any(Function) },
+    }),
+  )
+  expect(dispatchToolMock).not.toHaveBeenCalled()
+  expect(logVoiceTurnMock).toHaveBeenCalledWith(
+    expect.objectContaining({ sessionId: 's1', tool: 'prepareScenarioSave' }),
+  )
+})
+
+it('commitPendingAction geçerli argümanla → commitPendingAction çağrılır', async () => {
+  const res = await POST(req({ sessionId: 's1', toolName: 'commitPendingAction', args: { pendingActionId: 'pa_1' } }))
+  expect(res.status).toBe(200)
+  expect(commitPendingActionMock).toHaveBeenCalledWith(
+    expect.anything(),
+    { pendingActionId: 'pa_1', userId: 'u1', sessionId: 's1' },
+    { checkPlanLimit: expect.any(Function) },
+  )
+  expect(await res.json()).toEqual({
+    kind: 'action_committed',
+    ok: true,
+    scenarioId: 'sc_1',
+    projectId: 'p1',
+    projectName: 'Trabzon',
+    undoToken: 'ut',
+    undoUntil: '2026-01-01T00:00:00Z',
+  })
+})
+
+it('aksiyon aracı geçersiz argüman → 200 invalid_args (sözleşme korunur)', async () => {
+  const res = await POST(req({ sessionId: 's1', toolName: 'prepareScenarioSave', args: {} }))
+  expect(res.status).toBe(200)
+  const body = await res.json()
+  expect(body.error).toBe('invalid_args')
+  expect(body.field).toBeTruthy()
+  expect(prepareScenarioSaveMock).not.toHaveBeenCalled()
+})
+
+it('aksiyon aracında da sahiplik koruması (Akif-2.1) önce çalışır', async () => {
+  checkVoiceSessionOwnerMock.mockResolvedValue({ ok: false, code: 'forbidden_session' })
+  const args = { arsaAlani: 1000, emsal: 1.5, muteahhitPayi: 30 }
+  const res = await POST(req({ sessionId: 's1', toolName: 'prepareScenarioSave', args }))
+  expect(res.status).toBe(403)
+  expect(await res.json()).toEqual({ error: 'forbidden_session' })
+  expect(prepareScenarioSaveMock).not.toHaveBeenCalled()
 })

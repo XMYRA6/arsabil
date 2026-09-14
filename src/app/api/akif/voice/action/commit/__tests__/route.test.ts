@@ -1,0 +1,40 @@
+const getServerSessionMock = jest.fn()
+const checkRateLimitMock = jest.fn()
+const checkOwnerMock = jest.fn()
+const commitMock = jest.fn()
+jest.mock('next-auth/next', () => ({ getServerSession: (...a: unknown[]) => getServerSessionMock(...a) }))
+jest.mock('@/lib/auth', () => ({ authOptions: {} }))
+jest.mock('@/lib/prisma', () => ({ prisma: { project: { findUnique: jest.fn().mockResolvedValue({ name: 'Trabzon' }) } } }))
+jest.mock('@/lib/rate-limit', () => ({ checkRateLimit: (...a: unknown[]) => checkRateLimitMock(...a), RATE_LIMITS: { AKIF_TURN: { limit: 8, windowMs: 60000 } } }))
+jest.mock('@/lib/ai/akif/voice/voiceSession', () => ({ checkVoiceSessionOwner: (...a: unknown[]) => checkOwnerMock(...a) }))
+jest.mock('@/lib/ai/akif/voice/pendingAction', () => ({ commitPendingAction: (...a: unknown[]) => commitMock(...a) }))
+jest.mock('@/lib/plan', () => ({ checkPlanLimit: jest.fn() }))
+import { POST } from '../route'
+
+const req = (b: unknown) => new Request('http://x', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) })
+beforeEach(() => {
+  jest.clearAllMocks()
+  jest.spyOn(console, 'error').mockImplementation(() => {})
+  getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+  checkRateLimitMock.mockReturnValue({ ok: true })
+  checkOwnerMock.mockResolvedValue({ ok: true, status: 'active' })
+  commitMock.mockResolvedValue({ ok: true, scenarioId: 'sc_1', projectId: 'p1', projectName: '', undoToken: 'ut', undoUntil: '2026-01-01T00:00:00Z' })
+})
+
+it('401 no auth', async () => { getServerSessionMock.mockResolvedValue(null); expect((await POST(req({ pendingActionId: 'pa', sessionId: 's1' }))).status).toBe(401) })
+it('429 rate limited', async () => { checkRateLimitMock.mockReturnValue({ ok: false, retryAfterSec: 60 }); expect((await POST(req({ pendingActionId: 'pa', sessionId: 's1' }))).status).toBe(429) })
+it('403 session not owned', async () => { checkOwnerMock.mockResolvedValue({ ok: false, code: 'forbidden_session' }); expect((await POST(req({ pendingActionId: 'pa', sessionId: 's1' }))).status).toBe(403) })
+it('400 missing pendingActionId', async () => { expect((await POST(req({ sessionId: 's1' }))).status).toBe(400) })
+it('happy → 200 + looks up empty project name', async () => {
+  const res = await POST(req({ pendingActionId: 'pa', sessionId: 's1' }))
+  expect(res.status).toBe(200)
+  const body = await res.json()
+  expect(body.ok).toBe(true)
+  expect(body.projectName).toBe('Trabzon') // looked up because commit returned ''
+})
+it('typed failure → 409', async () => {
+  commitMock.mockResolvedValue({ ok: false, reason: 'expired', message: 'Süre doldu.' })
+  const res = await POST(req({ pendingActionId: 'pa', sessionId: 's1' }))
+  expect(res.status).toBe(409)
+  expect((await res.json()).error).toBe('expired')
+})

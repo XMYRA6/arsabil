@@ -1,5 +1,6 @@
 import { buildRealtimeSessionConfig } from '../realtimeSession'
 import { AKIF_TOOL_DEFS } from '../../gateway/toolRegistry'
+import { ACTION_TOOL_DEFS } from '../../gateway/actionTools'
 
 describe('buildRealtimeSessionConfig', () => {
   const cfg = buildRealtimeSessionConfig({ model: 'gpt-realtime-mini', voiceName: 'marin' })
@@ -24,9 +25,16 @@ describe('buildRealtimeSessionConfig', () => {
     expect(cfg.instructions.length).toBeGreaterThan(500)
   })
 
-  it('AKIF_TOOL_DEFS birebir aktarılır', () => {
-    expect(cfg.tools).toEqual(AKIF_TOOL_DEFS)
+  it('AKIF_TOOL_DEFS + ACTION_TOOL_DEFS birleştirilerek aktarılır', () => {
+    expect(cfg.tools).toEqual([...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS])
     expect(cfg.tool_choice).toBe('auto')
+  })
+
+  it('aksiyon araçları (prepareScenarioSave, commitPendingAction) hesaplayıcı araçların yanında bulunur', () => {
+    const names = (cfg.tools as { function: { name: string } }[]).map((t) => t.function.name)
+    expect(names).toEqual(
+      expect.arrayContaining(['explainTerm', 'compareContractorOffers', 'compareApartmentSizes', 'prepareScenarioSave', 'commitPendingAction']),
+    )
   })
 
   it('type realtime', () => {
