@@ -1,4 +1,5 @@
 import { commitPendingAction } from '../pendingAction'
+import type { PendingActionDb } from '../pendingAction'
 
 const fields = {
   luxLevel: 1.2, apartmentSize: 100, landShareRatio: 0.55, totalApartments: 20, arsaAlani: 2000,
@@ -19,7 +20,7 @@ function makeDb(r: unknown) {
       create: jest.fn().mockResolvedValue({ id: 'pNew', name: 'Yeni', scenarios: [{ id: 'sc_new' }] }),
     },
     scenario: { create: jest.fn().mockResolvedValue({ id: 'sc_1' }) },
-  } as never
+  } as unknown as PendingActionDb
 }
 const okPlan = { checkPlanLimit: jest.fn().mockResolvedValue({ allowed: true, current: 0, limit: 3 }) }
 const inp = (o = {}) => ({ pendingActionId: 'pa_1', userId: 'u1', sessionId: 's1', ...o })
@@ -34,7 +35,7 @@ it('happy: existing project → scenario.create + consumed + undoToken', async (
   expect(db.scenario.create).toHaveBeenCalledWith(
     expect.objectContaining({ data: expect.objectContaining({ projectId: 'p1', name: 'Akif — Müteahhit %45', fdTotal: 5000000, landShareRatio: 0.55 }) }),
   )
-  const upd = db.akifPendingAction.update.mock.calls[0][0].data
+  const upd = (db.akifPendingAction.update as any).mock.calls[0][0].data
   expect(upd.consumedAt).toBeInstanceOf(Date)
   expect(typeof upd.undoToken).toBe('string')
   expect(upd.createdScenarioId).toBe('sc_1')
@@ -47,7 +48,7 @@ it('happy: new project (newName) → nested project.create, createdProjectId set
   if (!r.ok) throw new Error(r.reason)
   expect(db.project.create).toHaveBeenCalled()
   expect(db.scenario.create).not.toHaveBeenCalled()
-  const upd = db.akifPendingAction.update.mock.calls[0][0].data
+  const upd = (db.akifPendingAction.update as any).mock.calls[0][0].data
   expect(upd.createdProjectId).toBe('pNew')
   expect(upd.createdScenarioId).toBe('sc_new')
 })
