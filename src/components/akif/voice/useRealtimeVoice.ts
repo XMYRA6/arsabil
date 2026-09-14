@@ -22,17 +22,43 @@ export interface VoiceTranscriptItem {
   card?: ToolResultCard
 }
 
+// Akif-2-Aksiyon — "senaryoyu kaydet" akışının istemci tarafı durumu.
+// proposal → (kullanıcı onayı) saving → saved | error. Tek seferde tek kart tutulur.
+export interface PendingAction {
+  phase: 'proposal' | 'saving' | 'saved' | 'error'
+  pendingActionId?: string
+  confirmCard?: unknown
+  candidates?: { id: string; name: string }[]
+  saved?: { projectName: string; undoToken: string; undoUntil: string }
+  errorMessage?: string
+}
+
+export interface PendingActionOverrides {
+  projectId?: string
+  projectName?: string
+  scenarioName?: string
+}
+
 export interface UseRealtimeVoice {
   status: VoiceStatus
   transcript: VoiceTranscriptItem[]
   elapsedSec: number
   errorText: string | null
+  pendingAction: PendingAction | null
   start: () => Promise<void>
   stop: (reason?: string) => void
+  confirmPendingAction: (overrides?: PendingActionOverrides) => Promise<void>
+  cancelPendingAction: () => void
+  undoLastAction: () => Promise<void>
 }
 
 const CALLS_URL = 'https://api.openai.com/v1/realtime/calls'
 const SESSION_URL = '/api/akif/voice/session'
+const COMMIT_URL = '/api/akif/voice/action/commit'
+const UNDO_URL = '/api/akif/voice/action/undo'
+// Yeniden bağlanmada onaylanmamış kaydetme önerisi düşer; model tekrar önerebilsin.
+const RESUME_PENDING_DROPPED =
+  ' Önceki kaydetme önerisi iptal oldu; kullanıcı isterse tekrar söylesin.'
 const WARN_BEFORE_SEC = 60
 const MAX_ERRORS = 3
 const ICE_GRACE_MS = 5000
@@ -58,6 +84,7 @@ export function useRealtimeVoice(opts?: {
   const [transcript, setTranscript] = useState<VoiceTranscriptItem[]>([])
   const [elapsedSec, setElapsedSec] = useState(0)
   const [errorText, setErrorText] = useState<string | null>(null)
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
 
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const dcRef = useRef<RTCDataChannel | null>(null)
@@ -72,6 +99,8 @@ export function useRealtimeVoice(opts?: {
   const reconnectRef = useRef<null | (() => void)>(null)
   // attemptReconnect'in kapanışı bayat 'transcript' görmesin diye ref'te güncel tutulur.
   const transcriptRef = useRef<VoiceTranscriptItem[]>([])
+  // confirm/cancel/undo ve attemptReconnect bayat 'pendingAction' görmesin (transcriptRef ile aynı desen).
+  const pendingActionRef = useRef<PendingAction | null>(null)
 
   const sessionIdRef = useRef<string>('')
   const startedAtRef = useRef<number>(0)
@@ -109,6 +138,17 @@ export function useRealtimeVoice(opts?: {
       }
     }
   }, [])
+
+  // Modele sistem rolüyle metin besle (resume bağlamı, süre uyarısı, aksiyon bildirimleri).
+  const sendSystemText = useCallback(
+    (text: string) => {
+      safeSend({
+        type: 'conversation.item.create',
+        item: { type: 'message', role: 'system', content: [{ type: 'input_text', text }] },
+      })
+    },
+    [safeSend],
+  )
 
   const appendUser = useCallback((text: string) => {
     setTranscript((t) => [...t, { id: rid(), role: 'user', text }])
@@ -223,6 +263,29 @@ export function useRealtimeVoice(opts?: {
             { sessionId: sessionIdRef.current, fetchFn },
           )
           if (r.card) attachCard(r.card)
+          // Akif-2-Aksiyon: kaydetme akışının sinyalini ekrandaki onay kartına çevir.
+          if (r.pendingAction) {
+            const pa = r.pendingAction
+            if (pa.type === 'proposal') {
+              setPendingAction({
+                phase: 'proposal',
+                pendingActionId: pa.pendingActionId,
+                confirmCard: pa.confirmCard,
+                candidates: pa.candidates,
+              })
+            } else if (pa.type === 'committed') {
+              setPendingAction({
+                phase: 'saved',
+                saved: {
+                  projectName: pa.projectName,
+                  undoToken: pa.undoToken,
+                  undoUntil: pa.undoUntil,
+                },
+              })
+            } else {
+              setPendingAction({ phase: 'error', errorMessage: pa.message })
+            }
+          }
           for (const m of buildFunctionCallOutputMessages(ev.callId, r.outputForModel)) {
             safeSend(m)
           }
@@ -340,15 +403,7 @@ export function useRealtimeVoice(opts?: {
       if (cfg.resume) {
         // Data-channel setRemoteDescription sonrası hâlâ 'connecting' olabilir; kanal
         // gerçekten açılınca gönder (açıksa hemen). Aksi halde safeSend sessizce yutar.
-        const sendResumeCtx = () =>
-          safeSend({
-            type: 'conversation.item.create',
-            item: {
-              type: 'message',
-              role: 'system',
-              content: [{ type: 'input_text', text: resumeContextRef.current ?? '' }],
-            },
-          })
+        const sendResumeCtx = () => sendSystemText(resumeContextRef.current ?? '')
         if (dc.readyState === 'open') sendResumeCtx()
         else dc.addEventListener('open', sendResumeCtx, { once: true })
       }
@@ -360,20 +415,13 @@ export function useRealtimeVoice(opts?: {
         setElapsedSec(sec)
         if (!warnedRef.current && sec >= maxSecRef.current - WARN_BEFORE_SEC) {
           warnedRef.current = true
-          safeSend({
-            type: 'conversation.item.create',
-            item: {
-              type: 'message',
-              role: 'system',
-              content: [{ type: 'input_text', text: 'Süremiz doluyor, kısa bir kapanış yap.' }],
-            },
-          })
+          sendSystemText('Süremiz doluyor, kısa bir kapanış yap.')
         }
         if (sec >= maxSecRef.current) stop('timeout')
       }, 1000)
       return true
     },
-    [opts, fetchFn, handleEvent, safeSend, stop, clearGrace, handleDrop],
+    [opts, fetchFn, handleEvent, sendSystemText, stop, clearGrace, handleDrop],
   )
 
   // Oturum başına TEK otomatik yeniden bağlanma. Ölü pc'yi kapatır, resume oturumu
@@ -396,6 +444,15 @@ export function useRealtimeVoice(opts?: {
     resumeContextRef.current = buildResumeContext(
       transcriptRef.current as ResumeTranscriptItem[],
     )
+    // Akif-2-Aksiyon: yeni oturumda eski pendingActionId geçersiz — kartı düşür.
+    // Henüz yazılmamış bir öneriyse modele de bildir ki gerekirse tekrar önersin
+    // ('saved' ise kayıt gerçekten olmuştur, "iptal oldu" demek yanlış olurdu).
+    const droppedPending = pendingActionRef.current
+    if (droppedPending && droppedPending.phase !== 'saved') {
+      resumeContextRef.current += RESUME_PENDING_DROPPED
+    }
+    // Koşulsuz: ref bir tık bayat olsa bile kart kesinlikle düşmeli.
+    setPendingAction(null)
 
     let sess: SessionInfo
     try {
@@ -457,6 +514,7 @@ export function useRealtimeVoice(opts?: {
     setErrorText(null)
     setTranscript([])
     setElapsedSec(0)
+    setPendingAction(null)
     setStatus('connecting')
 
     // 1) Önce auth/kota — anonim kullanıcı mikrofon istemi görmeden "giriş yap" alsın.
@@ -524,9 +582,96 @@ export function useRealtimeVoice(opts?: {
     }
   }, [status, opts, fetchFn, establishConnection, stop, clearGrace])
 
+  // Kullanıcı onay kartındaki "Kaydet"e bastı — pending action'ı gerçekten yaz.
+  const confirmPendingAction = useCallback(
+    async (overrides?: PendingActionOverrides) => {
+      const cur = pendingActionRef.current
+      if (cur?.phase !== 'proposal' || !cur.pendingActionId) return
+      // Ref effect ile senkronlanır (render sonrası); çift tıkta ikinci çağrı hâlâ
+      // 'proposal' görüp 409'a düşmesin diye burada elle de ilerlet.
+      pendingActionRef.current = { ...cur, phase: 'saving' }
+      setPendingAction((p) => (p ? { ...p, phase: 'saving' } : p))
+      const fail = (message: string) => {
+        setPendingAction({ phase: 'error', errorMessage: message })
+        sendSystemText(`Kayıt yapılamadı: ${message}.`)
+      }
+      let res: Response
+      try {
+        res = await fetchFn(COMMIT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            pendingActionId: cur.pendingActionId,
+            sessionId: sessionIdRef.current,
+            ...overrides,
+          }),
+        })
+      } catch {
+        fail('Bağlantı hatası')
+        return
+      }
+      const body = (await res.json().catch(() => ({}))) as {
+        projectName?: string
+        undoToken?: string
+        undoUntil?: string
+        message?: string
+      }
+      if (!res.ok) {
+        fail(body.message ?? 'Beklenmeyen bir hata oldu')
+        return
+      }
+      const projectName = body.projectName ?? ''
+      setPendingAction({
+        phase: 'saved',
+        saved: {
+          projectName,
+          undoToken: body.undoToken ?? '',
+          undoUntil: body.undoUntil ?? '',
+        },
+      })
+      sendSystemText(`Kullanıcı kaydı onayladı; senaryo ${projectName} projesine eklendi.`)
+    },
+    [fetchFn, sendSystemText],
+  )
+
+  // Kullanıcı "Vazgeç" dedi — kartı kaldır, modele de bildir ki ısrar etmesin.
+  const cancelPendingAction = useCallback(() => {
+    setPendingAction(null)
+    sendSystemText('Kullanıcı kaydetmekten vazgeçti.')
+  }, [sendSystemText])
+
+  // "Geri Al" — commit'ten dönen undoToken ile kısa pencerede yazılanı sil.
+  const undoLastAction = useCallback(async () => {
+    const saved = pendingActionRef.current?.saved
+    if (!saved?.undoToken) return
+    let res: Response
+    try {
+      res = await fetchFn(UNDO_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ undoToken: saved.undoToken }),
+      })
+    } catch {
+      // Kart yerinde kalsın — kayıt duruyor; kullanıcıya küçük bir not düş.
+      setPendingAction((p) => (p ? { ...p, errorMessage: 'Geri alınamadı.' } : p))
+      return
+    }
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { message?: string }
+      setPendingAction((p) => (p ? { ...p, errorMessage: body.message ?? 'Geri alınamadı.' } : p))
+      return
+    }
+    setPendingAction(null)
+    sendSystemText('Kayıt geri alındı.')
+  }, [fetchFn, sendSystemText])
+
   useEffect(() => {
     transcriptRef.current = transcript
   }, [transcript])
+
+  useEffect(() => {
+    pendingActionRef.current = pendingAction
+  }, [pendingAction])
 
   useEffect(() => {
     reconnectRef.current = () => void attemptReconnect()
@@ -538,5 +683,16 @@ export function useRealtimeVoice(opts?: {
     }
   }, [stop])
 
-  return { status, transcript, elapsedSec, errorText, start, stop }
+  return {
+    status,
+    transcript,
+    elapsedSec,
+    errorText,
+    pendingAction,
+    start,
+    stop,
+    confirmPendingAction,
+    cancelPendingAction,
+    undoLastAction,
+  }
 }

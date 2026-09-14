@@ -556,6 +556,353 @@ it('reconnect: ikinci kopma → error + stop(disconnect)', async () => {
   expect(JSON.parse(beaconCall![1] as string)).toMatchObject({ endReason: 'disconnect' })
 })
 
+// --- Task 8: pendingAction (prepareScenarioSave) ---
+
+const CONFIRM_CARD = {
+  scenarioName: 'Akif — %45',
+  display: {
+    arsaPayiPct: 45,
+    satisFiyati: 5e6,
+    toplamMaliyet: 28e5,
+    sahibineDaire: 9,
+    sahibineTL: 9e5,
+  },
+  projectRef: { newName: null },
+}
+
+const PREPARE_TOOL_EVENT = {
+  data: JSON.stringify({
+    type: 'response.function_call_arguments.done',
+    call_id: 'c1',
+    name: 'prepareScenarioSave',
+    arguments: '{"arsaAlani":2000,"emsal":2,"muteahhitPayi":45}',
+  }),
+}
+
+it('prepareScenarioSave tool result → pendingAction proposal', async () => {
+  let pc!: FakePC
+  const fetchSpy = jest.fn(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) return { ok: true, json: async () => ({ token: 't', sessionId: 's1', model: 'm', sessionMaxSec: 600 }) } as never
+    if (String(url).includes('/api/akif/voice/tool')) return { ok: true, json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: { scenarioName: 'Akif — %45', display: { arsaPayiPct: 45, satisFiyati: 5e6, toplamMaliyet: 28e5, sahibineDaire: 9, sahibineTL: 9e5 }, projectRef: { newName: null } } }) } as never
+    return { ok: true, text: async () => 'answer' } as never
+  })
+  const { result } = renderHook(() => useRealtimeVoice({ rtcFactory: () => { pc = new FakePC(); return pc as never }, fetchFn: fetchSpy as never }))
+  await act(async () => { await result.current.start() })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  await act(async () => {
+    pc.dc.emit('message', { data: JSON.stringify({ type: 'response.function_call_arguments.done', call_id: 'c1', name: 'prepareScenarioSave', arguments: '{"arsaAlani":2000,"emsal":2,"muteahhitPayi":45}' }) })
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('proposal'))
+  expect(result.current.pendingAction?.pendingActionId).toBe('pa_1')
+})
+
+it('confirmPendingAction → POST commit, phase saved, feeds system msg', async () => {
+  let pc!: FakePC
+  const undoUntil = new Date(Date.now() + 30_000).toISOString()
+  const fetchSpy = jest.fn(async (url: string, init?: RequestInit) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return {
+        ok: true,
+        json: async () => ({ token: 't', sessionId: 's1', model: 'm', sessionMaxSec: 600 }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/action/commit')) {
+      return {
+        ok: true,
+        json: async () => ({
+          ok: true,
+          scenarioId: 'sc_1',
+          projectId: 'p_1',
+          projectName: 'Trabzon',
+          undoToken: 'ut',
+          undoUntil,
+        }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/tool')) {
+      return {
+        ok: true,
+        json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: CONFIRM_CARD }),
+      } as never
+    }
+    return { ok: true, text: async () => 'answer' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => {
+        pc = new FakePC()
+        return pc as never
+      },
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  await act(async () => {
+    pc.dc.emit('message', PREPARE_TOOL_EVENT)
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('proposal'))
+
+  await act(async () => {
+    await result.current.confirmPendingAction()
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('saved'))
+  expect(result.current.pendingAction?.saved).toMatchObject({
+    projectName: 'Trabzon',
+    undoToken: 'ut',
+    undoUntil,
+  })
+  const commitCall = fetchSpy.mock.calls.find((c) =>
+    String(c[0]).includes('/api/akif/voice/action/commit'),
+  )
+  expect(commitCall).toBeTruthy()
+  expect(JSON.parse((commitCall![1] as RequestInit).body as string)).toMatchObject({
+    pendingActionId: 'pa_1',
+    sessionId: 's1',
+  })
+  expect(
+    pc.dc.sent.some(
+      (s) => s.includes('conversation.item.create') && s.includes('onayladı') && s.includes('Trabzon'),
+    ),
+  ).toBe(true)
+})
+
+it('cancelPendingAction → pendingAction null + system msg "vazgeçti"', async () => {
+  let pc!: FakePC
+  const fetchSpy = jest.fn(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return {
+        ok: true,
+        json: async () => ({ token: 't', sessionId: 's1', model: 'm', sessionMaxSec: 600 }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/tool')) {
+      return {
+        ok: true,
+        json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: CONFIRM_CARD }),
+      } as never
+    }
+    return { ok: true, text: async () => 'answer' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => {
+        pc = new FakePC()
+        return pc as never
+      },
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  await act(async () => {
+    pc.dc.emit('message', PREPARE_TOOL_EVENT)
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('proposal'))
+
+  act(() => {
+    result.current.cancelPendingAction()
+  })
+  await waitFor(() => expect(result.current.pendingAction).toBeNull())
+  expect(
+    pc.dc.sent.some((s) => s.includes('conversation.item.create') && s.includes('vazgeçti')),
+  ).toBe(true)
+})
+
+it('commit 409 → phase error with message', async () => {
+  let pc!: FakePC
+  const fetchSpy = jest.fn(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return {
+        ok: true,
+        json: async () => ({ token: 't', sessionId: 's1', model: 'm', sessionMaxSec: 600 }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/action/commit')) {
+      return {
+        ok: false,
+        status: 409,
+        json: async () => ({ error: 'expired', message: 'Süre doldu.' }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/tool')) {
+      return {
+        ok: true,
+        json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: CONFIRM_CARD }),
+      } as never
+    }
+    return { ok: true, text: async () => 'answer' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => {
+        pc = new FakePC()
+        return pc as never
+      },
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  await act(async () => {
+    pc.dc.emit('message', PREPARE_TOOL_EVENT)
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('proposal'))
+
+  await act(async () => {
+    await result.current.confirmPendingAction()
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('error'))
+  expect(result.current.pendingAction?.errorMessage).toBe('Süre doldu.')
+  expect(
+    pc.dc.sent.some(
+      (s) => s.includes('conversation.item.create') && s.includes('Kayıt yapılamadı: Süre doldu.'),
+    ),
+  ).toBe(true)
+})
+
+// Step 1 listesinde yok; undoLastAction dönen bir üye olduğu ve başarısızlık
+// davranışı (kartı koru + küçük not) bir yargı kararı olduğu için eklendi.
+async function driveToSaved(undoOk: boolean) {
+  let pc!: FakePC
+  const undoUntil = new Date(Date.now() + 30_000).toISOString()
+  const fetchSpy = jest.fn(async (url: string, init?: RequestInit) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return {
+        ok: true,
+        json: async () => ({ token: 't', sessionId: 's1', model: 'm', sessionMaxSec: 600 }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/action/commit')) {
+      return {
+        ok: true,
+        json: async () => ({ ok: true, projectName: 'Trabzon', undoToken: 'ut', undoUntil }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/action/undo')) {
+      return undoOk
+        ? ({ ok: true, json: async () => ({ ok: true, undid: 'scenario' }) } as never)
+        : ({ ok: false, status: 409, json: async () => ({ error: 'expired', message: 'Geri alma süresi doldu.' }) } as never)
+    }
+    if (String(url).includes('/api/akif/voice/tool')) {
+      return {
+        ok: true,
+        json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: CONFIRM_CARD }),
+      } as never
+    }
+    return { ok: true, text: async () => 'answer' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => {
+        pc = new FakePC()
+        return pc as never
+      },
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  await act(async () => {
+    pc.dc.emit('message', PREPARE_TOOL_EVENT)
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('proposal'))
+  await act(async () => {
+    await result.current.confirmPendingAction()
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('saved'))
+  return { result, getPc: () => pc, fetchSpy }
+}
+
+it('undoLastAction → POST undo, kart temizlenir + sistem mesajı', async () => {
+  const { result, getPc, fetchSpy } = await driveToSaved(true)
+  await act(async () => {
+    await result.current.undoLastAction()
+  })
+  await waitFor(() => expect(result.current.pendingAction).toBeNull())
+  const undoCall = fetchSpy.mock.calls.find((c) =>
+    String(c[0]).includes('/api/akif/voice/action/undo'),
+  )
+  expect(JSON.parse((undoCall![1] as RequestInit).body as string)).toEqual({ undoToken: 'ut' })
+  expect(
+    getPc().dc.sent.some(
+      (s) => s.includes('conversation.item.create') && s.includes('Kayıt geri alındı.'),
+    ),
+  ).toBe(true)
+})
+
+it('undoLastAction 409 → kayıtlı kart durur, küçük not düşer', async () => {
+  const { result } = await driveToSaved(false)
+  await act(async () => {
+    await result.current.undoLastAction()
+  })
+  await waitFor(() => expect(result.current.pendingAction?.errorMessage).toBe('Geri alma süresi doldu.'))
+  // kayıt gerçekten duruyor — kart 'saved' kalmalı
+  expect(result.current.pendingAction?.phase).toBe('saved')
+  expect(result.current.pendingAction?.saved?.projectName).toBe('Trabzon')
+})
+
+it('reconnect drops an uncommitted pendingAction', async () => {
+  let pc!: FakePC
+  const fetchSpy = jest.fn(async (url: string) => {
+    if (String(url).includes('/api/akif/voice/session')) {
+      return {
+        ok: true,
+        json: async () => ({
+          token: 'ek_1',
+          sessionId: 'sess-1',
+          model: 'gpt-realtime-mini',
+          sessionMaxSec: 600,
+        }),
+      } as never
+    }
+    if (String(url).includes('/api/akif/voice/tool')) {
+      return {
+        ok: true,
+        json: async () => ({ kind: 'pending_action', pendingActionId: 'pa_1', confirmCard: CONFIRM_CARD }),
+      } as never
+    }
+    return { ok: true, text: async () => 'answer-sdp' } as never
+  })
+  const { result } = renderHook(() =>
+    useRealtimeVoice({
+      rtcFactory: () => {
+        pc = new FakePC()
+        return pc as never
+      },
+      fetchFn: fetchSpy as never,
+    }),
+  )
+  await act(async () => {
+    await result.current.start()
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  await act(async () => {
+    pc.dc.emit('message', PREPARE_TOOL_EVENT)
+  })
+  await waitFor(() => expect(result.current.pendingAction?.phase).toBe('proposal'))
+
+  const oldPc = pc
+  await act(async () => {
+    oldPc.setConnState('failed')
+  })
+  await waitFor(() => expect(result.current.status).toBe('listening'))
+  expect(pc).not.toBe(oldPc) // yeni bağlantı kuruldu
+  expect(result.current.pendingAction).toBeNull()
+  // resume bağlamı, modele öneriyi tekrarlaması gerektiğini söyler
+  expect(
+    pc.dc.sent.some((s) => s.includes('Önceki kaydetme önerisi iptal oldu')),
+  ).toBe(true)
+})
+
 it('reconnect: resume 409 → error', async () => {
   let pc!: FakePC
   let sessionCalls = 0
