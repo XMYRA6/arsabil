@@ -29,6 +29,7 @@ export function AkifVoicePanel({ onExit }: { onExit: () => void }) {
 
       {v.pendingAction && (
         <AkifActionConfirmCard
+          key={v.pendingAction.pendingActionId ?? v.pendingAction.phase}
           pending={v.pendingAction}
           onConfirm={v.confirmPendingAction}
           onCancel={v.cancelPendingAction}

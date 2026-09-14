@@ -44,3 +44,28 @@ it('error: shows the message', () => {
   render(<AkifActionConfirmCard pending={{ phase: 'error', errorMessage: 'Süre doldu.' }} onConfirm={jest.fn()} onCancel={jest.fn()} onUndo={jest.fn()} />)
   expect(screen.getByText('Süre doldu.')).toBeInTheDocument()
 })
+
+// Regresyon: AkifVoicePanel, kartı `key={pending.pendingActionId ?? pending.phase}` ile
+// render ediyor — böylece yeni bir prepareScenarioSave teklifi geldiğinde React kartı
+// remount edip yerel state'i (senaryo/proje adı, seçili aday) sıfırlıyor. Bu test o `key`
+// mekanizmasını doğrudan burada simüle ediyor (panel gerçek üretimde bunu sağlıyor).
+it('key değişince (yeni pendingActionId): önceki teklife girilen değerler yeni teklife sızmaz', () => {
+  const first = base
+  const { rerender } = render(
+    <AkifActionConfirmCard key={first.pendingActionId} pending={first} onConfirm={jest.fn()} onCancel={jest.fn()} onUndo={jest.fn()} />,
+  )
+
+  fireEvent.change(screen.getByLabelText(/senaryo adı/i), { target: { value: 'KULLANICI YAZDI' } })
+  expect(screen.getByLabelText(/senaryo adı/i)).toHaveValue('KULLANICI YAZDI')
+
+  const second = {
+    phase: 'proposal' as const,
+    pendingActionId: 'pa_2',
+    confirmCard: { scenarioName: 'Akif — %60', display, projectRef: { newName: null } },
+  }
+  rerender(
+    <AkifActionConfirmCard key={second.pendingActionId} pending={second} onConfirm={jest.fn()} onCancel={jest.fn()} onUndo={jest.fn()} />,
+  )
+
+  expect(screen.getByLabelText(/senaryo adı/i)).toHaveValue('Akif — %60')
+})
