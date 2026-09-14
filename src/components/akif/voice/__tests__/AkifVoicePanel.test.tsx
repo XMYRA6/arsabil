@@ -15,7 +15,7 @@ import { AkifVoicePanel } from '../AkifVoicePanel'
 beforeEach(() => {
   jest.clearAllMocks()
   hookState = {
-    status: 'idle', transcript: [], elapsedSec: 0, errorText: null,
+    status: 'idle', transcript: [], elapsedSec: 0, errorText: null, pendingAction: null,
     start: startMock, stop: stopMock,
   }
 })
@@ -57,4 +57,27 @@ it('reconnecting: yeniden bağlanma ipucu, hata bandı yok', () => {
   render(<AkifVoicePanel onExit={jest.fn()} />)
   expect(screen.getByText(/yeniden kuruluyor/i)).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: /tekrar dene/i })).not.toBeInTheDocument()
+})
+
+it('pendingAction: onay kartını render eder', () => {
+  hookState.pendingAction = {
+    phase: 'proposal',
+    pendingActionId: 'pa_1',
+    confirmCard: {
+      scenarioName: 'Akif — %45',
+      display: {
+        arsaPayiPct: 45,
+        sahibineDaire: 9,
+        sahibineTL: 900000,
+        toplamMaliyet: 2800000,
+        satisFiyati: 5000000,
+      },
+      projectRef: { newName: null },
+    },
+  }
+  hookState.confirmPendingAction = jest.fn()
+  hookState.cancelPendingAction = jest.fn()
+  hookState.undoLastAction = jest.fn()
+  render(<AkifVoicePanel onExit={jest.fn()} />)
+  expect(screen.getByRole('button', { name: /kaydet/i })).toBeInTheDocument()
 })

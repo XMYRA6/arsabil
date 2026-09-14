@@ -2,6 +2,7 @@
 
 import { useRealtimeVoice } from './useRealtimeVoice'
 import { AkifVoiceTranscript } from './AkifVoiceTranscript'
+import { AkifActionConfirmCard } from './AkifActionConfirmCard'
 import styles from './AkifVoicePanel.module.css'
 
 function fmt(sec: number): string {
@@ -25,6 +26,15 @@ export function AkifVoicePanel({ onExit }: { onExit: () => void }) {
       </div>
 
       {v.errorText && <p className={styles.error}>{v.errorText}</p>}
+
+      {v.pendingAction && (
+        <AkifActionConfirmCard
+          pending={v.pendingAction}
+          onConfirm={v.confirmPendingAction}
+          onCancel={v.cancelPendingAction}
+          onUndo={v.undoLastAction}
+        />
+      )}
 
       <div className={styles.controls}>
         {v.status === 'idle' && (
