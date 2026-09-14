@@ -111,7 +111,11 @@ it('concurrent claim: updateMany returns count 0 → already_consumed, no writes
 
 function undoDb(r: unknown, scenCountAfter = 0) {
   return {
-    akifPendingAction: { findFirst: jest.fn().mockResolvedValue(r), update: jest.fn().mockResolvedValue({}) },
+    akifPendingAction: {
+      findFirst: jest.fn().mockResolvedValue(r),
+      update: jest.fn().mockResolvedValue({}),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+    },
     scenario: { delete: jest.fn().mockResolvedValue({}), count: jest.fn().mockResolvedValue(scenCountAfter) },
     project: { delete: jest.fn().mockResolvedValue({}) },
   } as unknown as PendingActionDb & {
@@ -154,4 +158,13 @@ it('undo: window closed → window_closed', async () => {
 it('undo: token not found → unknown; wrong user → forbidden', async () => {
   expect(await undoAction(undoDb(null), { undoToken: 'x', userId: 'u1' })).toMatchObject({ ok: false, reason: 'unknown' })
   expect(await undoAction(undoDb(committedRow({ userId: 'other' })), { undoToken: 'ut_1', userId: 'u1' })).toMatchObject({ ok: false, reason: 'forbidden' })
+})
+
+it('undo: concurrent claim lost (updateMany count 0) → unknown, no deletes', async () => {
+  const db = undoDb(committedRow())
+  db.akifPendingAction.updateMany = jest.fn().mockResolvedValue({ count: 0 })
+  const r = await undoAction(db, { undoToken: 'ut_1', userId: 'u1' })
+  expect(r).toMatchObject({ ok: false, reason: 'unknown' })
+  expect(db.scenario.delete).not.toHaveBeenCalled()
+  expect(db.project.delete).not.toHaveBeenCalled()
 })

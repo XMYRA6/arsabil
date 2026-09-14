@@ -175,6 +175,12 @@ export async function undoAction(
     return { ok: false, reason: 'window_closed', message: 'Geri alma süresi doldu.' }
   }
 
+  const claim = await db.akifPendingAction.updateMany({
+    where: { id: row.id, undoToken: input.undoToken },
+    data: { undoToken: null, undoUntil: null },
+  })
+  if (claim.count === 0) return { ok: false, reason: 'unknown', message: 'İşlem bulunamadı.' }
+
   if (row.createdScenarioId) await db.scenario.delete({ where: { id: row.createdScenarioId } })
 
   let projectDeleted = false
@@ -186,6 +192,5 @@ export async function undoAction(
     }
   }
 
-  await db.akifPendingAction.update({ where: { id: row.id }, data: { undoToken: null, undoUntil: null } })
   return { ok: true, undid: { scenario: Boolean(row.createdScenarioId), project: projectDeleted } }
 }
