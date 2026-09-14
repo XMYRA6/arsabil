@@ -21,6 +21,7 @@ export interface PendingActionDb {
     findUnique(a: { where: { id: string } }): Promise<PendingRow | null>
     findFirst?(a: { where: { undoToken: string } }): Promise<PendingRow | null>
     update(a: { where: { id: string }; data: Record<string, unknown> }): Promise<unknown>
+    updateMany(a: { where: Record<string, unknown>; data: Record<string, unknown> }): Promise<{ count: number }>
   }
   project: {
     findFirst(a: { where: { id: string; userId: string } }): Promise<{ id: string } | null>
@@ -95,8 +96,17 @@ export async function commitPendingAction(
     return { ok: false, reason: 'expired', message: MSG.expired }
   }
 
+  const claim = await db.akifPendingAction.updateMany({
+    where: { id: row.id, consumedAt: null },
+    data: { consumedAt: new Date() },
+  })
+  if (claim.count === 0) return { ok: false, reason: 'already_consumed', message: MSG.already_consumed }
+
   const limit = await planDep.checkPlanLimit(input.userId, 'scenarios')
-  if (!limit.allowed) return { ok: false, reason: 'plan_limit', message: limit.reason ?? MSG.plan_limit }
+  if (!limit.allowed) {
+    await db.akifPendingAction.update({ where: { id: row.id }, data: { consumedAt: null } })
+    return { ok: false, reason: 'plan_limit', message: limit.reason ?? MSG.plan_limit }
+  }
 
   const payload = row.payload as SaveScenarioPayload
   const scenarioName = (input.overrides?.scenarioName?.trim() || payload.scenarioName).slice(0, 120)
@@ -139,7 +149,7 @@ export async function commitPendingAction(
   const undoUntil = new Date(Date.now() + UNDO_MS)
   await db.akifPendingAction.update({
     where: { id: row.id },
-    data: { consumedAt: new Date(), undoToken, undoUntil, createdScenarioId, createdProjectId },
+    data: { undoToken, undoUntil, createdScenarioId, createdProjectId },
   })
 
   return { ok: true, scenarioId: createdScenarioId, projectId, projectName, undoToken, undoUntil: undoUntil.toISOString() }

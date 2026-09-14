@@ -14,7 +14,11 @@ function row(over: Partial<Record<string, unknown>> = {}) {
 }
 function makeDb(r: unknown) {
   return {
-    akifPendingAction: { findUnique: jest.fn().mockResolvedValue(r), update: jest.fn().mockResolvedValue({}) },
+    akifPendingAction: {
+      findUnique: jest.fn().mockResolvedValue(r),
+      update: jest.fn().mockResolvedValue({}),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+    },
     project: {
       findFirst: jest.fn().mockResolvedValue({ id: 'p1' }),
       create: jest.fn().mockResolvedValue({ id: 'pNew', name: 'Yeni', scenarios: [{ id: 'sc_new' }] }),
@@ -35,8 +39,9 @@ it('happy: existing project → scenario.create + consumed + undoToken', async (
   expect(db.scenario.create).toHaveBeenCalledWith(
     expect.objectContaining({ data: expect.objectContaining({ projectId: 'p1', name: 'Akif — Müteahhit %45', fdTotal: 5000000, landShareRatio: 0.55 }) }),
   )
+  const claim = (db.akifPendingAction.updateMany as any).mock.calls[0][0].data
+  expect(claim.consumedAt).toBeInstanceOf(Date)
   const upd = (db.akifPendingAction.update as any).mock.calls[0][0].data
-  expect(upd.consumedAt).toBeInstanceOf(Date)
   expect(typeof upd.undoToken).toBe('string')
   expect(upd.createdScenarioId).toBe('sc_1')
   expect(upd.createdProjectId).toBeNull()
@@ -94,4 +99,12 @@ it('plan limit re-check fails → plan_limit, no write', async () => {
   const r = await commitPendingAction(db, inp(), plan)
   expect(r).toMatchObject({ ok: false, reason: 'plan_limit' })
   expect(db.scenario.create).not.toHaveBeenCalled()
+})
+it('concurrent claim: updateMany returns count 0 → already_consumed, no writes', async () => {
+  const db = makeDb(row())
+  db.akifPendingAction.updateMany = jest.fn().mockResolvedValue({ count: 0 })
+  const r = await commitPendingAction(db, inp(), okPlan)
+  expect(r).toMatchObject({ ok: false, reason: 'already_consumed' })
+  expect(db.scenario.create).not.toHaveBeenCalled()
+  expect(db.project.create).not.toHaveBeenCalled()
 })
