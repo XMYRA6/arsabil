@@ -1,4 +1,4 @@
-import { commitPendingAction } from '../pendingAction'
+import { commitPendingAction, undoAction } from '../pendingAction'
 import type { PendingActionDb } from '../pendingAction'
 
 const fields = {
@@ -107,4 +107,51 @@ it('concurrent claim: updateMany returns count 0 → already_consumed, no writes
   expect(r).toMatchObject({ ok: false, reason: 'already_consumed' })
   expect(db.scenario.create).not.toHaveBeenCalled()
   expect(db.project.create).not.toHaveBeenCalled()
+})
+
+function undoDb(r: unknown, scenCountAfter = 0) {
+  return {
+    akifPendingAction: { findFirst: jest.fn().mockResolvedValue(r), update: jest.fn().mockResolvedValue({}) },
+    scenario: { delete: jest.fn().mockResolvedValue({}), count: jest.fn().mockResolvedValue(scenCountAfter) },
+    project: { delete: jest.fn().mockResolvedValue({}) },
+  } as unknown as PendingActionDb & {
+    scenario: { delete(a: { where: { id: string } }): Promise<unknown>; count(a: { where: Record<string, unknown> }): Promise<number> }
+    project: { delete(a: { where: { id: string } }): Promise<unknown> }
+  }
+}
+const committedRow = (over = {}) => ({
+  id: 'pa_1', userId: 'u1', sessionId: 's1', kind: 'save_scenario', payload: {}, createdAt: new Date(),
+  consumedAt: new Date(), undoToken: 'ut_1', undoUntil: new Date(Date.now() + 20000),
+  createdScenarioId: 'sc_1', createdProjectId: null, ...over,
+})
+
+it('undo: deletes the scenario, not the project (existing project)', async () => {
+  const db = undoDb(committedRow())
+  const r = await undoAction(db, { undoToken: 'ut_1', userId: 'u1' })
+  expect(r).toEqual({ ok: true, undid: { scenario: true, project: false } })
+  expect(db.scenario.delete).toHaveBeenCalledWith({ where: { id: 'sc_1' } })
+  expect(db.project.delete).not.toHaveBeenCalled()
+})
+
+it('undo: deletes the created project too when it is now empty', async () => {
+  const db = undoDb(committedRow({ createdProjectId: 'pNew' }), 0)
+  const r = await undoAction(db, { undoToken: 'ut_1', userId: 'u1' })
+  expect(r).toEqual({ ok: true, undid: { scenario: true, project: true } })
+  expect(db.project.delete).toHaveBeenCalledWith({ where: { id: 'pNew' } })
+})
+
+it('undo: keeps the created project if it somehow has other scenarios', async () => {
+  const db = undoDb(committedRow({ createdProjectId: 'pNew' }), 2)
+  const r = await undoAction(db, { undoToken: 'ut_1', userId: 'u1' })
+  expect(r).toEqual({ ok: true, undid: { scenario: true, project: false } })
+})
+
+it('undo: window closed → window_closed', async () => {
+  const db = undoDb(committedRow({ undoUntil: new Date(Date.now() - 1000) }))
+  expect(await undoAction(db, { undoToken: 'ut_1', userId: 'u1' })).toMatchObject({ ok: false, reason: 'window_closed' })
+})
+
+it('undo: token not found → unknown; wrong user → forbidden', async () => {
+  expect(await undoAction(undoDb(null), { undoToken: 'x', userId: 'u1' })).toMatchObject({ ok: false, reason: 'unknown' })
+  expect(await undoAction(undoDb(committedRow({ userId: 'other' })), { undoToken: 'ut_1', userId: 'u1' })).toMatchObject({ ok: false, reason: 'forbidden' })
 })

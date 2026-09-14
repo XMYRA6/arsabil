@@ -154,3 +154,38 @@ export async function commitPendingAction(
 
   return { ok: true, scenarioId: createdScenarioId, projectId, projectName, undoToken, undoUntil: undoUntil.toISOString() }
 }
+
+export async function undoAction(
+  db: PendingActionDb & {
+    scenario: {
+      delete(a: { where: { id: string } }): Promise<unknown>
+      count(a: { where: Record<string, unknown> }): Promise<number>
+    }
+    project: { delete(a: { where: { id: string } }): Promise<unknown> }
+  },
+  input: { undoToken: string; userId: string },
+): Promise<
+  | { ok: true; undid: { scenario: boolean; project: boolean } }
+  | { ok: false; reason: 'unknown' | 'forbidden' | 'window_closed'; message: string }
+> {
+  const row = await db.akifPendingAction.findFirst!({ where: { undoToken: input.undoToken } })
+  if (!row) return { ok: false, reason: 'unknown', message: 'İşlem bulunamadı.' }
+  if (row.userId !== input.userId) return { ok: false, reason: 'forbidden', message: 'Bu işlemi geri alamıyorum.' }
+  if (!row.undoUntil || Date.now() > new Date(row.undoUntil).getTime()) {
+    return { ok: false, reason: 'window_closed', message: 'Geri alma süresi doldu.' }
+  }
+
+  if (row.createdScenarioId) await db.scenario.delete({ where: { id: row.createdScenarioId } })
+
+  let projectDeleted = false
+  if (row.createdProjectId) {
+    const scen = await db.scenario.count({ where: { projectId: row.createdProjectId } })
+    if (scen === 0) {
+      await db.project.delete({ where: { id: row.createdProjectId } })
+      projectDeleted = true
+    }
+  }
+
+  await db.akifPendingAction.update({ where: { id: row.id }, data: { undoToken: null, undoUntil: null } })
+  return { ok: true, undid: { scenario: Boolean(row.createdScenarioId), project: projectDeleted } }
+}
