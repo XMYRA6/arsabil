@@ -101,7 +101,7 @@ export function computeFullScenario(args: ScenarioEngineArgs): {
     sdx: output.Sdx,
   };
   const display: ScenarioDisplay = {
-    arsaPayiPct: (1 - input.x) * 100,
+    arsaPayiPct: input.x * 100,
     sahibineDaire: output.Sdx,
     sahibineTL: output.FA,
     toplamMaliyet: output.M,

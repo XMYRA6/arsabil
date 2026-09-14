@@ -56,7 +56,7 @@ it('computeFullScenario returns output + mapped scenarioFields + display', () =>
   expect(r.scenarioFields.fa).toBe(r.output.FA)
   expect(r.scenarioFields.fabirim).toBe(r.output.FAbirim)
   // display
-  expect(r.display.arsaPayiPct).toBeCloseTo(45, 5) // (1 - 0.55) * 100
+  expect(r.display.arsaPayiPct).toBeCloseTo(55, 5) // 0.55 * 100 — x is the land owner's share ratio
   expect(r.display.satisFiyati).toBe(r.output.FD_total)
   expect(r.display.toplamMaliyet).toBe(r.output.M)
   expect(r.display.sahibineDaire).toBe(r.output.Sdx)

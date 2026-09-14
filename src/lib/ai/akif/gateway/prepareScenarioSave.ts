@@ -83,7 +83,7 @@ export async function prepareScenarioSave(
 
   // 2) Motor — seçilen tek satır.
   const defaults = await resolveEngineDefaults(db)
-  const x = args.muteahhitPayi / 100
+  const x = 1 - args.muteahhitPayi / 100
   const apartmentSize = args.daireBuyuklugu ?? 100
   const totalApartments = Math.floor((args.arsaAlani * args.emsal) / apartmentSize)
   const { scenarioFields, display } = computeFullScenario({
