@@ -249,4 +249,26 @@ describe('runAkifTurn', () => {
     )
     errSpy.mockRestore()
   })
+
+  it('(i) projectMemory verilirse sistem promptuna eklenir', async () => {
+    const { deps } = makeDeps()
+    await runAkifTurn({ ...INPUT, projectMemory: 'Bütçe üst sınırı 5M TL.' }, deps)
+    const sentMsgs = (deps.model.chatWithTools as jest.Mock).mock.calls[0][0] as Array<{
+      role: string
+      content: string
+    }>
+    const sys = sentMsgs.find((m) => m.role === 'system')!
+    expect(sys.content).toContain('Bütçe üst sınırı 5M TL.')
+  })
+
+  it('(j) projectMemory verilmezse sistem promptunda Arsa Dosyası bloğu yok (regresyon)', async () => {
+    const { deps } = makeDeps()
+    await runAkifTurn(INPUT, deps)
+    const sentMsgs = (deps.model.chatWithTools as jest.Mock).mock.calls[0][0] as Array<{
+      role: string
+      content: string
+    }>
+    const sys = sentMsgs.find((m) => m.role === 'system')!
+    expect(sys.content).not.toContain('Bu proje hakkında bildiklerin')
+  })
 })
