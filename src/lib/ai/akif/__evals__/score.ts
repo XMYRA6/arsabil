@@ -3,7 +3,7 @@
 
 import type { AkifIntent, AkifMessage, AkifTurn } from '../contract'
 
-export type ExpectedToolKind = 'term' | 'contractor_offers' | 'apartment_sizes' | 'none'
+export type ExpectedToolKind = 'term' | 'contractor_offers' | 'apartment_sizes' | 'parcel' | 'none'
 
 export interface EvalExpect {
   intent?: AkifIntent
@@ -88,7 +88,7 @@ export function scoreFixture(
 
   if (expected.arsaPayiX !== undefined) {
     const tr = turn.tool_result
-    if (!tr || tr.kind === 'term') {
+    if (!tr || tr.kind === 'term' || tr.kind === 'parcel') {
       checks.push({ name: 'arsaPayiX', ok: false, detail: 'senaryo kartı yok' })
     } else if (tr.rows.length !== expected.arsaPayiX.length) {
       checks.push({

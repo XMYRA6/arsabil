@@ -271,4 +271,19 @@ describe('runAkifTurn', () => {
     const sys = sentMsgs.find((m) => m.role === 'system')!
     expect(sys.content).not.toContain('Bu proje hakkında bildiklerin')
   })
+
+  it('(k) tool_result kind:parcel ise dönüşümsüz turn.tool_result\'a atanır (rows.map ile çökmez)', async () => {
+    const { deps } = makeDeps()
+    const PARCEL_CARD = { kind: 'parcel' as const, status: 'resolved' as const, dto: { parcel: { il: 'Trabzon' } } as never, siteUrl: 'https://x' }
+    ;(deps.model.chatWithTools as jest.Mock).mockResolvedValueOnce({
+      kind: 'tool_call',
+      toolName: 'lookupParcel',
+      toolArgs: {},
+      toolCallId: 'call_4',
+      usage: { promptTokens: 100, completionTokens: 10 },
+    })
+    ;(deps.dispatch as unknown as jest.Mock).mockResolvedValueOnce(PARCEL_CARD)
+    const turn = await runAkifTurn(INPUT, deps)
+    expect(turn.tool_result).toEqual(PARCEL_CARD)
+  })
 })

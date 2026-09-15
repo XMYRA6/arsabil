@@ -14,6 +14,9 @@ function cardLine(card: ToolResultCard): string {
   if (card.kind === 'term') {
     return `("${card.term}" terimi açıklandı)`
   }
+  if (card.kind === 'parcel') {
+    return `(Parsel sorgulandı: ${card.status})`
+  }
   const r = card.rows[0]
   if (!r) return `(Son hesap: ${card.kind})`
   const pct = Math.round(r.arsaPayiX * 100)

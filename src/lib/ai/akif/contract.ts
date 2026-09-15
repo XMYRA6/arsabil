@@ -2,6 +2,8 @@
 // Her sonraki modül (orchestrator, tool runner, API route, testler) buradan import eder.
 // zod YOK: elle yazılmış doğrulama + elle yazılmış JSON şema (5a parseInbound stili).
 
+import type { DegerCardDTO } from '@/lib/deger/card'
+
 export interface AkifMessage {
   role: 'user' | 'akif'
   content: string
@@ -49,7 +51,17 @@ export interface ScenarioCard {
   emsalNote: string
 }
 
-export type ToolResultCard = TermCard | ScenarioCard
+export interface ParcelCard {
+  kind: 'parcel'
+  status: 'resolved' | 'ambiguous' | 'location_not_found' | 'parcel_not_found' | 'parcel_unavailable'
+  dto?: DegerCardDTO
+  siteUrl?: string
+  candidates?: string[]
+  level?: 'il' | 'ilce' | 'mahalle'
+  term?: string
+}
+
+export type ToolResultCard = TermCard | ScenarioCard | ParcelCard
 
 export interface AkifTurn {
   intent: AkifIntent

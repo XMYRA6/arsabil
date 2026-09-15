@@ -69,3 +69,10 @@ describe('AKIF_TURN_JSON_SCHEMA', () => {
     expect(req).toContain('memory_updates')
   })
 })
+
+describe('ParcelCard (Akif-5)', () => {
+  it('ToolResultCard birleşimine dahildir — bir ParcelCard değişkene atanabilir', () => {
+    const card: import('../contract').ParcelCard = { kind: 'parcel', status: 'location_not_found', level: 'il', term: 'xyz' }
+    expect(card.kind).toBe('parcel')
+  })
+})
