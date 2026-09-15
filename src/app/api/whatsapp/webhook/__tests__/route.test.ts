@@ -1,6 +1,8 @@
 const handleMessageMock = jest.fn()
 const verifySignatureMock = jest.fn()
 const afterMock = jest.fn((cb: () => void) => cb())
+const createAkifModelMock = jest.fn((..._a: unknown[]) => ({ chatWithTools: jest.fn(), finalStructured: jest.fn() }))
+const createAuditLoggerMock = jest.fn((..._a: unknown[]) => ({ logTurn: jest.fn(), monthSpendUsd: jest.fn().mockResolvedValue(0) }))
 
 jest.mock('next/server', () => ({ after: (cb: () => void) => afterMock(cb) }))
 jest.mock('@/lib/whatsapp/config', () => ({
@@ -20,10 +22,10 @@ jest.mock('@/lib/ai/akif/openaiClient', () => ({
     const n = Number(v)
     return v != null && v !== '' && Number.isFinite(n) && n > 0 ? n : fallback
   },
-  createAkifModel: () => ({ chatWithTools: jest.fn(), finalStructured: jest.fn() }),
+  createAkifModel: (...a: unknown[]) => createAkifModelMock(...a),
 }))
 jest.mock('@/lib/ai/akif/audit', () => ({
-  createAuditLogger: () => ({ logTurn: jest.fn(), monthSpendUsd: jest.fn().mockResolvedValue(0) }),
+  createAuditLogger: (...a: unknown[]) => createAuditLoggerMock(...a),
 }))
 jest.mock('@/lib/ai/akif/costGuard', () => ({
   checkConversationBudget: jest.fn().mockReturnValue({ ok: true }),
@@ -44,6 +46,7 @@ jest.mock('@/lib/tkgm/idariYapi', () => ({ fetchIlListesi: jest.fn(), fetchIlceL
 jest.mock('@/lib/risk/riskSnapshot', () => ({ buildRiskSnapshot: jest.fn() }))
 
 import { GET, POST } from '../route'
+import { WA_AKIF_TOOL_DEFS } from '@/lib/whatsapp/akifToolGateway'
 
 const textBody = JSON.stringify({
   entry: [{ changes: [{ value: { messages: [{ from: '905321234567', id: 'wamid.1', timestamp: '1', type: 'text', text: { body: 'Trabzon Of 1/2' } }] } }] }],
@@ -83,6 +86,17 @@ describe('POST /api/whatsapp/webhook', () => {
     expect(res.status).toBe(200)
     expect(handleMessageMock).not.toHaveBeenCalled()
   })
+  it('kanal izolasyonu: createAuditLogger wa: prefix ile, createAkifModel WA_AKIF_TOOL_DEFS ile çağrılır', async () => {
+    verifySignatureMock.mockReturnValue(true)
+    createAuditLoggerMock.mockClear()
+    createAkifModelMock.mockClear()
+    await POST(new Request('http://x', { method: 'POST', body: textBody, headers: { 'x-hub-signature-256': 'sha256=ok' } }))
+    expect(createAuditLoggerMock).toHaveBeenCalledWith(expect.anything(), { conversationIdPrefix: 'wa:' })
+    expect(createAkifModelMock).toHaveBeenCalledTimes(1)
+    const modelCallArg = createAkifModelMock.mock.calls[0][0] as { toolDefs?: unknown[] }
+    expect(modelCallArg.toolDefs).toBe(WA_AKIF_TOOL_DEFS)
+  })
+
   it('handleMessage reject olsa da POST 200 döner', async () => {
     verifySignatureMock.mockReturnValue(true)
     handleMessageMock.mockRejectedValue(new Error('boom'))

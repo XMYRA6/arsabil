@@ -121,6 +121,21 @@ describe('POST /api/akif/turn', () => {
     expect(await res.json()).toEqual(TURN)
   })
 
+  it('createAuditLogger, wa: kanalini kendi web butcesinden haric tutacak sekilde cagrilir', async () => {
+    await POST(req(validBody))
+    expect(createAuditLoggerMock).toHaveBeenCalledWith(
+      expect.anything(),
+      { excludeConversationIdPrefix: 'wa:' },
+    )
+  })
+
+  it('conversationId "wa:" ile basliyorsa -> 400, runAkifTurn hic cagrilmaz', async () => {
+    const res = await POST(req({ ...validBody, conversationId: 'wa:905321234567' }))
+    expect(res.status).toBe(400)
+    expect(await res.json()).toEqual({ error: 'bad_request' })
+    expect(runAkifTurnMock).not.toHaveBeenCalled()
+  })
+
   it('readAkifEnv throw -> 503 akif_unavailable', async () => {
     readAkifEnvMock.mockImplementation(() => {
       throw new Error('missing OPENAI_API_KEY')

@@ -121,6 +121,19 @@ describe('audit', () => {
       })
     })
 
+    it('excludeConversationIdPrefix verilirse aggregate WHERE\'ine not-startsWith eklenir', async () => {
+      const now = new Date('2026-08-15T12:00:00Z')
+      const expectedMonthStart = new Date(Date.UTC(2026, 7, 1))
+      const mockAggregate = jest.fn().mockResolvedValue({ _sum: { estCostUsd: 5 } })
+      const db: AuditDb = { akifTurnLog: { create: jest.fn(), aggregate: mockAggregate } }
+      const logger = createAuditLogger(db, { excludeConversationIdPrefix: 'wa:' })
+      await logger.monthSpendUsd(now)
+      expect(mockAggregate).toHaveBeenCalledWith({
+        _sum: { estCostUsd: true },
+        where: { createdAt: { gte: expectedMonthStart }, conversationId: { not: { startsWith: 'wa:' } } },
+      })
+    })
+
     it('conversationIdPrefix verilmezse WHERE\'e conversationId eklenmez (regresyon)', async () => {
       const now = new Date('2026-08-15T12:00:00Z')
       const mockAggregate = jest.fn().mockResolvedValue({ _sum: { estCostUsd: 5 } })

@@ -66,6 +66,7 @@ export async function POST(req: Request) {
   if (
     typeof conversationId !== 'string' ||
     conversationId.length === 0 ||
+    conversationId.startsWith('wa:') ||
     !isValidHistory(history) ||
     typeof userMessage !== 'string' ||
     userMessage.length < 1 ||
@@ -116,7 +117,7 @@ export async function POST(req: Request) {
   // Prisma'nın aggregate imzasındaki opsiyonel `_sum` alanları yüzünden tsc
   // eşleşmiyor — tek noktada daraltıyoruz.
   const db = prisma as unknown as AuditDb & DispatchDeps['db']
-  const audit = createAuditLogger(db)
+  const audit = createAuditLogger(db, { excludeConversationIdPrefix: 'wa:' })
   const mb = await checkMonthlyBudget({
     monthSpendUsd: audit.monthSpendUsd,
     budgetUsd: env.monthlyBudgetUsd,

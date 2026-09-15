@@ -1,13 +1,14 @@
 import { lookupParcel, type LookupParcelDeps } from '../lookupParcel'
+import type { DegerCardDTO } from '@/lib/deger/card'
 
 const DTO = {
-  parcel: { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu', ada: '123', parsel: '45', areaSqm: 500, geometry: { type: 'Polygon', coordinates: [] } },
+  parcel: { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu', ada: '123', parsel: '45', areaSqm: 500, geometry: { type: 'Polygon', coordinates: [[[1, 2], [3, 4], [5, 6], [1, 2]]] } },
   risk: { faultDistanceM: 3200, floodQ100: false, status: 'ok' as const },
   value: { tier: 'free' as const, insufficientData: false, basis: 'mahalle' as const, thinData: false, freeRangeLow: 2000000, freeRangeHigh: 2500000, pricePerSqmCoarse: 4000 },
-  neighborhood: { geojson: null },
+  neighborhood: { geojson: { type: 'MultiPolygon', coordinates: [] } },
   comparables: { count: 3 },
   demographicsAvailable: false,
-} as never
+} as unknown as DegerCardDTO
 
 function makeDeps(over: Partial<LookupParcelDeps> = {}): LookupParcelDeps {
   return {
@@ -30,10 +31,19 @@ describe('lookupParcel', () => {
     ;(resolveLocation as jest.Mock).mockResolvedValue({ kind: 'resolved', mahalleId: 5000, il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Uğurlu' })
   })
 
-  it('resolved + buildCard ok → status:resolved, dto+siteUrl dolu', async () => {
+  it('resolved + buildCard ok → status:resolved, dto+siteUrl dolu (geometry/geojson temizlenmiş)', async () => {
     const deps = makeDeps()
     const card = await lookupParcel(ARGS, deps)
-    expect(card).toEqual({ kind: 'parcel', status: 'resolved', dto: DTO, siteUrl: 'https://www.arsabil.com/deger?x=1' })
+    expect(card.kind).toBe('parcel')
+    expect(card.status).toBe('resolved')
+    expect(card.siteUrl).toBe('https://www.arsabil.com/deger?x=1')
+    expect(card.dto?.parcel.geometry).toEqual({ type: 'Polygon', coordinates: [] })
+    expect(card.dto?.neighborhood.geojson).toBeNull()
+    expect(card.dto?.parcel).toEqual({ ...DTO.parcel, geometry: { type: 'Polygon', coordinates: [] } })
+    expect(card.dto?.risk).toEqual(DTO.risk)
+    expect(card.dto?.value).toEqual(DTO.value)
+    expect(card.dto?.comparables).toEqual(DTO.comparables)
+    expect(card.dto?.demographicsAvailable).toBe(DTO.demographicsAvailable)
     expect(deps.buildCard).toHaveBeenCalledWith(5000, '123', '45')
   })
 

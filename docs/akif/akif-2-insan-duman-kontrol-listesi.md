@@ -48,6 +48,8 @@ Model çıktısına bağlı davranış, Playwright simüle edemez — insan doğ
 
 Gerçek Meta webhook + gerçek telefon numarası gerektirir — hiçbir otomatik test bunu simüle edemez.
 
+**Ön koşul:** `OPENAI_API_KEY` Coolify'da tanımlı olmalı — eksikse WhatsApp botu tamamen SESSİZ kalır (web Akif'in aksine, kullanıcıya görünür bir hata dönmez).
+
 - [ ] Gerçek numaraya "merhaba" yaz → Akif serbest sohbetle karşılık verir (eski "hangi il?" state machine'i YOK)
 - [ ] "Trabzon Ortahisar Uğurlu 123/45" gibi tam bir sorgu yaz → gerçek Değer Kartı (renderCard formatında) + kısa Akif girişi gelir
 - [ ] Belirsiz bir mahalle adı yaz → Akif adayları kendi cümleleriyle sorar, numaralı liste DEĞİL

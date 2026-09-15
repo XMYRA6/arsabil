@@ -55,7 +55,11 @@ export async function lookupParcel(
   return {
     kind: 'parcel',
     status: 'resolved',
-    dto: res.card,
+    dto: {
+      ...res.card,
+      parcel: { ...res.card.parcel, geometry: { type: 'Polygon', coordinates: [] } },
+      neighborhood: { ...res.card.neighborhood, geojson: null },
+    },
     siteUrl: deps.siteUrlFor({
       il: r.il,
       ilce: r.ilce,

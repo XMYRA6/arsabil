@@ -18,7 +18,7 @@ export interface AuditDb {
 
 export function createAuditLogger(
   db: AuditDb,
-  opts: { conversationIdPrefix?: string } = {},
+  opts: { conversationIdPrefix?: string; excludeConversationIdPrefix?: string } = {},
 ) {
   return {
     async logTurn(entry: AuditEntry): Promise<void> {
@@ -39,6 +39,8 @@ export function createAuditLogger(
       };
       if (opts.conversationIdPrefix) {
         where.conversationId = { startsWith: opts.conversationIdPrefix };
+      } else if (opts.excludeConversationIdPrefix) {
+        where.conversationId = { not: { startsWith: opts.excludeConversationIdPrefix } };
       }
 
       const result = await db.akifTurnLog.aggregate({

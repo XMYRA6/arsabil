@@ -47,9 +47,14 @@ export interface AkifHandleDeps {
 export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleDeps): Promise<void> {
   const check = deps.checkRateLimit ?? defaultCheckRateLimit
 
-  // 1. Load state
+  // 1. Load state — eski (Akif-5 öncesi) şekilli bir satır varsa (30dk TTL
+  // içinde), `history` dizisi yoktur; sert geçiş gereği tamamen yok sayılır.
   const loaded = await deps.store.loadConversation(msg.from)
-  const state: WaAkifState = loaded?.state ?? { history: [] }
+  const rawState = loaded?.state
+  const state: WaAkifState = {
+    history: Array.isArray(rawState?.history) ? rawState.history : [],
+    awaitingFollowup: rawState?.awaitingFollowup,
+  }
 
   // 2. Idempotency — Meta retry'ları tekrar işlenmez.
   if (loaded && loaded.lastMessageId === msg.messageId) return

@@ -195,6 +195,21 @@ describe('runWhatsappAkifTurn', () => {
     errSpy.mockRestore()
   })
 
+  it('eski şekilli (Akif-5 öncesi) conversation satırı → çökmez, boş history ile normal akışa düşer', async () => {
+    const { deps } = makeDeps({
+      store: {
+        loadConversation: jest.fn().mockResolvedValue({
+          state: { fields: { ilText: 'Trabzon' }, pending: 'ilce' },
+          lastMessageId: 'wamid.0',
+        }),
+        saveConversation: jest.fn(),
+      },
+    })
+    await runWhatsappAkifTurn(msg({ messageId: 'wamid.1' }), deps)
+    expect(runAkifTurnMock).toHaveBeenCalledTimes(1)
+    expect(runAkifTurnMock.mock.calls[0][0]).toMatchObject({ history: [] })
+  })
+
   it('history 40 mesajı geçince kırpılır', async () => {
     const longHistory = Array.from({ length: 40 }, (_, i) => ({ role: i % 2 === 0 ? 'user' as const : 'akif' as const, content: `m${i}` }))
     const { deps, saved } = makeDeps({
