@@ -5,6 +5,7 @@
 .title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
 .headActions { display: flex; gap: 8px; align-items: center; }
 .voiceToggle { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--panel-border, #ddd); background: transparent; font-size: 13px; cursor: pointer; }
+.projectSelect { padding: 5px 10px; border-radius: 999px; border: 1px solid var(--panel-border, #ddd); background: transparent; font-size: 13px; max-width: 180px; }
 .reset { flex-shrink: 0; border: 1px solid #e5e5e7; background: #fff; border-radius: 999px; padding: 5px 12px; font-size: 12px; color: #0a5cff; cursor: pointer; }
 .reset:disabled { opacity: .5; cursor: default; }
 .sub { font-size: 13px; color: #6e6e73; margin-bottom: 12px; }

@@ -11,7 +11,10 @@ jest.mock('@/components/akif/voice/AkifVoicePanel', () => ({
   ),
 }))
 
+jest.mock('next-auth/react', () => ({ useSession: jest.fn() }))
+
 import AkifPage from './page'
+import { useSession } from 'next-auth/react'
 
 const turn = {
   intent: 'smalltalk',
@@ -24,6 +27,7 @@ const turn = {
 }
 
 beforeEach(() => {
+  ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
   global.fetch = jest
     .fn()
     .mockResolvedValue({ ok: true, status: 200, json: async () => turn }) as jest.Mock
@@ -132,4 +136,60 @@ it('panelden çık → metin moduna döner', () => {
   fireEvent.click(screen.getByText('panel-exit'))
   expect(screen.queryByText('SESLI PANEL')).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: /sesli konuş/i })).toBeInTheDocument()
+})
+
+it('oturum açıkken proje listesi çekilir ve seçici görünür', async () => {
+  ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
+  ;(global.fetch as jest.Mock).mockImplementation((url: string) => {
+    if (url === '/api/projects') {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ projects: [{ id: 'p1', name: 'Trabzon Arsa' }] }),
+      })
+    }
+    return Promise.resolve({ ok: true, status: 200, json: async () => turn })
+  })
+  render(<AkifPage />)
+  await waitFor(() =>
+    expect(screen.getByRole('combobox', { name: /proje seç/i })).toBeInTheDocument(),
+  )
+  expect(screen.getByText('Trabzon Arsa')).toBeInTheDocument()
+})
+
+it('proje seçilince sonraki istekte projectId gönderilir', async () => {
+  ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
+  ;(global.fetch as jest.Mock).mockImplementation((url: string) => {
+    if (url === '/api/projects') {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ projects: [{ id: 'p1', name: 'Trabzon Arsa' }] }),
+      })
+    }
+    return Promise.resolve({ ok: true, status: 200, json: async () => turn })
+  })
+  render(<AkifPage />)
+  await waitFor(() =>
+    expect(screen.getByRole('combobox', { name: /proje seç/i })).toBeInTheDocument(),
+  )
+  fireEvent.change(screen.getByRole('combobox', { name: /proje seç/i }), {
+    target: { value: 'p1' },
+  })
+  sendText('merhaba')
+  await waitFor(() => {
+    const calls = (global.fetch as jest.Mock).mock.calls.filter(([u]) => u === '/api/akif/turn')
+    expect(calls.length).toBe(1)
+  })
+  const turnCall = (global.fetch as jest.Mock).mock.calls.find(([u]) => u === '/api/akif/turn')!
+  const body = JSON.parse(turnCall[1].body)
+  expect(body.projectId).toBe('p1')
+})
+
+it('oturum kapalıyken proje seçici görünmez, projectId hiç gönderilmez', async () => {
+  ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
+  render(<AkifPage />)
+  expect(screen.queryByRole('combobox', { name: /proje seç/i })).not.toBeInTheDocument()
+  sendText('merhaba')
+  await waitFor(() => expect((global.fetch as jest.Mock).mock.calls.length).toBeGreaterThan(0))
+  const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body)
+  expect(body.projectId).toBeUndefined()
 })

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import type { AkifMessage, AkifTurn } from '@/lib/ai/akif/contract'
 import { AkifChat, type AkifChatEntry } from '@/components/akif/AkifChat'
 import { AkifVoicePanel } from '@/components/akif/voice/AkifVoicePanel'
@@ -25,12 +26,28 @@ function toHistory(entries: AkifChatEntry[]): AkifMessage[] {
   return msgs.slice(-40)
 }
 
+interface AkifProjectOption {
+  id: string
+  name: string
+}
+
 export default function AkifPage() {
   // Sohbet kimliği state'te — "Yeni sohbet" sıfırlamada yenilenir.
   const [conversationId, setConversationId] = useState(makeId)
   const [entries, setEntries] = useState<AkifChatEntry[]>([])
   const [pending, setPending] = useState(false)
   const [mode, setMode] = useState<'text' | 'voice'>('text')
+  const { status } = useSession()
+  const [projects, setProjects] = useState<AkifProjectOption[]>([])
+  const [projectId, setProjectId] = useState('')
+
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    fetch('/api/projects')
+      .then((r) => r.json())
+      .then((data) => setProjects(data.projects ?? []))
+      .catch(() => {})
+  }, [status])
 
   const resetConversation = () => {
     if (pending) return
@@ -47,7 +64,12 @@ export default function AkifPage() {
       const res = await fetch('/api/akif/turn', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId, history, userMessage: text }),
+        body: JSON.stringify({
+          conversationId,
+          history,
+          userMessage: text,
+          ...(projectId ? { projectId } : {}),
+        }),
       })
       if (!res.ok) {
         setEntries((prev) => [
@@ -77,6 +99,21 @@ export default function AkifPage() {
       <div className={styles.head}>
         <h1 className={styles.title}>Akif Usta&apos;ya Sor</h1>
         <div className={styles.headActions}>
+          {mode === 'text' && status === 'authenticated' && projects.length > 0 && (
+            <select
+              className={styles.projectSelect}
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              aria-label="Proje seç"
+            >
+              <option value="">Proje seçilmedi</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          )}
           {mode === 'text' && (
             <button
               type="button"
