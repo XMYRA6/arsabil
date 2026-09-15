@@ -7,7 +7,28 @@ jest.mock('@/lib/whatsapp/config', () => ({
   readWhatsappConfig: () => ({ verifyToken: 'VT', appSecret: 'AS', accessToken: 'AT', phoneNumberId: 'PN', graphVersion: 'v21.0' }),
 }))
 jest.mock('@/lib/whatsapp/verifySignature', () => ({ verifySignature: (...a: unknown[]) => verifySignatureMock(...a) }))
-jest.mock('@/lib/whatsapp/handleMessage', () => ({ handleMessage: (...a: unknown[]) => handleMessageMock(...a) }))
+jest.mock('@/lib/whatsapp/akifHandleMessage', () => ({ runWhatsappAkifTurn: (...a: unknown[]) => handleMessageMock(...a) }))
+jest.mock('openai', () => ({
+  __esModule: true,
+  default: class {
+    chat = {}
+  },
+}))
+jest.mock('@/lib/ai/akif/openaiClient', () => ({
+  readAkifEnv: () => ({ apiKey: 'sk-x', model: 'gpt-4o-mini', maxTurnTokens: 6000, monthlyBudgetUsd: 20 }),
+  numEnv: (v: string | undefined, fallback: number) => {
+    const n = Number(v)
+    return v != null && v !== '' && Number.isFinite(n) && n > 0 ? n : fallback
+  },
+  createAkifModel: () => ({ chatWithTools: jest.fn(), finalStructured: jest.fn() }),
+}))
+jest.mock('@/lib/ai/akif/audit', () => ({
+  createAuditLogger: () => ({ logTurn: jest.fn(), monthSpendUsd: jest.fn().mockResolvedValue(0) }),
+}))
+jest.mock('@/lib/ai/akif/costGuard', () => ({
+  checkConversationBudget: jest.fn().mockReturnValue({ ok: true }),
+  checkMonthlyBudget: jest.fn().mockResolvedValue({ ok: true, spent: 0 }),
+}))
 jest.mock('@/lib/prisma', () => ({
   prisma: {
     whatsappSubscription: {

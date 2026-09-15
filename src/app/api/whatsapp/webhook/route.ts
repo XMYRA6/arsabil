@@ -1,16 +1,21 @@
 import { after } from 'next/server'
 import { timingSafeEqual } from 'crypto'
+import OpenAI from 'openai'
 import { readWhatsappConfig } from '@/lib/whatsapp/config'
 import { verifySignature } from '@/lib/whatsapp/verifySignature'
 import { parseInbound } from '@/lib/whatsapp/parseInbound'
-import { handleMessage, type HandleDeps } from '@/lib/whatsapp/handleMessage'
+import { runWhatsappAkifTurn, type AkifHandleDeps } from '@/lib/whatsapp/akifHandleMessage'
 import { createPrismaConversationStore } from '@/lib/whatsapp/conversation'
-import { ruleBasedUnderstanding } from '@/lib/whatsapp/understanding'
+import { WA_AKIF_TOOL_DEFS, validateArgsWa, dispatchToolWa, type WaDispatchDeps } from '@/lib/whatsapp/akifToolGateway'
+import { AKIF_WHATSAPP_TOOL_POLICY } from '@/lib/whatsapp/akifToolPolicy'
 import { createSendText } from '@/lib/whatsapp/sendMessage'
 import { buildDegerCard } from '@/lib/deger/card'
 import { createAnonCardDeps } from '@/lib/deger/anonCardDeps'
 import { fetchIlListesi, fetchIlceListesi, fetchMahalleListesi } from '@/lib/tkgm/idariYapi'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
+import { readAkifEnv, numEnv, createAkifModel } from '@/lib/ai/akif/openaiClient'
+import { createAuditLogger, type AuditDb } from '@/lib/ai/akif/audit'
+import { checkConversationBudget, checkMonthlyBudget } from '@/lib/ai/akif/costGuard'
 import { prisma } from '@/lib/prisma'
 
 export const runtime = 'nodejs'
@@ -34,10 +39,19 @@ export async function GET(req: Request): Promise<Response> {
   return new Response('forbidden', { status: 403 })
 }
 
-function buildHandleDeps(): HandleDeps {
+function readWhatsappMonthlyBudgetUsd(): number {
+  return numEnv(process.env.AKIF_WHATSAPP_MONTHLY_BUDGET_USD, 20)
+}
+
+function buildAkifWhatsappDeps(): AkifHandleDeps {
   const config = readWhatsappConfig()
-  // Paylaşılan `DegerCardDeps` çekirdeği (/api/deger/kart ile ortak modül).
-  // Bot trend/demografi göstermez → ikisi de boş/null.
+  const env = readAkifEnv()
+  const db = prisma as unknown as AuditDb & WaDispatchDeps['db']
+  const audit = createAuditLogger(db, { conversationIdPrefix: 'wa:' })
+  const openai = new OpenAI({ apiKey: env.apiKey })
+  const model = createAkifModel({ client: openai, model: env.model, toolDefs: WA_AKIF_TOOL_DEFS })
+
+  // Paylaşılan `DegerCardDeps` çekirdeği (5a/5b ile ortak, WhatsApp bot trend/demografi göstermez).
   const cardDeps = {
     ...createAnonCardDeps(),
     findAreaTrend: async () => [],
@@ -48,15 +62,32 @@ function buildHandleDeps(): HandleDeps {
     ilce: normalizeAreaName(ilce),
     mahalle: normalizeAreaName(mahalle),
   })
+
   return {
     store: createPrismaConversationStore(prisma),
-    understanding: ruleBasedUnderstanding,
-    resolveDeps: { fetchIlListesi, fetchIlceListesi, fetchMahalleListesi },
-    buildCard: (mahalleId, ada, parsel) =>
-      buildDegerCard({ kind: 'adaParsel', mahalleId, ada, parsel }, cardDeps, { memberView: false }),
+    model,
+    modelName: env.model,
+    dispatch: (n, a) =>
+      dispatchToolWa(n, a, {
+        db,
+        lookupParcelDeps: {
+          resolveDeps: { fetchIlListesi, fetchIlceListesi, fetchMahalleListesi },
+          buildCard: (mahalleId, ada, parsel) =>
+            buildDegerCard({ kind: 'adaParsel', mahalleId, ada, parsel }, cardDeps, { memberView: false }),
+          siteUrlFor: (f) =>
+            `https://www.arsabil.com/deger?mahalleId=${f.mahalleId}&ada=${encodeURIComponent(f.ada)}&parsel=${encodeURIComponent(f.parsel)}`,
+        },
+      }),
+    validateArgs: validateArgsWa,
+    audit,
+    checkConversationBudget: (m) => checkConversationBudget(m, env.maxTurnTokens),
+    checkMonthlyBudget: () =>
+      checkMonthlyBudget({
+        monthSpendUsd: audit.monthSpendUsd,
+        budgetUsd: readWhatsappMonthlyBudgetUsd(),
+        now: () => new Date(),
+      }),
     sendText: createSendText({ fetch, config }),
-    siteUrlFor: (f) =>
-      `https://www.arsabil.com/deger?mahalleId=${f.mahalleId}&ada=${encodeURIComponent(f.ada)}&parsel=${encodeURIComponent(f.parsel)}`,
     hasSubscription: async (phone, il, ilce, mahalle) => {
       const k = nk(il, ilce, mahalle)
       const row = await prisma.whatsappSubscription.findUnique({
@@ -77,6 +108,8 @@ function buildHandleDeps(): HandleDeps {
       const r = await prisma.whatsappSubscription.deleteMany({ where: { phone } })
       return r.count
     },
+    toolPolicy: AKIF_WHATSAPP_TOOL_POLICY,
+    now: () => new Date(),
   }
 }
 
@@ -96,9 +129,9 @@ export async function POST(req: Request): Promise<Response> {
   for (const m of messages) {
     after(async () => {
       try {
-        await handleMessage(m, buildHandleDeps())
+        await runWhatsappAkifTurn(m, buildAkifWhatsappDeps())
       } catch (e) {
-        console.error('[wa] handle', e)
+        console.error('[wa-akif] handle', e)
       }
     })
   }
