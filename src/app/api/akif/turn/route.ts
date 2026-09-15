@@ -1,10 +1,14 @@
 // Akif-1 — /api/akif/turn: tek LLM danışma turu.
-// Akış: rate-limit → gövde doğrulama → env guard → aylık bütçe guard →
-// OpenAI client + orchestrator bağımlılıkları → runAkifTurn → AkifTurn JSON.
+// Akış: rate-limit → gövde doğrulama → (opsiyonel) Arsa Dosyası sahiplik
+// doğrulama (Akif-3) → env guard → aylık bütçe guard → OpenAI client +
+// orchestrator bağımlılıkları → runAkifTurn → (opsiyonel) Arsa Dosyası
+// güncelle → AkifTurn JSON.
 //
 // `readAkifEnv` / `new OpenAI(...)` YALNIZCA handler İÇİNDE çağrılır —
 // modül kapsamında değil — böylece `npm run build` OPENAI_API_KEY istemez.
 import OpenAI from 'openai'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { runAkifTurn } from '@/lib/ai/akif/orchestrator'
 import { createAkifModel, readAkifEnv } from '@/lib/ai/akif/openaiClient'
 import { createAuditLogger, type AuditDb } from '@/lib/ai/akif/audit'
@@ -22,6 +26,7 @@ import { prisma } from '@/lib/prisma'
 export const runtime = 'nodejs'
 
 const MAX_HISTORY = 40
+const MAX_MEMORY_CHARS = 2000
 
 function isValidHistory(v: unknown): v is AkifMessage[] {
   if (!Array.isArray(v) || v.length > MAX_HISTORY) return false
@@ -52,10 +57,11 @@ export async function POST(req: Request) {
   if (body == null || typeof body !== 'object') {
     return Response.json({ error: 'bad_request' }, { status: 400 })
   }
-  const { conversationId, history, userMessage } = body as {
+  const { conversationId, history, userMessage, projectId } = body as {
     conversationId?: unknown
     history?: unknown
     userMessage?: unknown
+    projectId?: unknown
   }
   if (
     typeof conversationId !== 'string' ||
@@ -68,7 +74,30 @@ export async function POST(req: Request) {
     return Response.json({ error: 'bad_request' }, { status: 400 })
   }
 
-  // 3. Ortam — OPENAI_API_KEY yoksa Akif kapalı.
+  // 3. Arsa Dosyası (Akif-3) — projectId gönderildiyse sahiplik doğrula.
+  // Sahipsiz/geçersiz projectId İSTEĞİ REDDETMEZ, sessizce yok sayılır —
+  // mevcut anonim/projesiz akışla tutarlı davranış. userId'yi burada bir kez
+  // sabitliyoruz — adım 8'de updateMany'nin where'i için tekrar oturum
+  // sorgulamaya gerek kalmasın diye.
+  let validatedProjectId: string | undefined
+  let validatedUserId: string | undefined
+  let projectMemory: string | null | undefined
+  if (typeof projectId === 'string' && projectId.length > 0) {
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id) {
+      const project = await prisma.project.findFirst({
+        where: { id: projectId, userId: session.user.id },
+        select: { akifMemory: true },
+      })
+      if (project) {
+        validatedProjectId = projectId
+        validatedUserId = session.user.id
+        projectMemory = project.akifMemory ?? null
+      }
+    }
+  }
+
+  // 4. Ortam — OPENAI_API_KEY yoksa Akif kapalı.
   let env
   try {
     env = readAkifEnv()
@@ -76,7 +105,7 @@ export async function POST(req: Request) {
     return Response.json({ error: 'akif_unavailable' }, { status: 503 })
   }
 
-  // 4. Aylık bütçe guard.
+  // 5. Aylık bütçe guard.
   // Prisma client, audit/gateway'in dar DI arayüzlerine yapısal olarak uyar;
   // Prisma'nın aggregate imzasındaki opsiyonel `_sum` alanları yüzünden tsc
   // eşleşmiyor — tek noktada daraltıyoruz.
@@ -91,14 +120,14 @@ export async function POST(req: Request) {
     return Response.json({ error: 'akif_unavailable', reason: 'monthly_budget' }, { status: 503 })
   }
 
-  // 5. OpenAI client + model sarmalayıcı.
+  // 6. OpenAI client + model sarmalayıcı.
   const openai = new OpenAI({ apiKey: env.apiKey })
   const model = createAkifModel({ client: openai, model: env.model })
 
-  // 6. Tur akışı.
+  // 7. Tur akışı.
   try {
     const turn = await runAkifTurn(
-      { conversationId, history, userMessage },
+      { conversationId, history, userMessage, projectMemory },
       {
         model,
         modelName: env.model,
@@ -110,6 +139,16 @@ export async function POST(req: Request) {
         now: () => new Date(),
       },
     )
+
+    // 8. Arsa Dosyası güncelle (Akif-3) — model yeni bir özet önerdiyse.
+    if (validatedProjectId && validatedUserId && turn.memory_updates != null) {
+      const trimmed = turn.memory_updates.trim()
+      await prisma.project.updateMany({
+        where: { id: validatedProjectId, userId: validatedUserId },
+        data: { akifMemory: trimmed.length > 0 ? trimmed.slice(0, MAX_MEMORY_CHARS) : null },
+      })
+    }
+
     return Response.json(turn)
   } catch (e) {
     console.error('[akif] turn', e)

@@ -8,6 +8,9 @@ const checkConversationBudgetMock = jest.fn()
 const dispatchToolMock = jest.fn()
 const validateArgsMock = jest.fn()
 const openAICtor = jest.fn()
+const getServerSessionMock = jest.fn()
+const projectFindFirstMock = jest.fn()
+const projectUpdateManyMock = jest.fn()
 
 jest.mock('openai', () => ({
   __esModule: true,
@@ -37,7 +40,19 @@ jest.mock('@/lib/ai/akif/gateway/toolRegistry', () => ({
   dispatchTool: (...a: unknown[]) => dispatchToolMock(...a),
   validateArgs: (...a: unknown[]) => validateArgsMock(...a),
 }))
-jest.mock('@/lib/prisma', () => ({ prisma: { __brand: 'prisma' } }))
+jest.mock('@/lib/prisma', () => ({
+  prisma: {
+    __brand: 'prisma',
+    project: {
+      findFirst: (...a: unknown[]) => projectFindFirstMock(...a),
+      updateMany: (...a: unknown[]) => projectUpdateManyMock(...a),
+    },
+  },
+}))
+jest.mock('next-auth/next', () => ({
+  getServerSession: (...a: unknown[]) => getServerSessionMock(...a),
+}))
+jest.mock('@/lib/auth', () => ({ authOptions: {} }))
 jest.mock('@/lib/rate-limit', () => ({
   checkRateLimit: (...a: unknown[]) => checkRateLimitMock(...a),
   getClientIp: () => '203.0.113.5',
@@ -89,6 +104,9 @@ describe('POST /api/akif/turn', () => {
     dispatchToolMock.mockReset()
     validateArgsMock.mockReset()
     openAICtor.mockReset()
+    getServerSessionMock.mockReset().mockResolvedValue(null)
+    projectFindFirstMock.mockReset().mockResolvedValue(null)
+    projectUpdateManyMock.mockReset().mockResolvedValue({ count: 1 })
   })
 
   it('gecerli POST -> 200, runAkifTurn bir kez, donen turn body', async () => {
@@ -160,5 +178,91 @@ describe('POST /api/akif/turn', () => {
     const res = await POST(req('{not json'))
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: 'bad_request' })
+  })
+})
+
+describe('POST /api/akif/turn — Arsa Dosyası (Akif-3)', () => {
+  beforeEach(() => {
+    checkRateLimitMock.mockReset().mockReturnValue({ ok: true })
+    runAkifTurnMock.mockReset().mockResolvedValue(TURN)
+    readAkifEnvMock
+      .mockReset()
+      .mockReturnValue({ apiKey: 'sk-x', model: 'gpt-4o-mini', maxTurnTokens: 6000, monthlyBudgetUsd: 20 })
+    createAkifModelMock.mockReset().mockReturnValue({ chatWithTools: jest.fn(), finalStructured: jest.fn() })
+    createAuditLoggerMock
+      .mockReset()
+      .mockReturnValue({ logTurn: jest.fn(), monthSpendUsd: jest.fn().mockResolvedValue(0) })
+    checkMonthlyBudgetMock.mockReset().mockResolvedValue({ ok: true, spent: 0 })
+    checkConversationBudgetMock.mockReset().mockReturnValue({ ok: true })
+    getServerSessionMock.mockReset().mockResolvedValue(null)
+    projectFindFirstMock.mockReset().mockResolvedValue(null)
+    projectUpdateManyMock.mockReset().mockResolvedValue({ count: 1 })
+  })
+
+  it('projectId gönderilmezse oturum/proje sorgusu hiç yapılmaz', async () => {
+    await POST(req(validBody))
+    expect(getServerSessionMock).not.toHaveBeenCalled()
+    expect(projectFindFirstMock).not.toHaveBeenCalled()
+    expect(runAkifTurnMock.mock.calls[0][0].projectMemory).toBeUndefined()
+  })
+
+  it('projectId var ama oturum yok -> sessizce yok sayılır, 200 döner', async () => {
+    const res = await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(res.status).toBe(200)
+    expect(projectFindFirstMock).not.toHaveBeenCalled()
+    expect(runAkifTurnMock.mock.calls[0][0].projectMemory).toBeUndefined()
+  })
+
+  it('projectId var, oturum var, proje bulunamaz (başkasının projesi) -> sessizce yok sayılır', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockResolvedValue(null)
+    const res = await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(res.status).toBe(200)
+    expect(projectFindFirstMock).toHaveBeenCalledWith({
+      where: { id: 'p1', userId: 'u1' },
+      select: { akifMemory: true },
+    })
+    expect(runAkifTurnMock.mock.calls[0][0].projectMemory).toBeUndefined()
+    expect(projectUpdateManyMock).not.toHaveBeenCalled()
+  })
+
+  it('projectId geçerli -> akifMemory projectMemory olarak orchestrator\'a geçirilir', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockResolvedValue({ akifMemory: 'Bütçe üst sınırı 5M TL.' })
+    const res = await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(res.status).toBe(200)
+    expect(runAkifTurnMock.mock.calls[0][0].projectMemory).toBe('Bütçe üst sınırı 5M TL.')
+    expect(getServerSessionMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('turn.memory_updates yoksa (undefined) project.updateMany hiç çağrılmaz', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockResolvedValue({ akifMemory: null })
+    runAkifTurnMock.mockResolvedValue({ ...TURN })
+    await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(projectUpdateManyMock).not.toHaveBeenCalled()
+  })
+
+  it('turn.memory_updates 2000 karakterden uzunsa kırpılarak yazılır', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockResolvedValue({ akifMemory: null })
+    const longText = 'x'.repeat(2500)
+    runAkifTurnMock.mockResolvedValue({ ...TURN, memory_updates: longText })
+    await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(projectUpdateManyMock).toHaveBeenCalledWith({
+      where: { id: 'p1', userId: 'u1' },
+      data: { akifMemory: 'x'.repeat(2000) },
+    })
+  })
+
+  it('turn.memory_updates boşluk-only ise akifMemory null yazılır', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockResolvedValue({ akifMemory: 'eski özet' })
+    runAkifTurnMock.mockResolvedValue({ ...TURN, memory_updates: '   ' })
+    await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(projectUpdateManyMock).toHaveBeenCalledWith({
+      where: { id: 'p1', userId: 'u1' },
+      data: { akifMemory: null },
+    })
   })
 })
