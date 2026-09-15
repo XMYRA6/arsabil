@@ -57,15 +57,21 @@ WhatsApp kullanıcı
 
 ## 3. Bileşenler
 
-### 3.1 Yeni `lookupParcel` Akif aracı
+### 3.1 Yeni `lookupParcel` Akif aracı — YALNIZ WhatsApp kanalında (2026-09-16 düzeltmesi)
 
-`src/lib/ai/akif/gateway/lookupParcel.ts` (yeni) — `resolveLocation.ts` (TKGM fuzzy il/ilçe/mahalle, mevcut, dokunulmaz) + `buildDegerCard`/`createAnonCardDeps` (mevcut, dokunulmaz) sarar. Üç çıktı, Akif'in mevcut sözleşmesine (`ToolResultCard`/`needs_confirmation`) yeni kod eklemeden oturur:
+**Önemli düzeltme (plan yazımı sırasında bulundu):** `AKIF_TOOL_DEFS` (OpenAI'a verilen araç listesi) bugün `openaiClient.ts`'in `chatWithTools`/`finalStructured` fonksiyonlarında SABİT KODLANMIŞ — hiçbir çağıran bunu override edemiyor. `lookupParcel`'i doğrudan paylaşılan `AKIF_TOOL_DEFS`'e eklemek, onu web `/akif` VE ses (`realtimeSession.ts` `AKIF_TOOL_DEFS`'i `ACTION_TOOL_DEFS` ile birleştiriyor) kanallarına da otomatik açardı — kullanıcı onayı bu KAPSAM DIŞI: yalnız WhatsApp.
+
+Çözüm: `createAkifModel`'e opsiyonel bir `toolDefs?: OpenAiToolDef[]` parametresi eklenir (verilmezse mevcut `AKIF_TOOL_DEFS`'e düşer — web/voice hiç etkilenmez, geriye dönük tam uyumlu, additive). `src/lib/whatsapp/akifToolGateway.ts` (yeni) — paylaşılan `toolRegistry.ts`'i DOKUNMADAN çevreler: 3 mevcut aracın şemasını (`AKIF_TOOL_DEFS`'ten spread) + yeni `lookupParcel` şemasını birleştiren bir dizi, 3 mevcut ad için paylaşılan `validateArgs`/`dispatchTool`'a delege eden + `lookupParcel` için kendi doğrulama/dispatch'ini ekleyen ince bir sarmalayıcı.
+
+`src/lib/ai/akif/gateway/lookupParcel.ts` (yeni, saf modül — `toolRegistry.ts`'e HİÇ eklenmez) — `resolveLocation.ts` (TKGM fuzzy il/ilçe/mahalle, mevcut, dokunulmaz) + `buildDegerCard`/`createAnonCardDeps` (mevcut, dokunulmaz) sarar. Üç çıktı, Akif'in mevcut sözleşmesine (`ToolResultCard`/`needs_confirmation`) yeni kod eklemeden oturur:
 
 - **Resolved** → yeni `ParcelCard` (`ToolResultCard` birleşimine eklenir) — gerçek Değer Kartı verisi, `renderCard.ts`'in formatlama mantığından uyarlanır.
 - **Ambiguous** (birden çok il/ilçe/mahalle eşleşmesi) → aday listesi `ParcelCard`'a `candidates` alanı olarak eklenir; Akif kullanıcıya kendi cümleleriyle sorar (mevcut `needs_confirmation` deseniyle aynı ruhta — model sayıyı uydurmaz, sadece seçenek sunar).
 - **Not found** → "bulunamadı" sinyali, Akif açıklama ister, tahmin etmez.
 
-`src/lib/ai/akif/prompts/toolPolicy.ts`'e bu aracın belirsiz/bulunamadı durumlarını nasıl ele alacağını anlatan bir talimat bloğu eklenir (mevcut "hesabı asla kendin yapma, aracını çağır" kuralıyla aynı stil).
+WhatsApp-özel bir `toolPolicy` eki (yeni `src/lib/whatsapp/akifToolPolicy.ts`, kısa bir string sabiti) bu aracın belirsiz/bulunamadı durumlarını nasıl ele alacağını anlatır — paylaşılan `toolPolicy.ts` DOKUNULMAZ (o dosya web/voice'un da gördüğü prompt'un parçası).
+
+Bu metnin modele ulaşması için `assembleSystemPrompt`/`runAkifTurn` Akif-3'teki `projectMemory` ile AYNI desende bir alan daha kazanır: `PromptContext.extraSystemPrompt?: string` (assemble.ts, tanımlıysa son katman olarak eklenir) + `RunAkifTurnInput.extraSystemPrompt?: string` (orchestrator.ts, doğrudan geçirir). Web/voice bu alanı hiç geçirmediği için davranışları birebir korunur — regresyon kilidi Akif-3'ünkiyle aynı testle doğrulanır (`extraSystemPrompt` verilmezse çıktı bugünküyle birebir aynı).
 
 ### 3.2 Konuşma durumu — `WhatsappConversation` yeniden kullanılır
 
@@ -77,7 +83,11 @@ Yeni model AÇILMAZ. `WhatsappConversation.state: Json` bugün `ConvState` (fiel
 
 ### 3.4 Maliyet guard'ları
 
-`AKIF_WHATSAPP_MONTHLY_BUDGET_USD` env (yeni, `AKIF_MONTHLY_BUDGET_USD`'den bağımsız) — `checkMonthlyBudget` aynı fonksiyonuyla, farklı bir audit sorgu kapsamıyla (`AkifTurnLog` tek tablo kalır, `conversationId` alanı `wa:<phone>` öneki ile kanal ayrımı yapar, WHERE koşulu bu önek + tarih aralığına göre filtrelenir). `RATE_LIMITS.AKIF_WHATSAPP_TURN` (yeni, telefon-bazlı, `AKIF_TURN`'ün IP-bazlı limitiyle benzer kademe) — mevcut `WHATSAPP_INBOUND` limitinin YANINA eklenir, onun yerine geçmez.
+`AKIF_WHATSAPP_MONTHLY_BUDGET_USD` env (yeni, `AKIF_MONTHLY_BUDGET_USD`'den bağımsız). `AkifTurnLog` TEK tablo kalır (yeni tablo YOK) — kanal ayrımı `conversationId` alanının `wa:<phone>` öneki üzerinden yapılır.
+
+**İkinci düzeltme (plan yazımı sırasında bulundu):** `createAuditLogger(db).monthSpendUsd(now)` bugün TÜM `AkifTurnLog` satırlarını (kanal ayrımı olmadan) topluyor — "ayrı bütçe havuzu" onayı bunu gerektirdiği için `audit.ts`'e opsiyonel bir üçüncü parametre eklenir: `createAuditLogger(db, { conversationIdPrefix? })`. Verilmezse (web'in mevcut çağrısı) davranış birebir aynı kalır; WhatsApp handler'ı `{ conversationIdPrefix: 'wa:' }` geçirir, `monthSpendUsd`'nin `aggregate` WHERE'ine `conversationId: { startsWith: prefix }` eklenir. Additive, geriye dönük tam uyumlu.
+
+`RATE_LIMITS.AKIF_WHATSAPP_TURN` (yeni, telefon-bazlı, `{ limit: 8, windowMs: 60_000 }` — `AKIF_TURN`'ün IP-bazlı limitiyle aynı kademe) — mevcut `WHATSAPP_INBOUND` (`{ limit: 10, windowMs: 60_000 }`, spam guard) limitinin YANINA eklenir, onun yerine geçmez.
 
 ### 3.5 Silinen dosyalar (ölü kod)
 
