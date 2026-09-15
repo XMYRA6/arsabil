@@ -11,7 +11,7 @@ import type { DegerCardResult } from '@/lib/deger/card'
 import { checkRateLimit as defaultCheckRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export interface HandleDeps {
-  store: ConversationStore
+  store: ConversationStore<ConvState>
   understanding: QueryUnderstanding
   resolveDeps: ResolveLocationDeps
   buildCard: (mahalleId: number, ada: string, parsel: string) => Promise<DegerCardResult>

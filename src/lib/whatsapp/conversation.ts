@@ -12,9 +12,9 @@ export function mergeFields(prev: ConvFields, incoming: Partial<ConvFields>): Co
   return out
 }
 
-export interface ConversationStore {
-  loadConversation(phone: string): Promise<{ state: ConvState; lastMessageId: string | null } | null>
-  saveConversation(phone: string, state: ConvState, lastMessageId: string): Promise<void>
+export interface ConversationStore<T> {
+  loadConversation(phone: string): Promise<{ state: T; lastMessageId: string | null } | null>
+  saveConversation(phone: string, state: T, lastMessageId: string): Promise<void>
 }
 
 type Db = {
@@ -24,13 +24,13 @@ type Db = {
   }
 }
 
-export function createPrismaConversationStore(db: Db, now: () => number = Date.now): ConversationStore {
+export function createPrismaConversationStore<T>(db: Db, now: () => number = Date.now): ConversationStore<T> {
   return {
     async loadConversation(phone) {
       const row = await db.whatsappConversation.findUnique({ where: { phone } })
       if (!row) return null
       if (now() - row.updatedAt.getTime() > TTL_MS) return null
-      return { state: row.state as ConvState, lastMessageId: row.lastMessageId }
+      return { state: row.state as T, lastMessageId: row.lastMessageId }
     },
     async saveConversation(phone, state, lastMessageId) {
       // Aynı telefondan eşzamanlı mesajlarda last-write-wins — v1 hacminde kabul; 5b'de atomik merge / SELECT FOR UPDATE.
