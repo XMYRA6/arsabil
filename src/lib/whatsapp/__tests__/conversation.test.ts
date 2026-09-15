@@ -1,19 +1,4 @@
-import { mergeFields, createPrismaConversationStore, TTL_MS } from '../conversation'
-
-describe('mergeFields', () => {
-  it('yeni dolu alanlar eskiyi ezer, boşlar korur', () => {
-    const r = mergeFields(
-      { ilText: 'Trabzon', ilId: 61, ada: '1' },
-      { ilceText: 'Of', ada: undefined },
-    )
-    expect(r).toEqual({ ilText: 'Trabzon', ilId: 61, ada: '1', ilceText: 'Of' })
-  })
-  it('ilText değişince alt seviye id\'leri korunur (çağıran temizler)', () => {
-    const r = mergeFields({ ilText: 'Trabzon', ilId: 61 }, { ilText: 'Rize' })
-    expect(r.ilText).toBe('Rize')
-    expect(r.ilId).toBe(61)
-  })
-})
+import { createPrismaConversationStore, TTL_MS } from '../conversation'
 
 describe('createPrismaConversationStore', () => {
   const row = (over: Record<string, unknown> = {}) => ({

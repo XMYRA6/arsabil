@@ -1,16 +1,4 @@
-import type { ConvFields, ConvState } from './types'
-
 export const TTL_MS = 30 * 60 * 1000
-
-export function mergeFields(prev: ConvFields, incoming: Partial<ConvFields>): ConvFields {
-  const out: ConvFields = { ...prev }
-  for (const [k, val] of Object.entries(incoming)) {
-    if (val !== undefined && val !== '' && val !== 0) {
-      ;(out as Record<string, unknown>)[k] = val
-    }
-  }
-  return out
-}
 
 export interface ConversationStore<T> {
   loadConversation(phone: string): Promise<{ state: T; lastMessageId: string | null } | null>
