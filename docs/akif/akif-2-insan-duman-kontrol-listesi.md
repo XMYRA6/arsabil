@@ -43,3 +43,16 @@ Model çıktısına bağlı davranış, Playwright simüle edemez — insan doğ
 - [ ] `/akif`'te oturum açıkken bir proje seç, birkaç tur konuş (ör. bütçe üst sınırı, deprem riskine hassasiyet gibi somut bir bilgi ver) → Dashboard → Projelerim'de o projenin kartında "Akif'in Hatırladıkları" bloğunda bu bilgi gerçekten göründü
 - [ ] Aynı projeyi seçip YENİ bir sohbet başlat (farklı `conversationId`) → Akif önceki sohbette öğrendiği bilgiyi hiç sormadan biliyor gibi davrandı (sistem promptuna gerçekten enjekte edildiği doğrulandı)
 - [ ] Dashboard → Projelerim'de "Temizle" butonuna bas → blok kayboldu, aynı projeye yeni bir Akif sohbetinde artık eski bilgi yok
+
+## Akif-5 (WhatsApp entegrasyonu)
+
+Gerçek Meta webhook + gerçek telefon numarası gerektirir — hiçbir otomatik test bunu simüle edemez.
+
+- [ ] Gerçek numaraya "merhaba" yaz → Akif serbest sohbetle karşılık verir (eski "hangi il?" state machine'i YOK)
+- [ ] "Trabzon Ortahisar Uğurlu 123/45" gibi tam bir sorgu yaz → gerçek Değer Kartı (renderCard formatında) + kısa Akif girişi gelir
+- [ ] Belirsiz bir mahalle adı yaz → Akif adayları kendi cümleleriyle sorar, numaralı liste DEĞİL
+- [ ] Kart geldikten sonra "evet" yaz → "takibe alındı" mesajı + `WhatsappSubscription` tablosunda satır oluşur
+- [ ] DURDUR yaz → abonelikler silinir, Akif'e hiç gitmeden anında yanıt gelir
+- [ ] Bir terim sor ("emsal nedir?") → Akif açıklar (lookupParcel'e gitmeden)
+- [ ] Aynı numaradan hızlıca çok mesaj gönder → önce spam guard (WHATSAPP_INBOUND), sonra (eğer aşarsa) AKIF_WHATSAPP_TURN limiti devreye girer
+- [ ] `AkifTurnLog`'da `conversationId` alanı `wa:<telefon>` formatında satırlar oluştuğunu doğrula (Coolify DB'den)
