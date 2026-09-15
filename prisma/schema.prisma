@@ -222,6 +222,7 @@ model Project {
   userId      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  akifMemory  String?
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   scenarios   Scenario[]
 }
