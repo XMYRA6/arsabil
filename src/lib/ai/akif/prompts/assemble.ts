@@ -5,9 +5,11 @@ import { TOOL_POLICY_PROMPT } from './toolPolicy'
 import { SAFETY_POLICY_PROMPT } from './safetyPolicy'
 import { DIALECT_PROMPT } from './dialect'
 import { HUMOR_PROMPT } from './humor'
+import { MEMORY_POLICY_PROMPT } from './memoryPolicy'
 
 export interface PromptContext {
   hasHistory: boolean
+  projectMemory?: string | null
 }
 
 const SEPARATOR = '\n\n---\n\n'
@@ -28,9 +30,16 @@ const LAYERS: readonly string[] = [
 /**
  * 7 katmanlı sistem-prompt'u sabit sırayla birleştirir. Deterministik:
  * aynı ctx her zaman aynı string'i üretir.
+ * Akif-3: projectMemory tanımlanmışsa Arsa Dosyası katmanı eklenir.
  */
 export function assembleSystemPrompt(ctx: PromptContext): string {
   const parts = LAYERS.map((layer) => layer.trim())
+  if (ctx.projectMemory !== undefined) {
+    parts.push(MEMORY_POLICY_PROMPT)
+    if (ctx.projectMemory) {
+      parts.push(`Bu proje hakkında bildiklerin:\n${ctx.projectMemory}`)
+    }
+  }
   if (!ctx.hasHistory) {
     parts.push(FIRST_MESSAGE_NOTE)
   }

@@ -6,6 +6,7 @@ import { TOOL_POLICY_PROMPT } from '../prompts/toolPolicy'
 import { SAFETY_POLICY_PROMPT } from '../prompts/safetyPolicy'
 import { DIALECT_PROMPT } from '../prompts/dialect'
 import { HUMOR_PROMPT } from '../prompts/humor'
+import { MEMORY_POLICY_PROMPT } from '../prompts/memoryPolicy'
 
 const FIRST_MESSAGE_MARKER = 'ilk mesaj'
 
@@ -97,5 +98,36 @@ describe('assembleSystemPrompt', () => {
   it('hasHistory:false ilk mesaj notunu ekler, true eklemez', () => {
     expect(assembleSystemPrompt({ hasHistory: false })).toContain(FIRST_MESSAGE_MARKER)
     expect(assembleSystemPrompt({ hasHistory: true })).not.toContain(FIRST_MESSAGE_MARKER)
+  })
+})
+
+describe('MEMORY_POLICY_PROMPT (Akif-3)', () => {
+  it('dolu bir string', () => {
+    expect(typeof MEMORY_POLICY_PROMPT).toBe('string')
+    expect(MEMORY_POLICY_PROMPT.trim().length).toBeGreaterThan(80)
+  })
+})
+
+describe('assembleSystemPrompt — Arsa Dosyası (Akif-3)', () => {
+  it('projectMemory verilmezse çıktı MEVCUT davranışla birebir aynı (regresyon kilidi)', () => {
+    const out = assembleSystemPrompt({ hasHistory: true })
+    expect(out).not.toContain('ARSA DOSYASI')
+    expect(out).not.toContain('Bu proje hakkında bildiklerin')
+  })
+
+  it('projectMemory: null → politika katmanı var, dinamik blok yok', () => {
+    const out = assembleSystemPrompt({ hasHistory: true, projectMemory: null })
+    expect(out).toContain('ARSA DOSYASI')
+    expect(out).not.toContain('Bu proje hakkında bildiklerin')
+  })
+
+  it('projectMemory: dolu metin → politika katmanı + dosya içeriği eklenir', () => {
+    const out = assembleSystemPrompt({
+      hasHistory: true,
+      projectMemory: 'Bütçe üst sınırı 5M TL.',
+    })
+    expect(out).toContain('ARSA DOSYASI')
+    expect(out).toContain('Bu proje hakkında bildiklerin:')
+    expect(out).toContain('Bütçe üst sınırı 5M TL.')
   })
 })
