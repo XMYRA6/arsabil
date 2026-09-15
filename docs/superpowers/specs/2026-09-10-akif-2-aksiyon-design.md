@@ -244,7 +244,7 @@ Akif-1 + Akif-2 + Akif-2.1 süitleri tam yeşil; `Scenario`/`Project`/`checkPlan
 
 - Migration `<ts>_add_akif_pending_action` prod'a `prisma migrate deploy` (bağımsız tablo)
 - Yeni env YOK
-- İnsan dumanı: yukarıdaki 5 madde
+- İnsan dumanı: 7 madde (`docs/akif/akif-2-insan-duman-kontrol-listesi.md` Akif-2-Aksiyon bölümü)
 - (Not: Realtime prompt değişikliği — `akif:voice-smoke` yeni tool şemalarının Realtime tarafından reddedilmediğini de kontrol etmeli)
 
 ## 11. Bilinen v1 kalıntıları / açık kararlar

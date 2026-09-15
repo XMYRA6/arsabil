@@ -26,6 +26,12 @@ describe("VOICE_RHYTHM_PROMPT", () => {
 
   it("boş değil, makul uzunlukta", () => {
     expect(VOICE_RHYTHM_PROMPT.length).toBeGreaterThan(120);
-    expect(VOICE_RHYTHM_PROMPT.length).toBeLessThan(1500);
+    expect(VOICE_RHYTHM_PROMPT.length).toBeLessThan(2000);
   });
+
+  it('VOICE_RHYTHM_PROMPT carries the save-action rules', () => {
+    expect(VOICE_RHYTHM_PROMPT).toMatch(/prepareScenarioSave/)
+    expect(VOICE_RHYTHM_PROMPT).toMatch(/commitPendingAction/)
+    expect(VOICE_RHYTHM_PROMPT).toMatch(/onaylamadan|görmeden/i) // "don't claim saved before commit success"
+  })
 });

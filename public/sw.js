@@ -1,5 +1,5 @@
-const CACHE_NAME = 'arsabil-cache-v1.0.3';
-const SW_VERSION = '1.0.3'; // Update this to force SW update
+const CACHE_NAME = 'arsabil-cache-cc3901dea186';
+const SW_VERSION = 'cc3901dea186'; // build-time damgalı — scripts/stamp-sw.mjs
 
 // Static assets to cache on install
 const STATIC_ASSETS = [

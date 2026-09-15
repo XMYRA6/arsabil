@@ -26,3 +26,12 @@ SADECE tarayıcı sayacıyla (`useRealtimeVoice`) uygulanır. Çökmüş/kötü 
 sayacı atlarsa oturum OpenAI'nin kendi sert üst sınırına kadar sürebilir; global aylık
 bütçe + kullanıcı aylık dakika + `AKIF_VOICE_SESSION` rate limit bu riski sınırlar.
 İnsan testinde 10. dk kapanışını gerçek tarayıcıda doğrula (yukarıdaki timeout maddesi).
+
+### Akif-2-Aksiyon (senaryo kaydet)
+- [ ] Sesli "şu yüzde elliyi kaydet" → onay kartı doğru sayılarla çıkar (arsa payı, sahibine daire/tutar, toplam maliyet) → "Kaydet" → proje sayfasında `Scenario` görünür → 30sn içinde "Geri Al" onu siler
+- [ ] Akif yüzdeyi yanlış duyar (ör. %15 yerine %50) → kart yanlış değeri gösterir → kullanıcı "Vazgeç" der, hiçbir şey kaydedilmez
+- [ ] Hiç proje yok → Akif "hangi ada?" diye sorar → kart proje adı input'uyla çıkar → ad + Kaydet → yeni proje + senaryo birlikte oluşur; Geri Al ikisini de siler
+- [ ] Buton yerine sesli "evet" ile commit → kaydedilir, Akif "kaydettim" der
+- [ ] Birden çok proje → kart radio listesi → seçim + Kaydet → doğru projeye yazılır
+- [ ] FREE planda 3 senaryo dolu → Akif "hakkın dolmuş" der, kart çıkmaz
+- [ ] `npm run akif:voice-smoke` (gerçek key) → yeni tool şemaları (`prepareScenarioSave`, `commitPendingAction`) Realtime tarafından reddedilmiyor
