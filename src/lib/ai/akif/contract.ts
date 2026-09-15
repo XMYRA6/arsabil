@@ -61,6 +61,7 @@ export interface AkifTurn {
   tool_result?: ToolResultCard
   needs_confirmation?: { field: string; heard: string; question: string }
   risk_level: 'low' | 'medium' | 'high'
+  memory_updates?: string
 }
 
 const INTENTS: readonly AkifIntent[] = [
@@ -105,6 +106,7 @@ export const AKIF_TURN_JSON_SCHEMA: Record<string, unknown> = {
     'missing_fields',
     'risk_level',
     'needs_confirmation',
+    'memory_updates',
   ],
   properties: {
     intent: { type: 'string', enum: [...INTENTS] },
@@ -124,6 +126,7 @@ export const AKIF_TURN_JSON_SCHEMA: Record<string, unknown> = {
         question: { type: 'string' },
       },
     },
+    memory_updates: { type: ['string', 'null'] },
   },
 }
 
@@ -177,6 +180,10 @@ export function parseAkifTurn(raw: unknown): AkifTurn | null {
       heard: n.heard,
       question: n.question,
     }
+  }
+
+  if (typeof r.memory_updates === 'string') {
+    turn.memory_updates = r.memory_updates
   }
 
   // tool_result: kasıtlı olarak yok sayılır.

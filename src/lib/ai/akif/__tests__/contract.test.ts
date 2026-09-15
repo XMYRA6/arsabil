@@ -31,6 +31,18 @@ describe('parseAkifTurn', () => {
     expect(parseAkifTurn(null)).toBeNull()
     expect(parseAkifTurn('x')).toBeNull()
   })
+  it('memory_updates string ise korunur', () => {
+    const r = parseAkifTurn({ ...valid, memory_updates: 'Bütçe üst sınırı 5M TL.' })
+    expect(r!.memory_updates).toBe('Bütçe üst sınırı 5M TL.')
+  })
+  it('memory_updates null ise turn nesnesine hiç eklenmez', () => {
+    const r = parseAkifTurn({ ...valid, memory_updates: null })
+    expect(r!.memory_updates).toBeUndefined()
+  })
+  it('memory_updates alanı hiç yoksa turn nesnesine eklenmez', () => {
+    const r = parseAkifTurn(valid)
+    expect(r!.memory_updates).toBeUndefined()
+  })
 })
 
 describe('AKIF_TURN_JSON_SCHEMA', () => {
@@ -49,5 +61,11 @@ describe('AKIF_TURN_JSON_SCHEMA', () => {
     )
     const req: string[] = (AKIF_TURN_JSON_SCHEMA as any).required
     expect([...req].sort()).toEqual(Object.keys(props).sort())
+  })
+  it('memory_updates alanı string|null olarak tanımlı ve required listesinde', () => {
+    const props = (AKIF_TURN_JSON_SCHEMA as any).properties
+    expect(props.memory_updates).toEqual({ type: ['string', 'null'] })
+    const req: string[] = (AKIF_TURN_JSON_SCHEMA as any).required
+    expect(req).toContain('memory_updates')
   })
 })
