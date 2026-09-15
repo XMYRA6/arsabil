@@ -78,22 +78,28 @@ export async function POST(req: Request) {
   // Sahipsiz/geçersiz projectId İSTEĞİ REDDETMEZ, sessizce yok sayılır —
   // mevcut anonim/projesiz akışla tutarlı davranış. userId'yi burada bir kez
   // sabitliyoruz — adım 8'de updateMany'nin where'i için tekrar oturum
-  // sorgulamaya gerek kalmasın diye.
+  // sorgulamaya gerek kalmasın diye. getServerSession/findFirst beklenmedik
+  // şekilde throw ederse (geçici DB/auth hatası) tur asla çökmemeli — bu
+  // durumda da "projectId yok sayıldı" davranışına düşüyoruz.
   let validatedProjectId: string | undefined
   let validatedUserId: string | undefined
   let projectMemory: string | null | undefined
   if (typeof projectId === 'string' && projectId.length > 0) {
-    const session = await getServerSession(authOptions)
-    if (session?.user?.id) {
-      const project = await prisma.project.findFirst({
-        where: { id: projectId, userId: session.user.id },
-        select: { akifMemory: true },
-      })
-      if (project) {
-        validatedProjectId = projectId
-        validatedUserId = session.user.id
-        projectMemory = project.akifMemory ?? null
+    try {
+      const session = await getServerSession(authOptions)
+      if (session?.user?.id) {
+        const project = await prisma.project.findFirst({
+          where: { id: projectId, userId: session.user.id },
+          select: { akifMemory: true },
+        })
+        if (project) {
+          validatedProjectId = projectId
+          validatedUserId = session.user.id
+          projectMemory = project.akifMemory ?? null
+        }
       }
+    } catch (e) {
+      console.error('[akif] project ownership check', e)
     }
   }
 
@@ -141,12 +147,19 @@ export async function POST(req: Request) {
     )
 
     // 8. Arsa Dosyası güncelle (Akif-3) — model yeni bir özet önerdiyse.
+    // Ayrı try/catch: tur zaten başarıyla üretildi ve bütçeye yazıldı — bu
+    // yan etki (hafıza kalıcılığı) başarısız olsa bile kullanıcı cevabını
+    // kaybetmemeli, sadece 502'ye düşmeden sessizce loglanır.
     if (validatedProjectId && validatedUserId && turn.memory_updates != null) {
-      const trimmed = turn.memory_updates.trim()
-      await prisma.project.updateMany({
-        where: { id: validatedProjectId, userId: validatedUserId },
-        data: { akifMemory: trimmed.length > 0 ? trimmed.slice(0, MAX_MEMORY_CHARS) : null },
-      })
+      try {
+        const trimmed = turn.memory_updates.trim()
+        await prisma.project.updateMany({
+          where: { id: validatedProjectId, userId: validatedUserId },
+          data: { akifMemory: trimmed.length > 0 ? trimmed.slice(0, MAX_MEMORY_CHARS) : null },
+        })
+      } catch (e) {
+        console.error('[akif] memory write-back', e)
+      }
     }
 
     return Response.json(turn)

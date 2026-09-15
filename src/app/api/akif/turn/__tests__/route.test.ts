@@ -265,4 +265,27 @@ describe('POST /api/akif/turn — Arsa Dosyası (Akif-3)', () => {
       data: { akifMemory: null },
     })
   })
+
+  it('getServerSession/findFirst throw eder -> tur yine 200 döner, projectMemory undefined', async () => {
+    getServerSessionMock.mockRejectedValue(new Error('auth provider down'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual(TURN)
+    expect(runAkifTurnMock.mock.calls[0][0].projectMemory).toBeUndefined()
+    expect(projectUpdateManyMock).not.toHaveBeenCalled()
+    errSpy.mockRestore()
+  })
+
+  it('project.updateMany throw eder -> yine de basarili turn 200 doner (502 degil)', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockResolvedValue({ akifMemory: null })
+    projectUpdateManyMock.mockRejectedValue(new Error('db write failed'))
+    runAkifTurnMock.mockResolvedValue({ ...TURN, memory_updates: 'yeni özet' })
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ ...TURN, memory_updates: 'yeni özet' })
+    errSpy.mockRestore()
+  })
 })
