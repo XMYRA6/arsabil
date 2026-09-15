@@ -15,6 +15,7 @@ interface Project {
     id: string;
     name: string;
     description?: string;
+    akifMemory?: string | null;
     _count?: { scenarios: number };
     scenarios?: Scenario[];
 }
@@ -45,6 +46,26 @@ export default function ProjectsPage() {
         }
         exportToExcel(project.scenarios, project.name);
         toast.success('Excel dosyası indirildi.');
+    };
+
+    const handleClearMemory = async (project: Project) => {
+        try {
+            const res = await fetch(`/api/projects/${project.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'clear_memory' }),
+            });
+            if (!res.ok) {
+                toast.error('Temizlenemedi, tekrar dene.');
+                return;
+            }
+            setProjects((prev) =>
+                prev.map((p) => (p.id === project.id ? { ...p, akifMemory: null } : p))
+            );
+            toast.success('Arsa Dosyası temizlendi.');
+        } catch {
+            toast.error('Bağlantı hatası, tekrar dene.');
+        }
     };
 
     if (loading) return <div className={styles.loading}>Yükleniyor...</div>;
@@ -81,6 +102,16 @@ export default function ProjectsPage() {
                                 <p className={styles.projectDescription}>
                                     {project.description}
                                 </p>
+                            )}
+
+                            {project.akifMemory && (
+                                <div className={styles.memoryBlock}>
+                                    <h5 className={styles.memoryTitle}>🎙 Akif&apos;in Hatırladıkları</h5>
+                                    <p className={styles.memoryText}>{project.akifMemory}</p>
+                                    <Button variant="outline" onClick={() => handleClearMemory(project)}>
+                                        Temizle
+                                    </Button>
+                                </div>
                             )}
 
                             {(project.scenarios?.length ?? 0) > 0 && (
