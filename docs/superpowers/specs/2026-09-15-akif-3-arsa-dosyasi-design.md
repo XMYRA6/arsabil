@@ -149,7 +149,10 @@ let validatedProjectId: string | undefined
 if (typeof projectId === 'string' && projectId.length > 0) {
   const session = await getServerSession(authOptions)
   if (session?.user) {
-    const project = await prisma.project.findUnique({
+    // findFirst — Project.id tekil alan ama (id, userId) bileşik-tekil
+    // DEĞİL; sahiplik+varlık kontrolü aynı sorguda böyle yapılır
+    // (bkz. `src/app/api/projects/[id]/scenarios/route.ts`'in mevcut deseni).
+    const project = await prisma.project.findFirst({
       where: { id: projectId, userId: session.user.id },
       select: { akifMemory: true },
     })
