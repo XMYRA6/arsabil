@@ -184,6 +184,43 @@ it('proje seçilince sonraki istekte projectId gönderilir', async () => {
   expect(body.projectId).toBe('p1')
 })
 
+it('Yeni sohbet sonrası proje seçimi KORUNUR (özelliğin amacı: hafıza sohbetler arası kalıcı)', async () => {
+  ;(useSession as jest.Mock).mockReturnValue({ status: 'authenticated' })
+  ;(global.fetch as jest.Mock).mockImplementation((url: string) => {
+    if (url === '/api/projects') {
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ projects: [{ id: 'p1', name: 'Trabzon Arsa' }] }),
+      })
+    }
+    return Promise.resolve({ ok: true, status: 200, json: async () => turn })
+  })
+  render(<AkifPage />)
+  await waitFor(() =>
+    expect(screen.getByRole('combobox', { name: /proje seç/i })).toBeInTheDocument(),
+  )
+  fireEvent.change(screen.getByRole('combobox', { name: /proje seç/i }), {
+    target: { value: 'p1' },
+  })
+  sendText('bir')
+  await waitFor(() => {
+    const calls = (global.fetch as jest.Mock).mock.calls.filter(([u]) => u === '/api/akif/turn')
+    expect(calls.length).toBe(1)
+  })
+
+  fireEvent.click(screen.getByRole('button', { name: 'Yeni sohbet' }))
+
+  sendText('iki')
+  await waitFor(() => {
+    const calls = (global.fetch as jest.Mock).mock.calls.filter(([u]) => u === '/api/akif/turn')
+    expect(calls.length).toBe(2)
+  })
+  const secondTurnCall = (global.fetch as jest.Mock).mock.calls
+    .filter(([u]) => u === '/api/akif/turn')[1]
+  const body = JSON.parse(secondTurnCall[1].body)
+  expect(body.projectId).toBe('p1')
+})
+
 it('oturum kapalıyken proje seçici görünmez, projectId hiç gönderilmez', async () => {
   ;(useSession as jest.Mock).mockReturnValue({ status: 'unauthenticated' })
   render(<AkifPage />)

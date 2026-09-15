@@ -42,6 +42,14 @@ describe('GET /api/projects', () => {
         expect(findManyMock.mock.calls[0][0].where.userId).not.toBeUndefined()
         expect(getServerSessionMock).toHaveBeenCalledWith(authOptions)
     })
+
+    it('include kullanır, select DEĞİL (akifMemory dahil TÜM proje alanları dönmeli — Akif-3 dashboard bloğu buna dayanıyor)', async () => {
+        getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+        await GET()
+        const call = findManyMock.mock.calls[0][0]
+        expect(call.select).toBeUndefined()
+        expect(call.include).toBeDefined()
+    })
 })
 
 describe('POST /api/projects', () => {

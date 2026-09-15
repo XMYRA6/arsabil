@@ -35,3 +35,11 @@ bütçe + kullanıcı aylık dakika + `AKIF_VOICE_SESSION` rate limit bu riski s
 - [ ] Birden çok proje → kart radio listesi → seçim + Kaydet → doğru projeye yazılır
 - [ ] FREE planda 3 senaryo dolu → Akif "hakkın dolmuş" der, kart çıkmaz
 - [ ] `npm run akif:voice-smoke` (gerçek key) → yeni tool şemaları (`prepareScenarioSave`, `commitPendingAction`) Realtime tarafından reddedilmiyor
+
+## Akif-3 (Arsa Dosyası — kalıcı hafıza)
+
+Model çıktısına bağlı davranış, Playwright simüle edemez — insan doğrulaması şart. Ayrıca: bu özelliğin migration'ı (`..._add_project_akif_memory`) şu ana kadar hiçbir CANLI veritabanına uygulanmadı (yalnız şema+tip seviyesinde doğrulandı) — deploy öncesi `prisma migrate deploy` bu listedeki maddelerden önce çalıştırılmalı.
+
+- [ ] `/akif`'te oturum açıkken bir proje seç, birkaç tur konuş (ör. bütçe üst sınırı, deprem riskine hassasiyet gibi somut bir bilgi ver) → Dashboard → Projelerim'de o projenin kartında "Akif'in Hatırladıkları" bloğunda bu bilgi gerçekten göründü
+- [ ] Aynı projeyi seçip YENİ bir sohbet başlat (farklı `conversationId`) → Akif önceki sohbette öğrendiği bilgiyi hiç sormadan biliyor gibi davrandı (sistem promptuna gerçekten enjekte edildiği doğrulandı)
+- [ ] Dashboard → Projelerim'de "Temizle" butonuna bas → blok kayboldu, aynı projeye yeni bir Akif sohbetinde artık eski bilgi yok
