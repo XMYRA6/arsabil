@@ -286,4 +286,12 @@ describe('runAkifTurn', () => {
     const turn = await runAkifTurn(INPUT, deps)
     expect(turn.tool_result).toEqual(PARCEL_CARD)
   })
+
+  it('(l) extraSystemPrompt verilirse sistem promptuna eklenir', async () => {
+    const { deps } = makeDeps()
+    await runAkifTurn({ ...INPUT, extraSystemPrompt: 'EK_POLITIKA_TEST_METNI' }, deps)
+    const sentMsgs = (deps.model.chatWithTools as jest.Mock).mock.calls[0][0] as Array<{ role: string; content: string }>
+    const sys = sentMsgs.find((m) => m.role === 'system')!
+    expect(sys.content).toContain('EK_POLITIKA_TEST_METNI')
+  })
 })

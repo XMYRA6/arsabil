@@ -10,6 +10,7 @@ import { MEMORY_POLICY_PROMPT } from './memoryPolicy'
 export interface PromptContext {
   hasHistory: boolean
   projectMemory?: string | null
+  extraSystemPrompt?: string
 }
 
 const SEPARATOR = '\n\n---\n\n'
@@ -39,6 +40,9 @@ export function assembleSystemPrompt(ctx: PromptContext): string {
     if (ctx.projectMemory) {
       parts.push(`Bu proje hakkında bildiklerin:\n${ctx.projectMemory}`)
     }
+  }
+  if (ctx.extraSystemPrompt) {
+    parts.push(ctx.extraSystemPrompt)
   }
   if (!ctx.hasHistory) {
     parts.push(FIRST_MESSAGE_NOTE)

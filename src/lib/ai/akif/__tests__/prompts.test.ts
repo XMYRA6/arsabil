@@ -131,3 +131,15 @@ describe('assembleSystemPrompt — Arsa Dosyası (Akif-3)', () => {
     expect(out).toContain('Bütçe üst sınırı 5M TL.')
   })
 })
+
+describe('assembleSystemPrompt — extraSystemPrompt (Akif-5)', () => {
+  it('extraSystemPrompt verilmezse çıktı MEVCUT davranışla birebir aynı (regresyon kilidi)', () => {
+    const out = assembleSystemPrompt({ hasHistory: true })
+    expect(out).not.toContain('EK_POLITIKA_TEST_METNI')
+  })
+
+  it('extraSystemPrompt verilirse son katman olarak eklenir', () => {
+    const out = assembleSystemPrompt({ hasHistory: true, extraSystemPrompt: 'EK_POLITIKA_TEST_METNI' })
+    expect(out).toContain('EK_POLITIKA_TEST_METNI')
+  })
+})

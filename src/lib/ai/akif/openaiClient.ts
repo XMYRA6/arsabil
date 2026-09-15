@@ -6,11 +6,12 @@
 
 import type OpenAI from 'openai'
 import { AKIF_TURN_JSON_SCHEMA } from './contract'
-import { AKIF_TOOL_DEFS } from './gateway/toolRegistry'
+import { AKIF_TOOL_DEFS, type OpenAiToolDef } from './gateway/toolRegistry'
 
 export interface AkifModelDeps {
   client: Pick<OpenAI, 'chat'>
   model: string
+  toolDefs?: OpenAiToolDef[]
 }
 
 export interface ChatMsg {
@@ -133,7 +134,7 @@ export function createAkifModel(deps: AkifModelDeps): {
       const resp = await create({
         model: deps.model,
         messages,
-        tools: AKIF_TOOL_DEFS,
+        tools: deps.toolDefs ?? AKIF_TOOL_DEFS,
         tool_choice: 'auto',
       })
       const usage = readUsage(resp)
@@ -159,7 +160,7 @@ export function createAkifModel(deps: AkifModelDeps): {
         messages,
         // Araç şeması bağlamda kalsın ama 2. çağrıda YENİ araç çağrısı YASAK —
         // bu çağrının tek görevi yapılandırılmış JSON üretmek (final review I5).
-        tools: AKIF_TOOL_DEFS,
+        tools: deps.toolDefs ?? AKIF_TOOL_DEFS,
         tool_choice: 'none',
         response_format: {
           type: 'json_schema',

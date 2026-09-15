@@ -107,5 +107,28 @@ describe('audit', () => {
 
       expect(spent).toBe(0);
     });
+
+    it('conversationIdPrefix verilirse aggregate WHERE\'ine startsWith eklenir', async () => {
+      const now = new Date('2026-08-15T12:00:00Z')
+      const expectedMonthStart = new Date(Date.UTC(2026, 7, 1))
+      const mockAggregate = jest.fn().mockResolvedValue({ _sum: { estCostUsd: 5 } })
+      const db: AuditDb = { akifTurnLog: { create: jest.fn(), aggregate: mockAggregate } }
+      const logger = createAuditLogger(db, { conversationIdPrefix: 'wa:' })
+      await logger.monthSpendUsd(now)
+      expect(mockAggregate).toHaveBeenCalledWith({
+        _sum: { estCostUsd: true },
+        where: { createdAt: { gte: expectedMonthStart }, conversationId: { startsWith: 'wa:' } },
+      })
+    })
+
+    it('conversationIdPrefix verilmezse WHERE\'e conversationId eklenmez (regresyon)', async () => {
+      const now = new Date('2026-08-15T12:00:00Z')
+      const mockAggregate = jest.fn().mockResolvedValue({ _sum: { estCostUsd: 5 } })
+      const db: AuditDb = { akifTurnLog: { create: jest.fn(), aggregate: mockAggregate } }
+      const logger = createAuditLogger(db)
+      await logger.monthSpendUsd(now)
+      const call = mockAggregate.mock.calls[0][0] as { where: Record<string, unknown> }
+      expect(call.where.conversationId).toBeUndefined()
+    })
   });
 });

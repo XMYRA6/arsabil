@@ -16,7 +16,10 @@ export interface AuditDb {
   };
 }
 
-export function createAuditLogger(db: AuditDb) {
+export function createAuditLogger(
+  db: AuditDb,
+  opts: { conversationIdPrefix?: string } = {},
+) {
   return {
     async logTurn(entry: AuditEntry): Promise<void> {
       try {
@@ -31,11 +34,16 @@ export function createAuditLogger(db: AuditDb) {
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
       );
 
+      const where: Record<string, unknown> = {
+        createdAt: { gte: monthStart },
+      };
+      if (opts.conversationIdPrefix) {
+        where.conversationId = { startsWith: opts.conversationIdPrefix };
+      }
+
       const result = await db.akifTurnLog.aggregate({
         _sum: { estCostUsd: true },
-        where: {
-          createdAt: { gte: monthStart },
-        },
+        where,
       });
 
       return result._sum.estCostUsd ?? 0;

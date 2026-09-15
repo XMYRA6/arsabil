@@ -17,6 +17,7 @@ export interface RunAkifTurnInput {
   history: AkifMessage[]
   userMessage: string
   projectMemory?: string | null
+  extraSystemPrompt?: string
 }
 
 export interface RunAkifTurnDeps {
@@ -57,7 +58,7 @@ export async function runAkifTurn(
   input: RunAkifTurnInput,
   deps: RunAkifTurnDeps,
 ): Promise<AkifTurn> {
-  const { conversationId, history, userMessage, projectMemory } = input
+  const { conversationId, history, userMessage, projectMemory, extraSystemPrompt } = input
   const turnNumber = Math.floor(history.length / 2) + 1
 
   // Sistem prompt'u bir kez kur — hem bütçe kontrolü hem sohbet mesajları
@@ -66,6 +67,7 @@ export async function runAkifTurn(
   const systemPrompt = assembleSystemPrompt({
     hasHistory: history.length > 0,
     projectMemory,
+    extraSystemPrompt,
   })
 
   // 1. Bütçe kontrolü — aşıldıysa model HİÇ çağrılmaz.

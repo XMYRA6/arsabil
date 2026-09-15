@@ -89,6 +89,28 @@ describe('createAkifModel.chatWithTools', () => {
     )
     expect(n).toBe(1)
   })
+
+  it('toolDefs verilirse AKIF_TOOL_DEFS yerine onu gönderir', async () => {
+    const CUSTOM = [{ type: 'function' as const, function: { name: 'x', description: 'd', parameters: {} } }]
+    const { deps, calls } = fakeDeps(async () => ({
+      choices: [{ message: { content: 'x' } }],
+      usage: { prompt_tokens: 1, completion_tokens: 1 },
+    }))
+    await createAkifModel({ ...deps, toolDefs: CUSTOM }).chatWithTools(MSGS)
+    const arg = calls[0][0] as { tools: unknown }
+    expect(arg.tools).toBe(CUSTOM)
+  })
+
+  it('toolDefs verilmezse AKIF_TOOL_DEFS kullanılır (regresyon)', async () => {
+    const { deps, calls } = fakeDeps(async () => ({
+      choices: [{ message: { content: 'x' } }],
+      usage: { prompt_tokens: 1, completion_tokens: 1 },
+    }))
+    await createAkifModel(deps).chatWithTools(MSGS)
+    const arg = calls[0][0] as { tools: unknown }
+    expect(Array.isArray(arg.tools)).toBe(true)
+    expect((arg.tools as unknown[]).length).toBeGreaterThan(0)
+  })
 })
 
 describe('createAkifModel.finalStructured', () => {
