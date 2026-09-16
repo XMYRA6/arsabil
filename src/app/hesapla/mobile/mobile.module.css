@@ -198,6 +198,17 @@
     /* `.metrikKutuSkor` / `.metrikDegerSkor` kaldirildi: skor kutusunun veri
        kaynagi yok (insan karari 2026-07-29). Geri gerekirse `5bc784a`de. */
 
+    /* Impeccable critique bulgusu (P0): veri girilmeden once "Sonuc Detayi"
+       vb. butonlara basilinca tire dolu bos ekranlara aciliyordu. Butonlar
+       artik hasEnoughDataForResult false iken disabled — bu ipucu neden
+       tiklanamadiklarini aciklar (bkz. SonucKarti.tsx). */
+    .hubIpucu {
+        margin: 0;
+        font: 600 12px Inter, sans-serif;
+        color: rgba(255, 255, 255, .78);
+        line-height: 1.4;
+    }
+
     .kartMenuButonu {
         position: relative;
         display: flex;
@@ -213,6 +224,11 @@
         color: #fff;
         font: 700 11.5px Inter, sans-serif;
         cursor: pointer;
+    }
+
+    .kartMenuButonu:disabled {
+        opacity: .5;
+        cursor: default;
     }
 
     /* ═══ Tasarım Stüdyosu hub (2026-08-23 IA sadelestirmesi) ═══════════

@@ -261,8 +261,23 @@ a {
       radial-gradient(620px 520px at 78% 96%, rgba(124,58,237,.34), transparent 62%),
       radial-gradient(520px 380px at 4% 86%,  rgba(16,185,129,.16), transparent 60%);
 
-    --m-grad-accent: linear-gradient(135deg, #4f9bff 0%, #1f6feb 46%, #22d3ee 118%);
-    --m-grad-btn: linear-gradient(135deg, #4f9bff, #1f6feb 60%, #22d3ee);
+    /* Impeccable audit (2026-09-17): --m-grad-btn ile AYNI kontrast sorunu —
+       bu token `.sonucKarti` (hesapla mobil sonuç kartı) gibi yüzeylerin
+       arka planı, üzerine yerleşen beyaz metin (`.sonucBosMetin`) dedektörün
+       flag'lediği 5 low-contrast öğeden biriydi. Aynı düzeltilmiş üç renk
+       (bkz. --m-grad-btn) buraya da uygulandı, durak yüzdeleri (%0/46/118)
+       korundu. */
+    --m-grad-accent: linear-gradient(135deg, #2f6fe0 0%, #1f6feb 46%, #0e7490 118%);
+    /* Impeccable audit (2026-09-17): beyaz metin bu gradyanın üzerinde
+       WCAG AA'nın (4.5:1) çok altındaydı — ölçülen en kötü nokta (#22d3ee)
+       1.8:1, hatta başlangıç ucu (#4f9bff) da yalnızca 2.8:1 idi; yalnızca
+       %60 durağı (#1f6feb) barely geçiyordu (4.63:1). Aynı "mavi→camgöbeği"
+       kimliği korunarak üç durak da beyaz metnin ≥4.5:1 geçtiği bir
+       parlaklık aralığına çekildi (yeni: 4.70:1 / 4.63:1 / 5.35:1) — bu
+       token site genelinde (dashboard/hesapla/inbox/marketplace/login vb.
+       ~30 dosya) birincil CTA arka planı olarak kullanılıyor, tek noktadan
+       düzeltme hepsini kapsıyor. */
+    --m-grad-btn: linear-gradient(135deg, #2f6fe0, #1f6feb 60%, #0e7490);
 
     --m-ink: #081729;
     --m-body: #4c5d78;

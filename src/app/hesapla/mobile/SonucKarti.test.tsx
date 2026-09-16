@@ -138,4 +138,52 @@ describe('SonucKarti', () => {
         render(<SonucKarti {...BASE} isDemoData={false} />)
         expect(screen.queryByText('Örnek Veri')).toBeNull()
     })
+
+    // Impeccable critique bulgusu (P0): hasEnoughDataForResult false iken
+    // "Sonuç Detayı"/"Tasarım Stüdyosu"/"Arsa Sahibi Teklifi" KOSULSUZ
+    // tikanabilirdi, tiklaninca tire dolu bos ekranlara aciliyordu — ilk
+    // kullanici veya dikkati dagilmis saha kullanicisi icin bir cikmaz.
+    it('hasEnoughDataForResult false iken uc menu butonu DEVRE DISI birakilir, tiklama HANDLER I cagirmaz', async () => {
+        const onSonucDetayiAc = jest.fn()
+        const onStudioHubAc = jest.fn()
+        const onLandownerOfferAc = jest.fn()
+        render(
+            <SonucKarti
+                {...BASE}
+                hasEnoughDataForResult={false}
+                minDaireFiyati={null}
+                birimFiyat={null}
+                onSonucDetayiAc={onSonucDetayiAc}
+                onStudioHubAc={onStudioHubAc}
+                onLandownerOfferAc={onLandownerOfferAc}
+            />
+        )
+        const sonucDetayi = screen.getByRole('button', { name: /Sonuç Detayı/ })
+        const studioHub = screen.getByRole('button', { name: /Tasarım Stüdyosu/ })
+        const landownerOffer = screen.getByRole('button', { name: /Arsa Sahibi Teklifi/ })
+        expect(sonucDetayi).toBeDisabled()
+        expect(studioHub).toBeDisabled()
+        expect(landownerOffer).toBeDisabled()
+
+        // disabled bir native <button>'a userEvent.click POINTER_EVENTS_NONE
+        // yuzunden hata firlatir — dogrudan click() DOM API'siyle handler'in
+        // gercekten cagrilmadigini dogruluyoruz (React disabled butonlarda
+        // onClick'i native olarak engeller).
+        sonucDetayi.click()
+        studioHub.click()
+        landownerOffer.click()
+        expect(onSonucDetayiAc).not.toHaveBeenCalled()
+        expect(onStudioHubAc).not.toHaveBeenCalled()
+        expect(onLandownerOfferAc).not.toHaveBeenCalled()
+
+        expect(screen.getByText(/Bu bölümleri görmek için önce/)).toBeInTheDocument()
+    })
+
+    it('hasEnoughDataForResult true iken uc menu butonu ETKIN dir, ipucu metni gorunmez', () => {
+        render(<SonucKarti {...BASE} />)
+        expect(screen.getByRole('button', { name: /Sonuç Detayı/ })).toBeEnabled()
+        expect(screen.getByRole('button', { name: /Tasarım Stüdyosu/ })).toBeEnabled()
+        expect(screen.getByRole('button', { name: /Arsa Sahibi Teklifi/ })).toBeEnabled()
+        expect(screen.queryByText(/Bu bölümleri görmek için önce/)).toBeNull()
+    })
 })

@@ -108,17 +108,41 @@ export function SonucKarti({
                 </>
             )}
 
-            <button type="button" className={styles.kartMenuButonu} onClick={onSonucDetayiAc}>
+            {/* Impeccable critique bulgusu (P0): bu uc buton eskiden
+                hasEnoughDataForResult'tan BAGIMSIZ, kosulsuz tiklanabilirdi —
+                veri girilmeden basilinca tire dolu bos ekranlara aciliyordu. */}
+            {!hasEnoughDataForResult && (
+                <p className={styles.hubIpucu}>
+                    Bu bölümleri görmek için önce daire m² ve birim maliyeti girin.
+                </p>
+            )}
+
+            <button
+                type="button"
+                className={styles.kartMenuButonu}
+                onClick={onSonucDetayiAc}
+                disabled={!hasEnoughDataForResult}
+            >
                 Sonuç Detayı · hesap fişi, analiz
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
 
-            <button type="button" className={styles.kartMenuButonu} onClick={onStudioHubAc}>
+            <button
+                type="button"
+                className={styles.kartMenuButonu}
+                onClick={onStudioHubAc}
+                disabled={!hasEnoughDataForResult}
+            >
                 Tasarım Stüdyosu · yerleşim, program, 3D
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
 
-            <button type="button" className={styles.kartMenuButonu} onClick={onLandownerOfferAc}>
+            <button
+                type="button"
+                className={styles.kartMenuButonu}
+                onClick={onLandownerOfferAc}
+                disabled={!hasEnoughDataForResult}
+            >
                 Arsa Sahibi Teklifi · hak ediş
                 <IconChevronRight size={15} strokeWidth={2.4} />
             </button>
