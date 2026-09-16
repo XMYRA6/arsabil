@@ -7,6 +7,7 @@ jest.mock('@/lib/prisma', () => ({
   prisma: { areaPriceStat, areaPriceTrend, districtDemographics, marketListing, neighborhood },
 }))
 jest.mock('@/lib/risk/riskSnapshot', () => ({ buildRiskSnapshot: 'BRS' }))
+jest.mock('react', () => ({ cache: (fn: unknown) => fn }))
 
 import { createAreaSeoCardDeps } from './areaSeoCardDeps'
 import type { AreaSeoKey } from './areaSeoCard'

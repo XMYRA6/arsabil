@@ -1,9 +1,25 @@
+import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 import { ARSA_LISTING_TYPES } from '@/lib/areaPrices/aggregate'
 import { buildRiskSnapshot } from '@/lib/risk/riskSnapshot'
 import type { TrendRow } from '@/lib/deger/priceTrend'
 import type { AreaSeoCardDeps, AreaSeoKey, AreaSeoStat } from './areaSeoCard'
+
+/**
+ * `countComparables`'ın aday kümesi — status/listingType/il filtreleri HER
+ * çağrıda birebir aynı (yalnız uygulama katmanındaki filtre `key`'e göre
+ * değişir). `cache()` ile sarılı: aynı build/request içinde binlerce
+ * mahalle/ilçe/il sayfası bu sorguyu ayrı ayrı değil, TEK sefer çalıştırır
+ * (final whole-branch review'in "ulusal ölçekte tekrar eden tarama" bulgusu).
+ */
+const fetchActiveArsaListings = cache(async () => {
+  return prisma.marketListing.findMany({
+    where: { status: 'active', listingType: { in: [...ARSA_LISTING_TYPES] }, il: { not: null } },
+    select: { il: true, ilce: true, mahalle: true },
+    take: 5000,
+  })
+})
 
 function trendScopeFilters(key: AreaSeoKey) {
   if (key.scope === 'mahalle') {
@@ -63,11 +79,7 @@ export function createAreaSeoCardDeps(): AreaSeoCardDeps {
      * (aynı desen: anonCardDeps.ts:findListingsNear).
      */
     countComparables: async (key): Promise<number> => {
-      const rows = await prisma.marketListing.findMany({
-        where: { status: 'active', listingType: { in: [...ARSA_LISTING_TYPES] }, il: { not: null } },
-        select: { il: true, ilce: true, mahalle: true },
-        take: 5000,
-      })
+      const rows = await fetchActiveArsaListings()
       return rows.filter((r) => {
         if (r.il == null || normalizeAreaName(r.il) !== key.ilNorm) return false
         if (key.ilceNorm != null && (r.ilce == null || normalizeAreaName(r.ilce) !== key.ilceNorm)) return false

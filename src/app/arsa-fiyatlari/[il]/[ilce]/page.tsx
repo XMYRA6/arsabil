@@ -96,9 +96,11 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
         </div>
       )}
 
-      {mahalleler.length > 0 && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>{entry.ilceDisplay} İlçesindeki Mahalleler</h2>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{entry.ilceDisplay} İlçesindeki Mahalleler</h2>
+        {mahalleler.length === 0 ? (
+          <p className={styles.note}>Bu ilçe için henüz yeterli mahalle verisi yok — veri kapsamı genişledikçe burada listelenecek.</p>
+        ) : (
           <table className={styles.table}>
             <thead>
               <tr>
@@ -119,8 +121,8 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className={styles.ctaRow}>
         <Link href="/deger" className={styles.ctaButton}>

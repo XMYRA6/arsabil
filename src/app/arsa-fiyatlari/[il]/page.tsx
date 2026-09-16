@@ -82,9 +82,11 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
         </div>
       )}
 
-      {ilceler.length > 0 && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>{entry.ilDisplay} İlindeki İlçeler</h2>
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{entry.ilDisplay} İlindeki İlçeler</h2>
+        {ilceler.length === 0 ? (
+          <p className={styles.note}>Bu il için henüz yeterli ilçe verisi yok — veri kapsamı genişledikçe burada listelenecek.</p>
+        ) : (
           <div className={styles.linkGrid}>
             {ilceler.map((e) => (
               <Link key={e.ilceSlug} href={`/arsa-fiyatlari/${e.ilSlug}/${e.ilceSlug}`} className={styles.linkCard}>
@@ -92,8 +94,8 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
               </Link>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
