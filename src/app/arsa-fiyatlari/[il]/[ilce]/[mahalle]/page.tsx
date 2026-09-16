@@ -40,7 +40,11 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
   const card = await buildAreaSeoCard(entry, createAreaSeoCardDeps())
   if (!card) notFound()
 
-  const siblings = entries.filter((e) => e.ilceNorm === entry.ilceNorm && e.mahalleNorm !== entry.mahalleNorm)
+  // il de kontrol edilir — Türkiye'de birden çok ilde aynı adı taşıyan ilçeler
+  // var (ör. "Merkez"), yalnız ilceNorm eşleşmesi çapraz-il karışıklığına yol açar.
+  const siblings = entries.filter(
+    (e) => e.ilNorm === entry.ilNorm && e.ilceNorm === entry.ilceNorm && e.mahalleNorm !== entry.mahalleNorm,
+  )
 
   return (
     <div className={styles.wrap}>
