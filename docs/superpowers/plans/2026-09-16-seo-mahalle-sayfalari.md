@@ -2122,16 +2122,19 @@ git commit -m "feat(seo-mahalle): arsa-fiyatlari kök dizin sayfası"
 
 **Files:**
 - Modify: `src/app/sitemap.ts`
-- Test: `src/app/sitemap.test.ts` (proje bu dosya için henüz test taşımıyor — yeni oluşturulacak)
+- Modify: `src/app/sitemap.test.ts` (**DÜZELTME: bu dosya ZATEN VAR ve 2 test içeriyor** — `'statik yollar (deger/akif/legal dahil) sitemap\`te'` ve `'aktif ilanlar listing yollarına eklenir'`. Önceki plan taslağı bunu yanlışlıkla "henüz test yok" varsaymıştı. Bu iki test AYNEN korunur, yeni test onlara EKLENİR — dosyanın tamamı değiştirilip mevcut testler silinmez.)
 
 **Interfaces:**
 - Consumes: `getSeoAreas` (Task 4)
 
 - [ ] **Step 1: Write the failing test**
 
+Mevcut `src/app/sitemap.test.ts` şu hale getirilir — ilk iki `it` bloğu (ve `findMany`/`beforeEach` altyapısı) dosyanın MEVCUT hâlinden birebir korunur, yalnızca `getSeoAreas` mock'u ve üçüncü `describe` bloğu eklenir:
+
 ```ts
 // src/app/sitemap.test.ts
-jest.mock('@/lib/prisma', () => ({ prisma: { listing: { findMany: jest.fn(async () => []) } } }))
+const findMany = jest.fn()
+jest.mock('@/lib/prisma', () => ({ prisma: { listing: { findMany: (...a: unknown[]) => findMany(...a) } } }))
 jest.mock('@/lib/areaSeo/seoAreaDeps', () => ({
   getSeoAreas: jest.fn(async (scope: string) => {
     if (scope === 'il') return [{ ilSlug: 'trabzon', ilceSlug: null, mahalleSlug: null }]
@@ -2142,8 +2145,34 @@ jest.mock('@/lib/areaSeo/seoAreaDeps', () => ({
 
 import sitemap from './sitemap'
 
-describe('sitemap', () => {
+beforeEach(() => {
+  findMany.mockReset()
+})
+
+it('statik yollar (deger/akif/legal dahil) sitemap`te', async () => {
+  findMany.mockResolvedValue([])
+  const entries = await sitemap()
+  const paths = entries.map((e) => new URL(e.url).pathname)
+  for (const p of ['/', '/hesapla', '/deger', '/marketplace', '/akif', '/contact', '/terms', '/privacy']) {
+    expect(paths).toContain(p)
+  }
+})
+
+it('aktif ilanlar listing yollarına eklenir', async () => {
+  findMany.mockResolvedValue([
+    { id: 'abc', createdAt: new Date('2026-08-01') },
+    { id: 'def', createdAt: new Date('2026-08-02') },
+  ])
+  const entries = await sitemap()
+  const paths = entries.map((e) => new URL(e.url).pathname)
+  expect(paths).toContain('/listing/abc')
+  expect(paths).toContain('/listing/def')
+  expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { isActive: true } }))
+})
+
+describe('sitemap — arsa-fiyatlari SEO route\'leri', () => {
   it('arsa-fiyatlari üç seviyesini de içerir', async () => {
+    findMany.mockResolvedValue([])
     const urls = (await sitemap()).map((r) => r.url)
     expect(urls).toContain('http://localhost:3000/arsa-fiyatlari/trabzon')
     expect(urls).toContain('http://localhost:3000/arsa-fiyatlari/trabzon/akcaabat')
@@ -2155,7 +2184,7 @@ describe('sitemap', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx jest src/app/sitemap.test.ts`
-Expected: FAIL — `arsa-fiyatlari` URL'leri listede yok
+Expected: İlk iki test (mevcut) hâlâ PASS; yeni üçüncü test FAIL — `arsa-fiyatlari` URL'leri listede yok
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -2228,7 +2257,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `npx jest src/app/sitemap.test.ts`
-Expected: PASS (1 test)
+Expected: PASS (3 test — 2 mevcut + 1 yeni)
 
 - [ ] **Step 5: Commit**
 
