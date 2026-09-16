@@ -169,20 +169,23 @@ describe('resolveDisplayNames', () => {
   const deps = { listDistinctMarketAreas: async () => rawRows }
 
   it('mahalle seviyesi: tam üçlü eşleşmeden doğru casing döner', async () => {
+    // Not: normalizeAreaName YALNIZ İ/ı'yı katlar, ç/ğ/ö/ş/ü'yü DEĞİL —
+    // normalizeAreaName('Akçaabat') === 'AKÇAABAT' (Ç kalır). Sorgu anahtarı
+    // bu yüzden 'AKÇAABAT' (düz 'AKCAABAT' değil).
     const out = await resolveDisplayNames(
-      [{ il: 'TRABZON', ilce: 'AKCAABAT', mahalle: 'DURUBINAR' }],
+      [{ il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: 'DURUBINAR' }],
       deps,
     )
-    const v = out.get(areaLookupKey('TRABZON', 'AKCAABAT', 'DURUBINAR'))
+    const v = out.get(areaLookupKey('TRABZON', 'AKÇAABAT', 'DURUBINAR'))
     expect(v).toEqual({ il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Durubinar' })
   })
 
   it('ilçe seviyesi: mahalle bilgisi olmadan da il+ilçe casing\'i bulunur', async () => {
     const out = await resolveDisplayNames(
-      [{ il: 'TRABZON', ilce: 'AKCAABAT', mahalle: null }],
+      [{ il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: null }],
       deps,
     )
-    const v = out.get(areaLookupKey('TRABZON', 'AKCAABAT', null))
+    const v = out.get(areaLookupKey('TRABZON', 'AKÇAABAT', null))
     expect(v).toEqual({ il: 'Trabzon', ilce: 'Akçaabat', mahalle: null })
   })
 
@@ -193,12 +196,18 @@ describe('resolveDisplayNames', () => {
   })
 
   it('eşleşen ham satır yoksa normalize anahtardan title-case üretir (fallback)', async () => {
+    // 'KADIKOY' (ham kaynaksız, düz ASCII normalize anahtar) tr-TR ile
+    // küçültülünce ASCII 'I' dotless 'ı'ya döner ('kadıkoy') — bu, eşleşen ham
+    // satır yokken kaçınılmaz bir tahmin (İ/I/ı/i ayrımı normalize anahtarda
+    // zaten kaybolmuş durumda; spec bunu kabul edilen kozmetik risk olarak
+    // not düşmüştü). 'ISTANBUL'/'MODA' bu belirsizliğe girmiyor (normalizeAreaName
+    // için gerçekçi çıktılar), o yüzden değişmedi.
     const out = await resolveDisplayNames(
       [{ il: 'ISTANBUL', ilce: 'KADIKOY', mahalle: 'MODA' }],
       deps,
     )
     const v = out.get(areaLookupKey('ISTANBUL', 'KADIKOY', 'MODA'))
-    expect(v).toEqual({ il: 'Istanbul', ilce: 'Kadikoy', mahalle: 'Moda' })
+    expect(v).toEqual({ il: 'Istanbul', ilce: 'Kadıkoy', mahalle: 'Moda' })
   })
 
   it('aynı normalize anahtara birden fazla ham satır düşerse İLK görüleni kullanır', async () => {
@@ -391,9 +400,13 @@ describe('listSeoAreas', () => {
   })
 
   it('slug ve display alanlarını doğru üretir', async () => {
+    // Not: normalizeAreaName ç'yi katlamaz — normalizeAreaName('Akçaabat')
+    // === 'AKÇAABAT', 'AKCAABAT' değil. AreaPriceStat satırı da bu yüzden
+    // 'AKÇAABAT' taşır (gerçek pipeline'da bu satır normalizeAreaName'den
+    // geçmiş MarketListing verisinden üretilir).
     const deps = {
       findAreaPriceStats: async () => [
-        { il: 'TRABZON', ilce: 'AKCAABAT', mahalle: 'DURUBINAR', sampleCount: 10 },
+        { il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: 'DURUBINAR', sampleCount: 10 },
       ],
       listDistinctMarketAreas: async () => [{ il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Durubinar' }],
     }
@@ -401,7 +414,7 @@ describe('listSeoAreas', () => {
     expect(entry).toEqual({
       scope: 'mahalle',
       ilNorm: 'TRABZON',
-      ilceNorm: 'AKCAABAT',
+      ilceNorm: 'AKÇAABAT',
       mahalleNorm: 'DURUBINAR',
       ilSlug: 'trabzon',
       ilceSlug: 'akcaabat',
@@ -1012,9 +1025,12 @@ describe('createAreaSeoCardDeps', () => {
   })
 
   it('countComparables — geniş aday kümesi çeker, normalizeAreaName ile uygulama katmanında filtreler', async () => {
+    // Not: mahalleKey.ilceNorm = 'AKCAABAT' (düz C) — normalizeAreaName ç'yi
+    // katlamadığı için burada 'Akcaabat' (cedillasız ham yazım) kullanılıyor,
+    // normalizeAreaName('Akcaabat') === 'AKCAABAT' ile birebir eşleşsin diye.
     marketListing.findMany.mockResolvedValue([
-      { il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Durubinar' }, // eşleşir
-      { il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Yıldızlı' }, // farklı mahalle
+      { il: 'Trabzon', ilce: 'Akcaabat', mahalle: 'Durubinar' }, // eşleşir
+      { il: 'Trabzon', ilce: 'Akcaabat', mahalle: 'Yıldızlı' }, // farklı mahalle
       { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Durubinar' }, // farklı ilçe
       { il: null, ilce: null, mahalle: null },
     ])
@@ -1509,7 +1525,11 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
   const card = await buildAreaSeoCard(entry, createAreaSeoCardDeps())
   if (!card) notFound()
 
-  const siblings = entries.filter((e) => e.ilceNorm === entry.ilceNorm && e.mahalleNorm !== entry.mahalleNorm)
+  // il de kontrol edilir — Türkiye'de birden çok ilde aynı adı taşıyan ilçeler
+  // var (ör. "Merkez"), yalnız ilceNorm eşleşmesi çapraz-il karışıklığına yol açar.
+  const siblings = entries.filter(
+    (e) => e.ilNorm === entry.ilNorm && e.ilceNorm === entry.ilceNorm && e.mahalleNorm !== entry.mahalleNorm,
+  )
 
   return (
     <div className={styles.wrap}>
@@ -1728,8 +1748,10 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
   const card = await buildAreaSeoCard(entry, createAreaSeoCardDeps())
   if (!card) notFound()
 
+  // il de kontrol edilir — Task 8'deki aynı çapraz-il karışıklığı riski
+  // (birden çok ilde aynı adı taşıyan ilçeler, ör. "Merkez") burada da geçerli.
   const mahalleler = mahalleEntries
-    .filter((e) => e.ilceNorm === entry.ilceNorm)
+    .filter((e) => e.ilNorm === entry.ilNorm && e.ilceNorm === entry.ilceNorm)
     .sort((a, b) => b.sampleCount - a.sampleCount)
 
   return (
@@ -2100,16 +2122,19 @@ git commit -m "feat(seo-mahalle): arsa-fiyatlari kök dizin sayfası"
 
 **Files:**
 - Modify: `src/app/sitemap.ts`
-- Test: `src/app/sitemap.test.ts` (proje bu dosya için henüz test taşımıyor — yeni oluşturulacak)
+- Modify: `src/app/sitemap.test.ts` (**DÜZELTME: bu dosya ZATEN VAR ve 2 test içeriyor** — `'statik yollar (deger/akif/legal dahil) sitemap\`te'` ve `'aktif ilanlar listing yollarına eklenir'`. Önceki plan taslağı bunu yanlışlıkla "henüz test yok" varsaymıştı. Bu iki test AYNEN korunur, yeni test onlara EKLENİR — dosyanın tamamı değiştirilip mevcut testler silinmez.)
 
 **Interfaces:**
 - Consumes: `getSeoAreas` (Task 4)
 
 - [ ] **Step 1: Write the failing test**
 
+Mevcut `src/app/sitemap.test.ts` şu hale getirilir — ilk iki `it` bloğu (ve `findMany`/`beforeEach` altyapısı) dosyanın MEVCUT hâlinden birebir korunur, yalnızca `getSeoAreas` mock'u ve üçüncü `describe` bloğu eklenir:
+
 ```ts
 // src/app/sitemap.test.ts
-jest.mock('@/lib/prisma', () => ({ prisma: { listing: { findMany: jest.fn(async () => []) } } }))
+const findMany = jest.fn()
+jest.mock('@/lib/prisma', () => ({ prisma: { listing: { findMany: (...a: unknown[]) => findMany(...a) } } }))
 jest.mock('@/lib/areaSeo/seoAreaDeps', () => ({
   getSeoAreas: jest.fn(async (scope: string) => {
     if (scope === 'il') return [{ ilSlug: 'trabzon', ilceSlug: null, mahalleSlug: null }]
@@ -2120,8 +2145,34 @@ jest.mock('@/lib/areaSeo/seoAreaDeps', () => ({
 
 import sitemap from './sitemap'
 
-describe('sitemap', () => {
+beforeEach(() => {
+  findMany.mockReset()
+})
+
+it('statik yollar (deger/akif/legal dahil) sitemap`te', async () => {
+  findMany.mockResolvedValue([])
+  const entries = await sitemap()
+  const paths = entries.map((e) => new URL(e.url).pathname)
+  for (const p of ['/', '/hesapla', '/deger', '/marketplace', '/akif', '/contact', '/terms', '/privacy']) {
+    expect(paths).toContain(p)
+  }
+})
+
+it('aktif ilanlar listing yollarına eklenir', async () => {
+  findMany.mockResolvedValue([
+    { id: 'abc', createdAt: new Date('2026-08-01') },
+    { id: 'def', createdAt: new Date('2026-08-02') },
+  ])
+  const entries = await sitemap()
+  const paths = entries.map((e) => new URL(e.url).pathname)
+  expect(paths).toContain('/listing/abc')
+  expect(paths).toContain('/listing/def')
+  expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { isActive: true } }))
+})
+
+describe('sitemap — arsa-fiyatlari SEO route\'leri', () => {
   it('arsa-fiyatlari üç seviyesini de içerir', async () => {
+    findMany.mockResolvedValue([])
     const urls = (await sitemap()).map((r) => r.url)
     expect(urls).toContain('http://localhost:3000/arsa-fiyatlari/trabzon')
     expect(urls).toContain('http://localhost:3000/arsa-fiyatlari/trabzon/akcaabat')
@@ -2133,7 +2184,7 @@ describe('sitemap', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `npx jest src/app/sitemap.test.ts`
-Expected: FAIL — `arsa-fiyatlari` URL'leri listede yok
+Expected: İlk iki test (mevcut) hâlâ PASS; yeni üçüncü test FAIL — `arsa-fiyatlari` URL'leri listede yok
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -2206,7 +2257,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `npx jest src/app/sitemap.test.ts`
-Expected: PASS (1 test)
+Expected: PASS (3 test — 2 mevcut + 1 yeni)
 
 - [ ] **Step 5: Commit**
 
