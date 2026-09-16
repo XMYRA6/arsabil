@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { getSeoAreas } from "@/lib/areaSeo/seoAreaDeps";
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/hesapla`, changeFrequency: "weekly", priority: 0.9 },
         { url: `${baseUrl}/deger`, changeFrequency: "weekly", priority: 0.9 },
         { url: `${baseUrl}/marketplace`, changeFrequency: "daily", priority: 0.9 },
+        { url: `${baseUrl}/arsa-fiyatlari`, changeFrequency: "weekly", priority: 0.8 },
         { url: `${baseUrl}/akif`, changeFrequency: "weekly", priority: 0.7 },
         { url: `${baseUrl}/contact`, changeFrequency: "yearly", priority: 0.3 },
         { url: `${baseUrl}/terms`, changeFrequency: "yearly", priority: 0.3 },
@@ -31,5 +33,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
     }));
 
-    return [...staticRoutes, ...listingRoutes];
+    const [ilAreas, ilceAreas, mahalleAreas] = await Promise.all([
+        getSeoAreas('il'),
+        getSeoAreas('ilce'),
+        getSeoAreas('mahalle'),
+    ]);
+
+    const areaSeoRoutes: MetadataRoute.Sitemap = [
+        ...ilAreas.map((e) => ({
+            url: `${baseUrl}/arsa-fiyatlari/${e.ilSlug}`,
+            changeFrequency: "weekly" as const,
+            priority: 0.6,
+        })),
+        ...ilceAreas.map((e) => ({
+            url: `${baseUrl}/arsa-fiyatlari/${e.ilSlug}/${e.ilceSlug}`,
+            changeFrequency: "weekly" as const,
+            priority: 0.6,
+        })),
+        ...mahalleAreas.map((e) => ({
+            url: `${baseUrl}/arsa-fiyatlari/${e.ilSlug}/${e.ilceSlug}/${e.mahalleSlug}`,
+            changeFrequency: "weekly" as const,
+            priority: 0.65,
+        })),
+    ];
+
+    return [...staticRoutes, ...listingRoutes, ...areaSeoRoutes];
 }
