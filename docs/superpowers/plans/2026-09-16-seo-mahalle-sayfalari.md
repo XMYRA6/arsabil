@@ -169,20 +169,23 @@ describe('resolveDisplayNames', () => {
   const deps = { listDistinctMarketAreas: async () => rawRows }
 
   it('mahalle seviyesi: tam üçlü eşleşmeden doğru casing döner', async () => {
+    // Not: normalizeAreaName YALNIZ İ/ı'yı katlar, ç/ğ/ö/ş/ü'yü DEĞİL —
+    // normalizeAreaName('Akçaabat') === 'AKÇAABAT' (Ç kalır). Sorgu anahtarı
+    // bu yüzden 'AKÇAABAT' (düz 'AKCAABAT' değil).
     const out = await resolveDisplayNames(
-      [{ il: 'TRABZON', ilce: 'AKCAABAT', mahalle: 'DURUBINAR' }],
+      [{ il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: 'DURUBINAR' }],
       deps,
     )
-    const v = out.get(areaLookupKey('TRABZON', 'AKCAABAT', 'DURUBINAR'))
+    const v = out.get(areaLookupKey('TRABZON', 'AKÇAABAT', 'DURUBINAR'))
     expect(v).toEqual({ il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Durubinar' })
   })
 
   it('ilçe seviyesi: mahalle bilgisi olmadan da il+ilçe casing\'i bulunur', async () => {
     const out = await resolveDisplayNames(
-      [{ il: 'TRABZON', ilce: 'AKCAABAT', mahalle: null }],
+      [{ il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: null }],
       deps,
     )
-    const v = out.get(areaLookupKey('TRABZON', 'AKCAABAT', null))
+    const v = out.get(areaLookupKey('TRABZON', 'AKÇAABAT', null))
     expect(v).toEqual({ il: 'Trabzon', ilce: 'Akçaabat', mahalle: null })
   })
 
@@ -193,12 +196,18 @@ describe('resolveDisplayNames', () => {
   })
 
   it('eşleşen ham satır yoksa normalize anahtardan title-case üretir (fallback)', async () => {
+    // 'KADIKOY' (ham kaynaksız, düz ASCII normalize anahtar) tr-TR ile
+    // küçültülünce ASCII 'I' dotless 'ı'ya döner ('kadıkoy') — bu, eşleşen ham
+    // satır yokken kaçınılmaz bir tahmin (İ/I/ı/i ayrımı normalize anahtarda
+    // zaten kaybolmuş durumda; spec bunu kabul edilen kozmetik risk olarak
+    // not düşmüştü). 'ISTANBUL'/'MODA' bu belirsizliğe girmiyor (normalizeAreaName
+    // için gerçekçi çıktılar), o yüzden değişmedi.
     const out = await resolveDisplayNames(
       [{ il: 'ISTANBUL', ilce: 'KADIKOY', mahalle: 'MODA' }],
       deps,
     )
     const v = out.get(areaLookupKey('ISTANBUL', 'KADIKOY', 'MODA'))
-    expect(v).toEqual({ il: 'Istanbul', ilce: 'Kadikoy', mahalle: 'Moda' })
+    expect(v).toEqual({ il: 'Istanbul', ilce: 'Kadıkoy', mahalle: 'Moda' })
   })
 
   it('aynı normalize anahtara birden fazla ham satır düşerse İLK görüleni kullanır', async () => {
@@ -391,9 +400,13 @@ describe('listSeoAreas', () => {
   })
 
   it('slug ve display alanlarını doğru üretir', async () => {
+    // Not: normalizeAreaName ç'yi katlamaz — normalizeAreaName('Akçaabat')
+    // === 'AKÇAABAT', 'AKCAABAT' değil. AreaPriceStat satırı da bu yüzden
+    // 'AKÇAABAT' taşır (gerçek pipeline'da bu satır normalizeAreaName'den
+    // geçmiş MarketListing verisinden üretilir).
     const deps = {
       findAreaPriceStats: async () => [
-        { il: 'TRABZON', ilce: 'AKCAABAT', mahalle: 'DURUBINAR', sampleCount: 10 },
+        { il: 'TRABZON', ilce: 'AKÇAABAT', mahalle: 'DURUBINAR', sampleCount: 10 },
       ],
       listDistinctMarketAreas: async () => [{ il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Durubinar' }],
     }
@@ -401,7 +414,7 @@ describe('listSeoAreas', () => {
     expect(entry).toEqual({
       scope: 'mahalle',
       ilNorm: 'TRABZON',
-      ilceNorm: 'AKCAABAT',
+      ilceNorm: 'AKÇAABAT',
       mahalleNorm: 'DURUBINAR',
       ilSlug: 'trabzon',
       ilceSlug: 'akcaabat',
@@ -1012,9 +1025,12 @@ describe('createAreaSeoCardDeps', () => {
   })
 
   it('countComparables — geniş aday kümesi çeker, normalizeAreaName ile uygulama katmanında filtreler', async () => {
+    // Not: mahalleKey.ilceNorm = 'AKCAABAT' (düz C) — normalizeAreaName ç'yi
+    // katlamadığı için burada 'Akcaabat' (cedillasız ham yazım) kullanılıyor,
+    // normalizeAreaName('Akcaabat') === 'AKCAABAT' ile birebir eşleşsin diye.
     marketListing.findMany.mockResolvedValue([
-      { il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Durubinar' }, // eşleşir
-      { il: 'Trabzon', ilce: 'Akçaabat', mahalle: 'Yıldızlı' }, // farklı mahalle
+      { il: 'Trabzon', ilce: 'Akcaabat', mahalle: 'Durubinar' }, // eşleşir
+      { il: 'Trabzon', ilce: 'Akcaabat', mahalle: 'Yıldızlı' }, // farklı mahalle
       { il: 'Trabzon', ilce: 'Ortahisar', mahalle: 'Durubinar' }, // farklı ilçe
       { il: null, ilce: null, mahalle: null },
     ])
