@@ -19,6 +19,16 @@ describe('StickyActionBar', () => {
         expect((container.firstChild as HTMLElement).className).toContain('aboveNav')
     })
 
+    it('varsayılanda glass sınıfı yok', () => {
+        const { container } = render(<StickyActionBar><span>x</span></StickyActionBar>)
+        expect((container.firstChild as HTMLElement).className).not.toContain('glass')
+    })
+
+    it('variant="glass" ile glass sınıfı eklenir (--m-* token ailesi)', () => {
+        const { container } = render(<StickyActionBar variant="glass"><span>x</span></StickyActionBar>)
+        expect((container.firstChild as HTMLElement).className).toContain('glass')
+    })
+
     // Kullanici bulgusu: klavye acilinca (ilan sihirbazi Ileri/Geri cubugu,
     // hesapla mobil CTA, ilan detayi "Teklif Ver") bar klavyenin altinda
     // kalip input gorunmuyordu. Ayni cozum BottomSheet/BottomNavbar'da

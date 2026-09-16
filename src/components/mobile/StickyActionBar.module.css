@@ -29,6 +29,16 @@
         padding-bottom: 10px;
     }
 
+    /* --m-* mobil glassmorphism token ailesi (dashboard/hesapla-mobile/deger) —
+       varsayılan --topbar-* yerine bu sayfaların kendi cam yüzey diliyle render eder. */
+    .glass {
+        background: var(--m-glass-bg);
+        border-top-color: var(--m-glass-border);
+        backdrop-filter: var(--m-glass-blur);
+        -webkit-backdrop-filter: var(--m-glass-blur);
+        box-shadow: var(--m-sh-sheet), inset 0 1px 0 #fff;
+    }
+
     .bar > * {
         flex: 1;
         min-height: var(--touch-target);

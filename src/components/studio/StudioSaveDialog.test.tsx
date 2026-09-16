@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { StudioSaveDialog } from './StudioSaveDialog';
 import type { StudioSnapshotDraft } from '@/lib/studio/types';
@@ -59,6 +59,39 @@ describe('StudioSaveDialog', () => {
     expect(screen.getByText(/İstanbul Kadıköy/)).toBeInTheDocument();
     expect(screen.getByText('TKGM Doğrulanmış')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Varsayılan Senaryo')).toBeInTheDocument();
+  });
+
+  // Kullanici bulgusu: "Senaryo Basligi"/"Versiyon Notu" alanlarina
+  // dokunulunca klavye modal'in alt kismini kapatiyordu — modal artik
+  // useKeyboardInset() ile klavye acikken kucculuyor (bkz. useKeyboardInset.ts,
+  // ParcelVerificationSheet'te dogrulanan ayni desen).
+  it('klavye acilinca (visualViewport kucculunce) modal --keyboard-inset ile kucculur', () => {
+    class FakeVisualViewport extends EventTarget {
+      height = 844
+      offsetTop = 0
+      resizeTo(height: number) {
+        this.height = height
+        this.dispatchEvent(new Event('resize'))
+      }
+    }
+    const fakeVv = new FakeVisualViewport()
+    Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
+    Object.defineProperty(window, 'visualViewport', { value: fakeVv, configurable: true })
+
+    render(
+      <StudioSaveDialog
+        isOpen={true}
+        onClose={jest.fn()}
+        currentSnapshot={mockSnapshot}
+        scenarioName="Varsayılan Senaryo"
+        onSaveSuccess={jest.fn()}
+      />
+    );
+    const modal = screen.getByRole('dialog').firstChild as HTMLElement;
+    expect(modal.style.getPropertyValue('--keyboard-inset')).toBe('0px');
+
+    act(() => fakeVv.resizeTo(844 - 320));
+    expect(modal.style.getPropertyValue('--keyboard-inset')).toBe('320px');
   });
 
   // REGRESYON: ozet karti "Brüt İnşaat / Tahsis" alaninda dolu bir

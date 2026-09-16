@@ -186,7 +186,10 @@
     .settingsShell {
         min-height: 100dvh;
         margin: -2rem;
-        padding: calc(16px + var(--safe-top)) 14px calc(96px + var(--safe-bottom));
+        /* BottomNavbar + StickyActionBar (variant="glass" aboveBottomNav) ikisi
+           birlikte kaplıyor — aynı formül listing/[id]/page.module.css'te de
+           kullanılıyor (bottomnav-height zaten safe-bottom'u içeriyor). */
+        padding: calc(16px + var(--safe-top)) 14px calc(var(--bottomnav-height) + 76px);
         background: var(--m-mesh), var(--m-bg);
         color: var(--m-ink);
     }
@@ -244,17 +247,13 @@
         box-shadow: var(--m-sh-grad-btn);
     }
 
+    /* Masaüstü-akışlı çubuk mobilde gizlenir — StickyActionBar (variant="glass",
+       aboveBottomNav) klavye/BottomNavbar-farkında sabit çubuğu devralır
+       (bkz. page.tsx). Eskiden burada bit-bit aynı bir position:fixed;bottom:0
+       kuralı vardı — hem klavye açıkken erişilemez oluyordu hem de BottomNavbar
+       (z-index 999) bu çubuğun (z-index yok) üstüne biniyordu. */
     .saveBar {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 12px 14px calc(12px + var(--safe-bottom));
-        background: var(--m-glass-bg);
-        border-top: 1px solid var(--m-glass-border);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
-        box-shadow: var(--m-sh-sheet), inset 0 1px 0 #fff;
+        display: none;
     }
 
     .saveButton {

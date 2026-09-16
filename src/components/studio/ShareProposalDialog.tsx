@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { StudioProposalViewModel } from '@/lib/studio/proposalViewModel';
 import { checkExportReadiness } from '@/lib/studio/exportReadiness';
+import { useKeyboardInset } from '@/components/mobile/useKeyboardInset';
 import styles from './ShareProposalDialog.module.css';
 
 export interface ShareProposalDialogProps {
@@ -26,6 +27,9 @@ export function ShareProposalDialog({
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Klavye acikken dialog'u klavyenin ustunde tutar (StudioSaveDialog/
+  // ParcelVerificationSheet ile ayni desen — bkz. useKeyboardInset.ts).
+  const keyboardInset = useKeyboardInset();
 
   // Modal açıldığında mevcut token'ı sorgula
   useEffect(() => {
@@ -120,7 +124,10 @@ export function ShareProposalDialog({
 
   return (
     <div className={styles.overlay} data-testid="share-proposal-dialog">
-      <div className={styles.dialog}>
+      <div
+        className={styles.dialog}
+        style={{ '--keyboard-inset': `${keyboardInset}px` } as React.CSSProperties}
+      >
         <div className={styles.header}>
           <div>
             <h2 className={styles.title}>Senaryoyu Güvenle Paylaş</h2>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import styles from './page.module.css';
 
 type PrefKey = 'mesaj' | 'teklif' | 'ilan';
@@ -96,6 +97,11 @@ export default function SettingsPage() {
                     {saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
             </div>
+            <StickyActionBar variant="glass" aboveBottomNav>
+                <button type="button" onClick={save} disabled={saving} className={styles.saveButton}>
+                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                </button>
+            </StickyActionBar>
         </main>
     );
 }

@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ShareProposalDialog } from './ShareProposalDialog';
 import type { StudioProposalViewModel } from '@/lib/studio/proposalViewModel';
 
@@ -81,6 +81,40 @@ describe('ShareProposalDialog', () => {
 
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  // useKeyboardInset ile ayni desen (StudioSaveDialog/ParcelVerificationSheet) —
+  // dialog klavye acikken --keyboard-inset ile kucculur.
+  it('klavye acilinca (visualViewport kucculunce) dialog --keyboard-inset ile kucculur', async () => {
+    class FakeVisualViewport extends EventTarget {
+      height = 844
+      offsetTop = 0
+      resizeTo(height: number) {
+        this.height = height
+        this.dispatchEvent(new Event('resize'))
+      }
+    }
+    const fakeVv = new FakeVisualViewport()
+    Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true })
+    Object.defineProperty(window, 'visualViewport', { value: fakeVv, configurable: true })
+
+    render(
+      <ShareProposalDialog
+        isOpen={true}
+        onClose={jest.fn()}
+        scenarioId="sc-1"
+        versionNumber={1}
+        scenarioName="Test Proje"
+        viewModel={mockViewModel}
+      />
+    );
+    await screen.findByRole('button', { name: /Paylaşım Bağlantısı Oluştur/i });
+
+    const dialog = screen.getByTestId('share-proposal-dialog').firstChild as HTMLElement;
+    expect(dialog.style.getPropertyValue('--keyboard-inset')).toBe('0px');
+
+    act(() => fakeVv.resizeTo(844 - 320));
+    expect(dialog.style.getPropertyValue('--keyboard-inset')).toBe('320px');
   });
 
   it('modal acildiginda readiness durumunu ve gizlilik notunu basar', async () => {

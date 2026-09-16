@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from 'react';
+import { useKeyboardInset } from '@/components/mobile/useKeyboardInset';
 import styles from './StudioSaveDialog.module.css';
 import type { StudioSnapshotDraft } from '@/lib/studio/types';
 import { extractSnapshotSummary } from '@/lib/studio/snapshotVersioning';
@@ -35,6 +36,11 @@ export function StudioSaveDialog({
   const [summaryNotes, setSummaryNotes] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  // Klavye acikken modal'i klavyenin ustunde tutar (ParcelVerificationSheet'te
+  // dogrulanan ayni desen — bkz. useKeyboardInset.ts) — kullanici bulgusu:
+  // "Senaryo Basligi"/"Versiyon Notu" alanlarina dokunulunca klavye modal'in
+  // alt kismini/formu kapatiyordu.
+  const keyboardInset = useKeyboardInset();
 
   if (!isOpen) return null;
 
@@ -105,7 +111,10 @@ export function StudioSaveDialog({
 
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true" data-testid="studio-save-dialog">
-      <div className={styles.modal}>
+      <div
+        className={styles.modal}
+        style={{ '--keyboard-inset': `${keyboardInset}px` } as React.CSSProperties}
+      >
         <div className={styles.header}>
           <h3 className={styles.title}>Senaryoyu Buluta Kaydet</h3>
           <button

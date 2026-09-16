@@ -21,6 +21,10 @@
   flex-direction: column;
   gap: 18px;
   animation: fadeIn 0.15s ease-out;
+  /* Klavye acikken --keyboard-inset kadar kucculur + kaydirilabilir olur
+     (StudioSaveDialog/ParcelVerificationSheet ile ayni desen). */
+  max-height: calc(100dvh - 32px - var(--keyboard-inset, 0px));
+  overflow-y: auto;
 }
 
 @keyframes fadeIn {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import styles from './page.module.css';
 
 type ProfileData = {
@@ -90,6 +91,11 @@ export default function ProfileEditPage() {
                     {saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
             </div>
+            <StickyActionBar variant="glass" aboveBottomNav>
+                <button type="button" onClick={save} disabled={saving} className={styles.saveButton}>
+                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                </button>
+            </StickyActionBar>
         </main>
     );
 }

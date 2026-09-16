@@ -6,6 +6,8 @@ interface StickyActionBarProps {
     children: React.ReactNode;
     /** BottomNavbar'ın göründüğü sayfalarda true — çubuk navbar'ın üstüne oturur */
     aboveBottomNav?: boolean;
+    /** 'glass': `--m-*` mobil glassmorphism token'larıyla (dashboard/hesapla-mobile/deger ailesi) render eder — varsayılan `--topbar-*` yerine */
+    variant?: 'default' | 'glass';
 }
 
 /**
@@ -25,7 +27,7 @@ interface StickyActionBarProps {
  * </StickyActionBar>
  * ```
  */
-export function StickyActionBar({ children, aboveBottomNav = false }: StickyActionBarProps) {
+export function StickyActionBar({ children, aboveBottomNav = false, variant = 'default' }: StickyActionBarProps) {
     // Klavye acikken bar'i klavyenin ustune kaydirir (bkz. useKeyboardInset.ts,
     // BottomSheet/BottomNavbar'da zaten dogrulanan ayni desen) — kullanici
     // bulgusu: ilan sihirbazi Ileri/Geri cubugu, hesapla mobil CTA ve ilan
@@ -33,7 +35,7 @@ export function StickyActionBar({ children, aboveBottomNav = false }: StickyActi
     const keyboardInset = useKeyboardInset();
     return (
         <div
-            className={`${styles.bar} ${aboveBottomNav ? styles.aboveNav : ''}`}
+            className={`${styles.bar} ${aboveBottomNav ? styles.aboveNav : ''} ${variant === 'glass' ? styles.glass : ''}`}
             style={{ '--keyboard-inset': `${keyboardInset}px` } as React.CSSProperties}
         >
             {children}
