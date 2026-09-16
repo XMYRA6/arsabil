@@ -73,10 +73,6 @@
 .linkCard:hover {
   filter: brightness(0.97);
 }
-.linkCardPrice {
-  color: var(--muted, #6e6e73);
-  font-size: 13px;
-}
 .ctaRow {
   display: flex;
   flex-wrap: wrap;

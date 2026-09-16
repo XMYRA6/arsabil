@@ -82,6 +82,9 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
       {card.priceTrend && (
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>12 Aylık Fiyat Trendi</h2>
+          <p className={styles.note}>
+            · {card.priceTrend.basis === 'mahalle' ? 'Mahalle' : card.priceTrend.basis === 'ilce' ? 'İlçe geneli' : 'İl geneli'}
+          </p>
           <PriceTrendChart
             points={card.priceTrend.points}
             changePct3m={card.priceTrend.changePct3m}
@@ -100,12 +103,14 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
             {card.risk.faultDistanceM != null
               ? `Bu mahallenin merkezine en yakın diri fay hattı: ${(card.risk.faultDistanceM / 1000).toFixed(1)} km.`
               : 'Fay hattı mesafesi bu mahalle için hesaplanamadı.'}
-            {' '}
-            {card.risk.floodQ100 != null
-              ? card.risk.floodQ100
-                ? 'Bu bölge 100 yıllık taşkın (Q100) risk alanı içinde.'
-                : 'Bu bölge 100 yıllık taşkın (Q100) risk alanı dışında.'
-              : ''}
+            {card.risk.floodQ100 != null && (
+              <>
+                {' '}
+                {card.risk.floodQ100
+                  ? 'Bu bölge 100 yıllık taşkın (Q100) risk alanı içinde.'
+                  : 'Bu bölge 100 yıllık taşkın (Q100) risk alanı dışında.'}
+              </>
+            )}
           </p>
         </div>
       )}

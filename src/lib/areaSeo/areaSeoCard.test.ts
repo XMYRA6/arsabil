@@ -38,6 +38,7 @@ describe('buildAreaSeoCard', () => {
     ]
     const out = await buildAreaSeoCard(ilKey, baseDeps({ findTrendRows: async () => rows }))
     expect(out?.priceTrend?.points).toHaveLength(3)
+    expect(out?.priceTrend?.basis).toBe('il')
   })
 
   it('ilçe seviyesinde demografi varsa demographics alanını doldurur', async () => {

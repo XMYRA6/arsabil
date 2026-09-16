@@ -24,7 +24,7 @@ export interface AreaSeoRiskInfo {
 
 export interface AreaSeoCardDTO {
   stat: AreaSeoStat
-  priceTrend?: { points: PriceTrendPoint[]; changePct3m: number | null; thinTrend: boolean }
+  priceTrend?: { points: PriceTrendPoint[]; changePct3m: number | null; thinTrend: boolean; basis: 'mahalle' | 'ilce' | 'il' }
   demographics?: {
     dataYear: number
     population: number | null
@@ -81,6 +81,7 @@ export async function buildAreaSeoCard(key: AreaSeoKey, deps: AreaSeoCardDeps): 
             points: trend.points!,
             changePct3m: trend.changePct3m ?? null,
             thinTrend: trend.thinTrend ?? false,
+            basis: trend.basis!,
           },
         }),
     ...(demo

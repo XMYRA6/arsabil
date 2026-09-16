@@ -78,6 +78,9 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
       {card.priceTrend && (
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>12 Aylık Fiyat Trendi</h2>
+          <p className={styles.note}>
+            · {card.priceTrend.basis === 'mahalle' ? 'Mahalle' : card.priceTrend.basis === 'ilce' ? 'İlçe geneli' : 'İl geneli'}
+          </p>
           <PriceTrendChart
             points={card.priceTrend.points}
             changePct3m={card.priceTrend.changePct3m}
