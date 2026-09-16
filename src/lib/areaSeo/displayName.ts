@@ -18,37 +18,15 @@ export interface ResolveDisplayNamesDeps {
 
 /** tr-TR locale-aware başlık-case. "DURUBİNAR" -> "Durubinar" (İ/I ayrımı korunur). */
 export function toTitleCase(s: string): string {
-  // Only use Turkish locale if the string contains Turkish-specific characters
-  // This ensures ASCII-only strings like 'KADIKOY' don't get Turkish ı/I conversion
-  const hasTurkishChars = /[çÇğĞşŞüÜöÖıİ]/.test(s)
-  const locale = hasTurkishChars ? 'tr-TR' : 'en-US'
-
   return s
-    .toLocaleLowerCase(locale)
+    .toLocaleLowerCase('tr-TR')
     .split(' ')
-    .map((w) => (w.length === 0 ? w : w[0].toLocaleUpperCase(locale) + w.slice(1)))
+    .map((w) => (w.length === 0 ? w : w[0].toLocaleUpperCase('tr-TR') + w.slice(1)))
     .join(' ')
 }
 
 export function areaLookupKey(il: string, ilce: string | null, mahalle: string | null): string {
   return `${il}|${ilce ?? ''}|${mahalle ?? ''}`
-}
-
-/**
- * ASCII-fold Turkish special characters for index matching.
- * Maps ç→c, ğ→g, ş→s, ü→u, ö→o while preserving case and handling İ/ı.
- */
-function asciiNormalizeAreaName(s: string): string {
-  return s
-    .trim()
-    .replace(/[çÇ]/g, 'c')
-    .replace(/[ğĞ]/g, 'g')
-    .replace(/[şŞ]/g, 's')
-    .replace(/[üÜ]/g, 'u')
-    .replace(/[öÖ]/g, 'o')
-    .replace(/İ/g, 'I')
-    .replace(/ı/g, 'i')
-    .toUpperCase()
 }
 
 /**
@@ -73,13 +51,13 @@ export async function resolveDisplayNames(
 
   for (const r of raws) {
     if (!r.il) continue
-    const ilK = asciiNormalizeAreaName(r.il)
+    const ilK = normalizeAreaName(r.il)
     if (!ilIndex.has(ilK)) ilIndex.set(ilK, r)
     if (r.ilce) {
-      const ilceK = `${ilK}|${asciiNormalizeAreaName(r.ilce)}`
+      const ilceK = `${ilK}|${normalizeAreaName(r.ilce)}`
       if (!ilceIndex.has(ilceK)) ilceIndex.set(ilceK, r)
       if (r.mahalle) {
-        const mahalleK = `${ilceK}|${asciiNormalizeAreaName(r.mahalle)}`
+        const mahalleK = `${ilceK}|${normalizeAreaName(r.mahalle)}`
         if (!mahalleIndex.has(mahalleK)) mahalleIndex.set(mahalleK, r)
       }
     }
@@ -87,9 +65,9 @@ export async function resolveDisplayNames(
 
   const out = new Map<string, RawAreaName>()
   for (const key of keys) {
-    const ilK = asciiNormalizeAreaName(key.il)
-    const ilceK = key.ilce != null ? asciiNormalizeAreaName(key.ilce) : null
-    const mahalleK = key.mahalle != null ? asciiNormalizeAreaName(key.mahalle) : null
+    const ilK = normalizeAreaName(key.il)
+    const ilceK = key.ilce != null ? normalizeAreaName(key.ilce) : null
+    const mahalleK = key.mahalle != null ? normalizeAreaName(key.mahalle) : null
 
     const ilRaw = ilIndex.get(ilK)
     const ilceRaw = ilceK != null ? ilceIndex.get(`${ilK}|${ilceK}`) : undefined
