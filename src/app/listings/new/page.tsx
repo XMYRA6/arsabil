@@ -20,11 +20,33 @@ const STEP_TITLES = [
   'Önizle & Yayınla',
 ]
 
+// Impeccable critique P1 (2026-09-17): form state yalnızca useState'te
+// yaşıyordu — sekme kapanır/yenilenirse TÜM ilerleme (yüklenmiş fotoğraflar
+// dahil) sessizce kayboluyordu. sessionStorage'a yazılıp geri okunuyor
+// (sekme kapanınca temizlenir — kalıcı localStorage DEĞİL, bilinçli tercih).
+const DRAFT_KEY = 'arsabil-listing-wizard-draft'
+
+function readDraft(): { form: WizardFormData; step: number } | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return null
+    return {
+      form: { ...emptyFormData, ...parsed.form },
+      step: typeof parsed.step === 'number' ? parsed.step : 1,
+    }
+  } catch {
+    return null
+  }
+}
+
 export default function NewListingPage() {
   const { status } = useSession()
   const router = useRouter()
-  const [step, setStep] = useState(1)
-  const [form, setForm] = useState<WizardFormData>(emptyFormData)
+  const [step, setStep] = useState(() => readDraft()?.step ?? 1)
+  const [form, setForm] = useState<WizardFormData>(() => readDraft()?.form ?? emptyFormData)
   const [publishing, setPublishing] = useState(false)
   const [tempId] = useState(() => `temp-${crypto.randomUUID()}`)
   const [publishError, setPublishError] = useState('')
@@ -32,6 +54,15 @@ export default function NewListingPage() {
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step }))
+    } catch {
+      // sessionStorage dolu/kapalı olabilir — taslak kalıcılığı best-effort,
+      // wizard'ın kendisi bundan bağımsız çalışmaya devam eder.
+    }
+  }, [form, step])
 
   const update = (patch: Partial<WizardFormData>) => setForm(prev => ({ ...prev, ...patch }))
 
@@ -52,6 +83,7 @@ export default function NewListingPage() {
       })
       if (res.ok) {
         const listing = await res.json()
+        try { sessionStorage.removeItem(DRAFT_KEY) } catch { /* best-effort */ }
         router.push(`/listing/${listing.id}`)
       } else {
         const err = await res.json()
@@ -69,7 +101,7 @@ export default function NewListingPage() {
   return (
     <>
       {publishError && (
-        <div role="alert" style={{ padding: '10px 16px', background: 'rgba(255,45,85,.12)', color: '#b8102f', fontSize: '.85rem', fontWeight: 600 }}>
+        <div role="alert" style={{ padding: '10px 16px', background: 'rgba(var(--red-rgb),.12)', color: 'var(--red)', fontSize: '.85rem', fontWeight: 600 }}>
           {publishError}
         </div>
       )}
@@ -79,6 +111,7 @@ export default function NewListingPage() {
         step={step}
         onBack={step > 1 ? () => setStep(s => s - 1) : undefined}
         onNext={step < 5 ? () => setStep(s => s + 1) : undefined}
+        onStepClick={setStep}
         nextDisabled={!canGoNext()}
       >
         {step === 1 && <WizardStep1Location data={form} onChange={update} />}

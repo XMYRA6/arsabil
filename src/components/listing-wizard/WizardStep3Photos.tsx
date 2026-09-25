@@ -55,7 +55,13 @@ export function WizardStep3Photos({ data, onChange, tempListingId }: Props) {
     <div className={styles.stepContainer}>
       <div
         className={styles.dropZone}
+        role="button"
+        tabIndex={0}
+        aria-label="Fotoğraf yüklemek için tıkla"
         onClick={() => inputRef.current?.click()}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current?.click() }
+        }}
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); handleFiles(e.dataTransfer.files) }}
       >
@@ -84,6 +90,7 @@ export function WizardStep3Photos({ data, onChange, tempListingId }: Props) {
               <Image fill unoptimized src={photo.url} alt="" style={{ objectFit: 'cover' }} />
               <button
                 className={styles.photoRemove}
+                aria-label="Fotoğrafı kaldır"
                 onClick={() => handleRemove(photo)}
               >
                 ×

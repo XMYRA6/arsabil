@@ -39,6 +39,13 @@
   color: white;
 }
 
+/* Tamamlanmış adıma atlama — Impeccable critique P2 (2026-09-17): bu durumda
+   .circle gerçek bir <button>, native chrome sıfırlanıyor. */
+.circleClickable {
+  font: inherit;
+  cursor: pointer;
+}
+
 .label {
   font-size: 0.6rem;
   white-space: nowrap;

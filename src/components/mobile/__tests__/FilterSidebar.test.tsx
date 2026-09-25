@@ -53,7 +53,7 @@ describe('FilterSidebar', () => {
         const onChange = jest.fn()
         render(<FilterSidebar filters={FILTERS} onChange={onChange} totalCount={0} />)
         const row = screen.getByText('Kat Karşılığı / Ortaklık').closest('label')
-        const checkbox = row?.querySelector('div')
+        const checkbox = row?.querySelector('input[type="checkbox"]')
         fireEvent.click(checkbox as HTMLElement)
         expect(onChange).toHaveBeenCalledWith({ ...FILTERS, type: [] })
     })

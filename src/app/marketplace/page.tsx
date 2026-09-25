@@ -12,7 +12,7 @@ import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapVi
 import { SegmentedTabs } from '@/components/mobile/SegmentedTabs';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
 import { MobileState } from '@/components/mobile/MobileState';
-import { filterListings, sortListings, mergeDemoOverlay, type ListingFilters } from '@/lib/listing/marketplaceFilters';
+import { filterListings, sortListings, mergeDemoOverlay, LISTING_TYPE_GROUPS, isTypeGroupActive, toggleTypeGroup, type ListingFilters } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
 
 // SSR-safe map import — dynamic + forwardRef birlikte ForwardRefExoticComponent olarak tip verilmeli
@@ -162,17 +162,14 @@ function MarketplaceContent() {
                     }}
                 />
 
-                {/* Quick filter chips */}
-                {[{ label: 'Satış', ids: ['SALE'] }, { label: 'Kat Karşılığı / Ortaklık', ids: ['KAT_KARSILIGI', 'ORTAKLIK'] }].map(({ label, ids }) => {
-                    const active = ids.every(id => filters.type.includes(id));
+                {/* Quick filter chips — FilterSidebar'daki "Satış Türü" checkbox'larıyla
+                    AYNI paylaşılan tanım+mantığı kullanır (Impeccable critique P1,
+                    2026-09-17: önceden bağımsız, kopya bir implementasyondu). */}
+                {LISTING_TYPE_GROUPS.map(({ key, ids, label }) => {
+                    const active = isTypeGroupActive(filters, ids);
                     return (
-                        <button key={label} onClick={() => {
-                            setFilters(f => ({
-                                ...f,
-                                type: active
-                                    ? f.type.filter(t => !ids.includes(t))
-                                    : [...f.type, ...ids.filter(id => !f.type.includes(id))],
-                            }));
+                        <button key={key} aria-pressed={active} onClick={() => {
+                            setFilters(f => toggleTypeGroup(f, ids));
                         }} className={`${styles.quickChip} ${active ? styles.quickChipActive : ''}`}>{label}</button>
                     );
                 })}
@@ -181,7 +178,7 @@ function MarketplaceContent() {
                 <div className={styles.desktopOnlySpacer} />
 
                 {/* Sort */}
-                <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={styles.sortSelect}>
+                <select aria-label="Sıralama" value={sortBy} onChange={e => setSortBy(e.target.value)} className={styles.sortSelect}>
                     <option value="score_desc">En Yüksek Skor</option>
                     <option value="price_asc">En Uygun Fiyat</option>
                     <option value="newest">En Yeniler</option>
@@ -212,7 +209,7 @@ function MarketplaceContent() {
                     onChange={(v) => setMobileTab(v as 'list' | 'map')}
                 />
                 <button type="button" className={styles.filterBtn} onClick={() => setFilterOpen(true)}>
-                    ⚙ Filtreler
+                    <span aria-hidden="true">⚙</span> Filtreler
                 </button>
             </div>
 

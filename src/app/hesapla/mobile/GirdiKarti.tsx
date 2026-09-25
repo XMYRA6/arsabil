@@ -247,7 +247,19 @@ export function GirdiKarti({
                     <>
                         <div className={styles.sliderBasligi}>
                             <span className={styles.girdiEtiket}>Toplam daire</span>
-                            <span className={`${styles.sliderDeger} mNum`}>{totalApartments}</span>
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                className={`${styles.sliderDegerInput} mNum`}
+                                value={totalApartments}
+                                min={1}
+                                max={80}
+                                aria-label="Toplam daire sayısı, sayı ile"
+                                onChange={e => {
+                                    if (e.target.value === '') return;
+                                    onTotalApartments(Number(e.target.value));
+                                }}
+                            />
                         </div>
                         <input
                             type="range"
@@ -263,7 +275,19 @@ export function GirdiKarti({
 
                         <div className={styles.sliderBasligi}>
                             <span className={styles.girdiEtiket}>Arsa sahibinin daire sayısı</span>
-                            <span className={`${styles.sliderDeger} mNum`}>{ownerApartmentShare}</span>
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                className={`${styles.sliderDegerInput} mNum`}
+                                value={ownerApartmentShare}
+                                min={0}
+                                max={Math.max(totalApartments - 1, 0)}
+                                aria-label="Arsa sahibinin daire sayısı, sayı ile"
+                                onChange={e => {
+                                    if (e.target.value === '') return;
+                                    onOwnerApartmentShare(Number(e.target.value));
+                                }}
+                            />
                         </div>
                         <input
                             type="range"

@@ -96,6 +96,14 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
           </div>
         )}
       </div>
+
+      {/* Impeccable critique P1 (2026-09-17): il seviyesinde ürüne dönüş
+          yolu yoktu — ilçe/mahalle sayfalarında zaten vardı. */}
+      <div className={styles.ctaRow}>
+        <Link href="/deger" className={styles.ctaButton}>
+          Bu ilde kendi parselini değerlendir
+        </Link>
+      </div>
     </div>
   )
 }

@@ -169,6 +169,28 @@
         font-family: var(--m-mono);
     }
 
+    .rangeValue {
+        display: inline-flex;
+        align-items: center;
+        color: var(--m-ink);
+        font-family: var(--m-mono);
+        font-weight: 800;
+    }
+
+    .rangeValueInput {
+        width: 32px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: inherit;
+        font: inherit;
+    }
+    .rangeValueInput::-webkit-outer-spin-button,
+    .rangeValueInput::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
     .range {
         width: 100%;
         accent-color: var(--m-link);

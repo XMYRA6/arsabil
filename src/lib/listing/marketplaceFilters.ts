@@ -21,6 +21,35 @@ export interface SortableListing {
     createdAt?: string
 }
 
+// Marketplace'te "Satış Türü" filtresi iki ayrı yerde (top-bar hızlı chip +
+// FilterSidebar checkbox) BAĞIMSIZ implementasyonla tekrarlanmıştı (Impeccable
+// critique P1, 2026-09-17 — Nielsen #4 Consistency ihlali). Tek kaynak burada:
+// ikisi de aynı grup tanımını ve toggle mantığını kullanır.
+export interface ListingTypeGroup {
+    key: string
+    ids: string[]
+    label: string
+}
+
+export const LISTING_TYPE_GROUPS: ListingTypeGroup[] = [
+    { key: 'SALE', ids: ['SALE'], label: 'Satış' },
+    { key: 'KAT_KARSILIGI', ids: ['KAT_KARSILIGI', 'ORTAKLIK'], label: 'Kat Karşılığı / Ortaklık' },
+]
+
+export function isTypeGroupActive(filters: Pick<ListingFilters, 'type'>, ids: string[]): boolean {
+    return ids.every(id => filters.type.includes(id))
+}
+
+export function toggleTypeGroup(filters: ListingFilters, ids: string[]): ListingFilters {
+    const allActive = isTypeGroupActive(filters, ids)
+    return {
+        ...filters,
+        type: allActive
+            ? filters.type.filter(t => !ids.includes(t))
+            : [...filters.type, ...ids.filter(id => !filters.type.includes(id))],
+    }
+}
+
 export function filterListings<T extends FilterableListing>(listings: T[], filters: ListingFilters): T[] {
     return listings.filter(l => {
         if (filters.type.length > 0 && !filters.type.includes(l.type)) return false

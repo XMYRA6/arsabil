@@ -7,6 +7,7 @@ import { buildAreaSeoCard } from '@/lib/areaSeo/areaSeoCard'
 import { createAreaSeoCardDeps } from '@/lib/areaSeo/areaSeoCardDeps'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PriceTrendChart } from '@/components/charts/PriceTrendChart'
+import { faultRiskLevel, floodRiskLevel, RISK_LEVEL_LABEL } from '@/lib/areaSeo/riskLevel'
 import styles from '../../../areaSeo.module.css'
 
 type Params = { il: string; ilce: string; mahalle: string }
@@ -96,24 +97,43 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
         </div>
       )}
 
-      {card.risk && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Deprem ve Taşkın Riski</h2>
-          <p>
-            {card.risk.faultDistanceM != null
-              ? `Bu mahallenin merkezine en yakın diri fay hattı: ${(card.risk.faultDistanceM / 1000).toFixed(1)} km.`
-              : 'Fay hattı mesafesi bu mahalle için hesaplanamadı.'}
-            {card.risk.floodQ100 != null && (
-              <>
-                {' '}
-                {card.risk.floodQ100
-                  ? 'Bu bölge 100 yıllık taşkın (Q100) risk alanı içinde.'
-                  : 'Bu bölge 100 yıllık taşkın (Q100) risk alanı dışında.'}
-              </>
-            )}
-          </p>
-        </div>
-      )}
+      {card.risk && (() => {
+        const faultLevel = faultRiskLevel(card.risk.faultDistanceM)
+        const floodLevel = floodRiskLevel(card.risk.floodQ100)
+        const badgeClass = (level: 'high' | 'medium' | 'low') => ({
+            high: styles.riskBadgeHigh,
+            medium: styles.riskBadgeMedium,
+            low: styles.riskBadgeLow,
+        }[level])
+        return (
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Deprem ve Taşkın Riski</h2>
+            <p>
+              {card.risk.faultDistanceM != null
+                ? <>Bu mahallenin merkezine en yakın diri fay hattı: {(card.risk.faultDistanceM / 1000).toFixed(1)} km</>
+                : 'Fay hattı mesafesi bu mahalle için hesaplanamadı.'}
+              {faultLevel && (
+                <span className={`${styles.riskBadge} ${badgeClass(faultLevel)}`}>
+                  {RISK_LEVEL_LABEL[faultLevel]}
+                </span>
+              )}
+              {card.risk.floodQ100 != null && (
+                <>
+                  <br />
+                  {card.risk.floodQ100
+                    ? 'Bu bölge 100 yıllık taşkın (Q100) risk alanı içinde'
+                    : 'Bu bölge 100 yıllık taşkın (Q100) risk alanı dışında'}
+                  {floodLevel && (
+                    <span className={`${styles.riskBadge} ${badgeClass(floodLevel)}`}>
+                      {RISK_LEVEL_LABEL[floodLevel]}
+                    </span>
+                  )}
+                </>
+              )}
+            </p>
+          </div>
+        )
+      })()}
 
       {card.demographics && (
         <div className={styles.section}>

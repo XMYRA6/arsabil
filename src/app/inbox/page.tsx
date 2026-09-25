@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState, useCallback, Suspense } from 'react'
+import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
@@ -35,6 +36,7 @@ function InboxContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [conversations, setConversations] = useState<Conversation[]>([])
+    const [conversationsLoading, setConversationsLoading] = useState(true)
     const [activeOtherId, setActiveOtherId] = useState<string | null>(null)
     const [messages, setMessages] = useState<Message[]>([])
     const [draft, setDraft] = useState('')
@@ -62,6 +64,7 @@ function InboxContent() {
 
             if (data.type === 'init') {
                 setConversations(data.conversations)
+                setConversationsLoading(false)
                 return
             }
 
@@ -196,27 +199,54 @@ function InboxContent() {
                         <h2 className={styles.sidebarTitle}>Mesajlar</h2>
                     </div>
                     <div className={styles.searchBox}>
-                        <span className={styles.searchIcon}>🔍</span>
+                        <span className={styles.searchIcon} aria-hidden="true">🔍</span>
                         <input
                             className={styles.searchInput}
                             placeholder="Ara"
+                            aria-label="Konuşma ara"
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
+                        {searchTerm && (
+                            <button
+                                type="button"
+                                aria-label="Aramayı temizle"
+                                className={styles.searchClear}
+                                onClick={() => setSearchTerm('')}
+                            >
+                                ×
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 <div className={styles.convList}>
-                    {filtered.length === 0 && (
+                    {conversationsLoading ? (
+                        <div className={styles.emptyConvList}>Yükleniyor…</div>
+                    ) : conversations.length === 0 ? (
                         <div className={styles.emptyConvList}>
-                            Henüz mesaj yok.
+                            <p>Henüz mesaj yok.</p>
+                            <Link href="/marketplace" className={styles.emptyConvCta}>
+                                İlanlara göz at →
+                            </Link>
                         </div>
-                    )}
-                    {filtered.map(c => (
+                    ) : filtered.length === 0 ? (
+                        <div className={styles.emptyConvList}>Aramanızla eşleşen konuşma yok.</div>
+                    ) : null}
+                    {!conversationsLoading && filtered.map(c => (
                         <div
                             key={c.otherUser.id}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${c.otherUser.name || 'Kullanıcı'} ile konuşmayı aç`}
                             className={`${styles.convItem} ${c.otherUser.id === activeOtherId ? styles.convItemActive : ''}`}
                             onClick={() => openConversation(c.otherUser.id)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    openConversation(c.otherUser.id);
+                                }
+                            }}
                         >
                             <div className={`${styles.avatar} ${styles.avatarSidebar} ${c.unreadCount > 0 ? styles.avatarUnread : ''}`}>
                                 {avatarInitials(c.otherUser.name)}
@@ -283,18 +313,21 @@ function InboxContent() {
                                     ref={textareaRef}
                                     className={styles.textarea}
                                     placeholder="Mesaj gönder..."
+                                    aria-label="Mesaj yaz"
                                     value={draft}
                                     onChange={e => setDraft(e.target.value)}
                                     onKeyDown={handleKey}
                                     rows={1}
                                 />
                                 {draft.trim() && (
-                                    <span
+                                    <button
+                                        type="button"
                                         onClick={sendMessage}
+                                        disabled={sending}
                                         className={`${styles.sendLink} ${sending ? styles.sendLinkDisabled : ''}`}
                                     >
                                         Gönder
-                                    </span>
+                                    </button>
                                 )}
                             </div>
                         </div>

@@ -217,15 +217,20 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
         <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
             {/* City Input */}
             <div style={{ position: 'relative', flex: '0 0 180px' }}>
-                <span style={{
+                <span aria-hidden="true" style={{
                     position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
                     fontSize: '0.8rem', color: 'var(--muted)', pointerEvents: 'none',
                 }}>📍</span>
                 <input
                     placeholder="İl ara…"
                     value={query}
+                    role="combobox"
+                    aria-expanded={open}
+                    aria-controls="city-search-listbox"
+                    aria-autocomplete="list"
                     onChange={e => { setQuery(e.target.value); setOpen(true); setShowDistricts(false); }}
                     onFocus={() => setOpen(true)}
+                    onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }}
                     style={{
                         width: '100%', padding: '7px 10px 7px 30px',
                         background: 'var(--bg)', border: '1.5px solid var(--border)',
@@ -242,53 +247,69 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
 
                 {/* City Dropdown */}
                 {open && (
-                    <div style={{
-                        position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-                        background: 'var(--panel)', border: '1.5px solid var(--border)',
-                        borderRadius: 10, maxHeight: 260, overflowY: 'auto',
-                        boxShadow: '0 12px 40px rgba(0,0,0,.25)', zIndex: 100,
-                    }}>
+                    <div
+                        id="city-search-listbox"
+                        role="listbox"
+                        aria-label="İller"
+                        style={{
+                            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
+                            background: 'var(--panel)', border: '1.5px solid var(--border)',
+                            borderRadius: 10, maxHeight: 260, overflowY: 'auto',
+                            boxShadow: '0 12px 40px rgba(0,0,0,.25)', zIndex: 100,
+                        }}>
                         {filtered.length === 0 ? (
                             <div style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--muted)' }}>
                                 Sonuç bulunamadı
                             </div>
                         ) : (
-                            filtered.map(city => (
-                                <div
-                                    key={city.name}
-                                    onClick={() => {
-                                        setProvinceName(city.name);
-                                        onCitySelect(city);
-                                        setQuery('');
-                                        setOpen(false);
-                                        setShowDistricts(false);
-                                    }}
-                                    style={{
-                                        padding: '8px 14px',
-                                        fontSize: '0.8rem',
-                                        color: city.name === selectedCity ? 'var(--primary)' : 'var(--text)',
-                                        fontWeight: city.name === selectedCity ? 800 : 500,
-                                        cursor: 'pointer',
-                                        borderBottom: '1px solid var(--border)',
-                                        transition: 'background 0.1s',
-                                        display: 'flex', alignItems: 'center', gap: 8,
-                                    }}
-                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
-                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                    <span style={{ fontSize: '0.75rem' }}>📍</span>
-                                    {city.name}
-                                    {DISTRICTS[city.name] && (
-                                        <span style={{
-                                            marginLeft: 'auto', fontSize: '0.58rem', background: 'rgba(var(--primary-rgb),.1)',
-                                            color: 'var(--primary)', padding: '1px 5px', borderRadius: 4, fontWeight: 700,
-                                        }}>{DISTRICTS[city.name].length} ilçe</span>
-                                    )}
-                                    {city.name === selectedCity && (
-                                        <span style={{ fontSize: '0.65rem', color: 'var(--primary)' }}>✓</span>
-                                    )}
-                                </div>
-                            ))
+                            filtered.map(city => {
+                                const secili = city.name === selectedCity;
+                                const sec = () => {
+                                    setProvinceName(city.name);
+                                    onCitySelect(city);
+                                    setQuery('');
+                                    setOpen(false);
+                                    setShowDistricts(false);
+                                };
+                                return (
+                                    <div
+                                        key={city.name}
+                                        role="option"
+                                        aria-selected={secili}
+                                        tabIndex={0}
+                                        onClick={sec}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sec(); }
+                                        }}
+                                        style={{
+                                            padding: '8px 14px',
+                                            fontSize: '0.8rem',
+                                            color: secili ? 'var(--primary)' : 'var(--text)',
+                                            fontWeight: secili ? 800 : 500,
+                                            cursor: 'pointer',
+                                            borderBottom: '1px solid var(--border)',
+                                            transition: 'background 0.1s',
+                                            display: 'flex', alignItems: 'center', gap: 8,
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
+                                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                        onFocus={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
+                                        onBlur={e => (e.currentTarget.style.background = 'transparent')}
+                                    >
+                                        <span aria-hidden="true" style={{ fontSize: '0.75rem' }}>📍</span>
+                                        {city.name}
+                                        {DISTRICTS[city.name] && (
+                                            <span style={{
+                                                marginLeft: 'auto', fontSize: '0.58rem', background: 'rgba(var(--primary-rgb),.1)',
+                                                color: 'var(--primary)', padding: '1px 5px', borderRadius: 4, fontWeight: 700,
+                                            }}>{DISTRICTS[city.name].length} ilçe</span>
+                                        )}
+                                        {secili && (
+                                            <span aria-hidden="true" style={{ fontSize: '0.65rem', color: 'var(--primary)' }}>✓</span>
+                                        )}
+                                    </div>
+                                );
+                            })
                         )}
                     </div>
                 )}
@@ -299,6 +320,9 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                 <div style={{ position: 'relative' }}>
                     <button
                         onClick={() => setShowDistricts(p => !p)}
+                        aria-expanded={showDistricts}
+                        aria-haspopup="listbox"
+                        aria-controls="district-search-listbox"
                         style={{
                             padding: '7px 12px', fontSize: '0.78rem',
                             background: showDistricts ? 'var(--primary)' : 'var(--bg)',
@@ -309,38 +333,53 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                             transition: 'all 0.15s',
                         }}
                     >
-                        🏘️ İlçe ▾
+                        <span aria-hidden="true">🏘️</span> İlçe ▾
                     </button>
 
                     {showDistricts && (
-                        <div style={{
-                            position: 'absolute', top: 'calc(100% + 4px)', left: 0,
-                            background: 'var(--panel)', border: '1.5px solid var(--border)',
-                            borderRadius: 10, maxHeight: 300, overflowY: 'auto',
-                            boxShadow: '0 12px 40px rgba(0,0,0,.25)', zIndex: 100,
-                            minWidth: 180,
-                        }}>
-                            {districts.map(d => (
-                                <div
-                                    key={d.name}
-                                    onClick={() => {
-                                        onCitySelect({ name: d.name, lat: d.lat, lng: d.lng, zoom: d.zoom, province: provinceName });
-                                        setShowDistricts(false);
-                                    }}
-                                    style={{
-                                        padding: '7px 14px', fontSize: '0.78rem',
-                                        color: 'var(--text)', cursor: 'pointer',
-                                        borderBottom: '1px solid var(--border)',
-                                        transition: 'background 0.1s',
-                                        display: 'flex', alignItems: 'center', gap: 6,
-                                    }}
-                                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
-                                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                >
-                                    <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>🏘️</span>
-                                    {d.name}
-                                </div>
-                            ))}
+                        <div
+                            id="district-search-listbox"
+                            role="listbox"
+                            aria-label="İlçeler"
+                            style={{
+                                position: 'absolute', top: 'calc(100% + 4px)', left: 0,
+                                background: 'var(--panel)', border: '1.5px solid var(--border)',
+                                borderRadius: 10, maxHeight: 300, overflowY: 'auto',
+                                boxShadow: '0 12px 40px rgba(0,0,0,.25)', zIndex: 100,
+                                minWidth: 180,
+                            }}>
+                            {districts.map(d => {
+                                const sec = () => {
+                                    onCitySelect({ name: d.name, lat: d.lat, lng: d.lng, zoom: d.zoom, province: provinceName });
+                                    setShowDistricts(false);
+                                };
+                                return (
+                                    <div
+                                        key={d.name}
+                                        role="option"
+                                        aria-selected={false}
+                                        tabIndex={0}
+                                        onClick={sec}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sec(); }
+                                        }}
+                                        style={{
+                                            padding: '7px 14px', fontSize: '0.78rem',
+                                            color: 'var(--text)', cursor: 'pointer',
+                                            borderBottom: '1px solid var(--border)',
+                                            transition: 'background 0.1s',
+                                            display: 'flex', alignItems: 'center', gap: 6,
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
+                                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                                        onFocus={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
+                                        onBlur={e => (e.currentTarget.style.background = 'transparent')}
+                                    >
+                                        <span aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.6 }}>🏘️</span>
+                                        {d.name}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

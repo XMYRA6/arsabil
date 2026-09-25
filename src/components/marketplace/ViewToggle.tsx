@@ -25,6 +25,8 @@ export function ViewToggle({ view, onChange }: Props) {
                     key={o.id}
                     onClick={() => onChange(o.id)}
                     title={o.label}
+                    aria-label={o.label}
+                    aria-pressed={view === o.id}
                     style={{
                         padding: '5px 10px', borderRadius: 7,
                         background: view === o.id ? 'var(--primary)' : 'transparent',
@@ -35,8 +37,7 @@ export function ViewToggle({ view, onChange }: Props) {
                         display: 'flex', alignItems: 'center', gap: 4,
                     }}
                 >
-                    <span>{o.icon}</span>
-                    <span style={{ display: 'none' }}>{o.label}</span>
+                    <span aria-hidden="true">{o.icon}</span>
                 </button>
             ))}
         </div>

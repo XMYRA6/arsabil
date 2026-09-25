@@ -133,11 +133,15 @@
 }
 
 .progressFill {
-    width: var(--score-pct, 0%);
+    /* transform:scaleX — Impeccable audit P3 (2026-09-17): width transition
+       tetikler layout, scaleX yalnizca compositor'da calisir. */
+    width: 100%;
     height: 100%;
+    transform: scaleX(var(--score-pct-ratio, 0));
+    transform-origin: left;
     background: var(--score-color, var(--green));
     border-radius: 6px;
-    transition: width 1s ease;
+    transition: transform 1s ease;
 }
 
 .progressValue {
@@ -363,6 +367,22 @@
     font-size: 1.1rem;
     color: var(--primary);
     width: 40px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    padding: 0;
+}
+.offerShare::-webkit-outer-spin-button,
+.offerShare::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.offerShareUnit {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--primary);
 }
 
 .offerTextarea {
@@ -411,6 +431,12 @@
         border: 1.5px solid var(--border);
         border-radius: 18px;
     }
+}
+
+/* Mobilde tab çubuğunun üstünde gösterilen fiyat özeti — masaüstünde
+   gizli (sidebar zaten görünür). Impeccable critique P2 (2026-09-17). */
+.mobilePriceSummary {
+    display: none;
 }
 
 .priceLabel {
@@ -575,6 +601,25 @@
     }
 
     .backBtn {
+        display: none;
+    }
+
+    .mobilePriceSummary {
+        /* `composes` burada KULLANILMAZ — CSS Modules composes bir @media
+           bloğu içinde Turbopack'te sessizce çalışmaz (bkz. proje hafızası:
+           composes+Turbopack build tuzağı). mStatSurface'in (globals.css)
+           görünümü elle kopyalanıyor. */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 16px;
+        margin-bottom: 4px;
+        background: var(--m-panel);
+        border: 1px solid var(--m-divider);
+        border-radius: var(--m-r-card);
+    }
+
+    .sidebarSummary {
         display: none;
     }
 

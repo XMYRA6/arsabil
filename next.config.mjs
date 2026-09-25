@@ -3,6 +3,11 @@ import { withSentryConfig } from '@sentry/nextjs'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "standalone",
+    // LAN'daki telefon/başka cihazlardan `npm run dev:next -- -H 0.0.0.0` ile
+    // test edebilmek için — Next dev sunucusu bunun dışındaki origin'lerden
+    // gelen dev-only istekleri (HMR/RSC) sessizce engelliyor, sayfa asla
+    // hydrate olmuyordu (yalnız dev'de etkili, prod build'i etkilemez).
+    allowedDevOrigins: ['192.168.1.106'],
     images: {
         remotePatterns: [
             { protocol: 'https', hostname: 'res.cloudinary.com' },

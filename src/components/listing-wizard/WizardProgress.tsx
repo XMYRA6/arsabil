@@ -9,9 +9,12 @@ const STEP_LABELS = ['Konum', 'Detay', 'Fotoğraf', 'Fizibilite', 'Yayınla']
 
 interface Props {
   currentStep: number
+  /** Yalnızca TAMAMLANMIŞ adımlar için çağrılır (Impeccable critique P2,
+      2026-09-17) — güç kullanıcısı art arda "Geri" tıklamak zorunda kalmasın. */
+  onStepClick?: (step: number) => void
 }
 
-export function WizardProgress({ currentStep }: Props) {
+export function WizardProgress({ currentStep, onStepClick }: Props) {
   const reduceMotion = useReducedMotion()
 
   return (
@@ -21,12 +24,17 @@ export function WizardProgress({ currentStep }: Props) {
         const done = step < currentStep
         const active = step === currentStep
         const sealState = done ? 'done' : active ? 'active' : 'idle'
+        const clickable = done && !!onStepClick
+        const MotionTag = clickable ? motion.button : motion.div
         return (
           <React.Fragment key={step}>
             <div className={styles.node}>
-              <motion.div
+              <MotionTag
+                {...(clickable
+                  ? { type: 'button' as const, 'aria-label': `${label} adımına dön`, onClick: () => onStepClick!(step) }
+                  : {})}
                 data-seal-state={sealState}
-                className={`${styles.circle} ${active ? styles.circleActive : ''} ${done ? styles.circleDone : ''}`}
+                className={`${styles.circle} ${active ? styles.circleActive : ''} ${done ? styles.circleDone : ''} ${clickable ? styles.circleClickable : ''}`}
                 animate={sealState}
                 variants={{
                   idle: { scale: 1 },
@@ -36,7 +44,7 @@ export function WizardProgress({ currentStep }: Props) {
                 transition={sealTransition}
               >
                 {done ? '✓' : step}
-              </motion.div>
+              </MotionTag>
               <span className={`${styles.label} ${active ? styles.labelActive : ''} ${done ? styles.labelDone : ''}`}>
                 {label}
               </span>

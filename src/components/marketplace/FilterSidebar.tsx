@@ -1,6 +1,7 @@
 "use client";
 
 import type { ListingFilters } from '@/lib/listing/marketplaceFilters';
+import { LISTING_TYPE_GROUPS, isTypeGroupActive, toggleTypeGroup } from '@/lib/listing/marketplaceFilters';
 import styles from './FilterSidebar.module.css';
 
 interface Props {
@@ -13,25 +14,11 @@ interface Props {
     onApply?: () => void;
 }
 
-const TYPES = [
-    { key: 'SALE', ids: ['SALE'], label: 'Satış' },
-    { key: 'KAT_KARSILIGI', ids: ['KAT_KARSILIGI', 'ORTAKLIK'], label: 'Kat Karşılığı / Ortaklık' },
-];
-
 const IMAR_OPTS = ['Konut', 'Ticari', 'Karma', 'Tarım'];
 const IMAR_VALS = ['KONUT', 'TICARI', 'KARMA', 'TARIM'];
 
 export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, onApply }: Props) {
     const set = (partial: Partial<ListingFilters>) => onChange({ ...filters, ...partial });
-
-    const toggleType = (ids: string[]) => {
-        const allActive = ids.every(id => filters.type.includes(id));
-        set({
-            type: allActive
-                ? filters.type.filter(t => !ids.includes(t))
-                : [...filters.type, ...ids.filter(id => !filters.type.includes(id))],
-        });
-    };
 
     const toggleImar = (val: string) => {
         const has = filters.imar.includes(val);
@@ -56,16 +43,19 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
             {/* Satış Türü */}
             <div className={styles.section}>
                 <span className={styles.sectionLabel}>SATIŞ TÜRÜ</span>
-                {TYPES.map(t => {
-                    const active = t.ids.every(id => filters.type.includes(id));
+                {LISTING_TYPE_GROUPS.map(t => {
+                    const active = isTypeGroupActive(filters, t.ids);
                     return (
                         <label key={t.key} className={styles.checkRow}>
-                            <div
-                                onClick={() => toggleType(t.ids)}
-                                className={`${styles.checkBox} ${active ? styles.checkBoxActive : ''}`}
-                            >
+                            <input
+                                type="checkbox"
+                                checked={active}
+                                onChange={() => onChange(toggleTypeGroup(filters, t.ids))}
+                                className={styles.checkBoxInput}
+                            />
+                            <span className={`${styles.checkBox} ${active ? styles.checkBoxActive : ''}`} aria-hidden="true">
                                 {active && <span className={styles.checkMark}>✓</span>}
-                            </div>
+                            </span>
                             {t.label}
                         </label>
                     );
@@ -103,15 +93,19 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
             {/* Fizibilite */}
             <div className={styles.section}>
                 <span className={styles.sectionLabel}>FİZİBİLİTE</span>
-                <label className={styles.toggleRow}>
-                    <div
+                <div className={styles.toggleRow}>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={filters.fizibiliteOnly}
+                        aria-label="Fizibilite Skoru Olanlar"
                         onClick={() => set({ fizibiliteOnly: !filters.fizibiliteOnly })}
                         className={`${styles.toggleTrack} ${filters.fizibiliteOnly ? styles.toggleTrackActive : ''}`}
                     >
-                        <div className={`${styles.toggleThumb} ${filters.fizibiliteOnly ? styles.toggleThumbActive : ''}`} />
-                    </div>
+                        <span className={`${styles.toggleThumb} ${filters.fizibiliteOnly ? styles.toggleThumbActive : ''}`} />
+                    </button>
                     <span className={styles.toggleLabel}>Fizibilite Skoru Olanlar</span>
-                </label>
+                </div>
                 {filters.fizibiliteOnly && (
                     <div>
                         <div className={styles.scoreHeader}>

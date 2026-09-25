@@ -16,7 +16,10 @@ export function FizibiliteScoreBadge({ score, size = 'md', showLabel = false }: 
     const dim = sizeMap[size];
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+            title={`Fizibilite Skoru ${score}/100 (${label}) — arsa payı, risk ve piyasa verisinden hesaplanır`}
+        >
             <div style={{
                 width: dim, height: dim,
                 borderRadius: '50%',

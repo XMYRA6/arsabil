@@ -10,18 +10,19 @@ interface WizardShellProps {
   step: number
   onBack?: () => void
   onNext?: () => void
+  onStepClick?: (step: number) => void
   nextDisabled?: boolean
   children: React.ReactNode
 }
 
-export function WizardShell({ pageTitle, stepTitle, step, onBack, onNext, nextDisabled, children }: WizardShellProps) {
+export function WizardShell({ pageTitle, stepTitle, step, onBack, onNext, onStepClick, nextDisabled, children }: WizardShellProps) {
   return (
     <div className={styles.container}>
       <h1 className={styles.pageTitle}>{pageTitle}</h1>
       <AppBar title={stepTitle} showBack={!!onBack} onBack={onBack} />
 
       <div className={styles.card}>
-        <WizardProgress currentStep={step} />
+        <WizardProgress currentStep={step} onStepClick={onStepClick} />
         <h2 className={styles.stepTitle}>{stepTitle}</h2>
 
         {children}

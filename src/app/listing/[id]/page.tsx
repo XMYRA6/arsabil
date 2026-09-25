@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
@@ -17,12 +18,12 @@ const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m 
 
 type Tab = 'genel' | 'fizibilite' | 'senaryo' | 'teklifler' | 'mesajlar';
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: 'genel', label: 'Genel Bilgiler', icon: '' },
-    { id: 'fizibilite', label: 'Ön Fizibilite', icon: '' },
-    { id: 'senaryo', label: 'Senaryo', icon: '' },
-    { id: 'teklifler', label: 'Teklifler', icon: '' },
-    { id: 'mesajlar', label: 'Mesajlar', icon: '' },
+const TABS: { id: Tab; label: string }[] = [
+    { id: 'genel', label: 'Genel Bilgiler' },
+    { id: 'fizibilite', label: 'Ön Fizibilite' },
+    { id: 'senaryo', label: 'Senaryo' },
+    { id: 'teklifler', label: 'Teklifler' },
+    { id: 'mesajlar', label: 'Mesajlar' },
 ];
 
 const MOCK_LISTING = {
@@ -70,8 +71,9 @@ export default function ListingDetailPage() {
 
     const initialTab = (searchParams.get('tab') as Tab) ?? 'genel';
     const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-    const [listing, setListing] = useState(MOCK_LISTING);
+    const [listing, setListing] = useState<typeof MOCK_LISTING | null>(null);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
 
     // Offer state
     const [offerShare, setOfferShare] = useState(33);
@@ -79,17 +81,22 @@ export default function ListingDetailPage() {
     const [sending, setSending] = useState(false);
 
     useEffect(() => {
-        // Try to fetch real listing, fall back to mock
+        // Impeccable critique P0 (2026-09-17): önceden hata/eksik-id durumunda
+        // sessizce MOCK_LISTING'e (uydurma başlık/fiyat) düşülüyordu, kullanıcı
+        // gerçek bir ilan gördüğünü sanabiliyordu — PRODUCT.md ilke #1'i
+        // ("gerçek veri, uydurma yok") ihlal ediyordu. Artık görünür bir hata
+        // durumu var; MOCK_LISTING yalnızca `mergeDemoOverlay`'in eksik
+        // (Prisma şemasında olmayan) alanları doldurmak için kullanılıyor.
         fetch(`/api/listings/${id}`)
-            .then(r => r.json())
+            .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
             .then(data => {
                 if (data && data.id) {
                     setListing({ ...mergeDemoOverlay(data, MOCK_LISTING), id });
                 } else {
-                    setListing({ ...MOCK_LISTING, id });
+                    setFetchError(true);
                 }
             })
-            .catch(() => setListing({ ...MOCK_LISTING, id }))
+            .catch(() => setFetchError(true))
             .finally(() => setLoading(false));
     }, [id]);
 
@@ -122,6 +129,15 @@ export default function ListingDetailPage() {
     if (loading) return (
         <div className={styles.loading}>
             Yükleniyor…
+        </div>
+    );
+
+    if (fetchError || !listing) return (
+        <div className={styles.loading} style={{ flexDirection: 'column', gap: 12 }}>
+            <p>İlan yüklenemedi.</p>
+            <button onClick={() => router.push('/marketplace')} className={styles.primaryBtn}>
+                Pazar Yerine Dön
+            </button>
         </div>
     );
 
@@ -166,7 +182,7 @@ export default function ListingDetailPage() {
                     {/* Progress bar */}
                     <div
                         className={styles.progressRow}
-                        style={{ '--score-pct': `${score}%`, '--score-color': scoreColor } as React.CSSProperties}
+                        style={{ '--score-pct-ratio': score / 100, '--score-color': scoreColor } as React.CSSProperties}
                     >
                         <span className={styles.progressLabel}>Fizibilite Skoru</span>
                         <div className={styles.progressTrack}>
@@ -191,11 +207,38 @@ export default function ListingDetailPage() {
                         <div className={styles.location}>{listing.district}, {listing.city}</div>
                     </div>
 
+                    {/* Mobilde fiyat/mini-stat özeti — Impeccable critique P2 (2026-09-17):
+                        önceden mobilde bu blok tüm tab içeriğinin ALTINDAydı (.sidebar
+                        tek sütuna düşünce en sona geliyordu), Casey persona ilk 2
+                        saniyede fiyatı göremiyordu. Sidebar'daki aynı bloğun mobil
+                        kopyası (CSS'te masaüstünde gizli, .sidebarSummary mobilde gizli
+                        — çift render yok, sadece görünürlük). */}
+                    <div className={styles.mobilePriceSummary}>
+                        <div>
+                            <div className={styles.priceLabel}>Tahmini Değer</div>
+                            <div className={styles.priceValue}>
+                                {(listing.price ?? 5171642).toLocaleString('tr-TR')} TL
+                            </div>
+                        </div>
+                        <div className={styles.miniStats}>
+                            <div className={`${styles.miniStat} ${styles.miniStatGreen}`}>
+                                <div className={styles.miniStatLabel}>Net Kâr</div>
+                                <div className={`${styles.miniStatValue} ${styles.miniStatValueGreen}`}>+%{listing.netKar}</div>
+                            </div>
+                            <div className={`${styles.miniStat} ${styles.miniStatBlue}`}>
+                                <div className={styles.miniStatLabel}>Arsa Payı</div>
+                                <div className={`${styles.miniStatValue} ${styles.miniStatValueBlue}`}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Tabs */}
-                    <div className={styles.tabs}>
+                    <div className={styles.tabs} role="tablist">
                         {TABS.map(tab => (
                             <button
                                 key={tab.id}
+                                role="tab"
+                                aria-selected={activeTab === tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ''}`}
                             >
@@ -205,7 +248,7 @@ export default function ListingDetailPage() {
                     </div>
 
                     {/* Tab Content */}
-                    <div className={styles.tabContent}>
+                    <div className={styles.tabContent} role="tabpanel">
 
                         {activeTab === 'genel' && (
                             <div>
@@ -271,39 +314,25 @@ export default function ListingDetailPage() {
                         )}
 
                         {activeTab === 'fizibilite' && (
-                            <div>
-                                <h3 className={styles.sectionTitle}>Ön Fizibilite Sonuçları</h3>
-                                {/* Bu sekmedeki degerlerin TAMAMI sabit ornek: arsa degeri, net kar,
-                                    daire/m2 ve proje suresi kodda literal; skor ve piyasa
-                                    karsilastirmasi ise semada bulunmayan mock alanlardan geliyor.
-                                    Gercek hesap /hesapla sayfasindaki motorda yapiliyor. */}
-                                <div className={styles.demoNote} role="note">
-                                    <strong>Örnek veri</strong> — Bu sekmedeki değerler tanıtım amaçlıdır ve bu
-                                    ilana ait bir hesap değildir. Gerçek fizibilite için{' '}
-                                    <a href="/hesapla" className={styles.demoNoteLink}>Hesapla</a> sayfasını kullanın.
-                                </div>
-                                <div className={styles.fizGrid}>
-                                    {[
-                                        ['Tahmini Arsa Değeri', '4.371.200 TL', 'var(--primary)'],
-                                        ['Tahmini Net Kâr', '+%34 (▲+1.76M TL)', 'var(--green)'],
-                                        ['Fizibilite Skoru', `${score}/100`, scoreColor],
-                                        ['Piyasa Karşılaştırma', `+${listing.changePercent}%`, 'var(--green)'],
-                                        ['Daire/m² Tahmini', '9.5/m²', 'var(--card-title)'],
-                                        ['Proje Süresi', '~18–24 ay', 'var(--muted)'],
-                                    ].map(([label, val, color]) => (
-                                        <div
-                                            key={label}
-                                            className={styles.fizCell}
-                                            style={{ '--cell-color': color as string } as React.CSSProperties}
-                                        >
-                                            <div className={styles.fizLabel}>{label}</div>
-                                            <div className={styles.fizValue}>{val}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className={styles.infoNote}>
-                                    Bu değerler ArsaBil Engine v2 tarafından otomatik hesaplanmıştır. Detaylı analiz için Senaryo sekmesini kullanın.
-                                </div>
+                            <div className={styles.centerCta}>
+                                {/* Impeccable critique P1 (2026-09-17): bu sekmedeki degerlerin
+                                    TAMAMI (arsa degeri, net kar, daire/m2, proje suresi) sabit
+                                    ornek kodmus, ilan verisiyle hic baglantisi yoktu — PRODUCT.md
+                                    ilke #1'i ("gercek veri, uydurma yok") ihlal ediyordu. Gercek
+                                    hesap /hesapla sayfasindaki motora baglanana kadar "Yakinda"
+                                    durumuna cevrildi. */}
+                                <div className={styles.centerCtaIcon}>Fizibilite</div>
+                                <div className={styles.centerCtaTitle}>Ön fizibilite yakında burada</div>
+                                <p className={styles.description}>
+                                    Bu ilan için otomatik fizibilite hesabı henüz hazır değil. Gerçek verilerle
+                                    kendi hesabınızı şimdi çıkarabilirsiniz.
+                                </p>
+                                <button
+                                    onClick={() => router.push(`/?listing=${listing.id}`)}
+                                    className={styles.primaryBtn}
+                                >
+                                    Hesapla&apos;yı Aç →
+                                </button>
                             </div>
                         )}
 
@@ -322,13 +351,28 @@ export default function ListingDetailPage() {
 
                         {activeTab === 'teklifler' && (
                             <div>
-                                <h3 className={styles.sectionTitle}>Teklif Ver</h3>
+                                <div className={styles.titleRow}>
+                                    <h3 className={styles.sectionTitle}>Teklif Ver</h3>
+                                    <Link href={`/listing/${id}/offers`} className={styles.demoNoteLink}>
+                                        Geçmiş teklifleri gör →
+                                    </Link>
+                                </div>
                                 <div className={styles.offerField}>
                                     <label className={styles.offerLabel}>Teklif Ettiğim Arsa Payı (%)</label>
                                     <div className={styles.offerRangeRow}>
                                         <input type="range" min={10} max={60} value={offerShare} onChange={e => setOfferShare(+e.target.value)}
                                             className={styles.offerRange} />
-                                        <span className={styles.offerShare}>%{offerShare}</span>
+                                        <span className={styles.offerShareUnit}>%</span>
+                                        <input
+                                            type="number"
+                                            inputMode="numeric"
+                                            min={10}
+                                            max={60}
+                                            aria-label="Teklif ettiğim arsa payı, sayı ile"
+                                            className={styles.offerShare}
+                                            value={offerShare}
+                                            onChange={e => { if (e.target.value !== '') setOfferShare(+e.target.value); }}
+                                        />
                                     </div>
                                 </div>
                                 <textarea
@@ -357,21 +401,23 @@ export default function ListingDetailPage() {
 
                 {/* RIGHT — Sticky sidebar */}
                 <div className={styles.sidebar}>
-                    <div>
-                        <div className={styles.priceLabel}>Tahmini Değer</div>
-                        <div className={styles.priceValue}>
-                            {(listing.price ?? 5171642).toLocaleString('tr-TR')} TL
+                    <div className={styles.sidebarSummary}>
+                        <div>
+                            <div className={styles.priceLabel}>Tahmini Değer</div>
+                            <div className={styles.priceValue}>
+                                {(listing.price ?? 5171642).toLocaleString('tr-TR')} TL
+                            </div>
                         </div>
-                    </div>
 
-                    <div className={styles.miniStats}>
-                        <div className={`${styles.miniStat} ${styles.miniStatGreen}`}>
-                            <div className={styles.miniStatLabel}>Net Kâr</div>
-                            <div className={`${styles.miniStatValue} ${styles.miniStatValueGreen}`}>+%{listing.netKar}</div>
-                        </div>
-                        <div className={`${styles.miniStat} ${styles.miniStatBlue}`}>
-                            <div className={styles.miniStatLabel}>Arsa Payı</div>
-                            <div className={`${styles.miniStatValue} ${styles.miniStatValueBlue}`}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
+                        <div className={styles.miniStats}>
+                            <div className={`${styles.miniStat} ${styles.miniStatGreen}`}>
+                                <div className={styles.miniStatLabel}>Net Kâr</div>
+                                <div className={`${styles.miniStatValue} ${styles.miniStatValueGreen}`}>+%{listing.netKar}</div>
+                            </div>
+                            <div className={`${styles.miniStat} ${styles.miniStatBlue}`}>
+                                <div className={styles.miniStatLabel}>Arsa Payı</div>
+                                <div className={`${styles.miniStatValue} ${styles.miniStatValueBlue}`}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
+                            </div>
                         </div>
                     </div>
 

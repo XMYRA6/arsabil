@@ -150,6 +150,11 @@
 }
 
 .toggleTrack {
+    /* Impeccable audit/critique (2026-09-17): önceden <div onClick>, artık
+       gerçek <button role="switch"> — native buton chrome'u sıfırlanıyor. */
+    padding: 0;
+    border: none;
+    font: inherit;
     width: 40px;
     height: 22px;
     border-radius: 11px;
@@ -158,6 +163,27 @@
     cursor: pointer;
     transition: background 0.2s;
     flex-shrink: 0;
+}
+
+/* Gerçek checkbox — görsel olarak `.checkBox`'ın (aria-hidden dekoratif
+   ikizi) altında gizli ama klavye/ekran okuyucu için TAM erişilebilir
+   (visually-hidden deseni, display:none DEĞİL — DOM'da ve tab sırasında
+   kalır). Impeccable critique P2 (2026-09-17). */
+.checkBoxInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.checkBoxInput:focus-visible + .checkBox {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .toggleTrackActive {

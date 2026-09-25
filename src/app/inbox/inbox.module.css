@@ -76,7 +76,7 @@
 
 .searchInput {
     width: 100%;
-    padding: 10px 12px 10px 36px;
+    padding: 10px 30px 10px 36px;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -443,6 +443,48 @@
     padding: 1.5rem;
     color: var(--muted);
     font-size: 0.85rem;
+    text-align: center;
+}
+
+.emptyConvList p {
+    margin: 0 0 10px;
+}
+
+/* Boş inbox'tan konuşma başlatma yolu — Impeccable critique P1 (2026-09-17):
+   önceden burada hiçbir CTA yoktu, ilk kez gelen kullanıcı çıkmaz sokaktaydı. */
+.emptyConvCta {
+    display: inline-block;
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.emptyConvCta:hover {
+    text-decoration: underline;
+}
+
+.searchClear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.searchClear:hover {
+    background: rgba(var(--primary-rgb), .08);
+    color: var(--text);
 }
 
 .msgTimestamp {
@@ -450,6 +492,12 @@
 }
 
 .sendLink {
+    /* Impeccable audit P1 (2026-09-17): önceden <span onClick>, klavye ile
+       tetiklenemiyordu — gerçek <button>'a geçirildi, native buton chrome'u
+       sıfırlanıyor (görünüm değişmedi). */
+    background: none;
+    border: none;
+    font: inherit;
     color: var(--primary);
     font-weight: 800;
     cursor: pointer;

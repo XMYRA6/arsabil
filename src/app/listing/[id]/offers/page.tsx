@@ -117,13 +117,25 @@ export default function ListingOffersPage() {
             <section className={styles.createPanel}>
                 <label className={styles.rangeLabel}>
                     <span>Teklif oranı</span>
-                    <strong>%{offeredShare}</strong>
+                    <span className={styles.rangeValue}>
+                        %
+                        <input
+                            type="number"
+                            inputMode="numeric"
+                            min={10}
+                            max={60}
+                            aria-label="Teklif oranı, sayı ile"
+                            className={styles.rangeValueInput}
+                            value={offeredShare}
+                            onChange={event => { if (event.target.value !== '') setOfferedShare(Number(event.target.value)); }}
+                        />
+                    </span>
                 </label>
                 <input
                     className={styles.range}
                     type="range"
                     min="10"
-                    max="70"
+                    max="60"
                     value={offeredShare}
                     onChange={event => setOfferedShare(Number(event.target.value))}
                 />

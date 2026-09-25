@@ -44,6 +44,9 @@ export function RiskCostFields({
     <>
       <div className={`${styles.drawerRow} ${styles.column}`}>
         <div className={styles.drawerRowLabel}>İksa Masrafı</div>
+        <p className={styles.drawerRowHint}>
+          Kazının çökmemesi için yapılan destek duvarı masrafı — parselin zemin/eğim durumuna göre değişir.
+        </p>
         <div className={styles.luxGrid}>
           {[
             { label: 'Yok', value: 'off' as const },

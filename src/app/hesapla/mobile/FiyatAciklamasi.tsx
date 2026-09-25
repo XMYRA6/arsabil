@@ -143,6 +143,9 @@ export function FiyatAciklamasi({
                     <span className={styles.anahtarTopu} />
                 </button>
             </div>
+            <p className={styles.muhendisIpucu}>
+                Hesabın formülünü ve sembollerini (M, Mi, Ma, FD_total) gösterir — çoğu kullanıcı için gerekli değil.
+            </p>
 
             {muhendisGorunumu && <HesapFisi result={result} />}
         </section>

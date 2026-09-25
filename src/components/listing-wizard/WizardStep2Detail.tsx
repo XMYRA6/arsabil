@@ -69,6 +69,13 @@ export function WizardStep2Detail({ data, onChange }: Props) {
           <option value="SALE">Satış</option>
           <option value="ORTAKLIK">Ortaklık</option>
         </select>
+        {/* Jargon yardımı — Impeccable critique P2 (2026-09-17): arsa sahibi
+            persona inşaat/hukuk profesyoneli değil, bu ayrımı bilmeyebilir. */}
+        <p className={styles.hintText}>
+          {data.type === 'KAT_KARSILIGI' && 'Müteahhit arsanıza bina yapar, karşılığında size bina içinden daire/pay verir.'}
+          {data.type === 'SALE' && 'Arsanızı doğrudan, nakit karşılığında satarsınız.'}
+          {data.type === 'ORTAKLIK' && 'Arsanızı sermaye veya iş gücü ortaklığıyla değerlendirirsiniz, kesin bir daire payı yerine anlaşmaya bağlı bir ortaklık kurulur.'}
+        </p>
       </div>
 
       <div className={styles.twoCol}>
@@ -91,6 +98,11 @@ export function WizardStep2Detail({ data, onChange }: Props) {
             <option value="HISSELI">Hisseli Tapu</option>
             <option value="DIGER">Diğer</option>
           </select>
+          {data.titleDeed === 'HISSELI' && (
+            <p className={styles.hintText}>
+              Arsanın tapuda birden fazla kişi adına, pay olarak kayıtlı olması. Beyan ettiğiniz alanla tapudaki toplam alan arasında fark olması bu yüzden normaldir.
+            </p>
+          )}
         </div>
       </div>
 

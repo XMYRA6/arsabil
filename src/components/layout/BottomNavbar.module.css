@@ -57,7 +57,9 @@
 }
 
 .label {
-    font-size: 9.8px;
+    /* 11px: erisilebilirlik tabani (Impeccable critique P2, 2026-09-17 —
+       eski 9.8px WCAG/iOS HIG kucuk-metin esiginin altindaydi). */
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: -.1px;
 }

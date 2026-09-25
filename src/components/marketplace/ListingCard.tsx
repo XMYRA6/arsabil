@@ -1,6 +1,7 @@
 "use client";
 
 import Image from 'next/image';
+import type { KeyboardEvent } from 'react';
 import { FizibiliteScoreBadge } from './FizibiliteScoreBadge';
 import { useRouter } from 'next/navigation';
 import styles from './ListingCard.module.css';
@@ -68,13 +69,29 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
     const typeRgb = listing.type === 'SALE' ? 'var(--info-rgb)' : 'var(--green-rgb)';
     const isList = view === 'list';
 
+    // Tum kart tiklanabilir ama klavye/switch-access ile erisilemiyordu
+    // (Impeccable audit P1, 2026-09-17) — role="link"+tabIndex+onKeyDown
+    // gercek bir <a> yerine tercih edildi cunku ic ice butonlar zaten
+    // stopPropagation ile korunuyor, <a> icinde <button> gecersiz HTML olurdu.
+    const acDetay = () => router.push(`/listing/${listing.id}`);
+    const detayKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            acDetay();
+        }
+    };
+
     /* ───────────────── LIST VIEW (row card) ───────────────── */
     if (isList) {
         return (
             <div
+                role="link"
+                tabIndex={0}
+                aria-label={listing.title}
                 onMouseEnter={() => onHover?.(listing.id)}
                 onMouseLeave={() => onHover?.(null)}
-                onClick={() => router.push(`/listing/${listing.id}`)}
+                onClick={acDetay}
+                onKeyDown={detayKeyDown}
                 style={{
                     display: 'flex', alignItems: 'stretch',
                     background: highlighted ? 'rgba(var(--primary-rgb),.06)' : 'var(--bg)',
@@ -210,9 +227,13 @@ export function ListingCard({ listing, highlighted, view, onHover, isFavorite, o
     return (
         <div
             className={styles.cardRoot}
+            role="link"
+            tabIndex={0}
+            aria-label={listing.title}
             onMouseEnter={() => onHover?.(listing.id)}
             onMouseLeave={() => onHover?.(null)}
-            onClick={() => router.push(`/listing/${listing.id}`)}
+            onClick={acDetay}
+            onKeyDown={detayKeyDown}
             style={{
                 display: 'flex', flexDirection: 'column',
                 background: highlighted ? 'rgba(var(--primary-rgb),.08)' : 'var(--bg)',
