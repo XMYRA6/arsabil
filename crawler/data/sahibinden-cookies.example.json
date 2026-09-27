@@ -1,0 +1,21 @@
+[
+  {
+    "name": "cf_clearance",
+    "value": "REPLACE_ME",
+    "domain": ".sahibinden.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax",
+    "expires": 1780000000
+  },
+  {
+    "name": "_px3",
+    "value": "REPLACE_ME",
+    "domain": ".sahibinden.com",
+    "path": "/",
+    "secure": true,
+    "httpOnly": false,
+    "sameSite": "Lax"
+  }
+]

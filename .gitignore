@@ -78,3 +78,6 @@ e2e/screenshots/
 
 # e2e debug scratch output
 e2e/tmp/
+
+# sahibinden crawl — gerçek oturum çerezleri asla commit edilmez
+crawler/data/sahibinden-cookies.json
