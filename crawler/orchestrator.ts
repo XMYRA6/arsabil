@@ -44,6 +44,8 @@ export interface OrchestratorDeps {
   headful?: boolean
   /** tkgmName (tr-TR küçük harf) veya emlakjetSlug — her ikisiyle de eşleşir. */
   only?: string[]
+  /** Faz 2 (Sahibinden) buildQueue()'yu yeniden kullanmak için — varsayılan 'emlakjet'. */
+  source?: string
 }
 
 export interface OrchestratorResult {
@@ -68,7 +70,7 @@ export async function buildQueue(
   const cutoff = new Date(deps.now().getTime() - deps.resumeDays * 86_400_000)
   const doneRuns = await deps.client.crawlRun.findMany({
     where: {
-      source: 'emlakjet',
+      source: deps.source ?? 'emlakjet',
       category: 'arsa',
       blocked: false,
       finishedAt: { not: null },

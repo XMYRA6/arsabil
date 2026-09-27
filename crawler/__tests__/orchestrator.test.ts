@@ -71,6 +71,39 @@ describe('buildQueue', () => {
     const { queue } = await buildQueue(deps)
     expect(queue.map((p) => p.tkgmName).sort()).toEqual(['Trabzon', 'Şanlıurfa'].sort())
   })
+
+  it('source verilince findMany where.source o değeri alır', async () => {
+    let capturedWhere: any
+    const deps = baseDeps({
+      source: 'sahibinden',
+      client: {
+        crawlRun: {
+          findMany: async (args: any) => {
+            capturedWhere = args.where
+            return []
+          },
+        },
+      } as any,
+    })
+    await buildQueue(deps)
+    expect(capturedWhere.source).toBe('sahibinden')
+  })
+
+  it('source verilmezse findMany where.source varsayılan emlakjet olur', async () => {
+    let capturedWhere: any
+    const deps = baseDeps({
+      client: {
+        crawlRun: {
+          findMany: async (args: any) => {
+            capturedWhere = args.where
+            return []
+          },
+        },
+      } as any,
+    })
+    await buildQueue(deps)
+    expect(capturedWhere.source).toBe('emlakjet')
+  })
 })
 
 describe('runOrchestrator', () => {
