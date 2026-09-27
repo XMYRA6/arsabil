@@ -30,6 +30,10 @@ function parseArgs(argv: string[]) {
     headful: has('headful'),
     maxPages: Number(get('max-pages') ?? 20),
     resumeDays: Number(process.env.CRAWL_RESUME_DAYS ?? 7),
+    // Varsayılan davranışı DEĞİŞTİRMEZ — bilinçli, elle geçilen bir bayrak.
+    // Yerel makineden (zaten residential IP) küçük ölçekli test için; ulusal/VPS
+    // ölçeğinde KULLANILMAMALI (spec'in "residential proxy zorunlu" kararı geçerli).
+    allowNoProxy: has('allow-no-proxy'),
   }
 }
 
@@ -45,12 +49,20 @@ async function main() {
   }
 
   const proxy = resolveProxyConfig()
-  if (!proxy) {
+  if (!proxy && !a.allowNoProxy) {
     console.error(
       'Sahibinden residential proxy olmadan neredeyse her zaman engellenir — ' +
-        'CRAWL_PROXY_SERVER/CRAWL_PROXY_USERNAME/CRAWL_PROXY_PASSWORD env değişkenlerini doldurun.',
+        'CRAWL_PROXY_SERVER/CRAWL_PROXY_USERNAME/CRAWL_PROXY_PASSWORD env değişkenlerini doldurun, ' +
+        "ya da bilerek riske girip küçük ölçekte test etmek için --allow-no-proxy ekleyin.",
     )
     process.exit(1)
+  }
+  if (!proxy && a.allowNoProxy) {
+    console.warn(
+      "⚠️  Proxy olmadan çalışıyorsun (--allow-no-proxy). Kendi bağlantın zaten residential olduğu için bir " +
+        'süre çalışabilir, ama Sahibinden istediği an engelleyebilir — yalnız küçük ölçekli test için, ulusal ' +
+        'taramada KULLANMA.',
+    )
   }
 
   let cookies
