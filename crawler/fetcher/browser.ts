@@ -1,6 +1,7 @@
 import { chromium, type Browser, type BrowserContext } from '@playwright/test'
 import type { CrawlConfig } from '../config'
 import { randDelayMs } from '../config'
+import type { ProxyConfig } from './proxy'
 
 export interface Fetcher {
   get(url: string): Promise<{ html: string; status: number }>
@@ -15,7 +16,10 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms))
 }
 
-export async function createFetcher(cfg: CrawlConfig, opts: { headful?: boolean } = {}): Promise<Fetcher> {
+export async function createFetcher(
+  cfg: CrawlConfig,
+  opts: { headful?: boolean; proxy?: ProxyConfig } = {},
+): Promise<Fetcher> {
   const browser: Browser = await chromium.launch({ headless: !opts.headful })
   let context: BrowserContext
   try {
@@ -24,6 +28,9 @@ export async function createFetcher(cfg: CrawlConfig, opts: { headful?: boolean 
       viewport: { width: 1440, height: 900 },
       locale: 'tr-TR',
       timezoneId: 'Europe/Istanbul',
+      ...(opts.proxy
+        ? { proxy: { server: opts.proxy.server, username: opts.proxy.username, password: opts.proxy.password } }
+        : {}),
     })
     // basit maskeleme
     await context.addInitScript(() => {
