@@ -26,6 +26,8 @@ export interface RunArgs {
   maxPages: number
   dryRun: boolean
   limit?: number
+  /** Verilirse adapter.searchUrls() bu değeri alır (URL slug), args.il DB scope/delisting/geocode için değişmeden kalır. */
+  ilUrlOverride?: string
 }
 
 export interface RunSummary {
@@ -99,7 +101,7 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
   let rethrow: unknown = null
 
   try {
-    const searchUrls = adapter.searchUrls(args.il, args.category, args.maxPages)
+    const searchUrls = adapter.searchUrls(args.ilUrlOverride ?? args.il, args.category, args.maxPages)
 
     outer: for (let pageIdx = 0; pageIdx < searchUrls.length; pageIdx++) {
       const url = searchUrls[pageIdx]

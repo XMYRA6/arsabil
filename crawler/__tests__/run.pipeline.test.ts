@@ -723,4 +723,53 @@ describe('runCrawl', () => {
     expect(summary.delisted).toBe(1)
     expect(rows.find((r) => r.id === 'stale9').status).toBe('delisted')
   })
+
+  it('ilUrlOverride verilirse searchUrls çağrısı args.il yerine bunu alır', async () => {
+    const { client } = fakeClient()
+    let capturedArg: string | undefined
+    const spyAdapter: PortalAdapter = {
+      ...fakeAdapter,
+      searchUrls: (il) => {
+        capturedArg = il
+        return []
+      },
+    }
+    await runCrawl(
+      { il: 'Şanlıurfa', ilUrlOverride: 'sanliurfa', category: 'arsa', maxPages: 1, dryRun: false },
+      {
+        adapter: spyAdapter,
+        client: client as any,
+        fetcher: countingFetcher(),
+        geocodeDeps: geoOk,
+        detectBlock: () => ({ blocked: false, reason: null }),
+        now: () => new Date('2026-09-27'),
+      },
+    )
+    expect(capturedArg).toBe('sanliurfa')
+  })
+
+  it('ilUrlOverride verilmezse searchUrls args.il alır (mevcut davranış)', async () => {
+    const { client } = fakeClient()
+    let capturedArg: string | undefined
+    const spyAdapter: PortalAdapter = {
+      ...fakeAdapter,
+      searchUrls: (il) => {
+        capturedArg = il
+        return []
+      },
+    }
+    await runCrawl(
+      { il: 'trabzon', category: 'arsa', maxPages: 1, dryRun: false },
+      {
+        adapter: spyAdapter,
+        client: client as any,
+        fetcher: countingFetcher(),
+        geocodeDeps: geoOk,
+        detectBlock: () => ({ blocked: false, reason: null }),
+        now: () => new Date('2026-09-27'),
+      },
+    )
+    expect(capturedArg).toBe('trabzon')
+  })
 })
+
