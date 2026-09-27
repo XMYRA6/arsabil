@@ -1,0 +1,148 @@
+import { runOrchestrator, buildQueue, maxRequestsFor, unmatchedOnlyTokens, type OrchestratorDeps } from '../orchestrator'
+import type { RunSummary } from '../run'
+
+function okSummary(): RunSummary {
+  return {
+    pagesFetched: 1, listingsFound: 0, listingsUpserted: 0, unparseable: 0, parseFailed: 0,
+    failed: 0, delisted: 0, dupes: 0, neighborhoodUpserted: 0, neighborhoodFailed: 0,
+    blocked: false, blockReason: null, complete: true,
+  }
+}
+
+function blockedSummary(reason = 'engellendi'): RunSummary {
+  return { ...okSummary(), blocked: true, blockReason: reason, complete: false }
+}
+
+function baseDeps(overrides: Partial<OrchestratorDeps> = {}): OrchestratorDeps {
+  return {
+    client: { crawlRun: { findMany: async () => [] } } as any,
+    createFetcher: async () => ({ get: async () => ({ html: '', status: 200 }), requestCount: 0, close: async () => {} }),
+    runCrawl: async () => okSummary(),
+    geocodeDeps: { resolveMahalleCentroid: async () => null, isWithinTurkey: () => true },
+    detectBlock: () => ({ blocked: false, reason: null }),
+    now: () => new Date('2026-09-27T00:00:00Z'),
+    workers: 1,
+    maxPages: 5,
+    resumeDays: 7,
+    forceAll: false,
+    ...overrides,
+  }
+}
+
+describe('maxRequestsFor', () => {
+  it('maxPages * 31 üzerine yuvarlar', () => {
+    expect(maxRequestsFor(25)).toBe(775)
+    expect(maxRequestsFor(1)).toBe(31)
+  })
+})
+
+describe('unmatchedOnlyTokens', () => {
+  it('bilinen il adı veya slug için boş liste döner', () => {
+    expect(unmatchedOnlyTokens(['trabzon', 'sanliurfa'])).toEqual([])
+  })
+  it('bilinmeyen bir token listelenir', () => {
+    expect(unmatchedOnlyTokens(['trabzon', 'atlantis'])).toEqual(['atlantis'])
+  })
+})
+
+describe('buildQueue', () => {
+  it('forceAll ise resume filtresi atlanır, findMany hiç çağrılmaz', async () => {
+    const findMany = jest.fn(async () => [])
+    const deps = baseDeps({ forceAll: true, client: { crawlRun: { findMany } } as any })
+    const { queue, skippedResume } = await buildQueue(deps)
+    expect(queue).toHaveLength(81)
+    expect(skippedResume).toEqual([])
+    expect(findMany).not.toHaveBeenCalled()
+  })
+
+  it('yakın zamanda tamamlanmış iller kuyruktan atlanır (karışık-case CrawlRun.il dahil)', async () => {
+    const deps = baseDeps({
+      client: { crawlRun: { findMany: async () => [{ il: 'trabzon' }, { il: 'İstanbul' }] } } as any,
+    })
+    const { queue, skippedResume } = await buildQueue(deps)
+    expect(queue.find((p) => p.tkgmName === 'Trabzon')).toBeUndefined()
+    expect(queue.find((p) => p.tkgmName === 'İstanbul')).toBeUndefined()
+    expect(queue).toHaveLength(79)
+    expect(skippedResume.sort()).toEqual(['Trabzon', 'İstanbul'].sort())
+  })
+
+  it('only verilince sadece belirtilen iller adaya girer (isim veya slug ile)', async () => {
+    const deps = baseDeps({ only: ['trabzon', 'sanliurfa'] })
+    const { queue } = await buildQueue(deps)
+    expect(queue.map((p) => p.tkgmName).sort()).toEqual(['Trabzon', 'Şanlıurfa'].sort())
+  })
+})
+
+describe('runOrchestrator', () => {
+  it('kuyruktaki tüm illeri worker sayısı kadar paralel tüketir', async () => {
+    const processed: string[] = []
+    const deps = baseDeps({
+      only: ['trabzon', 'istanbul', 'izmir', 'ankara'],
+      workers: 2,
+      runCrawl: async (args: any) => {
+        processed.push(args.il)
+        await new Promise((r) => setTimeout(r, 0))
+        return okSummary()
+      },
+    })
+    const result = await runOrchestrator(deps)
+    expect(result.completed.sort()).toEqual(['Ankara', 'Trabzon', 'İstanbul', 'İzmir'].sort())
+    expect(processed).toHaveLength(4)
+    expect(result.stoppedEarly).toBe(false)
+  })
+
+  it('blocked dönen il result.blocked listesine girer, kuyruk devam eder', async () => {
+    const deps = baseDeps({
+      only: ['trabzon', 'istanbul'],
+      workers: 1,
+      runCrawl: async (args: any) => (args.il === 'Trabzon' ? blockedSummary('test-block') : okSummary()),
+    })
+    const result = await runOrchestrator(deps)
+    expect(result.blocked).toEqual([{ il: 'Trabzon', reason: 'test-block' }])
+    expect(result.completed).toEqual(['İstanbul'])
+  })
+
+  it('runCrawl fırlatırsa il blocked listesine hata mesajıyla eklenir, tur çökmez', async () => {
+    const deps = baseDeps({
+      only: ['trabzon', 'istanbul'],
+      workers: 1,
+      runCrawl: async (args: any) => {
+        if (args.il === 'Trabzon') throw new Error('ağ koptu')
+        return okSummary()
+      },
+    })
+    const result = await runOrchestrator(deps)
+    expect(result.blocked).toEqual([{ il: 'Trabzon', reason: 'beklenmeyen hata: ağ koptu' }])
+    expect(result.completed).toEqual(['İstanbul'])
+  })
+
+  it('%50\'den fazla blocked oranı minimum örnekten sonra erken durur', async () => {
+    const only = ['trabzon', 'istanbul', 'izmir', 'ankara', 'bursa', 'antalya']
+    const seen: string[] = []
+    const deps = baseDeps({
+      only,
+      workers: 1,
+      runCrawl: async (args: any) => {
+        seen.push(args.il)
+        if (seen.length <= 4) return blockedSummary('test')
+        return okSummary()
+      },
+    })
+    const result = await runOrchestrator(deps)
+    expect(result.stoppedEarly).toBe(true)
+    expect(seen.length).toBeLessThan(6)
+  })
+
+  it('kuyruk boşsa (hepsi resume ile atlandı) hiç worker/fetcher açmadan boş sonuç döner', async () => {
+    const createFetcher = jest.fn()
+    const deps = baseDeps({
+      client: { crawlRun: { findMany: async () => [{ il: 'trabzon' }] } } as any,
+      only: ['trabzon'],
+      createFetcher,
+    })
+    const result = await runOrchestrator(deps)
+    expect(result.completed).toEqual([])
+    expect(result.skippedResume).toEqual(['Trabzon'])
+    expect(createFetcher).not.toHaveBeenCalled()
+  })
+})
