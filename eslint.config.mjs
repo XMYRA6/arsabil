@@ -18,10 +18,12 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
-    // Crawler: fixtures are captured portal HTML/JSON snapshots; scripts are
-    // one-off capture infra — both noisy, keep ignored. Source + tests are linted.
+    // Crawler: fixtures are captured portal HTML/JSON snapshots — noisy, keep
+    // ignored. capture-fixture.ts is one-off dev capture infra, also ignored.
+    // Other crawler/scripts/** files (e.g. crawl-all.ts) are real production
+    // entrypoints and ARE linted, via the crawler/**/*.ts block below.
     "crawler/fixtures/**",
-    "crawler/scripts/**",
+    "crawler/scripts/capture-fixture.ts",
   ]),
   // I8 — scoped lint for the crawler subsystem (was a blanket ignore).
   {
