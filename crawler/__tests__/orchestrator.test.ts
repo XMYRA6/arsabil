@@ -116,6 +116,70 @@ describe('buildQueue', () => {
   })
 })
 
+describe('runOrchestrator — ilçe bölme', () => {
+  const ilPage = (total: number) =>
+    `<html>Ara (${total.toLocaleString('tr-TR')} ilan)` +
+    `<a href="/satilik-arsa/izmir-bornova">b</a><a href="/satilik-arsa/izmir-buca">c</a>` +
+    `<a href="/satilik-arsa/istanbul-catalca">x</a><a href="/satilik-arsa/izmir/sahibinden">s</a>` +
+    `<div class="searchResultsItem"></div></html>`
+  const fetcherWith = (html: string) => async () => ({
+    get: async () => ({ html, status: 200 }),
+    requestCount: 0,
+    close: async () => {},
+  })
+
+  it('toplam maxPages erişimini aşarsa il ilçelere bölünür (label, noDelist, yalnız o ilin ilçeleri)', async () => {
+    const calls: any[] = []
+    const deps = baseDeps({
+      only: ['izmir'],
+      splitDistricts: true,
+      maxPages: 5, // erişim 150
+      createFetcher: fetcherWith(ilPage(6004)) as any,
+      runCrawl: async (args: any) => {
+        calls.push(args)
+        return okSummary()
+      },
+    })
+    const res = await runOrchestrator(deps)
+    expect(calls.map((c) => c.ilUrlOverride)).toEqual(['izmir-bornova', 'izmir-buca'])
+    expect(calls.every((c) => c.il === 'İzmir' && c.noDelist === true && c.maxPages === 50)).toBe(true)
+    expect(calls.map((c) => c.label)).toEqual(['İzmir/izmir-bornova', 'İzmir/izmir-buca'])
+    expect(res.completed).toEqual(['İzmir'])
+  })
+
+  it('toplam erişim içindeyse normal il taraması yapılır', async () => {
+    const calls: any[] = []
+    const deps = baseDeps({
+      only: ['izmir'],
+      splitDistricts: true,
+      maxPages: 5,
+      createFetcher: fetcherWith(ilPage(100)) as any,
+      runCrawl: async (args: any) => {
+        calls.push(args)
+        return okSummary()
+      },
+    })
+    await runOrchestrator(deps)
+    expect(calls).toHaveLength(1)
+    expect(calls[0].ilUrlOverride).toBe('izmir')
+    expect(calls[0].noDelist).toBeUndefined()
+  })
+
+  it('bir ilçe engellenirse il engelli raporlanır ve kalan ilçeler atlanır', async () => {
+    let n = 0
+    const deps = baseDeps({
+      only: ['izmir'],
+      splitDistricts: true,
+      maxPages: 5,
+      createFetcher: fetcherWith(ilPage(6004)) as any,
+      runCrawl: async () => (++n === 1 ? blockedSummary('perimeterx') : okSummary()),
+    })
+    const res = await runOrchestrator(deps)
+    expect(n).toBe(1)
+    expect(res.blocked).toEqual([{ il: 'İzmir', reason: 'izmir-bornova: perimeterx' }])
+  })
+})
+
 describe('runOrchestrator', () => {
   it('kuyruktaki tüm illeri worker sayısı kadar paralel tüketir', async () => {
     const processed: string[] = []

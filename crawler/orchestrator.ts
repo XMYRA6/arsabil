@@ -8,6 +8,9 @@ import type { GeocodeDeps } from './pipeline/geocode'
 import type { BlockCheckInput, BlockResult } from './fetcher/blockDetector'
 
 const REQUESTS_PER_PAGE_ESTIMATE = 31
+const LISTINGS_PER_PAGE = 30
+/** Emlakjet bir sorgu için en fazla 50 sayfa verir (51. sayfa 1.'ye yönlenir). */
+const PORTAL_MAX_PAGES = 50
 // Erken-dur eşiği yalnız yeterli örnekten sonra değerlendirilir — 1 blocked/1 il
 // %100 gösterip turu anlamsızca durdurmasın.
 const MIN_SAMPLE_FOR_EARLY_STOP = 5
@@ -30,7 +33,7 @@ export interface OrchestratorDeps {
   client: RunDeps['client'] & { crawlRun: { findMany(args: any): Promise<{ il: string }[]> } }
   createFetcher: (cfg: CrawlConfig, opts: { headful?: boolean; proxy?: ProxyConfig }) => Promise<Fetcher>
   runCrawl: (
-    args: { il: string; ilUrlOverride?: string; category: 'arsa' | 'konut'; maxPages: number; dryRun: boolean; fast?: boolean },
+    args: { il: string; ilUrlOverride?: string; category: 'arsa' | 'konut'; maxPages: number; dryRun: boolean; fast?: boolean; label?: string; noDelist?: boolean },
     deps: RunDeps,
   ) => Promise<RunSummary>
   geocodeDeps: GeocodeDeps
@@ -44,6 +47,8 @@ export interface OrchestratorDeps {
   headful?: boolean
   /** Detay sayfası çekmeden arama kartlarından kaydet (çok daha hızlı, daha az alan). */
   fast?: boolean
+  /** Sonuç sayısı maxPages'in erişebileceğinden büyük illeri ilçe arama sayfalarına böl. */
+  splitDistricts?: boolean
   /** Varsayılan bekleme/mola ayarlarının üzerine yazılır. */
   cfgOverride?: Partial<CrawlConfig>
   /** tkgmName (tr-TR küçük harf) veya emlakjetSlug — her ikisiyle de eşleşir. */
@@ -95,6 +100,30 @@ export async function buildQueue(
   return { queue, skippedResume }
 }
 
+/**
+ * İl arama sayfasının bildirdiği toplam, normal yolun (maxPages) erişebileceğinden büyükse
+ * ilçe slug listesini döndürür; değilse (veya tespit edilemezse) null → normal il taraması.
+ */
+async function districtsToSplit(
+  province: Province,
+  deps: OrchestratorDeps,
+  fetcher: Fetcher,
+): Promise<string[] | null> {
+  const { adapter } = { adapter: emlakjetAdapter }
+  const url = adapter.searchUrls(province.emlakjetSlug, 'arsa', 1)[0]
+  const { html, status } = await fetcher.get(url)
+  const block = deps.detectBlock({
+    html,
+    httpStatus: status,
+    expectedSelector: adapter.searchResultHint,
+    foundListingCount: -1,
+  })
+  if (block.blocked) return null // normal yol engeli kendi raporlar
+  const total = adapter.totalCount?.(html)
+  if (total == null || total <= deps.maxPages * LISTINGS_PER_PAGE) return null
+  return adapter.districtSlugs?.(html, province.emlakjetSlug) ?? null
+}
+
 async function runWorker(
   queue: Province[],
   deps: OrchestratorDeps,
@@ -113,25 +142,51 @@ async function runWorker(
       if (!province) break
 
       try {
-        const summary = await deps.runCrawl(
-          {
-            il: province.tkgmName,
-            ilUrlOverride: province.emlakjetSlug,
-            category: 'arsa',
-            maxPages: deps.maxPages,
-            dryRun: false,
-            fast: deps.fast,
-          },
-          {
-            adapter: emlakjetAdapter,
-            client: deps.client,
-            fetcher,
-            geocodeDeps: deps.geocodeDeps,
-            detectBlock: deps.detectBlock,
-            now: deps.now,
-            cfg,
-          },
-        )
+        const runDeps: RunDeps = {
+          adapter: emlakjetAdapter,
+          client: deps.client,
+          fetcher,
+          geocodeDeps: deps.geocodeDeps,
+          detectBlock: deps.detectBlock,
+          now: deps.now,
+          cfg,
+        }
+        const districts = deps.splitDistricts ? await districtsToSplit(province, deps, fetcher) : null
+        let summary: Pick<RunSummary, 'blocked' | 'blockReason'>
+        if (districts && districts.length > 0) {
+          summary = { blocked: false, blockReason: null }
+          for (const ds of districts) {
+            const s = await deps.runCrawl(
+              {
+                il: province.tkgmName,
+                ilUrlOverride: ds,
+                label: `${province.tkgmName}/${ds}`,
+                category: 'arsa',
+                maxPages: PORTAL_MAX_PAGES,
+                dryRun: false,
+                fast: deps.fast,
+                noDelist: true,
+              },
+              runDeps,
+            )
+            if (s.blocked) {
+              summary = { blocked: true, blockReason: `${ds}: ${s.blockReason}` }
+              break
+            }
+          }
+        } else {
+          summary = await deps.runCrawl(
+            {
+              il: province.tkgmName,
+              ilUrlOverride: province.emlakjetSlug,
+              category: 'arsa',
+              maxPages: deps.maxPages,
+              dryRun: false,
+              fast: deps.fast,
+            },
+            runDeps,
+          )
+        }
         if (summary.blocked) result.blocked.push({ il: province.tkgmName, reason: summary.blockReason })
         else result.completed.push(province.tkgmName)
       } catch (e) {

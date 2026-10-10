@@ -89,6 +89,22 @@ describe('emlakjetAdapter', () => {
   })
 })
 
+describe('emlakjetAdapter toplam sayı + ilçe slug', () => {
+  const page =
+    'Ara (6.004 ilan)<a href="/satilik-arsa/izmir-bornova">b</a><a href="/satilik-arsa/izmir-bornova">b</a>' +
+    '<a href="/satilik-arsa/izmir-cesme">c</a><a href="/satilik-arsa/kocaeli-kandira">k</a>' +
+    '<a href="/satilik-arsa/izmir/sahibinden">s</a><a href="/satilik-arsa/izmir?sayfa=2">p</a>'
+
+  it('totalCount binlik ayraçlı sayıyı okur, yoksa null', () => {
+    expect(emlakjetAdapter.totalCount!(page)).toBe(6004)
+    expect(emlakjetAdapter.totalCount!('<html></html>')).toBeNull()
+  })
+
+  it('districtSlugs yalnız o ilin ilçelerini, tekrarsız döndürür', () => {
+    expect(emlakjetAdapter.districtSlugs!(page, 'izmir')).toEqual(['izmir-bornova', 'izmir-cesme'])
+  })
+})
+
 describe('emlakjetAdapter arama kartı + boş il', () => {
   const ld = (o: unknown) => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
   const crumb = ld({

@@ -157,6 +157,16 @@ export const emlakjetAdapter: PortalAdapter = {
     return urls
   },
 
+  totalCount(html) {
+    const m = html.match(/Ara \(([\d.]+) ilan\)/)
+    return m ? Number(m[1].replace(/\./g, '')) : null
+  },
+
+  districtSlugs(html, ilSlug) {
+    const re = new RegExp(`href="/satilik-arsa/(${ilSlug}-[a-z0-9-]+)"`, 'g')
+    return [...new Set([...html.matchAll(re)].map((m) => m[1]))]
+  },
+
   isEmptyResults(html) {
     // Captcha/engel sayfalarında il breadcrumb'ı olmaz; gerçek boş il sayfasında olur.
     const crumb = findByType(collectJsonLd(html), 'BreadcrumbList')

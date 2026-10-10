@@ -93,4 +93,8 @@ export interface PortalAdapter {
    * bu yüzden yalnızca sayfanın kendi il/kategori breadcrumb'ı varsa true döner.
    */
   isEmptyResults?(html: string): boolean
+  /** Arama sayfasının bildirdiği toplam sonuç sayısı (örn. "Ara (1.698 ilan)"); bulunamazsa null. */
+  totalCount?(html: string): number | null
+  /** İl arama sayfasındaki ilçe arama slug'ları (örn. 'izmir-bornova'); yalnız bu ile ait olanlar. */
+  districtSlugs?(html: string, ilSlug: string): string[]
 }

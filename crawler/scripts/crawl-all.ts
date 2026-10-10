@@ -19,6 +19,7 @@ function parseArgs(argv: string[]) {
       : undefined,
     headful: has('headful'),
     fast: has('fast'),
+    splitDistricts: has('split-districts'),
     noBreaks: has('no-breaks'),
     delay: get('delay')?.split('-').map(Number),
     maxPages: Number(get('max-pages') ?? 25),
@@ -60,6 +61,7 @@ async function main() {
     forceAll: a.forceAll,
     headful: a.headful,
     fast: a.fast,
+    splitDistricts: a.splitDistricts,
     cfgOverride: {
       ...(a.delay && a.delay.length === 2 && a.delay.every(Number.isFinite)
         ? { minDelayMs: a.delay[0] * 1000, maxDelayMs: a.delay[1] * 1000 }

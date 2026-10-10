@@ -30,6 +30,11 @@ export interface RunArgs {
   ilUrlOverride?: string
   /** Detay sayfası çekme; arama kartındaki veriyi kullan (kart yoksa normal detay-fetch). */
   fast?: boolean
+  /** CrawlRun.il'e yazılacak etiket (varsayılan il). İlçe koşuları 'İzmir/izmir-bornova' kullanır;
+   *  böylece il-düzeyi resume mantığı bir ilçe koşusunu "il tamam" sanmaz. */
+  label?: string
+  /** İlçe koşularında il-kapsamlı delist atlanır (yoksa diğer ilçelerin ilanları silinirdi). */
+  noDelist?: boolean
 }
 
 export interface RunSummary {
@@ -93,7 +98,7 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
   const run = args.dryRun
     ? { id: 'dry' }
     : await deps.client.crawlRun.create({
-        data: { source: adapter.source, il: args.il, category: args.category, startedAt: deps.now() },
+        data: { source: adapter.source, il: args.label ?? args.il, category: args.category, startedAt: deps.now() },
       })
 
   const seenIds: string[] = []
@@ -338,11 +343,13 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
         }
       }
 
-      summary.delisted = await markDelistedExcept(
-        deps.client,
-        { source: adapter.source, il: args.il.toLocaleUpperCase('tr-TR'), listingTypes: types },
-        seenIds,
-      )
+      summary.delisted = args.noDelist
+        ? 0
+        : await markDelistedExcept(
+            deps.client,
+            { source: adapter.source, il: args.il.toLocaleUpperCase('tr-TR'), listingTypes: types },
+            seenIds,
+          )
       const links = findDupes(dedupeCands)
       // H2 — gerçekten yazılan link sayısı (writeDupeLinks self-link/döngü/zaten-linkli
       // satırı atlar; stabil re-run'da 0 yazar).
