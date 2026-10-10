@@ -81,3 +81,11 @@ e2e/tmp/
 
 # sahibinden crawl — gerçek oturum çerezleri asla commit edilmez
 crawler/data/sahibinden-cookies.json
+
+# crawler çıktıları / yerel artıklar
+crawl-*.txt
+err.txt
+sahibinden-export.json
+graphify-out*/
+**/graphify-out/
+scratch/dev-server.log
