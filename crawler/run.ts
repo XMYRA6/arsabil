@@ -97,6 +97,7 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
       })
 
   const seenIds: string[] = []
+  const seenStubIds = new Set<string>() // arama sayfalarında görülen ilan id'leri (sarma tespiti)
   const dedupeCands: DedupeCandidate[] = []
   // bu turda dokunulan (ilçe, mahalle) çiftleri — cross-portal dedupe sorgusu için (C2).
   const touchedAreas = new Set<string>()
@@ -136,6 +137,20 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
       ) {
         break
       }
+
+      // Sayfalama sarması: son sayfadan sonra portal 1. sayfaya yönlendirir (Emlakjet ?sayfa=N → 301).
+      // Sayfadaki TÜM ilanlar bu turda zaten görüldüyse sonuçlar tükendi; boşa sayfa gezme.
+      if (pageIdx > 0 && stubs.length > 0 && stubs.every((st) => seenStubIds.has(st.sourceListingId))) {
+        const hard = detectHardBlock(html, status)
+        if (hard.blocked) {
+          summary.blocked = true
+          summary.blockReason = hard.reason
+        } else {
+          summary.complete = true
+        }
+        break
+      }
+      for (const st of stubs) seenStubIds.add(st.sourceListingId)
 
       // Ruling B — engel göstergesi adapterden gelir. (pageIdx 0 + 0 ilan → soft-block.)
       const block = deps.detectBlock({

@@ -309,7 +309,15 @@ describe('runCrawl', () => {
     const fullAdapter: PortalAdapter = {
       ...fakeAdapter,
       searchUrls: () => ['http://s/1', 'http://s/2'],
-      parseSearchPage: () => [{ sourceListingId: 'A', detailUrl: 'http://s/ilan/A' }],
+      // her sayfa FARKLI ilanlar döndürür (gerçek "dolu son sayfa")
+      parseSearchPage: (() => {
+        let n = 0
+        return () => {
+          n++
+          const id = n === 1 ? 'A' : 'B'
+          return [{ sourceListingId: id, detailUrl: `http://s/ilan/${id}` }]
+        }
+      })(),
     }
     const deps: RunDeps = {
       adapter: fullAdapter,
@@ -322,6 +330,31 @@ describe('runCrawl', () => {
     const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 2, dryRun: false }, deps)
     expect(summary.complete).toBe(false)
     expect(spy.delistFindMany).toBe(0)
+  })
+
+  it('F1(d): sayfalama 1. sayfaya sararsa (aynı ilanlar tekrar) tükendi sayılır, complete=true', async () => {
+    const { client } = fakeClient()
+    let pages = 0
+    const wrapAdapter: PortalAdapter = {
+      ...fakeAdapter,
+      searchUrls: () => ['http://s/1', 'http://s/2', 'http://s/3'],
+      parseSearchPage: () => {
+        pages++
+        return [{ sourceListingId: 'A', detailUrl: 'http://s/ilan/A' }]
+      },
+    }
+    const deps: RunDeps = {
+      adapter: wrapAdapter,
+      client: client as any,
+      fetcher: countingFetcher(),
+      geocodeDeps: geoOk,
+      detectBlock: () => ({ blocked: false, reason: null }),
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 3, dryRun: false }, deps)
+    expect(summary.complete).toBe(true)
+    expect(summary.blocked).toBe(false)
+    expect(pages).toBe(2) // 3. sayfaya hiç gidilmedi
   })
 
   it('G1: sayfa 2 challenge dönerse tükenme SANILMAZ — blocked=true, complete=false, delist YOK', async () => {
