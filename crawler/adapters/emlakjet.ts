@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import type { PortalAdapter, ListingStub } from './types'
+import type { PortalAdapter, ListingStub, RawListing } from './types'
 
 const BASE = 'https://www.emlakjet.com'
 
@@ -78,6 +78,40 @@ function first<T>(...vals: (T | undefined | null | '')[]): T | undefined {
 }
 
 /**
+ * Arama sayfasındaki RealEstateListing JSON-LD kartları → id'ye göre ham kayıt.
+ * Hızlı modda detay sayfası çekilmez; açıklama, ada/parsel ve mahalle poligonu bu kartlarda YOK.
+ */
+function searchCards(html: string): Map<string, RawListing> {
+  const out = new Map<string, RawListing>()
+  for (const node of collectJsonLd(html)) {
+    if (node['@type'] !== 'RealEstateListing') continue
+    const url = node.url != null ? String(node.url) : ''
+    const id = url.match(ILAN_LINK_RE)?.[1]
+    if (!id) continue
+    const offers = (node.offers ?? {}) as Record<string, unknown>
+    const props = node.additionalProperty
+    // "Konum": "Sofudede Mahallesi, Sarıçam" → mahalle, ilçe
+    const konum = propValue(props, 'Konum')
+    const [rawMahalle, rawIlce] = konum ? konum.split(',').map((s) => s.trim()) : []
+    out.set(id, {
+      source: 'emlakjet',
+      sourceListingId: id,
+      sourceUrl: url,
+      rawTitle: node.name != null ? String(node.name) : undefined,
+      rawPrice: offers.price != null ? String(offers.price) : undefined,
+      rawArea: propValue(props, 'Metrekare'),
+      rawType: propValue(props, 'İlan Tipi'),
+      rawIlce,
+      rawMahalle,
+      rawListedAt: node.datePosted != null ? String(node.datePosted) : undefined,
+      photoUrls: node.image != null ? [String(node.image)] : [],
+      extra: { source: 'search_card' },
+    })
+  }
+  return out
+}
+
+/**
  * Emlakjet detay sayfası, mahalle sınır poligonunu + deprem risk skorunu
  * kaçışlı JSON olarak bir JS blob'unun içinde taşıyor:
  *   \"earthquakeRiskScore\":0.198, ... \"neighborhoodGeometry\":{\"type\":\"multipolygon\",\"coordinates\":[[[[lng,lat],...]]]}
@@ -123,8 +157,17 @@ export const emlakjetAdapter: PortalAdapter = {
     return urls
   },
 
+  isEmptyResults(html) {
+    // Captcha/engel sayfalarında il breadcrumb'ı olmaz; gerçek boş il sayfasında olur.
+    const crumb = findByType(collectJsonLd(html), 'BreadcrumbList')
+    const items = Array.isArray(crumb?.itemListElement) ? (crumb!.itemListElement as unknown[]) : []
+    // parseSearchPage zaten 0 stub döndürdü; yine de sayfada ilan linki kalmadığını doğrula.
+    return items.length >= 3 && !/\/ilan\/[a-z0-9-]+?-\d{5,}["'/?#]/i.test(html)
+  },
+
   parseSearchPage(html) {
     const $ = cheerio.load(html)
+    const cards = searchCards(html)
     const seen = new Map<string, ListingStub>()
     $('a[href]').each((_, a) => {
       const href = $(a).attr('href') ?? ''
@@ -133,7 +176,7 @@ export const emlakjetAdapter: PortalAdapter = {
       const id = m[1]
       if (seen.has(id)) return
       const detailUrl = href.startsWith('http') ? href : `${BASE}${href}`
-      seen.set(id, { sourceListingId: id, detailUrl })
+      seen.set(id, { sourceListingId: id, detailUrl, card: cards.get(id) })
     })
     return [...seen.values()]
   },

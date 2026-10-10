@@ -28,6 +28,8 @@ export interface RunArgs {
   limit?: number
   /** Verilirse adapter.searchUrls() bu değeri alır (URL slug), args.il DB scope/delisting/geocode için değişmeden kalır. */
   ilUrlOverride?: string
+  /** Detay sayfası çekme; arama kartındaki veriyi kullan (kart yoksa normal detay-fetch). */
+  fast?: boolean
 }
 
 export interface RunSummary {
@@ -124,6 +126,17 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
         break
       }
 
+      // Boş il: temiz 200 + challenge yok + 0 ilan + il breadcrumb'ı var → engel DEĞİL, o ilde ilan yok.
+      // complete=false kalır → delist/dedupe atlanır (yanlış pozitifte toplu delisting riski yok).
+      if (
+        stubs.length === 0 &&
+        pageIdx === 0 &&
+        adapter.isEmptyResults?.(html) &&
+        !detectHardBlock(html, status).blocked
+      ) {
+        break
+      }
+
       // Ruling B — engel göstergesi adapterden gelir. (pageIdx 0 + 0 ilan → soft-block.)
       const block = deps.detectBlock({
         html,
@@ -164,22 +177,27 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
         // hepsi tek try içinde. Hata → failed++, continue. İSTİSNA: detectBlock "blocked"
         // → break outer (yutulmaz); cap hatası → yeniden fırlat (dış catch yakalar).
         try {
-          const detail = await deps.fetcher.get(stub.detailUrl)
-          const db = deps.detectBlock({
-            html: detail.html,
-            httpStatus: detail.status,
-            expectedSelector: adapter.detailHint,
-            foundListingCount: -1,
-          })
-          if (db.blocked) {
-            summary.blocked = true
-            summary.blockReason = db.reason
-            break outer
+          let detail: { html: string; status: number } | null = null
+          if (!(args.fast && stub.card)) {
+            detail = await deps.fetcher.get(stub.detailUrl)
+            const db = deps.detectBlock({
+              html: detail.html,
+              httpStatus: detail.status,
+              expectedSelector: adapter.detailHint,
+              foundListingCount: -1,
+            })
+            if (db.blocked) {
+              summary.blocked = true
+              summary.blockReason = db.reason
+              break outer
+            }
           }
 
           let raw
           try {
-            raw = adapter.parseDetailPage(detail.html, stub.detailUrl)
+            raw = detail
+              ? adapter.parseDetailPage(detail.html, stub.detailUrl)
+              : { ...stub.card!, rawIl: stub.card!.rawIl ?? args.il }
           } catch {
             // gerçek parse hatası — ilan seenIds'e GİRMEDİ (abort oranını süren hazard).
             summary.parseFailed++

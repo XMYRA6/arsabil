@@ -15,6 +15,8 @@ export interface ListingStub {
   rawPrice?: string
   rawArea?: string
   rawTitle?: string
+  /** Hızlı mod: arama kartından çıkarılan ham kayıt — detay sayfası çekilmeden kullanılır. */
+  card?: RawListing
 }
 
 /** Detay sayfasından çıkan ham (normalize edilmemiş) kayıt. */
@@ -85,4 +87,10 @@ export interface PortalAdapter {
   searchUrls(il: string, category: ListingCategory, maxPages: number): string[]
   parseSearchPage(html: string): ListingStub[]
   parseDetailPage(html: string, url: string): RawListing
+  /**
+   * Temiz bir arama sayfası gerçekten SIFIR sonuç mu gösteriyor (o ilde ilan yok)?
+   * Yalnız sert-engel olmayan sayfalarda çağrılır; yanlış pozitif = gerçek engeli gizler,
+   * bu yüzden yalnızca sayfanın kendi il/kategori breadcrumb'ı varsa true döner.
+   */
+  isEmptyResults?(html: string): boolean
 }

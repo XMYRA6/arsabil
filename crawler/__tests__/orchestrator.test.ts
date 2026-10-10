@@ -46,6 +46,16 @@ describe('unmatchedOnlyTokens', () => {
 })
 
 describe('buildQueue', () => {
+  it('resume sorgusu 0 sayfalı koşuları "tamam" saymaz (pagesFetched > 0)', async () => {
+    const findMany = jest.fn(async () => [])
+    await buildQueue(baseDeps({ client: { crawlRun: { findMany } } as any }))
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ pagesFetched: { gt: 0 } }),
+      }),
+    )
+  })
+
   it('forceAll ise resume filtresi atlanır, findMany hiç çağrılmaz', async () => {
     const findMany = jest.fn(async () => [])
     const deps = baseDeps({ forceAll: true, client: { crawlRun: { findMany } } as any })

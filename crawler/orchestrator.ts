@@ -30,7 +30,7 @@ export interface OrchestratorDeps {
   client: RunDeps['client'] & { crawlRun: { findMany(args: any): Promise<{ il: string }[]> } }
   createFetcher: (cfg: CrawlConfig, opts: { headful?: boolean; proxy?: ProxyConfig }) => Promise<Fetcher>
   runCrawl: (
-    args: { il: string; ilUrlOverride?: string; category: 'arsa' | 'konut'; maxPages: number; dryRun: boolean },
+    args: { il: string; ilUrlOverride?: string; category: 'arsa' | 'konut'; maxPages: number; dryRun: boolean; fast?: boolean },
     deps: RunDeps,
   ) => Promise<RunSummary>
   geocodeDeps: GeocodeDeps
@@ -42,6 +42,10 @@ export interface OrchestratorDeps {
   resumeDays: number
   forceAll: boolean
   headful?: boolean
+  /** Detay sayfası çekmeden arama kartlarından kaydet (çok daha hızlı, daha az alan). */
+  fast?: boolean
+  /** Varsayılan bekleme/mola ayarlarının üzerine yazılır. */
+  cfgOverride?: Partial<CrawlConfig>
   /** tkgmName (tr-TR küçük harf) veya emlakjetSlug — her ikisiyle de eşleşir. */
   only?: string[]
   /** Faz 2 (Sahibinden) buildQueue()'yu yeniden kullanmak için — varsayılan 'emlakjet'. */
@@ -74,6 +78,8 @@ export async function buildQueue(
       category: 'arsa',
       blocked: false,
       finishedAt: { not: null },
+      // 0 sayfalı koşu "tamam" sayılmaz (yarım/başarısız tur yeniden denensin).
+      pagesFetched: { gt: 0 },
       startedAt: { gte: cutoff },
     },
     select: { il: true },
@@ -94,7 +100,11 @@ async function runWorker(
   deps: OrchestratorDeps,
   result: OrchestratorResult,
 ): Promise<void> {
-  const cfg: CrawlConfig = { ...DEFAULT_CONFIG, maxRequestsPerRun: maxRequestsFor(deps.maxPages) }
+  const cfg: CrawlConfig = {
+    ...DEFAULT_CONFIG,
+    maxRequestsPerRun: maxRequestsFor(deps.maxPages),
+    ...deps.cfgOverride,
+  }
   const fetcher = await deps.createFetcher(cfg, { headful: deps.headful, proxy: deps.proxy })
   try {
     while (queue.length > 0) {
@@ -110,6 +120,7 @@ async function runWorker(
             category: 'arsa',
             maxPages: deps.maxPages,
             dryRun: false,
+            fast: deps.fast,
           },
           {
             adapter: emlakjetAdapter,

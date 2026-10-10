@@ -18,6 +18,9 @@ function parseArgs(argv: string[]) {
           .filter(Boolean)
       : undefined,
     headful: has('headful'),
+    fast: has('fast'),
+    noBreaks: has('no-breaks'),
+    delay: get('delay')?.split('-').map(Number),
     maxPages: Number(get('max-pages') ?? 25),
     workers: Number(process.env.CRAWL_WORKERS ?? get('workers') ?? 3),
     resumeDays: Number(process.env.CRAWL_RESUME_DAYS ?? 7),
@@ -56,6 +59,13 @@ async function main() {
     resumeDays: a.resumeDays,
     forceAll: a.forceAll,
     headful: a.headful,
+    fast: a.fast,
+    cfgOverride: {
+      ...(a.delay && a.delay.length === 2 && a.delay.every(Number.isFinite)
+        ? { minDelayMs: a.delay[0] * 1000, maxDelayMs: a.delay[1] * 1000 }
+        : {}),
+      ...(a.noBreaks ? { breakEveryN: 0 } : {}),
+    },
     only: a.only,
   }
 

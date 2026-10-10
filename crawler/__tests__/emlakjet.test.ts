@@ -88,3 +88,60 @@ describe('emlakjetAdapter', () => {
     expect(r.rawMahalle).toBeTruthy()
   })
 })
+
+describe('emlakjetAdapter arama kartı + boş il', () => {
+  const ld = (o: unknown) => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
+  const crumb = ld({
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Anasayfa' },
+      { '@type': 'ListItem', position: 2, name: 'Satılık Arsa' },
+      { '@type': 'ListItem', position: 3, name: 'Şırnak Satılık Arsa' },
+    ],
+  })
+
+  it('parseSearchPage JSON-LD kartını stub.card olarak ekler', () => {
+    const url = 'https://www.emlakjet.com/ilan/kose-arsa-19962400'
+    const html =
+      `<a href="${url}">x</a>` +
+      ld({
+        '@graph': [
+          {
+            '@type': 'RealEstateListing',
+            name: 'Köşe Arsa',
+            url,
+            datePosted: '2026-10-10',
+            image: 'https://imaj.emlakjet.com/a.jpg',
+            offers: { price: 3500000 },
+            additionalProperty: [
+              { name: 'İlan Tipi', value: 'Satılık Arsa' },
+              { name: 'Konum', value: 'Sofudede Mahallesi, Sarıçam' },
+              { name: 'Metrekare', value: '437 m²' },
+            ],
+          },
+        ],
+      })
+    const [stub] = emlakjetAdapter.parseSearchPage(html)
+    expect(stub.sourceListingId).toBe('19962400')
+    expect(stub.card).toMatchObject({
+      rawPrice: '3500000',
+      rawArea: '437 m²',
+      rawMahalle: 'Sofudede Mahallesi',
+      rawIlce: 'Sarıçam',
+    })
+  })
+
+  it('isEmptyResults: il breadcrumb\'lı, ilan linksiz sayfa boştur', () => {
+    expect(emlakjetAdapter.isEmptyResults!(`<html>${crumb}</html>`)).toBe(true)
+  })
+
+  it('isEmptyResults: breadcrumb\'sız (captcha/bozuk) sayfa boş sayılmaz', () => {
+    expect(emlakjetAdapter.isEmptyResults!('<html>px-captcha</html>')).toBe(false)
+  })
+
+  it('isEmptyResults: ilan linki varsa boş değildir', () => {
+    expect(
+      emlakjetAdapter.isEmptyResults!(`${crumb}<a href="/ilan/arsa-satilik-19962400">x</a>`),
+    ).toBe(false)
+  })
+})
