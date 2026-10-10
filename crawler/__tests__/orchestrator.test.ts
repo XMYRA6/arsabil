@@ -165,6 +165,64 @@ describe('runOrchestrator — ilçe bölme', () => {
     expect(calls[0].noDelist).toBeUndefined()
   })
 
+  it('resume: resume penceresinde biten ilçe koşusu atlanır, diğerleri çalışır', async () => {
+    const calls: string[] = []
+    const deps = baseDeps({
+      only: ['izmir'],
+      splitDistricts: true,
+      maxPages: 5,
+      client: {
+        crawlRun: {
+          findMany: async (a: any) => (a.where.il === 'İzmir/izmir-bornova' ? [{ il: a.where.il }] : []),
+        },
+      } as any,
+      createFetcher: fetcherWith(ilPage(6004)) as any,
+      runCrawl: async (args: any) => {
+        calls.push(args.ilUrlOverride)
+        return okSummary()
+      },
+    })
+    await runOrchestrator(deps)
+    expect(calls).toEqual(['izmir-buca'])
+  })
+
+  it('resume: sorgu yalnız engelsiz, sayfa çekmiş, bitmiş koşuları arar', async () => {
+    let where: any
+    const deps = baseDeps({
+      only: ['izmir'],
+      splitDistricts: true,
+      maxPages: 5,
+      client: { crawlRun: { findMany: async (a: any) => ((where = a.where), []) } } as any,
+      createFetcher: fetcherWith(ilPage(6004)) as any,
+    })
+    await runOrchestrator(deps)
+    expect(where).toMatchObject({ blocked: false, pagesFetched: { gt: 0 }, finishedAt: { not: null } })
+  })
+
+  it('forceAll ise ilçe resume atlanır (hepsi yeniden çalışır)', async () => {
+    const calls: string[] = []
+    const deps = baseDeps({
+      only: ['izmir'],
+      splitDistricts: true,
+      forceAll: true,
+      maxPages: 5,
+      client: { crawlRun: { findMany: async () => [{ il: 'x' }] } } as any,
+      createFetcher: fetcherWith(ilPage(6004)) as any,
+      runCrawl: async (args: any) => (calls.push(args.ilUrlOverride), okSummary()),
+    })
+    await runOrchestrator(deps)
+    expect(calls).toEqual(['izmir-bornova', 'izmir-buca'])
+  })
+
+  it('bölme modunda il-düzeyi resume uygulanmaz (eski il koşusu ilçe kapsamı değildir)', async () => {
+    const findMany = jest.fn(async () => [{ il: 'İzmir' }])
+    const { queue, skippedResume } = await buildQueue(
+      baseDeps({ only: ['izmir'], splitDistricts: true, client: { crawlRun: { findMany } } as any }),
+    )
+    expect(queue.map((p) => p.tkgmName)).toEqual(['İzmir'])
+    expect(skippedResume).toEqual([])
+  })
+
   it('bir ilçe engellenirse il engelli raporlanır ve kalan ilçeler atlanır', async () => {
     let n = 0
     const deps = baseDeps({

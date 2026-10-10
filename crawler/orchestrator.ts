@@ -72,7 +72,9 @@ export async function buildQueue(
       ? PROVINCES.filter((p) => deps.only!.some((token) => matchesOnlyToken(p, token)))
       : [...PROVINCES]
 
-  if (deps.forceAll) {
+  // Bölme modunda il-düzeyi resume anlamsız: eski (25 sayfalık) il koşusu ilçe kapsamını göstermez.
+  // Resume ilçe koşuları düzeyinde yapılır (bkz. districtDone).
+  if (deps.forceAll || deps.splitDistricts) {
     return { queue: candidates, skippedResume: [] }
   }
 
@@ -124,6 +126,25 @@ async function districtsToSplit(
   return adapter.districtSlugs?.(html, province.emlakjetSlug) ?? null
 }
 
+/** Bu ilçe etiketli koşu, resume penceresi içinde engelsiz ve sayfa çekerek bitmiş mi? */
+async function districtDone(label: string, deps: OrchestratorDeps): Promise<boolean> {
+  if (deps.forceAll) return false
+  const cutoff = new Date(deps.now().getTime() - deps.resumeDays * 86_400_000)
+  const rows = await deps.client.crawlRun.findMany({
+    where: {
+      source: deps.source ?? 'emlakjet',
+      category: 'arsa',
+      il: label,
+      blocked: false,
+      finishedAt: { not: null },
+      pagesFetched: { gt: 0 },
+      startedAt: { gte: cutoff },
+    },
+    select: { il: true },
+  })
+  return rows.length > 0
+}
+
 async function runWorker(
   queue: Province[],
   deps: OrchestratorDeps,
@@ -156,11 +177,13 @@ async function runWorker(
         if (districts && districts.length > 0) {
           summary = { blocked: false, blockReason: null }
           for (const ds of districts) {
+            const label = `${province.tkgmName}/${ds}`
+            if (await districtDone(label, deps)) continue
             const s = await deps.runCrawl(
               {
                 il: province.tkgmName,
                 ilUrlOverride: ds,
-                label: `${province.tkgmName}/${ds}`,
+                label,
                 category: 'arsa',
                 maxPages: PORTAL_MAX_PAGES,
                 dryRun: false,
