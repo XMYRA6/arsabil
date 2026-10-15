@@ -6,8 +6,8 @@ import { WA_AKIF_TOOL_DEFS, validateArgsWa, dispatchToolWa } from '../akifToolGa
 import { AKIF_TOOL_DEFS } from '@/lib/ai/akif/gateway/toolRegistry'
 
 describe('WA_AKIF_TOOL_DEFS', () => {
-  it('3 mevcut araç + lookupParcel + 5 proje aracı içerir', () => {
-    expect(WA_AKIF_TOOL_DEFS.length).toBe(AKIF_TOOL_DEFS.length + 1 + 5)
+  it('3 mevcut araç + lookupParcel + 7 proje aracı içerir', () => {
+    expect(WA_AKIF_TOOL_DEFS.length).toBe(AKIF_TOOL_DEFS.length + 1 + 7)
     expect(WA_AKIF_TOOL_DEFS.map((d) => d.function.name)).toEqual(
       expect.arrayContaining([
         ...AKIF_TOOL_DEFS.map((d) => d.function.name),
@@ -17,6 +17,8 @@ describe('WA_AKIF_TOOL_DEFS', () => {
         'createProject',
         'updateProject',
         'rememberFact',
+        'estimateDaireFiyati',
+        'calculateProject',
       ]),
     )
   })

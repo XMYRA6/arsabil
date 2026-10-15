@@ -17,11 +17,17 @@ import {
   type ProjectListItem,
   type ProjectSummary,
 } from '@/lib/akifProje/projeKarti'
+import { runEstimateDaireFiyati, runCalculateProject } from '@/lib/akifProje/hesapTools'
 import { createClaim, CLAIM_TTL_MS, type ClaimDraft } from '@/lib/akifProje/claim'
 
-export type ProjectToolName = 'findProjects' | 'summarizeProject' | 'createProject' | 'updateProject' | 'rememberFact'
+export type ProjectToolName =
+  | 'findProjects' | 'summarizeProject' | 'createProject' | 'updateProject' | 'rememberFact'
+  | 'estimateDaireFiyati' | 'calculateProject'
 
-const NAMES: readonly ProjectToolName[] = ['findProjects', 'summarizeProject', 'createProject', 'updateProject', 'rememberFact']
+const NAMES: readonly ProjectToolName[] = [
+  'findProjects', 'summarizeProject', 'createProject', 'updateProject', 'rememberFact',
+  'estimateDaireFiyati', 'calculateProject',
+]
 export const isProjectToolName = (n: string): n is ProjectToolName => (NAMES as readonly string[]).includes(n)
 
 const CLAIM_RATE_LIMIT = { limit: 3, windowMs: 3_600_000 }
@@ -151,6 +157,34 @@ export const PROJECT_TOOL_DEFS: OpenAiToolDef[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'estimateDaireFiyati',
+      description:
+        "Projenin parselinin bölgesindeki konut ilanlarından yaklaşık daire fiyatını getirir (kullanıcıya 'doğru mu?' diye doğrulatmak için). İmar bilinmiyorsa veya daire fiyatı olgusu yoksa çağır. Sonuç doğrulanmadan hesaba girmez.",
+      parameters: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['projectId'],
+        properties: { projectId: { type: 'string' } },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'calculateProject',
+      description:
+        'Projeyi hesaplar: imar (emsal) biliniyorsa toplam daire ve arsa sahibine düşen daire/değer; yalnız doğrulanmış daire fiyatı varsa müteahhidin verebileceği en yüksek arsa payı (%). Rakamları yalnız bu aracın sonucundan aktar, kendin hesaplama. Sonuç projeye kaydedilir.',
+      parameters: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['projectId'],
+        properties: { projectId: { type: 'string' } },
+      },
+    },
+  },
 ]
 
 // --- Doğrulama --------------------------------------------------------------
@@ -179,6 +213,8 @@ export function validateProjectToolArgs(name: ProjectToolName, args: unknown): V
       return range.ok ? OK : bad(range.field, range.reason)
     }
     case 'summarizeProject':
+    case 'estimateDaireFiyati':
+    case 'calculateProject':
       return typeof o.projectId === 'string' && o.projectId.length > 0 && o.projectId.length <= 40
         ? OK
         : bad('projectId', 'eksik')
@@ -296,6 +332,10 @@ export async function dispatchProjectTool(name: ProjectToolName, args: unknown, 
       const s = await getProjectSummary(deps.db, { userId, projectId: String(o.projectId) })
       return s ? summaryCard(s) : { kind: 'project', op: 'not_found' }
     }
+    case 'estimateDaireFiyati':
+      return runEstimateDaireFiyati(deps.db, { userId, projectId: String(o.projectId) })
+    case 'calculateProject':
+      return runCalculateProject(deps.db, { userId, projectId: String(o.projectId) }, now)
     case 'createProject': {
       const v = validateCreateArgs(args)
       if (!v.ok) return { kind: 'project', op: 'failed', data: { alan: v.field, neden: v.reason } }

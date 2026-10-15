@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
+import { runEstimateDaireFiyati, runCalculateProject } from '@/lib/akifProje/hesapTools'
 import {
   PROJECT_TOOL_DEFS,
   isProjectToolName,
@@ -6,6 +7,11 @@ import {
   dispatchProjectTool,
   type ProjectToolDeps,
 } from '../projectTools'
+
+jest.mock('@/lib/akifProje/hesapTools', () => ({
+  runEstimateDaireFiyati: jest.fn(),
+  runCalculateProject: jest.fn(),
+}))
 
 const NOW = new Date('2026-10-15T12:00:00Z')
 const PHONE = '905321234567'
@@ -38,15 +44,18 @@ function makeDeps(opts: { linked?: boolean } = {}) {
 }
 
 describe('araç kaydı', () => {
-  it('5 araç, isProjectToolName doğru çalışır', () => {
+  it('7 araç, isProjectToolName doğru çalışır', () => {
     expect(PROJECT_TOOL_DEFS.map((d) => d.function.name)).toEqual([
       'findProjects',
       'summarizeProject',
       'createProject',
       'updateProject',
       'rememberFact',
+      'estimateDaireFiyati',
+      'calculateProject',
     ])
     expect(isProjectToolName('createProject')).toBe(true)
+    expect(isProjectToolName('calculateProject')).toBe(true)
     expect(isProjectToolName('lookupParcel')).toBe(false)
   })
 })
@@ -63,6 +72,15 @@ describe('validateProjectToolArgs', () => {
   it('summarizeProject: projectId zorunlu', () => {
     expect(validateProjectToolArgs('summarizeProject', { projectId: 'pk1' })).toEqual({ ok: true })
     expect(validateProjectToolArgs('summarizeProject', {}).ok).toBe(false)
+  })
+
+  it.each(['estimateDaireFiyati', 'calculateProject'] as const)('%s: projectId zorunlu', (name) => {
+    expect(validateProjectToolArgs(name, { projectId: 'pk1' })).toEqual({ ok: true })
+    for (const bad of [{}, { projectId: '' }, { projectId: 'x'.repeat(41) }, { projectId: 5 }]) {
+      const r = validateProjectToolArgs(name, bad)
+      expect(r.ok).toBe(false)
+      if (!r.ok) expect(r.field).toBe('projectId')
+    }
   })
 
   it('createProject: validateCreateArgs ile aynı kurallar', () => {
@@ -103,6 +121,13 @@ describe('dispatchProjectTool — bağlı olmayan telefon', () => {
     expect(card.op).toBe('needs_signup')
     expect(card.data?.taslakKaydedildi).toBe(false)
     expect(tx.phoneClaim.create.mock.calls[0][0].data.draft).toBeUndefined()
+  })
+
+  it.each(['estimateDaireFiyati', 'calculateProject'] as const)('%s: needs_signup, taslaksız', async (name) => {
+    const { deps } = makeDeps({ linked: false })
+    const card = await dispatchProjectTool(name, { projectId: 'pk1' }, deps)
+    expect(card.op).toBe('needs_signup')
+    expect(card.data?.taslakKaydedildi).toBe(false)
   })
 
   it('claim istekleri saatte 3 ile sınırlı', async () => {
@@ -196,6 +221,18 @@ describe('dispatchProjectTool — bağlı telefon', () => {
     expect((many.data?.adaylar as unknown[]).length).toBe(2)
     tx.projeKarti.findMany.mockResolvedValue([])
     expect((await dispatchProjectTool('findProjects', {}, deps)).op).toBe('not_found')
+  })
+
+  it('estimateDaireFiyati / calculateProject: hesapTools doğru userId+projectId ile çağrılır, kart aynen iletilir', async () => {
+    const { deps } = makeDeps()
+    const c1 = { kind: 'project', op: 'price_estimate', data: { a: 1 } }
+    const c2 = { kind: 'project', op: 'calculated', data: { b: 2 } }
+    ;(runEstimateDaireFiyati as jest.Mock).mockResolvedValue(c1)
+    ;(runCalculateProject as jest.Mock).mockResolvedValue(c2)
+    expect(await dispatchProjectTool('estimateDaireFiyati', { projectId: 'pk1' }, deps)).toBe(c1)
+    expect(runEstimateDaireFiyati).toHaveBeenCalledWith(deps.db, { userId: 'u1', projectId: 'pk1' })
+    expect(await dispatchProjectTool('calculateProject', { projectId: 'pk1' }, deps)).toBe(c2)
+    expect(runCalculateProject).toHaveBeenCalledWith(deps.db, { userId: 'u1', projectId: 'pk1' }, NOW)
   })
 
   it('summarizeProject: olmayan proje not_found', async () => {
