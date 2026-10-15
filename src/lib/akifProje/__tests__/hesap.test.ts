@@ -65,6 +65,55 @@ describe('computeProjectEstimate — tam mod', () => {
   })
 })
 
+describe('computeProjectEstimate — asiyor (x_max tavanı)', () => {
+  // Mi = 1M (P=10000, 100 m²); fiyat 5M -> x_max = %75
+  const base = { arsaAlani: 1000, emsal: 1.5, daireBuyuklugu: 100, fiyat: { m2: 100, tl: 5_000_000 }, defaults }
+  it('tavanın altı/eşiti false, üstü true', () => {
+    const r = computeProjectEstimate(base) // %40/45/50 hepsi < 75
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(r.xMaxYuzde).toBe(75)
+    expect(r.satirlar.map((s) => s.asiyor)).toEqual([false, false, false])
+    const at = computeProjectEstimate({ ...base, arsaSahibiPayiYuzde: 75 })
+    const over = computeProjectEstimate({ ...base, arsaSahibiPayiYuzde: 76 })
+    if (!at.ok || !over.ok) throw new Error('beklenmedik')
+    expect(at.satirlar[0].asiyor).toBe(false)
+    expect(over.satirlar[0].asiyor).toBe(true)
+  })
+  it('varsayılan senaryolarda yalnız tavanı aşanlar true (x_max %42 -> 45 ve 50)', () => {
+    // Mi=2.5M; x_max = 1 − 3.125M/5M = 0.375 -> %37: hepsi aşar
+    const r = computeProjectEstimate({ ...base, birimMaliyet: 25_000 })
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(r.xMaxYuzde).toBe(37)
+    expect(r.satirlar.map((s) => s.asiyor)).toEqual([true, true, true])
+  })
+  it('yapılamaz ise tüm satırlar true', () => {
+    const r = computeProjectEstimate({ ...base, birimMaliyet: 60_000 })
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(r.yapilamaz).toBe(true)
+    expect(r.satirlar.every((s) => s.asiyor)).toBe(true)
+  })
+  it('fiyat yoksa false', () => {
+    const r = computeProjectEstimate({ ...base, fiyat: undefined })
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(r.satirlar.every((s) => s.asiyor === false)).toBe(true)
+  })
+})
+
+describe('computeProjectEstimate — kenar durumlar', () => {
+  it('x_max %1 altındaysa (0 < x_max < 0.01) yapilamaz=true, xMaxYuzde=null', () => {
+    // Mi=1M*1.25 = 1.25M; fiyat 1.2625M -> x_max ≈ 0.0099
+    const r = computeProjectEstimate({ daireBuyuklugu: 100, fiyat: { m2: 100, tl: 1_262_500 }, defaults })
+    expect(r).toMatchObject({ ok: true, yapilamaz: true, xMaxYuzde: null })
+  })
+  it('emsal biliniyor ama arsa alanı yok: not arsa alanını söyler', () => {
+    const r = computeProjectEstimate({ emsal: 1.5, daireBuyuklugu: 100, fiyat: FIYAT, defaults })
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(r.mod).toBe('imarsiz')
+    expect(r.notlar.join(' ')).toMatch(/Arsa alanı bilinmediği için daire sayısı hesaplanamaz/)
+    expect(r.notlar.join(' ')).not.toMatch(/İmar bilinmediği/)
+  })
+})
+
 describe('computeProjectEstimate — eksik girdi', () => {
   it('ne imar ne fiyat: ok=false, eksikler adlandırılır', () => {
     const r = computeProjectEstimate({ defaults })

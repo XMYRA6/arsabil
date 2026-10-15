@@ -25,6 +25,8 @@ export interface EstimateRow {
   arsaSahibiDaire: number | null
   arsaSahibiDegerTL: number | null
   piyasaDegerTL: number | null
+  /** true: bu pay müteahhidin verebileceği üst sınırı (x_max) aşıyor veya yapılamaz → bu fiyat/maliyette uygulanabilir değil */
+  asiyor: boolean
 }
 
 export type EstimateResult =
@@ -90,13 +92,20 @@ export function computeProjectEstimate(i: EstimateInput): EstimateResult {
   if (daireFiyatiTL !== null) {
     const xMax = computeXMax(i, ad, daireFiyatiTL)
     if (Number.isFinite(xMax)) {
-      if (xMax <= 0) yapilamaz = true
+      // %1'in altındaki tavan ("en fazla %0") anlamsızdır: yapılamaz say.
+      if (xMax <= 0 || Math.floor(xMax * 100) < 1) yapilamaz = true
       else xMaxYuzde = Math.floor(xMax * 100)
     }
   }
 
   if (!tam) {
-    notlar.push('İmar bilinmediği için daire sayısı hesaplanamaz; yalnız arsa payı üst sınırı verilir')
+    const neden =
+      i.arsaAlani === undefined && i.emsal !== undefined
+        ? 'Arsa alanı'
+        : i.emsal === undefined && i.arsaAlani !== undefined
+          ? 'Emsal'
+          : 'İmar'
+    notlar.push(neden + ' bilinmediği için daire sayısı hesaplanamaz; yalnız arsa payı üst sınırı verilir')
     return { ok: true, mod: 'imarsiz', daireM2: ad, daireFiyatiTL, xMaxYuzde, yapilamaz, toplamDaire: null, satirlar: [], varsayimlar, notlar }
   }
 
@@ -119,6 +128,7 @@ export function computeProjectEstimate(i: EstimateInput): EstimateResult {
       arsaSahibiDaire: daire,
       arsaSahibiDegerTL: r.arsaSahibiDegeriTL === null ? null : Math.round(r.arsaSahibiDegeriTL),
       piyasaDegerTL: ham !== null && daireFiyatiTL !== null ? Math.round(ham * daireFiyatiTL) : null,
+      asiyor: yapilamaz || (xMaxYuzde !== null && 100 - muteahhitPaylari[idx] > xMaxYuzde),
     }
   })
   // card.defaultsUsed: birim maliyet / kalite varsayımları (daire m² zaten yukarıda yönetildi).

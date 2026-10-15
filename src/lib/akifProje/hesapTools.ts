@@ -71,11 +71,23 @@ function num(v: unknown): number | undefined {
   return typeof v === 'number' && Number.isFinite(v) ? v : undefined
 }
 
+function pos(v: unknown): number | undefined {
+  const n = num(v)
+  return n !== undefined && n > 0 ? n : undefined
+}
+
 function asRecord(v: unknown): Record<string, unknown> {
   return v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {}
 }
 
-function compact(result: unknown): { mod: unknown; xMaxYuzde: unknown; yapilamaz: unknown; arsaSahibiDaire: unknown } | null {
+function compact(result: unknown): {
+  mod: unknown
+  xMaxYuzde: unknown
+  yapilamaz: unknown
+  arsaSahibiDaire: unknown
+  daireFiyatiTL: unknown
+  toplamDaire: unknown
+} | null {
   if (result === null || typeof result !== 'object') return null
   const r = result as Record<string, unknown>
   const satirlar = Array.isArray(r.satirlar) ? (r.satirlar as Array<Record<string, unknown>>) : []
@@ -84,6 +96,8 @@ function compact(result: unknown): { mod: unknown; xMaxYuzde: unknown; yapilamaz
     xMaxYuzde: r.xMaxYuzde ?? null,
     yapilamaz: r.yapilamaz ?? null,
     arsaSahibiDaire: satirlar[0]?.arsaSahibiDaire ?? null,
+    daireFiyatiTL: r.daireFiyatiTL ?? null,
+    toplamDaire: r.toplamDaire ?? null,
   }
 }
 
@@ -136,8 +150,8 @@ export async function runEstimateDaireFiyati(
 
 function readFiyat(v: unknown): { m2: number; tl: number } | undefined {
   const o = asRecord(v)
-  const m2 = num(o.m2)
-  const tl = num(o.tl)
+  const m2 = pos(o.m2)
+  const tl = pos(o.tl)
   return m2 !== undefined && tl !== undefined ? { m2, tl } : undefined
 }
 
@@ -186,8 +200,9 @@ export async function runCalculateProject(
   const onceki = compact(p.result)
   const degisti = canonicalJson(onceki) !== canonicalJson(ozet)
 
-  await db.$transaction(async (tx) => {
-    await tx.projeKarti.update({ where: { id: p.id }, data: { result: result as never } })
+  const yazildi = await db.$transaction(async (tx) => {
+    const upd = await tx.projeKarti.updateMany({ where: { id: p.id, userId: a.userId }, data: { result: result as never } })
+    if (upd.count !== 1) return false
     if (degisti) {
       await tx.projeRevizyon.create({
         data: {
@@ -201,7 +216,9 @@ export async function runCalculateProject(
         },
       })
     }
+    return true
   })
+  if (!yazildi) return { kind: 'project', op: 'not_found' }
 
   return { kind: 'project', op: 'calculated', data: { projectId: p.id, ad: p.name, ...result } }
 }

@@ -104,3 +104,20 @@ export function formatRecentProjects(list: ReadonlyArray<{ id: string; name: str
     .map((p) => `- id=${clean(p.id)} | ${JSON.stringify(clean(p.name ?? '') || 'Adsız proje')}`)
   return ['SON ETKİLEŞİM PROJELERİ (bu konuşmada ele alınanlar; projectId için bunları kullan):', ...lines].join('\n')
 }
+
+export interface PendingPrice {
+  projectId: string
+  parsel: ParcelRef
+  daireM2: number
+  tahminiFiyatTL: number
+}
+
+/** Kullanıcı onayı bekleyen fiyat tahmini: araç sonucu sonraki tura taşınmadığından rememberFact değerleri her turda eklenir. */
+export function formatPendingPrice(p: PendingPrice | null | undefined): string {
+  if (!p) return ''
+  return (
+    'BEKLEYEN FİYAT TAHMİNİ (kullanıcı onayı bekleniyor; rememberFact için bu değerleri AYNEN kullan): ' +
+    `projectId=${clean(p.projectId)} | parsel il=${clean(p.parsel.il)} ilce=${clean(p.parsel.ilce)} mahalle=${clean(p.parsel.mahalle)} ada=${clean(p.parsel.ada)} parsel=${clean(p.parsel.parsel)} | ` +
+    `daireM2=${Number(p.daireM2)} | tahminiFiyatTL=${Number(p.tahminiFiyatTL)}`
+  )
+}

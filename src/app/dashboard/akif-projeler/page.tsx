@@ -43,6 +43,7 @@ const show = (v: unknown) => {
       const parts = [String(o.mod)]
       if (typeof o.xMaxYuzde === 'number') parts.push(`en fazla %${o.xMaxYuzde} arsa payı`)
       if (typeof o.arsaSahibiDaire === 'number') parts.push(`${o.arsaSahibiDaire} daire`)
+      if (typeof o.daireFiyatiTL === 'number') parts.push(`daire ${o.daireFiyatiTL.toLocaleString('tr-TR')} TL`)
       return parts.join(' · ')
     }
     return JSON.stringify(v)

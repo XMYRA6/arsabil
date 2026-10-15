@@ -30,10 +30,10 @@ function project(over: { inputs?: Record<string, unknown>; olgular?: Fact[]; res
 }
 
 function makeDb(row: unknown, konutRows: unknown[] = []) {
-  const projeKartiUpdate = jest.fn(async () => ({}))
+  const projeKartiUpdate = jest.fn(async (_a?: unknown) => ({ count: 1 }))
   const projeRevizyonCreate = jest.fn(async () => ({}))
   const findFirst = jest.fn(async () => row)
-  const tx = { projeKarti: { update: projeKartiUpdate }, projeRevizyon: { create: projeRevizyonCreate } }
+  const tx = { projeKarti: { updateMany: projeKartiUpdate }, projeRevizyon: { create: projeRevizyonCreate } }
   const db = {
     projeKarti: { findFirst },
     konutFiyatStat: { findMany: jest.fn(async () => konutRows) },
@@ -91,6 +91,62 @@ describe('runEstimateDaireFiyati', () => {
 })
 
 describe('runCalculateProject', () => {
+  it('başka kullanıcının/yok proje -> not_found, sorgu {id,userId} ile sınırlı, yazım yok', async () => {
+    const { db, findFirst, projeKartiUpdate } = makeDb(null)
+    const card = await runCalculateProject(db, args, NOW)
+    expect(card.op).toBe('not_found')
+    const call = findFirst.mock.calls[0] as unknown as [{ where: unknown }]
+    expect(call[0].where).toEqual({ id: 'p1', userId: 'u1' })
+    expect(projeKartiUpdate).not.toHaveBeenCalled()
+  })
+
+  it('yazım sahiplikle sınırlı (updateMany where {id,userId}); count!==1 -> not_found, revizyon yok', async () => {
+    const m = makeDb(project({ inputs: { daireBuyuklugu: 150 }, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_000 })] }))
+    const card = await runCalculateProject(m.db, args, NOW)
+    expect(card.op).toBe('calculated')
+    const w = (m.projeKartiUpdate.mock.calls[0] as unknown as [{ where: unknown }])[0].where
+    expect(w).toEqual({ id: 'p1', userId: 'u1' })
+
+    const n = makeDb(project({ inputs: { daireBuyuklugu: 150 }, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_000 })] }))
+    n.projeKartiUpdate.mockResolvedValueOnce({ count: 0 })
+    const c2 = await runCalculateProject(n.db, args, NOW)
+    expect(c2.op).toBe('not_found')
+    expect(n.projeRevizyonCreate).not.toHaveBeenCalled()
+  })
+
+  it('geçersiz fiyat olgusu ({m2:0,tl:-1}) yok sayılır', async () => {
+    const { db } = makeDb(project({ olgular: [fresh('daireFiyati', { m2: 0, tl: -1 })] }))
+    const card = await runCalculateProject(db, args, NOW)
+    expect(card.op).toBe('failed')
+    expect(card.data?.eksik).toContain('daireFiyati')
+  })
+
+  it('yalnız fiyat değişince hesap revizyonu yazılır', async () => {
+    const inputs = { daireBuyuklugu: 150 }
+    const first = makeDb(project({ inputs, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_000 })] }))
+    await runCalculateProject(first.db, args, NOW)
+    const saved = (first.projeKartiUpdate.mock.calls[0] as unknown as [{ data: { result: { xMaxYuzde: number } } }])[0].data.result
+    // x_max yüzdesi aynı kalır, yalnız daireFiyatiTL değişir
+    const second = makeDb(project({ inputs, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_900 })], result: saved }))
+    const card = await runCalculateProject(second.db, args, NOW)
+    expect(card.data?.xMaxYuzde).toBe(saved.xMaxYuzde)
+    expect(second.projeRevizyonCreate).toHaveBeenCalledTimes(1)
+  })
+
+  it('asiyor satır bayrağı kart ve sonuçta taşınır', async () => {
+    const { db, projeKartiUpdate } = makeDb(
+      project({
+        inputs: { arsaAlani: 1000, emsal: 1.5, daireBuyuklugu: 100, arsaSahibiPayiYuzde: 40, birimMaliyet: 25_000 },
+        olgular: [fresh('daireFiyati', { m2: 100, tl: 5_000_000 })],
+      }),
+    )
+    const card = await runCalculateProject(db, args, NOW)
+    const satirlar = card.data?.satirlar as Array<{ asiyor: boolean }>
+    expect(satirlar[0].asiyor).toBe(true) // x_max = %37 < %40
+    const saved = (projeKartiUpdate.mock.calls[0] as unknown as [{ data: { result: { satirlar: Array<{ asiyor: boolean }> } } }])[0].data.result
+    expect(saved.satirlar[0].asiyor).toBe(satirlar[0].asiyor)
+  })
+
   it('imarsız modda hesaplar, result yazar ve revizyon açar', async () => {
     const { db, projeKartiUpdate, projeRevizyonCreate } = makeDb(
       project({ inputs: { daireBuyuklugu: 150 }, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_000 })] }),

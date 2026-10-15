@@ -48,4 +48,26 @@ describe('AKIF_WHATSAPP_PROJECT_POLICY', () => {
     expect(p).toContain('satirlar dahil hiçbir yüzde, pay veya daire sayısı anlatma')
     expect(p).toContain('null ise hiç yüzde verme')
   })
+
+  it('x_max tavanı: asiyor alanı ve uygulanabilir değil ifadesi', () => {
+    const p = AKIF_WHATSAPP_PROJECT_POLICY
+    expect(p).toContain('asiyor')
+    expect(p).toContain('en fazla yaklaşık %<xMaxYuzde> arsa payı verebilir')
+    expect(p).toContain('uygulanabilir OLMADIĞINI')
+  })
+
+  it('onay turu: BEKLEYEN FİYAT TAHMİNİ bloğu, kullanici kaynağı, blok yoksa tekrar iste', () => {
+    const p = AKIF_WHATSAPP_PROJECT_POLICY
+    expect(p).toContain('BEKLEYEN FİYAT TAHMİNİ')
+    expect(p).toContain('source: kullanici')
+    expect(p).toContain('isteği tekrarlamasını iste')
+  })
+
+  it('politika boşlukları: createProject önce, fiyatı getireyim mi, emsal uydurma', () => {
+    const p = AKIF_WHATSAPP_PROJECT_POLICY
+    expect(p).toContain('projesi yoksa önce createProject')
+    expect(p).toContain('fiyatı getireyim mi?')
+    expect(p).toContain('emsali ASLA uydurma')
+    expect(p).toContain('imar durumu belgesinden')
+  })
 })
