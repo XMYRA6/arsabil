@@ -58,3 +58,19 @@ Gerçek Meta webhook + gerçek telefon numarası gerektirir — hiçbir otomatik
 - [ ] Bir terim sor ("emsal nedir?") → Akif açıklar (lookupParcel'e gitmeden)
 - [ ] Aynı numaradan hızlıca çok mesaj gönder → önce spam guard (WHATSAPP_INBOUND), sonra (eğer aşarsa) AKIF_WHATSAPP_TURN limiti devreye girer
 - [ ] `AkifTurnLog`'da `conversationId` alanı `wa:<telefon>` formatında satırlar oluştuğunu doğrula (Coolify DB'den)
+
+## Akif-5c Aşama B (WhatsApp Proje Kartları)
+
+Gerçek Meta webhook + gerçek telefon + gerçek ArsaBil hesabı gerektirir. **Ön koşul:** `prisma migrate deploy` (`20261015120000_add_akif_proje_kartlari`) çalıştırılmış olmalı; yeni env `AKIF_CLAIM_BASE_URL` (varsayılan `https://www.arsabil.com`).
+
+- [ ] Hesapsız numaradan arsa bilgisini anlat, "kaydet" de → Akif kayıt yapılmadığını söyleyip `…/akif/baglan?t=…` bağlantısı verir; `PhoneClaim` satırında `tokenHash` var, ham token yok
+- [ ] Bağlantıyı aç → giriş yap/üye ol → `/akif/baglan`'a geri dönülür → "WhatsApp'a bağla" → başarı; WhatsApp'a "bağlandı ✅ … projen kaydedildi" mesajı gelir; `User.whatsappPhone` dolu
+- [ ] Aynı bağlantıyı ikinci kez aç → "daha önce kullanılmış"
+- [ ] 15 dk sonra eski bir bağlantıyı aç → "süresi dolmuş"
+- [ ] Başka bir hesapla aynı telefonu bağlamayı dene → "başka bir hesaba bağlı"
+- [ ] Bağlı numaradan: proje oluştur, sonra "arsa payını %40 yap", ardından "%50 yap", "arsa alanı 900" de → `ProjeRevizyon` satırları eski→yeni ile oluşur
+- [ ] Birkaç gün sonra "15 Ekim'deki projeyi hatırlıyor musun?" (kendi tarihini kullan) → Akif en yeniden en eskiye kısa özet verir ve "değişiklik mi, yeni senaryo mu?" diye sorar
+- [ ] "Yeni senaryo" de → yeni `ProjeKarti` açılır, eskisi DEĞİŞMEZ
+- [ ] Aynı ay içinde iki proje varsa ("Ocak'taki proje") → Akif adayları listeler, tahmin etmez
+- [ ] 180+ gün önce kaydedilmiş bir emsal/imar için (DB'de `recordedAt` geriye çekerek simüle et) → Akif tarihiyle birlikte "hâlâ geçerli mi?" diye sorar; "evet" → `recordedAt` tazelenir, yeni satır açılmaz; taze olguyu tekrar SORMAZ
+- [ ] Web: Dashboard → "Akif Projelerim" → aynı projeler ve revizyon geçmişi (WhatsApp kanal etiketiyle) görünür
