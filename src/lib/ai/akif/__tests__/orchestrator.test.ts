@@ -287,6 +287,21 @@ describe('runAkifTurn', () => {
     expect(turn.tool_result).toEqual(PARCEL_CARD)
   })
 
+  it('(k2) tool_result kind:project ise dönüşümsüz turn.tool_result\'a atanır (rows.map ile çökmez)', async () => {
+    const { deps } = makeDeps()
+    const PROJECT_CARD = { kind: 'project' as const, op: 'summary' as const, data: { projectId: 'pk1', ad: 'Maçka' } }
+    ;(deps.model.chatWithTools as jest.Mock).mockResolvedValueOnce({
+      kind: 'tool_call',
+      toolName: 'findProjects',
+      toolArgs: {},
+      toolCallId: 'call_5',
+      usage: { promptTokens: 100, completionTokens: 10 },
+    })
+    ;(deps.dispatch as unknown as jest.Mock).mockResolvedValueOnce(PROJECT_CARD)
+    const turn = await runAkifTurn(INPUT, deps)
+    expect(turn.tool_result).toEqual(PROJECT_CARD)
+  })
+
   it('(l) extraSystemPrompt verilirse sistem promptuna eklenir', async () => {
     const { deps } = makeDeps()
     await runAkifTurn({ ...INPUT, extraSystemPrompt: 'EK_POLITIKA_TEST_METNI' }, deps)

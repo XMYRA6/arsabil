@@ -61,7 +61,25 @@ export interface ParcelCard {
   term?: string
 }
 
-export type ToolResultCard = TermCard | ScenarioCard | ParcelCard
+// Akif-5c — WhatsApp proje kartı araçlarının (findProjects, summarizeProject,
+// createProject, updateProject, rememberFact) sonucu. `data` modele aynen
+// JSON olarak verilir; web/voice bu türü hiç üretmez.
+export interface ProjectCard {
+  kind: 'project'
+  op:
+    | 'found'
+    | 'summary'
+    | 'created'
+    | 'updated'
+    | 'fact_saved'
+    | 'needs_signup'
+    | 'not_found'
+    | 'rate_limited'
+    | 'failed'
+  data?: Record<string, unknown>
+}
+
+export type ToolResultCard = TermCard | ScenarioCard | ParcelCard | ProjectCard
 
 export interface AkifTurn {
   intent: AkifIntent

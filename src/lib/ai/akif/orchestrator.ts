@@ -201,7 +201,7 @@ export async function runAkifTurn(
 
   // 7. Sonuç enjeksiyonu — modelin kendi tool_result'ı parseAkifTurn'de atıldı.
   if (toolResult) {
-    if (toolResult.kind === 'term' || toolResult.kind === 'parcel') {
+    if (toolResult.kind === 'term' || toolResult.kind === 'parcel' || toolResult.kind === 'project') {
       turn.tool_result = toolResult
     } else {
       turn.assumptions = [
