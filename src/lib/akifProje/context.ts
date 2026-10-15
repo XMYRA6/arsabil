@@ -95,3 +95,12 @@ export async function buildMemoryContext(
   }
   return lines.join('\n')
 }
+
+/** Bu konuşmada ele alınan projeler (id sürekliliği için); id'ler tur geçmişinde taşınmadığından her turda eklenir. */
+export function formatRecentProjects(list: ReadonlyArray<{ id: string; name: string | null }>): string {
+  if (!list.length) return ''
+  const lines = list
+    .slice(0, MAX_ITEMS)
+    .map((p) => `- id=${clean(p.id)} | ${JSON.stringify(clean(p.name ?? '') || 'Adsız proje')}`)
+  return ['SON ETKİLEŞİM PROJELERİ (bu konuşmada ele alınanlar; projectId için bunları kullan):', ...lines].join('\n')
+}

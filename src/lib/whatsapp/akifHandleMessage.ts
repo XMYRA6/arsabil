@@ -3,10 +3,11 @@
 // deterministik kalır, geri kalan her şey Akif-1 orchestrator'ına gider.
 
 import type { InboundMessage } from './types'
-import type { AkifMessage, AkifTurn, ToolResultCard } from '@/lib/ai/akif/contract'
+import type { AkifMessage, AkifTurn, ProjectCard, ToolResultCard } from '@/lib/ai/akif/contract'
 import { runAkifTurn } from '@/lib/ai/akif/orchestrator'
 import type { createAkifModel } from '@/lib/ai/akif/openaiClient'
 import type { createAuditLogger } from '@/lib/ai/akif/audit'
+import { formatRecentProjects } from '@/lib/akifProje/context'
 import { renderCard } from './renderCard'
 import { renderFollowup } from './renderFollowup'
 import { renderError } from './renderError'
@@ -15,11 +16,79 @@ import type { WaToolName } from './akifToolGateway'
 import type { ValidateResult } from '@/lib/ai/akif/gateway/toolRegistry'
 
 const MAX_HISTORY = 40
+const MAX_RECENT_PROJECTS = 5
 
 export interface WaAkifState {
   history: AkifMessage[]
   awaitingFollowup?: { il: string; ilce: string; mahalle: string }
+  /** Bu konuşmada ele alınan projeler (en yeni önce, en çok 5): id'ler tur geçmişinde taşınmadığı için state'te tutulur. */
+  recentProjects?: RecentProject[]
 }
+
+export interface RecentProject {
+  id: string
+  name: string | null
+}
+
+const str = (v: unknown): string | null => (typeof v === 'string' && v.length > 0 ? v : null)
+
+/** DB'den gelen state güvenilmez olabilir: yalnız geçerli şekilli girdiler alınır. */
+function readRecentProjects(raw: unknown): RecentProject[] {
+  if (!Array.isArray(raw)) return []
+  const out: RecentProject[] = []
+  for (const x of raw) {
+    const id = x && typeof x === 'object' ? str((x as { id?: unknown }).id) : null
+    if (!id || out.some((o) => o.id === id)) continue
+    const name = str((x as { name?: unknown }).name)
+    out.push({ id, name })
+    if (out.length >= MAX_RECENT_PROJECTS) break
+  }
+  return out
+}
+
+/** Bu turun proje kartından (varsa) yeni girdiler çıkarır; yeniler başa, eskiler arkaya, id ile tekilleştirilir. */
+function mergeRecentProjects(prev: RecentProject[], card: ToolResultCard | undefined): RecentProject[] {
+  if (!card || card.kind !== 'project') return prev
+  const data = card.data as Record<string, unknown> | undefined
+  const fresh: RecentProject[] = []
+  switch ((card as ProjectCard).op) {
+    case 'summary':
+    case 'created': {
+      const id = str(data?.projectId)
+      if (id) fresh.push({ id, name: str(data?.ad) })
+      break
+    }
+    case 'updated': {
+      const id = str(data?.projectId)
+      if (id) fresh.push({ id, name: prev.find((p) => p.id === id)?.name ?? null })
+      break
+    }
+    case 'found': {
+      if (Array.isArray(data?.adaylar)) {
+        for (const a of data.adaylar as unknown[]) {
+          const o = a && typeof a === 'object' ? (a as Record<string, unknown>) : null
+          const id = str(o?.id)
+          if (id) fresh.push({ id, name: str(o?.ad) })
+        }
+      }
+      break
+    }
+    default:
+      return prev
+  }
+  if (!fresh.length) return prev
+  const out: RecentProject[] = []
+  for (const p of [...fresh, ...prev]) {
+    if (!out.some((o) => o.id === p.id)) out.push(p)
+  }
+  return out.slice(0, MAX_RECENT_PROJECTS)
+}
+
+const stateFor = (state: WaAkifState, history: AkifMessage[], awaitingFollowup?: WaAkifState['awaitingFollowup']): WaAkifState => ({
+  history,
+  ...(awaitingFollowup ? { awaitingFollowup } : {}),
+  ...(state.recentProjects?.length ? { recentProjects: state.recentProjects } : {}),
+})
 
 export interface AkifHandleStore {
   loadConversation(phone: string): Promise<{ state: WaAkifState; lastMessageId: string | null } | null>
@@ -56,6 +125,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
   const state: WaAkifState = {
     history: Array.isArray(rawState?.history) ? rawState.history : [],
     awaitingFollowup: rawState?.awaitingFollowup,
+    recentProjects: readRecentProjects(rawState?.recentProjects),
   }
 
   // 2. Idempotency — Meta retry'ları tekrar işlenmez.
@@ -83,7 +153,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
   if (['durdur', 'stop', 'aboneliği iptal', 'abonelikten çık'].includes(low)) {
     const n = await deps.deleteSubscriptions(msg.from)
     await deps.sendText(msg.from, n > 0 ? renderFollowup.unsubscribedAll() : renderFollowup.noSubscription())
-    await deps.store.saveConversation(msg.from, { history: state.history }, msg.messageId)
+    await deps.store.saveConversation(msg.from, stateFor(state, state.history), msg.messageId)
     return
   }
 
@@ -94,7 +164,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
     if (yes) {
       await deps.upsertSubscription(msg.from, area)
       await deps.sendText(msg.from, renderFollowup.subscribed(area.mahalle))
-      await deps.store.saveConversation(msg.from, { history: state.history }, msg.messageId)
+      await deps.store.saveConversation(msg.from, stateFor(state, state.history), msg.messageId)
       return
     }
     // "evet" değil → flag temizlenir, mesaj normal Akif akışına düşer.
@@ -120,6 +190,8 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
   } catch (e) {
     console.error('[wa-akif] memory context', e)
   }
+  const recentBlock = formatRecentProjects(state.recentProjects ?? [])
+  const extraSystemPrompt = [deps.toolPolicy, memoryContext, recentBlock].filter(Boolean).join('\n\n')
   let turn: AkifTurn
   try {
     turn = await runAkifTurn(
@@ -127,7 +199,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
         conversationId: 'wa:' + msg.from,
         history: state.history,
         userMessage: text,
-        extraSystemPrompt: memoryContext ? deps.toolPolicy + '\n\n' + memoryContext : deps.toolPolicy,
+        extraSystemPrompt,
       },
       {
         model: deps.model,
@@ -157,6 +229,11 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
       newAwaitingFollowup = { il, ilce, mahalle }
     }
   }
+  // Kayıt bağlantısı (rastgele token) modelin kopyalamasına bırakılmaz.
+  if (card && card.kind === 'project' && card.op === 'needs_signup') {
+    const url = card.data?.url
+    if (typeof url === 'string' && url && !outgoing.includes(url)) outgoing += '\n\n' + url
+  }
   await deps.sendText(msg.from, outgoing)
 
   // 11. History + state kaydet.
@@ -170,7 +247,11 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
   const newHistory = mergedHistory.slice(-MAX_HISTORY)
   await deps.store.saveConversation(
     msg.from,
-    newAwaitingFollowup ? { history: newHistory, awaitingFollowup: newAwaitingFollowup } : { history: newHistory },
+    stateFor(
+      { ...state, recentProjects: mergeRecentProjects(state.recentProjects ?? [], card) },
+      newHistory,
+      newAwaitingFollowup,
+    ),
     msg.messageId,
   )
 }
