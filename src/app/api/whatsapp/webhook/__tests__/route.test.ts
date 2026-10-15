@@ -48,6 +48,7 @@ jest.mock('@/lib/risk/riskSnapshot', () => ({ buildRiskSnapshot: jest.fn() }))
 
 import { GET, POST } from '../route'
 import { WA_AKIF_TOOL_DEFS } from '@/lib/whatsapp/akifToolGateway'
+import { prisma } from '@/lib/prisma'
 
 const textBody = JSON.stringify({
   entry: [{ changes: [{ value: { messages: [{ from: '905321234567', id: 'wamid.1', timestamp: '1', type: 'text', text: { body: 'Trabzon Of 1/2' } }] } }] }],
@@ -105,5 +106,38 @@ describe('POST /api/whatsapp/webhook', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
     const res = await POST(new Request('http://x', { method: 'POST', body: textBody, headers: { 'x-hub-signature-256': 'sha256=ok' } }))
     expect(res.status).toBe(200)
+  })
+
+  it('tek POST, iki farklı telefon: her mesajın bağımlılıkları kendi telefonuna bağlı', async () => {
+    verifySignatureMock.mockReturnValue(true)
+    handleMessageMock.mockReset().mockResolvedValue(undefined)
+    const two = JSON.stringify({
+      entry: [{ changes: [{ value: { messages: [
+        { from: '905000000001', id: 'wamid.a', timestamp: '1', type: 'text', text: { body: 'bir' } },
+        { from: '905000000002', id: 'wamid.b', timestamp: '2', type: 'text', text: { body: 'iki' } },
+      ] } }] }],
+    })
+    const findUnique = prisma.user.findUnique as unknown as jest.Mock
+    findUnique.mockClear()
+    const res = await POST(new Request('http://x', { method: 'POST', body: two, headers: { 'x-hub-signature-256': 'sha256=ok' } }))
+    expect(res.status).toBe(200)
+    expect(handleMessageMock).toHaveBeenCalledTimes(2)
+    const [m1, d1] = handleMessageMock.mock.calls[0]
+    const [m2, d2] = handleMessageMock.mock.calls[1]
+    expect(m1.from).toBe('905000000001')
+    expect(m2.from).toBe('905000000002')
+    expect(d1).not.toBe(d2)
+    expect(d1.dispatch).not.toBe(d2.dispatch)
+
+    // loadMemoryContext: her çağrı kendi mesajının telefonuyla DB'ye gider.
+    await d1.loadMemoryContext(m1.from)
+    await d2.loadMemoryContext(m2.from)
+    expect(findUnique.mock.calls.map((c) => c[0].where.whatsappPhone)).toEqual(['905000000001', '905000000002'])
+
+    // dispatch: projectToolDeps.phone her mesajın kendi telefonu (kullanıcı arama kendi telefonuyla yapılır).
+    findUnique.mockClear()
+    await d1.dispatch('summarizeProject', { projectId: 'x' }).catch(() => undefined)
+    await d2.dispatch('summarizeProject', { projectId: 'x' }).catch(() => undefined)
+    expect(findUnique.mock.calls.map((c) => c[0].where.whatsappPhone)).toEqual(['905000000001', '905000000002'])
   })
 })
