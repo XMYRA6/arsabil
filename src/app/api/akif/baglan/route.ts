@@ -22,6 +22,11 @@ export async function POST(req: Request): Promise<Response> {
   const userId = session?.user?.id
   if (!userId) return NextResponse.json({ message: 'Giriş gerekli.' }, { status: 401 })
 
+  // CSRF derinlik savunması: düz form/text POST'ları (cross-site) reddedilir.
+  if (!(req.headers.get('content-type') ?? '').toLowerCase().startsWith('application/json')) {
+    return NextResponse.json({ message: 'application/json gerekli.' }, { status: 415 })
+  }
+
   if (!checkRateLimit('akif-baglan:' + userId, { limit: 10, windowMs: 3_600_000 }).ok) {
     return NextResponse.json({ message: 'Çok fazla deneme. Biraz sonra tekrar dene.' }, { status: 429 })
   }

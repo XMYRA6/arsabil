@@ -16,7 +16,11 @@ jest.mock('@/lib/rate-limit', () => ({
 import { POST } from '../route'
 
 const req = (body: unknown) =>
-  new Request('http://localhost/api/akif/baglan', { method: 'POST', body: JSON.stringify(body) })
+  new Request('http://localhost/api/akif/baglan', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'application/json' },
+  })
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -28,6 +32,18 @@ describe('POST /api/akif/baglan', () => {
   it('oturum yoksa 401', async () => {
     getServerSessionMock.mockResolvedValue(null)
     expect((await POST(req({ token: 't' }))).status).toBe(401)
+    expect(consumeClaimMock).not.toHaveBeenCalled()
+  })
+
+  it('Content-Type application/json değilse 415 (CSRF derinlik savunması), claim tüketilmez', async () => {
+    const r = new Request('http://localhost/api/akif/baglan', {
+      method: 'POST',
+      body: JSON.stringify({ token: 't' }),
+      headers: { 'Content-Type': 'text/plain' },
+    })
+    const res = await POST(r)
+    expect(res.status).toBe(415)
+    expect(typeof (await res.json()).message).toBe('string')
     expect(consumeClaimMock).not.toHaveBeenCalled()
   })
 
