@@ -33,6 +33,7 @@ jest.mock('@/lib/ai/akif/costGuard', () => ({
 }))
 jest.mock('@/lib/prisma', () => ({
   prisma: {
+    user: { findUnique: jest.fn().mockResolvedValue(null) },
     whatsappSubscription: {
       findUnique: jest.fn().mockResolvedValue(null),
       upsert: jest.fn(),
@@ -79,6 +80,7 @@ describe('POST /api/whatsapp/webhook', () => {
     expect(afterMock).toHaveBeenCalled()
     expect(handleMessageMock).toHaveBeenCalledTimes(1)
     expect(handleMessageMock.mock.calls[0][0]).toMatchObject({ from: '905321234567', messageId: 'wamid.1', type: 'text' })
+    expect(typeof handleMessageMock.mock.calls[0][1].loadMemoryContext).toBe('function')
   })
   it('bozuk JSON gövde → 200 (Meta retry fırtınası olmasın), handleMessage yok', async () => {
     verifySignatureMock.mockReturnValue(true)

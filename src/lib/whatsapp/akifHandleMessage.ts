@@ -41,6 +41,8 @@ export interface AkifHandleDeps {
   upsertSubscription: (phone: string, area: { il: string; ilce: string; mahalle: string }) => Promise<void>
   deleteSubscriptions: (phone: string) => Promise<number>
   toolPolicy: string
+  /** Telefon bağlıysa hesabın projelerini/olgularını, değilse yalnız tarihi içeren bağlam metni. */
+  loadMemoryContext: (phone: string) => Promise<string>
   now: () => Date
 }
 
@@ -112,6 +114,12 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
   }
 
   // 9. Tur akışı.
+  let memoryContext = ''
+  try {
+    memoryContext = await deps.loadMemoryContext(msg.from)
+  } catch (e) {
+    console.error('[wa-akif] memory context', e)
+  }
   let turn: AkifTurn
   try {
     turn = await runAkifTurn(
@@ -119,7 +127,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
         conversationId: 'wa:' + msg.from,
         history: state.history,
         userMessage: text,
-        extraSystemPrompt: deps.toolPolicy,
+        extraSystemPrompt: memoryContext ? deps.toolPolicy + '\n\n' + memoryContext : deps.toolPolicy,
       },
       {
         model: deps.model,

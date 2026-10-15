@@ -51,6 +51,7 @@ function makeDeps(over: Partial<AkifHandleDeps> = {}): {
     hasSubscription: jest.fn().mockResolvedValue(false),
     upsertSubscription: jest.fn().mockResolvedValue(undefined),
     deleteSubscriptions: jest.fn().mockResolvedValue(0),
+    loadMemoryContext: jest.fn().mockResolvedValue(''),
     toolPolicy: 'TEST_POLICY',
     now: () => new Date('2026-09-16T00:00:00Z'),
     ...over,
@@ -69,6 +70,25 @@ const msg = (over: Partial<InboundMessage> = {}): InboundMessage => ({
 
 describe('runWhatsappAkifTurn', () => {
   beforeEach(() => { runAkifTurnMock.mockReset().mockResolvedValue(TURN) })
+
+  it('hafıza bağlamı extraSystemPrompt\'a eklenir; boşsa yalnız politika', async () => {
+    runAkifTurnMock.mockResolvedValue(TURN)
+    const { deps } = makeDeps({ loadMemoryContext: jest.fn().mockResolvedValue('BUGÜN: 2026-10-15') })
+    await runWhatsappAkifTurn(msg(), deps)
+    expect(runAkifTurnMock.mock.calls[0][0].extraSystemPrompt).toBe('TEST_POLICY\n\nBUGÜN: 2026-10-15')
+
+    runAkifTurnMock.mockClear()
+    const { deps: d2 } = makeDeps()
+    await runWhatsappAkifTurn(msg({ messageId: 'wamid.2' }), d2)
+    expect(runAkifTurnMock.mock.calls[0][0].extraSystemPrompt).toBe('TEST_POLICY')
+  })
+
+  it('hafıza bağlamı yüklenemezse tur yine çalışır (yalnız politika)', async () => {
+    runAkifTurnMock.mockResolvedValue(TURN)
+    const { deps } = makeDeps({ loadMemoryContext: jest.fn().mockRejectedValue(new Error('db down')) })
+    await runWhatsappAkifTurn(msg(), deps)
+    expect(runAkifTurnMock.mock.calls[0][0].extraSystemPrompt).toBe('TEST_POLICY')
+  })
 
   it('düz sohbet → runAkifTurn çağrılır, cevap gönderilir, history kaydedilir', async () => {
     const { deps, sent, saved } = makeDeps()

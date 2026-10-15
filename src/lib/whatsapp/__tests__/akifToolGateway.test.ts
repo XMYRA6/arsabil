@@ -6,15 +6,24 @@ import { WA_AKIF_TOOL_DEFS, validateArgsWa, dispatchToolWa } from '../akifToolGa
 import { AKIF_TOOL_DEFS } from '@/lib/ai/akif/gateway/toolRegistry'
 
 describe('WA_AKIF_TOOL_DEFS', () => {
-  it('3 mevcut aracı + lookupParcel içerir', () => {
-    expect(WA_AKIF_TOOL_DEFS.length).toBe(AKIF_TOOL_DEFS.length + 1)
+  it('3 mevcut araç + lookupParcel + 5 proje aracı içerir', () => {
+    expect(WA_AKIF_TOOL_DEFS.length).toBe(AKIF_TOOL_DEFS.length + 1 + 5)
     expect(WA_AKIF_TOOL_DEFS.map((d) => d.function.name)).toEqual(
-      expect.arrayContaining([...AKIF_TOOL_DEFS.map((d) => d.function.name), 'lookupParcel']),
+      expect.arrayContaining([
+        ...AKIF_TOOL_DEFS.map((d) => d.function.name),
+        'lookupParcel',
+        'findProjects',
+        'summarizeProject',
+        'createProject',
+        'updateProject',
+        'rememberFact',
+      ]),
     )
   })
 
   it('paylaşılan AKIF_TOOL_DEFS mutasyona uğramaz', () => {
     expect(AKIF_TOOL_DEFS.some((d) => d.function.name === 'lookupParcel')).toBe(false)
+    expect(AKIF_TOOL_DEFS.some((d) => d.function.name === 'createProject')).toBe(false)
   })
 })
 
@@ -34,6 +43,11 @@ describe('validateArgsWa', () => {
     expect(validateArgsWa('explainTerm', { term: 'emsal' })).toEqual({ ok: true })
     expect(validateArgsWa('explainTerm', { term: 'bilinmeyen' }).ok).toBe(false)
   })
+
+  it('proje araçları projectTools doğrulayıcısına delege eder', () => {
+    expect(validateArgsWa('summarizeProject', { projectId: 'pk1' })).toEqual({ ok: true })
+    expect(validateArgsWa('summarizeProject', {}).ok).toBe(false)
+  })
 })
 
 describe('dispatchToolWa', () => {
@@ -46,13 +60,34 @@ describe('dispatchToolWa', () => {
     const card = await dispatchToolWa(
       'lookupParcel',
       { ilText: 'x', ilceText: 'x', mahalleText: 'x', ada: '1', parsel: '2' },
-      { db: {} as never, lookupParcelDeps },
+      { db: {} as never, lookupParcelDeps, projectToolDeps: {} as never },
     )
     expect(card.kind).toBe('parcel')
   })
 
   it('mevcut araç adları paylaşılan dispatchTool\'a delege eder', async () => {
-    const card = await dispatchToolWa('explainTerm', { term: 'emsal' }, { db: {} as never, lookupParcelDeps: {} as never })
+    const card = await dispatchToolWa('explainTerm', { term: 'emsal' }, { db: {} as never, lookupParcelDeps: {} as never, projectToolDeps: {} as never })
     expect(card.kind).toBe('term')
+  })
+
+  it('proje araçlarını dispatchProjectTool\'a yönlendirir', async () => {
+    const db = { user: { findUnique: jest.fn().mockResolvedValue(null) }, phoneClaim: { create: jest.fn() } }
+    const card = await dispatchToolWa(
+      'findProjects',
+      {},
+      {
+        db: {} as never,
+        lookupParcelDeps: {} as never,
+        projectToolDeps: {
+          db: db as never,
+          phone: '905321234567',
+          now: () => new Date('2026-10-15T12:00:00Z'),
+          baseUrl: 'https://x.test',
+          checkRateLimit: () => ({ ok: true }),
+        },
+      },
+    )
+    expect(card.kind).toBe('project')
+    expect(db.user.findUnique).toHaveBeenCalled()
   })
 })

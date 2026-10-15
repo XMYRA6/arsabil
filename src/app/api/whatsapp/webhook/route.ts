@@ -7,7 +7,9 @@ import { parseInbound } from '@/lib/whatsapp/parseInbound'
 import { runWhatsappAkifTurn, type AkifHandleDeps } from '@/lib/whatsapp/akifHandleMessage'
 import { createPrismaConversationStore } from '@/lib/whatsapp/conversation'
 import { WA_AKIF_TOOL_DEFS, validateArgsWa, dispatchToolWa, type WaDispatchDeps } from '@/lib/whatsapp/akifToolGateway'
-import { AKIF_WHATSAPP_TOOL_POLICY } from '@/lib/whatsapp/akifToolPolicy'
+import { AKIF_WHATSAPP_TOOL_POLICY, AKIF_WHATSAPP_PROJECT_POLICY } from '@/lib/whatsapp/akifToolPolicy'
+import { buildMemoryContext } from '@/lib/akifProje/context'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { createSendText } from '@/lib/whatsapp/sendMessage'
 import { buildDegerCard } from '@/lib/deger/card'
 import { createAnonCardDeps } from '@/lib/deger/anonCardDeps'
@@ -43,7 +45,7 @@ function readWhatsappMonthlyBudgetUsd(): number {
   return numEnv(process.env.AKIF_WHATSAPP_MONTHLY_BUDGET_USD, 20)
 }
 
-function buildAkifWhatsappDeps(): AkifHandleDeps {
+function buildAkifWhatsappDeps(phone: string): AkifHandleDeps {
   const config = readWhatsappConfig()
   const env = readAkifEnv()
   const db = prisma as unknown as AuditDb & WaDispatchDeps['db']
@@ -77,6 +79,13 @@ function buildAkifWhatsappDeps(): AkifHandleDeps {
           siteUrlFor: (f) =>
             `https://www.arsabil.com/deger?mahalleId=${f.mahalleId}&ada=${encodeURIComponent(f.ada)}&parsel=${encodeURIComponent(f.parsel)}`,
         },
+        projectToolDeps: {
+          db: prisma,
+          phone,
+          now: () => new Date(),
+          baseUrl: process.env.AKIF_CLAIM_BASE_URL || 'https://www.arsabil.com',
+          checkRateLimit,
+        },
       }),
     validateArgs: validateArgsWa,
     audit,
@@ -108,7 +117,11 @@ function buildAkifWhatsappDeps(): AkifHandleDeps {
       const r = await prisma.whatsappSubscription.deleteMany({ where: { phone } })
       return r.count
     },
-    toolPolicy: AKIF_WHATSAPP_TOOL_POLICY,
+    toolPolicy: AKIF_WHATSAPP_TOOL_POLICY + '\n\n' + AKIF_WHATSAPP_PROJECT_POLICY,
+    loadMemoryContext: async (p) => {
+      const u = await prisma.user.findUnique({ where: { whatsappPhone: p }, select: { id: true } })
+      return buildMemoryContext(prisma, { userId: u?.id ?? null, now: new Date() })
+    },
     now: () => new Date(),
   }
 }
@@ -129,7 +142,7 @@ export async function POST(req: Request): Promise<Response> {
   for (const m of messages) {
     after(async () => {
       try {
-        await runWhatsappAkifTurn(m, buildAkifWhatsappDeps())
+        await runWhatsappAkifTurn(m, buildAkifWhatsappDeps(m.from))
       } catch (e) {
         console.error('[wa-akif] handle', e)
       }

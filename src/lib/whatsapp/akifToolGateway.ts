@@ -14,8 +14,16 @@ import {
 } from '@/lib/ai/akif/gateway/toolRegistry'
 import { lookupParcel, type LookupParcelArgs, type LookupParcelDeps } from '@/lib/ai/akif/gateway/lookupParcel'
 import type { ToolResultCard } from '@/lib/ai/akif/contract'
+import {
+  PROJECT_TOOL_DEFS,
+  isProjectToolName,
+  validateProjectToolArgs,
+  dispatchProjectTool,
+  type ProjectToolName,
+  type ProjectToolDeps,
+} from './projectTools'
 
-export type WaToolName = ToolName | 'lookupParcel'
+export type WaToolName = ToolName | 'lookupParcel' | ProjectToolName
 
 const LOOKUP_PARCEL_DEF: OpenAiToolDef = {
   type: 'function',
@@ -38,13 +46,14 @@ const LOOKUP_PARCEL_DEF: OpenAiToolDef = {
   },
 }
 
-export const WA_AKIF_TOOL_DEFS: OpenAiToolDef[] = [...AKIF_TOOL_DEFS, LOOKUP_PARCEL_DEF]
+export const WA_AKIF_TOOL_DEFS: OpenAiToolDef[] = [...AKIF_TOOL_DEFS, LOOKUP_PARCEL_DEF, ...PROJECT_TOOL_DEFS]
 
 function isSharedToolName(name: WaToolName): name is ToolName {
-  return name !== 'lookupParcel'
+  return name !== 'lookupParcel' && !isProjectToolName(name)
 }
 
 export function validateArgsWa(name: WaToolName, args: unknown): ValidateResult {
+  if (isProjectToolName(name)) return validateProjectToolArgs(name, args)
   if (name === 'lookupParcel') {
     const obj: Record<string, unknown> =
       args && typeof args === 'object' && !Array.isArray(args) ? (args as Record<string, unknown>) : {}
@@ -61,6 +70,7 @@ export function validateArgsWa(name: WaToolName, args: unknown): ValidateResult 
 
 export interface WaDispatchDeps extends DispatchDeps {
   lookupParcelDeps: LookupParcelDeps
+  projectToolDeps: ProjectToolDeps
 }
 
 export async function dispatchToolWa(
@@ -68,6 +78,9 @@ export async function dispatchToolWa(
   args: unknown,
   deps: WaDispatchDeps,
 ): Promise<ToolResultCard> {
+  if (isProjectToolName(name)) {
+    return dispatchProjectTool(name, args, deps.projectToolDeps)
+  }
   if (name === 'lookupParcel') {
     return lookupParcel(args as LookupParcelArgs, deps.lookupParcelDeps)
   }
