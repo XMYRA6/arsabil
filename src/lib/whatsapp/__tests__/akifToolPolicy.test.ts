@@ -31,4 +31,12 @@ describe('AKIF_WHATSAPP_PROJECT_POLICY', () => {
       expect(p).toContain(k)
     }
   })
+
+  it('her tur tek araç: sıralı akış ifadeleri', () => {
+    const p = AKIF_WHATSAPP_PROJECT_POLICY
+    expect(p).not.toContain('ardından calculateProject')
+    for (const k of ['bir sonraki', 'Hesaplayayım mı?', 'xMaxYuzde', 'daireM2Varsayilan', 'daireFiyati', 'ilan', 'sonraki bir turda']) {
+      expect(p).toContain(k)
+    }
+  })
 })
