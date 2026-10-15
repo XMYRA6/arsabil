@@ -6,7 +6,7 @@
 import type { PrismaClient } from '@prisma/client'
 import type { OpenAiToolDef, ValidateResult } from '@/lib/ai/akif/gateway/toolRegistry'
 import type { ProjectCard } from '@/lib/ai/akif/contract'
-import { validateCreateArgs, validateFact, validateInputs, validateParcelRef } from '@/lib/akifProje/validation'
+import { cleanText, validateCreateArgs, validateFact, validateInputs, validateParcelRef } from '@/lib/akifProje/validation'
 import { istanbulDateString, parseDateRange } from '@/lib/akifProje/dateRange'
 import { recordFact, upsertParsel } from '@/lib/akifProje/parselDosyasi'
 import {
@@ -193,7 +193,7 @@ export function validateProjectToolArgs(name: ProjectToolName, args: unknown): V
       const inputs = validateInputs(o.changes)
       if (!inputs.ok) return bad(inputs.field, inputs.reason)
       const hasChanges = Object.keys(inputs.inputs).length > 0
-      const hasName = typeof o.name === 'string' && o.name.trim().length > 0
+      const hasName = typeof o.name === 'string' && cleanText(o.name).length > 0
       return hasChanges || hasName ? OK : bad('changes', 'değişiklik veya isim gerekli')
     }
     case 'rememberFact': {
@@ -309,7 +309,7 @@ export async function dispatchProjectTool(name: ProjectToolName, args: unknown, 
     case 'updateProject': {
       const inputs = validateInputs(o.changes)
       if (!inputs.ok) return { kind: 'project', op: 'failed', data: { alan: inputs.field, neden: inputs.reason } }
-      const nameArg = typeof o.name === 'string' && o.name.trim() ? o.name.trim() : undefined
+      const nameArg = typeof o.name === 'string' && cleanText(o.name) ? cleanText(o.name) : undefined
       const r = await updateProject(
         deps.db,
         { userId, projectId: String(o.projectId), changes: inputs.inputs, name: nameArg, channel: 'whatsapp' },
