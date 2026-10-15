@@ -1,0 +1,43 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.name {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+}
+
+.meta,
+.parcel {
+  margin: 0 0 4px;
+  opacity: 0.75;
+  font-size: 0.9rem;
+}
+
+.revisions {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date {
+  font-weight: 600;
+}
+
+.channel {
+  opacity: 0.6;
+}
+
+.error {
+  color: #b3261e;
+}

@@ -34,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { href: '/dashboard/profile', label: 'Profilim', icon: '👤' },
         { href: '/dashboard/reports', label: 'Raporlarım', icon: '📄' },
         { href: '/dashboard/projects', label: 'Projelerim', icon: '📁' },
+        { href: '/dashboard/akif-projeler', label: 'Akif Projelerim', icon: '💬' },
     ];
 
     return (
