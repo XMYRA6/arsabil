@@ -37,6 +37,9 @@ model User {
   favorites         Favorite[]
   studioScenarios   StudioScenario[]
   studioShareTokens StudioShareToken[]
+  whatsappPhone     String?            @unique
+  parselDosyalari   ParselDosyasi[]
+  projeKartlari     ProjeKarti[]
 }
 
 model Account {
@@ -577,4 +580,87 @@ model AkifVoiceTurnLog {
   estCostUsd Float    @default(0)
 
   @@index([sessionId])
+}
+
+// Akif-5c Aşama B — WhatsApp Proje Kartları. Kalıcı veri YALNIZ bağlı hesaba
+// (userId) aittir; telefon yalnız User.whatsappPhone ve PhoneClaim'de yaşar.
+model ParselDosyasi {
+  id        String   @id @default(cuid())
+  userId    String
+  il        String
+  ilce      String
+  mahalle   String
+  ada       String
+  parsel    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  olgular   ParselOlgu[]
+  projeler  ProjeKartiParsel[]
+
+  @@unique([userId, il, ilce, mahalle, ada, parsel])
+}
+
+model ParselOlgu {
+  id              String        @id @default(cuid())
+  parselDosyasiId String
+  key             String
+  value           Json
+  source          String
+  recordedAt      DateTime      @default(now())
+  supersededAt    DateTime?
+  parselDosyasi   ParselDosyasi @relation(fields: [parselDosyasiId], references: [id], onDelete: Cascade)
+
+  @@index([parselDosyasiId, key, supersededAt])
+}
+
+model ProjeKarti {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String?
+  inputs      Json
+  status      String   @default("aktif")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parseller   ProjeKartiParsel[]
+  revizyonlar ProjeRevizyon[]
+
+  @@index([userId, createdAt])
+}
+
+model ProjeKartiParsel {
+  projeKartiId    String
+  parselDosyasiId String
+  projeKarti      ProjeKarti    @relation(fields: [projeKartiId], references: [id], onDelete: Cascade)
+  parselDosyasi   ParselDosyasi @relation(fields: [parselDosyasiId], references: [id], onDelete: Cascade)
+
+  @@id([projeKartiId, parselDosyasiId])
+}
+
+model ProjeRevizyon {
+  id           String     @id @default(cuid())
+  projeKartiId String
+  field        String
+  oldValue     Json?
+  newValue     Json
+  changedAt    DateTime   @default(now())
+  channel      String
+  note         String?
+  projeKarti   ProjeKarti @relation(fields: [projeKartiId], references: [id], onDelete: Cascade)
+
+  @@index([projeKartiId, changedAt])
+}
+
+model PhoneClaim {
+  id        String    @id @default(cuid())
+  phone     String
+  tokenHash String    @unique
+  draft     Json?
+  expiresAt DateTime
+  usedAt    DateTime?
+  userId    String?
+  createdAt DateTime  @default(now())
+
+  @@index([phone])
 }

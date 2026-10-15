@@ -110,3 +110,10 @@ Additive: yeni modeller ve yeni WhatsApp-özel araçlar. Paylaşılan `toolRegis
 3. **Aşama A — Görsel anlama:** `parseInbound` image desteği, medya indirme, `extractFromImage`, onay akışı.
 
 Her aşama kendi implementasyon planı, testi ve teslimiyle ilerler; sırası B → C → A.
+
+## 9. Plan-zamanı netleştirmeler (2026-10-15, Aşama B planı)
+
+1. **Sahiplik:** §2'deki `ownerPhone` + `userId?` ikili sahipliği kaldırıldı. Kalıcı kayıt yalnız bağlı hesaba (`userId`, zorunlu) aittir (§3.4(4): üyelik olmadan kalıcı kart yoktur, dolayısıyla bağlanmamış telefonun toplu doldurulacak kaydı yoktur). Telefon yalnız `User.whatsappPhone` (benzersiz) ve `PhoneClaim`'de tutulur.
+2. **Aşama B'de eklenmeyenler:** `ProjeKarti.result` (Aşama C), web `Project`'e kopyalama / `projectId` (web'de "Akif Projelerim" görünümü bu ihtiyacı karşılar).
+3. **Üyelik öncesi kaydet:** `createProject` argümanları `PhoneClaim.draft`'a yazılır; bağlantı tüketilince kart otomatik oluşur (konuşma durumu 30 dk TTL'li olduğu için sohbet geçmişine güvenilemez).
+4. **Tek araç/tur:** orchestrator tur başına tek araç çağırır; `findProjects` tek eşleşmede özeti de döner (ayrı `summarizeProject` turu gerekmesin), `createProject` olguları parsel başına `facts` ile alır.
