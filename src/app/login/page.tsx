@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import styles from "./login.module.css";
+import { safeRedirectPath } from "@/lib/safeRedirect";
 
 export default function LoginPage() {
     const [view, setView] = useState<"login" | "register" | "forgot">("login");
@@ -27,7 +28,8 @@ export default function LoginPage() {
             setError(res.error);
             setLoading(false);
         } else {
-            window.location.href = "/";
+            const params = new URLSearchParams(window.location.search);
+            window.location.href = safeRedirectPath(params.get("next") ?? params.get("callbackUrl"), "/");
         }
     };
 
