@@ -10,13 +10,21 @@ const MAX_VALUE_CHARS = 60
 
 const day = (d: Date) => istanbulDateString(d)
 
+// Kullanıcı kaynaklı metinler system prompt satırı sahteleyemesin.
+const clean = (s: string) =>
+  String(s).replace(/[\x00-\x1f\x7f\x85]+/g, ' ').replace(/\s+/g, ' ').trim()
+
+type ParcelRef = { il: string; ilce: string; mahalle: string; ada: string; parsel: string }
+const parcelLabel = (x: ParcelRef) =>
+  `${clean(x.il)}/${clean(x.ilce)}/${clean(x.mahalle)} ada ${clean(x.ada)} parsel ${clean(x.parsel)}`
+
 function showValue(v: unknown): string {
-  const s = JSON.stringify(v)
+  const s = clean(JSON.stringify(v) ?? 'null')
   return s.length > MAX_VALUE_CHARS ? s.slice(0, MAX_VALUE_CHARS) + '…' : s
 }
 
 const factLine = (label: 'TAZE' | 'BAYAT', f: FactRow) =>
-  `  ${label}: ${f.key} = ${showValue(f.value)} (${f.source}, ${day(f.recordedAt)})` +
+  `  ${label}: ${clean(f.key)} = ${showValue(f.value)} (${clean(f.source)}, ${day(f.recordedAt)})` +
   (label === 'BAYAT' ? ' → kullanıcıya TARİHİYLE teyit ettir' : '')
 
 export async function buildMemoryContext(
@@ -42,17 +50,19 @@ export async function buildMemoryContext(
       name: true,
       createdAt: true,
       updatedAt: true,
-      parseller: { select: { parselDosyasi: { select: { il: true, ilce: true, mahalle: true, ada: true, parsel: true } } } },
+      parseller: { take: MAX_ITEMS + 1, select: { parselDosyasi: { select: { il: true, ilce: true, mahalle: true, ada: true, parsel: true } } } },
     },
   })
   if (projects.length) {
     lines.push('KAYITLI PROJELER (en yeni güncelleme önce):')
     for (const p of projects) {
-      const parcels = p.parseller
-        .map((x) => `${x.parselDosyasi.il}/${x.parselDosyasi.ilce}/${x.parselDosyasi.mahalle} ada ${x.parselDosyasi.ada} parsel ${x.parselDosyasi.parsel}`)
-        .join('; ')
+      const parcels =
+        p.parseller
+          .slice(0, MAX_ITEMS)
+          .map((x) => parcelLabel(x.parselDosyasi))
+          .join('; ') + (p.parseller.length > MAX_ITEMS ? ' (+daha fazla)' : '')
       lines.push(
-        `- id=${p.id} | "${p.name ?? 'Adsız proje'}" | oluşturma ${day(p.createdAt)} | güncelleme ${day(p.updatedAt)} | ${parcels}`,
+        `- id=${p.id} | ${JSON.stringify(clean(p.name ?? '') || 'Adsız proje')} | oluşturma ${day(p.createdAt)} | güncelleme ${day(p.updatedAt)} | ${parcels}`,
       )
     }
   } else {
@@ -76,7 +86,7 @@ export async function buildMemoryContext(
   if (parcels.length) {
     lines.push('KAYITLI PARSELLER:')
     for (const p of parcels) {
-      lines.push(`- ${p.il}/${p.ilce}/${p.mahalle} ada ${p.ada} parsel ${p.parsel}`)
+      lines.push(`- ${parcelLabel(p)}`)
       const c = classifyFacts(p.olgular as unknown as FactRow[], a.now)
       for (const f of c.taze) lines.push(factLine('TAZE', f))
       for (const f of c.bayat) lines.push(factLine('BAYAT', f))
