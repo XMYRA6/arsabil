@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "db:seed:district-prices": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" prisma/seed-district-prices.ts",
     "prices:aggregate": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/aggregate-area-prices.ts",
+    "prices:konut": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/aggregate-konut-prices.ts",
     "prices:trend": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/aggregate-trend.ts",
     "notify:run": "ts-node --compiler-options \"{\\\"module\\\":\\\"commonjs\\\"}\" scripts/whatsapp-notify.ts",
     "crawl": "cross-env TS_NODE_PROJECT=crawler/tsconfig.json ts-node --transpile-only -r tsconfig-paths/register crawler/run.ts",
