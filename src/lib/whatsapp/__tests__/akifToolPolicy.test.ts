@@ -24,4 +24,11 @@ describe('AKIF_WHATSAPP_PROJECT_POLICY', () => {
     expect(p).toContain('adDegisti')
     expect(p).toContain('degisti')
   })
+
+  it('Aşama C hesap kurallarını içerir', () => {
+    const p = AKIF_WHATSAPP_PROJECT_POLICY
+    for (const k of ['estimateDaireFiyati', 'calculateProject', 'price_estimate', 'price_unavailable', 'calculated', 'yapilamaz', 'fiyatBayat', 'pazarlık']) {
+      expect(p).toContain(k)
+    }
+  })
 })

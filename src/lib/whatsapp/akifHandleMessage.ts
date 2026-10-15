@@ -58,9 +58,12 @@ function mergeRecentProjects(prev: RecentProject[], card: ToolResultCard | undef
       if (id) fresh.push({ id, name: str(data?.ad) })
       break
     }
-    case 'updated': {
+    case 'updated':
+    case 'price_estimate':
+    case 'price_unavailable':
+    case 'calculated': {
       const id = str(data?.projectId)
-      if (id) fresh.push({ id, name: prev.find((p) => p.id === id)?.name ?? null })
+      if (id) fresh.push({ id, name: str(data?.ad) ?? prev.find((p) => p.id === id)?.name ?? null })
       break
     }
     case 'found': {

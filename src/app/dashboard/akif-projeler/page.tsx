@@ -21,6 +21,7 @@ interface AkifProject {
 }
 
 const LABELS: Record<string, string> = {
+  hesap: 'Hesap',
   arsaAlani: 'Arsa alanı (m²)',
   emsal: 'Emsal',
   arsaSahibiPayiYuzde: 'Arsa sahibi payı (%)',
@@ -33,7 +34,21 @@ const LABELS: Record<string, string> = {
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'long', year: 'numeric' })
-const show = (v: unknown) => (v === null || v === undefined ? '' : String(v))
+const show = (v: unknown) => {
+  if (v === null || v === undefined) return ''
+  if (typeof v === 'object') {
+    const o = v as Record<string, unknown>
+    if (typeof o.mod === 'string') {
+      if (o.yapilamaz === true) return `${o.mod} · bu fiyatla yapılamaz`
+      const parts = [String(o.mod)]
+      if (typeof o.xMaxYuzde === 'number') parts.push(`en fazla %${o.xMaxYuzde} arsa payı`)
+      if (typeof o.arsaSahibiDaire === 'number') parts.push(`${o.arsaSahibiDaire} daire`)
+      return parts.join(' · ')
+    }
+    return JSON.stringify(v)
+  }
+  return String(v)
+}
 
 export default function AkifProjelerPage() {
   const [projects, setProjects] = useState<AkifProject[] | null>(null)

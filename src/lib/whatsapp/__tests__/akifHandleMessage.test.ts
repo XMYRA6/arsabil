@@ -340,6 +340,26 @@ describe('runWhatsappAkifTurn — proje kartı (5c)', () => {
       expect(ids).toHaveLength(5)
     })
 
+    it('calculated: data.ad ile başa eklenir', async () => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('calculated', { projectId: 'p9', ad: 'Maçka' }) })
+      await c.say('hesapla')
+      expect(c.state().recentProjects![0]).toEqual({ id: 'p9', name: 'Maçka' })
+    })
+
+    it('price_estimate / price_unavailable: ad önceki girdiden, yoksa null', async () => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('price_estimate', { projectId: 'p9' }) })
+      await c.say('fiyat')
+      expect(c.state().recentProjects![0]).toEqual({ id: 'p9', name: null })
+
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('summary', { projectId: 'p8', ad: 'Ev' }) })
+      await c.say('özet')
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('price_unavailable', { projectId: 'p8' }) })
+      await c.say('fiyat')
+      expect(c.state().recentProjects![0]).toEqual({ id: 'p8', name: 'Ev' })
+    })
+
     it('proje dışı turlar (not_found, kartsız) mevcut listeyi korur', async () => {
       const c = conversation()
       runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('summary', { projectId: 'p1', ad: 'Ev' }) })

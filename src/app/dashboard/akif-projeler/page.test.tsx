@@ -40,6 +40,39 @@ describe('Akif Projelerim', () => {
     expect(rows[1]).toHaveTextContent('→ 40')
   })
 
+  it('hesap revizyonunu nesne olarak değil okunur metinle gösterir', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        projects: [
+          {
+            id: 'pk1',
+            name: 'Maçka arsası',
+            inputs: {},
+            createdAt: '2026-10-15T10:00:00.000Z',
+            updatedAt: '2026-10-16T10:00:00.000Z',
+            parcels: [],
+            revisions: [
+              {
+                field: 'hesap',
+                oldValue: null,
+                newValue: { mod: 'imarsiz', xMaxYuzde: 73, yapilamaz: false, arsaSahibiDaire: null },
+                changedAt: '2026-10-16T10:00:00.000Z',
+                channel: 'whatsapp',
+              },
+            ],
+          },
+        ],
+      }),
+    })
+    render(<AkifProjelerPage />)
+    await waitFor(() => expect(screen.getByTestId('revizyon')).toBeInTheDocument())
+    const row = screen.getByTestId('revizyon')
+    expect(row).toHaveTextContent('Hesap')
+    expect(row).toHaveTextContent('imarsiz · en fazla %73 arsa payı')
+    expect(row.textContent).not.toContain('[object Object]')
+  })
+
   it('proje yoksa yönlendirici boş durum metni gösterir', async () => {
     fetchMock.mockResolvedValue({ ok: true, json: async () => ({ projects: [] }) })
     render(<AkifProjelerPage />)
