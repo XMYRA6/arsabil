@@ -69,12 +69,12 @@ Pilot il başına örnek sayıları:
 ```sql
 SELECT il, ilce, mahalle, scope, "sampleCount"
 FROM "KonutFiyatStat"
-WHERE il IN ('İstanbul', 'Ankara', 'İzmir', 'Trabzon')
+WHERE il IN ('ISTANBUL', 'ANKARA', 'IZMIR', 'TRABZON')
 ORDER BY il, scope, "sampleCount" DESC
 LIMIT 50;
 ```
 
-(`il` değerlerinin yazımı `MarketListing`'deki normalize edilmiş adla aynıdır; eşleşmezse `SELECT DISTINCT il FROM "KonutFiyatStat";` ile gerçek yazımı gör.)
+(`il`/`ilce`/`mahalle` değerleri `normalizeAreaName` ile büyük harf yazılır (İ→I, ı→i, sonra büyük harf; ğ/ş/ç/ö/ü korunur): örn. `ISTANBUL`, `IZMIR`, mahalle `UĞURLU`. Beklenmedik sonuçta `SELECT DISTINCT il FROM "KonutFiyatStat";` ile gerçek yazımı gör.)
 
 ## Sonuç
 
@@ -82,9 +82,9 @@ Taramadan sonra doldurulacak:
 
 | il | ilan sayısı | KonutFiyatStat satır sayısı | tarih |
 | --- | --- | --- | --- |
-| İstanbul |  |  |  |
+| İstanbul (ISTANBUL) |  |  |  |
 | Ankara |  |  |  |
-| İzmir |  |  |  |
+| İzmir (IZMIR) |  |  |  |
 | Trabzon |  |  |  |
 
 ## Bilinen sınırlamalar
