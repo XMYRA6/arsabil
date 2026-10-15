@@ -6,12 +6,22 @@ Pilot illerde (İstanbul, Ankara, İzmir, Trabzon) satılık **konut** ilanları
 
 ## UYARI: bu runbook veritabanına YAZAR
 
-Hem `crawl` hem `prices:konut`, `DATABASE_URL` neyi gösteriyorsa **oraya yazar** (`MarketListing`, `CrawlRun`, `KonutFiyatStat`). Yalnızca proje sahibinin onayladığı bir veritabanına karşı çalıştır. Çalıştırmadan önce `echo $DATABASE_URL` ile hedefi doğrula.
+Hem `crawl` hem `prices:konut`, `DATABASE_URL` neyi gösteriyorsa **oraya yazar** (`MarketListing`, `CrawlRun`, `KonutFiyatStat`). Yalnızca proje sahibinin onayladığı bir veritabanına karşı çalıştır. Çalıştırmadan önce hedefi doğrula, ama parolayı yazdırma (`echo $DATABASE_URL` KULLANMA; çıktı kimlik bilgisi sızdırır). Yalnızca `@` sonrası host/db kısmını göster:
+
+```powershell
+# PowerShell
+($env:DATABASE_URL -split '@')[-1]
+```
+
+```bash
+# POSIX (Git Bash / Linux)
+echo "${DATABASE_URL##*@}"
+```
 
 ## Ön koşullar
 
 - Gerçek bir Postgres (`DATABASE_URL` onaylı DB'yi göstermeli).
-- Her iki migration da hedef DB'de uygulanmış olmalı (`DATABASE_URL=... npx prisma migrate deploy`; durum için `npx prisma migrate status`):
+- Her iki migration da hedef DB'de uygulanmış olmalı (önce `DATABASE_URL`'i ata: PowerShell `$env:DATABASE_URL="..."`, POSIX `export DATABASE_URL="..."`; sonra `npx prisma migrate deploy`; durum için `npx prisma migrate status`):
   - Aşama B: `20261015120000`
   - Aşama C: `20261016120000` (`KonutFiyatStat`)
   - (`MarketListing` migration'ı `20260829120000_add_market_listing` de uygulanmış olmalı.)
@@ -64,21 +74,21 @@ Tek worker, il il, sırayla (paralel çalıştırma yok). Bellek baskısı yüz�
 SELECT scope, count(*) FROM "KonutFiyatStat" GROUP BY scope;
 ```
 
-Pilot il başına örnek sayıları:
+Pilot il ve ölçek başına satır sayısı ve toplam örnek (hiçbir il gizlenmez):
 
 ```sql
-SELECT il, ilce, mahalle, scope, "sampleCount"
+SELECT il, scope, count(*) AS satir, sum("sampleCount") AS ornek
 FROM "KonutFiyatStat"
 WHERE il IN ('ISTANBUL', 'ANKARA', 'IZMIR', 'TRABZON')
-ORDER BY il, scope, "sampleCount" DESC
-LIMIT 50;
+GROUP BY il, scope
+ORDER BY il, scope;
 ```
 
 (`il`/`ilce`/`mahalle` değerleri `normalizeAreaName` ile büyük harf yazılır (İ→I, ı→i, sonra büyük harf; ğ/ş/ç/ö/ü korunur): örn. `ISTANBUL`, `IZMIR`, mahalle `UĞURLU`. Beklenmedik sonuçta `SELECT DISTINCT il FROM "KonutFiyatStat";` ile gerçek yazımı gör.)
 
 ## Sonuç
 
-Taramadan sonra doldurulacak:
+Taramadan sonra doldurulacak. Bu runbook'u yazan uygulayıcı hiçbir komutu çalıştırmadı; aşağıdaki tablo bilerek boştur.
 
 | il | ilan sayısı | KonutFiyatStat satır sayısı | tarih |
 | --- | --- | --- | --- |

@@ -7,7 +7,7 @@ import type { AkifMessage, AkifTurn, ProjectCard, ToolResultCard } from '@/lib/a
 import { runAkifTurn } from '@/lib/ai/akif/orchestrator'
 import type { createAkifModel } from '@/lib/ai/akif/openaiClient'
 import type { createAuditLogger } from '@/lib/ai/akif/audit'
-import { formatRecentProjects } from '@/lib/akifProje/context'
+import { formatRecentProjects, formatPendingPrice, type PendingPrice } from '@/lib/akifProje/context'
 import { renderCard } from './renderCard'
 import { renderFollowup } from './renderFollowup'
 import { renderError } from './renderError'
@@ -23,6 +23,8 @@ export interface WaAkifState {
   awaitingFollowup?: { il: string; ilce: string; mahalle: string }
   /** Bu konuşmada ele alınan projeler (en yeni önce, en çok 5): id'ler tur geçmişinde taşınmadığı için state'te tutulur. */
   recentProjects?: RecentProject[]
+  /** Kullanıcı onayı bekleyen fiyat tahmini (price_estimate kartından); fact_saved/calculated/price_unavailable ile temizlenir. */
+  pendingPrice?: PendingPrice
 }
 
 export interface RecentProject {
@@ -44,6 +46,40 @@ function readRecentProjects(raw: unknown): RecentProject[] {
     if (out.length >= MAX_RECENT_PROJECTS) break
   }
   return out
+}
+
+const posNum = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : null)
+
+/** Kart verisi veya DB'den gelen ham değerden güvenli PendingPrice üretir; şekil bozuksa null. */
+function readPendingPrice(raw: unknown): PendingPrice | null {
+  if (!raw || typeof raw !== 'object') return null
+  const o = raw as Record<string, unknown>
+  const projectId = str(o.projectId)
+  const pr = o.parsel && typeof o.parsel === 'object' ? (o.parsel as Record<string, unknown>) : null
+  const il = str(pr?.il)
+  const ilce = str(pr?.ilce)
+  const mahalle = str(pr?.mahalle)
+  const ada = str(pr?.ada)
+  const parsel = str(pr?.parsel)
+  const daireM2 = posNum(o.daireM2)
+  const tahminiFiyatTL = posNum(o.tahminiFiyatTL)
+  if (!projectId || !il || !ilce || !mahalle || !ada || !parsel || daireM2 === null || tahminiFiyatTL === null) return null
+  return { projectId, parsel: { il, ilce, mahalle, ada, parsel }, daireM2, tahminiFiyatTL }
+}
+
+/** Bu turun kartına göre bekleyen fiyatı günceller: price_estimate yeniler; fact_saved/calculated/price_unavailable temizler. */
+function nextPendingPrice(prev: PendingPrice | undefined, card: ToolResultCard | undefined): PendingPrice | undefined {
+  if (!card || card.kind !== 'project') return prev
+  switch ((card as ProjectCard).op) {
+    case 'price_estimate':
+      return readPendingPrice(card.data) ?? undefined
+    case 'fact_saved':
+    case 'calculated':
+    case 'price_unavailable':
+      return undefined
+    default:
+      return prev
+  }
 }
 
 /** Bu turun proje kartından (varsa) yeni girdiler çıkarır; yeniler başa, eskiler arkaya, id ile tekilleştirilir. */
@@ -91,6 +127,7 @@ const stateFor = (state: WaAkifState, history: AkifMessage[], awaitingFollowup?:
   history,
   ...(awaitingFollowup ? { awaitingFollowup } : {}),
   ...(state.recentProjects?.length ? { recentProjects: state.recentProjects } : {}),
+  ...(state.pendingPrice ? { pendingPrice: state.pendingPrice } : {}),
 })
 
 export interface AkifHandleStore {
@@ -129,6 +166,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
     history: Array.isArray(rawState?.history) ? rawState.history : [],
     awaitingFollowup: rawState?.awaitingFollowup,
     recentProjects: readRecentProjects(rawState?.recentProjects),
+    ...(readPendingPrice(rawState?.pendingPrice) ? { pendingPrice: readPendingPrice(rawState?.pendingPrice) as PendingPrice } : {}),
   }
 
   // 2. Idempotency — Meta retry'ları tekrar işlenmez.
@@ -194,7 +232,8 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
     console.error('[wa-akif] memory context', e)
   }
   const recentBlock = formatRecentProjects(state.recentProjects ?? [])
-  const extraSystemPrompt = [deps.toolPolicy, memoryContext, recentBlock].filter(Boolean).join('\n\n')
+  const pendingBlock = formatPendingPrice(state.pendingPrice)
+  const extraSystemPrompt = [deps.toolPolicy, memoryContext, recentBlock, pendingBlock].filter(Boolean).join('\n\n')
   let turn: AkifTurn
   try {
     turn = await runAkifTurn(
@@ -251,7 +290,7 @@ export async function runWhatsappAkifTurn(msg: InboundMessage, deps: AkifHandleD
   await deps.store.saveConversation(
     msg.from,
     stateFor(
-      { ...state, recentProjects: mergeRecentProjects(state.recentProjects ?? [], card) },
+      { ...state, recentProjects: mergeRecentProjects(state.recentProjects ?? [], card), pendingPrice: nextPendingPrice(state.pendingPrice, card) },
       newHistory,
       newAwaitingFollowup,
     ),

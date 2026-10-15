@@ -410,4 +410,76 @@ describe('runWhatsappAkifTurn — proje kartı (5c)', () => {
       expect(prompt).not.toContain('id=5')
     })
   })
+
+  describe('pendingPrice — onay turunda fiyat verisi taşınır', () => {
+    const PRICE = {
+      projectId: 'p1',
+      daireM2: 150,
+      tahminiFiyatTL: 7_000_000,
+      parsel: { il: 'TRABZON', ilce: 'AKCAABAT', mahalle: 'UĞURLU', ada: '101', parsel: '5' },
+    }
+    const estimate = () => ({ ...TURN, tool_result: card('price_estimate', PRICE) })
+
+    it('price_estimate state e yazar; sonraki turun extraSystemPrompt unda blok görünür', async () => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce(estimate())
+      await c.say('fiyat')
+      expect(c.state().pendingPrice).toEqual({
+        projectId: 'p1', parsel: PRICE.parsel, daireM2: 150, tahminiFiyatTL: 7_000_000,
+      })
+      await c.say('evet')
+      const prompt: string = runAkifTurnMock.mock.calls[1][0].extraSystemPrompt
+      expect(prompt).toContain('BEKLEYEN FİYAT TAHMİNİ')
+      expect(prompt).toContain('tahminiFiyatTL=7000000')
+      expect(prompt).toContain('ada=101 parsel=5')
+    })
+
+    it.each(['fact_saved', 'calculated', 'price_unavailable'])('%s kartı temizler', async (op) => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce(estimate())
+      await c.say('fiyat')
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card(op, { projectId: 'p1' }) })
+      await c.say('evet')
+      expect(c.state().pendingPrice).toBeUndefined()
+    })
+
+    it('yeni price_estimate öncekini değiştirir; ilgisiz kartlar korur', async () => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce(estimate())
+      await c.say('fiyat')
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('not_found') })
+      await c.say('x')
+      expect(c.state().pendingPrice!.tahminiFiyatTL).toBe(7_000_000)
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('price_estimate', { ...PRICE, tahminiFiyatTL: 8_000_000 }) })
+      await c.say('yeniden')
+      expect(c.state().pendingPrice!.tahminiFiyatTL).toBe(8_000_000)
+    })
+
+    it('DURDUR ve abone-daveti erken dönüşleri taşır', async () => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce(estimate())
+      await c.say('fiyat')
+      await c.say('DURDUR')
+      expect(c.state().pendingPrice?.projectId).toBe('p1')
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: { kind: 'parcel', status: 'resolved', dto: DTO, siteUrl: 'https://x' } })
+      await c.say('parsel')
+      expect(c.state().pendingPrice).toBeDefined() // ilgisiz kart korur
+      await c.say('evet') // abonelik evet erken dönüşü
+      expect(c.state().pendingPrice?.projectId).toBe('p1')
+    })
+
+    it('bozuk saklı pendingPrice yok sayılır', async () => {
+      for (const bad of [{ projectId: 'p1' }, { ...PRICE, daireM2: 0 }, { ...PRICE, tahminiFiyatTL: '7' }, { ...PRICE, parsel: { il: 'x' } }, 'x', null]) {
+        runAkifTurnMock.mockReset().mockResolvedValue(TURN)
+        const { deps } = makeDeps({
+          store: {
+            loadConversation: jest.fn().mockResolvedValue({ state: { history: [], pendingPrice: bad }, lastMessageId: 'wamid.0' }),
+            saveConversation: jest.fn(),
+          },
+        })
+        await runWhatsappAkifTurn(msg({ messageId: 'wamid.1' }), deps)
+        expect(runAkifTurnMock.mock.calls[0][0].extraSystemPrompt).not.toContain('BEKLEYEN')
+      }
+    })
+  })
 })
