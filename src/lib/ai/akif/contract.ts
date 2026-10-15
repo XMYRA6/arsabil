@@ -76,6 +76,9 @@ export interface ProjectCard {
     | 'not_found'
     | 'rate_limited'
     | 'failed'
+    | 'price_estimate'
+    | 'price_unavailable'
+    | 'calculated'
   data?: Record<string, unknown>
 }
 
