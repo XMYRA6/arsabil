@@ -39,4 +39,13 @@ describe('AKIF_WHATSAPP_PROJECT_POLICY', () => {
       expect(p).toContain(k)
     }
   })
+
+  it('aynı turda iki araç ima eden ifade yok; yapilamaz ve xMaxYuzde null kuralları', () => {
+    const p = AKIF_WHATSAPP_PROJECT_POLICY
+    expect(p).not.toContain('rememberFact ile kaydet, calculateProject çağır')
+    expect(p).not.toMatch(/rememberFact[^.\n]*,\s*calculateProject çağır/)
+    expect(p).toContain("calculateProject'i bir sonraki turda çağır")
+    expect(p).toContain('satirlar dahil hiçbir yüzde, pay veya daire sayısı anlatma')
+    expect(p).toContain('null ise hiç yüzde verme')
+  })
 })
