@@ -74,3 +74,18 @@ Gerçek Meta webhook + gerçek telefon + gerçek ArsaBil hesabı gerektirir. **�
 - [ ] Aynı ay içinde iki proje varsa ("Ocak'taki proje") → Akif adayları listeler, tahmin etmez
 - [ ] 180+ gün önce kaydedilmiş bir emsal/imar için (DB'de `recordedAt` geriye çekerek simüle et) → Akif tarihiyle birlikte "hâlâ geçerli mi?" diye sorar; "evet" → `recordedAt` tazelenir, yeni satır açılmaz; taze olguyu tekrar SORMAZ
 - [ ] Web: Dashboard → "Akif Projelerim" → aynı projeler ve revizyon geçmişi (WhatsApp kanal etiketiyle) görünür
+
+## Akif-5c Aşama C (Bölge daire fiyatı ve hesap)
+
+Gerçek Meta webhook + gerçek telefon + gerçek ArsaBil hesabı gerektirir. **Ön koşul:** hem Aşama B (`20261015120000`) hem Aşama C (`20261016120000`) migration'ı `prisma migrate deploy` ile uygulanmış olmalı; pilot il istatistiği `docs/akif/konut-tarama-pilot.md` runbook'uyla üretilmiş olmalı (`KonutFiyatStat` dolu). Akif her turda en fazla bir araç çağırır: fiyat onayı ile hesap ayrı mesajlardadır.
+
+- [ ] Bağlı numaradan pilot ilde parsel + proje kur; "imarı bilmiyorum" de → Akif daire fiyatını (bölge, m², yaklaşık TL, ilan notu) sorar, "doğru mu?" der
+- [ ] "Evet" de → `ParselOlgu`'da `daireFiyati` (source `ilan`) oluşur; Akif fiyatın kaydedildiğini söyleyip "Hesaplayayım mı?" diye sorar (aynı turda hesap YOK)
+- [ ] "Evet" de (sonraki mesaj) → hesap çalışır; Akif en fazla % arsa payını söyler, daire sayısı VERMEZ
+- [ ] Fiyatı düzelt ("hayır 6 milyon") → olgu `kullanici` kaynaklı yeni değerle kaydolur; sonraki mesajda hesap yenilenir
+- [ ] Pilot dışı bölgede aynı akış → Akif tahmin sunmaz, fiyatı sorar
+- [ ] Kat/emsal ver → tam hesap: toplam daire, arsa sahibi daire sayısı, piyasa değeri
+- [ ] Aşırı yüksek birim maliyet ver → "bu fiyatla yapılamaz", negatif yüzde yok
+- [ ] `daireFiyati` `recordedAt`'ı 46+ gün geriye çek → Akif tarihiyle teyit ister
+- [ ] Aynı hesabı tekrar iste → `ProjeRevizyon`'a ikinci `hesap` satırı EKLENMEZ, `ProjeKarti.result` günceldir
+- [ ] 20 Ekim senaryosu: "15 Ekim'deki projeyi hatırlıyor musun?" → özet hesabı da içerir; web "Akif Projelerim"de `Hesap` satırı okunur görünür
