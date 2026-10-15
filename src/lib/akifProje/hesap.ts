@@ -78,6 +78,11 @@ export function computeProjectEstimate(i: EstimateInput): EstimateResult {
     varsayimlar.push('ortalama daire = 100 m² (varsayılan)')
   }
 
+  if (i.daireBuyuklugu === undefined && fiyat) varsayimlar.push('daire büyüklüğü = fiyat m²si (' + ad + ' m²)')
+  if (i.birimMaliyet === undefined) varsayimlar.push('birim maliyet = ' + i.defaults.P + ' TL/m² (varsayılan)')
+  if (i.kaliteSinifi === undefined) varsayimlar.push('kalite = orta (varsayılan)')
+  varsayimlar.push('Kâr katsayısı = ' + i.defaults.K)
+
   const daireFiyatiTL = fiyat ? Math.round((fiyat.tl / fiyat.m2) * ad) : null
 
   let xMaxYuzde: number | null = null
@@ -106,17 +111,20 @@ export function computeProjectEstimate(i: EstimateInput): EstimateResult {
     i.defaults,
   )
   const satirlar: EstimateRow[] = card.rows.map((r, idx) => {
-    const daire = r.arsaSahibiDaireSayisi === null ? null : Math.round(r.arsaSahibiDaireSayisi * 10) / 10
+    const ham = r.arsaSahibiDaireSayisi
+    const daire = ham === null ? null : Math.round(ham * 10) / 10
     return {
       muteahhitYuzde: muteahhitPaylari[idx],
       arsaSahibiYuzde: 100 - muteahhitPaylari[idx],
       arsaSahibiDaire: daire,
       arsaSahibiDegerTL: r.arsaSahibiDegeriTL === null ? null : Math.round(r.arsaSahibiDegeriTL),
-      piyasaDegerTL: daire !== null && daireFiyatiTL !== null ? Math.round(daire * daireFiyatiTL) : null,
+      piyasaDegerTL: ham !== null && daireFiyatiTL !== null ? Math.round(ham * daireFiyatiTL) : null,
     }
   })
   // card.defaultsUsed: birim maliyet / kalite varsayımları (daire m² zaten yukarıda yönetildi).
-  varsayimlar.push(...card.defaultsUsed.filter((d) => !d.startsWith('ortalama daire')), ...card.assumptions)
+  for (const m of [...card.defaultsUsed.filter((d) => !d.startsWith('ortalama daire')), ...card.assumptions]) {
+    if (!varsayimlar.includes(m)) varsayimlar.push(m)
+  }
 
   return {
     ok: true,

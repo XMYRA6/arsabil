@@ -80,3 +80,41 @@ describe('computeProjectEstimate — eksik girdi', () => {
     expect(computeProjectEstimate({ fiyat: FIYAT, defaults }).ok).toBe(true)
   })
 })
+
+describe('computeProjectEstimate — varsayım şeffaflığı', () => {
+  it('imarsız: varsayılan P, orta, K ve fiyat m² notları', () => {
+    const r = computeProjectEstimate({ fiyat: FIYAT, defaults })
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(r.varsayimlar).toEqual(expect.arrayContaining([
+      'daire büyüklüğü = fiyat m²si (150 m²)',
+      'birim maliyet = 10000 TL/m² (varsayılan)',
+      'kalite = orta (varsayılan)',
+      'Kâr katsayısı = 1.25',
+    ]))
+  })
+  it('imarsız: birimMaliyet ve kalite verilirse P/orta notu yok, K notu var', () => {
+    const r = computeProjectEstimate({ daireBuyuklugu: 150, birimMaliyet: 10_000, kaliteSinifi: 'orta', fiyat: FIYAT, defaults })
+    if (!r.ok) throw new Error('beklenmedik')
+    const j = r.varsayimlar.join(' | ')
+    expect(j).not.toMatch(/birim maliyet/)
+    expect(j).not.toMatch(/kalite = orta/)
+    expect(j).not.toMatch(/fiyat m²si/)
+    expect(j).toMatch(/Kâr katsayısı = 1.25/)
+  })
+  it('tam mod: notlar tekrarlanmaz', () => {
+    const r = computeProjectEstimate({ arsaAlani: 1000, emsal: 1.5, daireBuyuklugu: 100, fiyat: { m2: 100, tl: 5_000_000 }, defaults })
+    if (!r.ok) throw new Error('beklenmedik')
+    expect(new Set(r.varsayimlar).size).toBe(r.varsayimlar.length)
+    expect(r.varsayimlar.filter((v) => v.startsWith('birim maliyet')).length).toBe(1)
+    expect(r.varsayimlar.filter((v) => v.startsWith('kalite')).length).toBe(1)
+    expect(r.varsayimlar.filter((v) => v.startsWith('Kâr katsayısı')).length).toBe(1)
+  })
+  it('piyasaDegerTL yuvarlanmamış daire sayısını kullanır', () => {
+    // 1000×1.5/100 = 15 daire; pay %45 -> 6.75 daire (1 ondalıkta 6.7/6.8 gösterilir); 6.75×5M = 33 750 000, yuvarlanmış sayıyla 33.5M/34M olurdu
+    const r = computeProjectEstimate({ arsaAlani: 1000, emsal: 1.5, daireBuyuklugu: 100, arsaSahibiPayiYuzde: 45, fiyat: { m2: 100, tl: 5_000_000 }, defaults })
+    if (!r.ok) throw new Error('beklenmedik')
+    const satir = r.satirlar[0]
+    expect(satir.piyasaDegerTL).toBe(33_750_000)
+    expect(satir.piyasaDegerTL).not.toBe(Math.round((satir.arsaSahibiDaire as number) * 5_000_000))
+  })
+})
