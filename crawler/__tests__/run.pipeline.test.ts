@@ -183,6 +183,33 @@ describe('runCrawl', () => {
     expect(summary.listingsUpserted).toBe(0)
   })
 
+  it('detay sayfası 410/404 (yayından kalkmış ilan) engel sayılmaz: ilan atlanır, tur devam eder', async () => {
+    const { client, rows } = fakeClient()
+    const fetcher = {
+      calls: 0,
+      requestCount: 0,
+      get: async (url: string) =>
+        url.endsWith('/A')
+          ? { html: '<html>gone</html>', status: 410 }
+          : { html: '<div class="searchResultsItem"></div>', status: 200 },
+      close: async () => {},
+    }
+    const deps: RunDeps = {
+      adapter: fakeAdapter,
+      client: client as any,
+      fetcher,
+      geocodeDeps: geoOk,
+      // gerçek detectBlock davranışını taklit eder: 410 sayfasında konteyner yok → blocked
+      detectBlock: ({ httpStatus }) =>
+        httpStatus === 410 ? { blocked: true, reason: 'beklenen konteyner yok' } : { blocked: false, reason: null },
+      now: () => new Date('2026-08-29'),
+    }
+    const summary = await runCrawl({ il: 'trabzon', category: 'arsa', maxPages: 1, dryRun: false }, deps)
+    expect(summary.blocked).toBe(false)
+    expect(summary.listingsUpserted).toBe(1)
+    expect(rows.map((r) => r.sourceListingId)).toEqual(['B'])
+  })
+
   it('dry-run DB yazmaz', async () => {
     const { client, rows } = fakeClient()
     const deps: RunDeps = {

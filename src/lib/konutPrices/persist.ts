@@ -11,7 +11,7 @@ export async function refreshKonutFiyatStats(
 ): Promise<{ written: number; total: number }> {
   const rows = await db.marketListing.findMany({
     where: { listingType: 'konut', status: 'active' },
-    select: { listingType: true, pricePerSqm: true, areaSqm: true, status: true, il: true, ilce: true, mahalle: true },
+    select: { listingType: true, pricePerSqm: true, areaSqm: true, status: true, il: true, ilce: true, mahalle: true, title: true },
   })
   const stats = aggregateKonutPrices(rows as KonutInputRow[])
   let written = 0

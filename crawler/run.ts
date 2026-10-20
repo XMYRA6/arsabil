@@ -200,6 +200,8 @@ export async function runCrawl(args: RunArgs, deps: RunDeps): Promise<RunSummary
           let detail: { html: string; status: number } | null = null
           if (!(args.fast && stub.card)) {
             detail = await deps.fetcher.get(stub.detailUrl)
+            // 404/410: ilan yayından kalkmış (engel değil). seenIds'e girmez → delist doğal akar.
+            if (detail.status === 404 || detail.status === 410) continue
             const db = deps.detectBlock({
               html: detail.html,
               httpStatus: detail.status,

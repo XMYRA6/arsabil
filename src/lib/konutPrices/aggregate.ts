@@ -1,7 +1,8 @@
 // Akif-5c Aşama C — konut (daire) ilanlarından bölge fiyat istatistiği. Saf modül.
 
-import { median, percentile } from '@/lib/areaPrices/stats'
-import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
+// Göreli import: bu modül ts-node CLI'ından (prices:konut) da yüklenir, `@/` orada çözülmez.
+import { median, percentile } from '../areaPrices/stats'
+import { normalizeAreaName } from '../areaPrices/normalizeAreaName'
 
 export interface KonutInputRow {
   listingType: string
@@ -11,6 +12,8 @@ export interface KonutInputRow {
   il: string | null
   ilce: string | null
   mahalle: string | null
+  /** Eski arsa taramalarından 'konut' etiketiyle kalan arsa ilanlarını ayıklamak için. */
+  title?: string | null
 }
 
 export interface KonutFiyatStatRow {
@@ -29,6 +32,7 @@ const MIN_SAMPLE = 3
 const MIN_AREA = 40
 const MAX_AREA = 400
 const MIN_FOR_OUTLIER_TRIM = 20
+const ARSA_TITLE_RE = /arsa|tarla|arazi/
 
 interface Clean { pricePerSqm: number; areaSqm: number; il: string; ilce: string; mahalle: string }
 
@@ -38,6 +42,7 @@ function clean(rows: KonutInputRow[]): Clean[] {
   const out: Clean[] = []
   for (const r of rows) {
     if (r.status !== 'active' || r.listingType !== 'konut') continue
+    if (r.title && ARSA_TITLE_RE.test(r.title.toLocaleLowerCase('tr-TR'))) continue
     if (!finitePositive(r.pricePerSqm) || !finitePositive(r.areaSqm)) continue
     if (r.areaSqm < MIN_AREA || r.areaSqm > MAX_AREA) continue
     if (!r.il) continue

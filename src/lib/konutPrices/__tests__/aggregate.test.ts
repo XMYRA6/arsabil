@@ -18,6 +18,16 @@ describe('aggregateKonutPrices', () => {
     expect(out.find((r) => r.scope === 'il')?.sampleCount).toBe(3)
   })
 
+  it('başlığında arsa/tarla/arazi geçen (eski arsa taramasından konut etiketli) ilanları atar', () => {
+    const rows = [
+      ...many(3, { title: 'Satılık 2+1 Daire' }),
+      row({ title: 'Konut İmarlı Arsa' }), row({ title: 'Villa Arsası' }),
+      row({ title: 'Arsa Konumlu Tarla' }), row({ title: 'Satılık ARAZİ' }),
+    ]
+    const out = aggregateKonutPrices(rows)
+    expect(out.find((r) => r.scope === 'il')?.sampleCount).toBe(3)
+  })
+
   it('üç ölçekte satır üretir; üst ölçeklerde ilce/mahalle boş string', () => {
     const out = aggregateKonutPrices(many(3))
     expect(out.map((r) => [r.scope, r.il, r.ilce, r.mahalle])).toEqual([

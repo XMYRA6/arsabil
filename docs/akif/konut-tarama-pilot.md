@@ -88,14 +88,16 @@ ORDER BY il, scope;
 
 ## Sonuç
 
-Taramadan sonra doldurulacak. Bu runbook'u yazan uygulayıcı hiçbir komutu çalıştırmadı; aşağıdaki tablo bilerek boştur.
+Pilot koşusu 2026-10-17, yerel dev DB (Docker `arsabil_postgres_dev`, 5433). Her il `--max-pages=3` (Trabzon 5); İstanbul ilk denemede bellek baskısıyla kesildi, ikinci koşuda tamamlandı. Ardından `npm run prices:konut`: 58 satır.
 
-| il | ilan sayısı | KonutFiyatStat satır sayısı | tarih |
+| il | yazılan daire ilanı | KonutFiyatStat (il / ilçe / mahalle) | il medyan TL/m² |
 | --- | --- | --- | --- |
-| İstanbul (ISTANBUL) |  |  |  |
-| Ankara |  |  |  |
-| İzmir (IZMIR) |  |  |  |
-| Trabzon |  |  |  |
+| İstanbul (ISTANBUL) | 91 | 1 / 11 / 2 | ~54K |
+| Ankara | 94 | 1 / 7 / 5 | ~38.3K |
+| İzmir (IZMIR) | 87 | 1 / 8 / 2 | ~53.1K |
+| Trabzon | 146 | 1 / 5 / 14 | ~37.0K |
+
+Koşuda bulunan iki hata düzeltildi: detay sayfası 404/410 dönen (yayından kalkmış) ilan taramayı "engel" diye kesiyordu (`crawler/run.ts`); eski arsa taramalarından `konut` etiketli kalan arsa ilanları istatistiği kirletiyordu (`aggregate.ts` başlıkta arsa/tarla/arazi geçeni atar). Hızlı mod CLI'dan açılamadığı için tarama ilan başına detay çeker (yavaş, ~25 ilan/10 dk).
 
 ## Bilinen sınırlamalar
 

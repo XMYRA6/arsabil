@@ -29,6 +29,6 @@ describe('refreshKonutFiyatStats', () => {
     await refreshKonutFiyatStats(db, NOW)
     const arg = (db.marketListing.findMany as jest.Mock).mock.calls[0][0]
     expect(arg.where).toEqual({ listingType: 'konut', status: 'active' })
-    expect(Object.keys(arg.select).sort()).toEqual(['areaSqm', 'il', 'ilce', 'listingType', 'mahalle', 'pricePerSqm', 'status'])
+    expect(Object.keys(arg.select).sort()).toEqual(['areaSqm', 'il', 'ilce', 'listingType', 'mahalle', 'pricePerSqm', 'status', 'title'])
   })
 })
