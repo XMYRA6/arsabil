@@ -42,8 +42,13 @@ const show = (v: unknown) => {
       if (o.yapilamaz === true) return `${o.mod} · bu fiyatla yapılamaz`
       const parts = [String(o.mod)]
       if (typeof o.xMaxYuzde === 'number') parts.push(`en fazla %${o.xMaxYuzde} arsa payı`)
-      if (typeof o.arsaSahibiDaire === 'number') parts.push(`${o.arsaSahibiDaire} daire`)
-      if (typeof o.daireFiyatiTL === 'number') parts.push(`daire ${o.daireFiyatiTL.toLocaleString('tr-TR')} TL`)
+      // asiyor: WhatsApp'ın kendisinin "uygulanabilir sunma" dediği senaryo — dashboard'da
+      // da aynı sayıları ulaşılabilir gibi göstermemek için ayrı dallandı (review bulgusu).
+      if (o.asiyor === true) parts.push('bu paylaşım bu fiyat ve maliyetle uygulanabilir değil')
+      else {
+        if (typeof o.arsaSahibiDaire === 'number') parts.push(`${o.arsaSahibiDaire} daire`)
+        if (typeof o.daireFiyatiTL === 'number') parts.push(`daire ${o.daireFiyatiTL.toLocaleString('tr-TR')} TL`)
+      }
       return parts.join(' · ')
     }
     return JSON.stringify(v)

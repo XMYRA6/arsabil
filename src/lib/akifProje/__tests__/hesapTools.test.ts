@@ -147,6 +147,18 @@ describe('runCalculateProject', () => {
     expect(saved.satirlar[0].asiyor).toBe(satirlar[0].asiyor)
   })
 
+  it('asiyor bayrağı ProjeRevizyon\'un "hesap" özetine de taşınır (review bulgusu — önceden compact() bunu düşürüyordu, dashboard WhatsApp ile çelişiyordu)', async () => {
+    const { db, projeRevizyonCreate } = makeDb(
+      project({
+        inputs: { arsaAlani: 1000, emsal: 1.5, daireBuyuklugu: 100, arsaSahibiPayiYuzde: 40, birimMaliyet: 25_000 },
+        olgular: [fresh('daireFiyati', { m2: 100, tl: 5_000_000 })],
+      }),
+    )
+    await runCalculateProject(db, args, NOW)
+    const rev = (projeRevizyonCreate.mock.calls[0] as unknown as [{ data: { newValue: { asiyor: boolean } } }])[0].data
+    expect(rev.newValue.asiyor).toBe(true)
+  })
+
   it('imarsız modda hesaplar, result yazar ve revizyon açar', async () => {
     const { db, projeKartiUpdate, projeRevizyonCreate } = makeDb(
       project({ inputs: { daireBuyuklugu: 150 }, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_000 })] }),

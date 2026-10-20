@@ -73,6 +73,42 @@ describe('Akif Projelerim', () => {
     expect(row.textContent).not.toContain('[object Object]')
   })
 
+  it('asiyor true iken daire/fiyat rakamlarını ulaşılabilir gibi göstermez (review bulgusu — WhatsApp ile çelişmesin)', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        projects: [
+          {
+            id: 'pk1',
+            name: 'Maçka arsası',
+            inputs: {},
+            createdAt: '2026-10-15T10:00:00.000Z',
+            updatedAt: '2026-10-16T10:00:00.000Z',
+            parcels: [],
+            revisions: [
+              {
+                field: 'hesap',
+                oldValue: null,
+                newValue: {
+                  mod: 'tam', xMaxYuzde: 70, yapilamaz: false,
+                  arsaSahibiDaire: 3, daireFiyatiTL: 4500000, asiyor: true,
+                },
+                changedAt: '2026-10-16T10:00:00.000Z',
+                channel: 'whatsapp',
+              },
+            ],
+          },
+        ],
+      }),
+    })
+    render(<AkifProjelerPage />)
+    await waitFor(() => expect(screen.getByTestId('revizyon')).toBeInTheDocument())
+    const row = screen.getByTestId('revizyon')
+    expect(row).toHaveTextContent('uygulanabilir değil')
+    expect(row).not.toHaveTextContent('3 daire')
+    expect(row).not.toHaveTextContent('4.500.000')
+  })
+
   it('proje yoksa yönlendirici boş durum metni gösterir', async () => {
     fetchMock.mockResolvedValue({ ok: true, json: async () => ({ projects: [] }) })
     render(<AkifProjelerPage />)

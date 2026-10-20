@@ -455,6 +455,25 @@ describe('runWhatsappAkifTurn — proje kartı (5c)', () => {
       expect(c.state().pendingPrice!.tahminiFiyatTL).toBe(8_000_000)
     })
 
+    it.each(['summary', 'updated'])('konuşma BAŞKA bir projeye kayarsa (%s farklı projectId) bekleyen fiyat temizlenir (review bulgusu)', async (op) => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce(estimate())
+      await c.say('fiyat')
+      expect(c.state().pendingPrice?.projectId).toBe('p1')
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card(op, { projectId: 'p2', ad: 'Başka proje' }) })
+      await c.say('başka projeye bak')
+      expect(c.state().pendingPrice).toBeUndefined()
+    })
+
+    it('aynı projeye updated kartı gelirse bekleyen fiyat korunur', async () => {
+      const c = conversation()
+      runAkifTurnMock.mockResolvedValueOnce(estimate())
+      await c.say('fiyat')
+      runAkifTurnMock.mockResolvedValueOnce({ ...TURN, tool_result: card('updated', { projectId: 'p1' }) })
+      await c.say('aynı projeyi güncelle')
+      expect(c.state().pendingPrice?.projectId).toBe('p1')
+    })
+
     it('DURDUR ve abone-daveti erken dönüşleri taşır', async () => {
       const c = conversation()
       runAkifTurnMock.mockResolvedValueOnce(estimate())

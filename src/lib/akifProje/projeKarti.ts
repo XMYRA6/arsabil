@@ -1,7 +1,7 @@
 // Akif-5c — Proje Kartı: oluştur / güncelle (revizyon günlüğüyle) / bul / özetle.
 // Sahiplik filtresi (userId) HER sorgunun parçasıdır.
 
-import type { Prisma, PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import { normalizeAreaName } from '@/lib/areaPrices/normalizeAreaName'
 import { INPUT_KEYS, type Channel, type CreateProjectInput, type InputChange, type ParcelRef, type ProjectInputs } from './types'
 import { applyChanges, diffInputs } from './validation'
@@ -74,7 +74,15 @@ export function updateProject(db: PrismaClient, a: UpdateProjectArgs, now: Date)
 
     await tx.projeKarti.update({
       where: { id: card.id },
-      data: { inputs: applyChanges(oldInputs, diff) as Prisma.InputJsonValue, ...(nameChanged ? { name: a.name } : {}) },
+      data: {
+        inputs: applyChanges(oldInputs, diff) as Prisma.InputJsonValue,
+        ...(nameChanged ? { name: a.name } : {}),
+        // Hesaba giren bir girdi değiştiyse önbelleklenmiş sonuç artık güncel girdileri
+        // yansıtmıyor (review bulgusu) — bayat bir xMaxYuzde/yapilamaz'ın "değişiklikYok"
+        // sanılıp sessizce güncel gibi kullanılmaması için temizlenir, sıradaki hesapta
+        // doğal olarak yeniden üretilir.
+        ...(diff.length ? { result: Prisma.DbNull } : {}),
+      },
     })
     const rows: Prisma.ProjeRevizyonCreateManyInput[] = diff.map((d) => ({
       projeKartiId: card.id,

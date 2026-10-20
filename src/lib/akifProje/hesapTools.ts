@@ -87,6 +87,7 @@ function compact(result: unknown): {
   arsaSahibiDaire: unknown
   daireFiyatiTL: unknown
   toplamDaire: unknown
+  asiyor: unknown
 } | null {
   if (result === null || typeof result !== 'object') return null
   const r = result as Record<string, unknown>
@@ -98,6 +99,9 @@ function compact(result: unknown): {
     arsaSahibiDaire: satirlar[0]?.arsaSahibiDaire ?? null,
     daireFiyatiTL: r.daireFiyatiTL ?? null,
     toplamDaire: r.toplamDaire ?? null,
+    // satirlar[0].asiyor — review bulgusu: bu alan önceden düşüyordu, dashboard'un
+    // WhatsApp politikasıyla (asiyor true ise uygulanabilir sunma) çelişmemesi için eklendi.
+    asiyor: satirlar[0]?.asiyor ?? null,
   }
 }
 

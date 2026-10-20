@@ -67,9 +67,12 @@ function readPendingPrice(raw: unknown): PendingPrice | null {
   return { projectId, parsel: { il, ilce, mahalle, ada, parsel }, daireM2, tahminiFiyatTL }
 }
 
-/** Bu turun kartına göre bekleyen fiyatı günceller: price_estimate yeniler; fact_saved/calculated/price_unavailable temizler. */
+/** Bu turun kartına göre bekleyen fiyatı günceller: price_estimate yeniler; fact_saved/calculated/price_unavailable temizler;
+ * konuşma BAŞKA bir projeye kayarsa (özet/oluşturma/güncelleme farklı bir projectId taşıyorsa) de temizler — yoksa eski
+ * projenin bekleyen fiyatı, aradaki turlarda hiç ilgisi olmayan bir "evet"e sahte onay olarak bağlanabilirdi (review bulgusu). */
 function nextPendingPrice(prev: PendingPrice | undefined, card: ToolResultCard | undefined): PendingPrice | undefined {
   if (!card || card.kind !== 'project') return prev
+  const data = card.data as Record<string, unknown> | undefined
   switch ((card as ProjectCard).op) {
     case 'price_estimate':
       return readPendingPrice(card.data) ?? undefined
@@ -77,6 +80,13 @@ function nextPendingPrice(prev: PendingPrice | undefined, card: ToolResultCard |
     case 'calculated':
     case 'price_unavailable':
       return undefined
+    case 'summary':
+    case 'created':
+    case 'updated': {
+      const activeId = str(data?.projectId)
+      if (prev && activeId && activeId !== prev.projectId) return undefined
+      return prev
+    }
     default:
       return prev
   }

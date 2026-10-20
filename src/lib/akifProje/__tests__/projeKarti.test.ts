@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@prisma/client'
 import { createProject, updateProject, findProjects, getProjectSummary } from '../projeKarti'
 
 const NOW = new Date('2026-10-15T12:00:00Z')
@@ -99,13 +99,27 @@ describe('updateProject', () => {
     })
     expect(tx.projeKarti.update).toHaveBeenCalledWith({
       where: { id: 'pk1' },
-      data: { inputs: { arsaAlani: 850, arsaSahibiPayiYuzde: 50 } },
+      data: { inputs: { arsaAlani: 850, arsaSahibiPayiYuzde: 50 }, result: Prisma.DbNull },
     })
     expect(tx.projeRevizyon.createMany).toHaveBeenCalledWith({
       data: [
         { projeKartiId: 'pk1', field: 'arsaSahibiPayiYuzde', oldValue: 40, newValue: 50, changedAt: NOW, channel: 'whatsapp', note: null },
       ],
     })
+  })
+
+  it('girdi değişince önbelleklenmiş hesap sonucu temizlenir (review bulgusu — bayat xMaxYuzde/yapilamaz güncel sanılmasın)', async () => {
+    const { db, tx } = makeDb()
+    tx.projeKarti.findFirst.mockResolvedValue(card)
+    await updateProject(db, { userId: 'u1', projectId: 'pk1', changes: { emsal: 1.5 }, channel: 'whatsapp' }, NOW)
+    expect(tx.projeKarti.update.mock.calls[0][0].data.result).toBe(Prisma.DbNull)
+  })
+
+  it('sadece isim değişirse (girdi diff yoksa) sonuç temizlenmez', async () => {
+    const { db, tx } = makeDb()
+    tx.projeKarti.findFirst.mockResolvedValue(card)
+    await updateProject(db, { userId: 'u1', projectId: 'pk1', changes: {}, name: 'Yeni ad', channel: 'whatsapp' }, NOW)
+    expect(tx.projeKarti.update.mock.calls[0][0].data).not.toHaveProperty('result')
   })
 
   it('değişiklik yoksa sessiz no-op (Review Focus 5)', async () => {
