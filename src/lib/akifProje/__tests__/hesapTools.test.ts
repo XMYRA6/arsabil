@@ -100,6 +100,13 @@ describe('runCalculateProject', () => {
     expect(projeKartiUpdate).not.toHaveBeenCalled()
   })
 
+  it('parseller deterministik sırayla çekilir (review bulgusu — çoklu parselde parseller[0] rastgele olmasın)', async () => {
+    const { db, findFirst } = makeDb(project())
+    await runCalculateProject(db, args, NOW)
+    const call = findFirst.mock.calls[0] as unknown as [{ select: { parseller: { orderBy: unknown } } }]
+    expect(call[0].select.parseller.orderBy).toEqual({ parselDosyasi: { id: 'asc' } })
+  })
+
   it('yazım sahiplikle sınırlı (updateMany where {id,userId}); count!==1 -> not_found, revizyon yok', async () => {
     const m = makeDb(project({ inputs: { daireBuyuklugu: 150 }, olgular: [fresh('daireFiyati', { m2: 150, tl: 7_000_000 })] }))
     const card = await runCalculateProject(m.db, args, NOW)

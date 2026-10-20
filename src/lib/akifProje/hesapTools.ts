@@ -37,6 +37,10 @@ async function loadProject(db: PrismaClient, userId: string, projectId: string):
       inputs: true,
       result: true,
       parseller: {
+        // Determinizm için: join tablosunda sıralanabilir bir alan yok, parselDosyasi.id
+        // (cuid, oluşturulma sırasına yakın) kullanılır — parseller[0] (bölge seçimi için)
+        // her çağrıda aynı parseli döner (review bulgusu — önceden sırasız/rastgele olabiliyordu).
+        orderBy: { parselDosyasi: { id: 'asc' } },
         select: {
           parselDosyasi: {
             select: {

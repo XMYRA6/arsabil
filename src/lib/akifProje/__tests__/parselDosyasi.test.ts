@@ -76,6 +76,22 @@ describe('recordFact', () => {
     })
     expect(tx.parselOlgu.create).not.toHaveBeenCalled()
   })
+
+  it('düşük güvenilirlikli bir teyit, daha yüksek güvenilirlikli mevcut kaynağı EZMEZ (review bulgusu)', async () => {
+    const tx = makeTx()
+    tx.parselOlgu.findFirst.mockResolvedValue({ id: 'o1', value: 1.5, source: 'tkgm' })
+    const r = await recordFact(tx, 'pd1', { key: 'emsal', value: 1.5, source: 'kullanici' }, NOW)
+    expect(r).toEqual({ changed: false })
+    expect(tx.parselOlgu.update).toHaveBeenCalledWith({ where: { id: 'o1' }, data: { recordedAt: NOW } })
+  })
+
+  it('eşit veya daha yüksek güvenilirlikli teyit kaynağı günceller', async () => {
+    const tx = makeTx()
+    tx.parselOlgu.findFirst.mockResolvedValue({ id: 'o1', value: 1.5, source: 'ilan' })
+    const r = await recordFact(tx, 'pd1', { key: 'emsal', value: 1.5, source: 'tkgm' }, NOW)
+    expect(r).toEqual({ changed: false })
+    expect(tx.parselOlgu.update).toHaveBeenCalledWith({ where: { id: 'o1' }, data: { recordedAt: NOW, source: 'tkgm' } })
+  })
 })
 
 describe('listCurrentFacts', () => {

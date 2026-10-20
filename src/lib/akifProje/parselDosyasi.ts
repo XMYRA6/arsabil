@@ -1,8 +1,12 @@
 // Akif-5c — Parsel Dosyası: parsel başına tek kayıt + tarihli, geçmişi korunan olgular.
 
 import type { Prisma } from '@prisma/client'
-import type { FactInput, ParcelRef } from './types'
+import type { FactInput, FactSource, ParcelRef } from './types'
 import type { FactRow } from './freshness'
+
+/** Kaynak güvenilirlik sırası (yüksekten düşüğe): resmi kayıt > görsel kanıt > kullanıcı beyanı > ilan taraması.
+ * Teyitte (aynı değer tekrar söylendi) daha düşük güvenilirlikli bir kaynak, daha yükseği EZEMEZ (review bulgusu). */
+const SOURCE_PRIORITY: Record<FactSource, number> = { tkgm: 3, goruntu: 2, kullanici: 1, ilan: 0 }
 
 export type Tx = Prisma.TransactionClient
 
@@ -38,10 +42,13 @@ export async function recordFact(
   })
   let changed = true
   if (current && canonicalJson(current.value) === canonicalJson(fact.value)) {
-    // Teyit: aynı değer tekrar söylendi → yeni satır açma, tazele.
+    // Teyit: aynı değer tekrar söylendi → yeni satır açma, tazele. Kaynak yalnız
+    // eşit-ya-da-daha-güvenilirse değişir — düşük güvenilirlikli bir teyit (ör.
+    // WhatsApp'ta "evet") TKGM/görsel kanıtının provenance'ını SİLMEZ.
+    const keepSource = SOURCE_PRIORITY[fact.source] < SOURCE_PRIORITY[current.source as FactSource]
     await tx.parselOlgu.update({
       where: { id: current.id },
-      data: { recordedAt: now, source: fact.source },
+      data: { recordedAt: now, ...(keepSource ? {} : { source: fact.source }) },
     })
     changed = false
   } else {
