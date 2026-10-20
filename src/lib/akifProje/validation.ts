@@ -56,9 +56,12 @@ export function validateInputs(raw: unknown): { ok: true; inputs: ProjectInputs 
   return { ok: true, inputs: out }
 }
 
-/** Kontrol karakterleri (NUL, satır sonu, tab…) tek boşluğa çevrilir; Postgres TEXT/JSONB NUL'u reddeder. */
+/** Kontrol karakterleri (NUL, satır sonu, tab… + C1 aralığı + U+2028/2029 satır/paragraf ayıracı)
+ * tek boşluğa çevrilir; Postgres TEXT/JSONB NUL'u reddeder, ayrıca sistem promptuna enjekte
+ * edilen metinde sahte satır üretip "HESAP:"/"TAZE/BAYAT" gibi satırları taklit etmesini önler
+ * (review bulgusu — önceki hal yalnız \x85'i kapsayıp C1'in geri kalanını ve U+2028/2029'u atlıyordu). */
 export const cleanText = (s: string): string =>
-  s.replace(/[\x00-\x1f\x7f\x85]+/g, ' ').replace(/\s+/g, ' ').trim()
+  s.replace(/[\x00-\x1f\x7f-\x9f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim()
 
 const trimmedText = (v: unknown, max: number): string | null => {
   if (typeof v !== 'string') return null

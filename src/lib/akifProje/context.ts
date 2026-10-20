@@ -10,9 +10,10 @@ const MAX_VALUE_CHARS = 60
 
 const day = (d: Date) => istanbulDateString(d)
 
-// Kullanıcı kaynaklı metinler system prompt satırı sahteleyemesin.
+// Kullanıcı kaynaklı metinler system prompt satırı sahteleyemesin (validation.ts'teki
+// cleanText ile aynı sözleşme — C1 aralığı + U+2028/2029 dahil, bkz. oradaki not).
 const clean = (s: string) =>
-  String(s).replace(/[\x00-\x1f\x7f\x85]+/g, ' ').replace(/\s+/g, ' ').trim()
+  String(s).replace(/[\x00-\x1f\x7f-\x9f\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim()
 
 type ParcelRef = { il: string; ilce: string; mahalle: string; ada: string; parsel: string }
 const parcelLabel = (x: ParcelRef) =>

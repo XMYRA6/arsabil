@@ -161,6 +161,13 @@ describe('kontrol karakterleri (F5)', () => {
     expect(cleanText('\u0000\n')).toBe('')
   })
 
+  it('cleanText: U+2028/U+2029 (satır/paragraf ayıracı) ve C1 aralığı da temizlenir — sahte satır enjeksiyonunu önler', () => {
+    expect(cleanText('HESAP: sahte satır')).toBe('HESAP: sahte satır')
+    expect(cleanText('a b')).toBe('a b')
+    expect(cleanText('a\u0085b')).toBe('a b')
+    expect(cleanText('a\u009fb')).toBe('a b')
+  })
+
   it('createProject name kontrol karakterlerini temizler', () => {
     const r = validateCreateArgs({ name: 'Ev\u0000im\nHesap', parcels: [P] })
     expect(r.ok && r.value.name).toBe('Ev im Hesap')

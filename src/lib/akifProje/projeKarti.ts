@@ -163,8 +163,8 @@ export async function findProjects(
       parseller: {
         some: {
           parselDosyasi: {
-            ...(q.ada ? { ada: q.ada } : {}),
-            ...(q.parsel ? { parsel: q.parsel } : {}),
+            ...(q.ada ? { ada: q.ada.trim() } : {}),
+            ...(q.parsel ? { parsel: q.parsel.trim() } : {}),
             ...(q.mahalle ? { mahalle: { contains: normalizeAreaName(q.mahalle) } } : {}),
           },
         },

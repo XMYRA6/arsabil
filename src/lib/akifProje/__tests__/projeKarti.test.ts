@@ -166,6 +166,15 @@ describe('findProjects', () => {
     })
   })
 
+  it('ada/parsel baştaki/sondaki boşluk kırpılarak aranır (review bulgusu — model çıktısında rastgele boşluk saklı eşleşmeyi kaçırmasın)', async () => {
+    const { db, tx } = makeDb()
+    await findProjects(db, { userId: 'u1', ada: ' 123 ', parsel: ' 45\t' })
+    const and = tx.projeKarti.findMany.mock.calls[0][0].where.AND
+    expect(and).toContainEqual({
+      parseller: { some: { parselDosyasi: { ada: '123', parsel: '45' } } },
+    })
+  })
+
   it('6 sonuçtan 5\'i döner ve more=true', async () => {
     const { db, tx } = makeDb()
     tx.projeKarti.findMany.mockResolvedValue(['a', 'b', 'c', 'd', 'e', 'f'].map(row))
