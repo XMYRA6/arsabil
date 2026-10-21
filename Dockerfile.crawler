@@ -10,7 +10,8 @@ RUN npm ci --include=dev --ignore-scripts
 
 # Chromium + sistem bagimliliklari (surum package-lock'taki Playwright ile eslesir)
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN npx playwright install --with-deps chromium \n    && rm -rf /var/lib/apt/lists/*
+RUN npx playwright install --with-deps chromium \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY prisma ./prisma
 RUN npx prisma generate
