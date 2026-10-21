@@ -1,0 +1,21 @@
+# Haftalik emlakjet crawler imaji (Coolify Scheduled Task / cron servisi).
+# App imajindan AYRI: Chromium + ts-node + crawler kaynagi gerekir.
+# Surum, package.json'daki @playwright/test ile birebir ayni olmali.
+FROM mcr.microsoft.com/playwright:v1.60.0-jammy
+WORKDIR /app
+ENV NODE_ENV=production CHECKPOINT_DISABLE=1
+
+COPY package*.json ./
+# devDependencies gerekli (ts-node, typescript, @playwright/test)
+RUN npm ci --include=dev --ignore-scripts
+
+COPY prisma ./prisma
+RUN npx prisma generate
+
+COPY tsconfig.json ./
+COPY src ./src
+COPY crawler ./crawler
+COPY scripts ./scripts
+
+# Calistirma: DATABASE_URL (prod, ic ag) + istege bagli CRAWL_PROXY_* env'leri
+CMD ["sh", "scripts/crawl-weekly.sh"]
