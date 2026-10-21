@@ -79,3 +79,19 @@ Her dilim ayrı PR/commit; her biri tek başına canlıya çıkabilir.
 - Renk yönü (§5) uygun mu, yoksa marka mavisinde mi kalalım?
 - Hero'da kaydırma-sahnesi mi (daha etkileyici, daha ağır) yoksa tek parça döngüsel animasyon mu (daha hafif)? **Benim önerim: kaydırma-sahnesi, mobilde poster fallback.**
 - Harita tabanı için ücretli bir sağlayıcı (aylık ~$) kabul edilir mi, yoksa yalnız ücretsiz/self-host mu?
+
+## 9. Revizyon 2 (2026-10-22, Emre geri bildirimi) — KARARLAR
+
+Emre'nin geri bildirimi: tasarım güzel ama (1) light tema görülmeli ve **varsayılan light** olacak (mobil uygulamada isteyen dark seçer), (2) arsa çizimi edermi'nin gerisinde, daha iyi illüstrasyon + animasyon + **hava** istiyor, (3) "Kat karşılığı – Arsa değerleme" eyebrow yazısı kötü görünüyor, daha güçlü bir yapı, (4) **TKGM reklam olarak kullanılmamalı** (hukuki risk), (5) edermi'deki gibi il sınırlı tıklanabilir Türkiye haritası, (6) arazi türüne göre (arsa/tarla/villa…) farklı görseller, (7) ana sayfada Akif + WhatsApp (mock numara) tanıtımı, (8) logo (kendi taslağı: eğik çizgi + üçgen) değerlendirme/iyileştirme, (9) palet ve kaydırma sahnesi önerimle devam.
+
+Kararlar (Figma'da çizildi):
+- **Varsayılan tema AÇIK** ("kâğıt harita" `#F4F1EA`, gökyüzü gradyanı). Koyu tema ikinci seçenek (mobil uygulama/sistem ayarı). Palet §5 aynen onaylandı (Emre "önerin olsun" dedi).
+- **TKGM** hiçbir vitrin metninde/istatistikte/rozette geçmez ("TKGM parsel kaynağı" istatistiği kaldırıldı). Yalnızca arka planda veri kaynağı; alt bilgi "veriler bilgilendirme amaçlıdır, resmi değerleme yerine geçmez". Kod tarafında da UI metinlerinde TKGM markası kullanılmayacak (ayrı denetim işi).
+- **İllüstrasyon sistemi** (izometrik, jeolojik toprak kesiti, parsel sınır kazıkları + bayrak, cam hacim, gölgeler, güneş/bulut): arazi türleri = Arsa (imarlı), Tarla, Villa, Ticari, Bağ-Bahçe, Kat karşılığı. Tür seçici sahneyi değiştirir. Hava durumu: güneşli/bulutlu/yağmurlu/karlı (animasyon fazında).
+- **Ana sayfa yapısı:** Hero (ürün seçici "Arsa Değerleme | Kat Karşılığı" + hızlı hesap formu + sahne) → **Türkiye fiyat haritası** (81 il, il sınırlı, hover ipucu, il sayfasına git) → Ürünler (iki büyük kart + üç mini) → Arazi türleri → **Akif + WhatsApp** (QR, mock numara `+90 850 000 00 00`) → Nasıl çalışır → Footer. Eyebrow yazı kaldırıldı; ürün ayrımı segmented control ile.
+- **Logo: "Parsel A"** (eğik çizgi + amber düzensiz parsel bloğu). Emre'nin yönü korundu; üçgen "konum oku" gibi okunduğu için parsel biçimine çevrildi, taban çizgisi hizalandı, amber eklendi. Alternatifler B (kontur), C (plinth) Figma'da.
+- **Türkiye haritası verisi:** il sınırları GeoJSON (alpers/Turkey-Maps-GeoJSON, lisansı kontrol edilecek) → sadeleştirilmiş SVG (81 path, ~48 KB). Uygulamada il sayfası `/arsa-fiyatlari/[il]` zaten var.
+- **Kaydırma sahnesi v2:** Türkiye (il sınırlı) → il yakınlaşması → seçilen arazi türünün sahnesi → fiyat. Kademeli cihaz desteği (§ Hareket) korunur.
+
+Teknik notlar (plan aşaması): illüstrasyonlar kod tarafında SVG/Three.js; Figma'daki sahneler görsel referanstır. Ağır 3B yerine **izometrik SVG/CSS katmanları + hafif animasyon** (güneş/bulut/ağaç sallanma) yeterli olabilir — plinth'in döndürülebilir 3B modu yalnızca detay sayfasında react-three-fiber ile.
+Açık: harita tabanı sağlayıcısı (ücretli/ücretsiz), GeoJSON lisansı, gerçek WhatsApp numarası ve resmi WhatsApp ikonu/marka kullanım kuralları, hava animasyonlarının bütçesi.
