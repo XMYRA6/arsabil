@@ -1,0 +1,95 @@
+/* ArsaBil "Arazi" paleti. globals.css'ten SONRA yüklenir; eski token adlarını (--bg, --panel, --text …)
+   yeni değerlere eşler, böylece mevcut CSS modülleri adı değiştirmeden yeni görünüme geçer.
+   Kural: açık temada siyah yok, koyu temada koyu yüzeyler. Amber = vurgu/seçili, mavi = birincil eylem. */
+
+:root {
+  --radius-pill: 999px;
+  --radius-card: 20px;
+  --radius-field: 12px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-press: 140ms;
+  --dur-ui: 200ms;
+}
+
+[data-theme="light"] {
+  --ink: #2f3b34;
+  --ink-secondary: #6a7268;
+  --line: #ddd6c6;
+  --surface: #ffffff;
+  --surface-2: #ece7dc;
+  --canvas: #f4f1ea;
+  --amber: #e5a52b;
+  --amber-text: #8a5a00;
+  --amber-soft: #f6e7c4;
+  --blue: #1f6feb;
+  --blue-on: #ffffff;
+  --blue-soft: #dce8fb;
+  --sage: #6f8f72;
+  --ok: #2e8b57;
+  --bad: #c4553b;
+  --shadow-card: 0 8px 24px rgba(47, 59, 52, 0.08);
+
+  --bg: var(--canvas);
+  --bg-body: var(--canvas);
+  --panel: var(--surface);
+  --panel-2: var(--surface-2);
+  --text: var(--ink);
+  --muted: var(--ink-secondary);
+  --border: var(--line);
+  --card-title: var(--ink);
+  --label-color: var(--ink);
+  --val-color: var(--ink);
+  --page-title-color: var(--ink);
+  --topbar-bg: var(--surface);
+  --topbar-border: var(--line);
+  --topbar-text: var(--ink);
+  --input-bg: var(--surface);
+  --stat-bg: var(--surface);
+  --shadow: var(--shadow-card);
+  --shadow2: var(--shadow-card);
+  --glass-highlight: none;
+  --accent: var(--amber);
+  --focus-ring: 0 0 0 3px rgba(31, 111, 235, 0.25);
+}
+
+[data-theme="dark"] {
+  --ink: #f3f1ec;
+  --ink-secondary: #9aa3b2;
+  --line: #26324a;
+  --surface: #16233b;
+  --surface-2: #1b2a47;
+  --canvas: #0f1a2e;
+  --amber: #f2b84b;
+  --amber-text: #f2b84b;
+  --amber-soft: #3a3320;
+  --blue: #4c8dff;
+  --blue-on: #0b1220;
+  --blue-soft: #1c3258;
+  --sage: #7fa383;
+  --ok: #4cc38a;
+  --bad: #f08a72;
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  --bg: var(--canvas);
+  --bg-body: var(--canvas);
+  --panel: var(--surface);
+  --panel-2: var(--surface-2);
+  --text: var(--ink);
+  --muted: var(--ink-secondary);
+  --border: var(--line);
+  --card-title: var(--ink);
+  --label-color: var(--ink);
+  --val-color: var(--ink);
+  --page-title-color: var(--ink);
+  --topbar-bg: var(--surface);
+  --topbar-border: var(--line);
+  --topbar-text: var(--ink);
+  --input-bg: var(--surface-2);
+  --stat-bg: var(--surface);
+  --shadow: var(--shadow-card);
+  --shadow2: var(--shadow-card);
+  --glass-highlight: none;
+  --accent: var(--amber);
+  --focus-ring: 0 0 0 3px rgba(76, 141, 255, 0.35);
+}
