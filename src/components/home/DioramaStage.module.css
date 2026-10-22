@@ -1,0 +1,220 @@
+.root {
+  position: relative;
+  width: min(1040px, 94vw);
+  margin: 12px auto 24px;
+  display: block;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.pic {
+  position: relative;
+  width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.poster,
+.weatherVariant,
+.sway,
+.cloud,
+.wave,
+.particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Noktasal efektler: konum inline (left/top %), yuvarlak olması için aspect-ratio şart. */
+.glint,
+.lamp {
+  position: absolute;
+  aspect-ratio: 1;
+}
+
+.poster {
+  object-fit: contain;
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+
+.weatherVariant {
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out);
+  pointer-events: none;
+}
+
+.weatherVariant[data-on] {
+  opacity: 1;
+}
+
+.sway {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  animation: sway calc(5.2s / var(--spd, 1)) var(--ease-in-out) var(--dl, 0s) infinite alternate;
+}
+
+@keyframes sway {
+  0% {
+    transform: rotate(calc(var(--a, 1) * var(--w, 0.8) * -1deg));
+  }
+  38% {
+    transform: rotate(calc(var(--a, 1) * var(--w, 0.8) * 0.55deg));
+  }
+  100% {
+    transform: rotate(calc(var(--a, 1) * var(--w, 0.8) * 1deg));
+  }
+}
+
+.cloud {
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cloudInner {
+  position: absolute;
+  inset: -20% -40%;
+  background:
+    radial-gradient(26% 22% at 30% 40%, rgba(15, 26, 46, 0.30), transparent 100%),
+    radial-gradient(20% 18% at 62% 58%, rgba(15, 26, 46, 0.22), transparent 100%);
+  animation: drift 34s var(--ease-in-out) infinite alternate;
+  will-change: transform;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(-14%, 2%, 0);
+  }
+  to {
+    transform: translate3d(14%, -2%, 0);
+  }
+}
+
+.cloudCover {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 60% at 50% 30%, rgba(30, 42, 60, 0.34), rgba(30, 42, 60, 0.22));
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+
+.glint {
+  width: 0.7%;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  animation: twinkle 3.2s var(--ease-in-out) infinite;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@keyframes twinkle {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  35% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.lamp {
+  background: radial-gradient(closest-side, rgba(255, 196, 102, 0.75), rgba(255, 196, 102, 0));
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: breathe 4.6s var(--ease-in-out) infinite;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.wave {
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.waveA,
+.waveB {
+  position: absolute;
+  inset: 0 -60%;
+  mix-blend-mode: screen;
+  will-change: transform;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 240, 190, 0.26) 50%, transparent 60%);
+  animation: gust 7s var(--ease-in-out) infinite;
+}
+
+.waveB {
+  background: linear-gradient(98deg, transparent 44%, rgba(255, 240, 190, 0.16) 50%, transparent 56%);
+  animation-duration: 5.2s;
+  animation-delay: -2.4s;
+}
+
+@keyframes gust {
+  from {
+    transform: translate3d(-30%, 0, 0);
+  }
+  to {
+    transform: translate3d(30%, 0, 0);
+  }
+}
+
+.particles {
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .root {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sway,
+  .cloud,
+  .glint,
+  .lamp,
+  .wave,
+  .particles {
+    transition: none;
+    transform: none;
+    animation: none;
+  }
+  
+  .wave,
+  .sway,
+  .cloud,
+  .glint,
+  .lamp,
+  .particles {
+    display: none;
+  }
+}
