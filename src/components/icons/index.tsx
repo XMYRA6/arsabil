@@ -117,3 +117,7 @@ export const IconRuler = (p: IconProps) => (
 export const IconFlame = (p: IconProps) => (
     <Svg {...p}><path d="M12 2s5 5 5 9a5 5 0 0 1-10 0c0-1.5.7-2.8 1.5-3.8C9 8.5 12 6 12 2z" /></Svg>
 )
+
+export const IconBell = (p: IconProps) => (
+    <Svg {...p}><path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2h-15z" /><path d="M10 21h4" /></Svg>
+)

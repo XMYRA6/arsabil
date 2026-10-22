@@ -1,408 +1,161 @@
-/* =========================================================================
-   NAVBAR — Referans Topbar Stili (Dark/Light uyumlu)
-   ========================================================================= */
-.navbarContainer {
-    position: sticky;
-    top: 0;
-    z-index: var(--z-topnav, 1050);
-    padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 14px;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    /* `.navbar` icindeki backdrop-filter, `position: sticky` ile birlikte
-       mobil WebKit/Chromium'da ayri bir compositing katmani olusturuyor ve
-       elastic overscroll (sayfayi elle yukari/asagi cekme) sirasinda bu
-       katman scroll'u gec/yanlis takip edip navbar'i ekranin ortasina kadar
-       suruklenmis gibi gosteriyor (kullanici bulgusu). `translateZ(0)` sticky
-       elemani kendi GPU katmanina sabitleyip dogru scroll takibini zorlar. */
-    transform: translateZ(0);
-    backface-visibility: hidden;
+/* Masaüstü: NavPill'i sarar, sayfa kayarken üstte yüzer (pill dışındaki alan tıklamayı engellemez). */
+.desktop {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-navbar, 100);
+  pointer-events: none;
 }
 
-
-.navbar {
-    pointer-events: auto;
-    height: var(--topbar-height, 64px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 18px;
-    border-radius: 22px;
-    background: var(--topbar-bg);
-    border: 1px solid var(--topbar-border);
-    max-width: 1280px;
-    margin: 0 auto;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: all 0.3s ease;
+.desktop > nav > div {
+  pointer-events: auto;
 }
 
-/* LEFT: Logo + Links */
-.navLeft {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.logoIcon {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-}
-
-.logoText {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--primary);
-    letter-spacing: 0.2px;
-}
-
-.desktopLinks {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-left: 1.5rem;
-    padding-left: 1.5rem;
-    border-left: 1px solid var(--topbar-border);
-}
-
-.desktopLinks a {
-    color: var(--topbar-text);
-    opacity: 0.65;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    border-bottom: 2px solid transparent;
-    padding-bottom: 4px;
-}
-
-.desktopLinks a:hover {
-    opacity: 1;
-}
-
-.desktopLinks .activeLink {
-    opacity: 1 !important;
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-}
-
-/* CENTER: Slogan */
-.centerNav {
-    display: flex;
-    align-items: center;
-    color: var(--topbar-text);
-    opacity: 0.85;
-    font-weight: 600;
-    font-size: 16px;
-    text-align: center;
-    white-space: nowrap;
-}
-
-/* RIGHT: Actions */
-.navRight {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.loginLink {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
 }
 
 .iconBtn {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    border: 1px solid var(--topbar-border);
-    background: rgba(255, 255, 255, .10);
-    color: var(--topbar-text);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  color: var(--ink-secondary);
+  transition: background-color var(--dur-ui) var(--ease-out), color var(--dur-ui) var(--ease-out);
 }
 
-.iconBtn:hover {
-    background: rgba(255, 255, 255, .18);
+.userWrap {
+  position: relative;
 }
 
-.userBtn {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .10));
-    border: 1px solid rgba(255, 255, 255, .22);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--topbar-text);
-    font-weight: 700;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background-color: var(--amber);
+  color: var(--canvas);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-.userBtn:hover {
-    background: rgba(255, 255, 255, .25);
+.avatar:focus-visible,
+.iconBtn:focus-visible,
+.item:focus-visible,
+.loginLink:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
-.primaryBtn {
-    padding: 0 1.5rem;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    border-radius: 14px;
-    background: linear-gradient(180deg, var(--accent), var(--accent-2));
-    box-shadow: 0 16px 26px rgba(var(--accent-rgb), .22);
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
 }
 
-.primaryBtn:hover {
-    box-shadow: 0 16px 26px rgba(var(--accent-rgb), .35);
+.dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 100;
+  min-width: 240px;
+  padding: 8px;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  animation: menuIn var(--dur-ui) var(--ease-out);
+  transform-origin: top right;
 }
 
-.hamburger {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
 }
 
-.hamburger span {
-    display: block;
-    width: 25px;
-    height: 2px;
-    background-color: var(--topbar-text);
-    transition: 0.3s;
-}
-
-.mobileMenu {
-    display: none;
-    animation: fadeIn 0.3s forwards;
-}
-
-/* ===== TABLET ===== */
-@media (min-width: 768px) and (max-width: 1280px) {
-    .centerNav {
-        display: none;
-    }
-}
-
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-    /* Hide navbar entirely on certain mobile pages (inbox, profile, home) */
-    .mobileHidden,
-    .mobileCompact {
-        display: none !important;
-    }
-
-    .navbarContainer {
-        padding: calc(8px + env(safe-area-inset-top, 0px)) 8px 8px !important;
-    }
-
-    .navbar {
-        height: auto;
-        border-radius: 20px;
-        padding: 12px 14px;
-        flex-wrap: wrap;
-    }
-
-    .desktopLinks,
-    .centerNav,
-    .navRight {
-        display: none;
-    }
-
-    .navLeft {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .hamburger {
-        display: none;
-    }
-
-    .mobileMenu {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid var(--topbar-border);
-        gap: 4px;
-    }
-
-    .mobileMenu a,
-    .mobileMenu button {
-        color: var(--topbar-text);
-        opacity: 0.8;
-        border: none;
-        padding: 10px 0;
-        font-size: 1.05rem;
-        display: block;
-        width: 100%;
-        text-align: left;
-        background: none;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .mobileMenu a.activeLink {
-        opacity: 1;
-    }
-
-    .mobileMenu .dangerText {
-        color: var(--red);
-    }
-
-    .mobileMenu .adminLink {
-        color: #C9A15A;
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* User Dropdown */
-.userDropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    width: 260px;
-    background: var(--panel);
-    border: 1px solid var(--topbar-border);
-    border-radius: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
-    z-index: 100;
-    overflow: hidden;
-    animation: fadeSlideIn 0.2s ease;
-}
-
-.dropdownHeader {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.userInitialsLarge {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 800;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-.userInfo {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.dropdownHead {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
 }
 
 .userName {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--card-title);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .userEmail {
-    font-size: 0.75rem;
-    color: var(--muted);
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  font-size: 12px;
+  color: var(--ink-secondary);
 }
 
-.dropdownDivider {
-    height: 1px;
-    background: var(--topbar-border);
+.item {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.dropdownList {
-    padding: 8px;
+.logout {
+  color: var(--bad);
 }
 
-.dropdownItem {
+@media (hover: hover) and (pointer: fine) {
+  .iconBtn:hover,
+  .item:hover {
+    background-color: var(--surface-2);
+    color: var(--ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropdown {
+    animation: none;
+  }
+}
+
+/* Mobil: pill yok; yalnız logo çubuğu. Gezinme alt menüde (TabBar). */
+.mobileBar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop {
+    display: none;
+  }
+
+  .mobileBar {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    color: var(--topbar-text);
+    padding: 14px 20px;
+  }
+
+  .mobileLogo {
+    display: inline-flex;
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    border: none;
-    background: none;
-    width: 100%;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
+    color: var(--ink);
+  }
 }
-
-.dropdownItem:hover {
-    background: rgba(var(--primary-rgb), 0.08);
-    color: var(--primary);
-}
-
-.dropdownItemAdmin {
-    background: rgba(201, 161, 90, 0.10);
-    color: #C9A15A;
-}
-
-.dropdownItemAdmin:hover {
-    background: rgba(201, 161, 90, 0.18);
-    color: #C9A15A;
-}
-
-.dropdownItem span {
-    font-size: 1.1rem;
-    width: 20px;
-}
-
-.logoutBtn {
-    color: var(--red);
-}
-
-.logoutBtn:hover {
-    background: rgba(var(--red-rgb), 0.08);
-    color: var(--red);
-}
-
-@keyframes fadeSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-

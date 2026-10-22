@@ -5,44 +5,27 @@ const css = fs.readFileSync(path.join(__dirname, '../Navbar.module.css'), 'utf8'
 const tsx = fs.readFileSync(path.join(__dirname, '../Navbar.tsx'), 'utf8')
 
 describe('Navbar ana keşif linkleri', () => {
-  it('masaüstü + mobil menü /deger ve /akif linklerini içerir', () => {
-    for (const href of ['/hesapla', '/deger', '/akif', '/marketplace']) {
-      expect(tsx.includes(`href="${href}"`)).toBe(true)
+  it('beş ana bağlantı tanımlı (Hesapla, Değer, Akif, Pazar Yeri, Fiyatlar)', () => {
+    for (const href of ['/hesapla', '/deger', '/akif', '/marketplace', '/arsa-fiyatlari']) {
+      expect(tsx).toContain(`"${href}"`)
     }
-    // hem masaüstü (Değer) hem mobil menü (Değer Kartı) etiketi
-    expect(tsx).toMatch(/>\s*Değer\s*</)
-    expect(tsx).toMatch(/>\s*Akif\s*</)
+    for (const label of ['Hesapla', 'Değer', 'Akif', 'Pazar Yeri', 'Fiyatlar']) {
+      expect(tsx).toContain(`"${label}"`)
+    }
+  })
+  it('sahte (sabit) bildirim/mesaj verisi yok', () => {
+    expect(tsx).not.toMatch(/Ahmet Yılmaz|Elif Demir|NOTIFS/)
   })
 })
 
-describe('Navbar profesyonel token hizalamasi', () => {
-  it('topbar yuksekligi global topbar tokenini kullanir', () => {
-    const match = css.match(/\.navbar\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/height:\s*var\(--topbar-height,\s*64px\)/)
+describe('Navbar Arazi token hizalaması', () => {
+  it('hardcoded renk yok, yalnız token', () => {
+    expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
+    expect(css).not.toMatch(/backdrop-filter|gradient/)
   })
-
-  it('logo primary token rengini kullanir', () => {
-    const match = css.match(/\.logoText\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/color:\s*var\(--primary\)/)
-  })
-
-  it('aktif desktop nav link primary renk ve bottom border kullanir', () => {
-    const base = css.match(/\.desktopLinks a\s*\{([^}]*)\}/)
-    const active = css.match(/\.desktopLinks \.activeLink\s*\{([^}]*)\}/)
-    expect(base).not.toBeNull()
-    expect(active).not.toBeNull()
-    expect(base![1]).toMatch(/border-bottom:\s*2px solid transparent/)
-    expect(active![1]).toMatch(/color:\s*var\(--primary\)/)
-    expect(active![1]).toMatch(/border-bottom-color:\s*var\(--primary\)/)
-  })
-
-  it('navbar CTA accent token ailesini kullanir', () => {
-    const match = css.match(/\.primaryBtn\s*\{([^}]*)\}/)
-    expect(match).not.toBeNull()
-    expect(match![1]).toMatch(/var\(--accent\)/)
-    expect(match![1]).toMatch(/var\(--accent-2\)/)
-    expect(match![1]).toMatch(/var\(--accent-rgb\)/)
+  it('mobilde masaüstü pill gizli, mobil çubuk görünür', () => {
+    const media = css.slice(css.indexOf('@media (max-width: 768px)'))
+    expect(media).toMatch(/\.desktop\s*\{[^}]*display:\s*none/)
+    expect(media).toMatch(/\.mobileBar\s*\{[^}]*display:\s*flex/)
   })
 })
