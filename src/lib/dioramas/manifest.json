@@ -1,0 +1,1242 @@
+{
+  "generated": "2026-10-22",
+  "sizes": [
+    1600,
+    800
+  ],
+  "types": {
+    "arsa": {
+      "label": "Arsa",
+      "variants": [
+        "agacli",
+        "agacsiz"
+      ],
+      "items": [
+        {
+          "id": "arsa_agacli_duz_gece",
+          "varyant": "agacli",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.4071,
+          "files": {
+            "800": {
+              "file": "arsa_agacli_duz_gece-800.webp",
+              "width": 800,
+              "height": 569,
+              "bytes": 87374
+            },
+            "1600": {
+              "file": "arsa_agacli_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1137,
+              "bytes": 330576
+            }
+          }
+        },
+        {
+          "id": "arsa_agacli_duz_gunduz",
+          "varyant": "agacli",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.4128,
+          "files": {
+            "800": {
+              "file": "arsa_agacli_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 566,
+              "bytes": 109788
+            },
+            "1600": {
+              "file": "arsa_agacli_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1133,
+              "bytes": 409858
+            }
+          }
+        },
+        {
+          "id": "arsa_agacli_yamac2_gece",
+          "varyant": "agacli",
+          "egim": "yamac2",
+          "zaman": "gece",
+          "aspect": 1.5668,
+          "files": {
+            "800": {
+              "file": "arsa_agacli_yamac2_gece-800.webp",
+              "width": 800,
+              "height": 511,
+              "bytes": 85160
+            },
+            "1600": {
+              "file": "arsa_agacli_yamac2_gece-1600.webp",
+              "width": 1600,
+              "height": 1021,
+              "bytes": 321734
+            }
+          }
+        },
+        {
+          "id": "arsa_agacli_yamac2_gunduz",
+          "varyant": "agacli",
+          "egim": "yamac2",
+          "zaman": "gunduz",
+          "aspect": 1.5611,
+          "files": {
+            "800": {
+              "file": "arsa_agacli_yamac2_gunduz-800.webp",
+              "width": 800,
+              "height": 512,
+              "bytes": 97682
+            },
+            "1600": {
+              "file": "arsa_agacli_yamac2_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1025,
+              "bytes": 374374
+            }
+          }
+        },
+        {
+          "id": "arsa_agacli_yamac_gece",
+          "varyant": "agacli",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.4289,
+          "files": {
+            "800": {
+              "file": "arsa_agacli_yamac_gece-800.webp",
+              "width": 800,
+              "height": 560,
+              "bytes": 92204
+            },
+            "1600": {
+              "file": "arsa_agacli_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1120,
+              "bytes": 346816
+            }
+          }
+        },
+        {
+          "id": "arsa_agacli_yamac_gunduz",
+          "varyant": "agacli",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.4198,
+          "files": {
+            "800": {
+              "file": "arsa_agacli_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 563,
+              "bytes": 110174
+            },
+            "1600": {
+              "file": "arsa_agacli_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1127,
+              "bytes": 408438
+            }
+          }
+        },
+        {
+          "id": "arsa_agacsiz_duz_gece",
+          "varyant": "agacsiz",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5147,
+          "files": {
+            "800": {
+              "file": "arsa_agacsiz_duz_gece-800.webp",
+              "width": 800,
+              "height": 528,
+              "bytes": 73712
+            },
+            "1600": {
+              "file": "arsa_agacsiz_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1056,
+              "bytes": 283946
+            }
+          }
+        },
+        {
+          "id": "arsa_agacsiz_duz_gunduz",
+          "varyant": "agacsiz",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.5239,
+          "files": {
+            "800": {
+              "file": "arsa_agacsiz_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 525,
+              "bytes": 94452
+            },
+            "1600": {
+              "file": "arsa_agacsiz_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1050,
+              "bytes": 364148
+            }
+          }
+        },
+        {
+          "id": "arsa_agacsiz_yamac_gece",
+          "varyant": "agacsiz",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.3839,
+          "files": {
+            "800": {
+              "file": "arsa_agacsiz_yamac_gece-800.webp",
+              "width": 800,
+              "height": 578,
+              "bytes": 82394
+            },
+            "1600": {
+              "file": "arsa_agacsiz_yamac_gece-1600.webp",
+              "width": 1031,
+              "height": 745,
+              "bytes": 136014
+            }
+          }
+        },
+        {
+          "id": "arsa_agacsiz_yamac_gunduz",
+          "varyant": "agacsiz",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.4,
+          "files": {
+            "800": {
+              "file": "arsa_agacsiz_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 571,
+              "bytes": 96706
+            },
+            "1600": {
+              "file": "arsa_agacsiz_yamac_gunduz-1600.webp",
+              "width": 1029,
+              "height": 735,
+              "bytes": 158640
+            }
+          }
+        }
+      ]
+    },
+    "bag": {
+      "label": "Bağ-Bahçe",
+      "variants": [
+        "asma",
+        "findik",
+        "zeytin"
+      ],
+      "items": [
+        {
+          "id": "bag_asma_duz_gece",
+          "varyant": "asma",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.7599,
+          "files": {
+            "800": {
+              "file": "bag_asma_duz_gece-800.webp",
+              "width": 800,
+              "height": 455,
+              "bytes": 86986
+            },
+            "1600": {
+              "file": "bag_asma_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 909,
+              "bytes": 321318
+            }
+          }
+        },
+        {
+          "id": "bag_asma_duz_gunduz",
+          "varyant": "asma",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.8525,
+          "files": {
+            "800": {
+              "file": "bag_asma_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 432,
+              "bytes": 114926
+            },
+            "1600": {
+              "file": "bag_asma_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 864,
+              "bytes": 413194
+            }
+          }
+        },
+        {
+          "id": "bag_asma_yamac2_gece",
+          "varyant": "asma",
+          "egim": "yamac2",
+          "zaman": "gece",
+          "aspect": 1.846,
+          "files": {
+            "800": {
+              "file": "bag_asma_yamac2_gece-800.webp",
+              "width": 800,
+              "height": 433,
+              "bytes": 76800
+            },
+            "1600": {
+              "file": "bag_asma_yamac2_gece-1600.webp",
+              "width": 1600,
+              "height": 867,
+              "bytes": 278834
+            }
+          }
+        },
+        {
+          "id": "bag_asma_yamac2_gunduz",
+          "varyant": "asma",
+          "egim": "yamac2",
+          "zaman": "gunduz",
+          "aspect": 1.8578,
+          "files": {
+            "800": {
+              "file": "bag_asma_yamac2_gunduz-800.webp",
+              "width": 800,
+              "height": 431,
+              "bytes": 96868
+            },
+            "1600": {
+              "file": "bag_asma_yamac2_gunduz-1600.webp",
+              "width": 1600,
+              "height": 861,
+              "bytes": 339796
+            }
+          }
+        },
+        {
+          "id": "bag_asma_yamac_gece",
+          "varyant": "asma",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.9026,
+          "files": {
+            "800": {
+              "file": "bag_asma_yamac_gece-800.webp",
+              "width": 800,
+              "height": 420,
+              "bytes": 86330
+            },
+            "1600": {
+              "file": "bag_asma_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 841,
+              "bytes": 325196
+            }
+          }
+        },
+        {
+          "id": "bag_asma_yamac_gunduz",
+          "varyant": "asma",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.9076,
+          "files": {
+            "800": {
+              "file": "bag_asma_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 419,
+              "bytes": 102726
+            },
+            "1600": {
+              "file": "bag_asma_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 839,
+              "bytes": 371278
+            }
+          }
+        },
+        {
+          "id": "bag_findik_duz_gece",
+          "varyant": "findik",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5528,
+          "files": {
+            "800": {
+              "file": "bag_findik_duz_gece-800.webp",
+              "width": 800,
+              "height": 515,
+              "bytes": 85546
+            },
+            "1600": {
+              "file": "bag_findik_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1030,
+              "bytes": 314206
+            }
+          }
+        },
+        {
+          "id": "bag_findik_duz_gunduz",
+          "varyant": "findik",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.5522,
+          "files": {
+            "800": {
+              "file": "bag_findik_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 515,
+              "bytes": 110244
+            },
+            "1600": {
+              "file": "bag_findik_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1031,
+              "bytes": 386276
+            }
+          }
+        },
+        {
+          "id": "bag_findik_yamac_gece",
+          "varyant": "findik",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.5528,
+          "files": {
+            "800": {
+              "file": "bag_findik_yamac_gece-800.webp",
+              "width": 800,
+              "height": 515,
+              "bytes": 84100
+            },
+            "1600": {
+              "file": "bag_findik_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1030,
+              "bytes": 316096
+            }
+          }
+        },
+        {
+          "id": "bag_findik_yamac_gunduz",
+          "varyant": "findik",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.5515,
+          "files": {
+            "800": {
+              "file": "bag_findik_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 516,
+              "bytes": 109702
+            },
+            "1600": {
+              "file": "bag_findik_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1031,
+              "bytes": 382782
+            }
+          }
+        },
+        {
+          "id": "bag_zeytin_duz_gece",
+          "varyant": "zeytin",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.8451,
+          "files": {
+            "800": {
+              "file": "bag_zeytin_duz_gece-800.webp",
+              "width": 800,
+              "height": 434,
+              "bytes": 78698
+            },
+            "1600": {
+              "file": "bag_zeytin_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 867,
+              "bytes": 303596
+            }
+          }
+        },
+        {
+          "id": "bag_zeytin_duz_gunduz",
+          "varyant": "zeytin",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.8549,
+          "files": {
+            "800": {
+              "file": "bag_zeytin_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 431,
+              "bytes": 95812
+            },
+            "1600": {
+              "file": "bag_zeytin_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 863,
+              "bytes": 344232
+            }
+          }
+        },
+        {
+          "id": "bag_zeytin_yamac_gece",
+          "varyant": "zeytin",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.8051,
+          "files": {
+            "800": {
+              "file": "bag_zeytin_yamac_gece-800.webp",
+              "width": 800,
+              "height": 443,
+              "bytes": 77936
+            },
+            "1600": {
+              "file": "bag_zeytin_yamac_gece-1600.webp",
+              "width": 1269,
+              "height": 703,
+              "bytes": 186064
+            }
+          }
+        },
+        {
+          "id": "bag_zeytin_yamac_gunduz",
+          "varyant": "zeytin",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.8245,
+          "files": {
+            "800": {
+              "file": "bag_zeytin_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 438,
+              "bytes": 94206
+            },
+            "1600": {
+              "file": "bag_zeytin_yamac_gunduz-1600.webp",
+              "width": 1268,
+              "height": 695,
+              "bytes": 234308
+            }
+          }
+        }
+      ]
+    },
+    "kat": {
+      "label": "Kat karşılığı",
+      "variants": [
+        "bitmis",
+        "insaat"
+      ],
+      "items": [
+        {
+          "id": "kat_bitmis_duz_gece",
+          "varyant": "bitmis",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.2404,
+          "files": {
+            "800": {
+              "file": "kat_bitmis_duz_gece-800.webp",
+              "width": 800,
+              "height": 645,
+              "bytes": 88944
+            },
+            "1600": {
+              "file": "kat_bitmis_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1290,
+              "bytes": 296262
+            }
+          }
+        },
+        {
+          "id": "kat_bitmis_duz_gunduz",
+          "varyant": "bitmis",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.2547,
+          "files": {
+            "800": {
+              "file": "kat_bitmis_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 638,
+              "bytes": 106650
+            },
+            "1600": {
+              "file": "kat_bitmis_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1275,
+              "bytes": 356244
+            }
+          }
+        },
+        {
+          "id": "kat_insaat_duz_gece",
+          "varyant": "insaat",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.1844,
+          "files": {
+            "800": {
+              "file": "kat_insaat_duz_gece-800.webp",
+              "width": 800,
+              "height": 675,
+              "bytes": 94178
+            },
+            "1600": {
+              "file": "kat_insaat_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1351,
+              "bytes": 319114
+            }
+          }
+        },
+        {
+          "id": "kat_insaat_duz_gunduz",
+          "varyant": "insaat",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.2053,
+          "files": {
+            "800": {
+              "file": "kat_insaat_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 664,
+              "bytes": 112886
+            },
+            "1600": {
+              "file": "kat_insaat_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1328,
+              "bytes": 374890
+            }
+          }
+        }
+      ]
+    },
+    "tarla": {
+      "label": "Tarla",
+      "variants": [
+        "aycicegi",
+        "bugday",
+        "surulu"
+      ],
+      "items": [
+        {
+          "id": "tarla_aycicegi_duz_gece",
+          "varyant": "aycicegi",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5457,
+          "files": {
+            "800": {
+              "file": "tarla_aycicegi_duz_gece-800.webp",
+              "width": 800,
+              "height": 518,
+              "bytes": 107608
+            },
+            "1600": {
+              "file": "tarla_aycicegi_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1035,
+              "bytes": 378644
+            }
+          }
+        },
+        {
+          "id": "tarla_aycicegi_duz_gunduz",
+          "varyant": "aycicegi",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.5839,
+          "files": {
+            "800": {
+              "file": "tarla_aycicegi_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 505,
+              "bytes": 116498
+            },
+            "1600": {
+              "file": "tarla_aycicegi_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1010,
+              "bytes": 405576
+            }
+          }
+        },
+        {
+          "id": "tarla_aycicegi_yamac_gece",
+          "varyant": "aycicegi",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.5821,
+          "files": {
+            "800": {
+              "file": "tarla_aycicegi_yamac_gece-800.webp",
+              "width": 800,
+              "height": 506,
+              "bytes": 93002
+            },
+            "1600": {
+              "file": "tarla_aycicegi_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1011,
+              "bytes": 321398
+            }
+          }
+        },
+        {
+          "id": "tarla_aycicegi_yamac_gunduz",
+          "varyant": "aycicegi",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.5828,
+          "files": {
+            "800": {
+              "file": "tarla_aycicegi_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 505,
+              "bytes": 114530
+            },
+            "1600": {
+              "file": "tarla_aycicegi_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1011,
+              "bytes": 390162
+            }
+          }
+        },
+        {
+          "id": "tarla_bugday_duz_gece",
+          "varyant": "bugday",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5612,
+          "files": {
+            "800": {
+              "file": "tarla_bugday_duz_gece-800.webp",
+              "width": 800,
+              "height": 512,
+              "bytes": 84968
+            },
+            "1600": {
+              "file": "tarla_bugday_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1025,
+              "bytes": 305712
+            }
+          }
+        },
+        {
+          "id": "tarla_bugday_duz_gunduz",
+          "varyant": "bugday",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.6293,
+          "files": {
+            "800": {
+              "file": "tarla_bugday_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 491,
+              "bytes": 109656
+            },
+            "1600": {
+              "file": "tarla_bugday_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 982,
+              "bytes": 398888
+            }
+          }
+        },
+        {
+          "id": "tarla_bugday_yamac_gece",
+          "varyant": "bugday",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.5226,
+          "files": {
+            "800": {
+              "file": "tarla_bugday_yamac_gece-800.webp",
+              "width": 800,
+              "height": 525,
+              "bytes": 91744
+            },
+            "1600": {
+              "file": "tarla_bugday_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1051,
+              "bytes": 336396
+            }
+          }
+        },
+        {
+          "id": "tarla_bugday_yamac_gunduz",
+          "varyant": "bugday",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.4633,
+          "files": {
+            "800": {
+              "file": "tarla_bugday_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 547,
+              "bytes": 110762
+            },
+            "1600": {
+              "file": "tarla_bugday_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1093,
+              "bytes": 392492
+            }
+          }
+        },
+        {
+          "id": "tarla_surulu_duz_gece",
+          "varyant": "surulu",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5319,
+          "files": {
+            "800": {
+              "file": "tarla_surulu_duz_gece-800.webp",
+              "width": 800,
+              "height": 522,
+              "bytes": 91212
+            },
+            "1600": {
+              "file": "tarla_surulu_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1044,
+              "bytes": 343784
+            }
+          }
+        },
+        {
+          "id": "tarla_surulu_duz_gunduz",
+          "varyant": "surulu",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.4792,
+          "files": {
+            "800": {
+              "file": "tarla_surulu_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 541,
+              "bytes": 104406
+            },
+            "1600": {
+              "file": "tarla_surulu_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1082,
+              "bytes": 361286
+            }
+          }
+        },
+        {
+          "id": "tarla_surulu_yamac_gece",
+          "varyant": "surulu",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.511,
+          "files": {
+            "800": {
+              "file": "tarla_surulu_yamac_gece-800.webp",
+              "width": 800,
+              "height": 529,
+              "bytes": 72692
+            },
+            "1600": {
+              "file": "tarla_surulu_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1059,
+              "bytes": 250998
+            }
+          }
+        },
+        {
+          "id": "tarla_surulu_yamac_gunduz",
+          "varyant": "surulu",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.52,
+          "files": {
+            "800": {
+              "file": "tarla_surulu_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 526,
+              "bytes": 100890
+            },
+            "1600": {
+              "file": "tarla_surulu_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1053,
+              "bytes": 352284
+            }
+          }
+        }
+      ]
+    },
+    "ticari": {
+      "label": "Ticari",
+      "variants": [
+        "ofis"
+      ],
+      "items": [
+        {
+          "id": "ticari_ofis_duz_gece",
+          "varyant": "ofis",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5373,
+          "files": {
+            "800": {
+              "file": "ticari_ofis_duz_gece-800.webp",
+              "width": 800,
+              "height": 520,
+              "bytes": 79046
+            },
+            "1600": {
+              "file": "ticari_ofis_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1041,
+              "bytes": 265832
+            }
+          }
+        },
+        {
+          "id": "ticari_ofis_duz_gunduz",
+          "varyant": "ofis",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.5521,
+          "files": {
+            "800": {
+              "file": "ticari_ofis_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 515,
+              "bytes": 82412
+            },
+            "1600": {
+              "file": "ticari_ofis_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1031,
+              "bytes": 273888
+            }
+          }
+        }
+      ]
+    },
+    "villa": {
+      "label": "Villa",
+      "variants": [
+        "modern",
+        "tas1",
+        "tas2",
+        "tas3"
+      ],
+      "items": [
+        {
+          "id": "villa_modern_duz_gece",
+          "varyant": "modern",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.535,
+          "files": {
+            "800": {
+              "file": "villa_modern_duz_gece-800.webp",
+              "width": 800,
+              "height": 521,
+              "bytes": 75082
+            },
+            "1600": {
+              "file": "villa_modern_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1042,
+              "bytes": 285420
+            }
+          }
+        },
+        {
+          "id": "villa_modern_duz_gunduz",
+          "varyant": "modern",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.5945,
+          "files": {
+            "800": {
+              "file": "villa_modern_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 502,
+              "bytes": 83586
+            },
+            "1600": {
+              "file": "villa_modern_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1003,
+              "bytes": 298600
+            }
+          }
+        },
+        {
+          "id": "villa_modern_yamac_gece",
+          "varyant": "modern",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.5324,
+          "files": {
+            "800": {
+              "file": "villa_modern_yamac_gece-800.webp",
+              "width": 800,
+              "height": 522,
+              "bytes": 76112
+            },
+            "1600": {
+              "file": "villa_modern_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1044,
+              "bytes": 286400
+            }
+          }
+        },
+        {
+          "id": "villa_modern_yamac_gunduz",
+          "varyant": "modern",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.5335,
+          "files": {
+            "800": {
+              "file": "villa_modern_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 522,
+              "bytes": 84822
+            },
+            "1600": {
+              "file": "villa_modern_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1043,
+              "bytes": 318962
+            }
+          }
+        },
+        {
+          "id": "villa_tas1_duz_gece",
+          "varyant": "tas1",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.5763,
+          "files": {
+            "800": {
+              "file": "villa_tas1_duz_gece-800.webp",
+              "width": 800,
+              "height": 508,
+              "bytes": 87620
+            },
+            "1600": {
+              "file": "villa_tas1_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 1015,
+              "bytes": 329524
+            }
+          }
+        },
+        {
+          "id": "villa_tas1_duz_gunduz",
+          "varyant": "tas1",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.5791,
+          "files": {
+            "800": {
+              "file": "villa_tas1_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 507,
+              "bytes": 94236
+            },
+            "1600": {
+              "file": "villa_tas1_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1013,
+              "bytes": 339390
+            }
+          }
+        },
+        {
+          "id": "villa_tas1_yamac_gece",
+          "varyant": "tas1",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.5579,
+          "files": {
+            "800": {
+              "file": "villa_tas1_yamac_gece-800.webp",
+              "width": 800,
+              "height": 513,
+              "bytes": 85662
+            },
+            "1600": {
+              "file": "villa_tas1_yamac_gece-1600.webp",
+              "width": 1089,
+              "height": 699,
+              "bytes": 155410
+            }
+          }
+        },
+        {
+          "id": "villa_tas1_yamac_gunduz",
+          "varyant": "tas1",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.5602,
+          "files": {
+            "800": {
+              "file": "villa_tas1_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 513,
+              "bytes": 96210
+            },
+            "1600": {
+              "file": "villa_tas1_yamac_gunduz-1600.webp",
+              "width": 1089,
+              "height": 698,
+              "bytes": 182550
+            }
+          }
+        },
+        {
+          "id": "villa_tas2_duz_gece",
+          "varyant": "tas2",
+          "egim": "duz",
+          "zaman": "gece",
+          "aspect": 1.8862,
+          "files": {
+            "800": {
+              "file": "villa_tas2_duz_gece-800.webp",
+              "width": 800,
+              "height": 424,
+              "bytes": 76220
+            },
+            "1600": {
+              "file": "villa_tas2_duz_gece-1600.webp",
+              "width": 1600,
+              "height": 848,
+              "bytes": 262460
+            }
+          }
+        },
+        {
+          "id": "villa_tas2_duz_gunduz",
+          "varyant": "tas2",
+          "egim": "duz",
+          "zaman": "gunduz",
+          "aspect": 1.9239,
+          "files": {
+            "800": {
+              "file": "villa_tas2_duz_gunduz-800.webp",
+              "width": 800,
+              "height": 416,
+              "bytes": 84302
+            },
+            "1600": {
+              "file": "villa_tas2_duz_gunduz-1600.webp",
+              "width": 1600,
+              "height": 832,
+              "bytes": 295808
+            }
+          }
+        },
+        {
+          "id": "villa_tas2_yamac_gece",
+          "varyant": "tas2",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.7486,
+          "files": {
+            "800": {
+              "file": "villa_tas2_yamac_gece-800.webp",
+              "width": 800,
+              "height": 458,
+              "bytes": 77732
+            },
+            "1600": {
+              "file": "villa_tas2_yamac_gece-1600.webp",
+              "width": 1231,
+              "height": 704,
+              "bytes": 176806
+            }
+          }
+        },
+        {
+          "id": "villa_tas2_yamac_gunduz",
+          "varyant": "tas2",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.7912,
+          "files": {
+            "800": {
+              "file": "villa_tas2_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 447,
+              "bytes": 84792
+            },
+            "1600": {
+              "file": "villa_tas2_yamac_gunduz-1600.webp",
+              "width": 1227,
+              "height": 685,
+              "bytes": 198192
+            }
+          }
+        },
+        {
+          "id": "villa_tas3_yamac_gece",
+          "varyant": "tas3",
+          "egim": "yamac",
+          "zaman": "gece",
+          "aspect": 1.5777,
+          "files": {
+            "800": {
+              "file": "villa_tas3_yamac_gece-800.webp",
+              "width": 800,
+              "height": 507,
+              "bytes": 89114
+            },
+            "1600": {
+              "file": "villa_tas3_yamac_gece-1600.webp",
+              "width": 1600,
+              "height": 1014,
+              "bytes": 349804
+            }
+          }
+        },
+        {
+          "id": "villa_tas3_yamac_gunduz",
+          "varyant": "tas3",
+          "egim": "yamac",
+          "zaman": "gunduz",
+          "aspect": 1.5803,
+          "files": {
+            "800": {
+              "file": "villa_tas3_yamac_gunduz-800.webp",
+              "width": 800,
+              "height": 506,
+              "bytes": 98916
+            },
+            "1600": {
+              "file": "villa_tas3_yamac_gunduz-1600.webp",
+              "width": 1600,
+              "height": 1012,
+              "bytes": 355924
+            }
+          }
+        }
+      ]
+    }
+  }
+}
