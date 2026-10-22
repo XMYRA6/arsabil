@@ -1,7 +1,6 @@
 .root {
   position: relative;
-  width: min(1040px, 94vw);
-  margin: 12px auto 24px;
+  width: 100%;
   display: block;
 }
 

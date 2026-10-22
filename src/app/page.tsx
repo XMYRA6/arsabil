@@ -6,6 +6,7 @@ import { motion, type Variants } from 'framer-motion';
 import styles from './page.module.css';
 import { useSession } from 'next-auth/react';
 import { HomeMobile } from './mobile/HomeMobile';
+import { Hero } from '@/components/home/Hero';
 import { DegerHookBox } from '@/components/home/DegerHookBox';
 import { AkifHookBox } from '@/components/home/AkifHookBox';
 import { StudioRenderHookBox } from '@/components/home/StudioRenderHookBox';
@@ -598,55 +599,7 @@ function MarketingHomePage() {
   return (
     <div className={styles.container}>
 
-      {/* Hero Section */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <span className={styles.heroKicker}>Türkiye&apos;nin İlk Dijital Arsa Fizibilite Platformu</span>
-          <h1 className={styles.heroTitle}>
-            Arsanızın Gerçek Değerini <br />
-            <span>Tahmin Etmeyin, Hesaplayın.</span>
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Kat karşılığı inşaat projelerinizde arsa payı, maliyet ve kâr analizini <br />
-            <strong>Engine v2</strong> teknolojisi ile saniyeler içinde, bilimsel verilerle yapın.
-          </p>
-          <div className={styles.heroCta}>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ display: 'inline-block' }}>
-              <Link href="/hesapla" className={styles.primaryBtn}>
-                Hemen Hesapla
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ display: 'inline-block' }}>
-              <Link href="/marketplace" className={styles.secondaryBtn}>
-                Pazar Yerine Git
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Hero Live Teaser Glass Widget */}
-          <div className={styles.heroTeaserGlass}>
-            <div className={styles.teaserBar}>
-              <span className={styles.teaserSearchIcon}>🔍</span>
-              <span className={styles.teaserInputText}>Kadıköy, İstanbul • 1.250 m² Arsa Parsel #4802</span>
-              <span className={styles.teaserBadgeLive}>LIVE DEMO</span>
-            </div>
-            <div className={styles.teaserResultsRow}>
-              <div className={styles.teaserScoreTile}>
-                <span className={styles.teaserScoreVal}>96/100</span>
-                <span className={styles.teaserScoreLabel}>Fizibilite Skoru</span>
-              </div>
-              <div className={styles.teaserMetricTile}>
-                <span className={styles.teaserMetricVal}>%50.0</span>
-                <span className={styles.teaserMetricLabel}>Optimal Arsa Payı</span>
-              </div>
-              <div className={styles.teaserMetricTile}>
-                <span className={styles.teaserMetricVal}>₺18.4M</span>
-                <span className={styles.teaserMetricLabel}>Tahmini İnşaat Maliyeti</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       <DegerHookBox />
 

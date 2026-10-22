@@ -45,7 +45,7 @@ export function Button({
   return (
     <button type={type} className={classes} {...rest}>
       {iconLeft && <span className={styles.iconLeft} aria-hidden="true">{iconLeft}</span>}
-      <span>{children}</span>
+      {iconLeft || iconRight ? <span>{children}</span> : children}
       {iconRight && <span className={styles.iconRight} aria-hidden="true">{iconRight}</span>}
     </button>
   )
