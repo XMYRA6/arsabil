@@ -19,6 +19,16 @@ const HAVA_DONGUSU = 9000
 /** Türe göre örnek m² fiyatı (vitrin için; gerçek fiyat hesaptan gelir). */
 const ORNEK_FIYAT: Record<Tur, number> = { arsa: 2450, tarla: 380, villa: 6200, ticari: 9800, bag: 720, kat: 4600 }
 
+/** Yüzen etiketlerin türe göre örnek içeriği (vitrin; gerçek değerler hesaptan gelir). */
+const OZET: Record<Tur, { alan: number; etiket: string; risk: [string, string]; riskTon: 'ok' | 'dikkat' }> = {
+  arsa: { alan: 1250, etiket: 'imarlı arsa', risk: ['Fay', 'düşük risk'], riskTon: 'ok' },
+  tarla: { alan: 8400, etiket: 'tarım arazisi', risk: ['Sulama', 'kanal yakın'], riskTon: 'ok' },
+  villa: { alan: 640, etiket: 'villa arsası', risk: ['Manzara', 'deniz cepheli'], riskTon: 'ok' },
+  ticari: { alan: 920, etiket: 'ticari imarlı', risk: ['Cephe', 'ana cadde'], riskTon: 'ok' },
+  bag: { alan: 3200, etiket: 'meyve bağı', risk: ['Su', 'kuyu mevcut'], riskTon: 'ok' },
+  kat: { alan: 1800, etiket: 'apartman projesi', risk: ['Arsa payı', 'önerilen %46'], riskTon: 'dikkat' },
+}
+
 function azaltilmisHareket(): boolean {
   return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
@@ -72,6 +82,8 @@ export function Hero() {
   const [alan, setAlan] = useState('')
   const alanId = 'hero-alan'
   const fiyat = useTween(fiyatHedef)
+  const ozet = OZET[tur]
+  const ozetAlan = useTween(ozet.alan, 800)
 
   const sec = (t: Tur) => { setSecildi(true); setTur(t) }
 
@@ -168,16 +180,16 @@ export function Hero() {
               <strong>₺{Math.round(fiyat).toLocaleString('tr-TR')}</strong>
               <small>/ m²</small>
             </div>
-            <span className={styles.leader} aria-hidden="true" />
             <div className={`${styles.floatChip} ${styles.chipArea}`}>
               <span className={styles.dot} aria-hidden="true" />
-              <strong>1.250 m²</strong>
-              <small>imarlı arsa</small>
+              <strong>{Math.round(ozetAlan).toLocaleString('tr-TR')} m²</strong>
+              <small key={tur} className={styles.swap}>{ozet.etiket}</small>
             </div>
             <div className={`${styles.floatChip} ${styles.chipRisk}`}>
-              <span className={`${styles.dot} ${styles.dotSage}`} aria-hidden="true" />
-              <strong>Fay</strong>
-              <small>düşük risk</small>
+              <span className={`${styles.dot} ${ozet.riskTon === 'ok' ? styles.dotSage : ''}`} aria-hidden="true" />
+              <span key={tur} className={styles.swap}>
+                <strong>{ozet.risk[0]}</strong> <small>{ozet.risk[1]}</small>
+              </span>
             </div>
           </div>
 

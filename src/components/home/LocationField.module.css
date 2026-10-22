@@ -5,8 +5,10 @@
 
 .field {
   display: grid;
+  align-content: center;
   gap: 2px;
-  padding: 9px 12px 9px 16px;
+  height: 62px;
+  padding: 0 12px 0 16px;
   border-radius: 16px;
   background-color: var(--surface-2);
 }
@@ -133,7 +135,10 @@
 }
 
 .msg:not(:empty) {
-  margin-top: 6px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
 }
 
 @media (hover: hover) and (pointer: fine) {

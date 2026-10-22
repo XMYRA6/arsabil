@@ -83,15 +83,17 @@
 
 .fields {
   display: grid;
-  align-items: start;
+  align-items: stretch;
   grid-template-columns: minmax(0, 1fr) 100px;
   gap: 10px;
 }
 
 .field {
   display: grid;
+  align-content: center;
   gap: 2px;
-  padding: 9px 16px;
+  height: 62px;
+  padding: 0 16px;
   border-radius: 16px;
   background-color: var(--surface-2);
 }
@@ -195,8 +197,8 @@
 }
 
 .priceTag {
-  top: 20%;
-  left: 33%;
+  top: 4%;
+  left: 4%;
   padding: 11px 20px;
   font-size: 26px;
 }
@@ -204,16 +206,6 @@
 .priceTag small {
   font-size: 15px;
   color: var(--ink-secondary);
-}
-
-.leader {
-  position: absolute;
-  z-index: 1;
-  top: 30%;
-  left: 45%;
-  width: 2px;
-  height: 10%;
-  background-color: var(--amber);
 }
 
 .floatChip {
@@ -242,6 +234,22 @@
   height: 9px;
   border-radius: 50%;
   background-color: var(--amber);
+}
+
+.swap {
+  display: inline-block;
+  animation: swapIn 320ms var(--ease-out);
+}
+
+@keyframes swapIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .dotSage {
@@ -315,9 +323,6 @@
   .floatChip {
     display: none;
   }
-  .leader {
-    display: none;
-  }
   .weather {
     position: static;
     margin-bottom: 8px;
@@ -330,6 +335,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .swap {
+    animation: none;
+  }
   .submit,
   .productBtn {
     transition: none;
