@@ -6,8 +6,16 @@
   pointer-events: none;
 }
 
-.desktop > nav > div {
+.desktop > nav > div,
+.themeSlot {
   pointer-events: auto;
+}
+
+/* Tema düğmesi Figma'daki pill'in parçası değil: sağ üst köşede, pill'in dışında. */
+.themeSlot {
+  position: absolute;
+  top: 28px;
+  right: 24px;
 }
 
 .right {

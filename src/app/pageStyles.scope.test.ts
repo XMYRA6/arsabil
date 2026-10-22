@@ -19,17 +19,10 @@ describe('anasayfa Apple Liquid Glass — hero kicker', () => {
     expect(body).toMatch(/font-weight:\s*600/);
   });
 
-  it('page.tsx heroBadge kullanmıyor; kicker Hero bileşeninde (2026-10 Arazi yenilemesi)', () => {
+  it('page.tsx heroBadge kullanmıyor; Hero bileşeninde emoji/pill ikonu yok', () => {
     const heroTsx = fs.readFileSync(path.join(__dirname, '../components/home/Hero.tsx'), 'utf8');
     expect(pageTsx).not.toMatch(/styles\.heroBadge/);
-    expect(heroTsx).toMatch(/styles\.kicker/);
-  });
-
-  it('Hero kicker metninde emoji/pill ikonu yok (sade metin)', () => {
-    const heroTsx = fs.readFileSync(path.join(__dirname, '../components/home/Hero.tsx'), 'utf8');
-    const kickerLineMatch = heroTsx.match(/styles\.kicker[^>]*>([^<]*)</);
-    expect(kickerLineMatch).not.toBeNull();
-    expect(kickerLineMatch![1]).not.toMatch(/✨/);
+    expect(heroTsx).not.toMatch(/✨/);
   });
 });
 

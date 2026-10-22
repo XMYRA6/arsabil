@@ -52,7 +52,7 @@ describe('/ — auth x viewport dallanmasi', () => {
         (useSession as jest.Mock).mockReturnValue({ data: null, status: 'unauthenticated' })
         viewportKur(false)
         render(<HomePage />)
-        expect(await screen.findByText(/Arsanın gerçek değerini/)).toBeInTheDocument()
+        expect(await screen.findByText(/Arsanı bil\./)).toBeInTheDocument()
         expect(screen.queryByTestId('home-mobile')).toBeNull()
     })
 
@@ -60,7 +60,7 @@ describe('/ — auth x viewport dallanmasi', () => {
         (useSession as jest.Mock).mockReturnValue({ data: { user: { name: 'Test' } }, status: 'authenticated' })
         viewportKur(true)
         render(<HomePage />)
-        expect(await screen.findByText(/Arsanın gerçek değerini/)).toBeInTheDocument()
+        expect(await screen.findByText(/Arsanı bil\./)).toBeInTheDocument()
         expect(screen.queryByTestId('home-mobile')).toBeNull()
     })
 
@@ -69,19 +69,19 @@ describe('/ — auth x viewport dallanmasi', () => {
         viewportKur(false)
         render(<HomePage />)
         expect(await screen.findByTestId('home-mobile')).toBeInTheDocument()
-        expect(screen.queryByText(/Arsanın gerçek değerini/)).toBeNull()
+        expect(screen.queryByText(/Arsanı bil\./)).toBeNull()
     })
 
     it('giris durumu hala "loading" iken (viewport zaten belli), pazarlama sayfasi hemen gorunur', async () => {
         (useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
         viewportKur(false)
         render(<HomePage />)
-        expect(await screen.findByText(/Arsanın gerçek değerini/)).toBeInTheDocument()
+        expect(await screen.findByText(/Arsanı bil\./)).toBeInTheDocument()
         expect(screen.queryByTestId('home-mobile')).toBeNull()
     })
 
     it('SSR ilk render pazarlama sayfasini basar (viewport/oturum cozulmeden)', () => {
         (useSession as jest.Mock).mockReturnValue({ data: null, status: 'loading' })
-        expect(renderToStaticMarkup(<HomePage />)).toContain('Arsanın gerçek değerini')
+        expect(renderToStaticMarkup(<HomePage />)).toContain('Arsanı bil.')
     })
 })

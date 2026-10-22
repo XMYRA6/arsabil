@@ -9,7 +9,8 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 10px 20px;
+  width: min(872px, 100%);
+  padding: 11px 11px 11px 23px;
   background-color: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
@@ -26,7 +27,8 @@
 .links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
+  margin-left: 24px;
 }
 
 .link {
@@ -44,6 +46,7 @@
 .right {
   display: flex;
   align-items: center;
+  margin-left: auto;
 }
 
 @media (hover: hover) and (pointer: fine) {

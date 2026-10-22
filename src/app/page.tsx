@@ -597,9 +597,9 @@ function FaqAccordion() {
 ═══════════════════════════════════════════ */
 function MarketingHomePage() {
   return (
+    <>
+    <Hero />
     <div className={styles.container}>
-
-      <Hero />
 
       <DegerHookBox />
 
@@ -766,6 +766,7 @@ function MarketingHomePage() {
       </section>
 
     </div>
+    </>
   );
 }
 

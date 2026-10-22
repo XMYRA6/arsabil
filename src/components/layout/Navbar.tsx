@@ -56,7 +56,6 @@ export function Navbar() {
 
     const right = (
         <div className={styles.right}>
-            <ThemeToggle />
             {status === "loading" ? null : session ? (
                 <>
                     <Link href="/notifications" className={styles.iconBtn} aria-label="Bildirimler">
@@ -114,6 +113,9 @@ export function Navbar() {
                     logo={<ArsabilLogo size={28} showText />}
                     right={right}
                 />
+                <div className={styles.themeSlot}>
+                    <ThemeToggle />
+                </div>
             </header>
             {!hiddenOnMobile && (
                 <header className={styles.mobileBar}>

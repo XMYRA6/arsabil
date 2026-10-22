@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { Hero } from './Hero'
 
 jest.mock('next/link', () => ({
@@ -18,15 +18,14 @@ beforeEach(() => {
 describe('Hero', () => {
   it('başlık ve iki çağrı bağlantısı', () => {
     render(<Hero />)
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Arsanın gerçek değerini')
-    expect(screen.getByRole('link', { name: 'Hemen hesapla' })).toHaveAttribute('href', '/hesapla')
-    expect(screen.getByRole('link', { name: 'Arsamın değerini öğren' })).toHaveAttribute('href', '/deger')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Arsanı bil. Değerini gör.')
+    expect(screen.getByRole('link', { name: /Değerini hesapla/ }).getAttribute('href')).toMatch(/^\/deger\?/)
   })
-  it('varsayılan sahne villa gündüz; tür çipi sahneyi değiştirir', () => {
+  it('varsayılan sahne arsa gündüz; tür çipi sahneyi değiştirir', () => {
     render(<Hero />)
     const stage = screen.getByTestId('diorama-stage')
-    expect(stage).toHaveAttribute('data-scene-id', 'villa_modern_duz_gunduz')
-    fireEvent.click(screen.getByRole('button', { name: 'Tarla' }))
+    expect(stage.getAttribute('data-scene-id')).toMatch(/^arsa_.*_duz_gunduz$/)
+    fireEvent.click(within(screen.getByRole('group', { name: 'Arazi türü' })).getByRole('button', { name: 'Tarla' }))
     expect(stage).toHaveAttribute('data-scene-id', 'tarla_bugday_duz_gunduz')
   })
   it('hava segmenti sahnenin havasını değiştirir', () => {
@@ -36,13 +35,28 @@ describe('Hero', () => {
   })
   it('zaman temaya bağlı: koyu tema → gece, tema değişince güncellenir', async () => {
     render(<Hero />)
-    expect(screen.getByTestId('diorama-stage')).toHaveAttribute('data-scene-id', 'villa_modern_duz_gunduz')
+    expect(screen.getByTestId('diorama-stage').getAttribute('data-scene-id')).toMatch(/_gunduz$/)
     await act(async () => { document.documentElement.setAttribute('data-theme', 'dark') })
-    expect(screen.getByTestId('diorama-stage')).toHaveAttribute('data-scene-id', 'villa_modern_duz_gece')
+    expect(screen.getByTestId('diorama-stage')).toHaveAttribute('data-scene-id', expect.stringMatching(/_gece$/))
   })
-  it('fiyat etiketi örnek olarak işaretli; TKGM ifadesi yok', () => {
+  it('Kat Karşılığı ürünü sahneyi ve bağlantıyı değiştirir', () => {
+    render(<Hero />)
+    fireEvent.click(screen.getByRole('button', { name: 'Kat Karşılığı Fizibilite' }))
+    expect(screen.getByTestId('diorama-stage').getAttribute('data-scene-id')).toMatch(/^kat_/)
+    expect(screen.getByRole('link', { name: /Fizibiliteyi hesapla/ }).getAttribute('href')).toMatch(/^\/hesapla\?/)
+  })
+  it('hızlı hesap konum ve alanı bağlantıya taşır', () => {
+    render(<Hero />)
+    fireEvent.change(screen.getByLabelText(/İl · İlçe/), { target: { value: 'Trabzon · Akçaabat' } })
+    fireEvent.change(screen.getByLabelText(/Alan/), { target: { value: '1.250 abc' } })
+    const href = screen.getByRole('link', { name: /Değerini hesapla/ }).getAttribute('href')!
+    const q = new URLSearchParams(href.split('?')[1])
+    expect(q.get('alan')).toBe('1250')
+    expect(q.get('konum')).toBe('Trabzon · Akçaabat')
+  })
+  it('örnek notu var; TKGM ifadesi yok', () => {
     const { container } = render(<Hero />)
-    expect(screen.getByLabelText('Örnek fiyat etiketi')).toHaveTextContent('örnek')
+    expect(screen.getByText(/örnektir/)).toBeInTheDocument()
     expect(container.textContent).not.toMatch(/TKGM/i)
   })
 })
