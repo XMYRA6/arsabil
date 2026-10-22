@@ -1,45 +1,91 @@
 .footer {
-    background: var(--panel);
-    border-top: 1px solid var(--border);
-    padding: 3rem 1rem 1.5rem;
-    margin-top: 3rem;
-    color: var(--text);
+    margin-top: 0;
+    padding: 64px 24px 32px;
+    background-color: var(--surface-2);
+    color: var(--ink);
 }
 
 .container {
-    max-width: 1280px;
+    max-width: 1248px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
+    display: grid;
+    gap: 48px;
 }
 
+.top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+    gap: 32px;
+}
 
+.brand {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    color: var(--ink);
+}
+
+.brand p {
+    margin: 0;
+    max-width: 280px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+}
+
+.col {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+}
+
+.col h2 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.col a {
+    font-size: 14px;
+    color: var(--ink-secondary);
+    text-decoration: none;
+    transition: color var(--dur-ui) var(--ease-out);
+}
+
+.col a:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 4px;
+}
 
 .bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid var(--border);
-    padding-top: 1.5rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--muted);
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink-secondary);
 }
 
-.links {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.links a:hover {
-    color: var(--primary);
+@media (hover: hover) and (pointer: fine) {
+    .col a:hover {
+        color: var(--ink);
+    }
 }
 
 @media (max-width: 768px) {
-    .bottom {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
+    .footer {
+        padding: 40px 16px 24px;
+    }
+    .top {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .brand {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .col a {
+        transition: none;
     }
 }

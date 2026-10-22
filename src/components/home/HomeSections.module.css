@@ -1,0 +1,559 @@
+.section {
+  padding: 80px 24px;
+  background-color: var(--canvas);
+}
+
+.tint {
+  background-color: color-mix(in srgb, var(--surface-2) 55%, var(--canvas));
+}
+
+.tintDeep {
+  background-color: var(--surface-2);
+}
+
+.inner {
+  max-width: 1248px;
+  margin: 0 auto;
+}
+
+.h2,
+.h2big {
+  margin: 0 0 16px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.h2 {
+  font-size: clamp(32px, 3.6vw, 52px);
+}
+
+.h2big {
+  font-size: clamp(38px, 4.2vw, 60px);
+}
+
+.h2 span,
+.h2big span {
+  display: block;
+  color: var(--ink-secondary);
+}
+
+.h2big span {
+  color: var(--amber-text);
+}
+
+.lead {
+  margin: 0 0 40px;
+  max-width: 640px;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+}
+
+.caption {
+  margin: 20px 0 0;
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.cta small {
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+
+.btnPrimary,
+.btnAmber {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--dur-press) var(--ease-out), background-color var(--dur-ui) var(--ease-out);
+}
+
+.btnPrimary {
+  background-color: var(--blue);
+  color: var(--blue-on);
+}
+
+.btnAmber {
+  background-color: var(--amber);
+  color: #2f3b34;
+}
+
+.btnPrimary:active,
+.btnAmber:active {
+  transform: scale(0.97);
+}
+
+.btnPrimary:focus-visible,
+.btnAmber:focus-visible,
+.mini:focus-visible,
+.turCard:focus-visible,
+.waBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Ürünler */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 48px 0 24px;
+}
+
+.product {
+  position: relative;
+  min-height: 460px;
+  padding: 40px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 40px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--blue) 7%, var(--surface)) 0%, var(--surface) 70%);
+}
+
+.productText {
+  position: relative;
+  z-index: 1;
+  max-width: 300px;
+}
+
+.productText h3 {
+  margin: 0 0 12px;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.productText p {
+  margin: 0 0 24px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.productText ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.productText li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.productText li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--amber);
+}
+
+.productImg {
+  position: absolute;
+  right: -6%;
+  bottom: 70px;
+  width: 62%;
+  height: auto;
+  pointer-events: none;
+}
+
+.product .btnPrimary {
+  position: absolute;
+  left: 40px;
+  bottom: 36px;
+}
+
+.miniGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.mini {
+  display: block;
+  padding: 24px 28px 28px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background-color: var(--surface);
+  text-decoration: none;
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+
+.mini h3 {
+  margin: 20px 0 6px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mini p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.miniIcon {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+}
+
+.sage {
+  background-color: color-mix(in srgb, var(--sage) 30%, var(--surface));
+}
+.amber {
+  background-color: var(--amber-soft);
+}
+.blue {
+  background-color: var(--blue-soft);
+}
+
+/* Arazi türleri */
+.turGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.turCard {
+  display: grid;
+  align-content: end;
+  gap: 2px;
+  min-height: 300px;
+  padding: 0 16px 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 8%, var(--surface)) 0%, var(--surface) 75%);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out), border-color var(--dur-ui) var(--ease-out);
+}
+
+.turCard img {
+  width: 112%;
+  max-width: none;
+  margin: 0 -6% 16px;
+  height: auto;
+}
+
+.turCard strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.turCard small {
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.turCard:active {
+  transform: scale(0.98);
+}
+
+.turOn {
+  border-color: var(--amber);
+}
+
+/* Akif */
+.akifGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: 56px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background-color: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--ok);
+}
+
+.feat {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.feat li {
+  display: grid;
+  gap: 2px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background-color: var(--surface);
+}
+
+.feat strong {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.feat small {
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.wa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 24px;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.waText {
+  display: grid;
+  gap: 2px;
+}
+
+.waText small {
+  font-size: 15px;
+  color: var(--ink-secondary);
+}
+
+.waText strong {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.waText em {
+  font-size: 11px;
+  font-style: normal;
+  color: var(--ink-secondary);
+}
+
+.waBtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: var(--radius-pill);
+  background-color: #25a05a;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.phone {
+  justify-self: center;
+  width: min(100%, 340px);
+  overflow: hidden;
+  border: 10px solid color-mix(in srgb, var(--line) 80%, var(--surface));
+  border-radius: 44px;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.phoneBar {
+  display: grid;
+  padding: 18px 20px;
+  background-color: #2b8a6a;
+  color: #fff;
+}
+
+.phoneBar b {
+  font-size: 15px;
+}
+
+.phoneBar small {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.chat {
+  display: grid;
+  gap: 12px;
+  padding: 18px 16px 22px;
+  background-color: color-mix(in srgb, var(--surface-2) 70%, var(--surface));
+}
+
+.chat p {
+  margin: 0;
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.me {
+  justify-self: end;
+  background-color: color-mix(in srgb, var(--ok) 22%, var(--surface));
+}
+
+.bot {
+  justify-self: start;
+  background-color: var(--surface);
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick span {
+  padding: 8px 14px;
+  border: 1px solid var(--ok);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  color: var(--ok);
+}
+
+/* Adımlar */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background-color: var(--surface);
+}
+
+.stepNum {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--amber-text);
+}
+
+.step h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.step p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btnPrimary:hover {
+    background-color: color-mix(in srgb, var(--blue) 90%, var(--canvas));
+  }
+  .btnAmber:hover {
+    background-color: color-mix(in srgb, var(--amber) 90%, var(--canvas));
+  }
+  .mini:hover,
+  .turCard:hover {
+    transform: translateY(-3px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .turGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .akifGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 48px 16px;
+  }
+  .productGrid,
+  .miniGrid,
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product {
+    min-height: 420px;
+    padding: 28px;
+    border-radius: 28px;
+  }
+  .product .btnPrimary {
+    left: 28px;
+  }
+  .turGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .turCard {
+    min-height: 240px;
+  }
+  .feat {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wa {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .waBtn {
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btnPrimary,
+  .btnAmber,
+  .mini,
+  .turCard {
+    transition: none;
+  }
+}

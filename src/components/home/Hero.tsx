@@ -1,11 +1,12 @@
 'use client'
 
-import { useId, useState, useSyncExternalStore } from 'react'
+import { useId, useState } from 'react'
 import Link from 'next/link'
 import { DioramaStage } from './DioramaStage'
 import { Chip } from '@/components/ui/Chip'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
-import { listTurler, listVarianlar, type SceneValue, type Tur, type Zaman } from '@/lib/dioramas/scene'
+import { listTurler, listVarianlar, type SceneValue, type Tur } from '@/lib/dioramas/scene'
+import { useThemeZaman } from './useThemeZaman'
 import styles from './Hero.module.css'
 
 type Weather = 'gunesli' | 'bulutlu' | 'yagmurlu' | 'karli'
@@ -16,20 +17,6 @@ const WEATHER_ITEMS: { value: Weather; label: string }[] = [
   { value: 'yagmurlu', label: 'Yağmurlu' },
   { value: 'karli', label: 'Karlı' },
 ]
-
-/** Tema (`data-theme`) → zaman: açık = gündüz, koyu = gece. Sunucuda ve ilk boyamada gündüz. */
-function subscribeTheme(cb: () => void) {
-  const mo = new MutationObserver(cb)
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-  return () => mo.disconnect()
-}
-function useThemeZaman(): Zaman {
-  return useSyncExternalStore(
-    subscribeTheme,
-    () => (document.documentElement.getAttribute('data-theme') === 'dark' ? 'gece' : 'gunduz'),
-    () => 'gunduz',
-  )
-}
 
 const COPY = {
   deger: {
