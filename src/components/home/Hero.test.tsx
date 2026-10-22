@@ -2,6 +2,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { Hero } from './Hero'
 
+jest.mock('./LocationField', () => ({ LocationField: () => <div data-testid="location-field" /> }))
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ href, children, ...r }: { href: string; children: React.ReactNode }) => <a href={href} {...r}>{children}</a>,
@@ -28,10 +29,34 @@ describe('Hero', () => {
     fireEvent.click(within(screen.getByRole('group', { name: 'Arazi türü' })).getByRole('button', { name: 'Tarla' }))
     expect(stage).toHaveAttribute('data-scene-id', 'tarla_bugday_duz_gunduz')
   })
-  it('hava segmenti sahnenin havasını değiştirir', () => {
+  it('hava düğmesi yok; hava kendiliğinden değişir', () => {
+    jest.useFakeTimers()
+    jest.spyOn(Math, 'random').mockReturnValue(0.99)
     render(<Hero />)
-    fireEvent.click(screen.getByRole('radio', { name: 'Yağmurlu' }))
-    expect(screen.getByTestId('diorama-stage')).toHaveAttribute('data-weather', 'yagmurlu')
+    expect(screen.queryByRole('radio', { name: 'Yağmurlu' })).toBeNull()
+    const stage = screen.getByTestId('diorama-stage')
+    expect(stage).toHaveAttribute('data-weather', 'gunesli')
+    act(() => { jest.advanceTimersByTime(9100) })
+    expect(stage.getAttribute('data-weather')).not.toBe('gunesli')
+    jest.restoreAllMocks()
+    jest.useRealTimers()
+  })
+  it('seçilmediyse türler 5 sn’de bir döner; seçince durur', () => {
+    jest.useFakeTimers()
+    render(<Hero />)
+    const stage = screen.getByTestId('diorama-stage')
+    expect(stage.getAttribute('data-scene-id')).toMatch(/^arsa_/)
+    act(() => { jest.advanceTimersByTime(5100) })
+    expect(stage.getAttribute('data-scene-id')).toMatch(/^tarla_/)
+    fireEvent.click(within(screen.getByRole('group', { name: 'Arazi türü' })).getByRole('button', { name: 'Villa' }))
+    act(() => { jest.advanceTimersByTime(20000) })
+    expect(stage.getAttribute('data-scene-id')).toMatch(/^villa_/)
+    jest.useRealTimers()
+  })
+  it('tür kartı tekrarı yok: arazi türü çipleri yalnız sahnenin altında', () => {
+    render(<Hero />)
+    expect(screen.queryByRole('group', { name: 'Hızlı hesap arazi türü' })).toBeNull()
+    expect(screen.getAllByRole('button', { name: 'Tarla' })).toHaveLength(1)
   })
   it('zaman temaya bağlı: koyu tema → gece, tema değişince güncellenir', async () => {
     render(<Hero />)
@@ -45,14 +70,11 @@ describe('Hero', () => {
     expect(screen.getByTestId('diorama-stage').getAttribute('data-scene-id')).toMatch(/^kat_/)
     expect(screen.getByRole('link', { name: /Fizibiliteyi hesapla/ }).getAttribute('href')).toMatch(/^\/hesapla\?/)
   })
-  it('hızlı hesap konum ve alanı bağlantıya taşır', () => {
+  it('hızlı hesap alanı bağlantıya taşır (yalnız rakam)', () => {
     render(<Hero />)
-    fireEvent.change(screen.getByLabelText(/İl · İlçe/), { target: { value: 'Trabzon · Akçaabat' } })
     fireEvent.change(screen.getByLabelText(/Alan/), { target: { value: '1.250 abc' } })
     const href = screen.getByRole('link', { name: /Değerini hesapla/ }).getAttribute('href')!
-    const q = new URLSearchParams(href.split('?')[1])
-    expect(q.get('alan')).toBe('1250')
-    expect(q.get('konum')).toBe('Trabzon · Akçaabat')
+    expect(new URLSearchParams(href.split('?')[1]).get('alan')).toBe('1250')
   })
   it('örnek notu var; TKGM ifadesi yok', () => {
     const { container } = render(<Hero />)

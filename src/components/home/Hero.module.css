@@ -83,6 +83,7 @@
 
 .fields {
   display: grid;
+  align-items: start;
   grid-template-columns: minmax(0, 1fr) 100px;
   gap: 10px;
 }
