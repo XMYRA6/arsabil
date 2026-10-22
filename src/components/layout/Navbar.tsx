@@ -67,16 +67,7 @@ export function Navbar() {
                 {/* --- HEADER LEFT: Logo & Main Navigation --- */}
                 <div className={styles.navLeft}>
                     <Link href="/" className={styles.logoIcon} onClick={() => setIsMenuOpen(false)}>
-                        <svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="40" height="40" rx="12" fill="url(#paint0_linear)" />
-                            <circle cx="20" cy="20" r="8" fill="rgba(0,0,0,0.3)" />
-                            <defs>
-                                <linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                                    <stop stopColor="#1f6feb" />
-                                    <stop offset="1" stopColor="#2b7cff" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
+                        <img src="/icon.svg" width={32} height={32} alt="" aria-hidden="true" />
                         <div className={`${styles.logoText} ${isCompactOnMobile ? styles.hideMobile : ""}`}>ArsaBil</div>
                     </Link>
 

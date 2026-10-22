@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { IconBox, IconFile, IconHome, IconMessage, IconUser, type IconProps } from '@/components/icons';
+import { IconCalculator, IconHome, IconMessage, IconPin, IconUser } from '@/components/icons';
 import { useKeyboardInset } from '@/components/mobile/useKeyboardInset';
-import styles from './BottomNavbar.module.css';
+import { TabBar } from './TabBar';
 
 interface Conversation {
     unreadCount: number;
@@ -18,12 +17,12 @@ export const BOTTOMNAV_HIDDEN_PATHS = ['/login', '/register'] as const;
 /** Alt cubugun gizlendigi yol onekleri: sohbet, wizard, ilan detay. */
 const HIDDEN_PREFIXES = ['/inbox/', '/listings/new', '/listing/'] as const;
 
-const TABS: { href: string; label: string; Icon: React.ComponentType<IconProps> }[] = [
-    { href: '/marketplace', label: 'Pazar', Icon: IconBox },
-    { href: '/dashboard/reports', label: 'Raporlar', Icon: IconFile },
-    { href: '/', label: 'Ana sayfa', Icon: IconHome },
-    { href: '/inbox', label: 'Mesajlar', Icon: IconMessage },
-    { href: '/dashboard/profile', label: 'Profil', Icon: IconUser },
+const TABS = [
+    { href: '/', label: 'Ana sayfa', icon: <IconHome size={22} /> },
+    { href: '/hesapla', label: 'Hesapla', icon: <IconCalculator size={22} /> },
+    { href: '/marketplace', label: 'Pazar', icon: <IconPin size={22} /> },
+    { href: '/akif', label: 'Akif', icon: <IconMessage size={22} /> },
+    { href: '/dashboard/profile', label: 'Profil', icon: <IconUser size={22} /> },
 ];
 
 export function BottomNavbar() {
@@ -72,39 +71,12 @@ export function BottomNavbar() {
         HIDDEN_PREFIXES.some(p => (pathname ?? '').startsWith(p));
     if (hidden) return null;
 
-    const showBadge = status === 'authenticated' && unreadTotal > 0;
-    const unreadLabel = unreadTotal > 9 ? '9+' : String(unreadTotal);
+    // Klavye açıkken alt menü gizlenir (yazma alanını kapatmasın).
+    if (viewportInset > 80) return null;
 
-    return (
-        <nav
-            className={styles.bottomNav}
-            style={{ '--keyboard-inset': `${viewportInset}px` } as React.CSSProperties}
-        >
-            {TABS.map(({ href, label, Icon }) => {
-                const active = pathname === href;
-                return (
-                    <Link
-                        key={href}
-                        href={href}
-                        className={`${styles.navItem} ${active ? styles.active : ''}`}
-                        aria-current={active ? 'page' : undefined}
-                    >
-                        <span className={styles.iconWrap}>
-                            <Icon size={21} strokeWidth={active ? 2.4 : 2} />
-                            {href === '/inbox' && showBadge && (
-                                // Gorsel olarak yalnizca sayi; ekran okuyucuya
-                                // ne oldugu soylenir. `role="status"` KULLANILMAZ:
-                                // canli bolge her sayac degisiminde yeniden
-                                // duyurur, `aria-label` tek basina yeterli.
-                                <span className={styles.badge} aria-label={`${unreadTotal} okunmamış mesaj`}>
-                                    {unreadLabel}
-                                </span>
-                            )}
-                        </span>
-                        <span className={styles.label}>{label}</span>
-                    </Link>
-                );
-            })}
-        </nav>
-    );
+    // Okunmamış mesaj/bildirim varsa Profil sekmesinde nokta (sayı değil).
+    const hasUnread = status === 'authenticated' && unreadTotal > 0;
+    const tabs = TABS.map(t => (t.href === '/dashboard/profile' ? { ...t, dot: hasUnread } : t));
+
+    return <TabBar tabs={tabs} activeHref={pathname ?? '/'} />;
 }
