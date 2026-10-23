@@ -41,9 +41,8 @@ describe('mobil token katmani', () => {
         // kopyalamaz. Kopyalasaydi token degisiminde sessizce eskirdi.
         expect(inside).toMatch(/backdrop-filter:\s*var\(--m-glass-blur\)/)
         expect(inside).toMatch(/-webkit-backdrop-filter:\s*var\(--m-glass-blur\)/)
-        // Token'in kendisi tasarim handoff'undaki degeri tasimali (2026-08-04
-        // "Derin Cam" B varyanti — lead onayi).
-        expect(inside).toMatch(/--m-glass-blur:\s*blur\(42px\)\s+saturate\(220%\)/)
+        // 2026-10 Arazi yenilemesi: cam bulanikligi kaldirildi, yuzey duz.
+        expect(inside).toMatch(/--m-glass-blur:\s*none/)
     })
 
     it("mevcut --seal-* token'lari SILINMEMIS", () => {
@@ -56,27 +55,28 @@ describe('mobil token katmani', () => {
         expect(pageCss).toMatch(/--seal-accent\s*:/)
     })
 
-    it('mono token JetBrains Mono ve tabular-nums iceriyor', () => {
+    it('sayi tokeni Inter (Arazi) ve tabular-nums iceriyor', () => {
         const inside = mobileBlock()
-        expect(inside).toMatch(/--m-mono:[^;]*JetBrains Mono/)
+        expect(inside).toMatch(/--m-mono:\s*Inter/)
         expect(inside).toMatch(/font-variant-numeric:\s*tabular-nums/)
     })
 
-    it("B varyanti (2026-08-04): radius ve golge olcegi buyudu", () => {
+    it("Arazi yenilemesi (2026-10): radius, golge ve renkler Arazi tokenlarina esli", () => {
         const inside = mobileBlock()
-        expect(inside).toMatch(/--m-r-card:\s*30px/)
-        expect(inside).toMatch(/--m-r-btn:\s*15px/)
-        expect(inside).toMatch(/--m-r-input:\s*17px/)
-        expect(inside).toMatch(/--m-r-chip:\s*12px/)
-        expect(inside).toMatch(/--m-sh-card:\s*0 22px 52px rgba\(20,70,150,\.20\)/)
-        expect(inside).toMatch(/--m-ink:\s*#081729/)
-        expect(inside).toMatch(/--m-success-text:\s*#067a56/)
+        expect(inside).toMatch(/--m-r-card:\s*28px/)
+        expect(inside).toMatch(/--m-r-btn:\s*999px/)
+        expect(inside).toMatch(/--m-r-input:\s*16px/)
+        expect(inside).toMatch(/--m-r-chip:\s*999px/)
+        expect(inside).toMatch(/--m-sh-card:\s*var\(--shadow-card\)/)
+        expect(inside).toMatch(/--m-ink:\s*var\(--ink\)/)
+        expect(inside).toMatch(/--m-grad-btn:\s*var\(--blue\)/)
+        expect(inside).toMatch(/--m-mesh:\s*none/)
     })
 
-    it("B varyanti: r-inner ve bottombar golgesi BILEREK degismedi (spec kapsami disinda)", () => {
+    it("Arazi yenilemesi: gradyan/mesh yok, r-inner 20px", () => {
         const inside = mobileBlock()
         expect(inside).toMatch(/--m-r-inner:\s*20px/)
-        expect(inside).toMatch(/--m-sh-bottombar:\s*0 -8px 30px rgba\(20,70,150,\.08\)/)
+        expect(inside).not.toMatch(/--m-(grad-btn|grad-accent|mesh):\s*[^;]*gradient/)
     })
 })
 
@@ -128,14 +128,14 @@ describe('Kart tekdüzeliği düzeltmesi — paylaşılan yüzey sınıfları (2
         expect(mobileBlock()).toMatch(/\.mRowList:focus-visible\s*\{[^}]*box-shadow:\s*var\(--focus-ring\)/)
     })
 
-    it('--m-panel tema-bagimsiz sabit acik bir yuzey tanimlar (--panel DEGIL — o [data-theme]e gore degisir ve --m-ink/--m-body gibi light-only metin tokenlariyla dark temada catisirdi)', () => {
-        expect(mobileBlock()).toMatch(/--m-panel:\s*#fff/i)
+    it('--m-panel tema-duyarli yuzey (--surface) tanimlar; metin tokenlari (--m-ink/--m-body) da ayni sekilde tema-duyarli', () => {
+        expect(mobileBlock()).toMatch(/--m-panel:\s*var\(--surface\)/)
     })
 })
 
 describe('Faz 2 — fotograf iceren ilan karti yuzeyi (2026-08-15)', () => {
-    it('--m-font-serif tanimli', () => {
-        expect(mobileBlock()).toMatch(/--m-font-serif:\s*Georgia/)
+    it('--m-font-serif tanimli (Arazi: serif kalkti, govde fontunu miras alir)', () => {
+        expect(mobileBlock()).toMatch(/--m-font-serif:\s*inherit/)
     })
 
     it('.editorialListingCard panel yuzeyi + overflow:hidden + link sifirlama tanimlar, cam/blur YOK', () => {

@@ -254,72 +254,51 @@ a {
      masaustu duzenini de degistirir. globalsMobile.scope.test.ts bunu
      dogruluyor. Mevcut --seal-* token'lari silinmez, mobilde kullanilmaz. */
   :root {
-    --m-bg: #f2f7ff;
-    --m-mesh:
-      radial-gradient(680px 420px at 12% -6%, rgba(43,124,255,.55), transparent 62%),
-      radial-gradient(560px 420px at 96% 8%,  rgba(34,211,238,.5), transparent 60%),
-      radial-gradient(620px 520px at 78% 96%, rgba(124,58,237,.34), transparent 62%),
-      radial-gradient(520px 380px at 4% 86%,  rgba(16,185,129,.16), transparent 60%);
+    /* 2026-10 "Arazi" yenilemesi: mobil token'lar artık Arazi paletine (tokens-arazi.css) eşlenir,
+       tema-duyarlıdır (açık/koyu). Eski "Liquid Glass" mavi gradyan, cam bulanıklığı ve serif/mono
+       fontlar kaldırıldı; adlar korunur ki 30+ mobil dosya değişmeden yeni görünüme geçsin. */
+    --m-bg: var(--canvas);
+    --m-mesh: none;
 
-    /* Impeccable audit (2026-09-17): --m-grad-btn ile AYNI kontrast sorunu —
-       bu token `.sonucKarti` (hesapla mobil sonuç kartı) gibi yüzeylerin
-       arka planı, üzerine yerleşen beyaz metin (`.sonucBosMetin`) dedektörün
-       flag'lediği 5 low-contrast öğeden biriydi. Aynı düzeltilmiş üç renk
-       (bkz. --m-grad-btn) buraya da uygulandı, durak yüzdeleri (%0/46/118)
-       korundu. */
-    --m-grad-accent: linear-gradient(135deg, #2f6fe0 0%, #1f6feb 46%, #0e7490 118%);
-    /* Impeccable audit (2026-09-17): beyaz metin bu gradyanın üzerinde
-       WCAG AA'nın (4.5:1) çok altındaydı — ölçülen en kötü nokta (#22d3ee)
-       1.8:1, hatta başlangıç ucu (#4f9bff) da yalnızca 2.8:1 idi; yalnızca
-       %60 durağı (#1f6feb) barely geçiyordu (4.63:1). Aynı "mavi→camgöbeği"
-       kimliği korunarak üç durak da beyaz metnin ≥4.5:1 geçtiği bir
-       parlaklık aralığına çekildi (yeni: 4.70:1 / 4.63:1 / 5.35:1) — bu
-       token site genelinde (dashboard/hesapla/inbox/marketplace/login vb.
-       ~30 dosya) birincil CTA arka planı olarak kullanılıyor, tek noktadan
-       düzeltme hepsini kapsıyor. */
-    --m-grad-btn: linear-gradient(135deg, #2f6fe0, #1f6feb 60%, #0e7490);
+    --m-grad-accent: var(--blue);
+    --m-grad-btn: var(--blue);
 
-    --m-ink: #081729;
-    --m-body: #4c5d78;
-    --m-on-glass: #12325a;
-    --m-link: #1560d0;
+    --m-ink: var(--ink);
+    --m-body: var(--ink-secondary);
+    --m-on-glass: var(--ink);
+    --m-link: var(--blue);
 
-    --m-glass-bg: rgba(238,246,255,.58);
-    --m-glass-border: rgba(255,255,255,.85);
-    --m-glass-blur: blur(42px) saturate(220%);
-    --m-fill: rgba(11,32,54,.05);
-    --m-divider: rgba(11,32,54,.07);
-    --m-panel: #ffffff;
-    /* Faz 2 (2026-08-15): yalnizca .editorialListingCard basliginda kullanilir
-       (onaylanan mockup: https://claude.ai/code/artifact/3b9656aa-a9fa-4bdd-a778-
-       1c9631f5c0e6) — genel bir site-geneli font migrasyonu DEGIL, Inter govde/UI
-       metninde kalir. */
-    --m-font-serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --m-glass-bg: var(--surface);
+    --m-glass-border: var(--line);
+    --m-glass-blur: none;
+    --m-fill: var(--surface-2);
+    --m-divider: var(--line);
+    --m-panel: var(--surface);
+    --m-font-serif: inherit;
 
-    --m-success: #10b981;
-    --m-success-text: #067a56;
-    --m-warn: #f59e0b;
-    --m-danger: #ff2d55;
+    --m-success: var(--ok);
+    --m-success-text: var(--ok);
+    --m-warn: var(--amber);
+    --m-danger: var(--bad);
 
-    --m-r-chip: 12px;
-    --m-r-btn: 15px;
-    --m-r-input: 17px;
+    --m-r-chip: 999px;
+    --m-r-btn: 999px;
+    --m-r-input: 16px;
     --m-r-inner: 20px;
-    --m-r-card: 30px;
-    --m-r-sheet: 30px;
+    --m-r-card: 28px;
+    --m-r-sheet: 28px;
 
-    --m-sh-card: 0 22px 52px rgba(20,70,150,.20);
-    --m-sh-card-sm: 0 6px 18px rgba(20,70,150,.10);
-    --m-sh-grad-card: 0 26px 64px rgba(31,111,235,.46);
-    --m-sh-grad-btn: 0 12px 28px rgba(43,124,255,.38);
-    --m-sh-sheet: 0 -18px 50px rgba(11,32,54,.22);
-    --m-sh-bottombar: 0 -8px 30px rgba(20,70,150,.08);
+    --m-sh-card: var(--shadow-card);
+    --m-sh-card-sm: var(--shadow-card);
+    --m-sh-grad-card: var(--shadow-card);
+    --m-sh-grad-btn: none;
+    --m-sh-sheet: 0 -18px 50px rgba(47, 59, 52, .18);
+    --m-sh-bottombar: 0 -8px 30px rgba(47, 59, 52, .08);
 
-    --m-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --m-mono: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
     /* Sayfa govdesinin alt cubuk icin birakmasi gereken bosluk. Cubugun
-       gercek yuksekliginden TURETILIR; 85px sabiti bayattı (cubuk 96px) ve
-       icerik cubugun 11px altina giriyordu. */
+       gercek yuksekliginden TURETILIR. */
     --mobile-nav-pb: var(--bottomnav-height);
   }
 
@@ -330,7 +309,7 @@ a {
     border: 1px solid var(--m-glass-border);
     backdrop-filter: var(--m-glass-blur);
     -webkit-backdrop-filter: var(--m-glass-blur);
-    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+    box-shadow: var(--m-sh-card);
   }
 
   /* Tum rakamlar mono + tabular. Sayilarin siralar arasi kaymamasi icin. */

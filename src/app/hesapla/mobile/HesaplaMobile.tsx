@@ -130,10 +130,8 @@ export function HesaplaMobile({
                     ayarlar" butonuna tasindi — gelismis ayarlara TEK kapi
                     (spec K4/K5). */}
                 <header className={styles.headerRow}>
-                    <div className={styles.logoBox} aria-hidden="true">
-                        <div className={styles.logoDot} />
-                    </div>
-                    <span className={styles.headerTitle}>Hesapla</span>
+                    <p className={styles.headerKicker}>Kat karşılığı fizibilite</p>
+                    <h1 className={styles.headerTitle}>Arsa payını ve minimum daire fiyatını hesapla</h1>
                 </header>
 
                 {studioScenarioAcik

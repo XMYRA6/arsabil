@@ -86,7 +86,7 @@
     justify-content: center;
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 999px;
     padding: 6px 8px;
     font-size: 0.85rem;
     font-weight: 600;
@@ -95,9 +95,9 @@
 }
 
 .riskPillActive {
-    background: rgba(59, 130, 246, 0.12);
-    border-color: #3b82f6;
-    color: #3b82f6;
+    background: var(--amber-soft);
+    border-color: var(--amber);
+    color: var(--ink);
 }
 
 .riskNote {
@@ -175,8 +175,8 @@
     .editBtn { color: var(--m-link); }
 
     .riskSection, .areaSection {
-        background: rgba(11, 32, 54, .055);
-        border: 1px solid rgba(11, 32, 54, .07);
+        background: var(--surface-2);
+        border: none;
         border-radius: var(--m-r-inner);
     }
     .riskHeader { color: var(--m-body); }
@@ -189,23 +189,23 @@
     .riskPill {
         background: transparent;
         border: none;
-        border-radius: 12px;
-        color: var(--m-on-glass);
+        border-radius: 999px;
+        color: var(--ink-secondary);
         min-height: 44px;
     }
     .riskPillActive {
-        background: var(--m-grad-btn);
-        color: #fff;
-        box-shadow: var(--m-sh-grad-btn);
+        background: var(--amber);
+        color: var(--ink);
+        box-shadow: none;
         border: none;
     }
 
-    .areaStatus { color: #b45309; }
+    .areaStatus { color: var(--amber-text); }
     .areaStatusOk { color: var(--m-success-text); }
 
     .areaInputRow input {
-        background: #f8fafd;
-        border: 1px solid rgba(11, 32, 54, .14);
+        background: var(--surface);
+        border: 1px solid var(--line);
         border-radius: var(--m-r-input);
         color: var(--m-ink);
         font-size: 16px;
