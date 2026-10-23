@@ -1,197 +1,35 @@
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem 1rem 6rem;
+/* Kullanıcı profili — Figma 10 (Kullanıcı profili · Masaüstü). Arazi tokenları. */
+.container { max-width: 1000px; margin: 0 auto; padding: 32px 24px 72px; display: flex; flex-direction: column; gap: 24px; color: var(--ink); }
+.header { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding: 28px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.avatarCircle, .avatarImg { flex: none; width: 88px; height: 88px; border-radius: 50%; object-fit: cover; }
+.avatarCircle { display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--ink); font: 700 30px Inter, sans-serif; }
+.headerBody { flex: 1; min-width: 220px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.name { margin: 0; font: 700 28px/1.15 Inter, sans-serif; color: var(--ink); }
+.verifiedBadge { padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font: 600 12px Inter, sans-serif; }
+.bio { margin: 0; font: 500 15px/1.55 Inter, sans-serif; color: var(--ink-secondary); max-width: 60ch; }
+.links { display: flex; gap: 14px; flex-wrap: wrap; }
+.link { color: var(--blue); font: 600 14px Inter, sans-serif; text-decoration: none; }
+.ctaBtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 24px; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 15px Inter, sans-serif; text-decoration: none; }
+.ctaBtn:focus-visible, .ilanKarti:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.sectionTitle { margin: 0 0 16px; font: 700 22px Inter, sans-serif; color: var(--ink); }
+.section { padding: 22px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.section .sectionTitle { font-size: 18px; }
+.ilanGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.ilanKarti { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); color: inherit; text-decoration: none; }
+.ilanFoto { display: block; aspect-ratio: 2 / 1; background: var(--surface-2); overflow: hidden; }
+.ilanFoto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ilanGovde { display: flex; flex-direction: column; gap: 2px; padding: 14px 18px 18px; }
+.ilanBaslik { font: 700 15.5px Inter, sans-serif; color: var(--ink); }
+.ilanFiyat { font: 700 22px/1.2 Inter, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink); }
+.listRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; margin-top: 10px; border-radius: 14px; background: var(--surface-2); text-decoration: none; color: inherit; }
+.listTitle { font: 700 15px Inter, sans-serif; color: var(--ink); }
+.listMeta { font: 500 13px Inter, sans-serif; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 900px) {
+  .container { padding: 16px 16px 48px; }
+  .header { padding: 20px; gap: 16px; }
+  .ctaBtn { width: 100%; justify-content: center; min-height: 51px; }
+  .ilanGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 }
-
-.header {
-  composes: mStatSurface from global;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  border-left: 4px solid var(--primary);
-  padding: 1.5rem 2rem;
-  margin-bottom: 1.5rem;
-}
-
-@media (min-width: 769px) {
-  .header {
-    background: var(--bg-body);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-  }
-}
-
-.avatarCircle {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: white;
-  flex-shrink: 0;
-}
-
-.avatarImg {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
-
-.name {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--text);
-  margin: 0 0 4px;
-}
-
-.bio {
-  font-size: 0.875rem;
-  color: var(--muted);
-  margin: 0 0 8px;
-}
-
-.links {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.link {
-  font-size: 0.78rem;
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 700;
-}
-
-.verifiedBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--green);
-  background: rgba(var(--green-rgb),.1);
-  border-radius: 20px;
-  padding: 2px 10px;
-  margin-left: 8px;
-}
-
-.section {
-  composes: mStatSurface from global;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
-}
-
-@media (min-width: 769px) {
-  .section {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-  }
-}
-
-.sectionTitle {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin: 0 0 0.875rem;
-}
-
-.listRow {
-  composes: mFlatRow from global;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.625rem 0.75rem;
-}
-
-@media (min-width: 769px) {
-  .listRow {
-    background: var(--bg);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    margin-bottom: 6px;
-  }
-}
-
-.listTitle {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.listMeta {
-  font-size: 0.7rem;
-  color: var(--muted);
-}
-
-.ctaBtn {
-  display: inline-block;
-  margin-top: 1.5rem;
-  padding: 0.75rem 2rem;
-  background: var(--primary);
-  color: white;
-  border-radius: 12px;
-  font-weight: 800;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-@media (max-width: 768px) {
-  .container {
-    min-height: 100dvh;
-    padding: calc(16px + var(--safe-top)) 14px calc(88px + var(--safe-bottom));
-    background: var(--m-mesh), var(--m-bg);
-    color: var(--m-ink);
-  }
-
-  .header,
-  .section {
-    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-  }
-
-  .header {
-    border-left: 1px solid var(--m-divider);
-    padding: 18px;
-  }
-
-  .listRow {
-    min-height: var(--touch-target);
-  }
-
-  .name,
-  .sectionTitle,
-  .listTitle {
-    color: var(--m-ink);
-  }
-
-  .bio,
-  .listMeta {
-    color: var(--m-body);
-  }
-
-  .listMeta {
-    font-family: var(--m-mono);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .avatarCircle,
-  .ctaBtn {
-    background: var(--m-grad-btn);
-    box-shadow: var(--m-sh-grad-btn);
-  }
-
-  .verifiedBadge {
-    color: var(--m-success-text);
-    background: rgba(16, 185, 129, 0.14);
-  }
-}
+@media (max-width: 520px) { .ilanGrid { grid-template-columns: minmax(0, 1fr); } }

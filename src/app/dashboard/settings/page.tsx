@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import styles from './page.module.css';
 
 type PrefKey = 'mesaj' | 'teklif' | 'ilan';
@@ -68,20 +67,24 @@ export default function SettingsPage() {
     if (loading) return <StateCard text="Ayarlar yükleniyor..." />;
 
     return (
-        <main className={styles.settingsShell}>
-            <header className={styles.heroCard}>
-                <p className={styles.eyebrow}>Ayarlar</p>
-                <h1>Bildirim tercihleri</h1>
-                <p>E-posta akışını sakin, seçilebilir ve hızlı güncellenebilir tut.</p>
+        <main className={styles.shell}>
+            <header className={styles.headRow}>
+                <div className={styles.head}>
+                    <h1>Bildirim tercihleri</h1>
+                    <p>E-posta akışını sakin, seçilebilir ve hızlı güncellenebilir tut.</p>
+                </div>
+                <button type="button" onClick={save} disabled={saving} className={styles.btn}>
+                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                </button>
             </header>
 
-            {error && <div className={styles.alertCard} role="alert">Ayarlar kaydedilemedi. Lütfen tekrar deneyin.</div>}
-            {saved && <div className={styles.successCard} role="status">Ayarlar kaydedildi.</div>}
+            {error && <div className={styles.alert} role="alert">Ayarlar kaydedilemedi. Lütfen tekrar deneyin.</div>}
+            {saved && <div className={styles.success} role="status">Ayarlar kaydedildi.</div>}
 
-            <section className={styles.settingsCard}>
+            <section className={`${styles.card} ${styles.toggleCard}`}>
                 {PREFS.map(item => (
                     <button key={item.key} type="button" className={styles.toggleRow} onClick={() => toggle(item.key)} aria-pressed={prefs[item.key]}>
-                        <span>
+                        <span className={styles.toggleText}>
                             <strong>{item.label}</strong>
                             <small>{item.desc}</small>
                         </span>
@@ -91,25 +94,14 @@ export default function SettingsPage() {
                     </button>
                 ))}
             </section>
-
-            <div className={styles.saveBar}>
-                <button type="button" onClick={save} disabled={saving} className={styles.saveButton}>
-                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
-                </button>
-            </div>
-            <StickyActionBar variant="glass" aboveBottomNav>
-                <button type="button" onClick={save} disabled={saving} className={styles.saveButton}>
-                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
-                </button>
-            </StickyActionBar>
         </main>
     );
 }
 
 function StateCard({ text }: { text: string }) {
     return (
-        <main className={styles.settingsShell}>
-            <section className={styles.settingsCard} aria-live="polite">{text}</section>
+        <main className={styles.shell}>
+            <section className={styles.card} aria-live="polite">{text}</section>
         </main>
     );
 }

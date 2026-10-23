@@ -1,265 +1,32 @@
-.editShell,
-.settingsShell {
-    width: 100%;
-}
-
-.heroCard,
-.formCard,
-.settingsCard,
-.alertCard,
-.successCard {
-    composes: mStatSurface from global;
-}
-
-@media (min-width: 769px) {
-    .heroCard,
-    .formCard,
-    .settingsCard,
-    .alertCard,
-    .successCard {
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        background: var(--stat-bg);
-        box-shadow: var(--shadow2);
-    }
-}
-
-.heroCard {
-    padding: 24px;
-    margin-bottom: 16px;
-}
-
-.eyebrow {
-    margin: 0 0 8px;
-    color: var(--primary);
-    font-size: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-}
-
-.heroCard h1 {
-    margin: 0;
-    color: var(--card-title);
-    font-size: 28px;
-}
-
-.heroCard p {
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-weight: 600;
-}
-
-.formCard,
-.settingsCard {
-    padding: 18px;
-}
-
-.fieldGroup {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.fieldGroup span {
-    color: var(--label-color);
-    font-weight: 800;
-    font-size: 13px;
-}
-
-.fieldGroup input,
-.fieldGroup textarea {
-    width: 100%;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    color: var(--text);
-    font: 600 16px/1.35 Inter, sans-serif;
-    padding: 12px 14px;
-    outline: none;
-}
-
-.fieldGroup textarea {
-    min-height: 128px;
-    resize: vertical;
-}
-
-.toggleRow {
-    width: 100%;
-    min-height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    border: 0;
-    border-bottom: 1px solid var(--border);
-    background: transparent;
-    color: inherit;
-    text-align: left;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.toggleRow:last-child {
-    border-bottom: 0;
-}
-
-.toggleRow strong,
-.toggleRow small {
-    display: block;
-}
-
-.toggleRow strong {
-    color: var(--card-title);
-    font-size: 14px;
-}
-
-.toggleRow small {
-    color: var(--muted);
-    margin-top: 3px;
-    font-size: 12px;
-}
-
-.toggleSwitch {
-    width: 48px;
-    height: 28px;
-    border-radius: 999px;
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    padding: 3px;
-    flex-shrink: 0;
-}
-
-.toggleSwitchOn {
-    background: var(--primary);
-}
-
-.toggleKnob {
-    width: 20px;
-    height: 20px;
-    display: block;
-    border-radius: 50%;
-    background: #fff;
-    transition: transform .18s ease;
-}
-
-.toggleKnobOn {
-    transform: translateX(20px);
-}
-
-.alertCard,
-.successCard {
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    font-weight: 800;
-}
-
-.alertCard {
-    color: var(--red);
-}
-
-.successCard {
-    color: var(--green);
-}
-
-.saveBar {
-    margin-top: 16px;
-}
-
-.saveButton {
-    width: 100%;
-    min-height: 46px;
-    border: 0;
-    border-radius: 14px;
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary), var(--primary-2));
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.saveButton:disabled {
-    opacity: .65;
-    cursor: not-allowed;
-}
-
-@media (max-width: 768px) {
-    .editShell,
-    .settingsShell {
-        min-height: 100dvh;
-        margin: -2rem;
-        /* BottomNavbar + StickyActionBar (variant="glass" aboveBottomNav) ikisi
-           birlikte kaplıyor — aynı formül listing/[id]/page.module.css'te de
-           kullanılıyor (bottomnav-height zaten safe-bottom'u içeriyor). */
-        padding: calc(16px + var(--safe-top)) 14px calc(var(--bottomnav-height) + 76px);
-        background: var(--m-mesh), var(--m-bg);
-        color: var(--m-ink);
-    }
-
-    .heroCard,
-    .formCard,
-    .settingsCard,
-    .alertCard,
-    .successCard {
-        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-    }
-
-    .heroCard {
-        padding: 18px;
-    }
-
-    .eyebrow {
-        color: var(--m-link);
-        letter-spacing: 0;
-    }
-
-    .heroCard h1,
-    .fieldGroup span,
-    .toggleRow strong {
-        color: var(--m-ink);
-    }
-
-    .heroCard p,
-    .toggleRow small {
-        color: var(--m-body);
-    }
-
-    .fieldGroup input,
-    .fieldGroup textarea {
-        min-height: var(--touch-target);
-        border-radius: var(--m-r-input);
-        border: 1px solid var(--m-glass-border);
-        background: var(--m-fill);
-        color: var(--m-ink);
-        font-size: 16px;
-    }
-
-    .toggleRow {
-        min-height: 74px;
-        border-bottom: 1px solid var(--m-divider);
-    }
-
-    .toggleSwitch {
-        background: var(--m-fill);
-        border: 1px solid var(--m-glass-border);
-    }
-
-    .toggleSwitchOn {
-        background: var(--m-grad-btn);
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    /* Masaüstü-akışlı çubuk mobilde gizlenir — StickyActionBar (variant="glass",
-       aboveBottomNav) klavye/BottomNavbar-farkında sabit çubuğu devralır
-       (bkz. page.tsx). Eskiden burada bit-bit aynı bir position:fixed;bottom:0
-       kuralı vardı — hem klavye açıkken erişilemez oluyordu hem de BottomNavbar
-       (z-index 999) bu çubuğun (z-index yok) üstüne biniyordu. */
-    .saveBar {
-        display: none;
-    }
-
-    .saveButton {
-        min-height: var(--touch-target);
-        border-radius: var(--m-r-btn);
-        background: var(--m-grad-btn);
-        box-shadow: var(--m-sh-grad-btn);
-    }
+/* Profil düzenle — Figma 10 (Profil düzenle · Masaüstü). Arazi tokenları. */
+.shell { display: flex; flex-direction: column; gap: 20px; color: var(--ink); }
+.head h1 { margin: 0 0 6px; font: 700 36px/1.15 Inter, sans-serif; letter-spacing: -0.4px; color: var(--ink); }
+.head p { margin: 0; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
+.card { padding: 24px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); min-width: 0; }
+.cardTitle { margin: 0 0 14px; font: 700 20px Inter, sans-serif; color: var(--ink); }
+.btn, .btnSoft, .btnAmber { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 22px; border: 0; border-radius: 999px; font: 600 15px Inter, sans-serif; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.btn { background: var(--blue); color: var(--blue-on); }
+.btnSoft { background: var(--blue-soft); color: var(--blue); }
+.btnAmber { background: var(--amber); color: var(--ink); }
+.btn:disabled, .btnSoft:disabled, .btnAmber:disabled { opacity: .6; cursor: default; }
+.btn:focus-visible, .btnSoft:focus-visible, .btnAmber:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.alert, .success { padding: 14px 18px; border-radius: 14px; font: 600 14px Inter, sans-serif; }
+.alert { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
+.success { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span { font: 600 13px Inter, sans-serif; color: var(--ink-secondary); }
+.field input, .field textarea { width: 100%; box-sizing: border-box; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 15px Inter, sans-serif; }
+.field input { min-height: 46px; }
+.field textarea { min-height: 110px; resize: vertical; }
+.field input::placeholder, .field textarea::placeholder { color: var(--ink-secondary); }
+.field input:focus-visible, .field textarea:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.counter { font: 500 12.5px Inter, sans-serif; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+.formStack { display: flex; flex-direction: column; gap: 16px; }
+.btnRow { display: flex; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .head h1 { font-size: 28px; }
+  .head p { font-size: 14px; }
+  .card { padding: 18px; }
+  .field input, .field textarea { font-size: 16px; }
+  .btn, .btnSoft, .btnAmber { min-height: 48px; }
 }

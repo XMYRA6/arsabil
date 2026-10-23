@@ -10,6 +10,10 @@ const dosyalar: [string, string][] = [
   ['reports/page.module.css', read('reports', 'page.module.css')],
   ['panelListe.module.css', read('panelListe.module.css')],
   ['inbox.module.css', fs.readFileSync(path.join(process.cwd(), 'src/app/inbox/inbox.module.css'), 'utf8')],
+  ['profile/profile.module.css', read('profile', 'profile.module.css')],
+  ['profile/edit/page.module.css', read('profile', 'edit', 'page.module.css')],
+  ['settings/page.module.css', read('settings', 'page.module.css')],
+  ['profile/[userId]/page.module.css', fs.readFileSync(path.join(process.cwd(), 'src/app/profile/[userId]/page.module.css'), 'utf8')],
   ['notifications/page.module.css', fs.readFileSync(path.join(process.cwd(), 'src/app/notifications/page.module.css'), 'utf8')],
 ]
 

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { IlanKarti } from './IlanKarti'
 import styles from './page.module.css'
 
 interface ProfileData {
@@ -40,26 +41,36 @@ export default async function PublicProfilePage(context: { params: Promise<{ use
 
     return (
         <div className={styles.container}>
-            <div className={styles.header}>
+            <section className={styles.header}>
                 {profile.image
-                    ? <Image unoptimized src={profile.image} width={64} height={64} className={styles.avatarImg} alt="Profil fotoğrafı" />
+                    ? <Image unoptimized src={profile.image} width={88} height={88} className={styles.avatarImg} alt="Profil fotoğrafı" />
                     : <div className={styles.avatarCircle}>{getInitials(profile.name)}</div>
                 }
-                <div>
-                    <h1 className={styles.name}>
-                        {profile.name || 'Kullanıcı'}
-                        {profile.isVerified && <span className={styles.verifiedBadge}>✓ Doğrulandı</span>}
-                    </h1>
+                <div className={styles.headerBody}>
+                    <h1 className={styles.name}>{profile.name || 'Kullanıcı'}</h1>
+                    {profile.isVerified && <span className={styles.verifiedBadge}>Doğrulanmış</span>}
                     {profile.bio && <p className={styles.bio}>{profile.bio}</p>}
                     <div className={styles.links}>
-                        {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className={styles.link}>🔗 LinkedIn</a>}
-                        {profile.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className={styles.link}>🌐 Website</a>}
+                        {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className={styles.link}>LinkedIn</a>}
+                        {profile.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className={styles.link}>Website</a>}
                     </div>
                 </div>
-            </div>
+                <Link href={`/inbox?with=${profile.id}`} className={styles.ctaBtn}>Mesaj gönder</Link>
+            </section>
+
+            {profile.listings.length > 0 && (
+                <section>
+                    <h2 className={styles.sectionTitle}>Yayındaki ilanları</h2>
+                    <div className={styles.ilanGrid}>
+                        {profile.listings.map(l => (
+                            <IlanKarti key={l.id} id={l.id} baslik={l.title || l.city || 'İsimsiz İlan'} price={l.price} />
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {profile.reports.length > 0 && (
-                <div className={styles.section}>
+                <section className={styles.section}>
                     <h2 className={styles.sectionTitle}>Portfolyo ({profile.reports.length} proje)</h2>
                     {profile.reports.map(r => (
                         <div key={r.id} className={styles.listRow}>
@@ -67,22 +78,8 @@ export default async function PublicProfilePage(context: { params: Promise<{ use
                             <span className={styles.listMeta}>Arsa payı: %{(r.landShareRatio * 100).toFixed(0)}</span>
                         </div>
                     ))}
-                </div>
+                </section>
             )}
-
-            {profile.listings.length > 0 && (
-                <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>Aktif İlanlar ({profile.listings.length})</h2>
-                    {profile.listings.map(l => (
-                        <Link key={l.id} href={`/listing/${l.id}`} className={styles.listRow}>
-                            <span className={styles.listTitle}>{l.title || 'İsimsiz İlan'}</span>
-                            <span className={styles.listMeta}>{l.city || '—'} · {l.price ? l.price.toLocaleString('tr-TR') + ' ₺' : ''}</span>
-                        </Link>
-                    ))}
-                </div>
-            )}
-
-            <Link href="/marketplace" className={styles.ctaBtn}>Marketplace&apos;e Göz At →</Link>
         </div>
     )
 }

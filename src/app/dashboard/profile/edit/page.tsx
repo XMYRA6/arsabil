@@ -1,8 +1,8 @@
 "use client";
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import styles from './page.module.css';
 
 type ProfileData = {
@@ -61,49 +61,44 @@ export default function ProfileEditPage() {
     if (loading) return <StateCard text="Profil yükleniyor..." />;
 
     return (
-        <main className={styles.editShell}>
-            <header className={styles.heroCard}>
-                <p className={styles.eyebrow}>Profil düzenleme</p>
+        <main className={styles.shell}>
+            <header className={styles.head}>
                 <h1>Bilgilerini güncelle</h1>
                 <p>Hakkında metni ve profesyonel bağlantılarını portföy görünümüne taşı.</p>
             </header>
 
-            {error && <div className={styles.alertCard} role="alert">İşlem tamamlanamadı. Lütfen tekrar deneyin.</div>}
-            {saved && <div className={styles.successCard} role="status">Profil kaydedildi.</div>}
+            {error && <div className={styles.alert} role="alert">İşlem tamamlanamadı. Lütfen tekrar deneyin.</div>}
+            {saved && <div className={styles.success} role="status">Profil kaydedildi.</div>}
 
-            <section className={styles.formCard}>
-                <label className={styles.fieldGroup}>
+            <section className={`${styles.card} ${styles.formStack}`}>
+                <label className={styles.field}>
                     <span>Hakkında</span>
                     <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={300} placeholder="Kendinizi ve uzmanlık alanınızı anlatın." />
+                    <small className={styles.counter}>{bio.length} / 300</small>
                 </label>
-                <label className={styles.fieldGroup}>
+                <label className={styles.field}>
                     <span>LinkedIn</span>
                     <input value={linkedin} onChange={e => setLinkedin(e.target.value)} placeholder="https://linkedin.com/in/..." />
                 </label>
-                <label className={styles.fieldGroup}>
+                <label className={styles.field}>
                     <span>Website</span>
                     <input value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://..." />
                 </label>
+                <div className={styles.btnRow}>
+                    <button type="button" onClick={save} disabled={saving} className={styles.btn}>
+                        {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                    </button>
+                    <Link href="/dashboard/profile" className={styles.btnSoft}>Vazgeç</Link>
+                </div>
             </section>
-
-            <div className={styles.saveBar}>
-                <button type="button" onClick={save} disabled={saving} className={styles.saveButton}>
-                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
-                </button>
-            </div>
-            <StickyActionBar variant="glass" aboveBottomNav>
-                <button type="button" onClick={save} disabled={saving} className={styles.saveButton}>
-                    {saving ? 'Kaydediliyor...' : 'Kaydet'}
-                </button>
-            </StickyActionBar>
         </main>
     );
 }
 
 function StateCard({ text }: { text: string }) {
     return (
-        <main className={styles.editShell}>
-            <section className={styles.formCard} aria-live="polite">{text}</section>
+        <main className={styles.shell}>
+            <section className={styles.card} aria-live="polite">{text}</section>
         </main>
     );
 }
