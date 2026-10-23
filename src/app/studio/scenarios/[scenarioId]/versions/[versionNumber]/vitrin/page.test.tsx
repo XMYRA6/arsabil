@@ -28,6 +28,7 @@ describe('studio proje vitrini (Figma 11)', () => {
     expect(view).toContain('2B yerleşim');
     expect(view).toContain('Teklif ver');
     expect(view).toContain('Senaryoları gör');
+    expect(view).toMatch(/<ShareProposalDialog/);
   });
 
   it('eski cam/hex degerleri yerine Arazi tokenlarini kullanir', () => {

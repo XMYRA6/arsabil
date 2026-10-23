@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { resolveScene } from '@/lib/dioramas/scene';
 import { useThemeZaman } from '@/components/home/useThemeZaman';
 import { ProposalVisualCapture } from '@/components/studio/ProposalVisualCapture';
+import { ShareProposalDialog } from '@/components/studio/ShareProposalDialog';
 import type { StudioProposalViewModel } from '@/lib/studio/proposalViewModel';
 import type { StudioSnapshotDraft } from '@/lib/studio/types';
 import styles from './page.module.css';
@@ -17,6 +18,7 @@ const sayi = (n: number, d = 0) => n.toLocaleString('tr-TR', { maximumFractionDi
  * ve 2B yerleşim.
  */
 export function VitrinProje({ viewModel, snapshot }: { viewModel: StudioProposalViewModel; snapshot: StudioSnapshotDraft }) {
+  const [paylasAcik, setPaylasAcik] = useState(false);
   const zaman = useThemeZaman();
   const sahne = resolveScene({ tur: 'kat', varyant: 'bitmis', egim: 'duz', zaman });
   const { projectContext, massingAnd2D, programSummary, landownerOfferSummary, financialAssumptions } = viewModel;
@@ -45,7 +47,10 @@ export function VitrinProje({ viewModel, snapshot }: { viewModel: StudioProposal
       <div className={styles.inner}>
         <header className={styles.topBar}>
           <Link href="/dashboard/projects" className={styles.backLink}>← Projelerim</Link>
-          <span className={styles.badge}>Proje vitrini</span>
+          <div className={styles.topRight}>
+            <button type="button" className={styles.shareBtn} onClick={() => setPaylasAcik(true)}>Paylaş</button>
+            <span className={styles.badge}>Proje vitrini</span>
+          </div>
         </header>
 
         <section className={styles.hero}>
@@ -108,6 +113,14 @@ export function VitrinProje({ viewModel, snapshot }: { viewModel: StudioProposal
         </section>
 
         <p className={styles.footnote}>ArsaBil ile hazırlandı · Bilgilendirme amaçlıdır.</p>
+        <ShareProposalDialog
+          isOpen={paylasAcik}
+          onClose={() => setPaylasAcik(false)}
+          scenarioId={projectContext.scenarioId}
+          versionNumber={projectContext.versionNumber}
+          scenarioName={projectContext.scenarioName}
+          viewModel={viewModel}
+        />
       </div>
     </main>
   );

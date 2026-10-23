@@ -4,6 +4,9 @@
 .topBar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .backLink { color: var(--blue); font: 600 14px Inter, sans-serif; text-decoration: none; }
 .backLink:hover { text-decoration: underline; }
+.topRight { display: flex; align-items: center; gap: 10px; }
+.shareBtn { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 13px Inter, sans-serif; cursor: pointer; }
+.shareBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .badge { padding: 4px 12px; border-radius: 999px; background: var(--amber-soft); color: var(--amber-text); font: 600 12px Inter, sans-serif; }
 
 .hero { display: flex; align-items: center; gap: 48px; }
