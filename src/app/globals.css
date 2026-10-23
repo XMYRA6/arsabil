@@ -44,7 +44,8 @@
      safe-area + 22px sabit = 56px, iOS'un kendi tab bar kuralinin iki
      katindan fazla). Kaldirildi — redesign ONCESI kodun da yaptigi gibi
      yalnizca gercek safe-area payi birakiliyor. */
-  --bottomnav-height: calc(74px + env(safe-area-inset-bottom, 0px));
+  /* Yüzen pill menü: 12px boşluk + 74px pill + 8px nefes payı */
+  --bottomnav-height: calc(94px + env(safe-area-inset-bottom, 0px));
   --font-size-title: clamp(1.25rem, 4vw, 1.5rem);
   --font-size-page-title: clamp(1.5rem, 5vw, 2rem);
 

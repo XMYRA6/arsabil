@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { AppBar } from '@/components/mobile/AppBar';
+import { MobileTopBar } from '@/components/layout/MobileTopBar';
 import { MobileScreen } from '@/components/mobile/MobileScreen';
+import { useThemeZaman } from '@/components/home/useThemeZaman';
+import { resolveScene } from '@/lib/dioramas/scene';
 import { QuickActionGrid } from './QuickActionGrid';
 import { RecentReportsList } from './RecentReportsList';
 import { RecentActivityRows } from './RecentActivityRows';
@@ -12,16 +14,20 @@ import styles from './mobile.module.css';
 
 /**
  * Giriş yapmış kullanıcının mobil ana sayfası. `/dashboard`'ın veri modelini
- * (`/api/user/dashboard`) tüketir ama ekranın kendisi sıfırdan mobil-özel —
- * bkz. spec `2026-08-06-mobil-anasayfa-panosu-design.md`.
+ * (`/api/user/dashboard`) tüketir. Alt menüde karşılığı olan eylemler (Hesapla,
+ * Pazar, Mesajlar) burada tekrarlanmaz; mesaj ve bildirim üst çubuktaki
+ * ikonlardan açılır.
  *
- * `hasBottomNav={false}` BİLEREK: `/hesapla` mobilin aynı gerekçesi —
- * `SiteChrome.tsx` alt-çubuk dolgusunu `--mobile-nav-pb` ile <main>'e zaten
- * veriyor, `true` bırakılsaydı dolgu iki kez uygulanırdı.
+ * `hasBottomNav={false}` BİLEREK: `SiteChrome.tsx` alt-çubuk dolgusunu
+ * `--mobile-nav-pb` ile <main>'e zaten veriyor, `true` bırakılsaydı dolgu
+ * iki kez uygulanırdı.
  */
 export function HomeMobile() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [error, setError] = useState(false);
+    const [bildirim, setBildirim] = useState(0);
+    const zaman = useThemeZaman();
+    const sahne = resolveScene({ tur: 'arsa', varyant: 'agacli', egim: 'duz', zaman });
 
     useEffect(() => {
         fetch('/api/user/dashboard')
@@ -31,12 +37,20 @@ export function HomeMobile() {
             })
             .then(setData)
             .catch(() => setError(true));
+        fetch('/api/notifications')
+            .then(res => (res.ok ? res.json() : null))
+            .then(d => {
+                if (Array.isArray(d?.notifications)) {
+                    setBildirim(d.notifications.filter((n: { read: boolean }) => !n.read).length);
+                }
+            })
+            .catch(() => {});
     }, []);
 
     return (
-        <MobileScreen hasBottomNav={false}>
+        <MobileScreen hasBottomNav={false} mesh={false}>
             <div className={styles.homeMobileKok}>
-                <AppBar title="Ana Sayfa" />
+                <MobileTopBar mesaj={data?.stats.unreadMessageCount ?? 0} bildirim={bildirim} />
                 <div className={styles.homeRoot}>
                     {error ? (
                         <p className={styles.error}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</p>
@@ -45,16 +59,12 @@ export function HomeMobile() {
                     ) : (
                         <>
                             <section className={styles.mobileHero}>
-                                <div>
-                                    <p className={styles.heroEyebrow}>Bugunku portfoy ozeti</p>
-                                    <h1 className={styles.heroTitle}>Arsa aksiyonlariniz hazir</h1>
-                                    <p className={styles.heroText}>
-                                        Hesap, ilan, teklif ve mesaj akisini tek mobil panelden yonetin.
-                                    </p>
+                                {/* eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP */}
+                                <img src={sahne.src800} alt="" className={styles.heroImg} />
+                                <div className={styles.heroCopy}>
+                                    <h1 className={styles.heroTitle}>Arsanı bil. Değerini gör.</h1>
+                                    <Link href="/hesapla" className={styles.heroPrimaryAction}>Yeni hesap yap</Link>
                                 </div>
-                                <Link href="/hesapla" className={styles.heroPrimaryAction}>
-                                    Yeni hesap yap
-                                </Link>
                             </section>
                             <QuickActionGrid stats={data.stats} />
                             <RecentReportsList reports={data.recentReports} />

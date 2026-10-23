@@ -27,6 +27,12 @@
     .aboveNav {
         bottom: calc(var(--bottomnav-height) + var(--keyboard-inset, 0px));
         padding-bottom: 10px;
+        /* Yüzen pill menünün üstünde: düz bant yerine sayfa zeminine eriyen degrade,
+           arkadaki içerik düğmenin altından okunmaz hale gelmesin */
+        background: linear-gradient(to top, var(--bg) 62%, transparent);
+        border-top: 0;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
     }
 
     /* --m-* mobil glassmorphism token ailesi (dashboard/hesapla-mobile/deger) —

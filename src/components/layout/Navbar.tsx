@@ -9,7 +9,7 @@ import { NavPill } from "./NavPill";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ArsabilLogo } from "@/components/ui/ArsabilLogo";
 import { Button } from "@/components/ui/Button";
-import { IconBell } from "@/components/icons";
+import { IconBell, IconMessage } from "@/components/icons";
 
 const LINKS = [
     { href: "/hesapla", label: "Hesapla" },
@@ -45,14 +45,10 @@ export function Navbar() {
         signOut();
     };
 
-    // Mobilde üst çubuğun gizlendiği sayfalar (kendi başlığı olan ekranlar).
-    // Girişli kullanıcıda `/` kendi AppBar'ı olan HomeMobile'i render eder.
-    const hiddenOnMobile =
-        pathname.startsWith("/inbox") ||
-        pathname.startsWith("/dashboard/profile") ||
-        pathname.startsWith("/listing/") ||
-        pathname.startsWith("/listings/") ||
-        (pathname === "/" && status === "authenticated");
+    // Mobilde logo çubuğu yalnızca misafirin ana sayfasında görünür (Figma 01:
+    // logo + Giriş). Girişli kullanıcıda `/` kendi üst çubuğu olan HomeMobile'i
+    // render eder; diğer ekranlar kendi başlığını taşır, her sayfada logo yok.
+    const showMobileBar = pathname === "/" && status !== "authenticated";
 
     const right = (
         <div className={styles.right}>
@@ -60,6 +56,9 @@ export function Navbar() {
                 <>
                     <Link href="/notifications" className={styles.iconBtn} aria-label="Bildirimler">
                         <IconBell size={20} />
+                    </Link>
+                    <Link href="/inbox" className={styles.iconBtn} aria-label="Mesajlar">
+                        <IconMessage size={20} />
                     </Link>
                     <div className={styles.userWrap}>
                         <button
@@ -117,11 +116,14 @@ export function Navbar() {
                     <ThemeToggle />
                 </div>
             </header>
-            {!hiddenOnMobile && (
+            {showMobileBar && (
                 <header className={styles.mobileBar}>
                     <Link href="/" aria-label="Ana sayfa" className={styles.mobileLogo}>
                         <ArsabilLogo size={28} showText />
                     </Link>
+                    {status === "unauthenticated" && (
+                        <Link href="/login" className={styles.mobileLogin}>Giriş</Link>
+                    )}
                 </header>
             )}
         </>

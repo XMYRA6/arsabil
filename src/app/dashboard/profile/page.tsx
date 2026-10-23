@@ -260,6 +260,17 @@ export default function ProfilePage() {
                 </div>
             </section>
 
+            <nav className={styles.quickLinks} aria-label="Mesajlar ve bildirimler">
+                <Link href="/inbox" className={styles.quickLink}>
+                    <span>Mesajlar</span>
+                    <span aria-hidden="true">→</span>
+                </Link>
+                <Link href="/notifications" className={styles.quickLink}>
+                    <span>Bildirimler</span>
+                    <span aria-hidden="true">→</span>
+                </Link>
+            </nav>
+
             <div className={styles.tabs} role="tablist" aria-label="Profil bölümleri">
                 {TABS.map(t => (
                     <button

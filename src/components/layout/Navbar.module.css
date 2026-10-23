@@ -158,7 +158,20 @@
   .mobileBar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 14px 20px;
+  }
+
+  .mobileLogin {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--amber);
+    color: var(--ink);
+    font: 600 14px Inter, sans-serif;
+    text-decoration: none;
   }
 
   .mobileLogo {

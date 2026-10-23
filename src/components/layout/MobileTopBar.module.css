@@ -1,0 +1,7 @@
+/* Mobil ana sayfa üst çubuğu — Arazi tokenları. */
+.bar { display: flex; align-items: center; justify-content: space-between; padding: calc(10px + var(--safe-top, 0px)) 16px 8px; color: var(--ink); }
+.logo { display: inline-flex; text-decoration: none; color: var(--ink); }
+.actions { display: flex; align-items: center; gap: 6px; }
+.iconBtn { position: relative; width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+.iconBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.badge { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--amber); color: var(--ink); font: 700 11px/18px Inter, sans-serif; text-align: center; box-sizing: border-box; }

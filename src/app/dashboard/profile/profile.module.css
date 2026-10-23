@@ -87,3 +87,7 @@
   .themeGrid { max-width: none; }
   .btn, .btnSoft, .btnDanger { min-height: 48px; }
 }
+
+.quickLinks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.quickLink { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); color: var(--ink); font: 600 15px Inter, sans-serif; text-decoration: none; }
+.quickLink:focus-visible { outline: none; box-shadow: var(--focus-ring); }

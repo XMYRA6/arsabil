@@ -36,7 +36,7 @@ describe('Navbar (Arazi)', () => {
     for (const l of ['Hesapla', 'Değer', 'Akif', 'Pazar Yeri', 'Fiyatlar']) {
       expect(nav).toHaveTextContent(l)
     }
-    expect(screen.getAllByRole('link', { name: 'Ana sayfa' })).toHaveLength(2) // masaüstü pill logosu + mobil çubuk logosu
+    expect(screen.getAllByRole('link', { name: 'Ana sayfa' })).toHaveLength(2) // masaüstü pill logosu + mobil çubuk logosu (misafir ana sayfası)
   })
 
   it('ilan yolu Pazar Yeri sekmesini aktif yapar', () => {
@@ -47,7 +47,7 @@ describe('Navbar (Arazi)', () => {
 
   it('misafir: Giriş bağlantısı ve "Ücretsiz dene" → /register; bildirim ve avatar yok', () => {
     render(<Navbar />)
-    expect(screen.getByRole('link', { name: 'Giriş' })).toHaveAttribute('href', '/login')
+    for (const l of screen.getAllByRole('link', { name: 'Giriş' })) expect(l).toHaveAttribute('href', '/login')
     fireEvent.click(screen.getByRole('button', { name: 'Ücretsiz dene' }))
     expect(push).toHaveBeenCalledWith('/register')
     expect(screen.queryByRole('link', { name: 'Bildirimler' })).not.toBeInTheDocument()
@@ -78,13 +78,13 @@ describe('Navbar (Arazi)', () => {
     expect(screen.getByRole('menuitem', { name: 'Yönetim paneli' })).toHaveAttribute('href', '/admin')
   })
 
-  it('mobil çubuk: girişli ana sayfada ve sohbet/profil/ilan detayında render edilmez', () => {
+  it('mobil çubuk: yalnız misafirin ana sayfasında; diğer ekranlarda ve girişli kullanıcıda yok', () => {
     const count = () => document.querySelectorAll('header').length
-    mockPathname = '/hesapla'
-    const a = render(<Navbar />)
-    expect(count()).toBe(2) // masaüstü + mobil
-    a.unmount()
-    for (const p of ['/inbox/abc', '/dashboard/profile', '/listing/1', '/listings/new']) {
+    mockPathname = '/'
+    const g = render(<Navbar />)
+    expect(count()).toBe(2) // masaüstü + mobil (misafir ana sayfası)
+    g.unmount()
+    for (const p of ['/hesapla', '/marketplace', '/inbox/abc', '/dashboard/profile', '/listing/1', '/listings/new']) {
       mockPathname = p
       const r = render(<Navbar />)
       expect(count()).toBe(1)
