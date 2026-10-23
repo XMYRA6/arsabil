@@ -19,6 +19,7 @@ function props(patch: Partial<React.ComponentProps<typeof GirdiKarti>> = {}) {
         isAaEnabled: false,
         onIsAaEnabled: jest.fn(),
         onParselDogrulaAc: jest.fn(),
+        onAyarlarAc: jest.fn(),
         luxTier: 'orta' as const, onLuxTier: jest.fn(),
         apartmentSize: 140, onApartmentSize: jest.fn(),
         globalUnitPrice: 12000, birimMaliyetKaynagi: { tur: 'varsayilan' as const }, onBirimMaliyet: jest.fn(),
@@ -59,22 +60,6 @@ describe('GirdiKarti', () => {
         render(<GirdiKarti {...props({ onLuxTier })} />)
         await userEvent.click(screen.getByRole('tab', { name: 'Lüks' }))
         expect(onLuxTier).toHaveBeenCalledWith('luks')
-    })
-
-    it('metrekare artir/azalt 5 adimla calisir', async () => {
-        const onApartmentSize = jest.fn()
-        render(<GirdiKarti {...props({ onApartmentSize })} />)
-        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi artır' }))
-        expect(onApartmentSize).toHaveBeenCalledWith(145)
-        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi azalt' }))
-        expect(onApartmentSize).toHaveBeenCalledWith(135)
-    })
-
-    it('metrekare minimum 50 nin altina inmez', async () => {
-        const onApartmentSize = jest.fn()
-        render(<GirdiKarti {...props({ apartmentSize: 50, onApartmentSize })} />)
-        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi azalt' }))
-        expect(onApartmentSize).not.toHaveBeenCalled()
     })
 
     // Slider'lar native `<input type="range">`. Bunlarin `role="slider"`i ve
@@ -130,45 +115,12 @@ describe('GirdiKarti', () => {
         expect(input).toHaveAttribute('placeholder', '—')
     })
 
-    it('apartmentSize null iken azalt hicbir sey yapmaz', async () => {
-        const onApartmentSize = jest.fn()
-        render(<GirdiKarti {...props({ apartmentSize: null, onApartmentSize })} />)
-        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi azalt' }))
-        expect(onApartmentSize).not.toHaveBeenCalled()
-    })
-
-    it('apartmentSize null iken artir varsayilan degere atlar', async () => {
-        const onApartmentSize = jest.fn()
-        render(<GirdiKarti {...props({ apartmentSize: null, onApartmentSize })} />)
-        await userEvent.click(screen.getByRole('button', { name: 'Metrekareyi artır' }))
-        expect(onApartmentSize).toHaveBeenCalledWith(140)
-    })
-
     it('elle yazilan deger dogrudan onApartmentSize a iletilir (clamp yok, masaustuyle tutarli)', () => {
         const onApartmentSize = jest.fn()
         render(<GirdiKarti {...props({ apartmentSize: 140, onApartmentSize })} />)
         const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
         fireEvent.change(input, { target: { value: '999' } })
         expect(onApartmentSize).toHaveBeenCalledWith(999)
-    })
-
-    it('input dogrudan stepperSatir icinde durur, ayri bir sarmalayicisi yok (tiklanabilir alanin tamami input\'un kendisi)', () => {
-        // Nihai tasarim (kullanici onayli mockup): input `flex:1` ile
-        // satirin kontrol kumesine kadar tum genisligini kaplar — ayrica
-        // bir onClick-focus sarmalayicisina gerek kalmaz, input'un kendisi
-        // zaten o alanin tamami.
-        render(<GirdiKarti {...props()} />)
-        const input = screen.getByRole('spinbutton', { name: 'Daire büyüklüğü, m²' })
-        expect(input.parentElement).toHaveClass('stepperSatir')
-    })
-
-    it('"m²" etiketi -/+ butonlariyla AYNI kontrol kumesinde durur, input\'a degil (kullanici: "m2 yazisini -/+ steppera yani sag tarafa yaslayalim")', () => {
-        render(<GirdiKarti {...props()} />)
-        const birim = screen.getByText('m²')
-        const azalt = screen.getByRole('button', { name: 'Metrekareyi azalt' })
-        const artir = screen.getByRole('button', { name: 'Metrekareyi artır' })
-        expect(birim.parentElement).toBe(azalt.parentElement)
-        expect(birim.parentElement).toBe(artir.parentElement)
     })
 
     it('input bosaltilinca onApartmentSize(null) cagrilir', () => {
@@ -194,11 +146,28 @@ describe('GirdiKarti', () => {
         expect(onBirimMaliyet).toHaveBeenCalledWith(21000)
     })
 
-    it('kartin alan sirasi: konum, arsa alani, yapi standardi, daire buyuklugu, birim maliyet, arsa payi, deprem riski', () => {
+    it('kartin alan sirasi Figma ile ayni: konum, arsa alani, ort. daire, birim maliyet, daire standardi, arsa payi, risk', () => {
         const { container } = render(<GirdiKarti {...props()} />)
         const bloklar = Array.from(container.querySelectorAll('[data-girdi-blok]'))
         expect(bloklar.map(el => el.getAttribute('data-girdi-blok'))).toEqual([
-            'konum', 'arsa-alani', 'yapi-standardi', 'daire-buyuklugu', 'birim-maliyet', 'arsa-payi', 'deprem-riski',
+            'konum', 'arsa-alani', 'daire-buyuklugu', 'birim-maliyet', 'yapi-standardi', 'arsa-payi', 'deprem-riski',
         ])
+    })
+
+    it('"Gelismis ayarlar" satiri kartin icinde ve sheet i acar', async () => {
+        const onAyarlarAc = jest.fn()
+        render(<GirdiKarti {...props({ onAyarlarAc })} />)
+        await userEvent.click(screen.getByRole('button', { name: 'Gelişmiş ayarlar' }))
+        expect(onAyarlarAc).toHaveBeenCalledTimes(1)
+    })
+
+    it('arsa alani anahtar kapaliyken input devre disi', () => {
+        render(<GirdiKarti {...props({ isAaEnabled: false })} />)
+        expect(screen.getByLabelText('Arsa alanı')).toBeDisabled()
+    })
+
+    it('metrekare artir/azalt dugmeleri YOK (Figma mobilde yalniz girdi)', () => {
+        render(<GirdiKarti {...props()} />)
+        expect(screen.queryByRole('button', { name: 'Metrekareyi artır' })).toBeNull()
     })
 })

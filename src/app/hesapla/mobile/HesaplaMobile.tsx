@@ -2,7 +2,6 @@
 
 import { MobileScreen } from '@/components/mobile/MobileScreen';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { IconSettings } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import { SonucDetayiMobileLeaf, type SonucDetayiMobileLeafProps } from './SonucDetayiMobileLeaf';
@@ -18,7 +17,7 @@ import styles from './mobile.module.css';
 
 export type HesaplaMobileProps = {
     sonuc: SonucKartiProps;
-    girdi: GirdiKartiProps;
+    girdi: Omit<GirdiKartiProps, 'onAyarlarAc'>;
     /** Parsel doğrulama modalını açar */
     onParselDogrulaAc: () => void;
     /** "Sonuç Detayı" yaprağı açık mı — Hesap Fişi + Analiz birleşimi
@@ -161,20 +160,7 @@ export function HesaplaMobile({
                     : (
                         <>
                             <SonucKarti {...sonuc} />
-                            <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} />
-                            {/* Tasarim 2a.html:39 — girdi kartinin ALTINDA birincil
-                                kesif yolu. Baslikaki disli ikonu tek basina kalsaydi
-                                kullanici bu ekrani zor bulurdu. */}
-                            <button
-                                type="button"
-                                className={styles.gelismisAyarlarBtn}
-                                onClick={onAyarlarAc}
-                            >
-                                <span className={styles.gelismisAyarlarIkon}>
-                                    <IconSettings size={16} strokeWidth={2.2} />
-                                </span>
-                                Gelişmiş ayarlar · risk, iksa, kâr
-                            </button>
+                            <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} onAyarlarAc={onAyarlarAc} />
                             {savedScenarios.length > 0 && (
                                 <div className={styles.senaryoPillSatiri}>
                                     {savedScenarios.map(s => (

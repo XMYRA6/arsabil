@@ -1,13 +1,15 @@
 "use client";
 
-import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE, type QualityTier } from '../calculatorUiHelpers';
-import { LocationHeader, RiskSection, AreaSection } from '../SmartContextCardSections';
+import { computeEffectiveLandShareX, type QualityTier } from '../calculatorUiHelpers';
+import { riskNotu } from '../SmartContextCardSections';
 import { useBufferedNumberInput } from '../useBufferedNumberInput';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './unitPriceSource';
+import { riskKaynakEtiketi, type RiskKaynagi } from './riskSource';
+import { Toggle } from '@/components/ui/Toggle';
+import { IconPin, IconChevronRight } from '@/components/icons';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import type { RiskLevel } from '../riskSuggestionHelpers';
-import type { RiskKaynagi } from './riskSource';
-import styles from './mobile.module.css';
+import styles from './girdiArazi.module.css';
 
 export type GirdiKartiProps = {
     parcelContext: ParcelPickerValue | null;
@@ -36,17 +38,25 @@ export type GirdiKartiProps = {
     onTotalApartments: (v: number) => void;
     ownerApartmentShare: number;
     onOwnerApartmentShare: (v: number) => void;
+    /** Gelişmiş ayarlar sheet'ini açar — Figma'da kartın son satırı. */
+    onAyarlarAc: () => void;
 };
 
 /**
- * Segment glifleri. Tasarim (2a.html:24-26) burada DOLU ikonlar kullaniyor;
- * `@/components/icons` setindeki cizgi ikonlardan bilerek farklilar — o set
- * navigasyon/aksiyon ikonlari icin.
+ * Yapı standardı glifleri — Figma 05 (Icon/home, Icon/building, Icon/star):
+ * çizgi ikonlar, seçili kart amber.
  */
-const GLIF: Record<string, string> = {
-    Standart: 'M12 3L2 12h3v8h14v-8h3L12 3zm0 2.84L17.5 12h-11L12 5.84z',
-    Orta: 'M3 21h18v-2H3v2zm6-4h6V5H9v12zm8 0h6v-8h-6v8zm-16 0h6v-6H1v6z',
-    'Lüks': 'M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z',
+const GLIF: Record<string, React.ReactNode> = {
+    Standart: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
+    Orta: (
+        <>
+            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+            <path d="M10 6h4M10 10h4M10 14h4M10 18h4" />
+        </>
+    ),
+    'Lüks': <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />,
 };
 
 /** Yapi standardi segmentlerinin SABIT kimligi (etiket+tier) — sayisal
@@ -65,16 +75,8 @@ function ilerleme(deger: number, min: number, max: number): React.CSSProperties 
     return { '--progress': `${Math.min(Math.max(yuzde, 0), 100)}%` } as React.CSSProperties;
 }
 
-const M2_ADIM = 5;
-const M2_MIN = 50;
-const M2_MAX = 400;
-
-const AA_ADIM = 10;
-const AA_MIN = 10;
-
 /**
- * `2a` cam girdi karti (tasarim kaynagi:
- * docs/tasarim/mobil-2026-07-28/kartlar/2a.html).
+ * Mobil "Proje bilgileri" kartı (Figma 05 · Hesapla Mobil 390 · 2045:46).
  *
  * KRITIK — korunan davranis: `isApartmentCountEnabled` acikken arsa payi
  * yuzdesi SALT-OKUNURDUR ve `ownerApartmentShare/totalApartments` tek gercek
@@ -108,6 +110,7 @@ export function GirdiKarti({
     ownerApartmentShare,
     onOwnerApartmentShare,
     onParselDogrulaAc,
+    onAyarlarAc,
 }: GirdiKartiProps) {
     // Sd acikken gosterilen yuzde TURETILMISTIR, ayri bir state degildir.
     // Formul KOPYALANMAZ: motora giden deger de ayni yardimcidan gelir
@@ -122,22 +125,102 @@ export function GirdiKarti({
     const { girdi: birimMaliyetGirdi, handleChange: handleBirimMaliyetChange } =
         useBufferedNumberInput(globalUnitPrice, onBirimMaliyet);
 
+    const parsel = parcelContext?.parcel ?? null;
+    const adres = parsel?.mahalle
+        ? [parsel.il, parsel.ilce, `${parsel.mahalle} Mah.`].filter(Boolean).join(' · ')
+        : parcelContext
+            ? 'Haritadan seçilen nokta'
+            : null;
+    const alanDogrulandi = parcelContext?.status === 'verified' && !!parsel?.areaSqm;
+
     return (
-        <section className={styles.girdiKarti} aria-label="Proje girdileri">
-            <LocationHeader parcelContext={parcelContext} onOpenMap={onParselDogrulaAc} />
+        <section className={styles.kart} aria-label="Proje girdileri">
+            <h2 className={styles.baslik}>Proje bilgileri</h2>
 
-            <AreaSection
-                parcelContext={parcelContext}
-                arsaAlani={arsaAlani}
-                onArsaAlani={onArsaAlani}
-                isAaEnabled={isAaEnabled}
-                onIsAaEnabled={onIsAaEnabled}
-                stepper={{ step: AA_ADIM, min: AA_MIN }}
-            />
+            {/* ── Konum ── */}
+            <div className={styles.alan} data-girdi-blok="konum">
+                <button type="button" className={styles.konum} onClick={onParselDogrulaAc}>
+                    <IconPin size={20} className={styles.konumIkon} />
+                    {adres ? (
+                        <span className={styles.konumMetin}>{adres}</span>
+                    ) : (
+                        <span className={`${styles.konumMetin} ${styles.konumBos}`}>Haritadan parsel seç</span>
+                    )}
+                    {adres && <span className="sr-only">Değiştir</span>}
+                    <IconChevronRight size={18} className={styles.konumOk} />
+                </button>
+                {alanDogrulandi && <span className={styles.resmiRozet}>Resmi parsel verisi</span>}
+            </div>
 
-            <div className={styles.girdiSatir} data-girdi-blok="yapi-standardi">
-                <span className={styles.girdiEtiket}>Yapı standardı</span>
-                <div className={styles.segmentKap} role="tablist" aria-label="Yapı standardı">
+            {/* ── Arsa alanı + Ort. daire ── */}
+            <div className={styles.ikiSutun}>
+                <div className={styles.alan} data-girdi-blok="arsa-alani">
+                    <label className={styles.etiket} htmlFor="hesapla-arsa-alani">Arsa alanı</label>
+                    <div className={styles.girdi} data-devre-disi={!isAaEnabled}>
+                        <input
+                            id="hesapla-arsa-alani"
+                            type="number"
+                            inputMode="numeric"
+                            className={styles.girdiInput}
+                            value={arsaAlani || ''}
+                            placeholder="—"
+                            disabled={!isAaEnabled}
+                            onChange={(e) => onArsaAlani(Number(e.target.value))}
+                        />
+                        <span className={styles.girdiBirim}>m²</span>
+                    </div>
+                </div>
+
+                <div className={styles.alan} data-girdi-blok="daire-buyuklugu">
+                    <label className={styles.etiket} htmlFor="hesapla-daire-m2">Ort. daire</label>
+                    <div className={styles.girdi}>
+                        <input
+                            id="hesapla-daire-m2"
+                            type="number"
+                            inputMode="numeric"
+                            className={styles.girdiInput}
+                            value={apartmentSize ?? ''}
+                            placeholder="—"
+                            aria-label="Daire büyüklüğü, m²"
+                            onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
+                        />
+                        <span className={styles.girdiBirim}>m²</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.anahtarSatir}>
+                <span>Arsa alanını hesaba kat</span>
+                <Toggle
+                    checked={isAaEnabled}
+                    aria-label="Arsa alanını hesaba kat"
+                    onChange={(e) => onIsAaEnabled(e.target.checked)}
+                />
+            </div>
+
+            {/* ── Birim maliyet ── */}
+            <div className={styles.alan} data-girdi-blok="birim-maliyet">
+                <label className={styles.etiket} htmlFor="hesapla-birim-maliyet">Birim maliyet</label>
+                <div className={styles.girdi}>
+                    <input
+                        id="hesapla-birim-maliyet"
+                        type="text"
+                        inputMode="decimal"
+                        className={styles.girdiInput}
+                        value={birimMaliyetGirdi}
+                        placeholder="—"
+                        aria-label="Birim inşaat maliyeti, TL/m²"
+                        onChange={(e) => handleBirimMaliyetChange(e.target.value)}
+                    />
+                    <span className={styles.girdiBirim}>₺/m²</span>
+                </div>
+                <p className={styles.altNot}>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</p>
+            </div>
+
+            {/* ── Daire standardı ── */}
+            <div className={styles.alan} data-girdi-blok="yapi-standardi">
+                <span className={styles.etiket}>Daire standardı</span>
+                <div className={styles.standartSatir} role="tablist" aria-label="Yapı standardı">
                     {YAPI_STANDARTLARI_SIRASI.map(({ etiket, tier }) => {
                         const secili = luxTier === tier;
                         return (
@@ -146,11 +229,21 @@ export function GirdiKarti({
                                 type="button"
                                 role="tab"
                                 aria-selected={secili}
-                                className={`${styles.segment} ${secili ? styles.segmentAktif : ''}`}
+                                className={`${styles.standart} ${secili ? styles.standartAktif : ''}`}
                                 onClick={() => onLuxTier(tier)}
                             >
-                                <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                    <path d={GLIF[etiket]} />
+                                <svg
+                                    width="22"
+                                    height="22"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.8"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                >
+                                    {GLIF[etiket]}
                                 </svg>
                                 {etiket}
                             </button>
@@ -159,98 +252,16 @@ export function GirdiKarti({
                 </div>
             </div>
 
-            {/* ── Daire buyuklugu ── */}
-            <div className={styles.girdiSatir} data-girdi-blok="daire-buyuklugu">
-                <span className={styles.girdiEtiket}>Daire büyüklüğü</span>
-                <div className={styles.stepperSatir}>
-                    <input
-                        type="number"
-                        inputMode="numeric"
-                        className={`${styles.stepperInput} mNum`}
-                        value={apartmentSize ?? ''}
-                        placeholder="—"
-                        aria-label="Daire büyüklüğü, m²"
-                        onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
-                    />
-                    <div className={styles.stepperKontrolGrup}>
-                        <span className={styles.stepperBirim}>m²</span>
-                        <button
-                            type="button"
-                            className={styles.stepperAzalt}
-                            aria-label="Metrekareyi azalt"
-                            onClick={() => {
-                                if (apartmentSize === null) return;
-                                const yeni = apartmentSize - M2_ADIM;
-                                if (yeni >= M2_MIN) onApartmentSize(yeni);
-                            }}
-                        >
-                            −
-                        </button>
-                        <button
-                            type="button"
-                            className={styles.stepperArtir}
-                            aria-label="Metrekareyi artır"
-                            onClick={() => {
-                                if (apartmentSize === null) { onApartmentSize(ORNEK_APARTMENT_SIZE); return; }
-                                const yeni = apartmentSize + M2_ADIM;
-                                if (yeni <= M2_MAX) onApartmentSize(yeni);
-                            }}
-                        >
-                            +
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* ── Birim insaat maliyeti — YENI, ana karta tasindi ── */}
-            <div className={styles.girdiSatir} data-girdi-blok="birim-maliyet">
-                <span className={styles.girdiEtiket}>
-                    Birim inşaat maliyeti
-                    <span className={styles.girdiEtiketKaynak}>{kaynakEtiketi(birimMaliyetKaynagi, globalUnitPrice)}</span>
-                </span>
-                <div className={styles.birimMaliyetSatir}>
-                    <input
-                        type="text"
-                        inputMode="decimal"
-                        className={`${styles.birimMaliyetInput} mNum`}
-                        value={birimMaliyetGirdi}
-                        placeholder="—"
-                        aria-label="Birim inşaat maliyeti, TL/m²"
-                        onChange={(e) => handleBirimMaliyetChange(e.target.value)}
-                    />
-                    <span className={styles.birimMaliyetBirim}>TL/m²</span>
-                </div>
-            </div>
-
-            {/* ── Arsa payi modu ── */}
-            <div className={styles.girdiSatir} data-girdi-blok="arsa-payi">
-                <div className={styles.modSatir}>
-                    <span className={styles.modEtiket}>
-                        Daire sayısıyla gir{' '}
-                        <span className={styles.modIpucu}>
-                            ({totalApartments}&rsquo;de {ownerApartmentShare})
-                        </span>
-                    </span>
-                    <button
-                        type="button"
-                        role="switch"
-                        aria-checked={isApartmentCountEnabled}
-                        aria-label="Toplam daire sayısı üzerinden hesapla"
-                        className={`${styles.anahtar} ${isApartmentCountEnabled ? styles.anahtarAcik : ''}`}
-                        onClick={() => onApartmentCountEnabled(!isApartmentCountEnabled)}
-                    >
-                        <span className={styles.anahtarTopu} />
-                    </button>
-                </div>
-
+            {/* ── Arsa payı ── */}
+            <div className={styles.alan} data-girdi-blok="arsa-payi">
                 {isApartmentCountEnabled ? (
                     <>
-                        <div className={styles.sliderBasligi}>
-                            <span className={styles.girdiEtiket}>Toplam daire</span>
+                        <div className={styles.payBaslik}>
+                            <span className={styles.etiket}>Toplam daire</span>
                             <input
                                 type="number"
                                 inputMode="numeric"
-                                className={`${styles.sliderDegerInput} mNum`}
+                                className={styles.payDegerInput}
                                 value={totalApartments}
                                 min={1}
                                 max={80}
@@ -273,12 +284,12 @@ export function GirdiKarti({
                             onChange={e => onTotalApartments(Number(e.target.value))}
                         />
 
-                        <div className={styles.sliderBasligi}>
-                            <span className={styles.girdiEtiket}>Arsa sahibinin daire sayısı</span>
+                        <div className={styles.payBaslik}>
+                            <span className={styles.etiket}>Arsa sahibinin daire sayısı</span>
                             <input
                                 type="number"
                                 inputMode="numeric"
-                                className={`${styles.sliderDegerInput} mNum`}
+                                className={styles.payDegerInput}
                                 value={ownerApartmentShare}
                                 min={0}
                                 max={Math.max(totalApartments - 1, 0)}
@@ -302,16 +313,16 @@ export function GirdiKarti({
                         />
 
                         {/* Salt-okunur: bu mod acikken yuzde TURETILIR, girilmez. */}
-                        <p className={styles.turetilmisNot}>
-                            Arsa payı <span className={`${styles.turetilmisYuzde} mNum`}>%{turetilmisYuzde}</span>
+                        <p className={styles.altNot}>
+                            Arsa payı <span className={styles.payDeger}>%{turetilmisYuzde}</span>
                             {' '}olarak hesaplanıyor.
                         </p>
                     </>
                 ) : (
                     <>
-                        <div className={styles.sliderBasligi}>
-                            <span className={styles.girdiEtiket}>Arsa payı</span>
-                            <span className={`${styles.sliderDeger} mNum`}>%{landShareRatio}</span>
+                        <div className={styles.payBaslik}>
+                            <span className={styles.etiket}>Arsa payı</span>
+                            <span className={styles.payDeger}>%{landShareRatio}</span>
                         </div>
                         <input
                             type="range"
@@ -331,20 +342,57 @@ export function GirdiKarti({
                             tamamini aldigi senaryonun dogru sonucu (denetim-2
                             bulgusu, desktop page.tsx'teki ayni satirin ikizi). */}
                         {landShareRatio >= 90 && (
-                            <p className={styles.landShareHighWarning}>
+                            <p className={styles.uyari}>
                                 Bu kadar yüksek bir arsa payında proje maliyeti matematiksel olarak çok yükselir — arsa sahibi projenin neredeyse tamamını alıyor demektir.
                             </p>
                         )}
                     </>
                 )}
+
+                <div className={styles.anahtarSatir}>
+                    <span>
+                        Daire sayısıyla belirle{' '}
+                        ({totalApartments}&rsquo;de {ownerApartmentShare})
+                    </span>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={isApartmentCountEnabled}
+                        aria-label="Toplam daire sayısı üzerinden hesapla"
+                        className={`${styles.anahtar} ${isApartmentCountEnabled ? styles.anahtarAcik : ''}`}
+                        onClick={() => onApartmentCountEnabled(!isApartmentCountEnabled)}
+                    >
+                        <span className={styles.anahtarTopu} />
+                    </button>
+                </div>
             </div>
 
-            <RiskSection
-                riskLevel={riskLevel}
-                riskLevels={riskLevels}
-                onRiskLevel={onRiskLevel}
-                riskKaynagi={riskKaynagi}
-            />
+            {/* ── Risk seviyesi ── */}
+            <div className={styles.alan} data-girdi-blok="deprem-riski">
+                <span className={styles.etiket}>
+                    Risk seviyesi
+                    <span className={styles.etiketKaynak}>{riskKaynakEtiketi(riskKaynagi)}</span>
+                </span>
+                <div className={styles.cipSatir}>
+                    {riskLevels.map(opt => (
+                        <button
+                            key={opt.id}
+                            type="button"
+                            aria-pressed={riskLevel === opt.value}
+                            className={`${styles.cip} ${riskLevel === opt.value ? styles.cipAktif : ''}`}
+                            onClick={() => onRiskLevel(opt.value)}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+                <p className={styles.altNot}>{riskNotu(riskLevel)}</p>
+            </div>
+
+            <button type="button" className={styles.gelismis} onClick={onAyarlarAc}>
+                Gelişmiş ayarlar
+                <IconChevronRight size={18} />
+            </button>
         </section>
     );
 }

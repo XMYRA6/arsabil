@@ -1,0 +1,356 @@
+/* Mobil "Proje bilgileri" karti — Figma 05 Hesapla · Mobil 390 (2045:46).
+   Yalnizca Arazi tokenlari kullanilir (tokens-arazi.css); eski --m-* cam tokenlari YOK. */
+
+.kart {
+    margin: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 21px;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    color: var(--ink);
+}
+
+.baslik {
+    margin: 0;
+    font: 700 17px Inter, sans-serif;
+    color: var(--ink);
+}
+
+.etiket {
+    font: 500 12px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+.etiketKaynak {
+    margin-left: 6px;
+    font-weight: 500;
+    color: var(--ink-secondary);
+}
+
+.alan {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.ikiSutun {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* ── Konum satiri ── */
+.konum {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 13px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    font: 500 14px Inter, sans-serif;
+    text-align: left;
+    cursor: pointer;
+}
+
+.konumIkon {
+    flex: none;
+    color: var(--sage);
+}
+
+.konumMetin {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.konumBos {
+    color: var(--blue);
+    font-weight: 600;
+}
+
+.konumOk {
+    flex: none;
+    color: var(--ink-secondary);
+}
+
+.resmiRozet {
+    align-self: flex-start;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--ok) 14%, transparent);
+    color: var(--ok);
+    font: 600 11.5px Inter, sans-serif;
+}
+
+/* ── Girdi ── */
+.girdi {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 15px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--input-bg);
+}
+
+.girdi:focus-within {
+    box-shadow: var(--focus-ring);
+}
+
+.girdi[data-devre-disi='true'] {
+    opacity: 0.5;
+}
+
+.girdiInput {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    outline: 0;
+    color: var(--ink);
+    font: 500 16px Inter, sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+
+.girdiBirim {
+    flex: none;
+    color: var(--ink-secondary);
+    font: 500 13px Inter, sans-serif;
+}
+
+.altNot {
+    margin: 0;
+    font: 500 12px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+/* ── Anahtar satiri (AA / daire sayisi modu) ── */
+.anahtarSatir {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font: 500 13px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+.anahtar {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    cursor: pointer;
+    transition: background-color var(--dur-ui) var(--ease-out);
+}
+
+.anahtarAcik {
+    background: var(--amber);
+    box-shadow: none;
+}
+
+.anahtarTopu {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform var(--dur-ui) var(--ease-out);
+}
+
+.anahtarAcik .anahtarTopu {
+    transform: translateX(16px);
+}
+
+/* ── Daire standardi ── */
+.standartSatir {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.standart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 70px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink-secondary);
+    font: 500 12.5px Inter, sans-serif;
+    cursor: pointer;
+    transition: background-color var(--dur-ui) var(--ease-out), border-color var(--dur-ui) var(--ease-out);
+}
+
+.standartAktif {
+    background: var(--amber-soft);
+    border-color: var(--amber);
+    color: var(--amber-text);
+}
+
+/* ── Arsa payi ── */
+.payBaslik {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.payDeger {
+    font: 700 17px Inter, sans-serif;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.payDegerInput {
+    width: 64px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--input-bg);
+    padding: 4px 8px;
+    text-align: right;
+    color: var(--ink);
+    font: 700 15px Inter, sans-serif;
+}
+
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 22px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--amber) var(--progress, 0%), var(--line) var(--progress, 0%));
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid var(--amber);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--line);
+}
+
+.slider::-moz-range-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--amber);
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid var(--amber);
+}
+
+.slider:focus-visible {
+    outline: none;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: var(--focus-ring);
+}
+
+.uyari {
+    margin: 0;
+    font: 500 12px Inter, sans-serif;
+    color: var(--bad);
+}
+
+/* ── Risk seviyesi ── */
+.cipSatir {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cip {
+    min-height: 34px;
+    padding: 0 15px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font: 500 13.5px Inter, sans-serif;
+    cursor: pointer;
+    transition: background-color var(--dur-ui) var(--ease-out), border-color var(--dur-ui) var(--ease-out);
+}
+
+.cipAktif {
+    background: var(--amber-soft);
+    border-color: var(--amber);
+    color: var(--amber-text);
+    font-weight: 600;
+}
+
+/* ── Gelismis ayarlar satiri ── */
+.gelismis {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 15px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font: 600 14px Inter, sans-serif;
+    cursor: pointer;
+}
+
+.gelismis svg {
+    color: var(--ink-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anahtar,
+    .anahtarTopu,
+    .standart,
+    .cip {
+        transition: none;
+    }
+}
+
+.anahtarSatir > label {
+    flex: none;
+    width: auto;
+}

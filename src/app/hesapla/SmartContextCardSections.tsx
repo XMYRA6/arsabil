@@ -49,7 +49,7 @@ export type RiskSectionProps = {
  * olarak isler; iksanin kendi ayri kontrolu var. Bu yuzden metin "iksa
  * maliyeti" degil "risk payi" der.
  */
-function riskNotu(level: number): string {
+export function riskNotu(level: number): string {
     if (level >= 15) return '+%15 risk payı maliyete eklendi';
     if (level >= 10) return '+%10 risk payı maliyete eklendi';
     if (level >= 5) return '+%5 risk payı maliyete eklendi';
