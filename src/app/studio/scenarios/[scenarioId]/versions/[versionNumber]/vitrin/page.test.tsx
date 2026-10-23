@@ -3,10 +3,10 @@ import path from 'path';
 
 const dir = __dirname;
 const page = fs.readFileSync(path.join(dir, 'page.tsx'), 'utf8');
-const cssPath = path.join(dir, 'page.module.css');
-const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : '';
+const view = fs.readFileSync(path.join(dir, 'VitrinProje.tsx'), 'utf8');
+const css = fs.readFileSync(path.join(dir, 'page.module.css'), 'utf8');
 
-describe('studio vitrin sayfasi (urun yerlesimi)', () => {
+describe('studio proje vitrini (Figma 11)', () => {
   it('owner-only: oturum yoksa signin sayfasina yonlendirir', () => {
     expect(page).toMatch(/getServerSession\(authOptions\)/);
     expect(page).toMatch(/redirect\('\/auth\/signin'\)/);
@@ -15,27 +15,24 @@ describe('studio vitrin sayfasi (urun yerlesimi)', () => {
   it('gecersiz veya eksik versiyon icin notFound dondurur', () => {
     expect(page).toMatch(/notFound\(\)/);
     expect(page).toMatch(/getStudioScenarioVersionDetail\(/);
+    expect(page).toMatch(/getStudioScenarioById\(/);
   });
 
-  it('StudioVitrinPreview bilesenine scenarioId, versionNumber ve isPro gecirir', () => {
-    expect(page).toMatch(/scenarioId=\{scenarioId\}/);
-    expect(page).toMatch(/versionNumber=\{versionNum\}/);
-    expect(page).toMatch(/isPro=\{user\?\.plan === 'PRO'\}/);
+  it('kayitli snapshotu motoru calistirmadan view modelden gosterir', () => {
+    expect(page).toMatch(/buildStudioProposalViewModel\(/);
   });
 
-  it('hesaplama aracina donus baglantisi tasir', () => {
-    expect(page).toMatch(/href="\/hesapla"/);
+  it('diorama, istatistik kartlari, program karmasi ve 2B yerlesimi sunar', () => {
+    expect(view).toMatch(/resolveScene\(/);
+    expect(view).toContain('Program karması');
+    expect(view).toContain('2B yerleşim');
+    expect(view).toContain('Teklif ver');
+    expect(view).toContain('Senaryoları gör');
   });
 
-  it('gecici dev-kapisi degil, gercek urun sayfasi olarak isaretlenmis', () => {
-    expect(page).not.toMatch(/geçici bir kapı|kesin ürün yerleşimi DEĞİL/i);
-  });
-
-  it('inline dark hex yerine CSS module + tema tokenlari kullanir', () => {
-    expect(page).toMatch(/import styles from '\.\/page\.module\.css'/);
-    expect(page).not.toMatch(/background:\s*'#090d16'/);
+  it('eski cam/hex degerleri yerine Arazi tokenlarini kullanir', () => {
     expect(css).toMatch(/\.page\s*\{[^}]*background:\s*var\(--bg\)/);
-    expect(css).toMatch(/color:\s*var\(--ink\)/);
-    expect(css).toMatch(/var\(--surface\)/);
+    expect(css).toMatch(/var\(--amber-soft\)/);
+    expect(css).not.toMatch(/var\(--m-|--seal-|#[0-9a-fA-F]{3,6}\b/);
   });
 });

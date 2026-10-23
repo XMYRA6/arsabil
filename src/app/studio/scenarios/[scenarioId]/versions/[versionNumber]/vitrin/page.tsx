@@ -2,17 +2,14 @@ import React from 'react';
 import { notFound, redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { getStudioScenarioVersionDetail } from '@/lib/studio/studioScenarioRepository';
-import { StudioVitrinPreview } from '@/components/studio/StudioVitrinPreview';
-import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
-import styles from './page.module.css';
+import { getStudioScenarioById, getStudioScenarioVersionDetail } from '@/lib/studio/studioScenarioRepository';
+import { buildStudioProposalViewModel } from '@/lib/studio/proposalViewModel';
+import { VitrinProje } from './VitrinProje';
 
 /**
- * Studio 3D Vitrin — kaydedilmiş bir senaryo versiyonunun kütlesini zengin
- * WebGL sahnesinde gösterir; PRO kullanıcılar için fotogerçekçi render
- * üretimini tetikler. Senaryo Kütüphanesindeki "3D Vitrin" bağlantısından
- * açılır. Yalnızca senaryo sahibine görünür.
+ * Proje vitrini — kaydedilmiş bir senaryo versiyonunun diorama merkezli özeti
+ * (Figma 11 · Vitrin). Senaryo Kütüphanesindeki "Vitrin" bağlantısından açılır.
+ * Yalnızca senaryo sahibine görünür.
  */
 export default async function StudioVitrinPage({
   params,
@@ -32,38 +29,15 @@ export default async function StudioVitrinPage({
   }
 
   const userId = session.user.id as string;
-  const versionRecord = await getStudioScenarioVersionDetail(scenarioId, versionNum, userId);
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { plan: true } });
+  const [versionRecord, scenarioData] = await Promise.all([
+    getStudioScenarioVersionDetail(scenarioId, versionNum, userId),
+    getStudioScenarioById(scenarioId, userId),
+  ]);
 
-  if (!versionRecord) {
+  if (!versionRecord || !scenarioData) {
     notFound();
   }
 
-  return (
-    <main className={styles.page}>
-      <div className={styles.inner}>
-        <header className={styles.header}>
-          <Link href="/hesapla" className={styles.backLink}>
-            ← Hesaplama Aracına Dön
-          </Link>
-          <h1 className={styles.title}>
-            Studio 3D Vitrin — Versiyon v{versionRecord.versionNumber}
-          </h1>
-          <p className={styles.subtitle}>
-            Kaydedilmiş senaryonuzun kütlesini 3D sahnede inceleyin. PRO planla,
-            bu kütlenin arsanızdaki fotogerçekçi görselini üretebilirsiniz.
-          </p>
-        </header>
-
-        <section className={styles.stage}>
-          <StudioVitrinPreview
-            snapshot={versionRecord.snapshot}
-            scenarioId={scenarioId}
-            versionNumber={versionNum}
-            isPro={user?.plan === 'PRO'}
-          />
-        </section>
-      </div>
-    </main>
-  );
+  const viewModel = buildStudioProposalViewModel(scenarioData.scenario, versionRecord);
+  return <VitrinProje viewModel={viewModel} snapshot={versionRecord.snapshot} />;
 }
