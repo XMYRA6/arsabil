@@ -69,8 +69,21 @@ export function PanelShell({ children }: { children: React.ReactNode }) {
 
     const aktifMi = (href: string) => (href === '/dashboard' ? pathname === href : pathname === href || pathname.startsWith(`${href}/`));
 
+    // Mobilde yan menü / çip satırı yok (profil sayfası menü merkezi, alt sayfalar geri
+    // bağlantısı taşır). Sohbet kendi başlığını çizdiği için `/inbox` bağlantı almaz.
+    const geri = pathname === '/dashboard/profile' || pathname.startsWith('/inbox')
+        ? null
+        : pathname.startsWith('/dashboard')
+            ? { href: '/dashboard/profile', etiket: 'Profil' }
+            : { href: '/', etiket: 'Ana sayfa' };
+
     return (
         <div className={styles.shell}>
+            {geri && (
+                <Link href={geri.href} className={styles.geri}>
+                    <span aria-hidden="true">←</span> {geri.etiket}
+                </Link>
+            )}
             <aside className={styles.sidebar} aria-label="Panel menüsü">
                 <nav className={styles.nav}>
                     {NAV.map(item => {

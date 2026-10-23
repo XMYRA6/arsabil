@@ -30,10 +30,11 @@ describe('panel Arazi dili', () => {
     expect(shell).toMatch(/\.rozet\s*\{[^}]*background:\s*var\(--blue\)/)
   })
 
-  it('mobilde yan menü yatay çip satırına döner (alt sayfalara erişim kaybolmaz)', () => {
+  it('mobilde yan menü yok (ikinci gezinme sırası yaratmaz), geri bağlantısı görünür', () => {
     const mobile = dosyalar[0][1].slice(dosyalar[0][1].indexOf('@media (max-width: 900px)'))
     expect(mobile).toMatch(/\.shell\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/)
-    expect(mobile).toMatch(/\.nav\s*\{[^}]*flex-direction:\s*row/)
+    expect(mobile).toMatch(/\.sidebar\s*\{[^}]*display:\s*none/)
+    expect(mobile).toMatch(/\.geri\s*\{[^}]*display:\s*inline-flex/)
   })
 
   it('durum rozetleri semantik renkleri korur (bekliyor amber, kabul yeşil, red kırmızı)', () => {

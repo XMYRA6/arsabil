@@ -88,6 +88,13 @@
   .btn, .btnSoft, .btnDanger { min-height: 48px; }
 }
 
-.quickLinks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.quickLink { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 52px; padding: 0 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); color: var(--ink); font: 600 15px Inter, sans-serif; text-decoration: none; }
-.quickLink:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* Mobil menü merkezi (masaüstünde sol menü var, bu liste gizli) */
+.hub { display: none; }
+.hubSatir { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; box-sizing: border-box; min-height: 52px; padding: 0 18px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--ink); font: 500 16px Inter, sans-serif; text-align: left; text-decoration: none; cursor: pointer; }
+.hubSatir:first-child { border-top: 0; }
+.hubSatir:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.hubCikis { color: var(--bad); font-weight: 600; }
+@media (max-width: 900px) {
+  .hub { display: flex; flex-direction: column; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); overflow: hidden; }
+  .masaustu { display: none; }
+}

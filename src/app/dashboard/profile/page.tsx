@@ -9,6 +9,18 @@ import styles from './profile.module.css'
 type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
 type Theme = 'dark' | 'light'
 
+const HUB: { href: string; etiket: string }[] = [
+    { href: '/dashboard/reports', etiket: 'Hesaplamalarım' },
+    { href: '/dashboard/projects', etiket: 'Projelerim' },
+    { href: '/dashboard/favorites', etiket: 'Favorilerim' },
+    { href: '/dashboard/listings', etiket: 'İlanlarım' },
+    { href: '/dashboard/akif-projeler', etiket: 'Akif projeleri' },
+    { href: '/inbox', etiket: 'Mesajlar' },
+    { href: '/notifications', etiket: 'Bildirimler' },
+    { href: '/dashboard/profile/edit', etiket: 'Profili düzenle' },
+    { href: '/dashboard/settings', etiket: 'Ayarlar' },
+]
+
 const TABS: { key: Tab; label: string }[] = [
     { key: 'portfolio', label: 'Portfolyo' },
     { key: 'listings',  label: 'İlanlarım' },
@@ -260,17 +272,26 @@ export default function ProfilePage() {
                 </div>
             </section>
 
-            <nav className={styles.quickLinks} aria-label="Mesajlar ve bildirimler">
-                <Link href="/inbox" className={styles.quickLink}>
-                    <span>Mesajlar</span>
-                    <span aria-hidden="true">→</span>
-                </Link>
-                <Link href="/notifications" className={styles.quickLink}>
-                    <span>Bildirimler</span>
-                    <span aria-hidden="true">→</span>
-                </Link>
+            {/* Mobil menü merkezi: ikinci bir sekme/gezinme sırası yok; her satır kendi sayfasına gider. */}
+            <nav className={styles.hub} aria-label="Hesap menüsü">
+                {HUB.map(({ href, etiket }) => (
+                    <Link key={href} href={href} className={styles.hubSatir}>
+                        <span>{etiket}</span>
+                        <span aria-hidden="true">→</span>
+                    </Link>
+                ))}
+                {(session.user as { role?: string })?.role === 'ADMIN' && (
+                    <Link href="/admin" className={styles.hubSatir}>
+                        <span>Yönetim paneli</span>
+                        <span aria-hidden="true">→</span>
+                    </Link>
+                )}
+                <button type="button" onClick={() => signOut()} className={`${styles.hubSatir} ${styles.hubCikis}`}>
+                    Çıkış yap
+                </button>
             </nav>
 
+            <div className={styles.masaustu}>
             <div className={styles.tabs} role="tablist" aria-label="Profil bölümleri">
                 {TABS.map(t => (
                     <button
@@ -448,6 +469,8 @@ export default function ProfilePage() {
                     </section>
                 </>
             )}
+
+            </div>
 
             {showDeleteModal && (
                 <div
