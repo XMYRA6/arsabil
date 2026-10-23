@@ -390,3 +390,63 @@
 .solKolon {
     min-width: 0;
 }
+
+/* ── Katlanir bolum ── */
+.acilirMetin {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.acilirAciklama {
+    margin: 0;
+    font: 500 13px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+.acilirDugme {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    min-height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--blue-soft);
+    color: var(--blue);
+    font: 600 13px Inter, sans-serif;
+    cursor: pointer;
+}
+
+.acilirOkKapali {
+    transform: rotate(90deg);
+}
+
+.acilirOkAcik {
+    transform: rotate(-90deg);
+}
+
+/* ── Yapi kutlesi ── */
+.sahne {
+    border-radius: 14px;
+    background: var(--surface-2);
+    overflow: hidden;
+}
+
+.cipSatir {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rozetYesil {
+    background: color-mix(in srgb, var(--ok) 15%, transparent);
+    color: var(--ok);
+}
+
+.rozetNotr {
+    background: var(--surface-2);
+    color: var(--ink-secondary);
+}

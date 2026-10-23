@@ -24,11 +24,12 @@ import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarS
 import { GirdiKarti } from './mobile/GirdiKarti';
 import { MaliyetAlanlari, PiyasaAlani } from './mobile/AyarAlanlari';
 import { SonucPaneli } from './masaustu/SonucPaneli';
+import { YapiKutlesiPaneli } from './masaustu/YapiKutlesiPaneli';
+import { AcilirBolum } from './masaustu/AcilirBolum';
 import { HesapOzetiPaneli } from './masaustu/HesapOzetiPaneli';
 import arazi from './masaustu/masaustu.module.css';
 import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 import { type RiskKaynagi } from './mobile/riskSource';
-import { StudioPreview } from '@/components/studio/StudioPreview';
 import { ProgramMixPanel } from '@/components/studio/ProgramMixPanel';
 import { LandownerOfferPanel } from '@/components/studio/LandownerOfferPanel';
 import { Studio2DPreview } from '@/components/studio/Studio2DPreview';
@@ -169,6 +170,8 @@ export default function Home() {
   // boylece yaprak yeni bir bolum kazanirsa/kaybederse burasi derlemede patlar.
   const [mobilAyarBolumu, setMobilAyarBolumu] = useState<AyarBolumu | undefined>(undefined);
 
+  const [masaustu2DAcik, setMasaustu2DAcik] = useState(false);
+  const [masaustuTeklifAcik, setMasaustuTeklifAcik] = useState(false);
   const [isParcelModalOpen, setIsParcelModalOpen] = useState(false);
   const [parcelContext, setParcelContext] = useState<ParcelPickerValue | null>(null);
   const [landCostModel, setLandCostModel] = useState<LandCostModel>('proportional');
@@ -519,57 +522,6 @@ export default function Home() {
 
   const marketPriceNum = parseMarketPrice(manualMarketPrice);
 
-  const actionsSection = (
-    <>
-      <div className={arazi.eylemSatir}>
-        <button type="button" className={arazi.eylemBirincil} onClick={handleSaveReport} disabled={!result || isSaving}>
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg>
-          {isSaving ? 'Kaydediliyor...' : 'Özet rapor oluştur'}
-        </button>
-        <button type="button" className={arazi.eylemIkincil} onClick={handlePdfDownload} disabled={!result}>PDF</button>
-        <button type="button" className={arazi.eylemIkincil} onClick={() => handleOpenShareDialog()} disabled={!result}>Paylaş</button>
-        <button type="button" className={arazi.eylemIkincil} onClick={() => handleOpenSaveDialog()} disabled={!result}>Kaydet</button>
-        <button
-          type="button"
-          className={arazi.eylemIkincil}
-          onClick={handleAddScenario}
-          disabled={!result || savedScenarios.length >= 3}
-          title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-        >
-          + Karşılaştır
-        </button>
-      </div>
-      {savedScenarios.length > 0 && (
-        <div className={styles.scenarioPills}>
-          {savedScenarios.map((s, i) => {
-            const pillClass = [styles.pillBlue, styles.pillGreen, styles.pillOrange][i % 3];
-            return (
-              <span key={s.id} className={`${styles.scenarioPill} ${pillClass}`}>
-                {s.name}
-                <button
-                  onClick={() => handleRemoveScenario(s.id)}
-                  aria-label={`${s.name}'i kaldır`}
-                  className={styles.scenarioPillRemove}
-                  title={`${s.name}'i kaldır`}
-                >×</button>
-              </span>
-            );
-          })}
-        </div>
-      )}
-      {savedScenarios.length >= 2 && (
-        <div className={styles.compareSection}>
-          <h3 className={styles.compareTitle}>
-            Senaryo Karşılaştırması
-          </h3>
-          <ScenarioCompare
-            scenarios={savedScenarios}
-            onShareRequest={handleShareScenarios}
-          />
-        </div>
-      )}
-    </>
-  );
 
   // Grafiklerin ortak girdisi TEK yerde. Onceden bu nesne masaustu JSX'inde
   // iki kez satir ici yaziliydi; mobil analiz sekmesi ucuncu bir kopya
@@ -997,6 +949,58 @@ export default function Home() {
    * eklenmemeli — bu blok tam olarak o hatayi imkansiz kilmak icin var.
    * Bekcisi: `page.test.tsx` her iki viewport'ta da modali aciyor.
    */
+  const actionsSection = (
+    <>
+      <div className={arazi.eylemSatir}>
+        <button type="button" className={arazi.eylemBirincil} onClick={handleSaveReport} disabled={!result || isSaving}>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg>
+          {isSaving ? 'Kaydediliyor...' : 'Özet rapor oluştur'}
+        </button>
+        <button type="button" className={arazi.eylemIkincil} onClick={handlePdfDownload} disabled={!result}>PDF</button>
+        <button type="button" className={arazi.eylemIkincil} onClick={handleOpenShareDialog} disabled={!result}>Paylaş</button>
+        <button type="button" className={arazi.eylemIkincil} onClick={handleOpenSaveDialog} disabled={!result}>Kaydet</button>
+        <button
+          type="button"
+          className={arazi.eylemIkincil}
+          onClick={handleAddScenario}
+          disabled={!result || savedScenarios.length >= 3}
+          title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
+        >
+          + Karşılaştır
+        </button>
+      </div>
+      {savedScenarios.length > 0 && (
+        <div className={styles.scenarioPills}>
+          {savedScenarios.map((s, i) => {
+            const pillClass = [styles.pillBlue, styles.pillGreen, styles.pillOrange][i % 3];
+            return (
+              <span key={s.id} className={`${styles.scenarioPill} ${pillClass}`}>
+                {s.name}
+                <button
+                  onClick={() => handleRemoveScenario(s.id)}
+                  aria-label={`${s.name}'i kaldır`}
+                  className={styles.scenarioPillRemove}
+                  title={`${s.name}'i kaldır`}
+                >×</button>
+              </span>
+            );
+          })}
+        </div>
+      )}
+      {savedScenarios.length >= 2 && (
+        <div className={styles.compareSection}>
+          <h3 className={styles.compareTitle}>
+            Senaryo Karşılaştırması
+          </h3>
+          <ScenarioCompare
+            scenarios={savedScenarios}
+            onShareRequest={handleShareScenarios}
+          />
+        </div>
+      )}
+    </>
+  );
+
   const ortakKatmanlar = (
     <>
       <AuthModal
@@ -1342,8 +1346,11 @@ export default function Home() {
               savedScenarioId={savedScenarioId}
               savedScenarioVersionNumber={savedScenarioVersionNumber}
               onRebalanceClick={() => {
-                const el = document.getElementById('landowner-offer-panel-container');
-                el?.scrollIntoView({ behavior: 'smooth' });
+                setMasaustuTeklifAcik(true);
+                // Bölüm açıldıktan sonra (içerik render olunca) hedefe kaydır.
+                requestAnimationFrame(() => {
+                  document.getElementById('landowner-offer-panel-container')?.scrollIntoView({ behavior: 'smooth' });
+                });
               }}
             />
           </div>
@@ -1362,18 +1369,11 @@ export default function Home() {
           )}
 
           <div className={styles.studioMain}>
-            <StudioPreview
-              mass={studioBuildingMass}
-              warnings={studioWarnings}
-              geometrySource={verifiedStudioPolygon ? 'TKGM doğrulanmış parsel sınırı' : result ? 'Demo parsel sınırı' : 'Parsel geometrisi bekleniyor'}
-              geometryStatus={verifiedStudioPolygon ? 'verified' : result ? 'demo' : 'missing'}
-              constructionAreaSource={studioMassingInput.grossConstructionAreaSource === 'authoritative'
-                ? 'Otoriter inşaat alanı verisi'
-                : 'Daire adedi x ortalama daire m² varsayımı (tahmini)'}
-              constructionAreaEstimated={studioMassingInput.grossConstructionAreaSource !== 'authoritative'}
-              programMixItems={programMixItems}
-              programBands={programBands}
-              layoutDraft={effectiveLayoutDraft}
+            <YapiKutlesiPaneli
+              hasResult={!!result}
+              katSayisi={studioBuildingMass?.floorCount ?? null}
+              daireSayisi={isApartmentCountEnabled ? totalApartments : null}
+              parselDogrulandi={!!verifiedStudioPolygon}
             />
           </div>
 
@@ -1387,6 +1387,14 @@ export default function Home() {
             />
           </div>
 
+          <div className={styles.studioWide}>
+            <AcilirBolum
+              baslik="2D yerleşim ve program"
+              aciklama="Kapsama, yön, çekme mesafeleri ve zemin ticaret cephesi"
+              acik={masaustu2DAcik}
+              onToggle={setMasaustu2DAcik}
+            >
+              <div className={styles.studioGrid}>
           <div className={styles.studioHalf}>
             <Studio2DPreview
               parcelPolygon={studioBuildingMass?.footprint ?? null}
@@ -1407,7 +1415,18 @@ export default function Home() {
             </div>
           )}
 
-          <div className={styles.studioWide} id="landowner-offer-panel-container">
+              </div>
+            </AcilirBolum>
+          </div>
+
+          <div className={styles.studioWide}>
+            <AcilirBolum
+              id="landowner-offer-panel-container"
+              baslik="Teklifi ayrıntılandır"
+              aciklama="Değerleme varsayımı ve özel teklif; nakit dengeleme buradan hesaplanır"
+              acik={masaustuTeklifAcik}
+              onToggle={setMasaustuTeklifAcik}
+            >
             <LandownerOfferPanel
               shareRatio={effectiveLandShareRatio / 100}
               totalUnitCount={totalApartments}
@@ -1418,6 +1437,7 @@ export default function Home() {
               onCustomOverrideChange={handleCustomOverrideChange}
               programMixItems={programMixItems}
             />
+            </AcilirBolum>
           </div>
 
         </div>
