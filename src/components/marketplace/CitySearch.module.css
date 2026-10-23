@@ -1,0 +1,18 @@
+/* Şehir/ilçe arama — Figma 07 araç çubuğu. Arazi tokenları. */
+.root { position: relative; display: flex; gap: 10px; align-items: center; width: 100%; }
+.cityBox { position: relative; flex: 1; min-width: 0; }
+.leadIcon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); display: inline-flex; color: var(--ink-secondary); pointer-events: none; }
+.input { width: 100%; min-height: 46px; box-sizing: border-box; padding: 0 110px 0 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 16px Inter, sans-serif; }
+.input::placeholder { color: var(--ink-secondary); }
+.input:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.cityBadge { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 3px 10px; border-radius: 999px; background: var(--amber-soft); color: var(--amber-text); font: 600 12px Inter, sans-serif; pointer-events: none; }
+.listbox { position: absolute; top: calc(100% + 6px); left: 0; right: 0; max-height: 280px; overflow-y: auto; padding: 6px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-card); z-index: 100; }
+.districtList { right: auto; min-width: 200px; }
+.empty { padding: 12px 14px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
+.option { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; font: 500 14.5px Inter, sans-serif; color: var(--ink); cursor: pointer; }
+.option:hover, .option:focus-visible { outline: none; background: var(--surface-2); }
+.optionActive { color: var(--blue); font-weight: 700; }
+.districtCount { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-secondary); font: 600 11.5px Inter, sans-serif; }
+.districtBox { position: relative; flex: none; }
+.districtBtn { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px Inter, sans-serif; cursor: pointer; white-space: nowrap; }
+.districtBtnOpen { background: var(--amber-soft); border-color: var(--amber); color: var(--amber-text); }

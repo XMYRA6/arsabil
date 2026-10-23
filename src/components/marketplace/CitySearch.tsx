@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
+import styles from './CitySearch.module.css';
 
 /* ─── All 81 Turkish provinces with lat/lng ─── */
 export const TURKEY_CITIES: { name: string; lat: number; lng: number; zoom: number }[] = [
@@ -213,15 +214,20 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
         return () => document.removeEventListener('mousedown', handleClick);
     }, []);
 
+    const pinIcon = (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+        </svg>
+    );
+
     return (
-        <div ref={wrapperRef} style={{ position: 'relative', display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-            {/* City Input */}
-            <div style={{ position: 'relative', flex: '0 0 180px' }}>
-                <span aria-hidden="true" style={{
-                    position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
-                    fontSize: '0.8rem', color: 'var(--muted)', pointerEvents: 'none',
-                }}>📍</span>
+        <div ref={wrapperRef} className={styles.root}>
+            {/* İl girdisi */}
+            <div className={styles.cityBox}>
+                <span className={styles.leadIcon}>{pinIcon}</span>
                 <input
+                    className={styles.input}
                     placeholder="İl ara…"
                     value={query}
                     role="combobox"
@@ -231,36 +237,15 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                     onChange={e => { setQuery(e.target.value); setOpen(true); setShowDistricts(false); }}
                     onFocus={() => setOpen(true)}
                     onKeyDown={e => { if (e.key === 'Escape') setOpen(false); }}
-                    style={{
-                        width: '100%', padding: '7px 10px 7px 30px',
-                        background: 'var(--bg)', border: '1.5px solid var(--border)',
-                        borderRadius: 8, color: 'var(--text)', fontFamily: 'inherit', fontSize: '0.8rem', outline: 'none',
-                    }}
                 />
                 {selectedCity && !open && (
-                    <span data-testid="cityBadge" style={{
-                        position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-                        fontSize: '0.62rem', background: 'var(--primary)', color: 'white',
-                        padding: '2px 6px', borderRadius: 5, fontWeight: 700,
-                    }}>{provinceName}</span>
+                    <span data-testid="cityBadge" className={styles.cityBadge}>{provinceName}</span>
                 )}
 
-                {/* City Dropdown */}
                 {open && (
-                    <div
-                        id="city-search-listbox"
-                        role="listbox"
-                        aria-label="İller"
-                        style={{
-                            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-                            background: 'var(--panel)', border: '1.5px solid var(--border)',
-                            borderRadius: 10, maxHeight: 260, overflowY: 'auto',
-                            boxShadow: '0 12px 40px rgba(0,0,0,.25)', zIndex: 100,
-                        }}>
+                    <div id="city-search-listbox" role="listbox" aria-label="İller" className={styles.listbox}>
                         {filtered.length === 0 ? (
-                            <div style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--muted)' }}>
-                                Sonuç bulunamadı
-                            </div>
+                            <div className={styles.empty}>Sonuç bulunamadı</div>
                         ) : (
                             filtered.map(city => {
                                 const secili = city.name === selectedCity;
@@ -281,31 +266,11 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                         onKeyDown={e => {
                                             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sec(); }
                                         }}
-                                        style={{
-                                            padding: '8px 14px',
-                                            fontSize: '0.8rem',
-                                            color: secili ? 'var(--primary)' : 'var(--text)',
-                                            fontWeight: secili ? 800 : 500,
-                                            cursor: 'pointer',
-                                            borderBottom: '1px solid var(--border)',
-                                            transition: 'background 0.1s',
-                                            display: 'flex', alignItems: 'center', gap: 8,
-                                        }}
-                                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
-                                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                        onFocus={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
-                                        onBlur={e => (e.currentTarget.style.background = 'transparent')}
+                                        className={`${styles.option} ${secili ? styles.optionActive : ''}`}
                                     >
-                                        <span aria-hidden="true" style={{ fontSize: '0.75rem' }}>📍</span>
                                         {city.name}
                                         {DISTRICTS[city.name] && (
-                                            <span style={{
-                                                marginLeft: 'auto', fontSize: '0.58rem', background: 'rgba(var(--primary-rgb),.1)',
-                                                color: 'var(--primary)', padding: '1px 5px', borderRadius: 4, fontWeight: 700,
-                                            }}>{DISTRICTS[city.name].length} ilçe</span>
-                                        )}
-                                        {secili && (
-                                            <span aria-hidden="true" style={{ fontSize: '0.65rem', color: 'var(--primary)' }}>✓</span>
+                                            <span className={styles.districtCount}>{DISTRICTS[city.name].length} ilçe</span>
                                         )}
                                     </div>
                                 );
@@ -315,39 +280,25 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                 )}
             </div>
 
-            {/* District Dropdown Button */}
+            {/* İlçe seçici */}
             {districts.length > 0 && (
-                <div style={{ position: 'relative' }}>
+                <div className={styles.districtBox}>
                     <button
+                        type="button"
                         onClick={() => setShowDistricts(p => !p)}
                         aria-expanded={showDistricts}
                         aria-haspopup="listbox"
                         aria-controls="district-search-listbox"
-                        style={{
-                            padding: '7px 12px', fontSize: '0.78rem',
-                            background: showDistricts ? 'var(--primary)' : 'var(--bg)',
-                            color: showDistricts ? 'white' : 'var(--text)',
-                            border: '1.5px solid var(--border)',
-                            borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
-                            fontWeight: 600, whiteSpace: 'nowrap',
-                            transition: 'all 0.15s',
-                        }}
+                        className={`${styles.districtBtn} ${showDistricts ? styles.districtBtnOpen : ''}`}
                     >
-                        <span aria-hidden="true">🏘️</span> İlçe ▾
+                        İlçe
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
                     </button>
 
                     {showDistricts && (
-                        <div
-                            id="district-search-listbox"
-                            role="listbox"
-                            aria-label="İlçeler"
-                            style={{
-                                position: 'absolute', top: 'calc(100% + 4px)', left: 0,
-                                background: 'var(--panel)', border: '1.5px solid var(--border)',
-                                borderRadius: 10, maxHeight: 300, overflowY: 'auto',
-                                boxShadow: '0 12px 40px rgba(0,0,0,.25)', zIndex: 100,
-                                minWidth: 180,
-                            }}>
+                        <div id="district-search-listbox" role="listbox" aria-label="İlçeler" className={`${styles.listbox} ${styles.districtList}`}>
                             {districts.map(d => {
                                 const sec = () => {
                                     onCitySelect({ name: d.name, lat: d.lat, lng: d.lng, zoom: d.zoom, province: provinceName });
@@ -363,19 +314,8 @@ export function CitySearch({ onCitySelect, selectedCity }: Props) {
                                         onKeyDown={e => {
                                             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sec(); }
                                         }}
-                                        style={{
-                                            padding: '7px 14px', fontSize: '0.78rem',
-                                            color: 'var(--text)', cursor: 'pointer',
-                                            borderBottom: '1px solid var(--border)',
-                                            transition: 'background 0.1s',
-                                            display: 'flex', alignItems: 'center', gap: 6,
-                                        }}
-                                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
-                                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                                        onFocus={e => (e.currentTarget.style.background = 'rgba(var(--primary-rgb),.08)')}
-                                        onBlur={e => (e.currentTarget.style.background = 'transparent')}
+                                        className={styles.option}
                                     >
-                                        <span aria-hidden="true" style={{ fontSize: '0.7rem', opacity: 0.6 }}>🏘️</span>
                                         {d.name}
                                     </div>
                                 );

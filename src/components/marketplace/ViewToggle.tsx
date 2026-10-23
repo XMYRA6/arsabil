@@ -1,5 +1,7 @@
 "use client";
 
+import styles from './ViewToggle.module.css';
+
 type View = 'split' | 'map' | 'list';
 
 interface Props {
@@ -7,37 +9,29 @@ interface Props {
     onChange: (v: View) => void;
 }
 
+/**
+ * İlanlar / Harita anahtarı — Figma 07 (iki seçenek). Eski "split" görünümü
+ * kalktı; URL'de `view=split` kalmış bağlantılar "İlanlar" olarak açılır.
+ */
 export function ViewToggle({ view, onChange }: Props) {
-    const opts: { id: View; icon: string; label: string }[] = [
-        { id: 'map', icon: '🗺', label: 'Harita' },
-        { id: 'list', icon: '☰', label: 'Liste' },
-        { id: 'split', icon: '❏', label: 'Split' },
+    const opts: { id: View; label: string }[] = [
+        { id: 'list', label: 'İlanlar' },
+        { id: 'map', label: 'Harita' },
     ];
+    const aktif: View = view === 'map' ? 'map' : 'list';
 
     return (
-        <div style={{
-            display: 'flex', gap: 2,
-            background: 'var(--bg)', border: '1.5px solid var(--border)',
-            borderRadius: 10, padding: 3,
-        }}>
+        <div className={styles.group} role="group" aria-label="Görünüm">
             {opts.map(o => (
                 <button
                     key={o.id}
+                    type="button"
                     onClick={() => onChange(o.id)}
-                    title={o.label}
                     aria-label={o.label}
-                    aria-pressed={view === o.id}
-                    style={{
-                        padding: '5px 10px', borderRadius: 7,
-                        background: view === o.id ? 'var(--primary)' : 'transparent',
-                        color: view === o.id ? 'white' : 'var(--muted)',
-                        border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                        fontSize: '0.75rem', fontWeight: view === o.id ? 700 : 500,
-                        transition: 'all 0.15s',
-                        display: 'flex', alignItems: 'center', gap: 4,
-                    }}
+                    aria-pressed={aktif === o.id}
+                    className={`${styles.btn} ${aktif === o.id ? styles.btnActive : ''}`}
                 >
-                    <span aria-hidden="true">{o.icon}</span>
+                    {o.label}
                 </button>
             ))}
         </div>

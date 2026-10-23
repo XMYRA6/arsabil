@@ -1,11 +1,11 @@
 /** @jest-environment jsdom */
 import React from 'react'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import MarketplacePage from './page'
 
 // MapView her zaman ham `listings`i alıyordu (page.tsx'in kendi filterListings/
-// sortListings ile hesapladığı `sorted` değil) — split/harita görünümünde filtre
+// sortListings ile hesapladığı `sorted` değil) — harita görünümünde filtre
 // uygulansa bile haritadaki ilan sayısı hiç değişmiyordu. Varsayılan filtre
 // (DEFAULT_FILTERS.type = ['KAT_KARSILIGI', 'ORTAKLIK']) 'SALE' ilanını zaten
 // dışarıda bırakıyor; bu test MapView'in ham 2 değil, filtrelenmiş 1 ilan
@@ -38,6 +38,8 @@ describe('marketplace/page — filtre/harita senkronu', () => {
     it('MapView varsayılan filtreyle eşleşmeyen ilanı almaz', async () => {
         render(<MarketplacePage />)
 
+        // Figma 07: varsayılan görünüm İlanlar; harita "Harita" anahtarıyla açılır.
+        fireEvent.click(await screen.findByRole('button', { name: 'Harita' }))
         await waitFor(() => expect(screen.getByTestId('mapview')).toBeInTheDocument())
         await waitFor(() => expect(lastMapViewListings.length).toBe(1))
         expect((lastMapViewListings[0] as { id: string }).id).toBe('1')

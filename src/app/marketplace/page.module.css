@@ -1,378 +1,56 @@
-.container {
-    max-width: 1280px;
-    margin: 0 auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    height: calc(100dvh - 106px);
-    overflow: hidden;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    border: 1px solid var(--border);
-    border-top: none;
-    background: var(--panel);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: var(--shadow2);
+/* Pazar yeri — Figma 07 (Pazar yeri · Liste · Masaüstü/Mobil). Arazi tokenları. */
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; color: var(--ink); }
+.suspenseFallback { padding: 48px; text-align: center; color: var(--ink-secondary); font: 500 14px Inter, sans-serif; }
+
+.pageHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.eyebrow { margin: 0 0 12px; font: 600 12px Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); }
+.title { margin: 0 0 10px; font: 700 40px/1.1 Inter, sans-serif; letter-spacing: -0.5px; color: var(--ink); }
+.subtitle { margin: 0; font: 500 16px Inter, sans-serif; color: var(--ink-secondary); }
+.demoBadge { flex: none; margin-top: 4px; padding: 4px 12px; border-radius: 999px; background: var(--amber-soft); color: var(--amber-text); font: 600 12px Inter, sans-serif; cursor: help; }
+
+.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.search { flex: 1; min-width: 0; }
+.sortSelect { min-height: 46px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 15px Inter, sans-serif; }
+.viewToggle { flex: none; }
+.filterBtn { display: none; width: 46px; height: 46px; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); cursor: pointer; }
+
+.quickRow { display: none; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.quickChip { min-height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 13.5px Inter, sans-serif; cursor: pointer; }
+.quickChipActive { background: var(--amber-soft); border-color: var(--amber); color: var(--amber-text); font-weight: 600; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.sidebarWrapper { position: sticky; top: 96px; }
+.content { min-width: 0; }
+.countLabel { margin: 4px 0 16px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px; }
+.skeletonItem { height: 380px; border-radius: var(--radius-card); background: var(--surface-2); animation: skeleton 1.4s ease-in-out infinite; }
+@keyframes skeleton { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .skeletonItem { animation: none; } }
+.emptyState { margin: 32px 0; }
+
+.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 28px; }
+.pageBtn { min-width: 40px; min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 14px Inter, sans-serif; cursor: pointer; }
+.pageBtnActive { background: var(--amber); border-color: var(--amber); color: var(--ink); font-weight: 600; }
+[data-theme='dark'] .pageBtnActive { color: #0f1a2e; }
+
+.mapPanel { position: relative; min-height: 640px; border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow-card); background: var(--surface-2); }
+.mapLoading { min-height: 640px; }
+
+@media (max-width: 900px) {
+  .container { padding: 16px 16px 32px; }
+  .pageHead { margin-bottom: 14px; }
+  .title { font-size: 26px; }
+  .subtitle { font-size: 14px; }
+  .toolbar { flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .search { flex: 1 1 calc(100% - 58px); }
+  .sortSelect { display: none; }
+  .filterBtn { display: inline-flex; }
+  .viewToggle { flex: 1 1 100%; order: 3; }
+  .viewToggle > div { display: flex; }
+  .viewToggle button { flex: 1; }
+  .quickRow { display: flex; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .sidebarWrapper { display: none; }
+  .grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .mapPanel { min-height: 480px; }
 }
-
-.topBar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-}
-
-.bodyContainer {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-}
-
-.sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    min-width: 0;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 16px 14px;
-    display: flex;
-    flex-direction: column;
-}
-
-.listPanel {
-    flex-shrink: 0;
-    min-width: 0;
-    max-width: 100%;
-    overflow-y: auto;
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-}
-
-.mapPanel {
-    flex: 1;
-    height: 100%;
-    border-left: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
-
-.desktopOnlySpacer {
-    flex: 1;
-    min-width: 10px;
-}
-
-.desktopViewToggle {
-    display: block;
-}
-
-/* ── Faz 1: mobil kontroller + inline stil migrasyonu ── */
-
-.suspenseFallback {
-    padding: 2rem;
-    text-align: center;
-    color: var(--muted);
-}
-
-.mapLoading {
-    flex: 1;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-}
-
-/* Uydurma veri ekranda oldugu surece acikca isaretlenir. */
-.demoBanner {
-    margin: 0 1rem 0.75rem;
-    padding: 0.6rem 0.9rem;
-    border: 1px solid rgba(var(--orange-rgb), 0.45);
-    border-radius: 10px;
-    background: rgba(var(--orange-rgb), 0.1);
-    color: var(--text);
-    font-size: 0.8rem;
-    line-height: 1.45;
-}
-
-.demoBanner strong {
-    color: var(--orange);
-}
-
-.quickChip {
-    /* KRITIK (Safari/WebKit bulgusu): `.topBar` (mobil) `overflow-x:auto`
-       ile BILEREK yatay kaydirmali — hicbir cocugun KUCULMESI gerekmiyor,
-       tasan icerik kaydirmayla gorulur. `flex-shrink:0` olmadan Safari'nin
-       flex algoritmasi bu chip'i (white-space:nowrap ile) kendi icerik
-       genisliginin ALTINA sikistirabiliyor, metin tasip komsu elemanlarla
-       ORTUSUYORDU ("Kat Karşılığı / Ortaklık" ekranin yarisini kapliyor
-       gibi gorunuyordu) — Chrome bu senaryoda kucultmuyor, Safari kucultuyor. */
-    flex-shrink: 0;
-    padding: 6px 14px;
-    border-radius: 20px;
-    background: var(--bg);
-    color: var(--muted);
-    border: 1.5px solid var(--border);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.78rem;
-    font-weight: 500;
-    transition: all 0.15s;
-    white-space: nowrap;
-    min-height: 32px;
-}
-
-.quickChipActive {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    font-weight: 700;
-}
-
-.sortSelect {
-    /* Ayni WebKit kaydirmali-satir kucultme hatasi, bkz. .quickChip. */
-    flex-shrink: 0;
-    padding: 6px 10px;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.78rem;
-    cursor: pointer;
-}
-
-.listPanelSplit {
-    width: 360px;
-    border-right: 1px solid var(--border);
-}
-
-.listPanelFull {
-    width: 100%;
-    border-right: none;
-}
-
-.skeletonList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.skeletonItem {
-    background: var(--panel);
-    border-radius: 16px;
-    animation: pulse 1.5s infinite;
-    border: 1px solid var(--border);
-}
-
-.skeletonItemSplit {
-    height: 280px;
-}
-
-.skeletonItemList {
-    height: 130px;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-}
-
-.emptyState {
-    text-align: center;
-    padding: 3rem;
-    color: var(--muted);
-}
-
-.emptyStateIcon {
-    font-size: 2rem;
-    color: var(--primary);
-    margin-bottom: 8px;
-}
-
-.countLabel {
-    font-size: 0.75rem;
-    color: var(--muted);
-    padding: 0 2px;
-}
-
-.pagination {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    padding: 8px 0;
-    flex-wrap: wrap;
-}
-
-.pageBtn {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: var(--bg);
-    color: var(--muted);
-    border: 1.5px solid var(--border);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.78rem;
-    font-weight: 700;
-}
-
-.pageBtnActive {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-.mobileControls {
-    display: none;
-}
-
-.filterBtn {
-    flex-shrink: 0;
-    padding: 0 14px;
-    min-height: var(--touch-target);
-    border-radius: var(--radius-md);
-    background: var(--m-grad-btn);
-    border: 1px solid rgba(255,255,255,.72);
-    color: white;
-    font-family: inherit;
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    cursor: pointer;
-}
-
-/* =========================================================================
-   RESPONSIVE DESIGN FOR MOBILE (< 768px)
-   ========================================================================= */
-@media (max-width: 768px) {
-.desktopOnlySpacer,
-    .desktopViewToggle {
-        display: none !important;
-    }
-
-    .container {
-        height: calc(100dvh - 70px - var(--mobile-nav-pb, 0px));
-        min-height: 0;
-        border: none;
-        border-radius: 0;
-        max-width: 100vw;
-        background: var(--m-mesh);
-        border-bottom-color: var(--m-divider);
-    }
-
-    .topBar {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 8px 12px;
-        gap: 8px;
-        min-width: 0;
-        background: var(--m-mesh);
-        border-bottom-color: var(--m-divider);
-        -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
-        mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
-    }
-
-    .topBar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .mobileControls {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        background: var(--m-glass-bg);
-        border-bottom: 1px solid var(--m-glass-border);
-        padding: 8px 16px;
-        flex-shrink: 0;
-    }
-
-    .filterBtn {
-        background: var(--m-grad-btn);
-        border-color: rgba(255,255,255,.72);
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .mobileControls > :first-child {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .listPanelSplit,
-    .listPanelFull {
-        width: 100% !important;
-    }
-
-    .pageBtn {
-        width: var(--touch-target);
-        height: var(--touch-target);
-    }
-
-    .quickChip {
-        min-height: var(--touch-target);
-    }
-
-    .bodyContainer {
-        flex-direction: column;
-        flex: 1;
-        min-height: 0;
-        overflow: hidden;
-    }
-
-    .sidebarWrapper,
-    .listPanel,
-    .mapPanel {
-        display: none !important;
-        width: 100% !important;
-        max-width: 100vw;
-        min-width: 0;
-        border-right: none !important;
-        border-bottom: none !important;
-    }
-
-    .sidebarWrapper > aside {
-        width: 100% !important;
-        border-right: none !important;
-        height: auto;
-        min-height: 100%;
-    }
-
-    .bodyContainer[data-mobile-tab="list"] .listPanel {
-        display: flex !important;
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-    }
-
-    .bodyContainer[data-mobile-tab="map"] .mapPanel {
-        display: block !important;
-        position: relative;
-        flex: 1;
-        min-height: 0;
-        height: auto !important;
-    }
-
-    .listPanel {
-        background: transparent;
-    }
-
-    .quickChipActive,
-    .pageBtnActive {
-        background: var(--m-grad-accent);
-        border-color: transparent;
-    }
-}
-

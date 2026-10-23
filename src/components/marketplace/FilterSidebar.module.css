@@ -1,375 +1,302 @@
-/* =========================================================================
-   FILTER SIDEBAR — Faz 1 inline stil migrasyonu + sheet varyantı
-   ========================================================================= */
+/* Filtreler — Figma 07 (Pazar yeri · Liste / Filtre sayfası). Arazi tokenları. */
 
 .sidebar {
-    width: 240px;
-    flex-shrink: 0;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 16px 14px;
     display: flex;
     flex-direction: column;
+    gap: 18px;
+    padding: 22px;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    color: var(--ink);
 }
 
-/* BottomSheet içinde: tam genişlik, kenarlıksız, sheet zaten kaydırıyor */
 .inSheet {
-    composes: mStatSurface from global;
-    width: 100%;
-    overflow-y: visible;
-    padding: 0 4px 8px;
-}
-
-@media (min-width: 769px) {
-    .inSheet {
-        border-right: none;
-        background: transparent;
-    }
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    gap: 16px;
 }
 
 .header {
-    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .headerTitle {
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--card-title);
-    margin-bottom: 2px;
+    margin: 0;
+    font: 700 18px Inter, sans-serif;
+    color: var(--ink);
 }
 
 .headerCount {
-    font-size: 0.72rem;
-    color: var(--muted);
+    margin: -12px 0 0;
+    font: 500 12.5px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+.inSheet .header,
+.inSheet .headerCount {
+    display: none;
+}
+
+.clearLink {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: var(--blue);
+    font: 600 13.5px Inter, sans-serif;
+    cursor: pointer;
 }
 
 .section {
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.inSheet .section {
+    padding-top: 0;
+    border-top: 0;
 }
 
 .sectionLabel {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 0.07em;
-    margin-bottom: 8px;
-    display: block;
+    font: 600 14px Inter, sans-serif;
+    color: var(--ink);
 }
 
+/* ── Onay kutuları ── */
 .checkRow {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 10px;
+    font: 500 14.5px Inter, sans-serif;
+    color: var(--ink);
     cursor: pointer;
-    font-size: 0.82rem;
-    color: var(--text);
-    font-weight: 500;
+}
+
+.checkBoxInput {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .checkBox {
-    width: 18px;
-    height: 18px;
-    border-radius: 5px;
-    border: 2px solid var(--border);
-    background: transparent;
-    display: flex;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.15s;
+    flex: none;
+    border-radius: 7px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
 }
 
 .checkBoxActive {
-    border-color: var(--primary);
-    background: var(--primary);
-}
-
-.checkMark {
-    color: white;
-    font-size: 0.6rem;
-    font-weight: 900;
-}
-
-.rangeRow {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-.rangeInput {
-    width: 70px;
-    padding: 6px 10px;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.8rem;
-}
-
-.rangeDash {
-    color: var(--muted);
-    font-size: 0.8rem;
-}
-
-.chipWrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.chip {
-    padding: 4px 10px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-size: 0.72rem;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s;
-}
-
-.chipActive {
-    border-color: var(--primary);
-    background: rgba(var(--primary-rgb), .10);
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.toggleRow {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
-.toggleTrack {
-    /* Impeccable audit/critique (2026-09-17): önceden <div onClick>, artık
-       gerçek <button role="switch"> — native buton chrome'u sıfırlanıyor. */
-    padding: 0;
-    border: none;
-    font: inherit;
-    width: 40px;
-    height: 22px;
-    border-radius: 11px;
-    background: var(--border);
-    position: relative;
-    cursor: pointer;
-    transition: background 0.2s;
-    flex-shrink: 0;
-}
-
-/* Gerçek checkbox — görsel olarak `.checkBox`'ın (aria-hidden dekoratif
-   ikizi) altında gizli ama klavye/ekran okuyucu için TAM erişilebilir
-   (visually-hidden deseni, display:none DEĞİL — DOM'da ve tab sırasında
-   kalır). Impeccable critique P2 (2026-09-17). */
-.checkBoxInput {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    background: var(--amber);
+    border-color: var(--amber);
 }
 
 .checkBoxInput:focus-visible + .checkBox {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
+}
+
+/* ── Çipler (sheet) ── */
+.chipWrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    min-height: 38px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font: 500 14px Inter, sans-serif;
+    cursor: pointer;
+}
+
+.chipActive {
+    background: var(--amber-soft);
+    border-color: var(--amber);
+    color: var(--amber-text);
+    font-weight: 600;
+}
+
+/* ── Aralık girdileri ── */
+.rangeRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.rangeField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.rangeCaption {
+    font: 500 12.5px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+.rangeInput {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--input-bg);
+    color: var(--ink);
+    font: 500 15px Inter, sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+
+.rangeInput:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* ── Fizibilite ── */
+.toggleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.toggleTrack {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    cursor: pointer;
 }
 
 .toggleTrackActive {
-    background: var(--primary);
+    background: var(--amber);
+    box-shadow: none;
 }
 
 .toggleThumb {
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: white;
-    transition: left 0.2s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform var(--dur-ui) var(--ease-out);
 }
 
 .toggleThumbActive {
-    left: 21px;
-}
-
-.toggleLabel {
-    font-size: 0.78rem;
-    color: var(--text);
-    font-weight: 500;
+    transform: translateX(16px);
 }
 
 .scoreHeader {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 4px;
+    margin: 6px 0 8px;
 }
 
 .scoreLabel {
-    font-size: 0.7rem;
-    color: var(--muted);
+    font: 500 13px Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .scoreValue {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--primary);
+    font: 700 13.5px Inter, sans-serif;
+    color: var(--amber-text);
 }
 
 .scoreRange {
+    -webkit-appearance: none;
+    appearance: none;
     width: 100%;
-    accent-color: var(--primary);
+    height: 22px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
 }
 
+.scoreRange::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--amber) var(--progress, 0%), var(--line) var(--progress, 0%));
+}
+
+.scoreRange::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid var(--amber);
+}
+
+.scoreRange::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--line);
+}
+
+.scoreRange::-moz-range-progress {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--amber);
+}
+
+.scoreRange::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid var(--amber);
+}
+
+/* ── Alt düğmeler ── */
 .footer {
-    margin-top: auto;
-    padding-top: 16px;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
-.inSheet .footer {
-    margin-top: 8px;
+.applyBtn,
+.resetBtn {
+    flex: 1;
+    min-height: 48px;
+    border: 0;
+    border-radius: 999px;
+    font: 600 15px Inter, sans-serif;
+    cursor: pointer;
 }
 
 .applyBtn {
-    padding: 10px;
-    border-radius: 10px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-weight: 800;
-    font-family: inherit;
-    font-size: 0.85rem;
+    background: var(--blue);
+    color: var(--blue-on);
 }
 
 .resetBtn {
-    padding: 8px;
-    border-radius: 10px;
-    background: transparent;
-    color: var(--muted);
-    border: 1.5px solid var(--border);
-    cursor: pointer;
-    font-weight: 600;
-    font-family: inherit;
-    font-size: 0.8rem;
-}
-
-@media (max-width: 768px) {
-    .inSheet {
-        box-shadow: var(--m-sh-sheet), inset 0 1px 0 #fff;
-        padding: 16px;
-    }
-
-    .headerTitle {
-        color: var(--m-ink);
-    }
-
-    .headerCount,
-    .sectionLabel,
-    .rangeDash,
-    .scoreLabel {
-        color: var(--m-body);
-    }
-
-    .checkRow,
-    .chip,
-    .toggleRow {
-        min-height: var(--touch-target);
-    }
-
-    .checkBox {
-        width: 24px;
-        height: 24px;
-        border-color: var(--m-glass-border);
-        background: var(--m-fill);
-    }
-
-    .checkBoxActive,
-    .toggleTrackActive {
-        background: var(--m-grad-accent);
-        border-color: transparent;
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .chip {
-        border-color: var(--m-glass-border);
-        background: var(--m-fill);
-        color: var(--m-body);
-        border-radius: var(--m-r-chip);
-        padding: 0 14px;
-    }
-
-    .chipActive {
-        background: var(--m-grad-accent);
-        border-color: transparent;
-        color: white;
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .rangeInput {
-        font-size: 16px; /* iOS zoom tetiklenmesin */
-        height: var(--input-height-mobile);
-        width: 96px;
-        border-color: var(--m-glass-border);
-        background: var(--m-fill);
-        color: var(--m-ink);
-        border-radius: var(--m-r-input);
-        font-family: var(--m-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .toggleTrack {
-        width: 48px;
-        height: 28px;
-        border-radius: 999px;
-        background: var(--m-fill);
-    }
-
-    .toggleThumb {
-        width: 22px;
-        height: 22px;
-    }
-
-    .toggleThumbActive {
-        left: 23px;
-    }
-
-    .scoreValue,
-    .scoreRange {
-        color: var(--m-link);
-        accent-color: var(--m-link);
-    }
-
-    .applyBtn,
-    .resetBtn {
-        min-height: var(--touch-target);
-        border-radius: var(--m-r-btn);
-    }
-
-    .applyBtn {
-        background: var(--m-grad-btn);
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .resetBtn {
-        border-color: var(--m-glass-border);
-        background: rgba(255,255,255,.38);
-        color: var(--m-body);
-    }
+    background: var(--blue-soft);
+    color: var(--blue);
 }

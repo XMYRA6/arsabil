@@ -9,7 +9,6 @@ import type { Listing } from '@/components/marketplace/ListingCard';
 import { ViewToggle } from '@/components/marketplace/ViewToggle';
 import { CitySearch } from '@/components/marketplace/CitySearch';
 import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
-import { SegmentedTabs } from '@/components/mobile/SegmentedTabs';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
 import { MobileState } from '@/components/mobile/MobileState';
 import { filterListings, sortListings, mergeDemoOverlay, LISTING_TYPE_GROUPS, isTypeGroupActive, toggleTypeGroup, type ListingFilters } from '@/lib/listing/marketplaceFilters';
@@ -58,8 +57,9 @@ function MarketplaceContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [view, setView] = useState<View>((searchParams.get('view') as View) || 'split');
-    const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
+    // Figma 07: yalnız İlanlar / Harita. Eski `split` (URL veya localStorage'da kalmış) İlanlar'a düşer.
+    const normalizeView = (v: string | null): View => (v === 'map' ? 'map' : 'list');
+    const [view, setView] = useState<View>(normalizeView(searchParams.get('view')));
     const [filterOpen, setFilterOpen] = useState(false);
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const [listings, setListings] = useState<Listing[]>([]);
@@ -80,7 +80,7 @@ function MarketplaceContent() {
     useEffect(() => {
         const saved = localStorage.getItem('arsabil-marketplace-view') as View | null;
         // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage'dan başlangıç görünüm tercihi okunuyor
-        if (saved) setView(saved);
+        if (saved) setView(normalizeView(saved));
     }, []);
 
     const handleViewChange = (v: View) => {
@@ -149,87 +149,81 @@ function MarketplaceContent() {
     /* ===================== RENDER ===================== */
     return (
         <div className={styles.container}>
+            <header className={styles.pageHead}>
+                <div>
+                    <p className={styles.eyebrow}>Pazar yeri</p>
+                    <h1 className={styles.title}>Kat karşılığı ve satılık arsalar</h1>
+                    <p className={styles.subtitle}>
+                        Fizibilite skoruyla sıralanmış ilanlar. Her ilan için senaryo hesapla, teklif ver.
+                    </p>
+                </div>
+                {!loading && demoData !== 'none' && (
+                    <span
+                        className={styles.demoBadge}
+                        role="status"
+                        title={demoData === 'all'
+                            ? 'Şu anda yayında ilan bulunmadığı için bu listedeki ilanların tamamı tanıtım amaçlı örnektir.'
+                            : 'İlanlar gerçek, ancak fizibilite skoru ve arsa payı aralığı henüz toplanmadığı için örnek değerlerle gösteriliyor.'}
+                    >
+                        Örnek veri
+                    </span>
+                )}
+            </header>
 
-            {/* ── Top Bar ── */}
-            <div className={styles.topBar}>
-                {/* City Search */}
-                <CitySearch
-                    selectedCity={selectedCity}
-                    onCitySelect={(city) => {
-                        setSelectedCity(city.name);
-                        mapRef.current?.flyTo(city.lat, city.lng, city.zoom);
-                        mapRef.current?.showProvinceBorder(city.province ?? city.name);
-                    }}
-                />
+            {/* ── Araç çubuğu: şehir/ilçe arama, sıralama, görünüm ── */}
+            <div className={styles.toolbar}>
+                <div className={styles.search}>
+                    <CitySearch
+                        selectedCity={selectedCity}
+                        onCitySelect={(city) => {
+                            setSelectedCity(city.name);
+                            mapRef.current?.flyTo(city.lat, city.lng, city.zoom);
+                            mapRef.current?.showProvinceBorder(city.province ?? city.name);
+                        }}
+                    />
+                </div>
 
-                {/* Quick filter chips — FilterSidebar'daki "Satış Türü" checkbox'larıyla
-                    AYNI paylaşılan tanım+mantığı kullanır (Impeccable critique P1,
-                    2026-09-17: önceden bağımsız, kopya bir implementasyondu). */}
+                <select aria-label="Sıralama" value={sortBy} onChange={e => setSortBy(e.target.value)} className={styles.sortSelect}>
+                    <option value="score_desc">En yüksek skor</option>
+                    <option value="price_asc">En uygun fiyat</option>
+                    <option value="newest">En yeniler</option>
+                </select>
+
+                <div className={styles.viewToggle}>
+                    <ViewToggle view={view} onChange={handleViewChange} />
+                </div>
+
+                <button type="button" className={styles.filterBtn} onClick={() => setFilterOpen(true)} aria-label="Filtreler">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M3 5h18l-7 8v6l-4-2v-4z" />
+                    </svg>
+                </button>
+            </div>
+
+            {/* Hızlı filtre çipleri — FilterSidebar'daki "İlan tipi" ile AYNI paylaşılan tanım+mantık
+                (Impeccable critique P1, 2026-09-17). Yalnız mobilde görünür; masaüstünde kenar çubuğu var. */}
+            <div className={styles.quickRow}>
                 {LISTING_TYPE_GROUPS.map(({ key, ids, label }) => {
                     const active = isTypeGroupActive(filters, ids);
                     return (
-                        <button key={key} aria-pressed={active} onClick={() => {
+                        <button key={key} type="button" aria-pressed={active} onClick={() => {
                             setFilters(f => toggleTypeGroup(f, ids));
                         }} className={`${styles.quickChip} ${active ? styles.quickChipActive : ''}`}>{label}</button>
                     );
                 })}
-
-                {/* Spacer (Hidden on mobile via CSS or flex logic) */}
-                <div className={styles.desktopOnlySpacer} />
-
-                {/* Sort */}
-                <select aria-label="Sıralama" value={sortBy} onChange={e => setSortBy(e.target.value)} className={styles.sortSelect}>
-                    <option value="score_desc">En Yüksek Skor</option>
-                    <option value="price_asc">En Uygun Fiyat</option>
-                    <option value="newest">En Yeniler</option>
-                </select>
-
-                {/* View Toggle */}
-                <div className={styles.desktopViewToggle}>
-                    <ViewToggle view={view} onChange={handleViewChange} />
-                </div>
             </div>
 
-            {/* ── Örnek veri uyarısı ── */}
-            {!loading && demoData !== 'none' && (
-                <div className={styles.demoBanner} role="status">
-                    <strong>Örnek veri</strong>
-                    {demoData === 'all'
-                        ? ' — Şu anda yayında ilan bulunmadığı için bu listedeki ilanların tamamı tanıtım amaçlı örnektir.'
-                        : ' — İlanlar gerçek, ancak fizibilite skoru ve arsa payı aralığı henüz toplanmadığı için örnek değerlerle gösteriliyor.'}
+            <div className={styles.layout} data-view={view}>
+                <div className={styles.sidebarWrapper}>
+                    <FilterSidebar filters={filters} onChange={setFilters} totalCount={sorted.length} />
                 </div>
-            )}
 
-            {/* ── Mobil kontroller: görünüm + filtre ── */}
-            <div className={styles.mobileControls}>
-                <SegmentedTabs
-                    ariaLabel="Görünüm"
-                    options={[{ value: 'list', label: 'İlanlar' }, { value: 'map', label: 'Harita' }]}
-                    value={mobileTab}
-                    onChange={(v) => setMobileTab(v as 'list' | 'map')}
-                />
-                <button type="button" className={styles.filterBtn} onClick={() => setFilterOpen(true)}>
-                    <span aria-hidden="true">⚙</span> Filtreler
-                </button>
-            </div>
-
-            {/* ── Body ── */}
-            <div className={styles.bodyContainer} data-mobile-tab={mobileTab}>
-
-                {/* Filter Sidebar (hidden in full map view) */}
-                {view !== 'map' && (
-                    <div className={styles.sidebarWrapper}>
-                        <FilterSidebar filters={filters} onChange={setFilters} totalCount={sorted.length} />
-                    </div>
-                )}
-
-                {/* List Panel */}
-                {(view === 'split' || view === 'list') && (
-                    <div className={`${styles.listPanel} ${view === 'list' ? styles.listPanelFull : styles.listPanelSplit}`}>
-                        {loading ? (
-                            <div className={styles.skeletonList}>
+                <div className={styles.content}>
+                    {view === 'list' ? (
+                        loading ? (
+                            <div className={styles.grid}>
                                 {Array.from({ length: 4 }).map((_, i) => (
-                                    <div key={i} className={`${styles.skeletonItem} ${view === 'list' ? styles.skeletonItemList : styles.skeletonItemSplit}`} />
+                                    <div key={i} className={styles.skeletonItem} />
                                 ))}
                             </div>
                         ) : paginated.length === 0 ? (
@@ -241,22 +235,21 @@ function MarketplaceContent() {
                             />
                         ) : (
                             <>
-                                {/* Count */}
-                                <div className={styles.countLabel}>
-                                    {sorted.length.toLocaleString('tr-TR')} arsa bulundu
+                                <p className={styles.countLabel}>
+                                    {sorted.length.toLocaleString('tr-TR')} ilan · {selectedCity}
+                                </p>
+                                <div className={styles.grid}>
+                                    {paginated.map(listing => (
+                                        <ListingCard
+                                            key={listing.id}
+                                            listing={listing}
+                                            highlighted={highlightedId === listing.id}
+                                            view="list"
+                                            onHover={setHighlightedId}
+                                        />
+                                    ))}
                                 </div>
 
-                                {paginated.map(listing => (
-                                    <ListingCard
-                                        key={listing.id}
-                                        listing={listing}
-                                        highlighted={highlightedId === listing.id}
-                                        view={view}
-                                        onHover={setHighlightedId}
-                                    />
-                                ))}
-
-                                {/* Pagination */}
                                 {totalPages > 1 && (
                                     <div className={styles.pagination}>
                                         {Array.from({ length: Math.min(totalPages, 6) }, (_, i) => i + 1).map(p => (
@@ -266,25 +259,22 @@ function MarketplaceContent() {
                                     </div>
                                 )}
                             </>
-                        )}
-                    </div>
-                )}
-
-                {/* Map Panel */}
-                {(view === 'split' || view === 'map') && (
-                    <div className={styles.mapPanel}>
-                        <MapView
-                            ref={mapRef}
-                            listings={sorted}
-                            highlightedId={highlightedId}
-                            onHighlight={setHighlightedId}
-                        />
-                    </div>
-                )}
+                        )
+                    ) : (
+                        <div className={styles.mapPanel}>
+                            <MapView
+                                ref={mapRef}
+                                listings={sorted}
+                                highlightedId={highlightedId}
+                                onHighlight={setHighlightedId}
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* ── Mobil filtre sheet'i ── */}
-            <BottomSheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Filtreler">
+            <BottomSheet open={filterOpen} onClose={() => setFilterOpen(false)} title="Filtreler" showCloseButton keepGrabber>
                 <FilterSidebar
                     inSheet
                     filters={filters}
@@ -296,5 +286,3 @@ function MarketplaceContent() {
         </div>
     );
 }
-
-
