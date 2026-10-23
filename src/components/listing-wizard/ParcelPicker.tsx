@@ -206,6 +206,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
         const map = mapRef.current
         if (!mapReady || !map || !value.parcel) return
         let cancelled = false
+        let resizeObserver: ResizeObserver | undefined
         void (async () => {
             const L = await import('leaflet')
             if (cancelled || !mapRef.current) return
@@ -224,13 +225,20 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             // harita kutusu yeniden boyutlanır). Boyut güncellenmeden sınıra sığdırmak sınırın
             // kırpılmış görünmesine yol açıyordu; önce ölçüyü yenile, sonra sığdır.
             const poly = polygonRef.current
-            requestAnimationFrame(() => {
+            const sigdir = () => {
                 if (cancelled || !mapRef.current) return
                 map.invalidateSize()
                 map.fitBounds(poly.getBounds(), { padding: [24, 24] })
-            })
+            }
+            requestAnimationFrame(sigdir)
+            // Doğrulamadan sonra altta sonuç/risk kartları belirdikçe harita kutusu küçülür;
+            // her boyut değişiminde sınırı yeniden sığdır ki kırmızı çizgi kırpılmasın.
+            if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+                resizeObserver = new ResizeObserver(sigdir)
+                resizeObserver.observe(containerRef.current)
+            }
         })()
-        return () => { cancelled = true }
+        return () => { cancelled = true; resizeObserver?.disconnect() }
     }, [mapReady, value.parcel])
 
     const handleUseMyLocation = () => {
