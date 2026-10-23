@@ -106,7 +106,8 @@ describe('tekrarlayan sonuç/slider gizleme kapsamı', () => {
     expect(pageCss).not.toMatch(/\.blueBox\b/);
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
     expect(pageTsx).not.toMatch(/styles\.blueBox\b/);
-    expect(pageTsx).toMatch(/<HesapFisi result={result} \/>/);
+    // Masaüstü sonuç paneli (Hesap fişi dahil) artık SonucPaneli bileşeninde; HesapFisi mobil FiyatAciklamasi'nda yaşıyor.
+    expect(pageTsx).toMatch(/<SonucPaneli/);
   });
 
   it('.sliderArea artık masaüstünde koşulsuz görünür — mobil viewport bu dosyanın JSX ağacını hiç render etmiyor, mobile-only gizleme kuralına gerek yok (2026-08-07 ölü kod temizliği)', () => {

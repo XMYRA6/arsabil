@@ -120,15 +120,17 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        expect(await screen.findByText(/Min\. Daire Fiyatı \(FD\)/)).toBeInTheDocument()
+        expect(await screen.findByText(/Min\. daire fiyatı \(FD\)/i)).toBeInTheDocument()
         expect(screen.queryByRole('button', { name: /Örnek Proje ile Dene/i })).not.toBeInTheDocument()
     })
 
-    it('Rapor Kaydet boş durumda devre dışıdır', async () => {
+    it('Özet rapor oluştur boş durumda devre dışıdır', async () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        const buton = await screen.findByRole('button', { name: /Rapor Kaydet/i })
-        expect(buton).toBeDisabled()
+        // Eylem satırındaki düğme + sabit CTA aynı metni taşır; hepsi devre dışı olmalı.
+        const butonlar = await screen.findAllByRole('button', { name: /Özet rapor oluştur/i })
+        expect(butonlar.length).toBeGreaterThan(0)
+        butonlar.forEach(b => expect(b).toBeDisabled())
     })
 
     it('geç gelen /api/settings defaultUnitPrice, Örnek Proje ile Dene ile girilmiş değeri ezmez', async () => {
@@ -153,7 +155,7 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
         render(<HesaplaPage />)
 
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        expect(await screen.findByText('Örnek Veri')).toBeInTheDocument()
+        expect((await screen.findAllByText(/Örnek veri/i)).length).toBeGreaterThan(0)
 
         // Kullanici etkilesiminden SONRA gec gelen /api/settings cevabini serbest birak.
         await act(async () => {
@@ -161,7 +163,7 @@ describe('/hesapla — boş durum + Örnek Proje ile Dene (masaüstü)', () => {
             await new Promise(resolve => setTimeout(resolve, 0))
         })
 
-        expect(screen.getByText('Örnek Veri')).toBeInTheDocument()
+        expect(screen.getAllByText(/Örnek veri/i).length).toBeGreaterThan(0)
     })
 })
 
@@ -194,9 +196,9 @@ describe('/hesapla — masaüstü Yapı Standardı admin katsayılarına bağlı
 
         // Mi_base = 140 m² × 10.000 TL/m² × 1.25 (admin'in qualityMedium'u, SABIT
         // 1.2 DEGIL) = 1.750.000. Varsayilan risk seviyesi %10 oldugundan
-        // (AYAR_VARSAYILANLARI.riskLevel) HesapFisi'nde gorunen "Insaat Maliyeti
-        // (Mi)" bunun uzerine R=1.10 ile carpilir: 1.750.000 × 1.10 = 1.925.000.
-        expect(await screen.findByText(/1\.925\.000/)).toBeInTheDocument()
+        // (AYAR_VARSAYILANLARI.riskLevel) risk payi ayri satir: Hesap fisinde
+        // "Insaat maliyeti" risksiz 1.750.000, "Risk payi (%10)" 175.000 (Figma).
+        expect((await screen.findAllByText(/1\.750\.000/)).length).toBeGreaterThan(0)
     })
 
     it('admin qualityMedium\'u degistirdikten SONRA bile "Orta" secimi kaybolmaz (tier bazli secim — denetim bulgusu C3)', async () => {
@@ -285,8 +287,8 @@ describe('/hesapla — masaüstü "Arsa Fiyatı" stat kartı "Min." niteleyicisi
         const toggleRow = screen.getByText('Arsa Payı').closest('div') as HTMLElement
         await user.click(within(toggleRow).getByRole('checkbox'))
 
-        expect(await screen.findByText('Min. Arsa Fiyatı (Arsa Sahibine)')).toBeInTheDocument()
-        expect(screen.queryByText('Arsa Fiyatı (Arsa Sahibine)')).not.toBeInTheDocument()
+        expect(await screen.findByText(/Min\. arsa fiyatı \(FA\)/i)).toBeInTheDocument()
+        expect(screen.queryByText(/^Arsa fiyatı \(FA\)/i)).not.toBeInTheDocument()
     })
 })
 
@@ -296,7 +298,7 @@ describe('/hesapla — masaüstü Maksimum Sürdürülebilir Arsa Payı (denetim
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        expect(screen.queryByText('Maks. Sürdürülebilir Arsa Payı')).toBeNull()
+        expect(screen.queryByText(/Maks\. sürdürülebilir arsa payı/i)).toBeNull()
     })
 
     it('piyasa fiyatı girilince x_max yüzde olarak gösterilir', async () => {
@@ -304,15 +306,14 @@ describe('/hesapla — masaüstü Maksimum Sürdürülebilir Arsa Payı (denetim
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        // Piyasa fiyatı artık "Piyasa Değerine Göre" kartının kendi
-        // davetinden giriliyor (2026-08-14 UX kararı): tıkla -> yaz -> Enter.
-        await user.click(await screen.findByRole('button', { name: /Piyasa Fiyatını Gir/i }))
-        const piyasaInput = screen.getByRole('textbox', { name: 'Yaklaşık Piyasa Fiyatı' })
+        // Piyasa fiyatı "Piyasa değerine göre" kartının kendi girdisinden giriliyor
+        // (2026-08-14 UX kararı): yaz -> Enter.
+        const piyasaInput = await screen.findByRole('textbox', { name: 'Yaklaşık Piyasa Fiyatı' })
         await user.type(piyasaInput, '10000000')
         await user.keyboard('{Enter}')
 
-        expect(await screen.findByText('Maks. Sürdürülebilir Arsa Payı')).toBeInTheDocument()
-        expect(screen.getByText(/^%/)).toBeInTheDocument()
+        expect(await screen.findByText(/Maks\. sürdürülebilir arsa payı/i)).toBeInTheDocument()
+        expect(screen.getAllByText(/^%/).length).toBeGreaterThan(0)
     })
 
     it('x_max negatifse ("bu fiyata proje mümkün değil") yüzde yerine anlaşılır bir uyarı gösterir, cam sayı DEĞİL', async () => {
@@ -320,8 +321,7 @@ describe('/hesapla — masaüstü Maksimum Sürdürülebilir Arsa Payı (denetim
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        await user.click(await screen.findByRole('button', { name: /Piyasa Fiyatını Gir/i }))
-        const piyasaInput = screen.getByRole('textbox', { name: 'Yaklaşık Piyasa Fiyatı' })
+        const piyasaInput = await screen.findByRole('textbox', { name: 'Yaklaşık Piyasa Fiyatı' })
         // Cok dusuk bir piyasa fiyati -> maliyet fiyati asiyor -> x_max negatif.
         await user.type(piyasaInput, '1')
         await user.keyboard('{Enter}')

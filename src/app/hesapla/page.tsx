@@ -9,11 +9,6 @@ import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput, type LandCostModel } from '@/lib/calculator/engine_v2';
 import type { DistrictPriceEntry } from '@/components/LocationSelector';
 import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput, type QualityTier } from './calculatorUiHelpers';
-import { PriceEvaluationChart } from '@/components/charts/PriceEvaluationChart';
-import { CostBreakdownChart } from '@/components/charts/CostBreakdownChart';
-import { SensitivityChart } from '@/components/charts/SensitivityChart';
-import { BreakEvenChart } from '@/components/charts/BreakEvenChart';
-import { FinancialDashboard } from '@/components/FinancialDashboard';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'react-hot-toast';
 // Dynamically imported to avoid SSR issues with @react-pdf/renderer
@@ -22,7 +17,6 @@ import { ScenarioCompare, type Scenario as ScenarioItem } from '@/components/Sce
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { BirimMaliyetField, RiskCostFields } from './AdvancedSettingsSections';
 
-import { HesapFisi } from './HesapFisi';
 import type { RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { ParcelVerificationSheet } from '@/components/listing-wizard/ParcelVerificationSheet';
@@ -31,6 +25,9 @@ import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker
 import type { RiskMeasurement } from '@/lib/risk/types';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
+import { SonucPaneli } from './masaustu/SonucPaneli';
+import { HesapOzetiPaneli } from './masaustu/HesapOzetiPaneli';
+import arazi from './masaustu/masaustu.module.css';
 import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 import { type RiskKaynagi } from './mobile/riskSource';
 import { StudioPreview } from '@/components/studio/StudioPreview';
@@ -228,7 +225,6 @@ export default function Home() {
 
   const [result, setResult] = useState<CalculationOutput | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [summaryPage, setSummaryPage] = useState(0); // 0: Dağılım, 1: Analiz, 2: Finans
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [savedScenarios, setSavedScenarios] = useState<ScenarioItem[]>([]);
 
@@ -527,24 +523,23 @@ export default function Home() {
 
   const actionsSection = (
     <>
-      <div className={styles.actionBottomRow}>
-        <Button variant="outline" onClick={handlePdfDownload} disabled={!result}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          PDF İndir
-        </Button>
-        <Button variant="primary" onClick={handleSaveReport} disabled={!result || isSaving}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={styles.btnIcon}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-          {isSaving ? 'Kaydediliyor...' : 'Rapor Kaydet'}
-        </Button>
-        <Button
-          variant="outline"
+      <div className={arazi.eylemSatir}>
+        <button type="button" className={arazi.eylemBirincil} onClick={handleSaveReport} disabled={!result || isSaving}>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg>
+          {isSaving ? 'Kaydediliyor...' : 'Özet rapor oluştur'}
+        </button>
+        <button type="button" className={arazi.eylemIkincil} onClick={handlePdfDownload} disabled={!result}>PDF</button>
+        <button type="button" className={arazi.eylemIkincil} onClick={() => handleOpenShareDialog()} disabled={!result}>Paylaş</button>
+        <button type="button" className={arazi.eylemIkincil} onClick={() => handleOpenSaveDialog()} disabled={!result}>Kaydet</button>
+        <button
+          type="button"
+          className={arazi.eylemIkincil}
           onClick={handleAddScenario}
           disabled={!result || savedScenarios.length >= 3}
           title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-          className={styles.compareBtn}
         >
           + Karşılaştır
-        </Button>
+        </button>
       </div>
       {savedScenarios.length > 0 && (
         <div className={styles.scenarioPills}>
@@ -1395,179 +1390,27 @@ export default function Home() {
         <section className={styles.rightGrid}>
 
 
-          {/* Main Panel */}
-          <main id="resultsPanel" className={`${styles.mainPanel} ${styles.swipeCard}`}>
-            <h2 className={styles.mainPanelTitle}>
-              Hesap Sonuçları <span className={`${styles.pill} ${styles.pillSmall}`}>Engine v2</span>
-              {isDemoData && <span className={styles.demoBadge}>Örnek Veri</span>}
-            </h2>
-
-            {hasEnoughDataForResult ? (
-              <>
-                <HesapFisi result={result} />
-
-                {/* Yapisal gruplama sarmalayicisi. `.mainPanelResults` sinifi
-                    KALDIRILDI: tek kurali Task 5'te silinen `data-revealed`
-                    kapisiydi, geriye hicbir CSS kurali olmayan bir sinif adi
-                    kalmisti. DOM derinligi bilerek korunuyor. */}
-                <div>
-                <div className={styles.statsRow}>
-                  {/* Arsa Fiyatı — sadece Sd açıkken görünür */}
-                  {isApartmentCountEnabled && (
-                    <div className={styles.statCard}>
-                      {/* "Min." — piyasa degeri DEGIL, hesaplanan minimum
-                          daire fiyatina dayali (denetim bulgusu C5). */}
-                      <h5>Min. Arsa Fiyatı (Arsa Sahibine)</h5>
-                      <div className={styles.statCardValue}>
-                        {result?.FA ? result.FA.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) : '—'}
-                        <span>TL</span>
-                      </div>
-                      <div className={styles.statCardSub}>
-                        <span>Daire Payı:</span>
-                        <span><strong>{result?.Sdx != null ? Number(result.Sdx).toFixed(1) : '—'}</strong> daire</span>
-                      </div>
-                      {isAaEnabled && result?.FAbirim != null && (
-                        <div className={`${styles.statCardSub} ${styles.statCardSubSpaced}`}>
-                          <span>Arsa Birim:</span>
-                          <span><strong>{result.FAbirim.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</strong> TL/m²</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className={styles.statCard}>
-                    <h5>Piyasa Değerine Göre</h5>
-                    <div className={styles.chartCenter}>
-                      <PriceEvaluationChart
-                        minPrice={result ? result.FD_total : 0}
-                        marketPrice={marketPriceNum}
-                        manualMarketPrice={manualMarketPrice}
-                        onManualMarketPriceChange={setManualMarketPrice}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Yalnizca piyasa fiyati girilmisse gorunur (denetim
-                      bulgusu C6) — Pmarket olmadan x_max motor tarafindan
-                      zaten null donuyor. */}
-                  {result?.x_max != null && (
-                    <div className={styles.statCard}>
-                      <h5>Maks. Sürdürülebilir Arsa Payı</h5>
-                      {result.x_max >= 0 ? (
-                        <>
-                          <div className={styles.statCardValue}>
-                            %{(result.x_max * 100).toFixed(1)}
-                          </div>
-                          <div className={styles.statCardSub}>
-                            <span>Kâr hedefini koruyarak verilebilecek en yüksek pay</span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className={styles.statCardSub}>
-                          <span>Bu birim maliyet ve kâr hedefiyle, girilen piyasa fiyatında proje mümkün değil (maliyet piyasa fiyatını aşıyor)</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                </div>
-              </>
-            ) : (
-              <div className={styles.resultsEmptyState}>
-                <p className={styles.resultsEmptyText}>
-                  Sonuçları görmek için daire m² ve birim maliyeti girin.
-                </p>
-                <Button variant="outline" onClick={handleOrnekProjeIleDene}>
-                  Örnek Proje ile Dene
-                </Button>
-              </div>
-            )}
-
-
+          <div id="resultsPanel" className={arazi.sonucKolonu}>
+            <SonucPaneli
+              result={result}
+              hasEnoughDataForResult={hasEnoughDataForResult}
+              isDemoData={isDemoData}
+              isApartmentCountEnabled={isApartmentCountEnabled}
+              isAaEnabled={isAaEnabled}
+              riskLevel={riskLevel}
+              marketPriceNum={marketPriceNum}
+              manualMarketPrice={manualMarketPrice}
+              onManualMarketPrice={setManualMarketPrice}
+              onOrnekProjeIleDene={handleOrnekProjeIleDene}
+            />
             {actionsSection}
-          </main>
-
-          {/* Hesap Özeti */}
-          <aside className={`${styles.summaryPanel} ${styles.swipeCard}`}>
-            <div className={styles.summaryPanelTitle}>
-              Hesap Özeti
-              <div className={styles.pagerDots}>
-                {['Dağılım', 'Analiz', 'Finans'].map((label, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSummaryPage(i)}
-                    title={label}
-                    aria-pressed={summaryPage === i}
-                    className={`${styles.pagerDot} ${summaryPage === i ? styles.pagerDotActive : ''}`}
-                  >{label}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* Page Container with slide animation */}
-            <div className={styles.pagerViewport}>
-              <div
-                className={styles.pagerTrack}
-                style={{ '--pager-x': `-${summaryPage * 100}%` } as React.CSSProperties}
-              >
-
-                {/* Page 0: Maliyet Dağılımı */}
-                <div className={styles.pagerPage}>
-                  <CostBreakdownChart
-                    constructionCost={result ? result.Mi_base + result.Mz : 0}
-                    landValue={result ? result.Ma : 0}
-                    profit={result ? (result.FD_total - result.M) : 0}
-                    risk={result ? (result.Mi - result.Mi_base - result.Mz) : 0}
-                  />
-                </div>
-
-                {/* Page 1: Hassasiyet + Kırılma Noktası */}
-                <div className={styles.pagerPage}>
-                  {hasEnoughDataForResult ? (
-                    <>
-                      <div className={styles.chartBlock}>
-                        <SensitivityChart baseInput={chartBaseInput} />
-                      </div>
-                      <div className={styles.chartDivider}>
-                        <BreakEvenChart
-                          baseInput={chartBaseInput}
-                          marketPrice={marketPriceNum}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <p className={styles.pagerEmptyText}>
-                      Hesap sonucu oluşunca grafikler burada görünecek. Girdileri tamamlayıp sonucun hesaplanmasını bekleyin.
-                    </p>
-                  )}
-                </div>
-
-                {/* Page 2: Finansal Modelleme */}
-                <div className={styles.pagerPage}>
-                  {hasEnoughDataForResult ? (
-                    result && (
-                      <FinancialDashboard
-                        totalInvestment={result.M}
-                        totalRevenue={result.FD_total}
-                      />
-                    )
-                  ) : (
-                    <p className={styles.pagerEmptyText}>
-                      Hesap sonucu oluşunca grafikler burada görünecek. Girdileri tamamlayıp sonucun hesaplanmasını bekleyin.
-                    </p>
-                  )}
-                </div>
-
-              </div>
-            </div>
-
-            {/* Page label */}
-            <div className={styles.pagerLabel}>
-              {summaryPage === 0 && 'Maliyet Dağılımı'}
-              {summaryPage === 1 && 'Hassasiyet & Kırılma'}
-              {summaryPage === 2 && 'Finansal Modelleme'}
-            </div>
-          </aside>
+            <HesapOzetiPaneli
+              result={result}
+              hasEnoughDataForResult={hasEnoughDataForResult}
+              chartBaseInput={chartBaseInput}
+              marketPriceNum={marketPriceNum}
+            />
+          </div>
 
           <div className={styles.advancedPanel}>
             <div className={styles.advancedPanelTitle}>Gelişmiş Ayarlar</div>
