@@ -1058,19 +1058,25 @@ export default function Home() {
           sonuc={{
             minDaireFiyati: sonucDegeri(result?.FD_total),
             arsaPayiYuzde: Math.round(effectiveLandShareRatio),
-            birimFiyat: sonucDegeri(result?.FD_per_m2),
-            karsilastirma: {
-              piyasaFiyati: manualMarketPrice,
-              onPiyasaFiyati: setManualMarketPrice,
-              farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
-            },
+            maksPayOrani: result?.x_max ?? null,
+            // Toplam daire yalnızca "Daire sayısıyla belirle" açıkken bilinir
+            // (motor Sd'yi aksi halde null döndürür); tahmin uydurmuyoruz.
+            daireSayisi: isApartmentCountEnabled ? totalApartments : null,
+            piyasaFiyati: marketPriceNum > 0 ? marketPriceNum : null,
+            farkYuzde: piyasaFarkiYuzdesi(result?.FD_total, marketPriceNum),
             hasEnoughDataForResult,
             isDemoData,
             onOrnekProjeIleDene: handleOrnekProjeIleDene,
-            onSonucDetayiAc: () => setMobilSonucDetayiAcik(true),
-            onStudioHubAc: () => setMobilStudioHubAcik(true),
-            onLandownerOfferAc: () => setMobilLandownerOfferAcik(true),
           }}
+          result={result}
+          yapiKutlesi={{
+            katSayisi: studioBuildingMass?.floorCount ?? null,
+            daireSayisi: isApartmentCountEnabled ? totalApartments : null,
+            parselDogrulandi: !!verifiedStudioPolygon,
+          }}
+          onSonucDetayiAc={() => setMobilSonucDetayiAcik(true)}
+          onTeklifAc={() => setMobilLandownerOfferAcik(true)}
+          onPiyasaEkle={() => { setMobilAyarBolumu('piyasa'); setMobilAyarlarAcik(true); }}
           onAyarlarAc={() => { setMobilAyarBolumu(undefined); setMobilAyarlarAcik(true); }}
           sonucDetayiAcik={mobilSonucDetayiAcik}
           sonucDetayi={{

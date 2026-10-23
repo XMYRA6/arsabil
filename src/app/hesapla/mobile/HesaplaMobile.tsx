@@ -2,7 +2,12 @@
 
 import { MobileScreen } from '@/components/mobile/MobileScreen';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
+import { IconFile } from '@/components/icons';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
+import { HesapOzetiKarti } from './HesapOzetiKarti';
+import { YapiKutlesiKarti, type YapiKutlesiKartiProps } from './YapiKutlesiKarti';
+import { SenaryolarKarti } from './SenaryolarKarti';
+import type { CalculationOutput } from '@/lib/calculator/engine_v2';
 import { GirdiKarti, type GirdiKartiProps } from './GirdiKarti';
 import { SonucDetayiMobileLeaf, type SonucDetayiMobileLeafProps } from './SonucDetayiMobileLeaf';
 import { TasarimStudyosuHub } from './TasarimStudyosuHub';
@@ -14,9 +19,19 @@ import { Studio2DMobileLeaf, type Studio2DMobileLeafProps } from './Studio2DMobi
 import { StudioScenarioMobileLeaf, type StudioScenarioMobileLeafProps } from './StudioScenarioMobileLeaf';
 import type { Scenario } from '@/components/ScenarioCompare';
 import styles from './mobile.module.css';
+import arazi from './sonucArazi.module.css';
 
 export type HesaplaMobileProps = {
-    sonuc: SonucKartiProps;
+    sonuc: Omit<SonucKartiProps, 'onPiyasaEkle'>;
+    /** Hesap özeti kartı için motor çıktısı. */
+    result: CalculationOutput | null;
+    yapiKutlesi: Pick<YapiKutlesiKartiProps, 'katSayisi' | 'daireSayisi' | 'parselDogrulandi'>;
+    /** Sonuç Detayı yaprağını açar (Hesap özeti > Analiz/Finans). */
+    onSonucDetayiAc: () => void;
+    /** Arsa Sahibi Teklifi yaprağını açar (Yapı kütlesi kartı). */
+    onTeklifAc: () => void;
+    /** Sonuç kartındaki "Piyasa fiyatı ekle" — sheet'i piyasa bölümüyle açar. */
+    onPiyasaEkle: () => void;
     girdi: Omit<GirdiKartiProps, 'onAyarlarAc'>;
     /** Parsel doğrulama modalını açar */
     onParselDogrulaAc: () => void;
@@ -82,6 +97,11 @@ export type HesaplaMobileProps = {
  */
 export function HesaplaMobile({
     sonuc,
+    result,
+    yapiKutlesi,
+    onSonucDetayiAc,
+    onTeklifAc,
+    onPiyasaEkle,
     girdi,
     sonucDetayiAcik,
     sonucDetayi,
@@ -159,32 +179,24 @@ export function HesaplaMobile({
                     ? <SenaryoKarsilastirmaSekmesi scenarios={savedScenarios} onKapat={onKarsilastirmaKapat} onShareRequest={onShareRequest} />
                     : (
                         <>
-                            <SonucKarti {...sonuc} />
+                            <SonucKarti {...sonuc} onPiyasaEkle={onPiyasaEkle} />
                             <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} onAyarlarAc={onAyarlarAc} />
-                            {savedScenarios.length > 0 && (
-                                <div className={styles.senaryoPillSatiri}>
-                                    {savedScenarios.map(s => (
-                                        <span key={s.id} className={styles.senaryoPill}>
-                                            {s.name}
-                                            <button
-                                                type="button"
-                                                onClick={() => onRemoveScenario(s.id)}
-                                                aria-label={`${s.name}'i kaldır`}
-                                                className={styles.senaryoPillKaldir}
-                                            >×</button>
-                                        </span>
-                                    ))}
-                                    {savedScenarios.length >= 2 && (
-                                        <button
-                                            type="button"
-                                            className={styles.senaryoKarsilastirCip}
-                                            onClick={onKarsilastirmaAc}
-                                        >
-                                            Karşılaştır ({savedScenarios.length}) ›
-                                        </button>
-                                    )}
-                                </div>
-                            )}
+                            <HesapOzetiKarti result={result} onSonucDetayiAc={onSonucDetayiAc} />
+                            <YapiKutlesiKarti
+                                hasResult={hasResult}
+                                {...yapiKutlesi}
+                                on2BPlan={onYerlesimAc}
+                                onProgramAc={onProgramAc}
+                                onTeklifAc={onTeklifAc}
+                                onTasarimSenaryolariAc={onSenaryolarAc}
+                            />
+                            <SenaryolarKarti
+                                senaryolar={savedScenarios}
+                                onEkle={onAddScenario}
+                                onKaldir={onRemoveScenario}
+                                onKarsilastirAc={onKarsilastirmaAc}
+                                hasResult={hasResult}
+                            />
                         </>
                     )}
             </div>
@@ -198,20 +210,12 @@ export function HesaplaMobile({
         <StickyActionBar aboveBottomNav>
             <button
                 type="button"
-                className={styles.mobilCta}
+                className={arazi.cta}
                 onClick={onCta}
                 disabled={ctaDevreDisi}
             >
+                <IconFile size={19} />
                 {ctaMetni}
-            </button>
-            <button
-                type="button"
-                className={styles.mobilKarsilastirBtn}
-                onClick={onAddScenario}
-                disabled={!hasResult || savedScenarios.length >= 3}
-                title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-            >
-                + Karşılaştır
             </button>
         </StickyActionBar>
         </>

@@ -48,15 +48,19 @@ function props(patch: Partial<HesaplaMobileProps> = {}): HesaplaMobileProps {
         sonuc: {
             minDaireFiyati: 8964000,
             arsaPayiYuzde: 33,
-            birimFiyat: 64028,
-            karsilastirma: { piyasaFiyati: '10.000.000', onPiyasaFiyati: jest.fn(), farkYuzde: -14 },
+            maksPayOrani: null,
+            daireSayisi: null,
+            piyasaFiyati: 10000000,
+            farkYuzde: -14,
             hasEnoughDataForResult: true,
             isDemoData: false,
             onOrnekProjeIleDene: jest.fn(),
-            onSonucDetayiAc: jest.fn(),
-            onStudioHubAc: jest.fn(),
-            onLandownerOfferAc: jest.fn(),
         },
+        result: null,
+        yapiKutlesi: { katSayisi: 7, daireSayisi: 18, parselDogrulandi: true },
+        onSonucDetayiAc: jest.fn(),
+        onTeklifAc: jest.fn(),
+        onPiyasaEkle: jest.fn(),
         girdi: {
             parcelContext: null,
             arsaAlani: 500, onArsaAlani: jest.fn(),
@@ -297,22 +301,41 @@ describe('HesaplaMobile — tek kapi', () => {
         expect(onRemoveScenario).toHaveBeenCalledWith('sc1')
     })
 
-    it('sabit CTA cubugunda "+ Karsilastir" butonu var, hasResult false veya 3 senaryo doluyken devre disi', () => {
+    it('Senaryolar kartinda "+ Ekle" var; hasResult false veya 3 senaryo doluyken devre disi', () => {
         const { rerender } = render(<HesaplaMobile {...props({ hasResult: false, savedScenarios: [] })} />)
-        expect(screen.getByRole('button', { name: '+ Karşılaştır' })).toBeDisabled()
+        expect(screen.getByRole('button', { name: '+ Ekle' })).toBeDisabled()
 
         rerender(<HesaplaMobile {...props({ hasResult: true, savedScenarios: [SCENARIO_1, SCENARIO_2, SCENARIO_3] })} />)
-        expect(screen.getByRole('button', { name: '+ Karşılaştır' })).toBeDisabled()
+        expect(screen.getByRole('button', { name: '+ Ekle' })).toBeDisabled()
 
         rerender(<HesaplaMobile {...props({ hasResult: true, savedScenarios: [] })} />)
-        expect(screen.getByRole('button', { name: '+ Karşılaştır' })).not.toBeDisabled()
+        expect(screen.getByRole('button', { name: '+ Ekle' })).not.toBeDisabled()
     })
 
-    it('"+ Karsilastir" tiklaninca onAddScenario cagirir', () => {
+    it('"+ Ekle" tiklaninca onAddScenario cagirir', () => {
         const onAddScenario = jest.fn()
         render(<HesaplaMobile {...props({ hasResult: true, onAddScenario })} />)
-        fireEvent.click(screen.getByRole('button', { name: '+ Karşılaştır' }))
+        fireEvent.click(screen.getByRole('button', { name: '+ Ekle' }))
         expect(onAddScenario).toHaveBeenCalled()
+    })
+
+    it('sabit CTA cubugunda yalniz Ozet Rapor butonu var (Karsilastir Senaryolar kartina tasindi)', () => {
+        render(<HesaplaMobile {...props()} />)
+        expect(screen.getByRole('button', { name: 'Özet Rapor Oluştur' })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: '+ Karşılaştır' })).toBeNull()
+    })
+
+    it('Yapi kutlesi kartinin kisayollari ilgili yapraklari acar', () => {
+        const onYerlesimAc = jest.fn(); const onProgramAc = jest.fn(); const onTeklifAc = jest.fn(); const onSenaryolarAc = jest.fn()
+        render(<HesaplaMobile {...props({ hasResult: true, onYerlesimAc, onProgramAc, onTeklifAc, onSenaryolarAc })} />)
+        fireEvent.click(screen.getByRole('button', { name: '2B plan' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Program karması' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Arsa sahibi teklifi' }))
+        fireEvent.click(screen.getByRole('button', { name: 'Tasarım senaryoları' }))
+        expect(onYerlesimAc).toHaveBeenCalledTimes(1)
+        expect(onProgramAc).toHaveBeenCalledTimes(1)
+        expect(onTeklifAc).toHaveBeenCalledTimes(1)
+        expect(onSenaryolarAc).toHaveBeenCalledTimes(1)
     })
 
     it('karsilastirmaAcik ile SenaryoKarsilastirmaSekmesi render edilir (sonuc karti yerine)', () => {
