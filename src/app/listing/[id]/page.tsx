@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
-import { ScoreRevealBadge } from './ScoreRevealBadge';
 import { toast } from 'react-hot-toast';
 import { AppBar } from '@/components/mobile/AppBar';
 import { SwipeGallery } from '@/components/mobile/SwipeGallery';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
+import { useThemeZaman } from '@/components/home/useThemeZaman';
+import { resolveScene, type Tur } from '@/lib/dioramas/scene';
 import { formatParcelIdentity, formatAreaCells, formatZoningLabel } from '@/lib/listing/listingDisplay';
 import { mergeDemoOverlay } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
@@ -19,12 +20,18 @@ const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m 
 type Tab = 'genel' | 'fizibilite' | 'senaryo' | 'teklifler' | 'mesajlar';
 
 const TABS: { id: Tab; label: string }[] = [
-    { id: 'genel', label: 'Genel Bilgiler' },
-    { id: 'fizibilite', label: 'Ön Fizibilite' },
+    { id: 'genel', label: 'Genel bilgiler' },
+    { id: 'fizibilite', label: 'Ön fizibilite' },
     { id: 'senaryo', label: 'Senaryo' },
     { id: 'teklifler', label: 'Teklifler' },
     { id: 'mesajlar', label: 'Mesajlar' },
 ];
+
+const TYPE_LABEL: Record<string, string> = {
+    SALE: 'Satış',
+    KAT_KARSILIGI: 'Kat karşılığı',
+    ORTAKLIK: 'Ortaklık',
+};
 
 const MOCK_LISTING = {
     id: '',
@@ -62,11 +69,32 @@ const MOCK_LISTING = {
     user: null as null | { id: string; name: string | null; email: string; isVerified: boolean },
 };
 
+const trNum = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
+
+/** İlan türü + imardan diorama sahnesi (fotoğraf yokken). Pazar yeri kartıyla aynı eşleme. */
+function sahneSec(l: { type: string; zoning: string | null }): { tur: Tur; varyant: string } {
+    if (l.type === 'KAT_KARSILIGI') return { tur: 'kat', varyant: 'bitmis' };
+    if (l.type === 'ORTAKLIK') return { tur: 'ticari', varyant: 'ofis' };
+    switch (l.zoning) {
+        case 'TARIM': return { tur: 'tarla', varyant: 'bugday' };
+        case 'TICARI': return { tur: 'ticari', varyant: 'ofis' };
+        case 'KONUT': return { tur: 'villa', varyant: 'modern' };
+        default: return { tur: 'arsa', varyant: 'agacsiz' };
+    }
+}
+
+function formatFault(m: number | null): string | null {
+    if (m == null) return null;
+    const metin = m >= 1000 ? `${(m / 1000).toFixed(1).replace('.', ',')} km` : `${m} m`;
+    return metin;
+}
+
 export default function ListingDetailPage() {
     const params = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { data: session } = useSession();
+    const zaman = useThemeZaman();
     const id = params?.id as string;
 
     const initialTab = (searchParams.get('tab') as Tab) ?? 'genel';
@@ -74,6 +102,7 @@ export default function ListingDetailPage() {
     const [listing, setListing] = useState<typeof MOCK_LISTING | null>(null);
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     // Offer state
     const [offerShare, setOfferShare] = useState(33);
@@ -99,6 +128,37 @@ export default function ListingDetailPage() {
             .catch(() => setFetchError(true))
             .finally(() => setLoading(false));
     }, [id]);
+
+    // Favori durumu — yalnız oturum açıksa sorgulanır.
+    useEffect(() => {
+        if (!session?.user?.id) return;
+        fetch('/api/favorites')
+            .then(r => (r.ok ? r.json() : []))
+            .then((favs: { listingId?: string; listing?: { id: string } }[]) => {
+                setIsFavorite(Array.isArray(favs) && favs.some(f => (f.listingId ?? f.listing?.id) === id));
+            })
+            .catch(() => {});
+    }, [session?.user?.id, id]);
+
+    const toggleFavorite = async () => {
+        if (!session?.user?.id) {
+            toast.error('Favorilere eklemek için giriş yapın.');
+            return;
+        }
+        try {
+            const res = isFavorite
+                ? await fetch(`/api/favorites/${id}`, { method: 'DELETE' })
+                : await fetch('/api/favorites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ listingId: id }),
+                });
+            if (res.ok) setIsFavorite(f => !f);
+            else toast.error('Favori güncellenemedi.');
+        } catch {
+            toast.error('Bağlantı hatası.');
+        }
+    };
 
     const handleOffer = async () => {
         setSending(true);
@@ -133,7 +193,7 @@ export default function ListingDetailPage() {
     );
 
     if (fetchError || !listing) return (
-        <div className={styles.loading} style={{ flexDirection: 'column', gap: 12 }}>
+        <div className={`${styles.loading} ${styles.loadingColumn}`}>
             <p>İlan yüklenemedi.</p>
             <button onClick={() => router.push('/marketplace')} className={styles.primaryBtn}>
                 Pazar Yerine Dön
@@ -142,97 +202,155 @@ export default function ListingDetailPage() {
     );
 
     const score = listing.fizibiliteSkoru ?? 82;
-    const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
-    const photoHue = 215 + (id?.charCodeAt(0) ?? 0) % 30;
+    const scoreTone = score >= 80 ? 'good' : score >= 60 ? 'mid' : 'bad';
+    const scoreLabel = score >= 80 ? 'Yüksek' : score >= 60 ? 'Orta' : 'Riskli';
     const areaCells = formatAreaCells(listing);
     const parcelId = formatParcelIdentity(listing);
+    const price = listing.price ?? 5171642;
+    const perM2 = listing.landSizeSqm ? Math.round(price / listing.landSizeSqm) : null;
+    const diorama = listing.photos.length === 0
+        ? resolveScene({ ...sahneSec(listing), egim: 'duz', zaman })
+        : null;
+    const isOwner = !!(session?.user?.id && listing.user?.id && (session.user.id as string) === (listing.user.id as string));
+    const faultText = formatFault(listing.faultDistanceM);
+    const baslik = [listing.district, listing.neighborhood].filter(Boolean).join(' · ') || listing.title;
+
+    const sidePanel = (
+        <aside className={styles.sidebar}>
+            <div className={`${styles.card} ${styles.priceCard}`}>
+                <span className={styles.priceLabel}>Tahmini değer</span>
+                <div className={styles.priceRow}>
+                    <span className={styles.priceValue}>₺{trNum.format(price)}</span>
+                    {perM2 !== null && <span className={styles.perM2}>₺{trNum.format(perM2)}/m²</span>}
+                </div>
+
+                <div className={styles.scoreBlock}>
+                    <div className={styles.scoreHead}>
+                        <span>Fizibilite skoru</span>
+                        <span className={`${styles.scorePill} ${styles[`score_${scoreTone}`]}`}>{score} · {scoreLabel}</span>
+                    </div>
+                    <div className={styles.progressTrack} role="img" aria-label={`Fizibilite skoru ${score}/100`}>
+                        <div className={`${styles.progressFill} ${styles[`fill_${scoreTone}`]}`} style={{ width: `${score}%` }} />
+                    </div>
+                    <p className={styles.scoreNote}>Arsa payı, risk ve piyasa verisinden hesaplanır.</p>
+                </div>
+
+                <div className={styles.sidebarActions}>
+                    <button type="button" onClick={() => setActiveTab('teklifler')} className={styles.offerBtn}>Teklif ver</button>
+                    <button type="button" onClick={() => setActiveTab('senaryo')} className={styles.softBtnWide}>Senaryo hesapla</button>
+                    <div className={styles.softRow}>
+                        <button type="button" onClick={() => setActiveTab('mesajlar')} className={styles.softBtn}>Mesaj</button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                navigator.clipboard.writeText(window.location.href)
+                                    .then(() => toast.success('Link kopyalandı!'))
+                                    .catch(() => toast.error('Kopyalanamadı.'));
+                            }}
+                            className={styles.softBtn}
+                        >Paylaş</button>
+                        <button type="button" onClick={toggleFavorite} aria-pressed={isFavorite} className={styles.softBtn}>
+                            {isFavorite ? 'Favoride' : 'Favori'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {listing.user && (
+                <div className={styles.card}>
+                    <div className={styles.ownerRow}>
+                        <span className={styles.avatar} aria-hidden="true">
+                            {(listing.user.name ?? listing.user.email).slice(0, 2).toUpperCase()}
+                        </span>
+                        <div className={styles.ownerText}>
+                            <strong>{listing.user.name ?? 'İlan sahibi'}</strong>
+                            <span>Arsa sahibi</span>
+                        </div>
+                        {listing.user.isVerified && <span className={`${styles.pill} ${styles.pillOk}`}>Doğrulanmış</span>}
+                    </div>
+                    <a href={`/profile/${listing.user.id}`} className={styles.ownerLink}>İlan sahibinin profili</a>
+                </div>
+            )}
+
+            {listing.lat != null && listing.lng != null ? (
+                <div className={styles.card}>
+                    <h3 className={styles.cardTitle}>Konum</h3>
+                    <div className={styles.mapWrap}>
+                        <MiniMap
+                            lat={listing.lat}
+                            lng={listing.lng}
+                            label={[listing.district, listing.city].filter(Boolean).join(', ') || undefined}
+                            listingId={id}
+                            parcelGeometry={listing.parcelGeometry}
+                            riskLayers
+                        />
+                    </div>
+                    <Link href={`/deger?lat=${listing.lat}&lng=${listing.lng}`} className={styles.relatedLink}>
+                        Parselin değerini incele →
+                    </Link>
+                </div>
+            ) : (
+                /* Koordinat yoksa harita GÖSTERİLMEZ: önceden `listing.lat ?? 41.042` ile
+                   Beşiktaş'a düşüyordu, konumu olmayan her ilan yanlış yerde görünüyordu. */
+                <div className={`${styles.card} ${styles.noLocationNote}`}>
+                    Bu ilan için konum belirtilmemiş.
+                </div>
+            )}
+
+            <p className={styles.footnote}>
+                Tüm anlaşmalar ArsaBil güvencesindedir. İlan No: {id?.slice(0, 8).toUpperCase()}
+            </p>
+        </aside>
+    );
 
     return (
         <div className={styles.page}>
             <AppBar title="İlan Detayı" showBack />
 
-            {/* ── Back button ── */}
-            <button onClick={() => router.back()} className={styles.backBtn}>← Pazar Yerine Dön</button>
+            <nav className={styles.breadcrumb} aria-label="Konum">
+                <Link href="/marketplace">Pazar yeri</Link>
+                {listing.city && <><span aria-hidden="true">/</span><span>{listing.city}</span></>}
+                {listing.district && <><span aria-hidden="true">/</span><span>{listing.district}</span></>}
+            </nav>
 
-            {/* ── Main Grid ── */}
             <div className={styles.grid}>
-
-                {/* LEFT */}
-                <div>
-                    {/* Photo area */}
-                    <div className={styles.photoArea}>
+                <div className={styles.main}>
+                    <div className={styles.hero}>
                         {listing.photos.length > 0 ? (
                             <SwipeGallery images={listing.photos} alt={listing.title} />
-                        ) : (
-                            <div
-                                className={styles.photoPlaceholder}
-                                style={{ '--photo-hue': photoHue } as React.CSSProperties}
-                            ><span className={styles.photoMark} aria-hidden="true" /></div>
-                        )}
-
-                        {/* Fizibilite score overlay */}
-                        <div className={styles.scoreOverlay}>
-                            <ScoreRevealBadge score={score} size="lg" showLabel />
+                        ) : diorama ? (
+                            // eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP
+                            <img className={styles.diorama} src={diorama.src1600} alt="" />
+                        ) : null}
+                        <div className={styles.heroBadges}>
+                            <span className={`${styles.pill} ${styles.pillOk}`}>{TYPE_LABEL[listing.type] ?? 'Kat karşılığı'}</span>
+                            {listing.parcelVerifiedAt && <span className={`${styles.pill} ${styles.pillOk}`}>Resmi parsel verisi</span>}
                         </div>
-
-                        {/* Change badge */}
-                        <span className={styles.changeBadge}>▲ +{listing.changePercent}%</span>
                     </div>
 
-                    {/* Progress bar */}
-                    <div
-                        className={styles.progressRow}
-                        style={{ '--score-pct-ratio': score / 100, '--score-color': scoreColor } as React.CSSProperties}
-                    >
-                        <span className={styles.progressLabel}>Fizibilite Skoru</span>
-                        <div className={styles.progressTrack}>
-                            <div className={styles.progressFill} />
-                        </div>
-                        <span className={styles.progressValue}>{score}/100</span>
-                    </div>
-
-                    {/* Title row */}
                     <div className={styles.titleBlock}>
                         <div className={styles.titleRow}>
-                            <h1 className={styles.title}>{listing.title}</h1>
-                            {session?.user?.id && listing.user?.id && (session.user.id as string) === (listing.user.id as string) && (
-                                <button
-                                    onClick={() => router.push(`/listings/${id}/edit`)}
-                                    className={styles.editBtn}
-                                >
+                            <h1 className={styles.title}>{baslik}</h1>
+                            {isOwner && (
+                                <button onClick={() => router.push(`/listings/${id}/edit`)} className={styles.editBtn}>
                                     Düzenle
                                 </button>
                             )}
                         </div>
-                        <div className={styles.location}>{listing.district}, {listing.city}</div>
+                        <p className={styles.subtitle}>
+                            {[areaCells.declared !== '—' ? areaCells.declared : null, formatZoningLabel(listing.zoning) !== '—' ? `${formatZoningLabel(listing.zoning).toLowerCase()} arsası` : null]
+                                .filter(Boolean).join(' ') || listing.title}
+                            {' · '}{TYPE_LABEL[listing.type] ?? 'Kat karşılığı'} veya satış
+                        </p>
                     </div>
 
-                    {/* Mobilde fiyat/mini-stat özeti — Impeccable critique P2 (2026-09-17):
-                        önceden mobilde bu blok tüm tab içeriğinin ALTINDAydı (.sidebar
-                        tek sütuna düşünce en sona geliyordu), Casey persona ilk 2
-                        saniyede fiyatı göremiyordu. Sidebar'daki aynı bloğun mobil
-                        kopyası (CSS'te masaüstünde gizli, .sidebarSummary mobilde gizli
-                        — çift render yok, sadece görünürlük). */}
-                    <div className={styles.mobilePriceSummary}>
-                        <div>
-                            <div className={styles.priceLabel}>Tahmini Değer</div>
-                            <div className={styles.priceValue}>
-                                {(listing.price ?? 5171642).toLocaleString('tr-TR')} TL
-                            </div>
-                        </div>
-                        <div className={styles.miniStats}>
-                            <div className={`${styles.miniStat} ${styles.miniStatGreen}`}>
-                                <div className={styles.miniStatLabel}>Net Kâr</div>
-                                <div className={`${styles.miniStatValue} ${styles.miniStatValueGreen}`}>+%{listing.netKar}</div>
-                            </div>
-                            <div className={`${styles.miniStat} ${styles.miniStatBlue}`}>
-                                <div className={styles.miniStatLabel}>Arsa Payı</div>
-                                <div className={`${styles.miniStatValue} ${styles.miniStatValueBlue}`}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
-                            </div>
-                        </div>
+                    {/* Mobil fiyat özeti: Figma mobilde fiyat başlığın hemen altında, yan kart yok. */}
+                    <div className={styles.mobilePrice}>
+                        <span className={styles.priceValue}>₺{trNum.format(price)}</span>
+                        {perM2 !== null && <span className={styles.perM2}>₺{trNum.format(perM2)}/m²</span>}
+                        <span className={`${styles.scorePill} ${styles[`score_${scoreTone}`]}`}>{score} · {scoreLabel}</span>
                     </div>
 
-                    {/* Tabs */}
                     <div className={styles.tabs} role="tablist">
                         {TABS.map(tab => (
                             <button
@@ -247,121 +365,110 @@ export default function ListingDetailPage() {
                         ))}
                     </div>
 
-                    {/* Tab Content */}
-                    <div className={styles.tabContent} role="tabpanel">
-
+                    <div role="tabpanel" className={styles.panel}>
                         {activeTab === 'genel' && (
-                            <div>
-                                <h3 className={styles.sectionTitle}>Parsel Detayları</h3>
-                                {parcelId && (
-                                    <div className={styles.parcelRow}>
-                                        <span className={styles.parcelId}>{parcelId}</span>
-                                        <span className={listing.parcelVerifiedAt ? styles.parcelBadgeOk : styles.parcelBadgeNo}>
-                                            {listing.parcelVerifiedAt
-                                                ? `TKGM ile doğrulandı · ${new Date(listing.parcelVerifiedAt).toLocaleDateString('tr-TR')}`
-                                                : 'Doğrulanmadı'}
-                                        </span>
+                            <>
+                                <section className={styles.card}>
+                                    <div className={styles.cardHead}>
+                                        <h3 className={styles.cardTitle}>Parsel bilgileri</h3>
+                                        {parcelId && (
+                                            <span className={`${styles.pill} ${listing.parcelVerifiedAt ? styles.pillOk : styles.pillMuted}`}>
+                                                {listing.parcelVerifiedAt
+                                                    ? `Resmi parsel kaydıyla doğrulandı · ${new Date(listing.parcelVerifiedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}`
+                                                    : 'Doğrulanmadı'}
+                                            </span>
+                                        )}
                                     </div>
-                                )}
-                                {listing.riskSnapshotAt != null && (
-                                    <div className={styles.parcelRow}>
-                                        <span>
-                                            {listing.faultDistanceM != null
-                                                ? <>Diri faya yaklaşık{' '}
-                                                    {listing.faultDistanceM >= 1000
-                                                        ? `${(listing.faultDistanceM / 1000).toFixed(1).replace('.', ',')} km`
-                                                        : `${listing.faultDistanceM} m`}
-                                                  </>
-                                                : '25 km içinde diri fay bulunamadı'}
-                                            {listing.floodQ100 != null &&
-                                                ` · Q100 taşkın bölgesi ${listing.floodQ100 ? 'İÇİNDE' : 'dışında'}`}
-                                        </span>
-                                    </div>
-                                )}
-                                <div className={styles.detailGrid}>
-                                    {[
-                                        ['Alan (beyan)', areaCells.declared],
-                                        ...(areaCells.official ? [['Alan (tapu · TKGM)', areaCells.official] as [string, string]] : []),
-                                        ['İmar Durumu', formatZoningLabel(listing.zoning)],
-                                        ['Emsal', listing.emsal?.toString() ?? '2.0'],
-                                        ['Arsa Payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
-                                        // Uydurma sehir/ilce YOK: "820 m2" duzeltmesinin
-                                        // ayni sinifindan kalan kisimdi, veri yoksa "—" basilir.
-                                        ['Şehir', listing.city ?? '—'],
-                                        ['İlçe', listing.district ?? '—'],
-                                    ].map(([label, val]) => (
-                                        <div key={label} className={styles.detailCell}>
-                                            <div className={styles.detailLabel}>{label}</div>
-                                            <div className={styles.detailValue}>{val}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                                {/* emsal / arsaPayi alanlari Prisma semasinda HIC yok; API
-                                    onlari donduremez, dolayisiyla her ilanda ayni ornek
-                                    degerler gorunur. imarDurumu artik GERCEK `zoning` alanindan
-                                    okunuyor (bkz. formatZoningLabel) — bu banner artik onu kapsamaz. */}
-                                <div className={styles.demoNote} role="note">
-                                    <strong>Örnek veri</strong> — Emsal ve arsa payı bilgileri henüz
-                                    toplanmadığı için tanıtım amaçlı örnek değerlerdir; bu ilana ait değildir.
-                                </div>
-                                {areaCells.warning && (
-                                    <div className={styles.areaWarning}>{areaCells.warning}</div>
-                                )}
-                                {listing.description && (
-                                    <p className={styles.description}>{listing.description}</p>
-                                )}
-                            </div>
+                                    <dl className={styles.table}>
+                                        {[
+                                            ...(parcelId ? [['Ada / Parsel', `${listing.adaNo || '—'} / ${listing.parselNo}`] as [string, string]] : []),
+                                            ['Alan (beyan)', areaCells.declared],
+                                            ...(areaCells.official ? [['Alan (tapu)', areaCells.official] as [string, string]] : []),
+                                            ['İmar durumu', formatZoningLabel(listing.zoning)],
+                                            ['Emsal', listing.emsal?.toString() ?? '2.0'],
+                                            ['Arsa payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
+                                            ...(listing.riskSnapshotAt != null
+                                                ? [
+                                                    ['Fay mesafesi', faultText ? `${faultText}` : '25 km içinde diri fay yok'] as [string, string],
+                                                    ...(listing.floodQ100 != null
+                                                        ? [['Taşkın (Q100)', listing.floodQ100 ? 'Bölge içinde' : 'Bölge dışında'] as [string, string]]
+                                                        : []),
+                                                ]
+                                                : []),
+                                            // Uydurma şehir/ilçe YOK: veri yoksa "—" basılır.
+                                            ['Şehir / İlçe', `${listing.city ?? '—'} / ${listing.district ?? '—'}`],
+                                        ].map(([label, val]) => (
+                                            <div key={label} className={styles.tableRow}>
+                                                <dt>{label}</dt>
+                                                <dd>{val}</dd>
+                                            </div>
+                                        ))}
+                                    </dl>
+                                    {areaCells.warning && (
+                                        <div className={styles.areaWarning}>{areaCells.warning}</div>
+                                    )}
+                                </section>
+
+                                <section className={styles.card}>
+                                    <h3 className={styles.cardTitle}>Açıklama</h3>
+                                    {listing.description && <p className={styles.description}>{listing.description}</p>}
+                                    {/* emsal / arsaPayi alanları Prisma şemasında HİÇ yok; API onları
+                                        döndüremez, dolayısıyla her ilanda aynı örnek değerler görünür. */}
+                                    <p className={styles.demoNote} role="note">
+                                        <strong>Örnek veri</strong> — Emsal ve arsa payı bilgileri henüz
+                                        toplanmadığı için tanıtım amaçlı örnek değerlerdir; bu ilana ait değildir.
+                                    </p>
+                                </section>
+                            </>
                         )}
 
                         {activeTab === 'fizibilite' && (
-                            <div className={styles.centerCta}>
-                                {/* Impeccable critique P1 (2026-09-17): bu sekmedeki degerlerin
-                                    TAMAMI (arsa degeri, net kar, daire/m2, proje suresi) sabit
-                                    ornek kodmus, ilan verisiyle hic baglantisi yoktu — PRODUCT.md
-                                    ilke #1'i ("gercek veri, uydurma yok") ihlal ediyordu. Gercek
-                                    hesap /hesapla sayfasindaki motora baglanana kadar "Yakinda"
-                                    durumuna cevrildi. */}
-                                <div className={styles.centerCtaIcon}>Fizibilite</div>
-                                <div className={styles.centerCtaTitle}>Ön fizibilite yakında burada</div>
+                            <section className={`${styles.card} ${styles.centerCta}`}>
+                                {/* Impeccable critique P1 (2026-09-17): bu sekmedeki değerlerin TAMAMI sabit
+                                    örnek koduydu, ilan verisiyle bağlantısı yoktu — "gerçek veri, uydurma yok"
+                                    ilkesini ihlal ediyordu. Gerçek hesap /hesapla motoruna bağlanana kadar
+                                    "yakında" durumunda. */}
+                                <h3 className={styles.cardTitle}>Ön fizibilite yakında burada</h3>
                                 <p className={styles.description}>
                                     Bu ilan için otomatik fizibilite hesabı henüz hazır değil. Gerçek verilerle
                                     kendi hesabınızı şimdi çıkarabilirsiniz.
                                 </p>
-                                <button
-                                    onClick={() => router.push(`/?listing=${listing.id}`)}
-                                    className={styles.primaryBtn}
-                                >
+                                <button onClick={() => router.push(`/?listing=${listing.id}`)} className={styles.primaryBtn}>
                                     Hesapla&apos;yı Aç →
                                 </button>
-                            </div>
+                            </section>
                         )}
 
                         {activeTab === 'senaryo' && (
-                            <div className={styles.centerCta}>
-                                <div className={styles.centerCtaIcon}>Senaryo</div>
-                                <div className={styles.centerCtaTitle}>Bu ilan için özel senaryo oluşturun</div>
-                                <button
-                                    onClick={() => router.push(`/?listing=${listing.id}`)}
-                                    className={styles.primaryBtn}
-                                >
+                            <section className={`${styles.card} ${styles.centerCta}`}>
+                                <h3 className={styles.cardTitle}>Bu ilan için özel senaryo oluşturun</h3>
+                                <button onClick={() => router.push(`/?listing=${listing.id}`)} className={styles.primaryBtn}>
                                     Hesap Makinesini Aç →
                                 </button>
-                            </div>
+                            </section>
                         )}
 
                         {activeTab === 'teklifler' && (
-                            <div>
-                                <div className={styles.titleRow}>
-                                    <h3 className={styles.sectionTitle}>Teklif Ver</h3>
-                                    <Link href={`/listing/${id}/offers`} className={styles.demoNoteLink}>
+                            <section className={styles.card}>
+                                <div className={styles.cardHead}>
+                                    <h3 className={styles.cardTitle}>Teklif ver</h3>
+                                    <Link href={`/listing/${id}/offers`} className={styles.relatedLink}>
                                         Geçmiş teklifleri gör →
                                     </Link>
                                 </div>
                                 <div className={styles.offerField}>
                                     <label className={styles.offerLabel}>Teklif Ettiğim Arsa Payı (%)</label>
                                     <div className={styles.offerRangeRow}>
-                                        <input type="range" min={10} max={60} value={offerShare} onChange={e => setOfferShare(+e.target.value)}
-                                            className={styles.offerRange} />
+                                        <input
+                                            type="range"
+                                            min={10}
+                                            max={60}
+                                            value={offerShare}
+                                            aria-label="Teklif ettiğim arsa payı"
+                                            onChange={e => setOfferShare(+e.target.value)}
+                                            className={styles.offerRange}
+                                            style={{ '--progress': `${((offerShare - 10) / 50) * 100}%` } as React.CSSProperties}
+                                        />
                                         <span className={styles.offerShareUnit}>%</span>
                                         <input
                                             type="number"
@@ -377,111 +484,33 @@ export default function ListingDetailPage() {
                                 </div>
                                 <textarea
                                     placeholder="Teklif notunuz (opsiyonel)"
-                                    value={offerMsg} onChange={e => setOfferMsg(e.target.value)}
+                                    value={offerMsg}
+                                    onChange={e => setOfferMsg(e.target.value)}
                                     rows={3}
                                     className={styles.offerTextarea}
                                 />
                                 <button onClick={handleOffer} disabled={sending} className={styles.offerSubmit}>
                                     {sending ? 'Gönderiliyor…' : 'Teklifi Gönder'}
                                 </button>
-                            </div>
+                            </section>
                         )}
 
                         {activeTab === 'mesajlar' && (
-                            <div className={styles.centerCta}>
-                                <div className={styles.centerCtaIcon}>Mesaj</div>
-                                İlan sahibiyle iletişime geçin
-                                <div className={styles.centerCtaAction}>
-                                    <button onClick={() => router.push('/inbox')} className={styles.primaryBtn}>Mesaj Aç →</button>
-                                </div>
-                            </div>
+                            <section className={`${styles.card} ${styles.centerCta}`}>
+                                <h3 className={styles.cardTitle}>İlan sahibiyle iletişime geçin</h3>
+                                <button onClick={() => router.push('/inbox')} className={styles.primaryBtn}>Mesaj Aç →</button>
+                            </section>
                         )}
                     </div>
                 </div>
 
-                {/* RIGHT — Sticky sidebar */}
-                <div className={styles.sidebar}>
-                    <div className={styles.sidebarSummary}>
-                        <div>
-                            <div className={styles.priceLabel}>Tahmini Değer</div>
-                            <div className={styles.priceValue}>
-                                {(listing.price ?? 5171642).toLocaleString('tr-TR')} TL
-                            </div>
-                        </div>
-
-                        <div className={styles.miniStats}>
-                            <div className={`${styles.miniStat} ${styles.miniStatGreen}`}>
-                                <div className={styles.miniStatLabel}>Net Kâr</div>
-                                <div className={`${styles.miniStatValue} ${styles.miniStatValueGreen}`}>+%{listing.netKar}</div>
-                            </div>
-                            <div className={`${styles.miniStat} ${styles.miniStatBlue}`}>
-                                <div className={styles.miniStatLabel}>Arsa Payı</div>
-                                <div className={`${styles.miniStatValue} ${styles.miniStatValueBlue}`}>%{listing.arsaPayiMin}–{listing.arsaPayiMax}</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mini Map — koordinat yoksa harita GÖSTERİLMEZ.
-                        Önceden `listing.lat ?? 41.042` ile Beşiktaş'a düşüyordu:
-                        konumu olmayan her ilan haritada yanlış yerde görünüyordu. */}
-                    {listing.lat != null && listing.lng != null ? (
-                        <MiniMap
-                            lat={listing.lat}
-                            lng={listing.lng}
-                            label={[listing.district, listing.city].filter(Boolean).join(', ') || undefined}
-                            listingId={id}
-                            parcelGeometry={listing.parcelGeometry}
-                            riskLayers
-                        />
-                    ) : (
-                        <div className={styles.noLocationNote}>
-                            Bu ilan için konum belirtilmemiş.
-                        </div>
-                    )}
-
-                    <div className={styles.sidebarActions}>
-                        <button onClick={() => setActiveTab('senaryo')} className={`${styles.actionBtn} ${styles.actionPrimary}`}>Senaryo Oluştur</button>
-                        <button onClick={() => setActiveTab('teklifler')} className={`${styles.actionBtn} ${styles.actionGreen}`}>Teklif Ver</button>
-                        <button onClick={() => setActiveTab('mesajlar')} className={`${styles.actionBtn} ${styles.actionGhost}`}>Mesaj At</button>
-                    </div>
-
-                    {/* Share + Owner */}
-                    <div className={styles.sidebarFooter}>
-                        <button
-                            onClick={() => {
-                                navigator.clipboard.writeText(window.location.href)
-                                    .then(() => toast.success('Link kopyalandı!'))
-                                    .catch(() => toast.error('Kopyalanamadı.'));
-                            }}
-                            className={styles.shareBtn}
-                        >Paylaş</button>
-
-                        {listing.user?.id && (
-                            <a
-                                href={`/profile/${listing.user.id}`}
-                                className={styles.ownerLink}
-                            >
-                                İlan Sahibinin Profili
-                            </a>
-                        )}
-                    </div>
-
-                    <div className={styles.footnote}>
-                        Tüm anlaşmalar ArsaBil güvencesindedir. İlan No: {id?.slice(0, 8).toUpperCase()}
-                    </div>
-                </div>
+                {sidePanel}
             </div>
 
             <StickyActionBar aboveBottomNav>
                 <div className={styles.stickyBtns}>
-                    <button
-                        onClick={() => setActiveTab('teklifler')}
-                        className={`${styles.actionBtn} ${styles.actionGreen} ${styles.stickyBtn}`}
-                    >Teklif Ver</button>
-                    <button
-                        onClick={() => setActiveTab('senaryo')}
-                        className={`${styles.actionBtn} ${styles.actionPrimary} ${styles.stickyBtn}`}
-                    >Senaryo</button>
+                    <button onClick={() => setActiveTab('senaryo')} className={`${styles.softBtnWide} ${styles.stickyBtn}`}>Senaryo</button>
+                    <button onClick={() => setActiveTab('teklifler')} className={`${styles.offerBtn} ${styles.stickyBtn}`}>Teklif ver</button>
                 </div>
             </StickyActionBar>
         </div>

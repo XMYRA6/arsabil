@@ -1,794 +1,126 @@
-/* =========================================================================
-   LISTING DETAY — Faz 1 mobil refactor (Task 2: inline stil migrasyonu)
-   Desktop görünümü, önceki inline stillerle birebir aynıdır.
-   ========================================================================= */
+/* İlan detay — Figma 07 (İlan detay · Masaüstü/Mobil). Arazi tokenları. */
+.page { max-width: 1200px; margin: 0 auto; padding: 24px 24px 64px; color: var(--ink); }
+.loading { min-height: 50vh; display: flex; align-items: center; justify-content: center; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
+.loadingColumn { flex-direction: column; gap: 12px; }
 
-.page {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-}
+.breadcrumb { display: flex; align-items: center; gap: 8px; margin: 0 0 20px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
+.breadcrumb a { color: var(--ink-secondary); text-decoration: none; }
+.breadcrumb a::before { content: '‹ '; }
 
-.loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
-    color: var(--muted);
-}
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); gap: 28px; align-items: start; }
+.main { min-width: 0; }
+.sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 96px; }
 
-.backBtn {
-    background: transparent;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-family: inherit;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 20px;
-    padding: 0;
-}
+/* ── Hero ── */
+.hero { position: relative; border-radius: var(--radius-card); background: var(--surface-2); overflow: hidden; min-height: 280px; }
+.diorama { display: block; width: 100%; height: 440px; object-fit: contain; padding: 40px 24px 12px; box-sizing: border-box; }
+.heroBadges { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; flex-wrap: wrap; }
 
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 24px;
-    align-items: start;
-}
+.pill { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
+.pillOk { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); color: var(--ok); }
+.pillMuted { background: var(--surface-2); color: var(--ink-secondary); }
 
-/* ── Fotoğraf alanı ── */
-.photoArea {
-    width: 100%;
-    height: 340px;
-    border-radius: 18px;
-    overflow: hidden;
-    background: var(--panel-2);
-    position: relative;
-    margin-bottom: 16px;
-}
+.titleBlock { margin: 22px 0 18px; }
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.title { margin: 0; font: 700 32px/1.15 Inter, sans-serif; letter-spacing: -0.3px; color: var(--ink); }
+.subtitle { margin: 8px 0 0; font: 500 15.5px Inter, sans-serif; color: var(--ink-secondary); }
+.editBtn { min-height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
 
-.photoPlaceholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, hsl(var(--photo-hue, 215), 55%, 18%), hsl(200, 60%, 12%));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    opacity: 0.5;
-}
-
-.scoreOverlay {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-}
-
-.changeBadge {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: rgba(var(--green-rgb), .85);
-    color: white;
-    font-size: 0.85rem;
-    font-weight: 900;
-    padding: 4px 12px;
-    border-radius: 10px;
-    backdrop-filter: blur(4px);
-}
-
-
-.photoMark {
-    width: 76px;
-    height: 76px;
-    border: 2px solid rgba(255,255,255,.72);
-    border-radius: 22px;
-    position: relative;
-    display: block;
-}
-
-.photoMark::before,
-.photoMark::after {
-    content: "";
-    position: absolute;
-    background: rgba(255,255,255,.78);
-}
-
-.photoMark::before {
-    width: 44px;
-    height: 3px;
-    left: 15px;
-    bottom: 24px;
-    transform: rotate(-32deg);
-}
-
-.photoMark::after {
-    width: 3px;
-    height: 42px;
-    left: 36px;
-    bottom: 16px;
-}
-/* ── Skor progress ── */
-.progressRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.progressLabel {
-    font-size: 0.75rem;
-    color: var(--muted);
-    white-space: nowrap;
-}
-
-.progressTrack {
-    flex: 1;
-    height: 6px;
-    background: var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-}
-
-.progressFill {
-    /* transform:scaleX — Impeccable audit P3 (2026-09-17): width transition
-       tetikler layout, scaleX yalnizca compositor'da calisir. */
-    width: 100%;
-    height: 100%;
-    transform: scaleX(var(--score-pct-ratio, 0));
-    transform-origin: left;
-    background: var(--score-color, var(--green));
-    border-radius: 6px;
-    transition: transform 1s ease;
-}
-
-.progressValue {
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: var(--score-color, var(--green));
-}
-
-/* ── Başlık ── */
-.titleBlock {
-    margin-bottom: 20px;
-}
-
-.titleRow {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.title {
-    font-size: 1.4rem;
-    font-weight: 900;
-    color: var(--card-title);
-    margin-bottom: 4px;
-}
-
-.editBtn {
-    padding: 6px 14px;
-    background: var(--border);
-    color: var(--card-title);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 700;
-    font-family: inherit;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.location {
-    font-size: 0.8rem;
-    color: var(--muted);
-}
+.mobilePrice { display: none; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 
 /* ── Sekmeler ── */
-.tabs {
-    display: flex;
-    gap: 2px;
-    border-bottom: 2px solid var(--border);
-    margin-bottom: 20px;
-    overflow-x: auto;
+.tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px; }
+.tab { flex: none; min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 15px Inter, sans-serif; cursor: pointer; }
+.tabActive { background: var(--amber-soft); color: var(--amber-text); font-weight: 600; }
+
+.panel { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Kartlar ── */
+.card { padding: 24px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); min-width: 0; }
+.cardHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.cardTitle { margin: 0; font: 700 18px Inter, sans-serif; color: var(--ink); }
+
+.table { margin: 8px 0 0; }
+.tableRow { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); font: 500 14.5px Inter, sans-serif; }
+.tableRow:last-child { border-bottom: 0; }
+.tableRow dt { margin: 0; color: var(--ink-secondary); }
+.tableRow dd { margin: 0; text-align: right; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.description { margin: 10px 0 0; font: 500 15px/1.6 Inter, sans-serif; color: var(--ink-secondary); }
+.demoNote { margin: 12px 0 0; font: 500 12.5px/1.5 Inter, sans-serif; color: var(--amber-text); }
+.areaWarning { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--amber-soft); color: var(--amber-text); font: 500 13px Inter, sans-serif; }
+
+.centerCta { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+
+/* ── Yan panel ── */
+.priceCard { display: flex; flex-direction: column; gap: 0; }
+.priceLabel { font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
+.priceRow { display: flex; align-items: baseline; gap: 10px; margin: 8px 0 16px; flex-wrap: wrap; }
+.priceValue { font: 700 34px/1.1 Inter, sans-serif; letter-spacing: -0.4px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.perM2 { font: 500 13px Inter, sans-serif; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+
+.scoreBlock { padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.scoreHead { display: flex; align-items: center; justify-content: space-between; font: 600 14.5px Inter, sans-serif; color: var(--ink); }
+.scorePill { padding: 4px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
+.score_good { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.score_mid { background: var(--amber-soft); color: var(--amber-text); }
+.score_bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.progressTrack { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.progressFill { height: 100%; border-radius: 4px; }
+.fill_good { background: var(--ok); }
+.fill_mid { background: var(--amber); }
+.fill_bad { background: var(--bad); }
+.scoreNote { margin: 0; font: 500 12.5px Inter, sans-serif; color: var(--ink-secondary); }
+
+.sidebarActions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.offerBtn, .primaryBtn, .offerSubmit { min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; cursor: pointer; }
+.primaryBtn { min-height: 44px; font-size: 15px; }
+.offerSubmit:disabled { opacity: .5; cursor: not-allowed; }
+.softBtnWide { min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 16px Inter, sans-serif; cursor: pointer; }
+.softRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.softBtn { min-height: 42px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
+.softBtn[aria-pressed='true'] { background: var(--amber-soft); color: var(--amber-text); }
+
+.ownerRow { display: flex; align-items: center; gap: 12px; }
+.avatar { width: 48px; height: 48px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage); font: 700 16px Inter, sans-serif; }
+.ownerText { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
+.ownerText strong { font: 700 16px Inter, sans-serif; color: var(--ink); }
+.ownerLink, .relatedLink { display: inline-block; margin-top: 12px; color: var(--blue); font: 600 14px Inter, sans-serif; text-decoration: none; }
+.mapWrap { margin-top: 12px; border-radius: 14px; overflow: hidden; }
+.noLocationNote { font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
+.footnote { margin: 4px 0 0; font: 500 12px Inter, sans-serif; color: var(--ink-secondary); }
+
+/* ── Teklif formu ── */
+.offerField { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 14px; }
+.offerLabel { font: 500 13.5px Inter, sans-serif; color: var(--ink-secondary); }
+.offerRangeRow { display: flex; align-items: center; gap: 10px; }
+.offerRange { flex: 1; -webkit-appearance: none; appearance: none; height: 22px; margin: 0; background: transparent; cursor: pointer; }
+.offerRange::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: linear-gradient(to right, var(--amber) var(--progress, 0%), var(--line) var(--progress, 0%)); }
+.offerRange::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%; background: var(--surface); border: 3px solid var(--amber); }
+.offerRange::-moz-range-track { height: 6px; border-radius: 3px; background: var(--line); }
+.offerRange::-moz-range-progress { height: 6px; border-radius: 3px; background: var(--amber); }
+.offerRange::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--surface); border: 3px solid var(--amber); }
+.offerShareUnit { font: 600 15px Inter, sans-serif; color: var(--ink-secondary); }
+.offerShare { width: 72px; min-height: 44px; padding: 0 10px; border-radius: 14px; border: 1px solid var(--line); background: var(--input-bg); color: var(--ink); text-align: right; font: 700 16px Inter, sans-serif; }
+.offerTextarea { width: 100%; box-sizing: border-box; margin-bottom: 14px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--input-bg); color: var(--ink); resize: vertical; font: 500 15px Inter, sans-serif; }
+
+.stickyBtns { display: flex; gap: 12px; padding: 0 16px max(var(--safe-bottom, 0px), 8px); width: 100%; box-sizing: border-box; }
+.stickyBtn { flex: 1; }
+
+/* ── Mobil ── */
+@media (max-width: 900px) {
+  .page { padding: 12px 16px 120px; }
+  .breadcrumb { display: none; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: static; }
+  .priceCard, .footnote { display: none; }
+  .diorama { height: 260px; padding-top: 52px; }
+  .hero { min-height: 220px; }
+  .title { font-size: 26px; }
+  .mobilePrice { display: flex; }
+  .mobilePrice .priceValue { font-size: 28px; }
+}
+
+@media (min-width: 901px) {
+  .stickyBtns { display: none; }
 }
-
-.tab {
-    padding: 10px 14px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    white-space: nowrap;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.tabActive {
-    font-weight: 800;
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-}
-
-.tabContent {
-    composes: mStatSurface from global;
-    padding: 20px;
-}
-
-@media (min-width: 769px) {
-    .tabContent {
-        background: var(--panel);
-        border: 1.5px solid var(--border);
-        border-radius: 16px;
-    }
-}
-
-.sectionTitle {
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: var(--card-title);
-    margin-bottom: 16px;
-}
-
-/* ── Genel sekmesi ── */
-.detailGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-}
-
-.detailCell {
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 10px 14px;
-}
-
-.detailLabel {
-    font-size: 0.68rem;
-    color: var(--muted);
-    margin-bottom: 2px;
-}
-
-.detailValue {
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: var(--card-title);
-}
-
-.description {
-    margin-top: 16px;
-    font-size: 0.85rem;
-    color: var(--text);
-    line-height: 1.6;
-}
-
-/* ── Fizibilite sekmesi ── */
-.fizGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.fizCell {
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 12px 14px;
-}
-
-.fizLabel {
-    font-size: 0.68rem;
-    color: var(--muted);
-    margin-bottom: 4px;
-}
-
-.fizValue {
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--cell-color, var(--card-title));
-}
-
-.infoNote {
-    margin-top: 14px;
-    padding: 10px 14px;
-    background: rgba(var(--primary-rgb), .08);
-    border-radius: 10px;
-    font-size: 0.78rem;
-    color: var(--muted);
-}
-
-/* ── Senaryo / Mesajlar boş durum CTA ── */
-.centerCta {
-    text-align: center;
-    padding: 2rem;
-    color: var(--muted);
-}
-
-.centerCtaIcon {
-    font-size: 2rem;
-    margin-bottom: 8px;
-}
-
-.centerCtaTitle {
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-
-.centerCtaAction {
-    margin-top: 12px;
-}
-
-.primaryBtn {
-    padding: 10px 24px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 800;
-}
-
-/* ── Teklif sekmesi ── */
-.offerField {
-    margin-bottom: 14px;
-}
-
-.offerLabel {
-    font-size: 0.75rem;
-    color: var(--muted);
-    display: block;
-    margin-bottom: 6px;
-}
-
-.offerRangeRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.offerRange {
-    flex: 1;
-    accent-color: var(--primary);
-}
-
-.offerShare {
-    font-weight: 900;
-    font-size: 1.1rem;
-    color: var(--primary);
-    width: 40px;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-family: inherit;
-    padding: 0;
-}
-.offerShare::-webkit-outer-spin-button,
-.offerShare::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.offerShareUnit {
-    font-weight: 900;
-    font-size: 1.1rem;
-    color: var(--primary);
-}
-
-.offerTextarea {
-    width: 100%;
-    padding: 10px;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.85rem;
-    resize: none;
-    outline: none;
-}
-
-.offerSubmit {
-    margin-top: 10px;
-    padding: 10px 24px;
-    background: var(--green);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 800;
-}
-
-.offerSubmit:disabled {
-    opacity: 0.6;
-}
-
-/* ── Sağ sidebar ── */
-.sidebar {
-    composes: mStatSurface from global;
-    position: sticky;
-    top: 80px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-@media (min-width: 769px) {
-    .sidebar {
-        background: var(--panel);
-        border: 1.5px solid var(--border);
-        border-radius: 18px;
-    }
-}
-
-/* Mobilde tab çubuğunun üstünde gösterilen fiyat özeti — masaüstünde
-   gizli (sidebar zaten görünür). Impeccable critique P2 (2026-09-17). */
-.mobilePriceSummary {
-    display: none;
-}
-
-.priceLabel {
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-bottom: 2px;
-}
-
-.priceValue {
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--card-title);
-}
-
-.miniStats {
-    display: flex;
-    gap: 10px;
-}
-
-.miniStat {
-    flex: 1;
-    border-radius: 10px;
-    padding: 10px 12px;
-}
-
-.miniStatGreen {
-    background: rgba(var(--green-rgb), .10);
-}
-
-.miniStatBlue {
-    background: rgba(var(--primary-rgb), .10);
-}
-
-.miniStatLabel {
-    font-size: 0.65rem;
-    color: var(--muted);
-}
-
-.miniStatValue {
-    font-size: 0.95rem;
-    font-weight: 800;
-}
-
-.miniStatValueGreen {
-    color: var(--green);
-}
-
-.miniStatValueBlue {
-    color: var(--primary);
-}
-
-.sidebarActions {
-    border-top: 1px solid var(--border);
-    padding-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.actionBtn {
-    padding: 11px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 800;
-    font-size: 0.85rem;
-}
-
-.actionPrimary {
-    background: var(--primary);
-    color: white;
-}
-
-.actionGreen {
-    background: rgba(var(--green-rgb), .15);
-    color: var(--green);
-    border: 1.5px solid rgba(var(--green-rgb), .4);
-}
-
-.actionGhost {
-    background: var(--bg);
-    color: var(--muted);
-    border: 1.5px solid var(--border);
-    font-weight: 700;
-}
-
-.sidebarFooter {
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.shareBtn {
-    padding: 9px;
-    background: var(--bg);
-    color: var(--muted);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 0.82rem;
-}
-
-.ownerLink {
-    display: block;
-    padding: 9px;
-    text-align: center;
-    background: var(--bg);
-    color: var(--muted);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    text-decoration: none;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 0.82rem;
-}
-
-.footnote {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-}
-
-/* Dokunma hedefleri yalnızca mobilde — desktop piksel-birebir kalır (insan kararı, Task 2 review) */
-@media (max-width: 768px) {
-    .tab,
-    .primaryBtn,
-    .offerSubmit,
-    .actionBtn,
-    .shareBtn {
-        min-height: var(--touch-target);
-    }
-}
-
-/* ── StickyActionBar içeriği (bar zaten yalnızca mobilde görünür) ── */
-.stickyBtns {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-    padding-bottom: max(var(--safe-bottom), 8px);
-}
-
-.stickyBtn {
-    flex: 1;
-    border-radius: var(--m-r-btn);
-}
-
-/* =========================================================================
-   MOBİL (≤768px) — tek kolon akış
-   ========================================================================= */
-@media (max-width: 768px) {
-    .page {
-        padding: 12px 12px calc(var(--bottomnav-height) + 76px);
-        background: var(--m-mesh);
-        color: var(--m-ink);
-    }
-
-    .backBtn {
-        display: none;
-    }
-
-    .mobilePriceSummary {
-        /* `composes` burada KULLANILMAZ — CSS Modules composes bir @media
-           bloğu içinde Turbopack'te sessizce çalışmaz (bkz. proje hafızası:
-           composes+Turbopack build tuzağı). mStatSurface'in (globals.css)
-           görünümü elle kopyalanıyor. */
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 14px 16px;
-        margin-bottom: 4px;
-        background: var(--m-panel);
-        border: 1px solid var(--m-divider);
-        border-radius: var(--m-r-card);
-    }
-
-    .sidebarSummary {
-        display: none;
-    }
-
-    .grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
-    .grid > div {
-        min-width: 0;
-    }
-
-    .photoArea {
-        height: 240px;
-        border-radius: var(--m-r-card);
-        border: 1px solid var(--m-glass-border);
-        box-shadow: var(--m-sh-card);
-    }
-
-    .title {
-        font-size: var(--font-size-title);
-        color: var(--m-ink);
-    }
-
-    .location,
-    .progressLabel,
-    .detailLabel,
-    .fizLabel,
-    .priceLabel,
-    .miniStatLabel,
-    .footnote {
-        color: var(--m-body);
-    }
-
-    .fizGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar,
-    .tabContent {
-        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-    }
-
-    .sidebar {
-        position: static;
-    }
-
-    .detailCell,
-    .fizCell,
-    .miniStat,
-    .noLocationNote {
-        background: var(--m-fill);
-        border: 1px solid var(--m-divider);
-        border-radius: var(--m-r-inner);
-    }
-
-    .priceValue,
-    .fizValue,
-    .detailValue,
-    .miniStatValue,
-    .progressValue,
-    .offerShare,
-    .changeBadge {
-        font-family: var(--m-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-variant-numeric: tabular-nums;
-    }
-
-    .primaryBtn,
-    .actionPrimary,
-    .offerSubmit {
-        background: var(--m-grad-btn);
-        color: white;
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .actionGreen {
-        background: rgba(16,185,129,.14);
-        color: var(--m-success-text);
-        border-color: rgba(16,185,129,.32);
-    }
-
-    .tabActive {
-        color: var(--m-link);
-        border-bottom-color: var(--m-link);
-    }
-
-    .sidebarActions {
-        display: none;
-    }
-
-    .offerTextarea {
-        font-size: 16px; /* iOS zoom tetiklenmesin */
-        background: var(--m-fill);
-        border-color: var(--m-glass-border);
-        color: var(--m-ink);
-        border-radius: var(--m-r-input);
-    }
-}
-.parcelRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-}
-
-.parcelId {
-    font-weight: 800;
-    font-size: 0.88rem;
-    color: var(--card-title);
-}
-
-.parcelBadgeOk {
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--green);
-    background: rgba(var(--green-rgb), 0.12);
-}
-
-.parcelBadgeNo {
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--label-color);
-    background: rgba(148, 163, 184, 0.16);
-}
-
-.areaWarning {
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: var(--label-color);
-    background: rgba(var(--orange-rgb), 0.08);
-    border: 1px solid rgba(var(--orange-rgb), 0.3);
-}
-
-/* Uydurma veri ekranda oldugu surece acikca isaretlenir. */
-.demoNote {
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 0.78rem;
-    line-height: 1.5;
-    color: var(--label-color);
-    background: rgba(var(--orange-rgb), 0.08);
-    border: 1px solid rgba(var(--orange-rgb), 0.3);
-}
-
-.demoNote strong {
-    color: var(--orange);
-}
-
-.demoNoteLink {
-    color: var(--m-link);
-    text-decoration: underline;
-}
-
-.noLocationNote {
-    padding: 16px;
-    border-radius: 12px;
-    border: 1px dashed var(--border);
-    background: var(--input-bg);
-    color: var(--label-color);
-    font-size: 0.82rem;
-    text-align: center;
-}
-
