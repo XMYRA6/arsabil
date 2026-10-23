@@ -1,0 +1,163 @@
+/* Panel kabuğu — Figma 10 (Dashboard · Masaüstü/Mobil). Arazi tokenları. */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  color: var(--ink-secondary);
+  font: 500 15px Inter, sans-serif;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  align-items: start;
+  color: var(--ink);
+}
+
+.sidebar {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 12px;
+  color: var(--ink);
+  font: 500 14.5px Inter, sans-serif;
+  text-decoration: none;
+}
+
+.navItem:hover {
+  background: var(--surface-2);
+}
+
+.navItem:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.navItemActive {
+  background: var(--amber-soft);
+  color: var(--amber-text);
+  font-weight: 600;
+}
+
+.navItem svg {
+  flex: none;
+  color: var(--ink-secondary);
+}
+
+.navItemActive svg {
+  color: var(--amber-text);
+}
+
+.navLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.rozet {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--blue-on);
+  font: 700 12px Inter, sans-serif;
+}
+
+.logout {
+  margin: 4px 0 0;
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink-secondary);
+  font: 500 14px Inter, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  padding: 0 14px;
+}
+
+.logout:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.content {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 16px 24px;
+  }
+
+  /* Mobilde yan menü yatay kaydırmalı çip satırına döner (Figma mobilde alt çubuk kullanır;
+     panel alt sayfalarına erişim kaybolmasın diye çipler kalır). */
+  .sidebar {
+    position: static;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .nav {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .navItem {
+    flex: none;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  .navItem svg {
+    display: none;
+  }
+
+  .navItemActive {
+    border-color: var(--amber);
+  }
+
+  .logout {
+    display: none;
+  }
+}

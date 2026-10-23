@@ -37,10 +37,10 @@ export interface DashboardData {
 }
 
 const STAT_CONFIG = [
-  { key: 'reportCount',        label: 'Hesaplama',       rgb: '59, 130, 246' },   // --info
-  { key: 'activeListingCount', label: 'Aktif İlan',       rgb: '16, 185, 129' },  // --green
-  { key: 'offerCount',         label: 'Teklif',          rgb: '245, 158, 11' },  // --orange
-  { key: 'unreadMessageCount', label: 'Okunmamış Mesaj', rgb: '139, 92, 246' },  // --accent-violet-stat
+  { key: 'reportCount',        label: 'Hesaplama',       accent: 'blue' },
+  { key: 'activeListingCount', label: 'Aktif ilan',      accent: 'green' },
+  { key: 'offerCount',         label: 'Teklif',          accent: 'amber' },
+  { key: 'unreadMessageCount', label: 'Okunmamış mesaj', accent: 'violet' },
 ] as const
 
 export default function DashboardPage() {
@@ -89,15 +89,21 @@ export default function DashboardPage() {
     return 'Reddedildi'
   }
 
+  const userName = (session?.user as { name?: string })?.name || 'Kullanıcı'
+  const ilkAd = userName.trim().split(' ')[0]
+
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>Dashboard</h1>
-      <p className={styles.welcome}>Hoş geldin, {(session?.user as { name?: string })?.name || 'Kullanıcı'}</p>
+      <header>
+        <h1 className={styles.pageTitle}>Dashboard</h1>
+        <p className={styles.welcome}>Hoş geldin, {ilkAd}</p>
+      </header>
 
       {/* Stat kartları */}
       <div className={styles.statsGrid}>
-        {STAT_CONFIG.map(({ key, label, rgb }) => (
-          <div key={key} className={styles.statCard} style={{ '--card-accent-rgb': rgb } as React.CSSProperties}>
+        {STAT_CONFIG.map(({ key, label, accent }) => (
+          <div key={key} className={styles.statCard} data-accent={accent}>
+            <span className={styles.statBar} aria-hidden="true" />
             <div className={styles.statValue}>{statValues[key] ?? 0}</div>
             <div className={styles.statLabel}>{label}</div>
           </div>
@@ -109,7 +115,7 @@ export default function DashboardPage() {
         {/* Sol: Son raporlar */}
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Son Projeler & Raporlar</h2>
+            <h2 className={styles.sectionTitle}>Son projeler &amp; raporlar</h2>
             <Link href="/dashboard/reports" className={styles.sectionLink}>Tümü →</Link>
           </div>
           {recentReports.length === 0 ? (
@@ -137,7 +143,7 @@ export default function DashboardPage() {
         <div className={styles.rightCol}>
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Son Mesajlar</h2>
+              <h2 className={styles.sectionTitle}>Son mesajlar</h2>
               <Link href="/inbox" className={styles.sectionLink}>Tümü →</Link>
             </div>
             {recentMessages.length === 0 ? (
@@ -158,7 +164,7 @@ export default function DashboardPage() {
 
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>Son Teklifler</h2>
+              <h2 className={styles.sectionTitle}>Son teklifler</h2>
               <Link href="/dashboard/projects" className={styles.sectionLink}>Tümü →</Link>
             </div>
             {recentOffers.length === 0 ? (
@@ -167,8 +173,10 @@ export default function DashboardPage() {
               <div className={styles.offerList}>
                 {recentOffers.map(o => (
                   <Link key={o.id} href={`/listing/${o.listing.id}`} className={styles.offerRow}>
-                    <span className={styles.offerAmount}>%{o.offeredShare} pay</span>
-                    <span className={styles.offerListing}>{o.listing.title || o.listing.city || 'İlan'}</span>
+                    <span className={styles.offerText}>
+                      <span className={styles.offerAmount}>%{o.offeredShare} pay</span>
+                      <span className={styles.offerListing}>{o.listing.title || o.listing.city || 'İlan'}</span>
+                    </span>
                     <span className={`${styles.offerStatus} ${offerStatusClass(o.status)}`}>
                       {offerStatusLabel(o.status)}
                     </span>
@@ -182,10 +190,10 @@ export default function DashboardPage() {
 
       {/* Hızlı aksiyonlar */}
       <div className={styles.quickActions}>
-        <Link href="/hesapla" className={styles.qaBtn}>+ Yeni Hesaplama</Link>
-        <Link href="/listings/new" className={styles.qaBtn}>+ Yeni İlan</Link>
+        <Link href="/hesapla" className={`${styles.qaBtn} ${styles.qaPrimary}`}>+ Yeni hesaplama</Link>
+        <Link href="/listings/new" className={styles.qaBtn}>+ Yeni ilan</Link>
         <Link href="/inbox" className={styles.qaBtn}>Mesajlar</Link>
-        <Link href="/marketplace" className={styles.qaBtn}>Pazar Yeri</Link>
+        <Link href="/marketplace" className={styles.qaBtn}>Pazar yeri</Link>
       </div>
     </div>
   )
