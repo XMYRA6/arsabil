@@ -1,11 +1,12 @@
 "use client";
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { MobileState } from '@/components/mobile/MobileState';
-import styles from './page.module.css';
+import { resolveScene } from '@/lib/dioramas/scene';
+import { useThemeZaman } from '@/components/home/useThemeZaman';
+import { sahneSec } from '../favorites/page';
+import styles from '../panelListe.module.css';
 
 type Listing = {
     id: string;
@@ -16,27 +17,25 @@ type Listing = {
     isActive: boolean;
     status: string;
     type?: string | null;
+    zoning?: string | null;
     photos?: string[] | null;
     createdAt: string;
     offers?: unknown[];
 };
 
-/** ListingCard.tsx'teki fotosuz-durum placeholder desenini yeniden kullanır (id'ye bağlı hue varyasyonu). */
-function photoPlaceholderGradient(id: string): string {
-    const hue = 220 + (id.charCodeAt(0) % 60);
-    return `linear-gradient(135deg, hsl(${hue}, 50%, 20%), hsl(${hue - 20}, 60%, 15%))`;
-}
+type Filter = 'all' | 'active' | 'pending' | 'passive';
 
-type Filter = 'all' | 'active' | 'draft';
+const TYPE_LABEL: Record<string, string> = { KAT_KARSILIGI: 'Kat karşılığı', SALE: 'Satılık', ORTAKLIK: 'Ortaklık' };
 
-const FILTERS: Array<{ key: Filter; label: string }> = [
-    { key: 'all', label: 'Tümü' },
-    { key: 'active', label: 'Aktif' },
-    { key: 'draft', label: 'Taslak' },
-];
+const durumu = (l: Listing): Exclude<Filter, 'all'> =>
+    l.isActive && l.status === 'APPROVED' ? 'active' : l.status === 'PENDING' ? 'pending' : 'passive';
+
+const DURUM_ETIKET = { active: 'Yayında', pending: 'Onay bekliyor', passive: 'Pasif' } as const;
+const DURUM_SINIF = { active: 'badgeOk', pending: 'badgeWait', passive: 'badgeOff' } as const;
 
 export default function DashboardListingsPage() {
     const { status } = useSession();
+    const zaman = useThemeZaman();
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -56,24 +55,36 @@ export default function DashboardListingsPage() {
             .finally(() => setLoading(false));
     }, [status]);
 
-    const filteredListings = useMemo(() => {
-        if (filter === 'active') return listings.filter(listing => listing.isActive && listing.status === 'APPROVED');
-        if (filter === 'draft') return listings.filter(listing => !listing.isActive || listing.status !== 'APPROVED');
-        return listings;
-    }, [filter, listings]);
+    const sayilar = useMemo(() => ({
+        all: listings.length,
+        active: listings.filter(l => durumu(l) === 'active').length,
+        pending: listings.filter(l => durumu(l) === 'pending').length,
+        passive: listings.filter(l => durumu(l) === 'passive').length,
+    }), [listings]);
 
-    if (loading) return <StateCard label="İlanlar" text="Yükleniyor..." />;
-    if (error) return <StateCard label="Bağlantı" text="İlanlar yüklenemedi. Lütfen sayfayı yenileyin." alert />;
+    const filtered = useMemo(
+        () => (filter === 'all' ? listings : listings.filter(l => durumu(l) === filter)),
+        [filter, listings],
+    );
+
+    const FILTERS: Array<{ key: Filter; label: string }> = [
+        { key: 'all', label: 'Tümü' },
+        { key: 'active', label: 'Yayında' },
+        { key: 'pending', label: 'Onay bekliyor' },
+        { key: 'passive', label: 'Pasif' },
+    ];
+
+    if (loading) return <div className={styles.state}>Yükleniyor...</div>;
+    if (error) return <div className={`${styles.state} ${styles.error}`} role="alert">İlanlar yüklenemedi. Lütfen sayfayı yenileyin.</div>;
 
     return (
-        <main className={styles.portfolioShell}>
-            <header className={styles.heroCard}>
+        <main className={styles.shell}>
+            <header className={styles.head}>
                 <div>
-                    <p className={styles.eyebrow}>Yayın akışı</p>
                     <h1>İlanlarım</h1>
-                    <p>Yayınlanan, onay bekleyen ve pasif ilanlarını mobilde temiz bir portföy listesiyle yönet.</p>
+                    <p>Yayınlanan, onay bekleyen ve pasif ilanlarını yönet.</p>
                 </div>
-                <Link href="/listings/new" className={styles.primaryLink}>Yeni ilan</Link>
+                <Link href="/listings/new" className={styles.btn}>+ Yeni ilan</Link>
             </header>
 
             <div className={styles.segmentedTabs} role="tablist" aria-label="İlan filtresi">
@@ -86,48 +97,46 @@ export default function DashboardListingsPage() {
                         className={filter === item.key ? styles.segmentActive : styles.segment}
                         onClick={() => setFilter(item.key)}
                     >
-                        {item.label}
+                        {item.label} · {sayilar[item.key]}
                     </button>
                 ))}
             </div>
 
-            {filteredListings.length === 0 ? (
-                <MobileState
-                    variant="empty"
-                    title="Bu filtrede ilan yok"
-                    description="Yeni ilan oluşturduğunda onay durumuyla birlikte burada listelenecek."
-                    action={<Link href="/listings/new" className={styles.primaryLink}>İlan oluştur</Link>}
-                    className={styles.emptyCard}
-                />
+            {filtered.length === 0 ? (
+                <section className={styles.empty}>
+                    <h2>Bu filtrede ilan yok</h2>
+                    <p>Yeni ilan oluşturduğunda onay durumuyla birlikte burada listelenecek.</p>
+                    <Link href="/listings/new" className={styles.btn}>İlan oluştur</Link>
+                </section>
             ) : (
-                <section className={styles.listStack} aria-label="İlanlarım">
-                    {filteredListings.map(listing => {
+                <section className={styles.stack} aria-label="İlanlarım">
+                    {filtered.map(listing => {
                         const photoUrl = listing.photos?.[0];
+                        const diorama = photoUrl ? null : resolveScene({ ...sahneSec(listing.type, listing.zoning), egim: 'duz', zaman });
+                        const d = durumu(listing);
+                        const baslik = [listing.district, listing.city].filter(Boolean).join(' · ') || listing.title || 'İsimsiz ilan';
                         return (
-                            <Link key={listing.id} href={`/listing/${listing.id}`} className={styles.itemCard}>
-                                <div
-                                    className={styles.itemPhoto}
-                                    style={!photoUrl ? { background: photoPlaceholderGradient(listing.id) } : undefined}
-                                >
-                                    {photoUrl && (
-                                        <Image fill unoptimized src={photoUrl} alt={listing.title || 'İlan'} style={{ objectFit: 'cover' }} />
-                                    )}
-                                </div>
-                                <div className={styles.itemBody}>
-                                    <div className={styles.itemTopline}>
-                                        <span>{listing.type || 'KAT_KARSILIGI'}</span>
-                                        <strong className={listing.isActive && listing.status === 'APPROVED' ? styles.statusActive : styles.statusDraft}>
-                                            {listing.isActive && listing.status === 'APPROVED' ? 'Aktif' : listing.status === 'PENDING' ? 'Onay bekliyor' : 'Taslak'}
-                                        </strong>
+                            <article key={listing.id} className={styles.listRow}>
+                                <Link href={`/listing/${listing.id}`} className={styles.rowPhoto} aria-label={listing.title || 'İlan'}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element -- harici ilan fotoğrafı / yerel statik WebP */}
+                                    {photoUrl ? <img src={photoUrl} alt={listing.title || 'İlan'} /> : diorama ? <img src={diorama.src800} alt="" loading="lazy" /> : null}
+                                </Link>
+                                <div className={styles.rowMain}>
+                                    <div className={styles.rowTitleLine}>
+                                        <Link href={`/listing/${listing.id}`} className={styles.rowTitle}>{baslik}</Link>
+                                        <span className={`${styles.badge} ${styles[DURUM_SINIF[d]]}`}>{DURUM_ETIKET[d]}</span>
                                     </div>
-                                    <h2>{listing.title || 'İsimsiz ilan'}</h2>
-                                    <p>{[listing.district, listing.city].filter(Boolean).join(', ') || 'Konum belirtilmedi'}</p>
-                                    <div className={styles.metricRow}>
-                                        <div><span>Fiyat</span><strong>{listing.price ? `₺${listing.price.toLocaleString('tr-TR')}` : 'Yok'}</strong></div>
-                                        <div><span>Teklif</span><strong>{listing.offers?.length ?? 0}</strong></div>
-                                    </div>
+                                    <p className={styles.rowSub}>{TYPE_LABEL[listing.type ?? ''] ?? 'Kat karşılığı'}{listing.title ? ` · ${listing.title}` : ''}</p>
                                 </div>
-                            </Link>
+                                <div className={styles.stats}>
+                                    <div className={styles.stat}><span>Fiyat</span><strong>{listing.price ? `₺${listing.price.toLocaleString('tr-TR')}` : '—'}</strong></div>
+                                    <div className={styles.stat}><span>Teklif</span><strong>{listing.offers?.length ?? 0}</strong></div>
+                                </div>
+                                <div className={styles.actions}>
+                                    <Link href={`/listings/${listing.id}/edit`} className={styles.btnSmSoft}>Düzenle</Link>
+                                    <Link href={`/listing/${listing.id}/offers`} className={styles.btnSmSoft}>Teklifler</Link>
+                                </div>
+                            </article>
                         );
                     })}
                 </section>
@@ -135,17 +144,3 @@ export default function DashboardListingsPage() {
         </main>
     );
 }
-
-function StateCard({ label, text, alert = false }: { label: string; text: string; alert?: boolean }) {
-    return (
-        <main className={styles.portfolioShell}>
-            <MobileState
-                variant={alert ? 'error' : 'loading'}
-                title={label}
-                description={text}
-                className={styles.stateCard}
-            />
-        </main>
-    );
-}
-

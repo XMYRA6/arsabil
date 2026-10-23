@@ -8,6 +8,7 @@ const dosyalar: [string, string][] = [
   ['panelShell.module.css', read('panelShell.module.css')],
   ['page.module.css', read('page.module.css')],
   ['reports/page.module.css', read('reports', 'page.module.css')],
+  ['panelListe.module.css', read('panelListe.module.css')],
 ]
 
 describe('panel Arazi dili', () => {
