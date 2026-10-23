@@ -15,7 +15,7 @@ export function RecentReportsList({ reports }: RecentReportsListProps) {
     if (reports.length === 0) {
         return (
             <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>Son Hesaplamalarım</h2>
+                <h2 className={styles.sectionTitle}>Hesaplamalarım</h2>
                 <p className={styles.emptyNote}>
                     Henüz hesaplama yok. <Link href="/hesapla" className={styles.emptyLink}>Hesapla →</Link>
                 </p>
@@ -25,9 +25,9 @@ export function RecentReportsList({ reports }: RecentReportsListProps) {
 
     return (
         <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Son Hesaplamalarım</h2>
+            <h2 className={styles.sectionTitle}>Hesaplamalarım</h2>
             <div className={styles.listStack}>
-                {reports.map(r => (
+                {reports.slice(0, 3).map(r => (
                     <Link key={r.id} href={`/hesapla?reportId=${r.id}`} className={styles.listRow}>
                         <span className={styles.listTitle}>{r.title}</span>
                         <span className={styles.listMeta}>

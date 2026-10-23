@@ -1,20 +1,24 @@
-/* Girişli mobil ana sayfa — Arazi tokenları. Bileşen yalnızca mobilde render edilir. */
+/* Girişli mobil ana sayfa (Özet) — Arazi tokenları. Bileşen yalnızca mobilde render edilir. */
 .homeMobileKok { display: flex; flex-direction: column; min-height: 100dvh; background: var(--bg); color: var(--ink); }
-.homeRoot { display: flex; flex-direction: column; gap: 16px; padding: 4px 16px calc(16px + var(--safe-bottom, 0px)); }
+.homeRoot { display: flex; flex-direction: column; gap: 16px; padding: calc(16px + var(--safe-top, 0px)) 16px calc(16px + var(--safe-bottom, 0px)); }
+.sayfaBaslik { margin: 0; font: 700 28px/1.1 Inter, sans-serif; letter-spacing: -0.02em; color: var(--ink); }
 
-.mobileHero { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 16px 20px; border-radius: 24px; background: var(--surface-2); text-align: center; }
-.heroImg { width: 82%; height: auto; max-height: 190px; object-fit: contain; }
-.heroCopy { display: flex; flex-direction: column; align-items: stretch; gap: 14px; width: 100%; }
-.heroTitle { margin: 0; font: 700 26px/1.1 Inter, sans-serif; letter-spacing: -0.02em; color: var(--ink); }
-.heroPrimaryAction { min-height: 51px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; text-decoration: none; }
-.heroPrimaryAction:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-
-.statGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.statTile { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); text-decoration: none; }
-.statValue { font: 700 26px/1.1 Inter, sans-serif; letter-spacing: -0.01em; color: var(--ink); font-variant-numeric: tabular-nums; }
-.statLabel { font: 500 12px Inter, sans-serif; color: var(--ink-secondary); }
-.listingAction { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 15px Inter, sans-serif; text-decoration: none; }
-.listingAction:focus-visible, .statTile:focus-visible, .listRow:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* Gelen kutusu: Mesajlar | Bildirimler */
+.kutu { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.sekmeSerit { display: flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.sekme, .sekmeAktif { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 14px Inter, sans-serif; cursor: pointer; }
+.sekmeAktif { background: var(--amber); color: var(--ink); font-weight: 600; }
+.sekmeSayi { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--ink); color: var(--bg); font: 700 11px/20px Inter, sans-serif; text-align: center; box-sizing: border-box; }
+.sekme:focus-visible, .sekmeAktif:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.liste { display: flex; flex-direction: column; }
+.satir { display: flex; flex-direction: column; gap: 2px; padding: 10px 4px; border-top: 1px solid var(--line); text-decoration: none; }
+.liste .satir:first-child { border-top: 0; }
+.satirOkunmamis .satirBaslik::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--amber); vertical-align: middle; }
+.satirBaslik { font: 600 14.5px Inter, sans-serif; color: var(--ink); }
+.satirAlt { font: 400 13px/1.4 Inter, sans-serif; color: var(--ink-secondary); }
+.bosSatir { margin: 0; padding: 10px 4px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
+.tumu { align-self: flex-end; padding: 4px 4px 0; color: var(--blue); font: 600 13.5px Inter, sans-serif; text-decoration: none; }
+.satir:focus-visible, .tumu:focus-visible, .listRow:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 .section { display: flex; flex-direction: column; gap: 10px; }
 .sectionTitle { margin: 0; font: 700 18px Inter, sans-serif; color: var(--ink); }
@@ -22,11 +26,7 @@
 .listRow { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); text-decoration: none; }
 .listTitle { font: 600 15px Inter, sans-serif; color: var(--ink); }
 .listMeta { font: 400 13px/1.4 Inter, sans-serif; color: var(--ink-secondary); }
-.emptyNote, .activityEmptyRow { margin: 0; padding: 14px 16px; border-radius: 16px; background: var(--surface-2); font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
+.emptyNote { margin: 0; padding: 14px 16px; border-radius: 16px; background: var(--surface-2); font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
 .emptyLink { color: var(--blue); font-weight: 600; text-decoration: none; }
-
-.statusPending { color: var(--amber-text); }
-.statusAccepted { color: var(--ok); }
-.statusRejected { color: var(--bad); }
 
 .loading, .error { padding: 40px 16px; text-align: center; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }

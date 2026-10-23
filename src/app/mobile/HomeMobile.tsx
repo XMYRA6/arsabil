@@ -1,22 +1,18 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { MobileTopBar } from '@/components/layout/MobileTopBar';
 import { MobileScreen } from '@/components/mobile/MobileScreen';
-import { useThemeZaman } from '@/components/home/useThemeZaman';
-import { resolveScene } from '@/lib/dioramas/scene';
-import { QuickActionGrid } from './QuickActionGrid';
+import { GelenKutusu, type BildirimOzeti } from './GelenKutusu';
 import { RecentReportsList } from './RecentReportsList';
-import { RecentActivityRows } from './RecentActivityRows';
+import { SenaryolarListesi, type SenaryoOzeti } from './SenaryolarListesi';
 import type { DashboardData } from '../dashboard/page';
 import styles from './mobile.module.css';
 
 /**
- * Giriş yapmış kullanıcının mobil ana sayfası. `/dashboard`'ın veri modelini
- * (`/api/user/dashboard`) tüketir. Alt menüde karşılığı olan eylemler (Hesapla,
- * Pazar, Mesajlar) burada tekrarlanmaz; mesaj ve bildirim üst çubuktaki
- * ikonlardan açılır.
+ * Giriş yapmış kullanıcının mobil ana sayfası: "Özet". Üst çubuk, logo ve
+ * zil yok; sayfa doğrudan içerikle başlar. Sıra: Gelen kutusu (mesajlar +
+ * bildirimler), Hesaplamalarım, Senaryolarım. Alt menüdeki eylemler burada
+ * tekrarlanmaz.
  *
  * `hasBottomNav={false}` BİLEREK: `SiteChrome.tsx` alt-çubuk dolgusunu
  * `--mobile-nav-pb` ile <main>'e zaten veriyor, `true` bırakılsaydı dolgu
@@ -25,9 +21,8 @@ import styles from './mobile.module.css';
 export function HomeMobile() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [error, setError] = useState(false);
-    const [bildirim, setBildirim] = useState(0);
-    const zaman = useThemeZaman();
-    const sahne = resolveScene({ tur: 'arsa', varyant: 'agacli', egim: 'duz', zaman });
+    const [bildirimler, setBildirimler] = useState<BildirimOzeti[]>([]);
+    const [senaryolar, setSenaryolar] = useState<SenaryoOzeti[]>([]);
 
     useEffect(() => {
         fetch('/api/user/dashboard')
@@ -39,36 +34,32 @@ export function HomeMobile() {
             .catch(() => setError(true));
         fetch('/api/notifications')
             .then(res => (res.ok ? res.json() : null))
-            .then(d => {
-                if (Array.isArray(d?.notifications)) {
-                    setBildirim(d.notifications.filter((n: { read: boolean }) => !n.read).length);
-                }
-            })
+            .then(d => { if (Array.isArray(d?.notifications)) setBildirimler(d.notifications); })
+            .catch(() => {});
+        fetch('/api/studio/scenarios')
+            .then(res => (res.ok ? res.json() : null))
+            .then(d => { if (Array.isArray(d?.scenarios)) setSenaryolar(d.scenarios); })
             .catch(() => {});
     }, []);
 
     return (
         <MobileScreen hasBottomNav={false} mesh={false}>
             <div className={styles.homeMobileKok}>
-                <MobileTopBar mesaj={data?.stats.unreadMessageCount ?? 0} bildirim={bildirim} />
                 <div className={styles.homeRoot}>
+                    <h1 className={styles.sayfaBaslik}>Özet</h1>
                     {error ? (
                         <p className={styles.error}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</p>
                     ) : !data ? (
                         <p className={styles.loading}>Yükleniyor...</p>
                     ) : (
                         <>
-                            <section className={styles.mobileHero}>
-                                {/* eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP */}
-                                <img src={sahne.src800} alt="" className={styles.heroImg} />
-                                <div className={styles.heroCopy}>
-                                    <h1 className={styles.heroTitle}>Arsanı bil. Değerini gör.</h1>
-                                    <Link href="/hesapla" className={styles.heroPrimaryAction}>Yeni hesap yap</Link>
-                                </div>
-                            </section>
-                            <QuickActionGrid stats={data.stats} />
+                            <GelenKutusu
+                                messages={data.recentMessages}
+                                unreadMessages={data.stats.unreadMessageCount}
+                                notifications={bildirimler}
+                            />
                             <RecentReportsList reports={data.recentReports} />
-                            <RecentActivityRows messages={data.recentMessages} offers={data.recentOffers} />
+                            <SenaryolarListesi senaryolar={senaryolar} />
                         </>
                     )}
                 </div>

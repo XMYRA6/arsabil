@@ -50,14 +50,18 @@ describe('Navbar (Arazi)', () => {
     for (const l of screen.getAllByRole('link', { name: 'Giriş' })) expect(l).toHaveAttribute('href', '/login')
     fireEvent.click(screen.getByRole('button', { name: 'Ücretsiz dene' }))
     expect(push).toHaveBeenCalledWith('/register')
-    expect(screen.queryByRole('link', { name: 'Bildirimler' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: 'Bildirimler' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Hesap menüsü' })).not.toBeInTheDocument()
   })
 
-  it('girişli: bildirim bağlantısı /notifications, avatar baş harfleri', () => {
+  it('girişli: üst çubukta zil/mesaj ikonu yok, avatar baş harfleri; bildirim ve mesaj hesap menüsünde', () => {
     login()
     render(<Navbar />)
-    expect(screen.getByRole('link', { name: 'Bildirimler' })).toHaveAttribute('href', '/notifications')
+    expect(screen.queryByRole('link', { name: 'Bildirimler' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Mesajlar' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Hesap menüsü' }))
+    expect(screen.getByRole('menuitem', { name: 'Bildirimler' })).toHaveAttribute('href', '/notifications')
+    expect(screen.getByRole('menuitem', { name: 'Mesajlarım' })).toHaveAttribute('href', '/inbox')
     expect(screen.getByRole('button', { name: 'Hesap menüsü' })).toHaveTextContent('EY')
     expect(screen.queryByRole('link', { name: 'Giriş' })).not.toBeInTheDocument()
   })

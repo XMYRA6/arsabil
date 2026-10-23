@@ -9,7 +9,6 @@ import { NavPill } from "./NavPill";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ArsabilLogo } from "@/components/ui/ArsabilLogo";
 import { Button } from "@/components/ui/Button";
-import { IconBell, IconMessage } from "@/components/icons";
 
 const LINKS = [
     { href: "/hesapla", label: "Hesapla" },
@@ -54,12 +53,6 @@ export function Navbar() {
         <div className={styles.right}>
             {status === "loading" ? null : session ? (
                 <>
-                    <Link href="/notifications" className={styles.iconBtn} aria-label="Bildirimler">
-                        <IconBell size={20} />
-                    </Link>
-                    <Link href="/inbox" className={styles.iconBtn} aria-label="Mesajlar">
-                        <IconMessage size={20} />
-                    </Link>
                     <div className={styles.userWrap}>
                         <button
                             type="button"
@@ -83,6 +76,7 @@ export function Navbar() {
                                     <Link href="/dashboard/reports" onClick={closeMenu} className={styles.item} role="menuitem">Raporlarım</Link>
                                     <Link href="/dashboard/listings" onClick={closeMenu} className={styles.item} role="menuitem">İlanlarım</Link>
                                     <Link href="/inbox" onClick={closeMenu} className={styles.item} role="menuitem">Mesajlarım</Link>
+                                    <Link href="/notifications" onClick={closeMenu} className={styles.item} role="menuitem">Bildirimler</Link>
                                     {session.user?.role === "ADMIN" && (
                                         <Link href="/admin" onClick={closeMenu} className={styles.item} role="menuitem">Yönetim paneli</Link>
                                     )}

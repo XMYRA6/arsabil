@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import styles from './PanelShell.module.css';
 
-type Ikon = 'home' | 'file' | 'layers' | 'heart' | 'building' | 'chat' | 'mail' | 'bell' | 'user' | 'settings';
+type Ikon = 'home' | 'file' | 'layers' | 'heart' | 'building' | 'chat' | 'mail' | 'info' | 'user' | 'settings';
 
 const IKONLAR: Record<Ikon, React.ReactNode> = {
     home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
@@ -16,7 +16,7 @@ const IKONLAR: Record<Ikon, React.ReactNode> = {
     building: <><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" /><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /><path d="M10 6h4M10 10h4M10 14h4M10 18h4" /></>,
     chat: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
-    bell: <><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></>,
+    info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><path d="M12 8h.01" /></>,
     user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
     settings: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" /></>,
 };
@@ -29,7 +29,7 @@ const NAV: { href: string; label: string; ikon: Ikon; rozet?: 'mesaj' | 'bildiri
     { href: '/dashboard/listings', label: 'İlanlarım', ikon: 'building' },
     { href: '/dashboard/akif-projeler', label: 'Akif projeleri', ikon: 'chat' },
     { href: '/inbox', label: 'Mesajlar', ikon: 'mail', rozet: 'mesaj' },
-    { href: '/notifications', label: 'Bildirimler', ikon: 'bell', rozet: 'bildirim' },
+    { href: '/notifications', label: 'Bildirimler', ikon: 'info', rozet: 'bildirim' },
     { href: '/dashboard/profile', label: 'Profil', ikon: 'user' },
     { href: '/dashboard/settings', label: 'Ayarlar', ikon: 'settings' },
 ];
