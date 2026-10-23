@@ -6,38 +6,30 @@ const homeTsx = fs.readFileSync(path.join(__dirname, 'mobile/HomeMobile.tsx'), '
 const quickActionsTsx = fs.readFileSync(path.join(__dirname, 'mobile/QuickActionGrid.tsx'), 'utf8')
 const css = fs.readFileSync(path.join(__dirname, 'mobile/mobile.module.css'), 'utf8')
 
-describe('HomeMobile Faz 3 ana ekran sozlesmesi', () => {
-  const mediaIndex = css.indexOf('@media (max-width: 768px)')
-  const mobile = css.slice(mediaIndex)
-
+describe('HomeMobile Arazi ana ekran sozlesmesi', () => {
   it('/ sayfasi authenticated mobil kullaniciyi HomeMobile yuzeyine gecirir', () => {
     expect(pageTsx).toMatch(/isDesktopViewport === false && status === 'authenticated'/)
     expect(pageTsx).toMatch(/return <HomeMobile \/>/)
   })
 
-  it('HomeMobile ilk viewportta ozet hero, stat kartlari ve gercek urun aksiyonlari tasir', () => {
-    expect(homeTsx).toMatch(/styles\.mobileHero/)
-    expect(homeTsx).toMatch(/styles\.heroPrimaryAction/)
-    expect(homeTsx).toMatch(/<QuickActionGrid stats=\{data\.stats\}/)
+  it('ust cubukta bildirim ve mesaj ikonlari var, alt menudeki eylemler tekrarlanmaz', () => {
+    expect(homeTsx).toMatch(/<MobileTopBar/)
     expect(homeTsx).toMatch(/href="\/hesapla"/)
-    expect(quickActionsTsx).toMatch(/href="\/marketplace"/)
+    expect(quickActionsTsx).toMatch(/href="\/listings\/new"/)
+    expect(quickActionsTsx).not.toMatch(/href="\/marketplace"/)
+    expect(quickActionsTsx).not.toMatch(/href="\/inbox"/)
   })
 
-  it('mobil hero ve kartlar Liquid Glass tokenlarini kullanir', () => {
-    expect(mediaIndex).toBeGreaterThan(-1)
-    expect(mobile).toMatch(/\.homeMobileKok\s*\{[^}]*background:\s*var\(--m-mesh\)/)
-    expect(mobile).toMatch(/\.mobileHero\s*\{[^}]*background:\s*var\(--m-grad-accent\)/)
-    expect(mobile).toMatch(/\.statGrid\s*\{[^}]*composes:\s*mStatSurface from global/)
-    expect(mobile).toMatch(/\.actionTile\s*\{[^}]*min-height:\s*var\(--touch-target\)/)
-  })
-
-  it('.listRow paylasilan .mRowList yuzeyine baglanir, glass ozelliklerini elle tekrarlamaz', () => {
-    expect(mobile).toMatch(/\.listRow\s*\{[^}]*composes:\s*mRowList from global/)
-    expect(mobile).not.toMatch(/\.listRow\s*\{[^}]*background:\s*var\(--m-glass-bg\)/)
+  it('eski cam (--m-*) tokenlarina ve emojiye bagli degil, Arazi tokenlarini kullanir', () => {
+    expect(css).not.toMatch(/var\(--m-/)
+    expect(css).not.toMatch(/composes:/)
+    expect(css).toMatch(/\.homeMobileKok\s*\{[^}]*background:\s*var\(--bg\)/)
+    expect(css).toMatch(/\.heroPrimaryAction\s*\{[^}]*background:\s*var\(--blue\)/)
+    expect(quickActionsTsx).not.toMatch(/[\u{1F300}-\u{1FAFF}]/u)
   })
 
   it('BottomNavbar boslugu iki kez uygulanmaz; global main dolgusu korunur', () => {
-    expect(homeTsx).toMatch(/<MobileScreen hasBottomNav=\{false\}>/)
-    expect(mobile).toMatch(/\.homeRoot\s*\{[^}]*padding:\s*0 14px calc\(16px \+ var\(--safe-bottom\)\)/)
+    expect(homeTsx).toMatch(/<MobileScreen hasBottomNav=\{false\}/)
+    expect(css).toMatch(/\.homeRoot\s*\{[^}]*padding:\s*4px 16px calc\(16px \+ var\(--safe-bottom, 0px\)\)/)
   })
 })
