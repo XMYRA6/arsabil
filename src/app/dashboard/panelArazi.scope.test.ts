@@ -5,10 +5,12 @@ import path from 'path'
 // Eski cam (--m-*, --seal-*) kapsam testlerinin yerini alır.
 const read = (...p: string[]) => fs.readFileSync(path.join(__dirname, ...p), 'utf8')
 const dosyalar: [string, string][] = [
-  ['panelShell.module.css', read('panelShell.module.css')],
+  ['panelShell.module.css', fs.readFileSync(path.join(process.cwd(), 'src/components/panel/PanelShell.module.css'), 'utf8')],
   ['page.module.css', read('page.module.css')],
   ['reports/page.module.css', read('reports', 'page.module.css')],
   ['panelListe.module.css', read('panelListe.module.css')],
+  ['inbox.module.css', fs.readFileSync(path.join(process.cwd(), 'src/app/inbox/inbox.module.css'), 'utf8')],
+  ['notifications/page.module.css', fs.readFileSync(path.join(process.cwd(), 'src/app/notifications/page.module.css'), 'utf8')],
 ]
 
 describe('panel Arazi dili', () => {

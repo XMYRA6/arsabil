@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { getNotificationIcon, getNotificationUrl } from '@/lib/notifications';
+import { getNotificationUrl } from '@/lib/notifications';
 import styles from './page.module.css';
 
 type NotificationItem = {
@@ -14,6 +14,27 @@ type NotificationItem = {
     entityId: string | null;
     createdAt: string;
 };
+
+const IKON: Record<string, { tone: string; path: React.ReactNode }> = {
+    MESAJ_VAR: { tone: 'iconBlue', path: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></> },
+    TEKLIF_GELDI: { tone: 'iconAmber', path: <><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></> },
+    ILAN_ONAYLANDI: { tone: 'iconGreen', path: <path d="m5 12 5 5L20 7" /> },
+    ILAN_REDDEDILDI: { tone: 'iconRed', path: <path d="M6 6l12 12M18 6 6 18" /> },
+};
+const VARSAYILAN_IKON = { tone: 'iconSage', path: <><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></> };
+
+/** "12 dk önce", "1 sa önce", "Dün", "2 gün önce"; bir haftadan eskiyse tarih. */
+function goreceZaman(iso: string, simdi = Date.now()): string {
+    const dk = Math.floor((simdi - new Date(iso).getTime()) / 60000);
+    if (dk < 1) return 'Şimdi';
+    if (dk < 60) return `${dk} dk önce`;
+    const sa = Math.floor(dk / 60);
+    if (sa < 24) return `${sa} sa önce`;
+    const gun = Math.floor(sa / 24);
+    if (gun === 1) return 'Dün';
+    if (gun < 7) return `${gun} gün önce`;
+    return new Date(iso).toLocaleDateString('tr-TR');
+}
 
 export default function NotificationsPage() {
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -56,27 +77,21 @@ export default function NotificationsPage() {
         <main className={styles.notificationsShell}>
             <header className={styles.heroCard}>
                 <div>
-                    <p className={styles.eyebrow}>Bildirimler</p>
                     <h1>Güncel akış</h1>
-                    <p>Mesaj, teklif ve ilan durumlarını tek sakin ekranda takip et.</p>
+                    <p>Mesaj, teklif ve ilan durumlarını tek ekranda takip et.</p>
                 </div>
-                <div className={styles.unreadMetric}>
-                    <strong>{unreadCount}</strong>
-                    <span>Okunmamış</span>
+                <div className={styles.heroSide}>
+                    {unreadCount > 0 && <span className={styles.unreadMetric}>{unreadCount} okunmamış</span>}
+                    {notifications.length > 0 && (
+                        <button type="button" onClick={markAllRead} disabled={markingAll || unreadCount === 0} className={styles.markAllButton}>
+                            Tümünü okundu yap
+                        </button>
+                    )}
                 </div>
             </header>
 
-            {notifications.length > 0 && (
-                <div className={styles.actionRow}>
-                    <button type="button" onClick={markAllRead} disabled={markingAll || unreadCount === 0} className={styles.markAllButton}>
-                        Tümünü okundu yap
-                    </button>
-                </div>
-            )}
-
             {notifications.length === 0 ? (
                 <section className={styles.emptyCard}>
-                    <span className={styles.emptyIcon}>N</span>
                     <h2>Bildirim yok</h2>
                     <p>Yeni mesajlar, teklifler ve ilan güncellemeleri burada görünecek.</p>
                 </section>
@@ -84,20 +99,21 @@ export default function NotificationsPage() {
                 <section className={styles.notificationList} aria-label="Bildirim listesi">
                     {notifications.map(item => {
                         const href = getNotificationUrl(item.type, item.entityId || '');
+                        const ikon = IKON[item.type] ?? VARSAYILAN_IKON;
                         const card = (
                             <article className={`${styles.notificationCard} ${item.read ? styles.notificationRead : styles.notificationUnread}`}>
-                                <span className={styles.notificationIcon}>{getNotificationIcon(item.type)}</span>
+                                <span className={`${styles.notificationIcon} ${styles[ikon.tone]}`}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ikon.path}</svg>
+                                </span>
                                 <div className={styles.notificationBody}>
-                                    <div className={styles.notificationTopline}>
-                                        <h2>{item.title}</h2>
-                                        {!item.read && <span className={styles.unreadDot}>Yeni</span>}
-                                    </div>
+                                    <h2>{item.title}</h2>
                                     <p>{item.body}</p>
-                                    <time>{new Date(item.createdAt).toLocaleDateString('tr-TR')}</time>
                                 </div>
+                                <time className={styles.time}>{goreceZaman(item.createdAt)}</time>
                                 {!item.read && (
-                                    <button type="button" className={styles.markButton} onClick={(event) => { event.preventDefault(); void markRead(item.id); }}>
-                                        Okundu
+                                    <button type="button" className={styles.markButton} aria-label="Okundu işaretle" onClick={(event) => { event.preventDefault(); void markRead(item.id); }}>
+                                        <span className={styles.unreadDot} aria-hidden="true" />
+                                        <span className={styles.markLabel}>Okundu</span>
                                     </button>
                                 )}
                             </article>

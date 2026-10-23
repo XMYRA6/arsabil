@@ -150,7 +150,9 @@ function InboxContent() {
     }, [conversations, activeOtherId, openConversation])
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+        // Sayfayı değil yalnız mesaj alanını en alta kaydır (scrollIntoView pencereyi de oynatıyordu).
+        const alan = bottomRef.current?.parentElement
+        if (alan) alan.scrollTo({ top: alan.scrollHeight, behavior: 'smooth' })
     }, [messages.length])
 
     useEffect(() => {
@@ -195,11 +197,8 @@ function InboxContent() {
             {/* Sidebar */}
             <aside className={`${styles.sidebar} ${isMobileChatActive ? styles.sidebarHidden : ''}`}>
                 <div className={styles.sidebarHeader}>
-                    <div className={styles.sidebarTitleRow}>
-                        <h2 className={styles.sidebarTitle}>Mesajlar</h2>
-                    </div>
                     <div className={styles.searchBox}>
-                        <span className={styles.searchIcon} aria-hidden="true">🔍</span>
+                        <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
                         <input
                             className={styles.searchInput}
                             placeholder="Ara"
@@ -261,7 +260,7 @@ function InboxContent() {
                                 </div>
                             </div>
                             {c.unreadCount > 0 && (
-                                <div className={styles.unreadCountBadge}>
+                                <div className={styles.unreadCountBadge} aria-label={`${c.unreadCount} okunmamış`}>
                                     {c.unreadCount}
                                 </div>
                             )}
@@ -319,16 +318,15 @@ function InboxContent() {
                                     onKeyDown={handleKey}
                                     rows={1}
                                 />
-                                {draft.trim() && (
-                                    <button
-                                        type="button"
-                                        onClick={sendMessage}
-                                        disabled={sending}
-                                        className={`${styles.sendLink} ${sending ? styles.sendLinkDisabled : ''}`}
-                                    >
-                                        Gönder
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={sendMessage}
+                                    disabled={sending || !draft.trim()}
+                                    className={styles.sendLink}
+                                    aria-label="Gönder"
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z" /><path d="M22 2 11 13" /></svg>
+                                </button>
                             </div>
                         </div>
                     </>

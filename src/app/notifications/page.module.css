@@ -1,271 +1,41 @@
-.notificationsShell {
-    width: 100%;
-}
+/* Bildirimler — Figma 10 (Bildirimler · Masaüstü). Arazi tokenları. */
+.notificationsShell { display: flex; flex-direction: column; gap: 20px; color: var(--ink); }
+.heroCard { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.heroCard h1 { margin: 0 0 6px; font: 700 36px/1.15 Inter, sans-serif; letter-spacing: -0.4px; color: var(--ink); }
+.heroCard p { margin: 0; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
+.heroSide { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.unreadMetric { padding: 4px 12px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 12.5px Inter, sans-serif; }
+.markAllButton { min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
+.markAllButton:disabled { opacity: .5; cursor: default; }
+.markAllButton:focus-visible, .markButton:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
-@media (min-width: 769px) {
-    .heroCard,
-    .notificationCard,
-    .emptyCard {
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        background: var(--stat-bg);
-        box-shadow: var(--shadow2);
-    }
-}
+.notificationList { display: flex; flex-direction: column; gap: 16px; }
+.cardLink { color: inherit; text-decoration: none; display: block; border-radius: var(--radius-card); }
+.cardLink:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.notificationCard { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.notificationRead { opacity: .85; }
+.notificationIcon { flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--surface-2); }
+.iconBlue { color: var(--blue); }
+.iconAmber { color: var(--amber); }
+.iconGreen { color: var(--ok); }
+.iconRed { color: var(--bad); }
+.iconSage { color: var(--sage); }
+.notificationBody { flex: 1; min-width: 0; }
+.notificationBody h2 { margin: 0 0 2px; font: 700 16px Inter, sans-serif; color: var(--ink); }
+.notificationBody p { margin: 0; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); overflow-wrap: anywhere; }
+.time { flex: none; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); white-space: nowrap; }
+.markButton { flex: none; display: inline-flex; align-items: center; gap: 8px; min-width: 24px; min-height: 36px; padding: 0 4px; border: 0; background: transparent; cursor: pointer; }
+.unreadDot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); }
+.markLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-.heroCard {
-    composes: mStatSurface from global;
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 24px;
-    margin-bottom: 14px;
-}
+.emptyCard { padding: 28px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.emptyCard h2 { margin: 0 0 6px; font: 700 20px Inter, sans-serif; color: var(--ink); }
+.emptyCard p { margin: 0; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
 
-.eyebrow {
-    margin: 0 0 8px;
-    color: var(--primary);
-    font-size: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-}
-
-.heroCard h1 {
-    margin: 0;
-    color: var(--card-title);
-    font-size: 28px;
-}
-
-.heroCard p {
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-weight: 600;
-}
-
-.unreadMetric {
-    min-width: 110px;
-    padding: 14px;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    background: var(--panel-2);
-    text-align: center;
-}
-
-.unreadMetric strong {
-    display: block;
-    color: var(--val-color);
-    font: 900 26px/1 var(--m-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-}
-
-.unreadMetric span {
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.actionRow {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 12px;
-}
-
-.markAllButton,
-.markButton {
-    min-height: 40px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: rgba(var(--primary-rgb), .08);
-    color: var(--primary);
-    font-weight: 900;
-    cursor: pointer;
-}
-
-.markAllButton {
-    padding: 0 14px;
-}
-
-.markButton {
-    padding: 0 10px;
-    flex-shrink: 0;
-}
-
-.markAllButton:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-}
-
-.notificationList {
-    display: grid;
-    gap: 10px;
-}
-
-.cardLink {
-    color: inherit;
-    text-decoration: none;
-}
-
-.notificationCard {
-    composes: mRowList from global;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-}
-
-.notificationRead {
-    opacity: .78;
-}
-
-.notificationUnread {
-    border-color: rgba(var(--primary-rgb), .24);
-}
-
-.notificationIcon {
-    width: 42px;
-    height: 42px;
-    display: grid;
-    place-items: center;
-    border-radius: 14px;
-    background: var(--panel-2);
-    flex-shrink: 0;
-}
-
-.notificationBody {
-    min-width: 0;
-    flex: 1;
-}
-
-.notificationTopline {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.notificationTopline h2 {
-    margin: 0;
-    color: var(--card-title);
-    font-size: 15px;
-}
-
-.notificationBody p {
-    margin: 4px 0;
-    color: var(--muted);
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.notificationBody time {
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 800;
-}
-
-.unreadDot {
-    border-radius: 999px;
-    padding: 4px 8px;
-    color: var(--primary);
-    background: rgba(var(--primary-rgb), .10);
-    font-size: 11px;
-    font-weight: 900;
-}
-
-.emptyCard {
-    composes: mStatSurface from global;
-    padding: 28px 18px;
-    text-align: center;
-    color: var(--muted);
-    font-weight: 700;
-}
-
-.emptyIcon {
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    margin: 0 auto 12px;
-    border-radius: 16px;
-    color: #fff;
-    background: var(--primary);
-    font-family: var(--m-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-    font-weight: 900;
-}
-
-.emptyCard h2 {
-    margin: 0 0 8px;
-    color: var(--card-title);
-}
-
-.emptyCard p {
-    margin: 0;
-}
-
-@media (max-width: 768px) {
-    .notificationsShell {
-        min-height: 100dvh;
-        margin: -2rem;
-        padding: calc(16px + var(--safe-top)) 14px calc(92px + var(--safe-bottom));
-        background: var(--m-mesh), var(--m-bg);
-        color: var(--m-ink);
-    }
-
-    .heroCard,
-    .notificationCard,
-    .emptyCard {
-        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-    }
-
-    .heroCard {
-        display: grid;
-        padding: 18px;
-    }
-
-    .eyebrow {
-        color: var(--m-link);
-        letter-spacing: 0;
-    }
-
-    .heroCard h1,
-    .notificationTopline h2,
-    .emptyCard h2 {
-        color: var(--m-ink);
-    }
-
-    .heroCard p,
-    .notificationBody p,
-    .notificationBody time,
-    .emptyCard {
-        color: var(--m-body);
-    }
-
-    .unreadMetric,
-    .notificationIcon {
-        border: 1px solid var(--m-glass-border);
-        background: var(--m-fill);
-    }
-
-    .unreadMetric strong {
-        color: var(--m-ink);
-        font-family: var(--m-mono);
-    }
-
-    .markAllButton,
-    .markButton {
-        min-height: var(--touch-target);
-        border-radius: var(--m-r-btn);
-        border: 1px solid var(--m-glass-border);
-        background: var(--m-grad-btn);
-        color: #fff;
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .unreadDot {
-        color: var(--m-link);
-        background: var(--m-fill);
-    }
-
-    .emptyIcon {
-        background: var(--m-grad-btn);
-        box-shadow: var(--m-sh-grad-btn);
-    }
+@media (max-width: 900px) {
+  .heroCard h1 { font-size: 28px; }
+  .heroCard p { font-size: 14px; }
+  .notificationCard { flex-wrap: wrap; padding: 16px; gap: 12px; }
+  .notificationBody { flex-basis: calc(100% - 120px); }
+  .time { order: 3; }
 }
