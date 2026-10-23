@@ -1,8 +1,8 @@
 .panel {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel);
-  box-shadow: var(--shadow2);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
   display: grid;
   gap: 0;
@@ -11,10 +11,9 @@
 .bolumBaslik {
   margin: 0;
   padding: 16px 16px 0;
-  color: var(--card-title);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .hakEdis {

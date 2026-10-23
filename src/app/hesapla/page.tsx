@@ -1481,106 +1481,6 @@ export default function Home() {
             {actionsSection}
           </main>
 
-          <div className={styles.studioPanel}>
-            <StudioScenarioBar
-              activeScenario={activeScenario}
-              allScenarios={scenarios}
-              canUndo={canUndo(scenarioHistory)}
-              canRedo={canRedo(scenarioHistory)}
-              isDirty={isDirty}
-              needsRebalance={needsRebalance}
-              historyEntries={historyEntries}
-              onUndo={handleUndo}
-              onRedo={handleRedo}
-              onNameChange={handleScenarioNameChange}
-              onAddAlternative={handleAddAlternative}
-              onCompareClick={() => setShowScenarioComparison((prev) => !prev)}
-              onSelectScenario={handleSelectScenario}
-              onSaveClick={handleOpenSaveDialog}
-              onLibraryClick={handleOpenLibrary}
-              onShareClick={handleOpenShareDialog}
-              onPdfClick={handleDownloadStudioPdf}
-              savedScenarioId={savedScenarioId}
-              savedScenarioVersionNumber={savedScenarioVersionNumber}
-              onRebalanceClick={() => {
-                const el = document.getElementById('landowner-offer-panel-container');
-                el?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            />
-          </div>
-
-          {showScenarioComparison && (
-            <div className={styles.studioPanel}>
-              <ScenarioComparison
-                rows={scenarioComparisonResult.rows}
-                activeScenarioId={activeScenario.id}
-                canAddMore={scenarioComparisonResult.canAddMore}
-                onSelectScenario={handleSelectScenario}
-                onDeleteScenario={handleDeleteScenario}
-                onClose={() => setShowScenarioComparison(false)}
-              />
-            </div>
-          )}
-
-          <div className={styles.studioPanel}>
-            <StudioPreview
-              mass={studioBuildingMass}
-              warnings={studioWarnings}
-              geometrySource={verifiedStudioPolygon ? 'TKGM doğrulanmış parsel sınırı' : result ? 'Demo parsel sınırı' : 'Parsel geometrisi bekleniyor'}
-              geometryStatus={verifiedStudioPolygon ? 'verified' : result ? 'demo' : 'missing'}
-              constructionAreaSource={studioMassingInput.grossConstructionAreaSource === 'authoritative'
-                ? 'Otoriter inşaat alanı verisi'
-                : 'Daire adedi x ortalama daire m² varsayımı (tahmini)'}
-              constructionAreaEstimated={studioMassingInput.grossConstructionAreaSource !== 'authoritative'}
-              programMixItems={programMixItems}
-              programBands={programBands}
-              layoutDraft={effectiveLayoutDraft}
-            />
-          </div>
-
-          <div className={styles.studioPanel}>
-            <ProgramMixPanel
-              items={programMixItems}
-              onItemsChange={handleProgramMixChange}
-              availableAreaM2={studioBuildingMass?.grossConstructionAreaM2 ?? null}
-              hasGeometry={!!studioBuildingMass}
-              layoutRequiresRecalculation={layoutRequiresRecalculation}
-            />
-          </div>
-
-          <div className={styles.studioPanel}>
-            <Studio2DPreview
-              parcelPolygon={studioBuildingMass?.footprint ?? null}
-              mass={studioBuildingMass}
-              layoutDraft={effectiveLayoutDraft}
-              programBands={programBands}
-              onParcelEkleClick={() => setIsParcelModalOpen(true)}
-            />
-          </div>
-
-          {studioBuildingMass && effectiveLayoutDraft && (
-            <div className={styles.studioPanel}>
-              <StudioLayoutControls
-                layoutDraft={effectiveLayoutDraft}
-                onLayoutDraftChange={handleLayoutDraftChange}
-                mass={studioBuildingMass}
-              />
-            </div>
-          )}
-
-          <div className={styles.studioPanel} id="landowner-offer-panel-container">
-            <LandownerOfferPanel
-              shareRatio={effectiveLandShareRatio / 100}
-              totalUnitCount={totalApartments}
-              valuationAssumptions={valuationAssumptions}
-              onValuationAssumptionsChange={handleValuationAssumptionsChange}
-              averageUnitAreaM2={apartmentSize ?? undefined}
-              customOverride={landownerCustomOverride}
-              onCustomOverrideChange={handleCustomOverrideChange}
-              programMixItems={programMixItems}
-            />
-          </div>
-
           {/* Hesap Özeti */}
           <aside className={`${styles.summaryPanel} ${styles.swipeCard}`}>
             <div className={styles.summaryPanelTitle}>
@@ -1687,6 +1587,113 @@ export default function Home() {
 
         </section>
       </div >
+
+      <section className={styles.studio} aria-labelledby="studio-baslik">
+        <p className={styles.pageKicker}>Stüdyo</p>
+        <h2 id="studio-baslik" className={styles.studioTitle}>Senaryolar, kütle ve program</h2>
+        <div className={styles.studioGrid}>
+          <div className={styles.studioBar}>
+            <StudioScenarioBar
+              activeScenario={activeScenario}
+              allScenarios={scenarios}
+              canUndo={canUndo(scenarioHistory)}
+              canRedo={canRedo(scenarioHistory)}
+              isDirty={isDirty}
+              needsRebalance={needsRebalance}
+              historyEntries={historyEntries}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onNameChange={handleScenarioNameChange}
+              onAddAlternative={handleAddAlternative}
+              onCompareClick={() => setShowScenarioComparison((prev) => !prev)}
+              onSelectScenario={handleSelectScenario}
+              onSaveClick={handleOpenSaveDialog}
+              onLibraryClick={handleOpenLibrary}
+              onShareClick={handleOpenShareDialog}
+              onPdfClick={handleDownloadStudioPdf}
+              savedScenarioId={savedScenarioId}
+              savedScenarioVersionNumber={savedScenarioVersionNumber}
+              onRebalanceClick={() => {
+                const el = document.getElementById('landowner-offer-panel-container');
+                el?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            />
+          </div>
+
+          {showScenarioComparison && (
+            <div className={styles.studioWide}>
+              <ScenarioComparison
+                rows={scenarioComparisonResult.rows}
+                activeScenarioId={activeScenario.id}
+                canAddMore={scenarioComparisonResult.canAddMore}
+                onSelectScenario={handleSelectScenario}
+                onDeleteScenario={handleDeleteScenario}
+                onClose={() => setShowScenarioComparison(false)}
+              />
+            </div>
+          )}
+
+          <div className={styles.studioMain}>
+            <StudioPreview
+              mass={studioBuildingMass}
+              warnings={studioWarnings}
+              geometrySource={verifiedStudioPolygon ? 'TKGM doğrulanmış parsel sınırı' : result ? 'Demo parsel sınırı' : 'Parsel geometrisi bekleniyor'}
+              geometryStatus={verifiedStudioPolygon ? 'verified' : result ? 'demo' : 'missing'}
+              constructionAreaSource={studioMassingInput.grossConstructionAreaSource === 'authoritative'
+                ? 'Otoriter inşaat alanı verisi'
+                : 'Daire adedi x ortalama daire m² varsayımı (tahmini)'}
+              constructionAreaEstimated={studioMassingInput.grossConstructionAreaSource !== 'authoritative'}
+              programMixItems={programMixItems}
+              programBands={programBands}
+              layoutDraft={effectiveLayoutDraft}
+            />
+          </div>
+
+          <div className={styles.studioSide}>
+            <ProgramMixPanel
+              items={programMixItems}
+              onItemsChange={handleProgramMixChange}
+              availableAreaM2={studioBuildingMass?.grossConstructionAreaM2 ?? null}
+              hasGeometry={!!studioBuildingMass}
+              layoutRequiresRecalculation={layoutRequiresRecalculation}
+            />
+          </div>
+
+          <div className={styles.studioHalf}>
+            <Studio2DPreview
+              parcelPolygon={studioBuildingMass?.footprint ?? null}
+              mass={studioBuildingMass}
+              layoutDraft={effectiveLayoutDraft}
+              programBands={programBands}
+              onParcelEkleClick={() => setIsParcelModalOpen(true)}
+            />
+          </div>
+
+          {studioBuildingMass && effectiveLayoutDraft && (
+            <div className={styles.studioHalf}>
+              <StudioLayoutControls
+                layoutDraft={effectiveLayoutDraft}
+                onLayoutDraftChange={handleLayoutDraftChange}
+                mass={studioBuildingMass}
+              />
+            </div>
+          )}
+
+          <div className={styles.studioWide} id="landowner-offer-panel-container">
+            <LandownerOfferPanel
+              shareRatio={effectiveLandShareRatio / 100}
+              totalUnitCount={totalApartments}
+              valuationAssumptions={valuationAssumptions}
+              onValuationAssumptionsChange={handleValuationAssumptionsChange}
+              averageUnitAreaM2={apartmentSize ?? undefined}
+              customOverride={landownerCustomOverride}
+              onCustomOverrideChange={handleCustomOverrideChange}
+              programMixItems={programMixItems}
+            />
+          </div>
+
+        </div>
+      </section>
 
       <StickyActionBar aboveBottomNav>
         <button className={styles.stickyCta} onClick={handleSaveReport} disabled={!result || isSaving}>

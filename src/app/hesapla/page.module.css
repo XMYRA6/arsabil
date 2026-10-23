@@ -1628,11 +1628,18 @@ button.compareBtn {
 }
 
 .summaryPanel {
-    align-self: stretch;
+    align-self: start;
+}
+
+.pagerDots {
+    gap: 6px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
 }
 
 .pagerDot {
-    width: 28px;
+    width: auto;
     height: 32px;
     padding: 0 14px;
     border-radius: var(--radius-pill);
@@ -1657,5 +1664,47 @@ button.compareBtn {
 @media (max-width: 1100px) {
     .statsRow {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Stüdyo bölümü: sayfanın tam genişliğinde, Figma "Senaryolar, kütle ve program". */
+.studio {
+    margin-top: 56px;
+}
+
+.studioTitle {
+    margin: 0 0 20px;
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+}
+
+.studioGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: start;
+}
+
+.studioBar,
+.studioWide {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+.studioMain,
+.studioSide {
+    min-width: 0;
+}
+
+.studioHalf {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+@media (max-width: 1100px) {
+    .studioGrid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

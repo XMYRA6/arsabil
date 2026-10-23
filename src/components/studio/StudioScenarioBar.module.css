@@ -4,12 +4,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow2);
-  margin-bottom: 12px;
+  padding: 14px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 0;
 }
 
 .leftSection {
@@ -23,10 +23,10 @@
   padding: 6px 10px;
   font-size: 13px;
   font-weight: 600;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--card-bg, #fff);
-  color: var(--text);
+  border-radius: 999px;
+  border: 1px solid var(--amber);
+  background: var(--amber-soft);
+  color: var(--ink);
   cursor: pointer;
   outline: none;
 }
@@ -72,16 +72,16 @@
   padding: 4px 10px;
   font-size: 12px;
   font-weight: 600;
-  color: #b45309;
-  background: #fef3c7;
-  border: 1px solid #fde68a;
-  border-radius: 6px;
+  color: var(--amber-text);
+  background: var(--amber-soft);
+  border: 1px solid var(--amber);
+  border-radius: 999px;
   cursor: pointer;
   transition: transform 0.1s ease, background-color 0.15s ease;
 }
 
 .rebalanceBadge:hover {
-  background: #fde68a;
+  background: color-mix(in srgb, var(--amber) 30%, var(--surface));
 }
 
 .centerSection {
@@ -95,20 +95,20 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 8px 16px;
   font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-  background: var(--card-bg, #fff);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  font-weight: 600;
+  color: var(--blue);
+  background: var(--blue-soft);
+  border: 1px solid transparent;
+  border-radius: 999px;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 
 .actionBtn:hover:not(:disabled) {
   background: var(--surface-hover, rgba(0, 0, 0, 0.04));
-  border-color: var(--text-muted, #888);
+  border-color: transparent;
 }
 
 .actionBtn:disabled {
@@ -117,13 +117,13 @@
 }
 
 .primaryActionBtn {
-  background: var(--primary, #0f172a);
-  color: #ffffff;
-  border-color: var(--primary, #0f172a);
+  background: var(--blue);
+  color: var(--blue-on);
+  border-color: transparent;
 }
 
 .primaryActionBtn:hover:not(:disabled) {
-  background: var(--primary-hover, #1e293b);
+  background: color-mix(in srgb, var(--blue) 90%, var(--canvas));
 }
 
 .shortcutHint {

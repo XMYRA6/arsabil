@@ -61,6 +61,9 @@
   --shadow2: var(--shadow-card);
   --glass-highlight: none;
   --accent: var(--amber);
+  --primary: var(--blue);
+  --primary-2: var(--blue);
+  --primary-rgb: 31, 111, 235;
   --focus-ring: 0 0 0 3px rgba(31, 111, 235, 0.25);
 }
 
@@ -102,5 +105,8 @@
   --shadow2: var(--shadow-card);
   --glass-highlight: none;
   --accent: var(--amber);
+  --primary: var(--blue);
+  --primary-2: var(--blue);
+  --primary-rgb: 76, 141, 255;
   --focus-ring: 0 0 0 3px rgba(76, 141, 255, 0.35);
 }
