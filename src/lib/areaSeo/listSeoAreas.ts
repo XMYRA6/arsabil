@@ -8,6 +8,8 @@ export interface AreaPriceStatScopeRow {
   ilce: string | null
   mahalle: string | null
   sampleCount: number
+  /** Medyan arsa ₺/m² (varsa) — liste kartları/tablolar için. */
+  medianPricePerSqm?: number | null
 }
 
 export interface SeoAreaEntry {
@@ -22,6 +24,7 @@ export interface SeoAreaEntry {
   ilceDisplay: string | null
   mahalleDisplay: string | null
   sampleCount: number
+  medianPricePerSqm: number | null
 }
 
 export interface ListSeoAreasDeps {
@@ -72,6 +75,7 @@ export async function listSeoAreas(scope: SeoScope, deps: ListSeoAreasDeps): Pro
       ilceDisplay: disp.ilce,
       mahalleDisplay: disp.mahalle,
       sampleCount: r.sampleCount,
+      medianPricePerSqm: r.medianPricePerSqm ?? null,
     })
   }
   return out

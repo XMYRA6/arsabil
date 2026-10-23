@@ -21,7 +21,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
               ) : (
                 <span className={styles.current}>{item.label}</span>
               )}
-              {!isLast && <span className={styles.sep}>›</span>}
+              {!isLast && <span className={styles.sep} aria-hidden="true">/</span>}
             </li>
           )
         })}

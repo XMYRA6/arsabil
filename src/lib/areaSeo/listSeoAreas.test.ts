@@ -64,6 +64,7 @@ describe('listSeoAreas', () => {
       ilceDisplay: 'Akçaabat',
       mahalleDisplay: 'Durubinar',
       sampleCount: 10,
+      medianPricePerSqm: null,
     })
   })
 
@@ -91,12 +92,12 @@ describe('findBySlug', () => {
     {
       scope: 'mahalle', ilNorm: 'TRABZON', ilceNorm: 'AKCAABAT', mahalleNorm: 'DURUBINAR',
       ilSlug: 'trabzon', ilceSlug: 'akcaabat', mahalleSlug: 'durubinar',
-      ilDisplay: 'Trabzon', ilceDisplay: 'Akçaabat', mahalleDisplay: 'Durubinar', sampleCount: 10,
+      ilDisplay: 'Trabzon', ilceDisplay: 'Akçaabat', mahalleDisplay: 'Durubinar', sampleCount: 10, medianPricePerSqm: null,
     },
     {
       scope: 'il', ilNorm: 'TRABZON', ilceNorm: null, mahalleNorm: null,
       ilSlug: 'trabzon', ilceSlug: null, mahalleSlug: null,
-      ilDisplay: 'Trabzon', ilceDisplay: null, mahalleDisplay: null, sampleCount: 10,
+      ilDisplay: 'Trabzon', ilceDisplay: null, mahalleDisplay: null, sampleCount: 10, medianPricePerSqm: null,
     },
   ]
 

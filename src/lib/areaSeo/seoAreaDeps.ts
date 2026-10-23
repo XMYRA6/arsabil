@@ -8,7 +8,7 @@ export function createSeoAreaDeps(): ListSeoAreasDeps {
     findAreaPriceStats: async (scope): Promise<AreaPriceStatScopeRow[]> => {
       const rows = await prisma.areaPriceStat.findMany({
         where: { scope },
-        select: { il: true, ilce: true, mahalle: true, sampleCount: true },
+        select: { il: true, ilce: true, mahalle: true, sampleCount: true, medianPricePerSqm: true },
       })
       return rows
     },

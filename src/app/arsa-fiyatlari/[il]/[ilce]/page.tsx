@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSeoAreas } from '@/lib/areaSeo/seoAreaDeps'
 import { findBySlug } from '@/lib/areaSeo/listSeoAreas'
 import { buildAreaSeoCard } from '@/lib/areaSeo/areaSeoCard'
 import { createAreaSeoCardDeps } from '@/lib/areaSeo/areaSeoCardDeps'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { PriceTrendChart } from '@/components/charts/PriceTrendChart'
+import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, AlanTablosu, DegerBandi, trNum, isaretliYuzde } from '../../areaSeoParts'
 import styles from '../../areaSeo.module.css'
 
 type Params = { il: string; ilce: string }
@@ -46,89 +45,63 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
   const mahalleler = mahalleEntries
     .filter((e) => e.ilNorm === entry.ilNorm && e.ilceNorm === entry.ilceNorm)
     .sort((a, b) => b.sampleCount - a.sampleCount)
+  const degisim = card.priceTrend?.changePct3m ?? null
 
   return (
     <div className={styles.wrap}>
       <Breadcrumb
         items={[
           { label: 'Anasayfa', href: '/' },
-          { label: 'Arsa Fiyatları', href: '/arsa-fiyatlari' },
+          { label: 'Arsa fiyatları', href: '/arsa-fiyatlari' },
           { label: entry.ilDisplay, href: `/arsa-fiyatlari/${entry.ilSlug}` },
           { label: entry.ilceDisplay! },
         ]}
       />
-      <h1 className={styles.title}>{entry.ilceDisplay} Arsa Fiyatları</h1>
-      <p className={styles.subtitle}>
-        {entry.ilDisplay} — {entry.sampleCount} ilan verisine dayanıyor.
-      </p>
+      <SayfaBasligi
+        baslik={`${entry.ilceDisplay} arsa fiyatları`}
+        aciklama={`${entry.ilceDisplay} ilçesinde (${entry.ilDisplay}) mahalle bazında güncel arsa m² fiyatları. ${entry.sampleCount} ilan verisine dayanıyor.`}
+      />
 
-      <div className={styles.statCard}>
-        <div className={styles.statItem}>
-          <span className={styles.statLabel}>Medyan ₺/m²</span>
-          <span className={styles.statValue}>{Math.round(card.stat.medianPricePerSqm).toLocaleString('tr-TR')} ₺</span>
-        </div>
-        <div className={styles.statItem}>
-          <span className={styles.statLabel}>Aralık (p25–p75)</span>
-          <span className={styles.statValue}>
-            {Math.round(card.stat.p25).toLocaleString('tr-TR')} – {Math.round(card.stat.p75).toLocaleString('tr-TR')} ₺
-          </span>
-        </div>
-      </div>
-
-      {card.priceTrend && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>12 Aylık Fiyat Trendi</h2>
-          <p className={styles.note}>
-            · {card.priceTrend.basis === 'mahalle' ? 'Mahalle' : card.priceTrend.basis === 'ilce' ? 'İlçe geneli' : 'İl geneli'}
-          </p>
-          <PriceTrendChart
-            points={card.priceTrend.points}
-            changePct3m={card.priceTrend.changePct3m}
-            thinTrend={card.priceTrend.thinTrend}
-          />
-        </div>
-      )}
-
-      {card.demographics && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>Demografi</h2>
-          <p>{card.demographics.summary}</p>
-        </div>
-      )}
-
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>{entry.ilceDisplay} İlçesindeki Mahalleler</h2>
-        {mahalleler.length === 0 ? (
-          <p className={styles.note}>Bu ilçe için henüz yeterli mahalle verisi yok — veri kapsamı genişledikçe burada listelenecek.</p>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Mahalle</th>
-                <th>Örnek Sayısı</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mahalleler.map((m) => (
-                <tr key={m.mahalleSlug}>
-                  <td>
-                    <Link href={`/arsa-fiyatlari/${m.ilSlug}/${m.ilceSlug}/${m.mahalleSlug}`}>
-                      {m.mahalleDisplay} Mahallesi
-                    </Link>
-                  </td>
-                  <td>{m.sampleCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <StatSatiri>
+        <StatKarti
+          etiket="Medyan m² fiyatı"
+          deger={trNum.format(Math.round(card.stat.medianPricePerSqm))}
+          birim="₺"
+          alt={`${card.stat.sampleCount} emsal`}
+        />
+        <StatKarti
+          etiket="Aralık (p25–p75)"
+          deger={`${trNum.format(Math.round(card.stat.p25))} – ${trNum.format(Math.round(card.stat.p75))}`}
+          birim="₺"
+        />
+        {degisim != null && (
+          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} />
         )}
-      </div>
+        <StatKarti etiket="Veri kapsamı" deger={card.comparableCount} alt="aktif emsal ilan" />
+      </StatSatiri>
 
-      <div className={styles.ctaRow}>
-        <Link href="/deger" className={styles.ctaButton}>
-          Bu ilçede kendi parselini değerlendir
-        </Link>
-      </div>
+      <TrendKarti trend={card.priceTrend} />
+
+      {card.demographics?.summary && (
+        <section className={styles.kart} aria-label="Demografi">
+          <h2 className={styles.kartBaslik}>Demografi</h2>
+          <p className={styles.paragraf}>{card.demographics.summary}</p>
+        </section>
+      )}
+
+      <AlanTablosu
+        baslik="Mahallelere göre arsa fiyatları"
+        ilkKolon="Mahalle"
+        bos="Bu ilçe için henüz yeterli mahalle verisi yok — veri kapsamı genişledikçe burada listelenecek."
+        satirlar={mahalleler.map((m) => ({
+          ad: `${m.mahalleDisplay} Mahallesi`,
+          href: `/arsa-fiyatlari/${m.ilSlug}/${m.ilceSlug}/${m.mahalleSlug}`,
+          medyan: m.medianPricePerSqm,
+          emsal: m.sampleCount,
+        }))}
+      />
+
+      <DegerBandi metin="Ada/parsel gir; bu ilçedeki emsallere göre tahmini değer aralığı ve risk özeti." />
     </div>
   )
 }
