@@ -16,7 +16,7 @@
     border-radius: 24px;
     width: 100%;
     max-width: 800px;
-    max-height: 90vh;
+    max-height: 92vh;
     display: flex;
     flex-direction: column;
     box-shadow: 0 24px 48px rgba(26, 20, 8, 0.2);
@@ -102,7 +102,9 @@
 }
 
 .largeMap {
-    height: 450px !important;
+    /* Ekran yüksekliğine göre ölçeklenir: modal içi kaydırma çubuğu çıkmaz (başlık, sekmeler,
+       sonuç ve alt çubuk için ~440px ayrılır). */
+    height: clamp(200px, calc(100vh - 545px), 420px) !important;
 }
 
 .loadingRisk {
@@ -184,40 +186,32 @@
     min-height: 52px;
 }
 
-.verifiedSummary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
-    background: color-mix(in srgb, var(--ok) 8%, transparent);
-}
+/* Masaüstü: harita solda, parsel riski sağda — modal içinde kaydırma çubuğu gerekmesin. */
+@media (min-width: 769px) {
+    .content {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 12px 20px;
+        align-content: start;
+        padding: 20px 24px;
+    }
 
-.verifiedSummaryText {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font: 400 13px Inter, sans-serif;
-    color: var(--ink-secondary);
-}
+    .instructions,
+    .toggleRow,
+    .manualNote,
+    .loadingRisk,
+    .fullRow {
+        grid-column: 1 / -1;
+    }
 
-.verifiedSummaryText strong {
-    color: var(--ink);
-    font: 600 15px Inter, sans-serif;
-}
+    .pickerCol {
+        grid-column: 1;
+    }
 
-.changeBtn {
-    min-height: 36px;
-    padding: 0 16px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--blue-soft);
-    color: var(--blue);
-    font: 600 13.5px Inter, sans-serif;
-    cursor: pointer;
-    white-space: nowrap;
+    .riskSection {
+        grid-column: 2;
+        align-self: start;
+    }
 }
 
 @media (max-width: 768px) {
@@ -239,7 +233,7 @@
     /* ParcelPicker'ın .wrapper'ına eklenir: harita kalan dikey alanı doldurur. */
     .pickerGrow {
         flex: 1;
-        min-height: 0;
+        min-height: 300px;
     }
 
     /* Uzun açıklama mobilde yok: haritanın altındaki tek ipucu yeterli. */

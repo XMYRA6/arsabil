@@ -227,8 +227,8 @@ describe('ParcelVerificationSheet', () => {
         expect(screen.getByTestId('parcel-lng')).toHaveTextContent('29')
     })
 
-    describe('mobil — dogrulandiktan sonra harita gizlenir (iOS safe-area tasma duzeltmesi)', () => {
-        it('mobilde parsel dogrulaninca harita/toggle kalkar, kompakt ozet gorunur', async () => {
+    describe('mobil — dogrulandiktan sonra harita kalir (parsel siniri gorunsun)', () => {
+        it('mobilde parsel dogrulaninca harita/toggle KALIR (kirmizi sinir haritada gorunur), kompakt ozet yok', async () => {
             viewportKur(false) // mobil
             render(
                 <ParcelVerificationSheet
@@ -239,13 +239,10 @@ describe('ParcelVerificationSheet', () => {
                 />,
             )
 
-            await waitFor(() => {
-                expect(screen.queryByTestId('parcel-picker')).not.toBeInTheDocument()
-                expect(screen.queryByRole('button', { name: 'Haritadan' })).not.toBeInTheDocument()
-                expect(screen.queryByRole('button', { name: 'Elle gir' })).not.toBeInTheDocument()
-            })
-            expect(screen.getByText(/Kırkkepenekli/)).toBeInTheDocument()
-            expect(screen.getByText(/830 m²/)).toBeInTheDocument()
+            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
+            expect(screen.getByRole('button', { name: 'Haritadan' })).toBeInTheDocument()
+            expect(screen.getByRole('button', { name: 'Elle gir' })).toBeInTheDocument()
+            expect(screen.queryByRole('button', { name: 'Değiştir' })).not.toBeInTheDocument()
         })
 
         it('masaustunde parsel dogrulanmis olsa da harita/toggle gizlenmez (masaustu davranisi degismedi)', async () => {
@@ -262,42 +259,24 @@ describe('ParcelVerificationSheet', () => {
             expect(screen.getByRole('button', { name: 'Haritadan' })).toBeInTheDocument()
         })
 
-        it('mobil kompakt ozette Degistir tiklaninca harita/toggle geri doner', async () => {
-            viewportKur(false)
-            render(
-                <ParcelVerificationSheet
-                    isOpen
-                    onClose={jest.fn()}
-                    onConfirm={jest.fn()}
-                    initialValue={{ lat: 41.0, lng: 29.0, parcel: VERIFIED_PARCEL, status: 'verified' }}
-                />,
-            )
-            await waitFor(() => expect(screen.queryByTestId('parcel-picker')).not.toBeInTheDocument())
-
-            fireEvent.click(screen.getByRole('button', { name: 'Değiştir' }))
-
-            await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
-            expect(screen.queryByText(/Kırkkepenekli/)).not.toBeInTheDocument()
-        })
-
         it('mobilde ipucu metni mockup ile ayni kisa cumle olmali, masaustunde eski uzun metin kalir', async () => {
             viewportKur(false)
             render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
             await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
             expect(screen.getByText('Arsanızın bulunduğu noktaya haritadan tıklayın.')).toBeInTheDocument()
-            expect(screen.queryByText(/Tapu ve Kadastro Genel Müdürlüğü/)).not.toBeInTheDocument()
+            expect(screen.queryByText(/Tapu ve Kadastro \(TKGM\)/)).not.toBeInTheDocument()
         })
 
         it('masaustunde eski uzun ipucu metni korunur', async () => {
             viewportKur(true)
             render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
             await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
-            expect(screen.getByText(/Tapu ve Kadastro Genel Müdürlüğü/)).toBeInTheDocument()
+            expect(screen.getByText(/Tapu ve Kadastro \(TKGM\)/)).toBeInTheDocument()
         })
     })
 
     describe('Elle gir — ada/parsel exact match direkt verified state üretir', () => {
-        it('mobilde: mahalle+ada+parsel TKGM ile eslesirse harita/Dogrula adimi atlanir, kompakt ozet direkt gorunur', async () => {
+        it('mobilde: mahalle+ada+parsel TKGM ile eslesirse Dogrula adimi atlanir, harita (sinirla) direkt gorunur', async () => {
             viewportKur(false) // mobil
             // NOT: paylasilan VERIFIED_PARCEL'in geometry.coordinates BOS —
             // ManualParcelEntryForm'un yeni exact-lookup dali polygonCentroid'in
@@ -342,11 +321,10 @@ describe('ParcelVerificationSheet', () => {
             fireEvent.click(screen.getByRole('button', { name: 'Sorgula' }))
 
             // ParcelPicker'in "Parseli Dogrula"suna (simulate-verify) HIC
-            // basilmadan, dogrudan mobil kompakt "dogrulandi" ozeti gorunmeli.
+            // basilmadan, dogrudan harita modu (dogrulanmis parselle) acilmali; elle form kapanir.
             await waitFor(() => {
-                expect(screen.queryByTestId('parcel-picker')).not.toBeInTheDocument()
-                expect(screen.getByText(/Kırkkepenekli/)).toBeInTheDocument()
-                expect(screen.getByText(/830 m²/)).toBeInTheDocument()
+                expect(screen.getByTestId('parcel-picker')).toBeInTheDocument()
+                expect(screen.queryByLabelText('Ada No')).not.toBeInTheDocument()
             })
         })
 

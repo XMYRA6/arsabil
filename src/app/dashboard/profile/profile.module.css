@@ -93,6 +93,10 @@
 .hubSatir { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; box-sizing: border-box; min-height: 52px; padding: 0 18px; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--ink); font: 500 16px Inter, sans-serif; text-align: left; text-decoration: none; cursor: pointer; }
 .hubSatir:first-child { border-top: 0; }
 .hubSatir:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.hubTema { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.hubTemaBtn, .hubTemaOn { min-height: 34px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 14px Inter, sans-serif; cursor: pointer; }
+.hubTemaOn { background: var(--amber); color: var(--ink); font-weight: 600; }
+.hubTemaBtn:focus-visible, .hubTemaOn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .hubCikis { color: var(--bad); font-weight: 600; }
 @media (max-width: 900px) {
   .hub { display: flex; flex-direction: column; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); overflow: hidden; }

@@ -34,10 +34,17 @@ export function RiskSuggestionCard({ risk, onApply, hideApply = false }: Props) 
                 <strong>R = {risk.suggestedR.toFixed(2).replace('.', ',')}</strong>
             </p>
 
-            <p className={styles.line}>
-                Bu öneri yalnızca bu ölçümün kapsadığı payı yansıtır; projenin piyasa, inşaat ve
-                diğer bilinmezliklerini içeren toplam riskini temsil etmez.
-            </p>
+            <details className={styles.not}>
+                <summary>Ölçüm notu</summary>
+                <p className={styles.line}>
+                    Bu öneri yalnızca bu ölçümün kapsadığı payı yansıtır; projenin piyasa, inşaat ve
+                    diğer bilinmezliklerini içeren toplam riskini temsil etmez.
+                </p>
+                <small className={styles.disclaimer}>
+                    γF, TBDY 2018 uyarınca deprem tasarım talebini ölçekler; maliyet etkisi tahminidir.
+                    Mesafe fayın yüzey izine göre hesaplanmıştır. Mühendislik raporu yerine geçmez.
+                </small>
+            </details>
 
             {percent > 0 && !hideApply && (
                 <button type="button" className={styles.applyBtn} onClick={() => onApply(percent)}>
@@ -45,10 +52,6 @@ export function RiskSuggestionCard({ risk, onApply, hideApply = false }: Props) 
                 </button>
             )}
 
-            <small className={styles.disclaimer}>
-                γF, TBDY 2018 uyarınca deprem tasarım talebini ölçekler; maliyet etkisi tahminidir.
-                Mesafe fayın yüzey izine göre hesaplanmıştır. Mühendislik raporu yerine geçmez.
-            </small>
         </div>
     )
 }

@@ -174,7 +174,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             // Tile layer
             const savedTile = (typeof window !== 'undefined' ? localStorage.getItem('arsabil-map-tile') : null) as TileKey || 'dark';
             const tile = TILES[savedTile] || TILES.dark;
-            tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, maxZoom: 19 }).addTo(map);
+            tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, maxZoom: 21, maxNativeZoom: tile.url.includes('arcgisonline') ? 18 : 19 }).addTo(map);
 
             map.on('moveend', () => {
                 const c = map.getCenter();
@@ -316,7 +316,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
         const L = LRef.current;
         const tile = TILES[tileKey];
         mapRef.current.removeLayer(tileLayerRef.current);
-        tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, maxZoom: 19 }).addTo(mapRef.current);
+        tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, maxZoom: 21, maxNativeZoom: tile.url.includes('arcgisonline') ? 18 : 19 }).addTo(mapRef.current);
         localStorage.setItem('arsabil-map-tile', tileKey);
     }, [tileKey]);
 

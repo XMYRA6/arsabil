@@ -136,7 +136,11 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             // Leaflet ile atif sarti disinda ucretsiz kullanilabilen uydu katmani.
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics',
-                maxZoom: 19,
+                // Esri uydu görüntüsü çoğu kırsal alanda 18. seviyenin ötesinde karo üretmez ve
+                // "Map data not yet available" yer tutucusu döner. 18'e kadar gerçek karo,
+                // ötesinde (yakınlaştırdıkça 21'e kadar) son gerçek karo büyütülür.
+                maxNativeZoom: 18,
+                maxZoom: 21,
             }).addTo(map)
 
             // Leaflet'in varsayılan ikonu görsel yollarını sayfa URL'ine göre
@@ -216,7 +220,15 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             // dilimizi TKGM'ninkiyle tutarli tutmak icin ayni renk (kullanici
             // bulgusu: onceki yesil #10b981 TKGM'nin gosterdigiyle tutarsizdi).
             polygonRef.current = L.polygon(ring, { color: '#ef4444', weight: 2, fillOpacity: 0.12 }).addTo(map)
-            map.fitBounds(polygonRef.current.getBounds(), { padding: [24, 24] })
+            // Sheet/modal yerleşimi doğrulamayla birlikte değişir (sonuç ve risk kartları eklenir,
+            // harita kutusu yeniden boyutlanır). Boyut güncellenmeden sınıra sığdırmak sınırın
+            // kırpılmış görünmesine yol açıyordu; önce ölçüyü yenile, sonra sığdır.
+            const poly = polygonRef.current
+            requestAnimationFrame(() => {
+                if (cancelled || !mapRef.current) return
+                map.invalidateSize()
+                map.fitBounds(poly.getBounds(), { padding: [24, 24] })
+            })
         })()
         return () => { cancelled = true }
     }, [mapReady, value.parcel])
@@ -277,7 +289,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
 
             {geoError && <div className={styles.warnCard}>{geoError}</div>}
 
-            <p className={styles.hint}>{hint}</p>
+            {hint && <p className={styles.hint}>{hint}</p>}
 
             <div className={styles.coordRow}>
                 {value.lat != null && value.lng != null && (

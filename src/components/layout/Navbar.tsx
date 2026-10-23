@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { NavPill } from "./NavPill";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useTema } from "@/components/ui/useTema";
 import { ArsabilLogo } from "@/components/ui/ArsabilLogo";
 import { Button } from "@/components/ui/Button";
 
@@ -29,6 +29,7 @@ export function Navbar() {
     const pathname = usePathname() ?? "/";
     const router = useRouter();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [tema, setTema] = useTema();
 
     const getInitials = () => {
         const name = session?.user?.name?.trim();
@@ -80,6 +81,14 @@ export function Navbar() {
                                     {session.user?.role === "ADMIN" && (
                                         <Link href="/admin" onClick={closeMenu} className={styles.item} role="menuitem">Yönetim paneli</Link>
                                     )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setTema(tema === 'dark' ? 'light' : 'dark')}
+                                        className={styles.item}
+                                        role="menuitem"
+                                    >
+                                        {tema === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+                                    </button>
                                     <button type="button" onClick={handleLogout} className={`${styles.item} ${styles.logout}`} role="menuitem">
                                         Çıkış yap
                                     </button>
@@ -106,9 +115,6 @@ export function Navbar() {
                     logo={<ArsabilLogo size={28} showText />}
                     right={right}
                 />
-                <div className={styles.themeSlot}>
-                    <ThemeToggle />
-                </div>
             </header>
             {showMobileBar && (
                 <header className={styles.mobileBar}>

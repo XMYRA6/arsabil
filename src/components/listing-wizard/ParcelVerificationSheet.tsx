@@ -12,9 +12,8 @@ import styles from './ParcelVerificationSheet.module.css'
 import pickerStyles from './ParcelPicker.module.css'
 
 const LONG_HINT =
-    'Arsanızın konumunu harita üzerinden işaretleyin. Sistem, Tapu ve Kadastro Genel Müdürlüğü ' +
-    '(TKGM) kayıtlarından gerçek alan (m²) ve nitelik bilgisini, ayrıca deprem ve fay hattı risk ' +
-    'durumunu otomatik sorgulayacaktır.'
+    'Arsanızın konumunu haritadan işaretleyin; Tapu ve Kadastro (TKGM) kayıtlarından alan ve nitelik, ' +
+    'ayrıca fay hattı riski otomatik sorgulanır.'
 const SHORT_HINT = 'Arsanızın bulunduğu noktaya haritadan tıklayın.'
 
 export type ParcelVerificationSheetProps = {
@@ -111,51 +110,14 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
         onClose()
     }
 
-    // Mobilde parsel dogrulaninca harita + toggle + uzun aciklama kaldirilip
-    // yerine kompakt bir ozet konur (mockup'in "dogrulandi" ekraniyle ayni
-    // fikir) — gercek bir iOS PWA'da (env(safe-area-inset-bottom) > 0)
-    // harita + toggle + uzun metin + sonuc kartlari ust uste bindiginde
-    // "Hesaplamaya Aktar" butonu ekranin tamamen disina tasiyordu (canli
-    // olculdu: 390x844 + 34px safe-area'da buton 99-164px gorunmez alanda
-    // kaliyordu). Masaustunde bu sikistirma YAPILMAZ — orada zaten yer var
-    // ve harita her zaman gorunur kalmasi beklenen davranistir.
-    const isVerifiedCompact = !isDesktopViewport && parcelValue.status === 'verified' && parcelValue.parcel
-
-    // Mockup bu akisi TAM EKRAN sunuyordu — BottomSheet'in varsayilan 85dvh
-    // "peek" kapagi (sayfanin bir kismini arkada gorunur birakan, hafif
-    // panellere uygun bir tasarim) burada kullanicinin kendi gozlemiyle
-    // eslesmiyordu: "mockup'ta tam sayfa, biz hala yarim sayfa yapiyoruz".
-    // Yalnizca dogrulanmamisken (harita/elle-giris) uygulanir — dogrulama
-    // sonrasi kompakt ozet kendi dogal boyunda kalir, altinda bos alan
-    // birakmaz.
-    const isPickingFullHeight = !isDesktopViewport && !isVerifiedCompact
+    // Mobilde sheet tam ekran. Parsel doğrulandığında harita KALIR: parselin sınırı (kırmızı
+    // çizgi) haritada görünür, altında özet ve risk kartı sheet içinde kaydırılır. (Eskiden
+    // doğrulanınca harita kaldırılıp kompakt özet konuyordu; kullanıcı sınırı göremiyordu.)
+    const isPickingFullHeight = !isDesktopViewport
 
     const body = (
         <div className={styles.content}>
-            {isVerifiedCompact ? (
-                <div className={styles.verifiedSummary}>
-                    <div className={styles.verifiedSummaryText}>
-                        <strong>
-                            {formatParcelIdentity({
-                                adaNo: parcelValue.parcel!.adaNo,
-                                parselNo: parcelValue.parcel!.parselNo,
-                                neighborhood: null,
-                            })}
-                        </strong>
-                        <span>
-                            {parcelValue.parcel!.mahalle} · {parcelValue.parcel!.quality} · {parcelValue.parcel!.areaSqm.toLocaleString('tr-TR')} m²
-                        </span>
-                    </div>
-                    <button
-                        type="button"
-                        className={styles.changeBtn}
-                        onClick={() => setParcelValue(v => ({ ...v, status: 'idle', parcel: null }))}
-                    >
-                        Değiştir
-                    </button>
-                </div>
-            ) : (
-                <>
+            <>
                     <p className={styles.instructions}>
                         {isDesktopViewport ? LONG_HINT : SHORT_HINT}
                     </p>
@@ -182,12 +144,12 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
                             ref={pickerRef}
                             value={parcelValue}
                             onChange={patch => setParcelValue(v => ({ ...v, ...patch }))}
-                            className={isPickingFullHeight ? styles.pickerGrow : undefined}
+                            className={isPickingFullHeight ? styles.pickerGrow : (risk ? styles.pickerCol : styles.fullRow)}
                             mapClassName={isDesktopViewport ? styles.largeMap : (isPickingFullHeight ? pickerStyles.mapGrow : undefined)}
-                            hint={SHORT_HINT}
+                            hint={isDesktopViewport ? '' : SHORT_HINT}
                         />
                     ) : (
-                        <ManualParcelEntryForm onLocationFound={handleManualFound} />
+                        <div className={styles.fullRow}><ManualParcelEntryForm onLocationFound={handleManualFound} /></div>
                     )}
 
                     {manualRef && !(
@@ -211,8 +173,7 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
                             ].filter(Boolean).join(', ') || `${manualRef.ilce}, ${manualRef.il}`} — TKGM sonucuyla karşılaştırın.
                         </div>
                     )}
-                </>
-            )}
+            </>
 
             {isFetchingRisk && (
                 <div className={styles.loadingRisk}>Risk verileri hesaplanıyor...</div>

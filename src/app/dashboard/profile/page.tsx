@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTema } from '@/components/ui/useTema'
 import styles from './profile.module.css'
 
 type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
@@ -53,6 +54,7 @@ interface ProfileData {
 
 export default function ProfilePage() {
     const { data: session, update } = useSession()
+    const [hubTema, setHubTema] = useTema()
     const [tab, setTab] = useState<Tab>('portfolio')
     const [profile, setProfile] = useState<ProfileData | null>(null)
     const [avatarUrl, setAvatarUrl] = useState<string | null>(session?.user?.image ?? null)
@@ -286,6 +288,13 @@ export default function ProfilePage() {
                         <span aria-hidden="true">→</span>
                     </Link>
                 )}
+                <div className={styles.hubSatir} role="group" aria-label="Görünüm">
+                    <span>Görünüm</span>
+                    <span className={styles.hubTema}>
+                        <button type="button" aria-pressed={hubTema === 'light'} className={hubTema === 'light' ? styles.hubTemaOn : styles.hubTemaBtn} onClick={() => setHubTema('light')}>Açık</button>
+                        <button type="button" aria-pressed={hubTema === 'dark'} className={hubTema === 'dark' ? styles.hubTemaOn : styles.hubTemaBtn} onClick={() => setHubTema('dark')}>Koyu</button>
+                    </span>
+                </div>
                 <button type="button" onClick={() => signOut()} className={`${styles.hubSatir} ${styles.hubCikis}`}>
                     Çıkış yap
                 </button>
