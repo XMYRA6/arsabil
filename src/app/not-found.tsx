@@ -1,23 +1,24 @@
+'use client'
+
 import Link from 'next/link'
-import { MobileScreen } from '@/components/mobile/MobileScreen'
-import { MobileState } from '@/components/mobile/MobileState'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { resolveScene } from '@/lib/dioramas/scene'
+import { useThemeZaman } from '@/components/home/useThemeZaman'
 import styles from './not-found.module.css'
 
 export default function NotFound() {
+    const zaman = useThemeZaman()
+    const sahne = resolveScene({ tur: 'arsa', varyant: 'agacli', egim: 'duz', zaman })
     return (
-        <MobileScreen hasBottomNav={false} className={styles.screen}>
-            <div className={styles.themeToggle}>
-                <ThemeToggle />
+        <main className={styles.main}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP */}
+            <img className={styles.diorama} src={sahne.src800} alt="" />
+            <p className={styles.kicker}>404</p>
+            <h1 className={styles.title}>Sayfa bulunamadı</h1>
+            <p className={styles.text}>Aradığın sayfa taşınmış ya da hiç var olmamış olabilir. Ana sayfadan devam edebilirsin.</p>
+            <div className={styles.actions}>
+                <Link href="/" className={styles.primary}>Ana sayfaya dön</Link>
+                <Link href="/deger" className={styles.soft}>Arsa değerini öğren</Link>
             </div>
-            <main className={styles.main}>
-                <MobileState
-                    variant="empty"
-                    title="Sayfa bulunamadı"
-                    description="Bu adrese bağlı bir sayfa yok. Ana sayfadan yeniden başlayabilirsiniz."
-                    action={<Link href="/" className={styles.action}>Ana sayfa</Link>}
-                />
-            </main>
-        </MobileScreen>
+        </main>
     )
 }

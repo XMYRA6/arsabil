@@ -1,39 +1,12 @@
-.main {
-  max-width: 480px;
-  margin: 48px auto;
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.title {
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.button {
-  display: inline-block;
-  align-self: flex-start;
-  padding: 12px 20px;
-  border: 0;
-  border-radius: 10px;
-  background: #1f6f4a;
-  color: #fff;
-  font-size: 1rem;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.button:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.success {
-  color: #1f6f4a;
-}
-
-.error {
-  color: #b3261e;
-}
+/* Akif bağlan — Figma 11. Arazi tokenları. */
+.main { min-height: 60dvh; display: flex; align-items: center; justify-content: center; padding: 48px 16px; color: var(--ink); }
+.card { width: 100%; max-width: 520px; box-sizing: border-box; padding: 36px; border-radius: 28px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.card p { margin: 0; font: 500 15px/1.6 Inter, sans-serif; color: var(--ink-secondary); }
+.icon { width: 72px; height: 72px; border-radius: 50%; background: #25d366; color: #fff; display: inline-flex; align-items: center; justify-content: center; }
+.title { margin: 0; font: 700 26px/1.2 Inter, sans-serif; color: var(--ink); }
+.button { display: inline-flex; align-items: center; justify-content: center; align-self: stretch; min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; text-decoration: none; cursor: pointer; }
+.button:disabled { opacity: .6; cursor: default; }
+.button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.success { color: var(--ok) !important; font-weight: 600 !important; }
+.error { color: var(--bad) !important; font-weight: 600 !important; }
+@media (max-width: 768px) { .card { padding: 24px 20px; } .title { font-size: 22px; } }

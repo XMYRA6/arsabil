@@ -1,35 +1,9 @@
-.screen {
-    min-height: 100dvh;
-}
-
-.main {
-    min-height: 100dvh;
-    display: grid;
-    place-items: center;
-    padding: 24px;
-}
-
-.action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    border-radius: var(--radius-md);
-    background: var(--primary);
-    color: white;
-    padding: 0 18px;
-    font-weight: 800;
-    text-decoration: none;
-}
-
-@media (max-width: 768px) {
-    .main {
-        padding: max(var(--safe-top), 18px) 16px max(var(--safe-bottom), 18px);
-    }
-
-    .action {
-        border-radius: var(--m-r-btn);
-        background: var(--m-accent);
-        box-shadow: 0 12px 26px rgba(20, 70, 150, .16);
-    }
-}
+/* Çevrimdışı — Figma 11. Arazi tokenları. */
+.main { min-height: 70dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 48px 24px; text-align: center; color: var(--ink); }
+.iconCircle { width: 88px; height: 88px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--amber-soft); color: var(--amber-text); }
+.copy { display: flex; flex-direction: column; gap: 12px; }
+.title { margin: 0; font: 700 40px/1.1 Inter, sans-serif; letter-spacing: -0.4px; color: var(--ink); }
+.text { margin: 0; max-width: 48ch; font: 500 17px/1.5 Inter, sans-serif; color: var(--ink-secondary); }
+.retry { min-height: 51px; padding: 0 28px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; cursor: pointer; }
+.retry:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+@media (max-width: 768px) { .title { font-size: 30px; } .text { font-size: 15px; } .retry { width: 100%; max-width: 320px; } }

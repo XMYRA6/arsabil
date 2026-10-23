@@ -83,10 +83,15 @@ function BaglanInner() {
 export default function BaglanPage() {
   return (
     <main className={styles.main}>
-      <h1 className={styles.title}>WhatsApp bağlantısı</h1>
-      <Suspense fallback={<p>Yükleniyor…</p>}>
-        <BaglanInner />
-      </Suspense>
+      <div className={styles.card}>
+        <span className={styles.icon} aria-hidden="true">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5z" /><path d="M9 9.5c.5 2 2.5 4 5 5l1.2-1.2-1.7-1-.8.6c-.9-.4-1.6-1.1-2-2l.6-.8-1-1.7z" /></svg>
+        </span>
+        <h1 className={styles.title}>WhatsApp numaranı bağla</h1>
+        <Suspense fallback={<p>Yükleniyor…</p>}>
+          <BaglanInner />
+        </Suspense>
+      </div>
     </main>
   )
 }
