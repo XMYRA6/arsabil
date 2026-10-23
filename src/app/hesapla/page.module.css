@@ -1470,7 +1470,8 @@ button.compareBtn {
     color: var(--ink);
 }
 
-.luxGrid {
+.luxGrid,
+[data-theme="dark"] .luxGrid {
     background: none;
     box-shadow: none;
     padding: 0;

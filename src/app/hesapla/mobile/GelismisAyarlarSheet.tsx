@@ -76,19 +76,6 @@ export function GelismisAyarlarSheet({
         <BottomSheet open={open} onClose={onClose} title="Gelişmiş ayarlar">
             <div className={styles.ayarlarGovde}>
                 <section
-                    ref={piyasaRef}
-                    className={styles.ayarBolum}
-                    role="group"
-                    aria-label="Piyasa karşılaştırması"
-                    data-acilis={bolum('piyasa')}
-                >
-                    <MarketField
-                        manualMarketPrice={alanlar.manualMarketPrice}
-                        setManualMarketPrice={alanlar.setManualMarketPrice}
-                    />
-                </section>
-
-                <section
                     ref={maliyetRef}
                     className={styles.ayarBolum}
                     role="group"
@@ -105,6 +92,19 @@ export function GelismisAyarlarSheet({
                         builderProfit={alanlar.builderProfit}
                         setBuilderProfit={alanlar.setBuilderProfit}
                         profitLevels={alanlar.profitLevels}
+                    />
+                </section>
+
+                <section
+                    ref={piyasaRef}
+                    className={styles.ayarBolum}
+                    role="group"
+                    aria-label="Piyasa karşılaştırması"
+                    data-acilis={bolum('piyasa')}
+                >
+                    <MarketField
+                        manualMarketPrice={alanlar.manualMarketPrice}
+                        setManualMarketPrice={alanlar.setManualMarketPrice}
                     />
                 </section>
 
