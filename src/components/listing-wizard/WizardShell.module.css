@@ -1,137 +1,127 @@
+/* İlan sihirbazı kabuğu — Figma 07 (İlan oluştur · Masaüstü/Mobil). Arazi tokenları. */
 .container {
-  max-width: 720px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem 6rem;
+  padding: 40px 24px 96px;
+  color: var(--ink);
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  font: 600 12px Inter, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sage);
 }
 
 .pageTitle {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--page-title-color);
-  letter-spacing: -1px;
-  margin-bottom: 2rem;
+  margin: 0 0 28px;
+  font: 700 40px/1.1 Inter, sans-serif;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: 24px;
+  align-items: start;
+}
+
+.layout:not(:has(.aside)) {
+  grid-template-columns: minmax(0, 760px);
 }
 
 .card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2rem;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  min-width: 0;
+}
+
+.aside {
+  position: sticky;
+  top: 96px;
 }
 
 .stepTitle {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 1.5rem;
+  margin: 0 0 20px;
+  font: 700 22px Inter, sans-serif;
+  color: var(--ink);
 }
 
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+  margin-top: 28px;
 }
 
-.backBtn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: border-color 0.15s;
-}
-
-.backBtn:hover { border-color: var(--primary); }
-
-.nextBtn {
-  padding: 0.75rem 2rem;
-  border-radius: 12px;
-  background: var(--brand-gradient);
-  border: none;
-  color: white;
-  font-weight: 800;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: opacity 0.15s;
-}
-
-.nextBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.stickyBackBtn {
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
+.backBtn,
+.nextBtn,
+.stickyBackBtn,
 .stickyNextBtn {
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  background: var(--brand-gradient);
-  border: none;
-  color: white;
-  font-weight: 800;
+  min-height: 44px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  font: 600 15px Inter, sans-serif;
   cursor: pointer;
-  font-size: 0.9rem;
 }
 
-.stickyNextBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.backBtn,
+.stickyBackBtn {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
 
-@media (max-width: 768px) {
+.nextBtn,
+.stickyNextBtn {
+  background: var(--blue);
+  color: var(--blue-on);
+}
+
+.nextBtn:disabled,
+.stickyNextBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
   .container {
     min-height: 100dvh;
-    max-width: none;
-    padding: 1rem 1rem calc(var(--bottomnav-height) + 76px + env(safe-area-inset-bottom));
-    background: var(--m-mesh), var(--m-bg);
-    color: var(--m-ink);
+    padding: 12px 16px calc(var(--bottomnav-height) + 76px + env(safe-area-inset-bottom));
   }
 
-  .card {
-    padding: 1.25rem;
-    background: var(--m-glass-bg);
-    border: 1px solid var(--m-glass-border);
-    border-radius: var(--m-r-card);
-    color: var(--m-ink);
-    backdrop-filter: var(--m-glass-blur);
-    -webkit-backdrop-filter: var(--m-glass-blur);
-    box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .pageTitle {
+  .aside {
     display: none;
   }
 
-  .stepTitle {
-    display: none;
-  }
-
+  .eyebrow,
+  .pageTitle,
+  .stepTitle,
   .nav {
     display: none;
   }
 
-  .stickyBackBtn {
-    min-height: 44px;
-    border-radius: var(--m-r-btn);
-    background: var(--m-fill);
-    border: 1px solid var(--m-glass-border);
-    color: var(--m-ink);
+  .card {
+    padding: 18px;
   }
 
+  .stickyBackBtn,
   .stickyNextBtn {
-    min-height: 44px;
-    border-radius: var(--m-r-btn);
-    background: var(--m-grad-btn);
-    color: var(--m-on-glass);
-    box-shadow: var(--m-sh-grad-btn);
+    min-height: 51px;
+    font-size: 16px;
+  }
+
+  .stickyBackBtn,
+  .stickyNextBtn {
+    flex: 1;
   }
 }

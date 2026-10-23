@@ -6,11 +6,11 @@ import { WizardProgress } from './WizardProgress'
 describe('WizardProgress', () => {
   it('5 adım etiketini render eder', () => {
     render(<WizardProgress currentStep={1} />)
-    expect(screen.getByText('Konum')).toBeInTheDocument()
-    expect(screen.getByText('Detay')).toBeInTheDocument()
-    expect(screen.getByText('Fotoğraf')).toBeInTheDocument()
-    expect(screen.getByText('Fizibilite')).toBeInTheDocument()
-    expect(screen.getByText('Yayınla')).toBeInTheDocument()
+    expect(screen.getByText('Konum bilgisi')).toBeInTheDocument()
+    expect(screen.getByText('Arsa detayları')).toBeInTheDocument()
+    expect(screen.getByText('Fotoğraflar')).toBeInTheDocument()
+    expect(screen.getByText('Fizibilite bağla')).toBeInTheDocument()
+    expect(screen.getByText('Önizle & yayınla')).toBeInTheDocument()
   })
 
   it('mevcut adımdan önceki adımlar tamamlanmış (✓) gösterilir', () => {

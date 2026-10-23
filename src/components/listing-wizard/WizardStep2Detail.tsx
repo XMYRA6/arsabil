@@ -57,18 +57,25 @@ export function WizardStep2Detail({ data, onChange }: Props) {
         </div>
       </div>
 
-      <div className={styles.fieldGroup}>
-        <label className={styles.label}>İlan Türü</label>
-        <select
-          className={styles.select}
-          aria-label="İlan Türü"
-          value={data.type}
-          onChange={e => onChange({ type: e.target.value })}
-        >
-          <option value="KAT_KARSILIGI">Kat Karşılığı</option>
-          <option value="SALE">Satış</option>
-          <option value="ORTAKLIK">Ortaklık</option>
-        </select>
+      <div className={styles.fieldGroup} role="group" aria-label="İlan Türü">
+        <span className={styles.label}>İlan Türü</span>
+        <div className={styles.segment}>
+          {[
+            { value: 'SALE', label: 'Satış' },
+            { value: 'KAT_KARSILIGI', label: 'Kat karşılığı' },
+            { value: 'ORTAKLIK', label: 'Ortaklık' },
+          ].map(o => (
+            <button
+              key={o.value}
+              type="button"
+              aria-pressed={data.type === o.value}
+              className={`${styles.segmentBtn} ${data.type === o.value ? styles.segmentBtnActive : ''}`}
+              onClick={() => onChange({ type: o.value })}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
         {/* Jargon yardımı — Impeccable critique P2 (2026-09-17): arsa sahibi
             persona inşaat/hukuk profesyoneli değil, bu ayrımı bilmeyebilir. */}
         <p className={styles.hintText}>
@@ -79,15 +86,26 @@ export function WizardStep2Detail({ data, onChange }: Props) {
       </div>
 
       <div className={styles.twoCol}>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label}>İmar Durumu</label>
-          <select className={styles.select} value={data.zoning} onChange={e => onChange({ zoning: e.target.value })}>
-            <option value="">Seçiniz</option>
-            <option value="KONUT">Konut</option>
-            <option value="TICARI">Ticari</option>
-            <option value="KARMA">Karma</option>
-            <option value="TARIM">Tarım</option>
-          </select>
+        <div className={styles.fieldGroup} role="group" aria-label="İmar Durumu">
+          <span className={styles.label}>İmar Durumu</span>
+          <div className={styles.chipRow}>
+            {[
+              { value: 'KONUT', label: 'Konut' },
+              { value: 'TICARI', label: 'Ticari' },
+              { value: 'KARMA', label: 'Karma' },
+              { value: 'TARIM', label: 'Tarım' },
+            ].map(o => (
+              <button
+                key={o.value}
+                type="button"
+                aria-pressed={data.zoning === o.value}
+                className={`${styles.chip} ${data.zoning === o.value ? styles.chipActive : ''}`}
+                onClick={() => onChange({ zoning: data.zoning === o.value ? '' : o.value })}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div className={styles.fieldGroup}>
           <label className={styles.label}>Tapu Durumu</label>

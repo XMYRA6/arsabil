@@ -5,10 +5,9 @@ const pagePath = path.join(__dirname, 'page.tsx')
 const cssPath = path.join(__dirname, 'page.module.css')
 const offersRoute = fs.readFileSync(path.join(process.cwd(), 'src/app/api/offers/route.ts'), 'utf8')
 
-describe('listing offers mobil Faz 4', () => {
-  const page = fs.existsSync(pagePath) ? fs.readFileSync(pagePath, 'utf8') : ''
-  const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, 'utf8') : ''
-  const mobile = css.slice(css.indexOf('@media (max-width: 768px)'))
+describe('listing offers sayfası', () => {
+  const page = fs.readFileSync(pagePath, 'utf8')
+  const css = fs.readFileSync(cssPath, 'utf8')
 
   it('offers API listingId query ile GET listeleme destekler', () => {
     expect(offersRoute).toMatch(/export async function GET/)
@@ -23,18 +22,23 @@ describe('listing offers mobil Faz 4', () => {
     expect(page).toMatch(/offeredShare/)
   })
 
-  it('mobil teklif sayfasi stat kartlari ve status badge tasir', () => {
-    expect(mobile).toMatch(/\.offersShell\s*\{[^}]*background:\s*var\(--m-mesh\)/)
-    expect(mobile).toMatch(/\.summaryCard\s*\{[^}]*background:\s*var\(--m-grad-accent\)/)
-    expect(mobile).toMatch(/\.offerCard\s*\{[^}]*background:\s*var\(--m-panel\)/)
-    expect(mobile).toMatch(/\.statusBadge\s*\{[^}]*border-radius:\s*var\(--m-r-chip\)/)
+  // Figma 07 (Teklifler): Arazi diline geçti; eski cam (--m-*) kapsam testinin yerini aldı.
+  it('Arazi tokenlarını kullanır, eski cam tokenlarını kullanmaz', () => {
+    expect(css).not.toMatch(/var\(--m-/)
+    expect(css).toMatch(/\.offerCard\s*\{[^}]*background:\s*var\(--surface\)/)
+    expect(css).toMatch(/\.statusPENDING\s*\{[^}]*var\(--amber-soft\)/)
+    expect(css).toMatch(/\.submitButton\s*\{[^}]*background:\s*var\(--blue\)/)
   })
 
-  it('mobil create action touch target ve safe-area ile korunur', () => {
-    expect(mobile).toMatch(/\.createPanel\s*\{[^}]*padding-bottom:\s*calc\(16px \+ var\(--safe-bottom\)\)/)
-    expect(mobile).toMatch(/\.submitButton\s*\{[^}]*min-height:\s*var\(--touch-target\)/)
-    expect(mobile).toMatch(/\.submitButton\s*\{[^}]*background:\s*var\(--m-grad-btn\)/)
+  it('mobilde teklif formu listenin üstüne çıkar ve safe-area ile korunur', () => {
+    const mobile = css.slice(css.indexOf('@media (max-width: 900px)'))
+    expect(mobile).toMatch(/\.createPanel\s*\{[^}]*order:\s*-1/)
+    expect(mobile).toMatch(/\.createPanel\s*\{[^}]*var\(--safe-bottom,\s*0px\)/)
+  })
+
+  it('teklif kartı yalnızca tanımlı durumları (Bekliyor/Kabul/Red) rozetler', () => {
+    expect(page).toMatch(/PENDING: 'Bekliyor'/)
+    expect(page).toMatch(/ACCEPTED: 'Kabul edildi'/)
+    expect(page).toMatch(/REJECTED: 'Reddedildi'/)
   })
 })
-
-

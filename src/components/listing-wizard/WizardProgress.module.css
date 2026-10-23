@@ -1,123 +1,100 @@
+/* İlan sihirbazı adımları — Figma 07 (İlan oluştur). Arazi tokenları. */
 .progress {
   display: flex;
   align-items: center;
-  margin-bottom: 2rem;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
 }
 
 .node {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  flex: 1;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 18px 0 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.nodeActive {
+  background: var(--amber-soft);
+  border-color: var(--amber);
 }
 
 .circle {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--panel);
-  border: 2px solid var(--border);
-  color: var(--muted);
+  background: var(--surface-2);
+  border: 0;
+  color: var(--ink-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 800;
+  font: 700 12px Inter, sans-serif;
 }
 
 .circleActive {
-  background: var(--brand-gradient);
-  border-color: var(--primary);
-  color: white;
+  background: var(--amber);
+  color: var(--ink);
+}
+
+[data-theme='dark'] .circleActive {
+  color: #0f1a2e;
 }
 
 .circleDone {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
+  background: var(--ok);
+  color: #fff;
 }
 
 /* Tamamlanmış adıma atlama — Impeccable critique P2 (2026-09-17): bu durumda
    .circle gerçek bir <button>, native chrome sıfırlanıyor. */
 .circleClickable {
-  font: inherit;
+  font: 700 12px Inter, sans-serif;
   cursor: pointer;
 }
 
 .label {
-  font-size: 0.6rem;
+  font: 500 14px Inter, sans-serif;
   white-space: nowrap;
-  font-weight: 600;
-  color: var(--muted);
+  color: var(--ink-secondary);
 }
 
 .labelActive {
-  font-weight: 800;
-  color: var(--primary);
+  font-weight: 600;
+  color: var(--amber-text);
 }
 
 .labelDone {
-  color: var(--text);
-}
-
-.connector {
-  height: 2px;
-  flex: 1;
-  margin-bottom: 20px;
-  background: var(--border);
-}
-
-.connectorDone {
-  background: var(--primary);
-}
-
-.connectorActive {
-  background: var(--brand-gradient);
+  color: var(--ink);
 }
 
 @media (max-width: 768px) {
   .progress {
-    margin-bottom: 1.25rem;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-bottom: 18px;
+    overflow-x: auto;
   }
 
-  .circle {
-    width: 22px;
-    height: 22px;
-    font-size: 0.65rem;
-    background: var(--m-fill);
-    border: 1px solid var(--m-glass-border);
-    color: var(--m-body);
+  .node {
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .nodeActive {
+    background: transparent;
+    border-color: transparent;
   }
 
   .label {
     display: none;
-  }
-
-  .connector {
-    margin-bottom: 0;
-    background: var(--m-divider);
-  }
-
-  .circleActive {
-    background: var(--m-grad-btn);
-    border-color: transparent;
-    color: var(--m-on-glass);
-    box-shadow: var(--m-sh-grad-btn);
-  }
-
-  .circleDone {
-    background: var(--m-grad-btn);
-    border-color: transparent;
-    color: var(--m-on-glass);
-  }
-
-  .connectorDone {
-    background: var(--m-link);
-  }
-
-  .connectorActive {
-    background: var(--m-grad-accent);
   }
 }

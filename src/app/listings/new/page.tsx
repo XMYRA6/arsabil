@@ -10,7 +10,9 @@ import { WizardStep3Photos } from '@/components/listing-wizard/WizardStep3Photos
 import { WizardStep4Feasibility } from '@/components/listing-wizard/WizardStep4Feasibility'
 import { WizardStep5Preview } from '@/components/listing-wizard/WizardStep5Preview'
 import { WizardFormData, emptyFormData } from '@/components/listing-wizard/types'
+import styles from './page.module.css'
 import { buildListingPublishBody } from './publishBody'
+import { IlanOnizleme } from './IlanOnizleme'
 
 const STEP_TITLES = [
   'Konum Bilgisi',
@@ -101,12 +103,13 @@ export default function NewListingPage() {
   return (
     <>
       {publishError && (
-        <div role="alert" style={{ padding: '10px 16px', background: 'rgba(var(--red-rgb),.12)', color: 'var(--red)', fontSize: '.85rem', fontWeight: 600 }}>
+        <div role="alert" className={styles.publishError}>
           {publishError}
         </div>
       )}
       <WizardShell
-        pageTitle="Yeni İlan Oluştur"
+        pageTitle="İlanını oluştur"
+        aside={<IlanOnizleme form={form} />}
         stepTitle={STEP_TITLES[step - 1]}
         step={step}
         onBack={step > 1 ? () => setStep(s => s - 1) : undefined}

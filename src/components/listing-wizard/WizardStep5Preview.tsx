@@ -27,11 +27,11 @@ export function WizardStep5Preview({ data, publishing, onPublish }: Props) {
             <Image fill unoptimized src={data.photos[0].url} alt={data.title} style={{ objectFit: 'cover' }} />
           </div>
         ) : (
-          <div className={styles.previewImgPlaceholder}>📷 Fotoğraf eklenmedi</div>
+          <div className={styles.previewImgPlaceholder}>Fotoğraf eklenmedi</div>
         )}
         <div className={styles.previewBody}>
           <div className={styles.previewTitle}>{data.title || 'Başlık girilmedi'}</div>
-          <div className={styles.previewLocation}>📍 {location}</div>
+          <div className={styles.previewLocation}>{location}</div>
           {(data.landSizeSqm || data.zoning) && (
             <div className={styles.previewMeta}>
               {data.landSizeSqm && `${data.landSizeSqm} m²`}
@@ -44,7 +44,7 @@ export function WizardStep5Preview({ data, publishing, onPublish }: Props) {
       </div>
 
       <button className={styles.publishBtn} onClick={onPublish} disabled={publishing || !canPublish}>
-        {publishing ? 'Yayınlanıyor...' : '🚀 İlanı Yayınla'}
+        {publishing ? 'Yayınlanıyor...' : 'İlanı yayınla'}
       </button>
 
       {!canPublish && (

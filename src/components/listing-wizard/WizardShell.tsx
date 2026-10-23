@@ -12,39 +12,47 @@ interface WizardShellProps {
   onNext?: () => void
   onStepClick?: (step: number) => void
   nextDisabled?: boolean
+  /** Masaüstünde formun sağında duran önizleme kartı (Figma: "Önizleme"). */
+  aside?: React.ReactNode
   children: React.ReactNode
 }
 
-export function WizardShell({ pageTitle, stepTitle, step, onBack, onNext, onStepClick, nextDisabled, children }: WizardShellProps) {
+export function WizardShell({ pageTitle, stepTitle, step, onBack, onNext, onStepClick, nextDisabled, aside, children }: WizardShellProps) {
   return (
     <div className={styles.container}>
+      <p className={styles.eyebrow}>Yeni ilan</p>
       <h1 className={styles.pageTitle}>{pageTitle}</h1>
       <AppBar title={stepTitle} showBack={!!onBack} onBack={onBack} />
 
-      <div className={styles.card}>
-        <WizardProgress currentStep={step} onStepClick={onStepClick} />
-        <h2 className={styles.stepTitle}>{stepTitle}</h2>
+      <WizardProgress currentStep={step} onStepClick={onStepClick} />
 
-        {children}
+      <div className={styles.layout}>
+        <div className={styles.card}>
+          <h2 className={styles.stepTitle}>{stepTitle}</h2>
 
-        {onNext && (
-          <div className={styles.nav}>
-            {onBack
-              ? <button className={styles.backBtn} onClick={onBack}>← Geri</button>
-              : <div />
-            }
-            <button className={styles.nextBtn} onClick={onNext} disabled={nextDisabled}>
-              İleri →
-            </button>
-          </div>
-        )}
+          {children}
 
-        {!onNext && onBack && (
-          <div className={styles.nav}>
-            <button className={styles.backBtn} onClick={onBack}>← Geri</button>
-            <div />
-          </div>
-        )}
+          {onNext && (
+            <div className={styles.nav}>
+              {onBack
+                ? <button className={styles.backBtn} onClick={onBack}>← Geri</button>
+                : <div />
+              }
+              <button className={styles.nextBtn} onClick={onNext} disabled={nextDisabled}>
+                İleri →
+              </button>
+            </div>
+          )}
+
+          {!onNext && onBack && (
+            <div className={styles.nav}>
+              <button className={styles.backBtn} onClick={onBack}>← Geri</button>
+              <div />
+            </div>
+          )}
+        </div>
+
+        {aside && <aside className={styles.aside}>{aside}</aside>}
       </div>
 
       <StickyActionBar aboveBottomNav>

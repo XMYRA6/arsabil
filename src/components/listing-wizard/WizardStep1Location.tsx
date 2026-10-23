@@ -74,7 +74,7 @@ export function WizardStep1Location({ data, onChange }: Props) {
           </div>
         ) : (
           <button type="button" className={styles.parcelTriggerBtn} onClick={() => setSheetOpen(true)}>
-            📍 Konumu Haritadan Seç
+            Konumu Haritadan Seç
           </button>
         )}
       </div>
