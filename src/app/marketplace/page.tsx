@@ -237,6 +237,7 @@ function MarketplaceContent() {
                             <>
                                 <p className={styles.countLabel}>
                                     {sorted.length.toLocaleString('tr-TR')} ilan · {selectedCity}
+                                    {demoData !== 'none' && <span className={styles.countDemo}> · örnek veri</span>}
                                 </p>
                                 <div className={styles.grid}>
                                     {paginated.map(listing => (
