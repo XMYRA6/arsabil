@@ -205,8 +205,8 @@
   display: grid;
   grid-template-columns: 1fr 1.5fr;
   gap: 16px;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background: var(--blue-soft);
+  border: 1px solid var(--blue-soft);
   border-radius: 12px;
   padding: 20px;
 }
@@ -251,7 +251,7 @@
 }
 
 .cashHighlight {
-  color: #059669;
+  color: var(--ok);
   font-weight: 700;
 }
 

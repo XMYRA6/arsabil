@@ -138,7 +138,7 @@
 
 .cardActive {
   border-color: var(--blue);
-  background: #f8faff;
+  background: var(--surface-2);
 }
 
 .cardHeader {
@@ -185,8 +185,8 @@
 }
 
 .badgeVersion {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--blue-soft);
+  color: var(--blue);
 }
 
 .badgeWarning {
@@ -278,7 +278,7 @@
   font-weight: 600;
   color: var(--blue);
   background: var(--surface);
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--blue-soft);
   border-radius: 4px;
   cursor: pointer;
 }
@@ -308,7 +308,7 @@
 }
 
 .vitrinLink:hover {
-  background: #f3e8ff;
+  background: var(--surface-2);
 }
 
 .versionActions .vitrinLink {

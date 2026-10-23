@@ -12,7 +12,7 @@
 
 .dialog {
   background: var(--surface);
-  border-radius: 16px;
+  border-radius: 20px;
   width: 100%;
   max-width: 520px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -80,8 +80,8 @@
 }
 
 .statusReady {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ok) 15%, transparent);
   color: var(--ok);
   padding: 12px 14px;
   border-radius: 8px;
@@ -155,7 +155,7 @@
   font-size: 13px;
   font-weight: 600;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
 }
 
@@ -177,7 +177,7 @@
   font-size: 14px;
   font-weight: 600;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 999px;
   width: 100%;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -220,7 +220,7 @@
   font-size: 13px;
   font-weight: 600;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
 }
 
@@ -265,6 +265,6 @@
   font-size: 13px;
   font-weight: 600;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
 }
