@@ -1240,6 +1240,16 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
+      <header className={styles.pageHead}>
+        <div>
+          <p className={styles.pageKicker}>Kat karşılığı fizibilite</p>
+          <h1 className={styles.pageTitle}>Arsa payını ve minimum daire fiyatını hesapla</h1>
+          <p className={styles.pageSub}>Girdilerini düzenle, sonuç anında güncellensin. Sayılar deterministik motordan gelir.</p>
+        </div>
+        <div className={styles.pageActions}>
+          <Button variant="secondary" onClick={() => window.location.assign('/hesapla')}>+ Yeni hesaplama</Button>
+        </div>
+      </header>
       <div className={styles.layout} id="formTop">
         {/* Left Sidebar (Main Form) */}
         <aside className={styles.leftSidebar}>
@@ -1581,8 +1591,9 @@ export default function Home() {
                     key={i}
                     onClick={() => setSummaryPage(i)}
                     title={label}
+                    aria-pressed={summaryPage === i}
                     className={`${styles.pagerDot} ${summaryPage === i ? styles.pagerDotActive : ''}`}
-                  />
+                  >{label}</button>
                 ))}
               </div>
             </div>
