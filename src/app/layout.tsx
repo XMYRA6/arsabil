@@ -9,7 +9,6 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { UpdateBanner } from "@/components/pwa/UpdateBanner";
 import { Toaster } from "react-hot-toast";
 
-import Script from 'next/script';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,18 +55,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
+      <head>
+        {/* Tema, ilk boyamadan ÖNCE eşzamanlı uygulanır: sunucu varsayılanı açık (data-theme="light"),
+            kayıtlı tercih koyuysa bu betik boyamadan önce koyuya çevirir. Böylece sayfa yenilenirken
+            önce koyu lacivert, sonra açık tema görünmez. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('arsabil-theme');document.documentElement.setAttribute('data-theme',(t==='dark'||t==='light')?t:'light');}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Script
-          id="theme-script"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('arsabil-theme');var valid=['dark','light'];if(t&&valid.indexOf(t)!==-1){document.documentElement.setAttribute('data-theme',t);}else{document.documentElement.setAttribute('data-theme','light');}}catch(e){document.documentElement.setAttribute('data-theme','light');}})()`,
-          }}
-        />
         <AuthProvider>
           <Toaster position="top-center" containerStyle={{ top: 'calc(12px + env(safe-area-inset-top, 0px))' }} />
           <ServiceWorkerRegister />

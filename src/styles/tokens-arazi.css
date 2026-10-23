@@ -23,6 +23,8 @@
   --danger: var(--bad);
 }
 
+/* :root da açık: data-theme henüz yokken bile (ilk boyama) koyu lacivert default görünmesin. */
+:root,
 [data-theme="light"] {
   --ink: #2f3b34;
   --ink-secondary: #6a7268;
