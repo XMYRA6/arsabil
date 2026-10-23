@@ -162,7 +162,7 @@
 .optionActive {
   background: var(--blue);
   border: 1px solid var(--blue);
-  color: var(--surface);
+  color: var(--blue-on);
   font-size: 13px;
   font-weight: 600;
   padding: 8px 12px;
@@ -172,7 +172,7 @@
 
 .createButton {
   background: var(--blue);
-  color: var(--surface);
+  color: var(--blue-on);
   border: none;
   font-size: 14px;
   font-weight: 600;

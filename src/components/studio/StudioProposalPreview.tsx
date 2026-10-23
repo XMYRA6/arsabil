@@ -1,4 +1,9 @@
+'use client';
+
 import React from 'react';
+import Link from 'next/link';
+import { resolveScene } from '@/lib/dioramas/scene';
+import { useThemeZaman } from '@/components/home/useThemeZaman';
 import type { StudioProposalViewModel } from '@/lib/studio/proposalViewModel';
 import { ProposalVisualCapture } from './ProposalVisualCapture';
 import type { StudioPolygon, StudioLayoutDraft } from '@/lib/studio/types';
@@ -21,6 +26,8 @@ export function StudioProposalPreview({
   onDownloadPdf,
   isDownloadingPdf,
 }: StudioProposalPreviewProps) {
+  const zaman = useThemeZaman();
+  const sahne = resolveScene({ tur: 'kat', varyant: 'bitmis', egim: 'duz', zaman });
   const {
     projectContext,
     massingAnd2D,
@@ -64,6 +71,33 @@ export function StudioProposalPreview({
           </div>
         )}
       </header>
+
+      {/* 1b. Özet: diorama + öne çıkan sayılar (Figma 11 · Paylaşılan öneri) */}
+      <section className={styles.heroRow} aria-label="Öneri özeti">
+        <div className={styles.dioramaCard}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP */}
+          <img src={sahne.src800} alt="" className={styles.dioramaImg} />
+        </div>
+        <div className={styles.heroSide}>
+          <div className={styles.heroStat}>
+            <span className={styles.heroStatLabel}>Arsa sahibine hak ediş</span>
+            <span className={styles.heroStatValue}>
+              {landownerOfferSummary.entitledUnitCount.toLocaleString('tr-TR', { maximumFractionDigits: 1 })}
+              <small> daire</small>
+            </span>
+          </div>
+          {financialAssumptions.unitValueTl != null && (
+            <div className={styles.heroStat}>
+              <span className={styles.heroStatLabel}>Daire satış değeri</span>
+              <span className={styles.heroStatValue}>
+                {(financialAssumptions.unitValueTl / 1_000_000).toLocaleString('tr-TR', { maximumFractionDigits: 2 })} M
+                <small> ₺</small>
+              </span>
+            </div>
+          )}
+          <Link href="/hesapla" className={styles.heroCta}>Kendi hesaplamanı yap</Link>
+        </div>
+      </section>
 
       {/* 2. Görsel 2D Yerleşim & Kütle Özeti */}
       <section className={styles.section}>
@@ -113,6 +147,22 @@ export function StudioProposalPreview({
       {/* 3. Program Dağılımı */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Fonksiyon & Program Dağılımı</h2>
+        <div className={styles.mixBars} aria-label="Program karması">
+          {programSummary.items.map((item) => {
+            const pct = programSummary.totalAllocatedAreaM2 > 0
+              ? Math.round((item.allocatedAreaM2 / programSummary.totalAllocatedAreaM2) * 100)
+              : 0;
+            return (
+              <div key={`bar-${item.id}`} className={styles.mixRow}>
+                <div className={styles.mixLabelRow}>
+                  <span>{item.useLabel}</span>
+                  <span>%{pct}</span>
+                </div>
+                <div className={styles.mixTrack}><div className={styles.mixFill} style={{ width: `${pct}%` }} /></div>
+              </div>
+            );
+          })}
+        </div>
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>

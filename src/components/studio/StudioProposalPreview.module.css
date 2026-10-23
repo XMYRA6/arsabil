@@ -81,7 +81,7 @@
 
 .pdfButton {
   background: var(--blue);
-  color: var(--surface);
+  color: var(--blue-on);
   border: none;
   font-weight: 600;
   font-size: 14px;
@@ -348,3 +348,19 @@
     justify-content: center;
   }
 }
+
+/* Figma 11 · Paylaşılan öneri: özet satırı + program karması çubukları */
+.heroRow { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; }
+.dioramaCard { border-radius: 20px; background: var(--surface-2); overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 240px; }
+.dioramaImg { width: 100%; height: 100%; object-fit: contain; display: block; }
+.heroSide { display: flex; flex-direction: column; gap: 12px; }
+.heroStat { padding: 18px 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.heroStatLabel { font-size: 13px; color: var(--ink-secondary); font-weight: 500; }
+.heroStatValue { font-size: 36px; line-height: 1.1; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.heroStatValue small { font-size: 16px; font-weight: 500; color: var(--ink-secondary); }
+.heroCta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-weight: 600; font-size: 15px; text-decoration: none; }
+.mixBars { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
+.mixLabelRow { display: flex; justify-content: space-between; font-size: 14px; color: var(--ink); font-weight: 600; margin-bottom: 6px; }
+.mixTrack { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.mixFill { height: 100%; border-radius: 999px; background: var(--amber); }
+@media (max-width: 768px) { .heroRow { grid-template-columns: minmax(0, 1fr); } .dioramaCard { min-height: 180px; } }

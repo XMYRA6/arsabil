@@ -55,7 +55,7 @@
 
 .showButton {
   background: var(--blue);
-  color: var(--surface);
+  color: var(--blue-on);
   border: none;
   font-size: 14px;
   font-weight: 600;
@@ -200,7 +200,7 @@
 
 .renderButton {
   background: var(--blue);
-  color: var(--surface);
+  color: var(--blue-on);
   border: none;
   font-size: 14px;
   font-weight: 600;
