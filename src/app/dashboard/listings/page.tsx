@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { resolveScene } from '@/lib/dioramas/scene';
 import { useThemeZaman } from '@/components/home/useThemeZaman';
-import { sahneSec } from '../favorites/page';
+import { sahneSec } from '../sahneSec';
 import styles from '../panelListe.module.css';
 
 type Listing = {
