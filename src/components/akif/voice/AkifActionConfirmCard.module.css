@@ -1,14 +1,14 @@
-.card { display: flex; flex-direction: column; gap: 10px; border: 1px solid #e5e5e7; border-radius: 12px; padding: 14px; margin: 4px 0; background: #fff; }
-.facts { margin: 0; font-size: 13px; line-height: 1.5; color: #1d1d1f; }
-.label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #6e6e73; }
-.input { padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e5e7; font-size: 14px; color: #1d1d1f; background: #fff; }
-.candidates { display: flex; flex-direction: column; gap: 6px; }
-.candidateOption { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1d1d1f; }
+.card { display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--line); border-radius: 18px; padding: 16px; background: var(--surface); box-shadow: var(--shadow-card); }
+.facts { margin: 0; font: 600 14px/1.5 Inter, sans-serif; color: var(--ink); }
+.label { display: flex; flex-direction: column; gap: 6px; font: 500 12.5px Inter, sans-serif; color: var(--ink-secondary); }
+.input { min-height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); font: 500 15px Inter, sans-serif; color: var(--ink); background: var(--input-bg); }
+.candidates { display: flex; flex-direction: column; gap: 8px; }
+.candidateOption { display: flex; align-items: center; gap: 8px; font: 500 14px Inter, sans-serif; color: var(--ink); }
 .actions { display: flex; gap: 10px; padding-top: 4px; }
-.primary { padding: 8px 18px; border-radius: 999px; border: none; background: var(--accent, #1a73e8); color: #fff; font-size: 14px; cursor: pointer; }
+.primary { flex: 1; min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 14px Inter, sans-serif; cursor: pointer; }
 .primary:disabled { opacity: 0.45; cursor: not-allowed; }
-.secondary { padding: 8px 16px; border-radius: 999px; border: 1px solid #e5e5e7; background: transparent; color: #1d1d1f; font-size: 14px; cursor: pointer; }
+.secondary { flex: 1; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
 .secondary:disabled { opacity: 0.45; cursor: not-allowed; }
-.hint { margin: 0; font-size: 13px; color: #6e6e73; }
-.savedText { margin: 0; font-size: 13px; color: #1d1d1f; }
-.errorText { margin: 0; font-size: 13px; color: #c5221f; }
+.hint { margin: 0; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
+.savedText { margin: 0; font: 500 13px Inter, sans-serif; color: var(--ink); }
+.errorText { margin: 0; font: 500 13px Inter, sans-serif; color: var(--bad); }

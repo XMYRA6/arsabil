@@ -1,7 +1,21 @@
-.card { border: 1px solid #e5e5e7; border-radius: 12px; padding: 12px; margin: 8px 0; background: #fff; }
-.title { font-size: 12px; font-weight: 600; margin-bottom: 8px; color: #1d1d1f; }
-.scroll { overflow-x: auto; }
-.table { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.table th { text-align: left; color: #6e6e73; font-weight: 500; padding: 4px 10px 4px 0; border-bottom: 1px solid #e5e5e7; }
-.table td { padding: 6px 10px 6px 0; border-bottom: 1px solid #f0f0f2; }
-.note { font-size: 11px; color: #8a8a8e; margin-top: 8px; }
+.card { margin: 12px 0 0 46px; }
+.title { margin: 0 0 8px; font: 600 11px Inter, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-secondary); }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.table { border-collapse: collapse; width: 100%; font: 500 13.5px Inter, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
+.table th { text-align: left; color: var(--ink-secondary); font: 600 12px Inter, sans-serif; padding: 12px 16px; background: var(--surface-2); }
+.table td { padding: 12px 16px; border-top: 1px solid var(--line); }
+.table td:first-child { font-weight: 700; }
+.note { margin: 10px 0 0; font: 500 12px Inter, sans-serif; color: var(--ink-secondary); }
+
+/* Mobil (Figma): tablo yerine satır kartları — "Senaryo" kalın, altında daire sayısı · değer. */
+@media (max-width: 768px) {
+  .card { margin-left: 0; padding: 18px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+  .scroll { border: 0; background: transparent; overflow: visible; }
+  .table, .table tbody { display: block; white-space: normal; }
+  .table thead { display: none; }
+  .table tr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; margin-bottom: 8px; padding: 12px 16px; border-radius: 14px; background: var(--surface-2); }
+  .table td { padding: 0; border: 0; color: var(--ink-secondary); font-size: 13px; }
+  .table td:first-child { flex: 0 0 100%; color: var(--ink); font-size: 15px; }
+  .table td:nth-child(2), .table td:nth-child(5) { display: none; }
+  .table td:nth-child(3)::after { content: ' ·'; }
+}

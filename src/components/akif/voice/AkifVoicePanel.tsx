@@ -19,8 +19,29 @@ export function AkifVoicePanel({ onExit }: { onExit: () => void }) {
     onExit()
   }
 
+  const active = v.status === 'listening' || v.status === 'speaking'
+
   return (
     <div className={styles.panel}>
+      {active && (
+        <>
+          <h2 className={styles.status}>{v.status === 'listening' ? 'Dinliyorum…' : 'Akif konuşuyor…'}</h2>
+          <p className={styles.statusSub}>Arsanı, emsali ve payı söyle.</p>
+        </>
+      )}
+
+      {v.status !== 'reconnecting' && active && (
+        <div className={styles.orbWrap}>
+          <span className={`${styles.orb} ${styles[v.status]}`} aria-hidden>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+            </svg>
+          </span>
+          <span className={styles.timer}>{fmt(v.elapsedSec)}</span>
+        </div>
+      )}
+
       <div className={styles.transcript}>
         <AkifVoiceTranscript items={v.transcript} />
       </div>
@@ -40,23 +61,17 @@ export function AkifVoicePanel({ onExit }: { onExit: () => void }) {
       <div className={styles.controls}>
         {v.status === 'idle' && (
           <button type="button" className={styles.start} onClick={() => void v.start()}>
-            🎙 Konuşmaya başla
+            Konuşmaya başla
           </button>
         )}
         {v.status === 'connecting' && <span className={styles.hint}>Bağlanıyor…</span>}
         {v.status === 'reconnecting' && (
           <span className={styles.hint}>Bağlantı yeniden kuruluyor…</span>
         )}
-        {(v.status === 'listening' || v.status === 'speaking' || v.status === 'reconnecting') && (
-          <>
-            {v.status !== 'reconnecting' && (
-              <span className={`${styles.orb} ${styles[v.status]}`} aria-hidden />
-            )}
-            <span className={styles.timer}>{fmt(v.elapsedSec)}</span>
-            <button type="button" className={styles.stop} onClick={() => v.stop('user_ended')}>
-              Bitir
-            </button>
-          </>
+        {(active || v.status === 'reconnecting') && (
+          <button type="button" className={styles.stop} onClick={() => v.stop('user_ended')}>
+            Bitir
+          </button>
         )}
         {v.status === 'error' && (
           <button type="button" className={styles.start} onClick={() => void v.start()}>

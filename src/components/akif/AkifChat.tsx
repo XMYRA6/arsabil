@@ -17,11 +17,13 @@ export interface AkifChatProps {
   entries: AkifChatEntry[]
   pending: boolean
   onSend: (text: string) => void
+  /** Verilirse besteciye mikrofon düğmesi eklenir (sesli moda geçiş). */
+  onVoice?: () => void
 }
 
 const EXAMPLES = ['900 m² arsa, emsal 1.5, müteahhit %50', 'emsal nedir?']
 
-export function AkifChat({ entries, pending, onSend }: AkifChatProps) {
+export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   // Mobil sanal klavye açılınca `100dvh` küçülmez; besteci klavyenin altında
@@ -53,18 +55,6 @@ export function AkifChat({ entries, pending, onSend }: AkifChatProps) {
               Merhaba, ben Akif Usta. Arsanın alanını, emsali ve müteahhit payını yaz; iki
               senaryoyu hesaplayıp anlatayım.
             </p>
-            <div className={styles.examples}>
-              {EXAMPLES.map((ex) => (
-                <button
-                  key={ex}
-                  type="button"
-                  className={styles.example}
-                  onClick={() => onSend(ex)}
-                >
-                  {ex}
-                </button>
-              ))}
-            </div>
           </div>
         )}
 
@@ -122,13 +112,35 @@ export function AkifChat({ entries, pending, onSend }: AkifChatProps) {
             if (e.key === 'Enter' && !e.shiftKey) submit()
           }}
           placeholder="Arsanı ve payı yaz…"
-          rows={2}
+          rows={1}
           disabled={pending}
         />
-        <button type="submit" className={styles.send} disabled={pending}>
-          Gönder
+        {onVoice && (
+          <button type="button" className={styles.mic} onClick={onVoice} aria-label="Sesli giriş">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+            </svg>
+          </button>
+        )}
+        <button type="submit" className={styles.send} disabled={pending} aria-label="Gönder">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" />
+          </svg>
         </button>
       </form>
+      <div className={styles.hints}>
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  className={styles.example}
+                  onClick={() => onSend(ex)}
+                >
+                  {ex}
+                </button>
+              ))}
+      </div>
     </div>
   )
 }

@@ -1,20 +1,20 @@
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .term {
-  border: 1px solid #e5e5e7;
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin: 6px 0;
-  font-size: 13px;
-  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: 500 13.5px Inter, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .termEx {
-  color: #6e6e73;
-  font-size: 12px;
+  color: var(--ink-secondary);
+  font-size: 12.5px;
   margin-top: 4px;
 }

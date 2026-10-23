@@ -97,7 +97,13 @@ export default function AkifPage() {
   return (
     <div className={styles.page}>
       <div className={styles.head}>
-        <h1 className={styles.title}>Akif Usta&apos;ya Sor</h1>
+        <div className={styles.identity}>
+          <span className={styles.avatar} aria-hidden="true">A</span>
+          <div>
+            <h1 className={styles.title}>Akif Usta&apos;ya sor</h1>
+            <p className={styles.tagline}>Yapay zekâ asistanı · iki senaryoyu hesaplayıp anlatır</p>
+          </div>
+        </div>
         <div className={styles.headActions}>
           {mode === 'text' && status === 'authenticated' && projects.length > 0 && (
             <select
@@ -120,7 +126,11 @@ export default function AkifPage() {
               className={styles.voiceToggle}
               onClick={() => setMode('voice')}
             >
-              🎙 Sesli konuş
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="3" width="6" height="11" rx="3" />
+                <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+              </svg>
+              Sesli konuş
             </button>
           )}
           {mode === 'text' && entries.length > 0 && (
@@ -139,11 +149,23 @@ export default function AkifPage() {
         Arsanı, emsali ve müteahhit payını {mode === 'voice' ? 'söyle' : 'yaz'} — iki senaryoyu
         hesaplayıp anlatayım. Sayılar deterministik motordan gelir, uydurma yok.
       </p>
-      {mode === 'text' ? (
-        <AkifChat entries={entries} pending={pending} onSend={send} />
-      ) : (
-        <AkifVoicePanel onExit={() => setMode('text')} />
-      )}
+      <div className={styles.chatCard}>
+        {mode === 'voice' && (
+          <div className={styles.modeSwitch} role="group" aria-label="Akif modu">
+            <button type="button" className={styles.modeBtn} aria-pressed="false" onClick={() => setMode('text')}>
+              Yazı
+            </button>
+            <button type="button" className={`${styles.modeBtn} ${styles.modeBtnActive}`} aria-pressed="true">
+              Sesli
+            </button>
+          </div>
+        )}
+        {mode === 'text' ? (
+          <AkifChat entries={entries} pending={pending} onSend={send} onVoice={() => setMode('voice')} />
+        ) : (
+          <AkifVoicePanel onExit={() => setMode('text')} />
+        )}
+      </div>
     </div>
   )
 }
