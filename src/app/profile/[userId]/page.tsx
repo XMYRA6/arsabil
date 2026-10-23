@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { IlanKarti } from './IlanKarti'
 import styles from './page.module.css'
 
@@ -19,9 +20,16 @@ interface ProfileData {
 async function getProfile(userId: string): Promise<ProfileData | null> {
     try {
         const base = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-        const res = await fetch(`${base}/api/user/profile/${userId}`, { cache: 'no-store' })
-        if (!res.ok) return null
-        return res.json()
+        // Profil API'si oturum ister; sunucu tarafı fetch istemci çerezlerini kendiliğinden taşımaz,
+        // aksi halde istek /login'e yönlenip HTML döner ve JSON ayrıştırma 500 verir.
+        const cookieHeader = (await cookies()).toString()
+        const res = await fetch(`${base}/api/user/profile/${userId}`, {
+            cache: 'no-store',
+            headers: cookieHeader ? { cookie: cookieHeader } : undefined,
+            redirect: 'manual',
+        })
+        if (!res.ok || !(res.headers.get('content-type') || '').includes('application/json')) return null
+        return await res.json()
     } catch {
         return null
     }
