@@ -1,853 +1,112 @@
-/* Admin Panel — Premium Dark/Light Aware */
+/* Yönetim sayfaları — Figma 12 (Admin). Arazi tokenları; tüm /admin/* sayfalarında ortak. */
+.loading { display: flex; justify-content: center; align-items: center; min-height: 50vh; color: var(--ink-secondary); font: 500 15px Inter, sans-serif; }
 
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 60vh;
-    color: var(--muted);
-    font-size: 1.1rem;
-}
+.adminShell { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 28px; max-width: 1400px; margin: 0 auto; padding: 28px 32px 64px; align-items: start; color: var(--ink); }
+.sidebar { position: sticky; top: 24px; padding: 12px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.sidebarNav { display: flex; flex-direction: column; gap: 2px; }
+.navItem { display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 14px; border-radius: 12px; color: var(--ink); font: 500 14.5px Inter, sans-serif; text-decoration: none; }
+.navItem svg { flex: none; color: var(--ink-secondary); }
+.navItem:hover { background: var(--surface-2); }
+.navItem:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.navItemActive { background: var(--amber-soft); color: var(--amber-text); font-weight: 600; }
+.navItemActive svg { color: var(--amber-text); }
+.mainContent { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
 
-.adminShell {
-    --admin-accent: var(--primary);
-    --admin-accent-2: var(--primary-2);
-    --admin-accent-rgb: var(--primary-rgb);
-    display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
-    min-height: calc(100dvh - 100px);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 14px;
-    gap: 14px;
-}
+.pageHeader h1 { margin: 0 0 6px; font: 700 36px/1.15 Inter, sans-serif; letter-spacing: -0.4px; color: var(--ink); }
+.pageHeader p { margin: 0; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
 
-/* Sidebar */
-.sidebar {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
+/* İstatistik kartları: renkli üst çubuk, emoji ikonlar gizli */
+.statsGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.statBox { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 20px 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); min-width: 0; }
+.statBox::before { content: ''; width: 28px; height: 4px; margin-bottom: 8px; border-radius: 2px; background: var(--blue); }
+.statBox:nth-child(2)::before { background: var(--ok); }
+.statBox:nth-child(3)::before { background: var(--amber); }
+.statBox:nth-child(4)::before { background: #8b5cf6; }
+.statBox .icon { display: none; }
+.statBox .value, .value { font: 700 36px/1.1 Inter, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink); order: 1; }
+.statBox .label, .label { font: 500 14px Inter, sans-serif; color: var(--ink-secondary); order: 2; }
+.statBox::before { order: 0; }
 
-.sidebarHeader {
-    padding: 1.5rem;
-    border-bottom: 2px solid var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.searchBox { position: relative; flex: 1; min-width: 220px; display: flex; align-items: center; }
+.searchBox input, .roleSelect, .formGroup input, .formGroup select, .formGroup textarea { box-sizing: border-box; min-height: 44px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 500 15px Inter, sans-serif; }
+.searchBox input { width: 100%; }
+.searchBox input::placeholder { color: var(--ink-secondary); }
+.searchBox input:focus-visible, .roleSelect:focus-visible, .formGroup input:focus-visible, .formGroup select:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.roleSelect { min-height: 38px; padding: 0 12px; font-size: 14px; }
 
-.sidebarHeader h2 {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--card-title);
-}
+.segmentTabs { display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); max-width: 100%; overflow-x: auto; }
+.segmentTab, .segmentTabActive { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 14px Inter, sans-serif; cursor: pointer; white-space: nowrap; }
+.segmentTabActive { background: var(--amber); color: var(--ink); font-weight: 600; }
+[data-theme='dark'] .segmentTabActive { color: #0f1a2e; }
 
-.badge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 99px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    background: rgba(var(--admin-accent-rgb), 0.12);
-    color: var(--admin-accent);
-    border: 1px solid rgba(var(--admin-accent-rgb), 0.2);
-    letter-spacing: 0.5px;
-}
+.tableWrap { overflow-x: auto; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.table { width: 100%; border-collapse: collapse; font: 500 15px Inter, sans-serif; }
+.table th { padding: 14px 20px; background: var(--surface-2); text-align: left; color: var(--ink-secondary); font: 600 12.5px Inter, sans-serif; white-space: nowrap; }
+.table td { padding: 14px 20px; border-top: 1px solid var(--line); color: var(--ink); vertical-align: middle; }
+.table td:first-child { font-weight: 700; }
+.tabularNums { font-variant-numeric: tabular-nums; }
 
-.sidebarNav {
-    padding: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-}
+.roleBadge { display: inline-block; padding: 3px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
+.roleAdmin { background: var(--amber-soft); color: var(--amber-text); }
+.roleUser { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.statusPending { background: var(--amber-soft); color: var(--amber-text); }
+.statusApproved, .statusAccepted { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.statusRejected { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
 
-.navItem {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: var(--text);
-    text-decoration: none;
-    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
+.iconBtn, .adminPrimaryBtn, .addLevelBtn, .deleteBtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; font: 600 14px Inter, sans-serif; cursor: pointer; white-space: nowrap; }
+.iconBtn { min-height: 34px; min-width: 34px; padding: 0 14px; background: var(--surface-2); color: var(--ink); }
+.iconBtn:disabled { opacity: .45; cursor: default; }
+.adminPrimaryBtn { min-height: 44px; padding: 0 22px; background: var(--blue); color: var(--blue-on); font-size: 15px; }
+.adminPrimaryBtn:disabled { opacity: .6; cursor: default; }
+.addLevelBtn { min-height: 44px; padding: 0 20px; background: var(--surface-2); color: var(--ink); }
+.deleteBtn { min-height: 34px; padding: 0 16px; background: var(--blue-soft); color: var(--blue); }
+.iconBtn:focus-visible, .adminPrimaryBtn:focus-visible, .addLevelBtn:focus-visible, .deleteBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
-.navItem:hover {
-    background: var(--panel-2);
-}
+.settingsCard { padding: 24px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); min-width: 0; }
+.settingsCard h3 { margin: 0 0 16px; font: 700 20px Inter, sans-serif; color: var(--ink); }
+.settingsCard > p { margin: 0 0 16px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
 
-.navItemActive {
-    background: var(--admin-accent) !important;
-    color: white !important;
-    box-shadow: 0 4px 14px rgba(var(--admin-accent-rgb), 0.24);
-}
+.errorMsg, .successMsg { padding: 12px 16px; border-radius: 14px; font: 600 14px Inter, sans-serif; }
+.errorMsg { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
+.successMsg { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
 
-/* Main Content */
-.mainContent {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow2);
-    padding: 2rem;
-    overflow-y: auto;
-}
+.formGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.formGroup { display: flex; flex-direction: column; gap: 6px; }
+.formGroup label { font: 600 13px Inter, sans-serif; color: var(--ink-secondary); }
+.distributionGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.funnelGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 
-/* Page Header */
-.pageHeader {
-    margin-bottom: 2rem;
-}
+/* Motor ayarları: katsayı tablosu */
+.profitLevelHeader, .profitLevelRow { display: grid; grid-template-columns: minmax(0, 1fr) 100px 70px 70px 80px; gap: 10px; align-items: center; padding: 0 20px; }
+.profitLevelHeader { min-height: 44px; background: var(--surface-2); border-radius: 14px 14px 0 0; }
+.profitLevelHeader span { font: 600 12.5px Inter, sans-serif; color: var(--ink-secondary); }
+.profitLevelRow { min-height: 60px; border-bottom: 1px solid var(--line); }
+.profitLevelRow input { min-height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px Inter, sans-serif; font-variant-numeric: tabular-nums; min-width: 0; }
+.profitLevelRow input:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.defaultBadge { justify-self: start; min-height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 600 12px Inter, sans-serif; cursor: pointer; }
+.defaultBadgeActive { background: var(--amber-soft); color: var(--amber-text); }
 
-.pageHeader h1 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--card-title);
-    margin-bottom: 0.5rem;
-}
+.mobileCardList { display: none; }
+.dataCardGlass { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-card); }
+.card { padding: 24px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 
-.pageHeader p {
-    color: var(--muted);
-    font-weight: 500;
-}
-
-/* Stats Grid */
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
-    margin-bottom: 2rem;
-}
-
-.statBox {
-    padding: 1.25rem;
-    border-radius: var(--radius-md);
-    background: var(--stat-bg);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow2);
-    text-align: center;
-}
-
-.statBox .icon {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-}
-
-.statBox .value {
-    font-size: 2rem;
-    font-weight: 900;
-    color: var(--val-color);
-}
-
-.statBox .label {
-    font-size: 0.85rem;
-    color: var(--muted);
-    font-weight: 600;
-    margin-top: 0.25rem;
-}
-
-/* Settings Form */
-.settingsCard {
-    background: var(--stat-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow2);
-    margin-bottom: 1.5rem;
-}
-
-.settingsCard h3 {
-    font-weight: 800;
-    color: var(--card-title);
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-
-.formGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-}
-
-.formGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.formGroup label {
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--label-color);
-}
-
-.formGroup input,
-.formGroup select {
-    height: 42px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    padding: 0 12px;
-    outline: none;
-    font-weight: 700;
-    color: var(--label-color);
-    font-family: inherit;
-    font-size: 0.95rem;
-}
-
-.formGroup input:focus,
-.formGroup select:focus {
-    border-color: var(--input-focus-border);
-    box-shadow: var(--input-focus-shadow);
-}
-
-.successMsg {
-    padding: 0.75rem 1rem;
-    background: rgba(var(--green-rgb), 0.1);
-    border: 1px solid rgba(var(--green-rgb), 0.2);
-    color: var(--green);
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
-.errorMsg {
-    padding: 0.75rem 1rem;
-    background: rgba(var(--red-rgb), 0.1);
-    border: 1px solid rgba(var(--red-rgb), 0.2);
-    color: var(--red);
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-}
-
-/* Users Table */
-.tableWrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    max-width: 100%;
-}
-
-/* DataCard/CardList sayfaları — masaüstünde tablo görünür, kart listesi gizli (self-gating, JS kontrolü yok) */
-.mobileCardList {
-    display: none;
-}
-
-.table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.table th {
-    background: var(--panel-2);
-    padding: 0.85rem 1rem;
-    font-weight: 800;
-    font-size: 0.8rem;
-    color: var(--muted);
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.table td {
-    padding: 0.85rem 1rem;
-    border-top: 1px solid var(--border);
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--text);
-}
-
-.table tr:hover td {
-    background: var(--panel-2);
-}
-
-.roleBadge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 99px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    display: inline-block;
-}
-
-.roleAdmin {
-    background: rgba(var(--primary-rgb), 0.12);
-    color: var(--primary);
-    border: 1px solid rgba(var(--primary-rgb), 0.2);
-}
-
-.statusPending {
-    background: rgba(var(--admin-accent-rgb), 0.12);
-    color: var(--admin-accent);
-    border: 1px solid rgba(var(--admin-accent-rgb), 0.2);
-}
-
-.statusApproved,
-.statusAccepted {
-    background: rgba(var(--green-rgb), 0.12);
-    color: var(--green);
-    border: 1px solid rgba(var(--green-rgb), 0.2);
-}
-
-.statusRejected {
-    background: rgba(var(--red-rgb), 0.12);
-    color: var(--red);
-    border: 1px solid rgba(var(--red-rgb), 0.2);
-}
-
-.roleUser {
-    background: rgba(var(--green-rgb), 0.12);
-    color: var(--green);
-    border: 1px solid rgba(var(--green-rgb), 0.2);
-}
-
-.roleSelect {
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    padding: 0 8px;
-    font-weight: 700;
-    color: var(--label-color);
-    font-size: 0.85rem;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-/* Toolbar */
-.toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: var(--stat-bg);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    flex-wrap: wrap;
-}
-
-.searchBox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px;
-    height: 36px;
-    background: var(--input-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    flex: 1;
-    min-width: 200px;
-    max-width: 320px;
-}
-
-.searchBox span {
-    font-size: 0.85rem;
-    opacity: 0.6;
-}
-
-.searchBox input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text);
-    width: 100%;
-}
-
-.searchBox input::placeholder {
-    color: var(--muted);
-}
-
-/* Segment Tabs (filter toggle) */
-.segmentTabs {
-    display: flex;
-    background: var(--panel-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.segmentTab,
-.segmentTabActive {
-    padding: 6px 14px;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    border-right: 1px solid var(--border);
-}
-
-.segmentTab:last-child,
-.segmentTabActive:last-child {
-    border-right: none;
-}
-
-.segmentTab:hover {
-    background: var(--border);
-}
-
-.segmentTabActive {
-    background: var(--admin-accent);
-    color: white;
-    font-weight: 700;
-}
-
-/* Icon Button (table actions) */
-.iconBtn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    cursor: pointer;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.iconBtn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
-}
-
-.funnelGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-}
-
-.distributionGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
-
-/* Responsive */
 @media (max-width: 900px) {
-    .adminShell {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        flex-direction: row;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
-        mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
-    }
-
-    .sidebar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .sidebarNav {
-        flex-direction: row;
-        padding: 0.5rem;
-    }
-
-    .sidebarHeader {
-        display: none;
-    }
-
-    .navItem {
-        white-space: nowrap;
-        font-size: 0.85rem;
-        padding: 0.6rem 0.75rem;
-    }
-
-    /* Faz 4 — Mühür kimliği: mobil cam yüzey (bkz. docs/superpowers/specs/2026-07-14-admin-panel-mobil-muhur-kimlik-design.md) */
-    [data-theme="dark"] .adminShell {
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border: rgba(201, 161, 90, 0.25);
-    }
-
-    [data-theme="light"] .adminShell {
-        --seal-surface: var(--shell-bg);
-        --seal-border: var(--shell-border);
-    }
-
-    .statBox,
-    .settingsCard,
-    .toolbar {
-        background: var(--seal-surface);
-        border-color: var(--seal-border);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-    }
-
-    .dataCardGlass {
-        background: var(--seal-surface) !important;
-        border-color: var(--seal-border) !important;
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-    }
-
-    .tableWrap {
-        display: none;
-    }
-
-    .mobileCardList {
-        display: block;
-    }
-
-    .funnelGrid,
-    .distributionGrid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Profit Levels CRUD */
-.profitLevelRow {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 100px 60px 60px 80px;
-    gap: 8px;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.profitLevelRow:last-child {
-    border-bottom: none;
-}
-
-.profitLevelRow input {
-    height: 38px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    padding: 0 10px;
-    font-weight: 700;
-    color: var(--label-color);
-    font-family: inherit;
-    font-size: 0.9rem;
-    outline: none;
-}
-
-.profitLevelRow input:focus {
-    border-color: var(--input-focus-border);
-    box-shadow: var(--input-focus-shadow);
-}
-
-.profitLevelHeader {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 100px 60px 60px 80px;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 2px solid var(--border);
-    margin-bottom: 4px;
-}
-
-.profitLevelHeader span {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-}
-
-.defaultBadge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    cursor: pointer;
-    font-size: 1rem;
-    transition: transform 0.2s;
-}
-
-.defaultBadge:hover {
-    transform: scale(1.1);
-}
-
-.defaultBadgeActive {
-    background: rgba(var(--primary-rgb), 0.15);
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.15);
-}
-
-.deleteBtn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    cursor: pointer;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
-    color: var(--text);
-}
-
-.deleteBtn:hover {
-    background: rgba(var(--red-rgb), 0.1);
-    border-color: var(--red);
-    color: var(--red);
-    transform: scale(1.1);
-}
-
-.addLevelBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    padding: 10px;
-    margin-top: 12px;
-    border-radius: 12px;
-    border: 2px dashed var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-family: inherit;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
-}
-
-.addLevelBtn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: rgba(var(--primary-rgb), 0.05);
-}
-
-/* Profit level grid — must come AFTER the base .profitLevelRow/.profitLevelHeader rules */
-@media (max-width: 900px) {
-    .profitLevelHeader,
-    .profitLevelRow {
-        grid-template-columns: minmax(0, 1fr) 80px 50px;
-        font-size: 0.75rem;
-    }
-
-    /* Hide Sıra (3rd col) and Vars. (4th col) on mobile */
-    .profitLevelHeader span:nth-child(3),
-    .profitLevelHeader span:nth-child(4),
-    .profitLevelRow > *:nth-child(3),
-    .profitLevelRow > *:nth-child(4) {
-        display: none;
-    }
-}
-
-/* Admin birincil buton — pirinç vurgu (masaüstü + mobil, admin geneli) */
-.adminPrimaryBtn {
-    background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-2) 100%) !important;
-    color: white !important;
-    box-shadow: 0 8px 24px rgba(var(--admin-accent-rgb), 0.28), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
-}
-
-.adminPrimaryBtn:hover:not(:disabled) {
-    box-shadow: var(--shadow-hover), inset 0 1px 0 rgba(255, 255, 255, .25) !important;
-    filter: brightness(1.05) !important;
-}
-
-/* Sayı/para değerleri — DataCard fields içinde kullanılır */
-.tabularNums {
-    font-variant-numeric: tabular-nums;
-}
-
-
-/* Faz 8 — Admin mobile shell: compact, safe-area aware rail without changing desktop tables. */
-@media (max-width: 768px) {
-    .adminShell {
-        --topbar-height: 58px;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        min-height: calc(100dvh - var(--topbar-height));
-        max-width: none;
-        margin: 0;
-        padding: calc(var(--mobile-safe-top) + 8px) 10px 0;
-        gap: 10px;
-        background: var(--m-mesh), var(--m-bg);
-    }
-
-    .sidebar {
-        position: sticky;
-        top: var(--topbar-height);
-        z-index: 20;
-        flex-direction: row;
-        width: 100%;
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        border: 1px solid var(--m-glass-border);
-        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x proximity;
-        mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
-        -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
-    }
-
-    .sidebarNav {
-        flex-direction: row;
-        gap: 6px;
-        padding: 8px;
-        min-width: max-content;
-    }
-
-    .sidebarHeader {
-        display: none;
-    }
-
-    .navItem {
-        min-height: var(--touch-target);
-        white-space: nowrap;
-        scroll-snap-align: start;
-        border-radius: 14px;
-        padding: 0 12px;
-        font-size: 0.82rem;
-        background: rgba(255, 255, 255, 0.52);
-        border: 1px solid rgba(15, 42, 67, 0.08);
-        color: var(--m-ink);
-    }
-
-    .navItem:focus-visible {
-        outline: none;
-        box-shadow: var(--focus-ring);
-    }
-
-    .navItem:active {
-        transform: scale(0.98);
-    }
-
-    .navItemActive {
-        background: linear-gradient(135deg, var(--admin-accent) 0%, var(--admin-accent-2) 100%) !important;
-        color: #fff !important;
-        box-shadow: 0 10px 24px rgba(var(--admin-accent-rgb), 0.24), inset 0 1px 0 rgba(255, 255, 255, .28);
-    }
-
-    .mainContent {
-        width: 100%;
-        min-width: 0;
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        box-shadow: none;
-        padding: 8px 0 0;
-        padding-bottom: calc(var(--bottomnav-height) + var(--mobile-safe-bottom) + 18px);
-        overflow: visible;
-    }
-
-    .loading {
-        min-height: calc(100dvh - var(--topbar-height));
-        padding: calc(var(--mobile-safe-top) + 24px) 16px calc(var(--mobile-safe-bottom) + 24px);
-        font-size: 0.95rem;
-    }
-}
-
-/* Faz 8 — Admin mobile data/form surfaces: tables collapse to card lists without losing controls. */
-@media (max-width: 768px) {
-    .pageHeader {
-        margin-bottom: 14px;
-    }
-
-    .pageHeader h1 {
-        font-size: 1.45rem;
-    }
-
-    .settingsCard,
-    .toolbar {
-        border-radius: var(--m-r-card);
-        padding: 14px;
-    }
-
-    .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-
-    .searchBox {
-        width: 100%;
-        min-width: 0;
-        max-width: none;
-        min-height: var(--touch-target);
-    }
-
-    .formGrid {
-        grid-template-columns: 1fr;
-    }
-
-    .formGroup input,
-    .formGroup select {
-        min-height: var(--touch-target);
-        font-size: 16px;
-    }
-
-    .profitLevelHeader {
-        display: none;
-    }
-
-    .profitLevelRow {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(86px, auto);
-        gap: 10px;
-        align-items: stretch;
-        padding: 12px;
-        margin-bottom: 10px;
-        border: 1px solid var(--m-glass-border);
-        border-radius: var(--m-r-card);
-        background: var(--m-glass-bg);
-        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
-    }
-
-    .profitLevelRow > *:nth-child(3),
-    .profitLevelRow > *:nth-child(4) {
-        display: flex;
-    }
-
-    .profitLevelRow input {
-        min-height: var(--touch-target);
-        width: 100%;
-        font-size: 16px;
-    }
-
-    .iconBtn,
-    .deleteBtn,
-    .defaultBadge {
-        min-width: var(--touch-target);
-        min-height: var(--touch-target);
-    }
-
-    .addLevelBtn,
-    .adminPrimaryBtn {
-        min-height: var(--touch-target);
-    }
-
-    .tableWrap {
-        display: none;
-    }
-
-    .mobileCardList {
-        display: block;
-    }
+  .adminShell { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 12px 16px 32px; }
+  .sidebar { position: static; padding: 0; border: 0; box-shadow: none; background: transparent; }
+  .sidebarNav { flex-direction: row; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .navItem { flex: none; min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); white-space: nowrap; }
+  .navItem svg { display: none; }
+  .navItemActive { border-color: var(--amber); }
+  .pageHeader h1 { font-size: 28px; }
+  .pageHeader p { font-size: 14px; }
+  .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .statBox { padding: 16px 18px; }
+  .statBox .value, .value { font-size: 28px; }
+  .distributionGrid { grid-template-columns: minmax(0, 1fr); }
+  .tableWrap { display: none; }
+  .mobileCardList { display: block; }
+  .profitLevelHeader { display: none; }
+  .profitLevelRow { grid-template-columns: minmax(0, 1fr) 90px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; background: var(--surface); }
+  .settingsCard { padding: 18px; }
 }
