@@ -1,78 +1,14 @@
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 1rem 6rem;
-}
-
-.header {
-  margin-bottom: 1.5rem;
-}
-
-.title {
-  font-size: 1.75rem;
-  font-weight: 900;
-  color: var(--text);
-  letter-spacing: -0.5px;
-  margin: 0 0 6px;
-}
-
-.subtitle {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin: 0;
-}
-
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 1.5rem;
-}
-
-.cta {
-  margin-top: 1.5rem;
-  text-align: center;
-}
-
-.ctaBtn {
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  background: var(--brand-gradient);
-  color: white;
-  border-radius: 12px;
-  font-weight: 800;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
+/* Herkese açık senaryo karşılaştırma — Figma 11. Arazi tokenları. */
+.container { max-width: 1200px; margin: 0 auto; padding: 48px 24px 80px; display: flex; flex-direction: column; gap: 24px; color: var(--ink); }
+.title { margin: 0 0 10px; font: 700 48px/1.1 Inter, sans-serif; letter-spacing: -0.6px; color: var(--ink); }
+.subtitle { margin: 0; font: 500 16px Inter, sans-serif; color: var(--ink-secondary); }
+.card { min-width: 0; }
+.cta { text-align: left; }
+.ctaBtn { display: inline-flex; align-items: center; min-height: 51px; padding: 0 28px; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; text-decoration: none; }
+.ctaBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 @media (max-width: 768px) {
-  .container {
-    padding: 1.25rem 1rem 2rem;
-  }
-
-  [data-theme="dark"] .container {
-    --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-    --seal-border-soft: rgba(43, 124, 255, 0.18);
-  }
-
-  [data-theme="light"] .container {
-    --seal-surface: var(--shell-bg);
-    --seal-border-soft: var(--shell-border);
-  }
-
-  .card {
-    background: var(--seal-surface);
-    border-color: var(--seal-border-soft);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    padding: 1.25rem;
-  }
-
-  .ctaBtn {
-    width: 100%;
-    min-height: var(--touch-target);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  .container { padding: 24px 16px 48px; gap: 16px; }
+  .title { font-size: 30px; }
+  .subtitle { font-size: 14px; }
+  .ctaBtn { width: 100%; justify-content: center; }
 }

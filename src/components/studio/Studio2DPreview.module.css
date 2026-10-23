@@ -40,7 +40,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text);
+  color: var(--ink);
   font-size: 13px;
 }
 
@@ -54,7 +54,7 @@
 .uyarilar {
   margin: 0;
   padding-left: 18px;
-  color: var(--muted);
+  color: var(--ink-secondary);
   font-size: 12px;
   display: grid;
   gap: 4px;
@@ -62,9 +62,9 @@
 
 .bosDurum {
   padding: 24px 16px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--panel);
+  background: var(--surface);
   display: grid;
   gap: 10px;
   justify-items: start;
@@ -72,23 +72,23 @@
 
 .bosDurumBaslik {
   margin: 0;
-  color: var(--card-title);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 700;
 }
 
 .bosDurumSayi {
   margin: 0;
-  color: var(--muted);
+  color: var(--ink-secondary);
   font-size: 12px;
 }
 
 .parselEkleBtn {
   min-height: 36px;
-  border: 1px solid rgba(var(--primary-rgb), 0.4);
+  border: 1px solid rgba(31, 111, 235, 0.4);
   border-radius: 999px;
-  background: rgba(var(--primary-rgb), 0.1);
-  color: var(--primary);
+  background: rgba(31, 111, 235, 0.1);
+  color: var(--blue);
   font-size: 12px;
   font-weight: 800;
   padding: 0 16px;
@@ -102,6 +102,6 @@
 
   .gorunumAlani {
     border-bottom: none;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--line);
   }
 }

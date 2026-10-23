@@ -35,7 +35,7 @@ describe('ScenarioCompare', () => {
         expect(screen.getByText(/en az 2 senaryo gereklidir/i)).toBeInTheDocument();
     });
 
-    it('senaryo isimlerini tablo başlığında gösterir, en düşük maliyetliyi yıldızla işaretler', () => {
+    it('senaryo isimlerini tablo başlığında gösterir, en düşük maliyetliyi Önerilen olarak işaretler', () => {
         render(<ScenarioCompare scenarios={scenarios} />);
         // Mobil kart görünümü de aynı senaryo adlarını render ettiği için (bkz. aşağıdaki test),
         // sorguyu masaüstü tablosuyla sınırlıyoruz — aksi halde getByText belirsiz hale gelir.
@@ -44,7 +44,7 @@ describe('ScenarioCompare', () => {
         expect(table.getAllByText(/Lüks/).length).toBeGreaterThan(0);
         // fdTotal'i en düşük olan (Ekonomik, 4M < 6M) best — yıldız o sütunun başlığında
         const ekonomikHeader = table.getByText(/Ekonomik/).closest('th');
-        expect(ekonomikHeader?.textContent).toContain('★');
+        expect(ekonomikHeader).toHaveAttribute('data-best', 'true');
     });
 
     it('mobil kart görünümünde de her iki senaryo adı bulunur (jsdom media query uygulamaz, DOM\'da ikisi de var olmalı)', () => {

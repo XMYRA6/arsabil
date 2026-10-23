@@ -8,7 +8,7 @@
 .alan {
   display: grid;
   gap: 3px;
-  color: var(--muted);
+  color: var(--ink-secondary);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -17,10 +17,10 @@
 
 .girdi {
   min-height: 34px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--panel);
-  color: var(--text);
+  background: var(--surface);
+  color: var(--ink);
   font-size: 13px;
   padding: 0 8px;
   width: 100%;
@@ -33,10 +33,10 @@
 
 .uygulaBtn {
   min-height: 36px;
-  border: 1px solid rgba(var(--primary-rgb), 0.4);
+  border: 1px solid rgba(31, 111, 235, 0.4);
   border-radius: 999px;
-  background: rgba(var(--primary-rgb), 0.1);
-  color: var(--primary);
+  background: rgba(31, 111, 235, 0.1);
+  color: var(--blue);
   font-size: 12px;
   font-weight: 800;
   padding: 0 16px;
@@ -45,10 +45,10 @@
 
 .kaldirBtn {
   min-height: 36px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: 999px;
   background: transparent;
-  color: var(--muted);
+  color: var(--ink-secondary);
   font-size: 12px;
   font-weight: 700;
   padding: 0 14px;

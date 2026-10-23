@@ -1,7 +1,7 @@
 .page {
   min-height: calc(100dvh - var(--topbar-height, 72px));
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   padding: 32px 16px 48px;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .backLink {
-  color: var(--accent-violet);
+  color: var(--blue);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -35,20 +35,20 @@
   font-size: var(--font-size-title, 1.375rem);
   font-weight: 700;
   margin: 4px 0 0;
-  color: var(--text);
+  color: var(--ink);
 }
 
 .subtitle {
   font-size: 13.5px;
   line-height: 1.55;
-  color: var(--muted);
+  color: var(--ink-secondary);
   margin: 0;
   max-width: 640px;
 }
 
 .stage {
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg, 1rem);
   padding: 24px;
   box-shadow: var(--shadow2);

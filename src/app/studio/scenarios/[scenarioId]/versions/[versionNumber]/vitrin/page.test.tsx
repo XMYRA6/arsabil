@@ -35,7 +35,7 @@ describe('studio vitrin sayfasi (urun yerlesimi)', () => {
     expect(page).toMatch(/import styles from '\.\/page\.module\.css'/);
     expect(page).not.toMatch(/background:\s*'#090d16'/);
     expect(css).toMatch(/\.page\s*\{[^}]*background:\s*var\(--bg\)/);
-    expect(css).toMatch(/color:\s*var\(--text\)/);
-    expect(css).toMatch(/var\(--panel\)/);
+    expect(css).toMatch(/color:\s*var\(--ink\)/);
+    expect(css).toMatch(/var\(--surface\)/);
   });
 });

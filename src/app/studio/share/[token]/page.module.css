@@ -1,15 +1,15 @@
 .pageContainer {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--surface-2);
   display: flex;
   flex-direction: column;
-  color: #1e293b;
+  color: var(--ink);
   font-family: inherit;
 }
 
 .topNav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
   z-index: 40;
@@ -38,21 +38,21 @@
 }
 
 .brandDot {
-  color: #0284c7;
+  color: var(--blue);
   font-size: 16px;
 }
 
 .brandText {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .brandStudio {
   font-size: 14px;
   font-weight: 600;
-  color: #0284c7;
-  background: #e0f2fe;
+  color: var(--blue);
+  background: var(--blue-soft);
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: 2px;
@@ -61,8 +61,8 @@
 .shareBadge {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
-  background: #f1f5f9;
+  color: var(--ink-secondary);
+  background: var(--surface-2);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -74,8 +74,8 @@
 
 .calcCtaButton {
   text-decoration: none;
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--ink);
+  color: var(--surface);
   font-size: 13px;
   font-weight: 600;
   padding: 8px 14px;
@@ -84,7 +84,7 @@
 }
 
 .calcCtaButton:hover {
-  background: #1e293b;
+  background: var(--ink);
 }
 
 .mainContent {
@@ -99,18 +99,18 @@
 }
 
 .expiryNotice {
-  background: #eff6ff;
-  border: 1px solid #dbeafe;
+  background: var(--blue-soft);
+  border: 1px solid var(--blue-soft);
   border-radius: 8px;
   padding: 10px 16px;
   font-size: 13px;
-  color: #1e40af;
+  color: var(--blue);
   text-align: center;
 }
 
 .bottomCtaBox {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--ink) 0%, var(--ink) 100%);
+  color: var(--surface);
   border-radius: 16px;
   padding: 32px;
   text-align: center;
@@ -129,7 +129,7 @@
 
 .bottomCtaBox p {
   font-size: 14px;
-  color: #94a3b8;
+  color: var(--ink-secondary);
   max-width: 600px;
   margin: 0;
   line-height: 1.5;
@@ -137,8 +137,8 @@
 
 .largeCtaButton {
   text-decoration: none;
-  background: #0284c7;
-  color: #ffffff;
+  background: var(--blue);
+  color: var(--surface);
   font-size: 15px;
   font-weight: 700;
   padding: 12px 24px;
@@ -148,16 +148,16 @@
 }
 
 .largeCtaButton:hover {
-  background: #0369a1;
+  background: var(--blue);
 }
 
 .pageFooter {
-  border-top: 1px solid #e2e8f0;
-  background: #ffffff;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
   padding: 20px;
   text-align: center;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--ink-secondary);
 }
 
 @media (max-width: 640px) {

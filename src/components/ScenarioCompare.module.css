@@ -1,275 +1,46 @@
-.root {
-}
+/* Senaryo karşılaştırma — Figma 11 (Senaryo karşılaştırma). Arazi tokenları.
+   Masaüstü tablo, mobil kart/sekme görünümü. Hesapla, Projelerim ve herkese açık /compare sayfasında ortak. */
+.root { display: flex; flex-direction: column; gap: 14px; color: var(--ink); }
+.emptyMessage { padding: 20px; border-radius: 14px; background: var(--surface-2); color: var(--ink-secondary); font: 500 14px Inter, sans-serif; text-align: center; }
 
-.mobileCards {
-    display: none;
-}
+.actions { display: flex; justify-content: flex-end; gap: 8px; }
+.actionBtn, .copyBtn { min-width: 40px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.actionBtn:disabled { opacity: .6; cursor: wait; }
+.actionBtnSharing { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.actionBtn:focus-visible, .copyBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.shareBox { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line); }
+.shareUrlText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
 
-.emptyMessage {
-    text-align: center;
-    padding: 1.5rem;
-    color: var(--muted);
-    font-size: 0.9rem;
-}
+.tableWrap { overflow-x: auto; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+.table { width: 100%; border-collapse: collapse; font: 500 15px Inter, sans-serif; font-variant-numeric: tabular-nums; }
+.thLabel, .thScenario { padding: 18px 24px; background: var(--surface-2); text-align: left; vertical-align: top; font: 700 14px Inter, sans-serif; color: var(--ink); white-space: nowrap; }
+.thLabel { color: var(--ink-secondary); font-weight: 600; font-size: 12.5px; }
+.thScenarioBest { color: var(--ink); }
+.thScenarioBest::after { content: 'Önerilen'; display: block; width: fit-content; margin-top: 6px; padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font: 600 12px Inter, sans-serif; }
+.tdLabel, .tdValue { padding: 16px 24px; border-top: 1px solid var(--line); text-align: left; }
+.tdLabel { color: var(--ink-secondary); white-space: nowrap; }
+.tdValue { color: var(--ink); font-weight: 700; }
+.tdValueHighlight { color: var(--ink); }
+.tdValueBest { color: var(--ink); }
 
-.actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.875rem;
-    flex-wrap: wrap;
-}
-
-.actionBtn {
-    width: 42px;
-    height: 42px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 12px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    cursor: pointer;
-}
-
-.actionBtnSharing {
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-.shareBox {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding: 0.625rem 0.875rem;
-    background: rgba(59, 130, 246, 0.07);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 10px;
-    margin-bottom: 0.875rem;
-}
-
-.shareUrlText {
-    font-size: 0.78rem;
-    color: var(--text);
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.copyBtn {
-    width: 32px;
-    height: 32px;
-    display: inline-grid;
-    place-items: center;
-    border-radius: 10px;
-    background: var(--primary);
-    border: none;
-    color: white;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.tableWrap {
-    overflow-x: auto;
-}
-
-.table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.thLabel {
-    padding: 0.85rem 1rem;
-    background: var(--panel-2);
-    font-weight: 800;
-    font-size: 0.8rem;
-    color: var(--muted);
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.thScenario {
-    padding: 0.85rem 1rem;
-    background: var(--panel-2);
-    font-weight: 800;
-    font-size: 0.85rem;
-    color: var(--card-title);
-    text-align: center;
-    border-left: 1px solid var(--border);
-}
-
-.thScenarioBest {
-    background: rgba(var(--primary-rgb), 0.08);
-    color: var(--primary);
-}
-
-.tdLabel {
-    padding: 0.75rem 1rem;
-    border-top: 1px solid var(--border);
-    font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--label-color);
-}
-
-.tdValue {
-    padding: 0.75rem 1rem;
-    border-top: 1px solid var(--border);
-    border-left: 1px solid var(--border);
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--text);
-    text-align: center;
-    background: transparent;
-}
-
-.tdValueHighlight {
-    font-weight: 900;
-    font-size: 1rem;
-    color: var(--primary);
-}
-
-.tdValueBest {
-    background: rgba(var(--primary-rgb), 0.03);
-}
-
-/* .scenarioCard yalnizca mobilde render edilir (bkz. asagidaki media query),
-   ama `composes:` Turbopack/lightningcss'te @media ICINDE bir selector'da
-   OLAMAZ (bkz. docs/superpowers/plans/2026-08-15-mobil-kart-dili-revizyonu-faz1.md) —
-   bu yuzden composes'u tasiyan taban kural burada, media query DISINDA. */
-.scenarioCard {
-    composes: mStatSurface from global;
-}
+.mobileCards { display: none; }
 
 @media (max-width: 768px) {
-    .tableWrap {
-        display: none;
-    }
-
-    .mobileCards {
-        display: block;
-    }
-
-    .root {
-        color: var(--m-ink);
-    }
-
-    .actions {
-        justify-content: flex-end;
-    }
-
-    .actionBtn,
-    .copyBtn {
-        min-width: var(--touch-target);
-        min-height: var(--touch-target);
-        border-radius: var(--m-r-btn);
-        border: 1px solid var(--m-glass-border);
-        background: var(--m-glass-bg);
-        color: var(--m-link);
-        backdrop-filter: var(--m-glass-blur);
-        -webkit-backdrop-filter: var(--m-glass-blur);
-        box-shadow: var(--m-sh-card-sm), inset 0 1px 0 #fff;
-    }
-
-    .scenarioTabs {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
-        gap: 4px;
-        padding: 4px;
-        margin-bottom: 12px;
-        border-radius: var(--m-r-input);
-        border: 1px solid var(--m-glass-border);
-        background: var(--m-fill);
-    }
-
-    .scenarioTab,
-    .scenarioTabActive {
-        min-height: var(--touch-target);
-        border: 0;
-        border-radius: var(--m-r-btn);
-        background: transparent;
-        color: var(--m-on-glass);
-        font-weight: 900;
-        font-size: 12px;
-    }
-
-    .scenarioTabActive {
-        background: var(--m-grad-btn);
-        color: #fff;
-        box-shadow: var(--m-sh-grad-btn);
-    }
-
-    .cardTrack {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .scenarioCard {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
-        padding: 1rem;
-        box-shadow: var(--m-sh-card), inset 0 1px 0 #fff;
-    }
-
-    .scenarioCardBest {
-        border-color: var(--m-link);
-    }
-
-    .cardHeader {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--m-divider);
-    }
-
-    .cardName {
-        font-weight: 800;
-        font-size: 0.95rem;
-        color: var(--m-ink);
-    }
-
-    .cardBadge {
-        font-size: 0.68rem;
-        font-weight: 800;
-        color: var(--m-link);
-    }
-
-    .cardRow {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        padding: 0.4rem 0;
-    }
-
-    .cardLabel {
-        font-size: 0.78rem;
-        color: var(--m-body);
-        font-weight: 600;
-    }
-
-    .cardValue {
-        font-family: var(--m-mono);
-        font-variant-numeric: tabular-nums;
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: var(--m-ink);
-        text-align: right;
-    }
-
-    .cardValueHighlight {
-        font-size: 0.95rem;
-        font-weight: 900;
-        color: var(--m-link);
-    }
+  .actionBtn, .copyBtn { min-width: var(--touch-target); min-height: var(--touch-target); }
+  .tableWrap { display: none; }
+  .mobileCards { display: block; }
+  .scenarioTabs { display: flex; gap: 2px; padding: 4px; margin-bottom: 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow-x: auto; }
+  .scenarioTab, .scenarioTabActive { flex: 1; min-height: var(--touch-target); padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 14px Inter, sans-serif; white-space: nowrap; cursor: pointer; }
+  .scenarioTabActive { background: var(--amber); color: var(--ink); font-weight: 600; }
+  .cardTrack { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+  .cardTrack::-webkit-scrollbar { display: none; }
+  .scenarioCard { flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; padding: 18px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+  .scenarioCardBest { border-color: var(--ok); }
+  .cardHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .cardName { font: 700 17px Inter, sans-serif; color: var(--ink); }
+  .cardBadge { padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font: 600 12px Inter, sans-serif; }
+  .cardRow { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
+  .cardLabel { color: var(--ink-secondary); font: 500 14px Inter, sans-serif; }
+  .cardValue { color: var(--ink); font: 700 15px Inter, sans-serif; font-variant-numeric: tabular-nums; text-align: right; }
+  .cardValueHighlight { color: var(--ink); }
 }

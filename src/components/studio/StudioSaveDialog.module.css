@@ -12,7 +12,7 @@
 }
 
 .modal {
-  background: #ffffff;
+  background: var(--surface);
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
@@ -42,13 +42,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 24px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--line);
 }
 
 .title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -56,7 +56,7 @@
   background: transparent;
   border: none;
   font-size: 1.25rem;
-  color: #64748b;
+  color: var(--ink-secondary);
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
@@ -64,8 +64,8 @@
 }
 
 .closeButton:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface-2);
+  color: var(--ink);
 }
 
 .body {
@@ -81,8 +81,8 @@
 }
 
 .summaryCard {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 10px;
   padding: 14px 16px;
   display: flex;
@@ -98,12 +98,12 @@
 }
 
 .summaryLabel {
-  color: #64748b;
+  color: var(--ink-secondary);
   font-weight: 500;
 }
 
 .summaryValue {
-  color: #0f172a;
+  color: var(--ink);
   font-weight: 600;
 }
 
@@ -116,19 +116,19 @@
 }
 
 .sourceVerified {
-  background: #dcfce7;
+  background: color-mix(in srgb, var(--ok) 15%, transparent);
   color: #15803d;
 }
 
 .sourceDemo {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--amber-soft);
+  color: var(--amber-text);
 }
 
 .warningAlert {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #92400e;
+  background: var(--amber-soft);
+  border: 1px solid var(--amber-soft);
+  color: var(--amber-text);
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 0.8125rem;
@@ -138,7 +138,7 @@
 .modeSwitch {
   display: flex;
   gap: 8px;
-  background: #f1f5f9;
+  background: var(--surface-2);
   padding: 4px;
   border-radius: 8px;
 }
@@ -151,14 +151,14 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #64748b;
+  color: var(--ink-secondary);
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .modeButtonActive {
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--surface);
+  color: var(--ink);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -171,7 +171,7 @@
 .label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--ink);
 }
 
 .input,
@@ -179,7 +179,7 @@
   width: 100%;
   padding: 10px 12px;
   font-size: 0.875rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--line);
   border-radius: 8px;
   outline: none;
   box-sizing: border-box;
@@ -187,7 +187,7 @@
 
 .input:focus,
 .textarea:focus {
-  border-color: #3b82f6;
+  border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
@@ -202,7 +202,7 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 24px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--line);
   background: #fafafa;
 }
 
@@ -210,31 +210,31 @@
   padding: 9px 16px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  color: var(--ink-secondary);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 8px;
   cursor: pointer;
 }
 
 .cancelBtn:hover {
-  background: #f1f5f9;
+  background: var(--surface-2);
 }
 
 .saveBtn {
   padding: 9px 20px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #ffffff;
-  background: #2563eb;
-  border: 1px solid #1d4ed8;
+  color: var(--surface);
+  background: var(--blue);
+  border: 1px solid var(--blue);
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .saveBtn:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: var(--blue);
 }
 
 .saveBtn:disabled {

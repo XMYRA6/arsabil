@@ -6,12 +6,12 @@
 }
 
 .emptyBox {
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
   border-radius: 12px;
   padding: 40px 20px;
   text-align: center;
-  color: #64748b;
+  color: var(--ink-secondary);
   font-size: 14px;
 }
 
@@ -21,14 +21,14 @@
   justify-content: center;
   height: 100%;
   width: 100%;
-  color: #64748b;
+  color: var(--ink-secondary);
   font-size: 14px;
-  background: #0f172a;
+  background: var(--ink);
 }
 
 .previewClosed {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -42,20 +42,20 @@
 .closedTitle {
   font-size: 16px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
 }
 
 .closedSubtitle {
   font-size: 13px;
-  color: #64748b;
+  color: var(--ink-secondary);
   margin: 0;
   max-width: 480px;
 }
 
 .showButton {
-  background: #0284c7;
-  color: #ffffff;
+  background: var(--blue);
+  color: var(--surface);
   border: none;
   font-size: 14px;
   font-weight: 600;
@@ -66,7 +66,7 @@
 }
 
 .showButton:hover {
-  background: #0369a1;
+  background: var(--blue);
 }
 
 .sceneWrapper {
@@ -74,10 +74,10 @@
   width: 100%;
   aspect-ratio: 16 / 10;
   min-height: 380px;
-  background: #0f172a;
+  background: var(--ink);
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .topBar {
@@ -95,7 +95,7 @@
 .badge {
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--surface);
   font-size: 12px;
   font-weight: 600;
   padding: 4px 10px;
@@ -107,7 +107,7 @@
   pointer-events: auto;
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(4px);
-  color: #e2e8f0;
+  color: var(--line);
   border: 1px solid rgba(255, 255, 255, 0.15);
   font-size: 12px;
   font-weight: 600;
@@ -118,20 +118,20 @@
 
 .hideButton:hover {
   background: rgba(15, 23, 42, 0.9);
-  color: #ffffff;
+  color: var(--surface);
 }
 
 .disclaimer {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--ink-secondary);
   line-height: 1.4;
   margin: 0;
   text-align: center;
 }
 
 .fallbackBox {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -142,13 +142,13 @@
 .fallbackTitle {
   font-size: 15px;
   font-weight: 700;
-  color: #92400e;
+  color: var(--amber-text);
   margin: 0;
 }
 
 .fallbackText {
   font-size: 13px;
-  color: #475569;
+  color: var(--ink-secondary);
   margin: 0;
 }
 
@@ -160,8 +160,8 @@
 }
 
 .renderLockedCta {
-  background: #faf5ff;
-  border: 1px solid #e9d5ff;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 16px 20px;
   display: flex;
@@ -174,13 +174,13 @@
 .lockedTitle {
   font-size: 14px;
   font-weight: 700;
-  color: #6b21a8;
+  color: var(--blue);
   margin: 0;
 }
 
 .lockedText {
   font-size: 12.5px;
-  color: #64748b;
+  color: var(--ink-secondary);
   line-height: 1.5;
   margin: 0;
   max-width: 420px;
@@ -190,7 +190,7 @@
   margin-top: 4px;
   font-size: 13px;
   font-weight: 600;
-  color: #7c3aed;
+  color: var(--blue);
   text-decoration: none;
 }
 
@@ -199,8 +199,8 @@
 }
 
 .renderButton {
-  background: #7c3aed;
-  color: #ffffff;
+  background: var(--blue);
+  color: var(--surface);
   border: none;
   font-size: 14px;
   font-weight: 600;
@@ -221,7 +221,7 @@
 
 .renderError {
   font-size: 13px;
-  color: #b91c1c;
+  color: var(--bad);
   margin: 0;
   text-align: center;
 }
@@ -230,7 +230,7 @@
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 .renderImage {
