@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { listTurler, resolveScene, type Tur } from '@/lib/dioramas/scene'
 import { useThemeZaman } from './useThemeZaman'
@@ -88,10 +88,81 @@ export function ProductsSection() {
   )
 }
 
-/** "Her arazi, kendi mantığıyla." — altı arazi türü kartı. */
+interface TurBilgi {
+  alt: string
+  kriterler: [string, string][]
+  ozet: [string, string][]
+  cta: string
+  href: string
+}
+
+/** Tür başına değerlendirme kriterleri ve örnek rapor özeti (vitrin; gerçek değerler hesaptan gelir). */
+const TUR_BILGI: Record<Tur, TurBilgi> = {
+  arsa: {
+    alt: 'İmarlı arsada değeri imar hakkı, konum ve çevre belirler.',
+    kriterler: [['Emsal ve imar durumu', 'KAKS, TAKS ve kat sayısı'], ['Yola cephe ve konum', 'Cadde, ulaşım ve çevre'], ['Risk durumu', 'Fay, taşkın ve heyelan']],
+    ozet: [['Fiyat', '₺2.450 / m²'], ['Risk', 'Düşük'], ['Emsal', '0,60']],
+    cta: 'Arsanı değerle', href: '/deger',
+  },
+  tarla: {
+    alt: 'Tarlada değeri toprak, su ve erişim belirler.',
+    kriterler: [['Toprak sınıfı ve verim', 'Tarım sınıfı, parsel bütünlüğü'], ['Su ve sulama', 'Kanal, kuyu ve yağış'], ['Eğim ve erişim', 'Yol ve makine girişi']],
+    ozet: [['Fiyat', '₺380 / m²'], ['Verim', 'Yüksek'], ['Sınıf', 'II']],
+    cta: 'Tarlanı değerle', href: '/deger',
+  },
+  villa: {
+    alt: 'Villa arsasında değeri manzara ve yapılaşma hakkı belirler.',
+    kriterler: [['Konum ve manzara', 'Deniz, orman ve yükseklik'], ['Yapılaşma hakkı', 'TAKS, kat ve inşaat alanı'], ['Çevre ve erişim', 'Site, yol ve altyapı']],
+    ozet: [['Fiyat', '₺6.200 / m²'], ['Manzara', 'Deniz'], ['TAKS', '0,30']],
+    cta: 'Arsanı değerle', href: '/deger',
+  },
+  ticari: {
+    alt: 'Ticari arsada değeri cephe ve imar hakkı belirler.',
+    kriterler: [['Cephe ve görünürlük', 'Cadde, yaya ve araç akışı'], ['İmar ve kat sayısı', 'Ticaret, ofis ve otopark'], ['Çevre ve talep', 'Komşu işletmeler, kira potansiyeli']],
+    ozet: [['Fiyat', '₺9.800 / m²'], ['Cephe', 'Ana cadde'], ['Emsal', '1,20']],
+    cta: 'Arsanı değerle', href: '/deger',
+  },
+  bag: {
+    alt: 'Bağ-bahçede değeri ürün, su ve arazi yapısı belirler.',
+    kriterler: [['Ürün ve ağaç', 'Tür, yaş ve verim'], ['Su ve sulama', 'Kuyu, kanal ve damla'], ['Arazi yapısı', 'Eğim, toprak ve erişim']],
+    ozet: [['Fiyat', '₺720 / m²'], ['Su', 'Kuyu var'], ['Ağaç', '180 adet']],
+    cta: 'Bağını değerle', href: '/deger',
+  },
+  kat: {
+    alt: 'Kat karşılığında önemli olan arsa payı ve maliyet dengesidir.',
+    kriterler: [['Arsa payı önerisi', 'Müteahhitle adil paylaşım'], ['Maliyet ve kâr marjı', 'İnşaat, satış ve risk'], ['Daire karması', 'Kat, daire sayısı ve bölüm']],
+    ozet: [['Fiyat', '₺4.600 / m²'], ['Arsa payı', '%46'], ['Marj', '%18']],
+    cta: 'Fizibilite hesapla', href: '/hesapla',
+  },
+}
+
+const TUR_SURESI = 5000
+
+function azaltilmisHareket(): boolean {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+function turEtiketi(k: Tur, l: string) {
+  return k === 'bag' ? 'Bağ · Bahçe' : l
+}
+
+/** "Her arazi, kendi mantığıyla." — altı arazi türü kartı + seçili türün kriter paneli. */
 export function LandTypesSection() {
   const zaman = useThemeZaman()
   const [secili, setSecili] = useState<Tur>('arsa')
+  const [secildi, setSecildi] = useState(false)
+  const turler = listTurler()
+  const bilgi = TUR_BILGI[secili]
+  const seciliEtiket = turEtiketi(secili, turler.find((t) => t.key === secili)?.label ?? '')
+
+  // Kullanıcı seçmediyse türler sırayla kendiliğinden döner.
+  useEffect(() => {
+    if (secildi || azaltilmisHareket()) return
+    const sira = listTurler().map((t) => t.key)
+    const id = setInterval(() => setSecili((t) => sira[(sira.indexOf(t) + 1) % sira.length]), TUR_SURESI)
+    return () => clearInterval(id)
+  }, [secildi])
+
   return (
     <section className={`${styles.section} ${styles.tint}`} aria-labelledby="turler-baslik">
       <div className={styles.inner}>
@@ -100,21 +171,54 @@ export function LandTypesSection() {
           Tarla ile villa arsası aynı fiyatlanmaz. ArsaBil arazi türüne göre emsal, imar ve risk kriterlerini değiştirir.
         </p>
         <div className={styles.turGrid} role="group" aria-label="Arazi türleri">
-          {listTurler().map((t) => (
+          {turler.map((t) => (
             <button
               key={t.key}
               type="button"
               aria-pressed={secili === t.key}
               className={secili === t.key ? `${styles.turCard} ${styles.turOn}` : styles.turCard}
-              onClick={() => setSecili(t.key)}
+              onClick={() => { setSecildi(true); setSecili(t.key) }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={sceneSrc(t.key, zaman)} alt="" loading="lazy" />
-              <strong>{t.key === 'bag' ? 'Bağ · Bahçe' : t.label}</strong>
+              <strong>{turEtiketi(t.key, t.label)}</strong>
               <small>{TUR_ALT[t.key]}</small>
             </button>
           ))}
         </div>
+
+        <div className={styles.panel} aria-live="polite">
+          <div className={styles.panelScene}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img key={secili} className={styles.swapIn} src={sceneSrc(secili, zaman)} alt="" />
+          </div>
+          <div key={secili} className={`${styles.panelBody} ${styles.swapIn}`}>
+            <p className={styles.eyebrow}>{seciliEtiket.toLocaleUpperCase('tr')} NELERE GÖRE DEĞERLENİR</p>
+            <h3 className={styles.panelTitle}>{seciliEtiket}</h3>
+            <p className={styles.panelSub}>{bilgi.alt}</p>
+            <ul className={styles.criteria}>
+              {bilgi.kriterler.map(([k, d]) => (
+                <li key={k}><strong>{k}</strong><span>{d}</span></li>
+              ))}
+            </ul>
+            <div className={styles.panelFoot}>
+              <div>
+                <small className={styles.sampleLabel}>Örnek rapor özeti</small>
+                <div className={styles.tiles}>
+                  {bilgi.ozet.map(([k, v]) => (
+                    <div key={k} className={styles.tile}><small>{k}</small><strong>{v}</strong></div>
+                  ))}
+                </div>
+              </div>
+              <Link href={bilgi.href} className={styles.btnPrimary}>{bilgi.cta} <Arrow /></Link>
+            </div>
+          </div>
+          <div className={styles.dots} aria-hidden="true">
+            {turler.map((t) => <i key={t.key} className={t.key === secili ? styles.dotOn : undefined} />)}
+            {!secildi && <small>Seçmezsen 5 sn’de bir değişir</small>}
+          </div>
+        </div>
+
         <p className={styles.caption}>
           Sahne seçilen türe göre değişir: toprak kesiti, ekin sırası, çatı, otopark, vinç… Güneş, bulut ve hava durumu canlı animasyonlu.
         </p>

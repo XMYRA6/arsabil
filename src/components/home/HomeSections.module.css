@@ -282,6 +282,192 @@
   border-color: var(--amber);
 }
 
+/* Tür paneli */
+.panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
+  gap: 40px;
+  margin-top: 32px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  background-color: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.panelScene {
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+  overflow: hidden;
+  border-radius: 24px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--blue) 8%, var(--surface)) 0%, var(--surface) 100%);
+}
+
+.panelScene img {
+  width: 92%;
+  height: auto;
+}
+
+.panelBody {
+  display: grid;
+  align-content: start;
+  padding: 16px 20px 8px 0;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--sage);
+}
+
+.panelTitle {
+  margin: 0 0 6px;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.panelSub {
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: var(--ink-secondary);
+}
+
+.criteria {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.criteria li {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+}
+
+.criteria strong {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.criteria strong::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--amber);
+}
+
+.criteria span {
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+
+.panelFoot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.sampleLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tile {
+  display: grid;
+  gap: 2px;
+  min-width: 118px;
+  padding: 10px 16px;
+  border-radius: 18px;
+  background-color: var(--surface-2);
+}
+
+.tile small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.tile strong {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.dots {
+  position: absolute;
+  top: 36px;
+  right: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+}
+
+.dots i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--line);
+  transition: width var(--dur-ui) var(--ease-out), background-color var(--dur-ui) var(--ease-out);
+}
+
+.dots .dotOn {
+  width: 28px;
+  background-color: var(--amber);
+}
+
+.dots small {
+  flex-basis: 100%;
+  text-align: right;
+  font-size: 11px;
+  color: var(--ink-secondary);
+}
+
+.swapIn {
+  animation: swapIn 320ms var(--ease-out);
+}
+
+@keyframes swapIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Akif */
 .akifGrid {
   display: grid;
@@ -506,6 +692,16 @@
 }
 
 @media (max-width: 1100px) {
+  .panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .panelBody {
+    padding: 4px 8px 8px;
+  }
+  .dots {
+    display: none;
+  }
   .turGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -540,6 +736,16 @@
   .feat {
     grid-template-columns: minmax(0, 1fr);
   }
+  .criteria li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .panelTitle {
+    font-size: 32px;
+  }
+  .panelScene {
+    min-height: 220px;
+  }
   .wa {
     flex-direction: column;
     align-items: stretch;
@@ -550,6 +756,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .swapIn {
+    animation: none;
+  }
+  .dots i {
+    transition: none;
+  }
   .btnPrimary,
   .btnAmber,
   .mini,
