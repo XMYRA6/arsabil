@@ -1,6 +1,7 @@
 "use client";
 
-import { computeEffectiveLandShareX, type QualityTier } from '../calculatorUiHelpers';
+import { useState, type ReactNode } from 'react';
+import { computeEffectiveLandShareX, ORNEK_APARTMENT_SIZE, type QualityTier } from '../calculatorUiHelpers';
 import { riskNotu } from '../SmartContextCardSections';
 import { useBufferedNumberInput } from '../useBufferedNumberInput';
 import { kaynakEtiketi, type BirimMaliyetKaynagi } from './unitPriceSource';
@@ -38,8 +39,18 @@ export type GirdiKartiProps = {
     onTotalApartments: (v: number) => void;
     ownerApartmentShare: number;
     onOwnerApartmentShare: (v: number) => void;
-    /** Gelişmiş ayarlar sheet'ini açar — Figma'da kartın son satırı. */
-    onAyarlarAc: () => void;
+    /** Gelişmiş ayarlar sheet'ini açar — Figma'da kartın son satırı (mobil). */
+    onAyarlarAc?: () => void;
+    /** Verilirse masaüstü düzeni: tek sütun alanlar, arsa maliyeti modeli,
+     * −/+ metrekare ve satır içinde açılan Gelişmiş ayarlar (Figma 05 masaüstü). */
+    masaustu?: {
+        landCostModel: 'proportional' | 'comparable';
+        onLandCostModel: (m: 'proportional' | 'comparable') => void;
+        canUseComparable: boolean;
+        comparableNote: string;
+        comparableTitle: string;
+        ayarlarAlani: ReactNode;
+    };
 };
 
 /**
@@ -111,7 +122,9 @@ export function GirdiKarti({
     onOwnerApartmentShare,
     onParselDogrulaAc,
     onAyarlarAc,
+    masaustu,
 }: GirdiKartiProps) {
+    const [ayarlarAcik, setAyarlarAcik] = useState(false);
     // Sd acikken gosterilen yuzde TURETILMISTIR, ayri bir state degildir.
     // Formul KOPYALANMAZ: motora giden deger de ayni yardimcidan gelir
     // (page.tsx), satir ici bir kopya zamanla ayrisirdi (A1 minor).
@@ -134,7 +147,7 @@ export function GirdiKarti({
     const alanDogrulandi = parcelContext?.status === 'verified' && !!parsel?.areaSqm;
 
     return (
-        <section className={styles.kart} aria-label="Proje girdileri">
+        <section className={`${styles.kart} ${masaustu ? styles.kartMasaustu : ''}`} aria-label="Proje girdileri">
             <h2 className={styles.baslik}>Proje bilgileri</h2>
 
             {/* ── Konum ── */}
@@ -185,6 +198,26 @@ export function GirdiKarti({
                             onChange={(e) => onApartmentSize(e.target.value === '' ? null : Number(e.target.value))}
                         />
                         <span className={styles.girdiBirim}>m²</span>
+                        {masaustu && (
+                            <>
+                                <button
+                                    type="button"
+                                    className={styles.adimBtn}
+                                    aria-label="Metrekareyi azalt"
+                                    onClick={() => { if (apartmentSize !== null) onApartmentSize(Math.max(50, apartmentSize - 5)); }}
+                                >
+                                    −
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.adimBtn}
+                                    aria-label="Metrekareyi artır"
+                                    onClick={() => onApartmentSize(apartmentSize === null ? ORNEK_APARTMENT_SIZE : apartmentSize + 5)}
+                                >
+                                    +
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -197,6 +230,33 @@ export function GirdiKarti({
                     onChange={(e) => onIsAaEnabled(e.target.checked)}
                 />
             </div>
+
+            {masaustu && (
+                <div className={styles.alan}>
+                    <span className={styles.etiket}>Arsa maliyeti modeli</span>
+                    <div className={styles.segmentSerit} role="group" aria-label="Arsa maliyeti modeli">
+                        <button
+                            type="button"
+                            aria-pressed={masaustu.landCostModel === 'proportional'}
+                            className={`${styles.segmentSecenek} ${masaustu.landCostModel === 'proportional' ? styles.segmentSecili : ''}`}
+                            onClick={() => masaustu.onLandCostModel('proportional')}
+                        >
+                            Oransal
+                        </button>
+                        <button
+                            type="button"
+                            aria-pressed={masaustu.landCostModel === 'comparable'}
+                            className={`${styles.segmentSecenek} ${masaustu.landCostModel === 'comparable' ? styles.segmentSecili : ''}`}
+                            disabled={!masaustu.canUseComparable}
+                            title={masaustu.comparableTitle}
+                            onClick={() => masaustu.onLandCostModel('comparable')}
+                        >
+                            Emsal
+                        </button>
+                    </div>
+                    <p className={styles.altNot}>{masaustu.comparableNote}</p>
+                </div>
+            )}
 
             {/* ── Birim maliyet ── */}
             <div className={styles.alan} data-girdi-blok="birim-maliyet">
@@ -327,14 +387,20 @@ export function GirdiKarti({
                         <input
                             type="range"
                             className={styles.slider}
-                            min={0}
+                            min={masaustu ? 10 : 0}
                             max={100}
                             step={1}
                             value={landShareRatio}
-                            style={ilerleme(landShareRatio, 0, 100)}
+                            style={ilerleme(landShareRatio, masaustu ? 10 : 0, 100)}
                             aria-label="Arsa payı yüzdesi"
                             onChange={e => onLandShareRatio(Number(e.target.value))}
                         />
+                        {masaustu && (
+                            <div className={styles.olcekUclar} aria-hidden="true">
+                                <span>%10</span>
+                                <span>%100</span>
+                            </div>
+                        )}
                         {/* Musteri bilerek %100'e kadar cikabilmesini istedi —
                             kelepce yerine seffaflik: x=1'e yaklasinca engine_v2.ts
                             maliyeti matematiksel olarak buyutuyor (M=Mi/(1-x)),
@@ -389,10 +455,18 @@ export function GirdiKarti({
                 <p className={styles.altNot}>{riskNotu(riskLevel)}</p>
             </div>
 
-            <button type="button" className={styles.gelismis} onClick={onAyarlarAc}>
+            <button
+                type="button"
+                className={styles.gelismis}
+                aria-expanded={masaustu ? ayarlarAcik : undefined}
+                onClick={masaustu ? () => setAyarlarAcik(a => !a) : onAyarlarAc}
+            >
                 Gelişmiş ayarlar
-                <IconChevronRight size={18} />
+                <IconChevronRight size={18} className={masaustu && ayarlarAcik ? styles.gelismisAcik : undefined} />
             </button>
+            {masaustu && ayarlarAcik && (
+                <div className={styles.ayarlarAcilan}>{masaustu.ayarlarAlani}</div>
+            )}
         </section>
     );
 }

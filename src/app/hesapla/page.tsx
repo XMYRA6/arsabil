@@ -3,28 +3,26 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
-import { RangeSlider } from '@/components/ui/RangeSlider';
-import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { CalculatorEngineV2, CalculationInput, CalculationOutput, type LandCostModel } from '@/lib/calculator/engine_v2';
 import type { DistrictPriceEntry } from '@/components/LocationSelector';
-import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, ORNEK_APARTMENT_SIZE, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput, type QualityTier } from './calculatorUiHelpers';
+import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput, type QualityTier } from './calculatorUiHelpers';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'react-hot-toast';
 // Dynamically imported to avoid SSR issues with @react-pdf/renderer
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare, type Scenario as ScenarioItem } from '@/components/ScenarioCompare';
 import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { BirimMaliyetField, RiskCostFields } from './AdvancedSettingsSections';
 
 import type { RiskLevel } from './riskSuggestionHelpers';
 import { HesaplaMobile } from './mobile/HesaplaMobile';
 import { ParcelVerificationSheet } from '@/components/listing-wizard/ParcelVerificationSheet';
-import { LocationHeader, AreaSection, RiskSection } from './SmartContextCardSections';
 import type { ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker';
 import type { RiskMeasurement } from '@/lib/risk/types';
 import { piyasaFarkiYuzdesi, sonucDegeri } from './mobile/hesaplaMobileProps';
 import { GelismisAyarlarSheet, type AyarBolumu } from './mobile/GelismisAyarlarSheet';
+import { GirdiKarti } from './mobile/GirdiKarti';
+import { MaliyetAlanlari, PiyasaAlani } from './mobile/AyarAlanlari';
 import { SonucPaneli } from './masaustu/SonucPaneli';
 import { HesapOzetiPaneli } from './masaustu/HesapOzetiPaneli';
 import arazi from './masaustu/masaustu.module.css';
@@ -1045,6 +1043,26 @@ export default function Home() {
     return <div className={styles.viewportIskelet} aria-busy="true" aria-live="polite" />;
   }
 
+  // Mobil ve masaüstü AYNI girdi kartını (GirdiKarti) kullanır: tek state, tek sözleşme.
+  const girdiOrtak = {
+    parcelContext,
+    arsaAlani, onArsaAlani: setArsaAlani,
+    isAaEnabled,
+    onIsAaEnabled: setIsAaEnabled,
+    riskLevel,
+    riskLevels,
+    onRiskLevel: handleRiskLevel,
+    riskKaynagi,
+    onParselDogrulaAc: () => setIsParcelModalOpen(true),
+    luxTier, onLuxTier: setLuxTier,
+    apartmentSize, onApartmentSize: handleApartmentSizeChange,
+    globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet: handleGlobalUnitPriceChange,
+    landShareRatio, onLandShareRatio: setLandShareRatio,
+    isApartmentCountEnabled, onApartmentCountEnabled: setIsApartmentCountEnabled,
+    totalApartments, onTotalApartments: setTotalApartments,
+    ownerApartmentShare, onOwnerApartmentShare: setOwnerApartmentShare,
+  };
+
   // Mobil dal: yeni "Premium Liquid Glass" ekranina devreder (spec 2026-07-28).
   if (!isDesktopViewport) {
     return (
@@ -1169,24 +1187,7 @@ export default function Home() {
             onKapat: () => setMobilStudioScenarioAcik(false),
           }}
           onParselDogrulaAc={() => setIsParcelModalOpen(true)}
-          girdi={{
-            parcelContext,
-            arsaAlani, onArsaAlani: setArsaAlani,
-            isAaEnabled,
-            onIsAaEnabled: setIsAaEnabled,
-            riskLevel,
-            riskLevels,
-            onRiskLevel: handleRiskLevel,
-            riskKaynagi,
-            onParselDogrulaAc: () => setIsParcelModalOpen(true),
-            luxTier, onLuxTier: setLuxTier,
-            apartmentSize, onApartmentSize: handleApartmentSizeChange,
-            globalUnitPrice, birimMaliyetKaynagi, onBirimMaliyet: handleGlobalUnitPriceChange,
-            landShareRatio, onLandShareRatio: setLandShareRatio,
-            isApartmentCountEnabled, onApartmentCountEnabled: setIsApartmentCountEnabled,
-            totalApartments, onTotalApartments: setTotalApartments,
-            ownerApartmentShare, onOwnerApartmentShare: setOwnerApartmentShare,
-          }}
+          girdi={girdiOrtak}
           ctaMetni={isSaving ? 'Kaydediliyor...' : 'Özet Rapor Oluştur'}
           ctaDevreDisi={!result || isSaving}
           onCta={handleSaveReport}
@@ -1252,138 +1253,38 @@ export default function Home() {
         </div>
       </header>
       <div className={styles.layout} id="formTop">
-        {/* Left Sidebar (Main Form) */}
-        <aside className={styles.leftSidebar}>
-
-          {/* ===== DESKTOP SIDEBAR: Original full form (visible on web only) ===== */}
-          <div className={styles.desktopSidebar}>
-            <div className={styles.sidebarTitle}>Proje Bilgileri</div>
-
-            <div className={styles.settingsGroup}>
-              <LocationHeader parcelContext={parcelContext} onOpenMap={() => setIsParcelModalOpen(true)} />
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <AreaSection
-                parcelContext={parcelContext}
-                arsaAlani={arsaAlani}
-                onArsaAlani={setArsaAlani}
-                isAaEnabled={isAaEnabled}
-                onIsAaEnabled={setIsAaEnabled}
-              />
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Arsa Maliyeti Modeli</h4>
-              <div className={styles.luxGrid} style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-                <button
-                  type="button"
-                  className={`${styles.luxBox} ${activeLandCostModel === 'proportional' ? styles.luxBoxActive : ''}`}
-                  onClick={() => setLandCostModel('proportional')}
-                >
-                  <span>Oransal</span>
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.luxBox} ${activeLandCostModel === 'comparable' ? styles.luxBoxActive : ''}`}
-                  disabled={!canUseComparableLandCost}
-                  title={canUseComparableLandCost ? `${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m² arsa emsali` : 'Emsal için haritadan parsel seçin ve ilçe arsa m² fiyatı tanımlı olsun'}
-                  onClick={() => setLandCostModel('comparable')}
-                >
-                  <span>Emsal</span>
-                </button>
-              </div>
-              <p className={styles.sliderValueBox}>
-                {canUseComparableLandCost
-                  ? `İlçe arsa emsali: ${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m²`
-                  : 'Emsal model için doğrulanmış arsa alanı ve ilçe arsa m² fiyatı gerekir.'}
-              </p>
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Daire Standardı</h4>
-              <div className={styles.luxGrid}>
-                {[
-                  { tier: 'standart' as const, label: 'Standart', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.84L17.5 12h-11L12 5.84z" /></svg> },
-                  { tier: 'orta' as const, label: 'Orta', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21h18v-2H3v2zm6-4h6V5H9v12zm8 0h6v-8h-6v8zm-16 0h6v-6H1v6z" /></svg> },
-                  { tier: 'luks' as const, label: 'Lüks', icon: <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M5 21h14V3H5v18zm2-14h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z" /><circle cx="17.5" cy="5.5" r="3.5" fill="#4ade80" /><path d="M16 6l1 1 2-2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg> }
-                ].map(opt => (
-                  <div key={opt.label} className={`${styles.luxBox} ${luxTier === opt.tier ? styles.luxBoxActive : ''}`} onClick={() => setLuxTier(opt.tier)}>
-                    {opt.icon}
-                    <span>{opt.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <h4>Ortalama Daire Metrekaresi</h4>
-              <div className={styles.stepperInput}>
-                <input type="number" value={apartmentSize ?? ''} onChange={(e) => handleApartmentSizeChange(e.target.value === '' ? null : Number(e.target.value))} />
-                <div className={styles.stepperRight}>
-                  <span>m²</span>
-                  <button onClick={() => { if (apartmentSize !== null) handleApartmentSizeChange(Math.max(50, apartmentSize - 5)); }}>−</button>
-                  <button onClick={() => handleApartmentSizeChange(apartmentSize === null ? ORNEK_APARTMENT_SIZE : apartmentSize + 5)}>+</button>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <BirimMaliyetField globalUnitPrice={globalUnitPrice} birimMaliyetKaynagi={birimMaliyetKaynagi} onBirimMaliyet={handleGlobalUnitPriceChange} />
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <div className={styles.toggleRow}>
-                <h4>Arsa Payı</h4>
-                <Toggle checked={isApartmentCountEnabled} onChange={(e) => setIsApartmentCountEnabled(e.target.checked)} />
-              </div>
-              {isApartmentCountEnabled ? (
+        {/* Sol kolon: Proje bilgileri — mobil ile AYNI GirdiKarti, masaüstü varyantı */}
+        <aside className={arazi.solKolon}>
+          <GirdiKarti
+            {...girdiOrtak}
+            masaustu={{
+              landCostModel: activeLandCostModel,
+              onLandCostModel: setLandCostModel,
+              canUseComparable: canUseComparableLandCost,
+              comparableTitle: canUseComparableLandCost
+                ? `${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m² arsa emsali`
+                : 'Emsal için haritadan parsel seçin ve ilçe arsa m² fiyatı tanımlı olsun',
+              comparableNote: canUseComparableLandCost
+                ? `İlçe arsa emsali: ${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m²`
+                : 'Emsal model için doğrulanmış arsa alanı ve ilçe arsa m² fiyatı gerekir.',
+              ayarlarAlani: (
                 <>
-                  <div className={styles.stepperInput}>
-                    <input type="number" value={totalApartments} onChange={(e) => setTotalApartments(Number(e.target.value))} />
-                    <div className={styles.stepperRight}>
-                      <span>daire</span>
-                      <button onClick={() => setTotalApartments(p => Math.max(1, p - 1))}>−</button>
-                      <button onClick={() => setTotalApartments(p => p + 1)}>+</button>
-                    </div>
-                  </div>
-                  <RangeSlider label="Arsa Sahibine Düşen Daire" aria-label="Arsa Sahibine Düşen Daire" min={0} max={Math.max(totalApartments - 1, 0)} step={1} value={ownerApartmentShare} unit="daire" onChange={(e) => setOwnerApartmentShare(Number(e.target.value))} />
-                  <p className={styles.sliderValueBox}>Arsa payı %{Math.round(effectiveLandShareRatio)} olarak hesaplanıyor.</p>
+                  <MaliyetAlanlari
+                    iksaMode={iksaMode}
+                    setIksaMode={setIksaMode}
+                    iksaPercentage={iksaPercentage}
+                    setIksaPercentage={setIksaPercentage}
+                    iksaManualTL={iksaManualTL}
+                    setIksaManualTL={setIksaManualTL}
+                    builderProfit={builderProfit}
+                    setBuilderProfit={setBuilderProfit}
+                    profitLevels={profitLevels}
+                  />
+                  <PiyasaAlani manualMarketPrice={manualMarketPrice} setManualMarketPrice={setManualMarketPrice} />
                 </>
-              ) : (
-                <div className={styles.sliderContainer}>
-                  <div className={styles.sliderTrackWrapper}>
-                    <div className={styles.sliderTrack} style={{ '--share-pct': `${((landShareRatio - 10) / 90) * 100}%` } as React.CSSProperties}>
-                      <div className={`${styles.sliderFill} ${styles.sliderFillDynamic}`}></div>
-                      <div className={`${styles.sliderThumb} ${styles.sliderThumbDynamic}`}></div>
-                      {/* Ust sinir 100 — musteri bilerek %100'e kadar
-                          cikabilmesini istedi (daire-sayisi modundaki N-1
-                          kelepcesi burada UYGULANMIYOR). x=1'e yaklasinca
-                          engine_v2.ts maliyeti matematiksel olarak
-                          buyutuyor (M=Mi/(1-x)) — bu YANLIS degil, arsa
-                          sahibinin projenin neredeyse tamamini aldigi
-                          senaryonun dogru sonucu; kullaniciya asagidaki
-                          uyari metniyle acikca anlatiliyor (denetim-2
-                          bulgusu, cozum: kelepce yerine seffaflik). */}
-                      <input type="range" min="10" max="100" value={landShareRatio} onChange={(e) => setLandShareRatio(Number(e.target.value))} className={styles.sliderInput} aria-label="Arsa payı yüzdesi" />
-                      <div className={styles.sliderTicks}><span>10%</span><span>100%</span></div>
-                    </div>
-                  </div>
-                  <div className={styles.sliderValueBox}>{landShareRatio}%</div>
-                  {landShareRatio >= 90 && (
-                    <p className={styles.landShareHighWarning}>
-                      Bu kadar yüksek bir arsa payında proje maliyeti matematiksel olarak çok yükselir — arsa sahibi projenin neredeyse tamamını alıyor demektir.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className={styles.settingsGroup}>
-              <RiskSection riskLevel={riskLevel} riskLevels={riskLevels} onRiskLevel={handleRiskLevel} riskKaynagi={riskKaynagi} />
-            </div>
-          </div>
-
+              ),
+            }}
+          />
         </aside>
 
         {/* Right Grid: Hesap Sonuçları + Hesap Özeti */}
@@ -1410,28 +1311,6 @@ export default function Home() {
               chartBaseInput={chartBaseInput}
               marketPriceNum={marketPriceNum}
             />
-          </div>
-
-          <div className={styles.advancedPanel}>
-            <div className={styles.advancedPanelTitle}>Gelişmiş Ayarlar</div>
-            <div className={styles.advancedPanelCols}>
-              {/* Yaklaşık Piyasa Fiyatı artık burada değil — "Piyasa
-                  Değerine Göre" kartının kendi bos-durumundan (tikla ->
-                  yaz -> Enter) giriliyor (2026-08-14 UX kararı). Alan
-                  mobil `GelismisAyarlarSheet`de hâlâ kullanılıyor,
-                  `MarketField` bilesenin kendisi SILINMEDI. */}
-              <RiskCostFields
-                iksaMode={iksaMode}
-                setIksaMode={setIksaMode}
-                iksaPercentage={iksaPercentage}
-                setIksaPercentage={setIksaPercentage}
-                iksaManualTL={iksaManualTL}
-                setIksaManualTL={setIksaManualTL}
-                builderProfit={builderProfit}
-                setBuilderProfit={setBuilderProfit}
-                profitLevels={profitLevels}
-              />
-            </div>
           </div>
 
         </section>

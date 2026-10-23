@@ -191,8 +191,7 @@ describe('/hesapla — masaüstü Yapı Standardı admin katsayılarına bağlı
         })
 
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        const kaliteBloku = screen.getByText('Daire Standardı').closest('div') as HTMLElement
-        await user.click(within(kaliteBloku).getByText('Orta'))
+        await user.click(screen.getByRole('tab', { name: 'Orta' }))
 
         // Mi_base = 140 m² × 10.000 TL/m² × 1.25 (admin'in qualityMedium'u, SABIT
         // 1.2 DEGIL) = 1.750.000. Varsayilan risk seviyesi %10 oldugundan
@@ -218,10 +217,9 @@ describe('/hesapla — masaüstü Yapı Standardı admin katsayılarına bağlı
         const user = userEvent.setup()
         render(<HesaplaPage />)
 
-        const kaliteBloku = screen.getByText('Daire Standardı').closest('div') as HTMLElement
-        const ortaKutusu = within(kaliteBloku).getByText('Orta')
-        await user.click(ortaKutusu)
-        expect(ortaKutusu.closest('div')?.className).toMatch(/luxBoxActive/)
+        const ortaSekmesi = screen.getByRole('tab', { name: 'Orta' })
+        await user.click(ortaSekmesi)
+        expect(ortaSekmesi).toHaveAttribute('aria-selected', 'true')
 
         // Admin degeri (1.2 -> 1.25) kullanicinin secimini yaptiktan SONRA gelsin.
         await act(async () => {
@@ -229,52 +227,48 @@ describe('/hesapla — masaüstü Yapı Standardı admin katsayılarına bağlı
             await new Promise(resolve => setTimeout(resolve, 0))
         })
 
-        expect(ortaKutusu.closest('div')?.className).toMatch(/luxBoxActive/)
+        expect(screen.getByRole('tab', { name: 'Orta' })).toHaveAttribute('aria-selected', 'true')
     })
 })
 
-describe('/hesapla — masaüstü Gelişmiş Ayarlar paneli (sütun dengesi)', () => {
-    it('İksa Masrafı ve Müteahhit Kazancı artık sol "Proje Bilgileri" sidebar\'ında DEĞİL', () => {
+describe('/hesapla — masaüstü Gelişmiş ayarlar (sol kartta açılır bölüm)', () => {
+    const solKart = () => screen.getByRole('region', { name: 'Proje girdileri' })
+
+    it('İksa maliyeti ve Müteahhit kâr hedefi başlangıçta kapalı (Gelişmiş ayarlar açılana kadar görünmez)', () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        const sidebar = screen.getByText('Proje Bilgileri').closest('aside') as HTMLElement
-        expect(within(sidebar).queryByText('İksa Masrafı')).toBeNull()
-        expect(within(sidebar).queryByText('Müteahhit Kazancı')).toBeNull()
-        expect(within(sidebar).queryByText('Piyasa Analizi')).toBeNull()
+        expect(within(solKart()).queryByText('İksa maliyeti')).toBeNull()
+        expect(within(solKart()).queryByText('Müteahhit kâr hedefi')).toBeNull()
     })
 
-    it('Birim İnşaat Maliyeti sol sidebar\'da KALIR', () => {
+    it('Birim maliyet sol kartta durur', () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        const sidebar = screen.getByText('Proje Bilgileri').closest('aside') as HTMLElement
-        expect(within(sidebar).getByText('Birim inşaat maliyeti')).toBeInTheDocument()
+        expect(within(solKart()).getByText('Birim maliyet')).toBeInTheDocument()
     })
 
-    it('"Gelişmiş Ayarlar" paneli İksa Masrafı + Müteahhit Kazancı içerir (Piyasa Fiyatı artık burada değil)', () => {
-        viewportKur(true)
-        render(<HesaplaPage />)
-        // `getByText('Gelişmiş Ayarlar')` başlık div'inin KENDİSİNİ döner
-        // (`.advancedPanelTitle` de bir div) — `.closest('div')` bu durumda
-        // kendisini döner, kardeş `.advancedPanelCols`'u KAPSAMAZ. CSS
-        // module'ler jest'te `identity-obj-proxy` ile literal class adına
-        // eşleniyor (`jest.config.js:7`), bu yüzden `.advancedPanel`
-        // gerçek bir CSS selector olarak çalışır.
-        const panel = screen.getByText('Gelişmiş Ayarlar').closest('.advancedPanel') as HTMLElement
-        expect(within(panel).getByText('İksa Masrafı')).toBeInTheDocument()
-        expect(within(panel).getByText('Müteahhit Kazancı')).toBeInTheDocument()
-        // Piyasa fiyatı artık "Piyasa Değerine Göre" kartının kendi
-        // bos-durumundan giriliyor (2026-08-14 UX kararı) — Gelişmiş
-        // Ayarlar'da SADECE gerçek ince-ayar parametreleri kaldı.
-        expect(within(panel).queryByText('Yaklaşık Piyasa Fiyatı')).toBeNull()
-    })
-
-    it('yeni konumda İksa Masrafı "Yüzde" seçilince yüzde input\'u açılır (kablolama sağlam)', async () => {
+    it('"Gelişmiş ayarlar" satırı açılır; İksa maliyeti, Müteahhit kâr hedefi ve piyasa fiyatı gelir', async () => {
         viewportKur(true)
         const user = userEvent.setup()
         render(<HesaplaPage />)
-        const panel = screen.getByText('Gelişmiş Ayarlar').closest('.advancedPanel') as HTMLElement
-        await user.click(within(panel).getByText('Yüzde'))
-        expect(within(panel).getByRole('spinbutton')).toBeInTheDocument()
+        const satir = within(solKart()).getByRole('button', { name: 'Gelişmiş ayarlar' })
+        expect(satir).toHaveAttribute('aria-expanded', 'false')
+        await user.click(satir)
+        expect(satir).toHaveAttribute('aria-expanded', 'true')
+        expect(within(solKart()).getByText('İksa maliyeti')).toBeInTheDocument()
+        expect(within(solKart()).getByText('Müteahhit kâr hedefi')).toBeInTheDocument()
+        expect(within(solKart()).getByText('Piyasa daire fiyatı (isteğe bağlı)')).toBeInTheDocument()
+    })
+
+    it('açılan bölümde iksa "Elle (₺)" seçilince tutar alanı, "Yüzde" seçilince oran alanı gelir (kablolama sağlam)', async () => {
+        viewportKur(true)
+        const user = userEvent.setup()
+        render(<HesaplaPage />)
+        await user.click(within(solKart()).getByRole('button', { name: 'Gelişmiş ayarlar' }))
+        await user.click(within(solKart()).getByRole('button', { name: 'Elle (₺)' }))
+        expect(within(solKart()).getByRole('textbox', { name: 'İksa tutarı' })).toBeInTheDocument()
+        await user.click(within(solKart()).getByRole('button', { name: 'Yüzde' }))
+        expect(within(solKart()).getByRole('spinbutton', { name: 'İksa oranı' })).toBeInTheDocument()
     })
 })
 
@@ -284,8 +278,7 @@ describe('/hesapla — masaüstü "Arsa Fiyatı" stat kartı "Min." niteleyicisi
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        const toggleRow = screen.getByText('Arsa Payı').closest('div') as HTMLElement
-        await user.click(within(toggleRow).getByRole('checkbox'))
+        await user.click(screen.getByRole('switch', { name: /Toplam daire sayısı üzerinden hesapla/ }))
 
         expect(await screen.findByText(/Min\. arsa fiyatı \(FA\)/i)).toBeInTheDocument()
         expect(screen.queryByText(/^Arsa fiyatı \(FA\)/i)).not.toBeInTheDocument()
@@ -336,10 +329,9 @@ describe('/hesapla — masaüstü "Arsa Sahibine Düşen Daire" slider üst sın
         viewportKur(true)
         const user = userEvent.setup()
         render(<HesaplaPage />)
-        const toggleRow = screen.getByText('Arsa Payı').closest('div') as HTMLElement
-        await user.click(within(toggleRow).getByRole('checkbox'))
+        await user.click(screen.getByRole('switch', { name: /Toplam daire sayısı üzerinden hesapla/ }))
 
-        const slider = screen.getByRole('slider', { name: 'Arsa Sahibine Düşen Daire' })
+        const slider = screen.getByRole('slider', { name: 'Arsa sahibinin daire sayısı' })
         // Varsayılan totalApartments (AYAR_VARSAYILANLARI) 24'tür.
         expect(slider).toHaveAttribute('max', '23')
     })
@@ -347,30 +339,18 @@ describe('/hesapla — masaüstü "Arsa Sahibine Düşen Daire" slider üst sın
 
 
 describe('/hesapla — masaüstü girdi kartı sırası mobille aynı (denetim sonrası UX düzeltmesi)', () => {
-    it('sidebar başlıkları Konum→Arsa Alanı→Daire Standardı→Daire m²→Birim Maliyet→Arsa Payı→Deprem Riski sırasında render edilir', async () => {
+    it('kart blokları Konum→Arsa Alanı→Ort. daire→Birim maliyet→Daire standardı→Arsa payı→Risk sırasında render edilir', async () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        const sidebar = await screen.findByText('Proje Bilgileri')
-        const container = sidebar.closest('.desktopSidebar') as HTMLElement
-        const beklenenSira = ['[data-girdi-blok="konum"]', '[data-girdi-blok="arsa-alani"]']
-        const html = container.innerHTML
-        const indeksler = beklenenSira.map(sel => {
-            const el = container.querySelector(sel)
-            expect(el).not.toBeNull()
-            return Array.from(container.querySelectorAll('*')).indexOf(el as Element)
-        })
-        for (let i = 1; i < indeksler.length; i++) expect(indeksler[i]).toBeGreaterThan(indeksler[i - 1])
-        const baslikMetinleri = ['Daire Standardı', 'Ortalama Daire Metrekaresi', 'Birim inşaat maliyeti', 'Deprem Riski']
-        const pozisyonlar = baslikMetinleri.map(metin => html.indexOf(metin))
-        pozisyonlar.forEach(p => expect(p).toBeGreaterThan(-1))
-        for (let i = 1; i < pozisyonlar.length; i++) expect(pozisyonlar[i]).toBeGreaterThan(pozisyonlar[i - 1])
-        expect(html.indexOf('Deprem Riski')).toBeGreaterThan(html.indexOf('Birim inşaat maliyeti'))
+        const kart = await screen.findByRole('region', { name: 'Proje girdileri' })
+        const bloklar = Array.from(kart.querySelectorAll('[data-girdi-blok]')).map(el => el.getAttribute('data-girdi-blok'))
+        expect(bloklar).toEqual(['konum', 'arsa-alani', 'daire-buyuklugu', 'birim-maliyet', 'yapi-standardi', 'arsa-payi', 'deprem-riski'])
     })
 
-    it('SmartContextCard artik render edilmiyor (sidebar dogrudan alt-bilesenleri kullaniyor)', async () => {
+    it('SmartContextCard artik render edilmiyor (sol kolon mobille ortak GirdiKarti kullaniyor)', async () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        await screen.findByText('Proje Bilgileri')
+        await screen.findByText('Proje bilgileri')
         expect(document.querySelector('.container[class*="SmartContextCard"]')).toBeNull()
     })
 })
@@ -378,13 +358,11 @@ describe('/hesapla — masaüstü Emsal arsa maliyeti modeli', () => {
     it('ilçe arsa m² fiyatı ve arsa alanı yokken Emsal seçeneği devre dışıdır', async () => {
         viewportKur(true)
         render(<HesaplaPage />)
-        const sidebar = await screen.findByText('Proje Bilgileri')
-        const container = sidebar.closest('.desktopSidebar') as HTMLElement
-        const modelBloku = within(container).getByText('Arsa Maliyeti Modeli').closest('.settingsGroup') as HTMLElement
+        const modelBloku = await screen.findByRole('group', { name: 'Arsa maliyeti modeli' })
 
         expect(within(modelBloku).getByRole('button', { name: 'Oransal' })).toBeEnabled()
         expect(within(modelBloku).getByRole('button', { name: 'Emsal' })).toBeDisabled()
-        expect(within(modelBloku).getByText(/Emsal model için doğrulanmış arsa alanı/)).toBeInTheDocument()
+        expect(screen.getByText(/Emsal model için doğrulanmış arsa alanı/)).toBeInTheDocument()
     })
 })
 
@@ -404,7 +382,7 @@ describe('/hesapla — masaüstü Arsa Payı TEK blokta (denetim sonrası UX dü
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        const sidebar = screen.getByText('Proje Bilgileri').closest('.desktopSidebar') as HTMLElement
+        const sidebar = screen.getByRole('region', { name: 'Proje girdileri' })
         const slider = within(sidebar).getByLabelText('Arsa payı yüzdesi')
         fireEvent.change(slider, { target: { value: '45' } })
         expect(slider).toHaveValue('45')
@@ -415,7 +393,7 @@ describe('/hesapla — masaüstü Arsa Payı TEK blokta (denetim sonrası UX dü
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        const sidebar = screen.getByText('Proje Bilgileri').closest('.desktopSidebar') as HTMLElement
+        const sidebar = screen.getByRole('region', { name: 'Proje girdileri' })
         const slider = within(sidebar).getByLabelText('Arsa payı yüzdesi') as HTMLInputElement
         expect(slider.max).toBe('100')
     })
@@ -425,7 +403,7 @@ describe('/hesapla — masaüstü Arsa Payı TEK blokta (denetim sonrası UX dü
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        const sidebar = screen.getByText('Proje Bilgileri').closest('.desktopSidebar') as HTMLElement
+        const sidebar = screen.getByRole('region', { name: 'Proje girdileri' })
         const slider = within(sidebar).getByLabelText('Arsa payı yüzdesi')
 
         fireEvent.change(slider, { target: { value: '50' } })
@@ -440,8 +418,7 @@ describe('/hesapla — masaüstü Arsa Payı TEK blokta (denetim sonrası UX dü
         const user = userEvent.setup()
         render(<HesaplaPage />)
         await user.click(await screen.findByRole('button', { name: /Örnek Proje ile Dene/i }))
-        const toggleRow = screen.getByText('Arsa Payı').closest('div') as HTMLElement
-        await user.click(within(toggleRow).getByRole('checkbox'))
-        expect(await screen.findByText(/Arsa payı.*%0.*olarak hesaplanıyor/)).toBeInTheDocument()
+        await user.click(screen.getByRole('switch', { name: /Toplam daire sayısı üzerinden hesapla/ }))
+        expect(await screen.findByText((_, el) => el?.tagName === 'P' && /Arsa payı.*%0.*olarak hesaplanıyor/.test(el.textContent ?? ''))).toBeInTheDocument()
     })
 })

@@ -322,13 +322,14 @@ describe('birim maliyet ve piyasa fiyati gorunurlugu (spec 2026-07-29 K1/K7)', (
     // mu, (2) `BirimMaliyetField` gercekten `kaynakEtiketi`yi bu iki deger
     // ile cagiriyor mu — ikisi birlikte, onceki tek-dosyalik assertion'la
     // ayni garantiyi veriyor.
+    // Masaüstü ve mobil AYNI GirdiKarti'nı kullanır (2026-10-23 Figma): page.tsx
+    // değerleri `girdiOrtak` ile geçirir, GirdiKarti `kaynakEtiketi`yi çağırır.
     const pageTsx = fs.readFileSync(path.join(__dirname, 'page.tsx'), 'utf8');
-    expect(pageTsx).toMatch(/<BirimMaliyetField/);
-    expect(pageTsx).toMatch(/globalUnitPrice=\{globalUnitPrice\}/);
-    expect(pageTsx).toMatch(/birimMaliyetKaynagi=\{birimMaliyetKaynagi\}/);
+    expect(pageTsx).toMatch(/<GirdiKarti/);
+    expect(pageTsx).toMatch(/globalUnitPrice, birimMaliyetKaynagi/);
 
-    const sectionsTsx = fs.readFileSync(path.join(__dirname, 'AdvancedSettingsSections.tsx'), 'utf8');
-    expect(sectionsTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
+    const girdiTsx = fs.readFileSync(path.join(__dirname, 'mobile', 'GirdiKarti.tsx'), 'utf8');
+    expect(girdiTsx).toMatch(/kaynakEtiketi\(birimMaliyetKaynagi, globalUnitPrice\)/);
   });
 
   // il/ilce -> ortalama ilce fiyati secici (handleKonumSec/handleIlceChange)

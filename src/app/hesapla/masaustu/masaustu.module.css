@@ -385,3 +385,8 @@
 .statSatirUst {
     margin-top: 16px;
 }
+
+/* Sol kolon: GirdiKarti kendi kart yuzeyini tasir. */
+.solKolon {
+    min-width: 0;
+}
