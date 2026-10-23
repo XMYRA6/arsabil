@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GelismisAyarlarSheet } from './GelismisAyarlarSheet'
 
@@ -40,11 +40,64 @@ describe('GelismisAyarlarSheet', () => {
         expect(screen.queryByRole('group', { name: 'Arsa alanı' })).toBeNull()
     })
 
-    it('mevcut alan bilesenleri yeniden kullaniliyor (kopyalanmiyor)', () => {
+    it('bolum sirasi Figma ile ayni: iksa, kar hedefi, piyasa', () => {
         render(<GelismisAyarlarSheet {...props()} />)
-        // RiskCostFields / MarketField'in kendi etiketleri.
-        expect(screen.getByText('İksa Masrafı')).toBeInTheDocument()
-        expect(screen.getByText('Yaklaşık Piyasa Fiyatı')).toBeInTheDocument()
+        const iksa = screen.getByText('İksa maliyeti')
+        const kar = screen.getByText('Müteahhit kâr hedefi')
+        const piyasa = screen.getByText('Piyasa daire fiyatı (isteğe bağlı)')
+        expect(iksa.compareDocumentPosition(kar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+        expect(kar.compareDocumentPosition(piyasa) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    })
+
+    it('iksa segmenti yalnizca Yuzde ve Elle (₺) sunar; Yok secenegi yok', () => {
+        render(<GelismisAyarlarSheet {...props()} />)
+        expect(screen.getByRole('button', { name: 'Yüzde' })).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: 'Elle (₺)' })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Yok' })).toBeNull()
+    })
+
+    it('iksa yuzdesi 0 dan buyuk yazilinca yuzde modu ve oran ayarlanir', () => {
+        const setIksaMode = jest.fn(); const setIksaPercentage = jest.fn()
+        render(<GelismisAyarlarSheet {...props({ setIksaMode, setIksaPercentage })} />)
+        fireEvent.change(screen.getByLabelText('İksa oranı'), { target: { value: '4' } })
+        expect(setIksaPercentage).toHaveBeenCalledWith(4)
+        expect(setIksaMode).toHaveBeenCalledWith('percentage')
+    })
+
+    it('iksa yuzdesi 0 yazilinca mod off a doner (motor girdisi korunur)', () => {
+        const setIksaMode = jest.fn()
+        render(<GelismisAyarlarSheet {...props({ iksaMode: 'percentage', setIksaMode })} />)
+        fireEvent.change(screen.getByLabelText('İksa oranı'), { target: { value: '0' } })
+        expect(setIksaMode).toHaveBeenCalledWith('off')
+    })
+
+    it('Elle (₺) secilince tutar alani gorunur', async () => {
+        const setIksaMode = jest.fn()
+        render(<GelismisAyarlarSheet {...props({ setIksaMode })} />)
+        await userEvent.click(screen.getByRole('button', { name: 'Elle (₺)' }))
+        expect(setIksaMode).toHaveBeenCalledWith('manual')
+    })
+
+    it('kar chip leri yuzdeli etiket tasir ve secimi bildirir', async () => {
+        const setBuilderProfit = jest.fn()
+        render(<GelismisAyarlarSheet {...props({ setBuilderProfit })} />)
+        await userEvent.click(screen.getByRole('button', { name: 'Yüksek %50' }))
+        expect(setBuilderProfit).toHaveBeenCalledWith(1.5)
+        expect(screen.getByRole('button', { name: 'Orta %30' })).toHaveAttribute('aria-pressed', 'true')
+    })
+
+    it('piyasa fiyati binlik ayiracla bildirilir', () => {
+        const setManualMarketPrice = jest.fn()
+        render(<GelismisAyarlarSheet {...props({ setManualMarketPrice })} />)
+        fireEvent.change(screen.getByLabelText('Piyasa daire fiyatı (isteğe bağlı)'), { target: { value: '7900000' } })
+        expect(setManualMarketPrice).toHaveBeenCalledWith('7.900.000')
+    })
+
+    it('sag ustte Kapat dugmesi ve surukleme tutamagi birlikte bulunur', async () => {
+        const onClose = jest.fn()
+        render(<GelismisAyarlarSheet {...props({ onClose })} />)
+        await userEvent.click(screen.getByRole('button', { name: 'Kapat' }))
+        expect(onClose).toHaveBeenCalledTimes(1)
     })
 
     it('acilisBolumu kar ise maliyet bolumu isaretlenir', () => {

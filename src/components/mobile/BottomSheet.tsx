@@ -17,6 +17,9 @@ interface BottomSheetProps {
      * gizlenir, suruklemeyle kapatma devre disi kalir ve X butonu belirir.
      * Varsayilan false: mevcut grabber + drag-to-dismiss davranisi degismez. */
     showCloseButton?: boolean;
+    /** `showCloseButton` ile birlikte kullanilir: X gosterilirken surukleme tutamagi
+     * ve suruklemeyle kapatma da korunur (Figma: Hesapla gelismis ayarlar). */
+    keepGrabber?: boolean;
     children: React.ReactNode;
 }
 
@@ -66,7 +69,7 @@ function useIsMounted() {
  * </BottomSheet>
  * ```
  */
-export function BottomSheet({ open, onClose, title, className, showCloseButton = false, children }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, title, className, showCloseButton = false, keepGrabber = false, children }: BottomSheetProps) {
     const reduceMotion = useReducedMotion();
     const dragControls = useDragControls();
     const mounted = useIsMounted();
@@ -170,7 +173,7 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
                         animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
                         exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}
                         transition={sheetTransition(reduceMotion ?? false)}
-                        drag={reduceMotion || showCloseButton ? false : 'y'}
+                        drag={reduceMotion || (showCloseButton && !keepGrabber) ? false : 'y'}
                         /* KRITIK: `dragListener={false}` + `dragControls`.
                            Varsayilan halinde framer-motion `drag="y"` icin
                            yaprak kokune `touch-action: pan-x` koyuyor ve
@@ -189,7 +192,7 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
                             if (info.offset.y > 120 || info.velocity.y > 800) onClose();
                         }}
                     >
-                        {!showCloseButton && (
+                        {(!showCloseButton || keepGrabber) && (
                             <div
                                 className={styles.grabber}
                                 aria-hidden="true"

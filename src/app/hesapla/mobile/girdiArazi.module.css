@@ -354,3 +354,47 @@
     flex: none;
     width: auto;
 }
+
+/* Gelismis ayarlar sheet'i (Figma 2045:187) */
+.sheetBolum {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.sheetBaslik {
+    font: 700 14px Inter, sans-serif;
+    color: var(--ink);
+}
+
+.segmentSerit {
+    align-self: flex-start;
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+}
+
+.segmentSecenek {
+    min-height: 32px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--ink-secondary);
+    font: 500 13.5px Inter, sans-serif;
+    cursor: pointer;
+}
+
+.segmentSecili {
+    background: var(--amber);
+    color: var(--ink);
+    font-weight: 600;
+}
+
+[data-theme='dark'] .segmentSecili {
+    color: #0f1a2e;
+}
