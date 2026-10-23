@@ -52,4 +52,19 @@ describe('SiteChrome', () => {
         expect(main.style.minHeight).toMatch(/dvh/)
         expect(main.style.minHeight).not.toMatch(/(?<!d)vh/)
     })
+
+    it.each(['/login', '/register', '/reset-password/abc', '/verify-email/xyz'])('%s kimlik ekranında ortak kabuğu gizler (Figma 09: kendi marka paneli var)', (yol) => {
+        mockPathname = yol
+        render(<SiteChrome><div>kimlik içerik</div></SiteChrome>)
+        expect(screen.queryByTestId('navbar')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('footer')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('bottom-navbar')).not.toBeInTheDocument()
+        expect(screen.getByText('kimlik içerik')).toBeInTheDocument()
+    })
+
+    it('/login-help gibi benzer ön ekli yolları kimlik ekranı SAYMAZ', () => {
+        mockPathname = '/login-help'
+        render(<SiteChrome><div>x</div></SiteChrome>)
+        expect(screen.getByTestId('navbar')).toBeInTheDocument()
+    })
 })

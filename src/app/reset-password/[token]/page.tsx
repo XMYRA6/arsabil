@@ -3,7 +3,8 @@
 import { useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import styles from "./page.module.css";
+import { AuthShell, AuthField } from "@/components/auth/AuthShell";
+import styles from "@/components/auth/AuthShell.module.css";
 
 export default function ResetPasswordPage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = use(params);
@@ -51,50 +52,26 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
     };
 
     return (
-        <div className={styles.page}>
-            <div className={styles.card}>
-                <h1 className={styles.title}>Yeni Şifre Belirle</h1>
-                <p className={styles.subtitle}>Hesabın için yeni bir şifre gir.</p>
+        <AuthShell>
+            <h1 className={styles.title}>Yeni şifre belirle</h1>
+            <p className={styles.subtitle}>Hesabın için yeni bir şifre gir.</p>
 
-                {error && <div className={`${styles.banner} ${styles.bannerError}`}>{error}</div>}
-                {success && <div className={`${styles.banner} ${styles.bannerSuccess}`}>{success}</div>}
+            {!success ? (
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    {error && <div className={`${styles.banner} ${styles.bannerError}`} role="alert">{error}</div>}
+                    <AuthField id="password" label="Yeni şifre" icon="lock" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={8} autoComplete="new-password" />
+                    <AuthField id="confirmPassword" label="Şifre tekrar" icon="lock" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required minLength={8} autoComplete="new-password" />
+                    <button type="submit" className={styles.submit} disabled={loading}>
+                        {loading ? "Güncelleniyor..." : "Şifreyi güncelle"}
+                    </button>
+                </form>
+            ) : (
+                <div className={`${styles.banner} ${styles.bannerSuccess}`} role="status">{success}</div>
+            )}
 
-                {!success && (
-                    <form onSubmit={handleSubmit}>
-                        <div className={styles.fieldGroup}>
-                            <label className={styles.label} htmlFor="password">Yeni Şifre</label>
-                            <input
-                                id="password"
-                                type="password"
-                                className={styles.input}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                required
-                                minLength={8}
-                            />
-                        </div>
-                        <div className={styles.fieldGroup}>
-                            <label className={styles.label} htmlFor="confirmPassword">Şifre Tekrar</label>
-                            <input
-                                id="confirmPassword"
-                                type="password"
-                                className={styles.input}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="••••••••"
-                                required
-                                minLength={8}
-                            />
-                        </div>
-                        <button type="submit" className={styles.submitBtn} disabled={loading}>
-                            {loading ? "Güncelleniyor..." : "Şifreyi Güncelle"}
-                        </button>
-                    </form>
-                )}
-
-                <Link href="/login" className={styles.loginLink}>← Giriş Ekranına Dön</Link>
+            <div className={styles.footer}>
+                <Link href="/login" className={styles.footerLink}>← Giriş ekranına dön</Link>
             </div>
-        </div>
+        </AuthShell>
     );
 }

@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import styles from "./login.module.css";
 import { safeRedirectPath } from "@/lib/safeRedirect";
+import { AuthShell, AuthField } from "@/components/auth/AuthShell";
+import styles from "@/components/auth/AuthShell.module.css";
+
+const OK_SOZ = "gönderildi";
 
 export default function LoginPage() {
     const [view, setView] = useState<"login" | "register" | "forgot">("login");
@@ -85,153 +88,77 @@ export default function LoginPage() {
         }
     };
 
-    return (
-        <div className={styles.page}>
-            <div className={styles.orbTop} />
-            <div className={styles.orbBottom} />
-
-            <div className={`${styles.panel} ${styles.authShell}`}>
-                {/* Left Side: Branding / Intro */}
-                <div className={`${styles.brandSide} ${styles.brandPanel}`}>
-                    <div className={styles.brandPattern} />
-
-                    <div className={styles.brandContent}>
-                        <div className={`${styles.brandLogoRow} ${styles.brandLogo}`}>
-                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect width="40" height="40" rx="12" fill="white" />
-                                <circle cx="20" cy="20" r="8" fill="var(--primary)" />
-                            </svg>
-                            <h2 className={styles.brandLogoText}>ArsaBil</h2>
-                        </div>
-                        <h1 className={styles.brandHeading}>
-                            Geleceğinize <br />
-                            <span className={styles.brandHeadingMuted}>Zemin Hazırlayın</span>
-                        </h1>
-                        <p className={styles.brandParagraph}>
-                            Arsanızın gerçek değerini tahmin etmeyin, bilimsel verilerle hesaplayın. Arsa sahipleri ve müteahhitlerin güven noktasına hoş geldiniz.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Right Side: Auth Forms */}
-                <div className={`${styles.formSide} ${styles.formPanel}`}>
-
-                    {/* VIEW: LOGIN */}
-                    {view === "login" && (
-                        <div className={`${styles.formView} ${styles.formCard}`}>
-                            <div className={styles.formHeader}>
-                                <h2 className={styles.formTitle}>Tekrar Hoş Geldiniz</h2>
-                                <p className={styles.formSubtitle}>Lütfen hesabınıza giriş yapın.</p>
-                            </div>
-
-                            <form onSubmit={handleLogin} className={styles.form}>
-                                {error && (
-                                    <div className={`${styles.errorBanner} ${error.includes("gönderildi") ? styles.errorBannerSuccess : ''}`}>
-                                        {error}
-                                    </div>
-                                )}
-
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.label}>E-Posta Adresi</label>
-                                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" className={styles.input} />
-                                </div>
-
-                                <div className={styles.fieldGroup}>
-                                    <div className={styles.fieldRow}>
-                                        <label className={styles.label}>Şifre</label>
-                                        <button type="button" onClick={() => { setError(""); setView("forgot"); }} className={styles.forgotLink}>Şifremi Unuttum</button>
-                                    </div>
-                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" className={styles.input} />
-                                </div>
-
-                                <button type="submit" disabled={loading} className={styles.submitBtn}>
-                                    {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
-                                </button>
-                            </form>
-
-                            <div className={styles.footerText}>
-                                Hesabınız yok mu?{" "}
-                                <button onClick={() => { setError(""); setView("register"); }} className={styles.footerLink}>Hemen Kayıt Olun</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* VIEW: REGISTER */}
-                    {view === "register" && (
-                        <div className={`${styles.formView} ${styles.formCard}`}>
-                            <div className={styles.formHeader}>
-                                <h2 className={styles.formTitle}>Aramıza Katılın</h2>
-                                <p className={styles.formSubtitle}>Sistemi hemen kullanmak için kayıt olun.</p>
-                            </div>
-
-                            <form onSubmit={handleRegister} className={`${styles.form} ${styles.formCompact}`}>
-                                {error && (
-                                    <div className={styles.errorBanner}>
-                                        {error}
-                                    </div>
-                                )}
-
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.label}>Ad Soyad</label>
-                                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Örn: Ahmet Yılmaz" className={styles.input} />
-                                </div>
-
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.label}>E-Posta Adresi</label>
-                                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" className={styles.input} />
-                                </div>
-
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.label}>Şifre</label>
-                                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" className={styles.input} />
-                                </div>
-
-                                <button type="submit" disabled={loading} className={styles.submitBtn}>
-                                    {loading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}
-                                </button>
-                            </form>
-
-                            <div className={styles.footerText}>
-                                Zaten hesabınız var mı?{" "}
-                                <button onClick={() => { setError(""); setView("login"); }} className={styles.footerLink}>Giriş Yapın</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* VIEW: FORGOT PASSWORD */}
-                    {view === "forgot" && (
-                        <div className={`${styles.formView} ${styles.formCard}`}>
-                            <div className={styles.formHeader}>
-                                <h2 className={styles.formTitle}>Şifremi Unuttum</h2>
-                                <p className={styles.formSubtitle}>E-posta adresinizi girin, sıfırlama talimatlarını gönderelim.</p>
-                            </div>
-
-                            <form onSubmit={handleForgot} className={styles.form}>
-                                {error && (
-                                    <div className={`${styles.errorBanner} ${error.includes("gönderildi") ? styles.errorBannerSuccess : ''}`}>
-                                        {error}
-                                    </div>
-                                )}
-
-                                <div className={styles.fieldGroup}>
-                                    <label className={styles.label}>E-Posta Adresi</label>
-                                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" className={styles.input} />
-                                </div>
-
-                                <button type="submit" disabled={loading} className={styles.submitBtn}>
-                                    {loading ? "Gönderiliyor..." : "Bağlantı Gönder"}
-                                </button>
-                            </form>
-
-                            <div className={styles.footerText}>
-                                <button onClick={() => { setError(""); setView("login"); }} className={styles.footerLink}>← Giriş Ekranına Dön</button>
-                            </div>
-                        </div>
-                    )}
-
-                </div>
-            </div>
+    const banner = error && (
+        <div className={`${styles.banner} ${error.includes(OK_SOZ) ? styles.bannerSuccess : styles.bannerError}`} role="alert">
+            {error}
         </div>
     );
-}
 
+    return (
+        <AuthShell>
+            {view === "login" && (
+                <>
+                    <h1 className={styles.title}>Tekrar hoş geldiniz</h1>
+                    <p className={styles.subtitle}>Lütfen hesabınıza giriş yapın.</p>
+
+                    <form onSubmit={handleLogin} className={styles.form}>
+                        {banner}
+                        <AuthField id="login-email" label="E-posta adresi" icon="mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" autoComplete="email" />
+                        <AuthField id="login-password" label="Şifre" icon="lock" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" autoComplete="current-password" />
+                        <button type="button" onClick={() => { setError(""); setView("forgot"); }} className={styles.link}>Şifremi unuttum</button>
+                        <button type="submit" disabled={loading} className={styles.submit}>
+                            {loading ? "Giriş yapılıyor..." : "Giriş yap"}
+                        </button>
+                    </form>
+
+                    <div className={styles.footer}>
+                        Hesabın yok mu?
+                        <button onClick={() => { setError(""); setView("register"); }} className={styles.footerLink}>Kayıt ol</button>
+                    </div>
+                </>
+            )}
+
+            {view === "register" && (
+                <>
+                    <h1 className={styles.title}>Hesap oluştur</h1>
+                    <p className={styles.subtitle}>Ücretsiz üye ol; net değer ve emsalleri aç.</p>
+
+                    <form onSubmit={handleRegister} className={styles.form}>
+                        {banner}
+                        <AuthField id="reg-name" label="Ad soyad" icon="user" type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Örn: Ahmet Yılmaz" autoComplete="name" />
+                        <AuthField id="reg-email" label="E-posta adresi" icon="mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" autoComplete="email" />
+                        <AuthField id="reg-password" label="Şifre" icon="lock" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="En az 8 karakter" autoComplete="new-password" />
+                        <button type="submit" disabled={loading} className={styles.submit}>
+                            {loading ? "Kayıt yapılıyor..." : "Kayıt ol"}
+                        </button>
+                    </form>
+
+                    <div className={styles.footer}>
+                        Zaten üye misin?
+                        <button onClick={() => { setError(""); setView("login"); }} className={styles.footerLink}>Giriş yap</button>
+                    </div>
+                </>
+            )}
+
+            {view === "forgot" && (
+                <>
+                    <h1 className={styles.title}>Şifreni sıfırla</h1>
+                    <p className={styles.subtitle}>E-posta adresini yaz, sıfırlama bağlantısı gönderelim.</p>
+
+                    <form onSubmit={handleForgot} className={styles.form}>
+                        {banner}
+                        <AuthField id="forgot-email" label="E-posta adresi" icon="mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" autoComplete="email" />
+                        <button type="submit" disabled={loading} className={styles.submit}>
+                            {loading ? "Gönderiliyor..." : "Bağlantı gönder"}
+                        </button>
+                    </form>
+
+                    <div className={styles.footer}>
+                        Hatırladın mı?
+                        <button onClick={() => { setError(""); setView("login"); }} className={styles.footerLink}>Giriş yap</button>
+                    </div>
+                </>
+            )}
+        </AuthShell>
+    );
+}

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import styles from "./page.module.css";
+import { AuthShell } from "@/components/auth/AuthShell";
+import styles from "@/components/auth/AuthShell.module.css";
 
 export default function VerifyEmailPage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = use(params);
@@ -32,14 +33,35 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
     }, [token]);
 
     return (
-        <div className={styles.page}>
-            <div className={styles.card}>
-                <h1 className={styles.title}>E-posta Doğrulama</h1>
-                {status === "loading" && <p className={styles.subtitle}>Doğrulanıyor...</p>}
-                {status === "success" && <div className={`${styles.banner} ${styles.bannerSuccess}`}>{message}</div>}
-                {status === "error" && <div className={`${styles.banner} ${styles.bannerError}`}>{message}</div>}
-                <Link href="/login" className={styles.loginLink}>Giriş Ekranına Dön</Link>
+        <AuthShell>
+            <div className={styles.result}>
+                {status === "loading" && (
+                    <>
+                        <h1 className={styles.title}>E-posta doğrulama</h1>
+                        <p className={styles.subtitle} role="status">Doğrulanıyor...</p>
+                    </>
+                )}
+                {status === "success" && (
+                    <>
+                        <span className={`${styles.resultIcon} ${styles.resultIconOk}`} aria-hidden="true">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 5 5L20 7" /></svg>
+                        </span>
+                        <h1 className={styles.title}>E-posta doğrulandı</h1>
+                        <p className={styles.subtitle} role="status">{message}</p>
+                        <Link href="/login" className={styles.submit}>Giriş yap</Link>
+                    </>
+                )}
+                {status === "error" && (
+                    <>
+                        <span className={`${styles.resultIcon} ${styles.resultIconBad}`} aria-hidden="true">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                        </span>
+                        <h1 className={styles.title}>Bağlantı geçersiz</h1>
+                        <p className={styles.subtitle} role="alert">{message || "Bağlantının süresi dolmuş olabilir. Yeni bir bağlantı isteyebilirsin."}</p>
+                        <Link href="/login" className={`${styles.submit} ${styles.submitAmber}`}>Giriş ekranına dön</Link>
+                    </>
+                )}
             </div>
-        </div>
+        </AuthShell>
     );
 }

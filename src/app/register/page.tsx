@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Card } from "@/components/ui/Card";
-import styles from "./register.module.css";
+import { AuthShell, AuthField } from "@/components/auth/AuthShell";
+import styles from "@/components/auth/AuthShell.module.css";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -43,76 +41,24 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className={styles.page}>
-            <div className={styles.authShell}>
-                <section className={styles.brandPanel}>
-                    <div className={styles.brandLogo}>ARSABİL</div>
-                    <h1 className={styles.brandTitle}>Profesyonel arsa fizibilitesine başlayın</h1>
-                    <ul className={styles.brandBullets}>
-                        <li>Parsel verisiyle hızlı ön analiz</li>
-                        <li>Raporlarınızı panelinizde saklayın</li>
-                        <li>İlan ve teklif akışını tek yerden yönetin</li>
-                    </ul>
-                </section>
+        <AuthShell>
+            <h1 className={styles.title}>Hesap oluştur</h1>
+            <p className={styles.subtitle}>Ücretsiz üye ol; net değer ve emsalleri aç.</p>
 
-                <section className={styles.formPanel}>
-                    <div className={styles.header}>
-                        <h1 className={styles.logo}>Hesap oluştur</h1>
-                        <p className={styles.subtitle}>Sisteme Kayıt Olun</p>
-                    </div>
+            <form onSubmit={handleSubmit} className={styles.form}>
+                {error && <div className={`${styles.banner} ${styles.bannerError}`} role="alert">{error}</div>}
+                <AuthField id="register-name" label="Ad soyad" icon="user" type="text" value={name} onChange={(e) => setName(e.target.value)} required autoComplete="name" />
+                <AuthField id="register-email" label="E-posta adresi" icon="mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="ornek@mail.com" autoComplete="email" />
+                <AuthField id="register-password" label="Şifre" icon="lock" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="En az 8 karakter" autoComplete="new-password" />
+                <button type="submit" disabled={loading} className={styles.submit}>
+                    {loading ? "Kayıt yapılıyor..." : "Kayıt ol"}
+                </button>
+            </form>
 
-                    <Card className={`${styles.sealCard} ${styles.formCard}`}>
-                        <form onSubmit={handleSubmit} className={styles.form}>
-                            {error && (
-                                <div className={styles.errorBanner}>
-                                    {error}
-                                </div>
-                            )}
-
-                            <Input
-                                label="Ad Soyad"
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                                className={styles.sealInput}
-                            />
-
-                            <Input
-                                label="E-Posta Adresi"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className={styles.sealInput}
-                            />
-
-                            <Input
-                                label="Şifre"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className={styles.sealInput}
-                            />
-
-                            <div className={styles.submitRow}>
-                                <Button type="submit" variant="primary" fullWidth disabled={loading} className={styles.sealSubmit}>
-                                    {loading ? "Kayıt Yapılıyor..." : "Kayıt Ol"}
-                                </Button>
-                            </div>
-                        </form>
-
-                        <div className={styles.footerText}>
-                            Zaten hesabınız var mı?{" "}
-                            <Link href="/login" className={styles.footerLink}>
-                                Giriş Yapın
-                            </Link>
-                        </div>
-                    </Card>
-                </section>
+            <div className={styles.footer}>
+                Zaten üye misin?
+                <Link href="/login" className={styles.footerLink}>Giriş yap</Link>
             </div>
-        </div>
-    );}
-
-
+        </AuthShell>
+    );
+}

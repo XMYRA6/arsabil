@@ -1,0 +1,296 @@
+/* Kimlik ekranları — Figma 09 (Giriş · Kayıt · Şifre · E-posta doğrula). Arazi tokenları. */
+.page {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 47% 53%;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 48px 56px;
+  background: var(--surface-2);
+  min-width: 0;
+}
+
+.logo {
+  align-self: flex-start;
+  text-decoration: none;
+}
+
+.copy {
+  max-width: 560px;
+}
+
+.heading {
+  margin: 0;
+  font: 700 44px/1.5 Inter, sans-serif;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+
+.accent {
+  display: block;
+  color: var(--amber-text);
+}
+
+.lead {
+  margin: 16px 0 0;
+  max-width: 540px;
+  font: 500 16px/1.6 Inter, sans-serif;
+  color: var(--ink-secondary);
+}
+
+.diorama {
+  align-self: center;
+  width: min(520px, 100%);
+  height: auto;
+  object-fit: contain;
+}
+
+.formSide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 32px 24px;
+}
+
+.mobileLogo {
+  display: none;
+  text-decoration: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 440px;
+  padding: 36px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Ortak form parçaları ── */
+.title {
+  margin: 0;
+  font: 700 32px/1.15 Inter, sans-serif;
+  letter-spacing: -0.3px;
+  color: var(--ink);
+}
+
+.subtitle {
+  margin: 14px 0 22px;
+  font: 500 14.5px/1.5 Inter, sans-serif;
+  color: var(--ink-secondary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font: 500 13px Inter, sans-serif;
+  color: var(--ink-secondary);
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-secondary);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 0 16px 0 44px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  color: var(--ink);
+  font: 500 16px Inter, sans-serif;
+}
+
+.input::placeholder {
+  color: var(--ink-secondary);
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.link {
+  align-self: flex-end;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--blue);
+  font: 600 13.5px Inter, sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.submit {
+  min-height: 51px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--blue);
+  color: var(--blue-on);
+  font: 600 16px Inter, sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitAmber {
+  background: var(--amber);
+  color: var(--ink);
+}
+
+[data-theme='dark'] .submitAmber {
+  color: #0f1a2e;
+}
+
+.footer {
+  margin-top: 18px;
+  text-align: center;
+  font: 500 14px Inter, sans-serif;
+  color: var(--ink-secondary);
+}
+
+.footerLink {
+  margin-left: 4px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--blue);
+  font: 600 14px Inter, sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font: 500 13.5px/1.45 Inter, sans-serif;
+}
+
+.bannerError {
+  background: color-mix(in srgb, var(--bad) 12%, transparent);
+  color: var(--bad);
+}
+
+.bannerSuccess {
+  background: color-mix(in srgb, var(--ok) 14%, transparent);
+  color: var(--ok);
+}
+
+/* ── Sonuç ekranı (e-posta doğrula) ── */
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+
+.resultIcon {
+  width: 72px;
+  height: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 14px;
+}
+
+.resultIconBad {
+  background: color-mix(in srgb, var(--bad) 16%, transparent);
+  color: var(--bad);
+}
+
+.resultIconOk {
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok);
+}
+
+.result .title {
+  font-size: 26px;
+}
+
+.result .subtitle {
+  margin: 12px 0 22px;
+  font-size: 13.5px;
+}
+
+.result .submit {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .formSide {
+    justify-content: flex-start;
+    padding: 28px 16px 48px;
+  }
+
+  .mobileLogo {
+    display: inline-flex;
+    align-self: flex-start;
+  }
+
+  .card {
+    padding: 28px 22px;
+    box-shadow: none;
+    background: var(--surface);
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}
