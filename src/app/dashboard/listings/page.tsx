@@ -43,6 +43,7 @@ export default function DashboardListingsPage() {
 
     useEffect(() => {
         if (status !== 'authenticated') return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- oturum açılınca veri çekme; yükleme durumu fetch başında sıfırlanıyor
         setLoading(true);
         setError(false);
         fetch('/api/listings?mine=1')

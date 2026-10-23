@@ -23,6 +23,7 @@ export default function ProfileEditPage() {
 
     useEffect(() => {
         if (status !== 'authenticated' || !session?.user?.id) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- oturum açılınca veri çekme; yükleme durumu fetch başında sıfırlanıyor
         setLoading(true);
         setError(false);
         fetch(`/api/user/profile/${session.user.id}`)

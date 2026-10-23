@@ -25,6 +25,7 @@ export default function SettingsPage() {
 
     useEffect(() => {
         if (status !== 'authenticated' || !session?.user?.id) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- oturum açılınca veri çekme; yükleme durumu fetch başında sıfırlanıyor
         setLoading(true);
         fetch(`/api/user/profile/${session.user.id}`)
             .then(res => {
