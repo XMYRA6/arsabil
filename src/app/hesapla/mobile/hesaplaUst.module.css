@@ -1,0 +1,5 @@
+/* Hesapla mobil üst satır — Arazi tokenları. */
+.satir { display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; min-height: 28px; }
+.baslik { margin: 0; font: 700 20px Inter, sans-serif; letter-spacing: -0.01em; color: var(--ink); }
+.ornek { min-height: 32px; padding: 0 4px; border: 0; background: none; color: var(--blue); font: 600 13.5px Inter, sans-serif; cursor: pointer; }
+.ornek:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 8px; }

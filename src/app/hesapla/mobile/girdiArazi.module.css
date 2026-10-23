@@ -399,6 +399,22 @@
     color: #0f1a2e;
 }
 
+/* ── Mobil kompakt varyant: dikey alanı en aza indirir (masaüstü etkilenmez) ── */
+/* Görsel olarak gizli, ekran okuyucuya açık bölüm başlığı */
+.baslikGizli { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.kartKompakt { margin: 0 12px; padding: 12px; gap: 10px; border-radius: 18px; }
+.kartKompakt .alan { gap: 4px; }
+.kartKompakt .konum { min-height: 40px; padding: 0 12px; border-radius: 12px; font-size: 14px; }
+.kartKompakt .girdi { height: 40px; padding: 0 12px; border-radius: 12px; }
+.kartKompakt .girdiInput { font-size: 15px; }
+.kartKompakt .altNot { font-size: 11.5px; }
+.kartKompakt .standartSatir { gap: 6px; }
+.kartKompakt .standart { flex-direction: row; gap: 6px; height: 40px; border-radius: 12px; }
+.kartKompakt .standart svg { width: 18px; height: 18px; }
+.kartKompakt .cip { min-height: 32px; padding: 0 12px; }
+.kartKompakt .gelismis { min-height: 40px; border-radius: 12px; }
+.kartKompakt .payDegerInput { padding: 2px 8px; }
+
 /* ── Masaustu varyanti (Figma 05 masaustu sol kart) ── */
 .kartMasaustu {
     margin: 0;

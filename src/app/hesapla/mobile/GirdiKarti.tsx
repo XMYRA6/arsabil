@@ -147,8 +147,8 @@ export function GirdiKarti({
     const alanDogrulandi = parcelContext?.status === 'verified' && !!parsel?.areaSqm;
 
     return (
-        <section className={`${styles.kart} ${masaustu ? styles.kartMasaustu : ''}`} aria-label="Proje girdileri">
-            <h2 className={styles.baslik}>Proje bilgileri</h2>
+        <section className={`${styles.kart} ${masaustu ? styles.kartMasaustu : styles.kartKompakt}`} aria-label="Proje girdileri">
+            <h2 className={`${styles.baslik} ${masaustu ? '' : styles.baslikGizli}`}>Proje bilgileri</h2>
 
             {/* ── Konum ── */}
             <div className={styles.alan} data-girdi-blok="konum">

@@ -3,6 +3,7 @@
     inset: 0;
     z-index: var(--z-sheet-backdrop, 1100);
     background: rgba(0, 0, 0, 0.45);
+    touch-action: none;
 }
 
 .sheet {
@@ -28,6 +29,23 @@
     border-top: 1px solid var(--border);
     padding-bottom: var(--safe-bottom);
     box-shadow: var(--shadow);
+    overscroll-behavior: contain;
+}
+
+/* Geniş sürükleme bölgesi (44px yükseklik): parmakla tutulup aşağı çekilince panel kapanır. */
+.dragZone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    flex-shrink: 0;
+    touch-action: none;
+    cursor: grab;
+}
+
+.dragZoneRow {
+    touch-action: none;
+    cursor: grab;
 }
 
 .grabber {
@@ -36,7 +54,6 @@
     border-radius: 2px;
     background: var(--muted);
     opacity: 0.5;
-    margin: 10px auto 6px auto;
     flex-shrink: 0;
 }
 
@@ -88,6 +105,7 @@
 
 .content {
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     padding: 12px 16px;
     -webkit-overflow-scrolling: touch;
     /* `.sheet`in yuksekligi kendi icerigine gore mi belirlenecek yoksa

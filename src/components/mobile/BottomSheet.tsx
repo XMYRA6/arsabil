@@ -123,11 +123,16 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
             if (e.key === 'Escape') onClose();
         };
         document.addEventListener('keydown', onKey);
+        // Arkadaki sayfa kilitlenir: body + html kaydırması kapanır, böylece panelin
+        // dışına/başlığına dokunup sürüklemek sayfayı oynatmaz.
         const prevOverflow = document.body.style.overflow;
+        const prevHtmlOverflow = document.documentElement.style.overflow;
         document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
         return () => {
             document.removeEventListener('keydown', onKey);
             document.body.style.overflow = prevOverflow;
+            document.documentElement.style.overflow = prevHtmlOverflow;
         };
     }, [open, onClose]);
 
@@ -192,15 +197,27 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
                             if (info.offset.y > 120 || info.velocity.y > 800) onClose();
                         }}
                     >
+                        {/* Sürükleme bölgesi: tutamaç + başlık satırı. `touch-action: none` ile
+                            tarayıcı bu bölgedeki dikey hareketi sayfa kaydırması olarak ALMAZ;
+                            hareket yalnızca paneli kapatır (arkadaki sayfa sürüklenmez). */}
                         {(!showCloseButton || keepGrabber) && (
                             <div
-                                className={styles.grabber}
-                                aria-hidden="true"
+                                className={styles.dragZone}
+                                data-testid="bottomsheet-dragzone"
                                 onPointerDown={e => { if (!reduceMotion) dragControls.start(e); }}
-                            />
+                            >
+                                <div className={styles.grabber} aria-hidden="true" />
+                            </div>
                         )}
                         {showCloseButton ? (
-                            <div className={styles.titleRow}>
+                            <div
+                                className={`${styles.titleRow} ${keepGrabber ? styles.dragZoneRow : ''}`}
+                                onPointerDown={e => {
+                                    if (reduceMotion || !keepGrabber) return;
+                                    if ((e.target as HTMLElement).closest('button')) return;
+                                    dragControls.start(e);
+                                }}
+                            >
                                 {title && <span className={styles.titleText}>{title}</span>}
                                 <button
                                     type="button"

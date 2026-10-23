@@ -1,8 +1,9 @@
 "use client";
 
 import { MobileScreen } from '@/components/mobile/MobileScreen';
-import { StickyActionBar } from '@/components/mobile/StickyActionBar';
-import { IconFile } from '@/components/icons';
+import { useState } from 'react';
+import { BottomSheet } from '@/components/mobile/BottomSheet';
+import { SonucCubugu } from './SonucCubugu';
 import { SonucKarti, type SonucKartiProps } from './SonucKarti';
 import { HesapOzetiKarti } from './HesapOzetiKarti';
 import { YapiKutlesiKarti, type YapiKutlesiKartiProps } from './YapiKutlesiKarti';
@@ -19,7 +20,8 @@ import { Studio2DMobileLeaf, type Studio2DMobileLeafProps } from './Studio2DMobi
 import { StudioScenarioMobileLeaf, type StudioScenarioMobileLeafProps } from './StudioScenarioMobileLeaf';
 import type { Scenario } from '@/components/ScenarioCompare';
 import styles from './mobile.module.css';
-import arazi from './sonucArazi.module.css';
+import kompakt from './sonucCubugu.module.css';
+import ust from './hesaplaUst.module.css';
 
 export type HesaplaMobileProps = {
     sonuc: Omit<SonucKartiProps, 'onPiyasaEkle'>;
@@ -135,6 +137,7 @@ export function HesaplaMobile({
     onKarsilastirmaKapat,
     onShareRequest,
 }: HesaplaMobileProps) {
+    const [sonucAcik, setSonucAcik] = useState(false);
     return (
         <>
         {/* `hasBottomNav={false}` BILEREK: bu sayfanin alt cubuk dolgusunu
@@ -144,14 +147,12 @@ export function HesaplaMobile({
             `hasStickyCta` ise asagidaki sabit CTA'nin yuksekligini ekler. */}
         <MobileScreen hasBottomNav={false} hasStickyCta>
             <div className={styles.hesaplaMobilKok}>
-                {/* Baslikta artik yalnizca logo + ad var: konum cipi girdi
-                    kartina (`KonumBlogu`), disli ise etiketli "Gelismis
-                    ayarlar" butonuna tasindi — gelismis ayarlara TEK kapi
-                    (spec K4/K5). */}
+                {/* Kompakt üst satır: yalnızca küçük "Örnek proje" bağlantısı. Eski
+                    kicker/başlık ve büyük örnek-proje kartı mobilde yer yiyordu (alt menüde
+                    sekme adı zaten var). */}
                 {!(studioScenarioAcik || studio2DAcik || landownerOfferAcik || programMixAcik || studioAcik || studioHubAcik || sonucDetayiAcik || karsilastirmaAcik) && (
-                    <header className={styles.headerRow}>
-                        <p className={styles.headerKicker}>Kat karşılığı fizibilite</p>
-                        <h1 className={styles.headerTitle}>Arsa payını ve minimum daire fiyatını hesapla</h1>
+                    <header className={ust.satir}>
+                        <button type="button" className={ust.ornek} onClick={sonuc.onOrnekProjeIleDene}>Örnek proje</button>
                     </header>
                 )}
 
@@ -179,7 +180,6 @@ export function HesaplaMobile({
                     ? <SenaryoKarsilastirmaSekmesi scenarios={savedScenarios} onKapat={onKarsilastirmaKapat} onShareRequest={onShareRequest} />
                     : (
                         <>
-                            <SonucKarti {...sonuc} onPiyasaEkle={onPiyasaEkle} />
                             <GirdiKarti {...girdi} onParselDogrulaAc={onParselDogrulaAc} onAyarlarAc={onAyarlarAc} />
                             <HesapOzetiKarti result={result} onSonucDetayiAc={onSonucDetayiAc} />
                             <YapiKutlesiKarti
@@ -202,22 +202,25 @@ export function HesaplaMobile({
             </div>
         </MobileScreen>
 
-        {/* CTA cubugu `MobileScreen`in DISINDA: `.screen > *` kurali her
-            dogrudan cocuga `position: relative` veriyor ve StickyActionBar
-            `position: fixed` — ikisi ayni specificity'de (0,1,0) oldugu icin
-            kazanan CSS modul sirasina kalirdi. Kardes olarak birakilinca
-            catisma hic dogmuyor. */}
-        <StickyActionBar aboveBottomNav>
-            <button
-                type="button"
-                className={arazi.cta}
-                onClick={onCta}
-                disabled={ctaDevreDisi}
-            >
-                <IconFile size={19} />
-                {ctaMetni}
-            </button>
-        </StickyActionBar>
+        {/* Sonuç çubuğu `MobileScreen`in DISINDA: `.screen > *` kuralı her doğrudan
+            çocuğa `position: relative` veriyor, çubuk ise `position: fixed`. Kardeş
+            olarak bırakılınca çakışma hiç doğmuyor. Çubuk yalnızca ana ekranda görünür. */}
+        {!(studioScenarioAcik || studio2DAcik || landownerOfferAcik || programMixAcik || studioAcik || studioHubAcik || sonucDetayiAcik || karsilastirmaAcik) && (
+            <SonucCubugu
+                minDaireFiyati={sonuc.minDaireFiyati}
+                arsaPayiYuzde={sonuc.arsaPayiYuzde}
+                hasEnoughDataForResult={sonuc.hasEnoughDataForResult}
+                ctaMetni={ctaMetni}
+                ctaDevreDisi={ctaDevreDisi}
+                onCta={onCta}
+                onDetayAc={() => setSonucAcik(true)}
+            />
+        )}
+        <BottomSheet open={sonucAcik} onClose={() => setSonucAcik(false)} title="Sonuç" showCloseButton keepGrabber>
+            <div className={kompakt.sheetIc}>
+                <SonucKarti {...sonuc} onPiyasaEkle={() => { setSonucAcik(false); onPiyasaEkle(); }} />
+            </div>
+        </BottomSheet>
         </>
     );
 }
