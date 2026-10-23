@@ -1,3 +1,4 @@
+/* Harita üzerinden parsel seçici — Arazi tokenları. */
 .wrapper {
     display: flex;
     flex-direction: column;
@@ -7,29 +8,28 @@
 .mapBox {
     width: 100%;
     height: 280px;
-    border-radius: 12px;
+    border-radius: 18px;
     overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
+    border: 1px solid var(--line);
+    background: var(--surface-2);
 }
 
-/* ParcelVerificationSheet'in tam-ekran mobil moduna ozel: sabit piksel
-   yukseklik yerine .mapWrapper'in (flex:1 ile) kendisine ayrilan kalan
-   dikey alani doldurur. */
+/* ParcelVerificationSheet'in tam ekran mobil moduna özel: sabit yükseklik yerine
+   .mapWrapper'ın kendisine ayrılan kalan dikey alanı doldurur. */
 .mapGrow {
     height: 100% !important;
 }
 
 .hint {
-    font-size: 0.8rem;
-    color: var(--label-color);
+    margin: 0;
+    font: 500 13px/1.4 Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .mapWrapper {
     position: relative;
-    /* Ayni gerekce: ust flex zincirinde gercek "artik" alan yoksa no-op'tur —
-       yalnizca ParcelVerificationSheet'in tam-ekran modunda (.pickerGrow +
-       .mapGrow ikilisi) map'in kendisi kalan dikey alani doldurur. */
+    /* Üst flex zincirinde gerçek "artık" alan yoksa no-op; yalnızca tam ekran modunda
+       (.pickerGrow + .mapGrow) harita kalan alanı doldurur. */
     flex: 1;
     min-height: 0;
 }
@@ -38,22 +38,23 @@
     position: absolute;
     bottom: 12px;
     right: 12px;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-card);
     z-index: 400;
 }
 
-.locateBtn:hover:not(:disabled) {
-    background: var(--panel);
+.locateBtn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .locateBtn:disabled {
@@ -62,10 +63,10 @@
 }
 
 .locateSpinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid var(--border);
-    border-top-color: var(--text);
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--line);
+    border-top-color: var(--ink);
     border-radius: 50%;
     animation: parcelPickerSpin 0.7s linear infinite;
 }
@@ -74,68 +75,81 @@
     to { transform: rotate(360deg); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .locateSpinner { animation-duration: 2s; }
+}
+
 .manualNote {
     padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px dashed var(--border);
-    background: var(--input-bg);
-    font-size: 0.78rem;
-    color: var(--label-color);
+    border-radius: 14px;
+    border: 1px dashed var(--line);
+    background: var(--surface-2);
+    font: 500 12.5px Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .coordRow {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
     flex-wrap: wrap;
-    font-size: 0.8rem;
-    color: var(--label-color);
+    font: 500 12.5px Inter, sans-serif;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-secondary);
 }
 
+/* Haritaya dokunmak zaten otomatik doğrular; bu düğme yeniden sorgulamak içindir,
+   bu yüzden ikincil (yumuşak) görünür. */
 .verifyBtn {
-    padding: 10px 16px;
-    border-radius: 10px;
-    border: none;
-    background: var(--brand-gradient);
-    color: #fff;
-    font-weight: 800;
-    font-size: 0.85rem;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--blue-soft);
+    color: var(--blue);
+    font: 600 14px Inter, sans-serif;
     cursor: pointer;
 }
 
+.verifyBtn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
 .verifyBtn:disabled {
-    opacity: 0.5;
+    background: var(--surface-2);
+    color: var(--ink-secondary);
     cursor: not-allowed;
 }
 
 .resultCard {
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(var(--green-rgb), 0.35);
-    background: rgba(var(--green-rgb), 0.06);
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+    background: color-mix(in srgb, var(--ok) 8%, transparent);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .resultTitle {
-    font-weight: 800;
-    font-size: 0.9rem;
-    color: var(--card-title);
+    font: 700 15px Inter, sans-serif;
+    color: var(--ink);
 }
 
 .resultMeta {
-    font-size: 0.8rem;
-    color: var(--label-color);
+    font: 400 13px Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .warnCard {
     padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(var(--orange-rgb), 0.35);
-    background: rgba(var(--orange-rgb), 0.07);
-    font-size: 0.82rem;
-    color: var(--label-color);
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent);
+    background: var(--amber-soft);
+    font: 500 13px/1.45 Inter, sans-serif;
+    color: var(--amber-text);
 }
 
 @media (max-width: 768px) {
@@ -145,6 +159,5 @@
 
     .verifyBtn {
         min-height: 44px;
-        width: 100%;
     }
 }

@@ -52,20 +52,21 @@
        ilce/mahalle etiketleri sizıyordu (kullanicinin "kotu tasarim"
        bulgusunun bir parcasi). `--panel`, BottomSheet.module.css'in ayni
        amacla kullandigi gercek/tanimli token. */
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(26, 20, 8, 0.18);
 }
 
 .option {
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font: 500 14.5px Inter, sans-serif;
+    color: var(--ink);
     cursor: pointer;
 }
 
+
 .optionActive {
-    background: var(--input-bg);
+    background: var(--surface-2);
 }

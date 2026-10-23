@@ -1,11 +1,8 @@
+/* Parsel seçimi (masaüstü modal + mobil tam ekran sheet) — Arazi tokenları. */
 .overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
+    inset: 0;
+    background: rgba(20, 16, 8, 0.45);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -14,15 +11,15 @@
 }
 
 .modal {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
     width: 100%;
     max-width: 800px;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 24px 48px rgba(26, 20, 8, 0.2);
     overflow: hidden;
 }
 
@@ -31,32 +28,35 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
 }
 
 .header h2 {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--fg);
+    font: 700 20px Inter, sans-serif;
+    color: var(--ink);
 }
 
 .closeBtn {
-    background: none;
-    border: none;
-    color: var(--label-color);
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink);
     cursor: pointer;
-    padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: background 0.2s;
 }
 
-.closeBtn:hover {
-    background: var(--input-bg);
-    color: var(--fg);
+.closeBtn:focus-visible,
+.modeBtn:focus-visible,
+.cancelBtn:focus-visible,
+.applyBtn:focus-visible,
+.changeBtn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .content {
@@ -65,37 +65,40 @@
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .instructions {
     margin: 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: var(--label-color);
+    font: 500 14px/1.5 Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
+/* Haritadan | Elle gir — diğer ekranlardaki segment diliyle aynı */
 .toggleRow {
     display: flex;
-    gap: 8px;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
 }
 
 .modeBtn {
     flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--input-bg);
-    color: var(--text);
-    font-weight: 700;
-    font-size: 0.85rem;
+    min-height: 38px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-secondary);
+    font: 500 14px Inter, sans-serif;
     cursor: pointer;
 }
 
 .modeBtnOn {
-    background: var(--brand-gradient);
-    color: #fff;
-    border-color: transparent;
+    background: var(--amber);
+    color: var(--ink);
+    font-weight: 600;
 }
 
 .largeMap {
@@ -103,10 +106,10 @@
 }
 
 .loadingRisk {
-    font-size: 0.9rem;
-    color: var(--label-color);
+    font: 500 13px Inter, sans-serif;
+    color: var(--ink-secondary);
     text-align: center;
-    padding: 10px;
+    padding: 6px;
 }
 
 .riskSection {
@@ -116,9 +119,8 @@
 }
 
 .riskAppliedNote {
-    color: #10b981;
-    font-size: 0.9rem;
-    font-weight: 600;
+    color: var(--ok);
+    font: 600 13.5px Inter, sans-serif;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -126,192 +128,130 @@
 
 .manualNote {
     padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px dashed var(--border);
-    background: var(--input-bg);
-    font-size: 0.78rem;
-    color: var(--label-color);
+    border-radius: 14px;
+    border: 1px dashed var(--line);
+    background: var(--surface-2);
+    font: 500 12.5px/1.45 Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .footer {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    padding: 20px 24px;
-    border-top: 1px solid var(--border);
-    background: var(--input-bg);
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
 }
 
 .cancelBtn {
-    padding: 10px 20px;
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--fg);
-    border-radius: 10px;
-    font-weight: 600;
+    min-height: 48px;
+    padding: 0 22px;
+    background: var(--surface-2);
+    border: 0;
+    color: var(--ink);
+    border-radius: 999px;
+    font: 600 15px Inter, sans-serif;
     cursor: pointer;
-    transition: background 0.2s;
-}
-
-.cancelBtn:hover {
-    background: rgba(0,0,0,0.05);
 }
 
 .applyBtn {
-    padding: 10px 24px;
-    background: var(--brand-gradient, linear-gradient(135deg, #1f6feb, #3b82f6));
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
+    min-height: 48px;
+    padding: 0 26px;
+    background: var(--blue);
+    color: var(--blue-on);
+    border: 0;
+    border-radius: 999px;
+    font: 600 15px Inter, sans-serif;
     cursor: pointer;
-    transition: opacity 0.2s;
 }
 
 .applyBtn:disabled {
-    opacity: 0.5;
+    background: var(--surface-2);
+    color: var(--ink-secondary);
     cursor: not-allowed;
 }
 
-.applyBtn:not(:disabled):hover {
-    opacity: 0.9;
-}
-
 .mobileFooter {
-    padding-top: 12px;
+    position: sticky;
+    bottom: 0;
+    padding: 10px 0 4px;
+    background: var(--surface);
 }
 
 .mobileFooter .applyBtn {
     width: 100%;
+    min-height: 52px;
+}
+
+.verifiedSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--ok) 35%, transparent);
+    background: color-mix(in srgb, var(--ok) 8%, transparent);
+}
+
+.verifiedSummaryText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font: 400 13px Inter, sans-serif;
+    color: var(--ink-secondary);
+}
+
+.verifiedSummaryText strong {
+    color: var(--ink);
+    font: 600 15px Inter, sans-serif;
+}
+
+.changeBtn {
+    min-height: 36px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--blue-soft);
+    color: var(--blue);
+    font: 600 13.5px Inter, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 @media (max-width: 768px) {
-    [data-theme="dark"] .sheet {
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
-        --seal-surface: linear-gradient(160deg, #0F2A43 0%, #16324F 100%);
-        --seal-border: rgba(43, 124, 255, 0.25);
-    }
-
-    [data-theme="light"] .sheet {
-        --seal-accent: var(--aurora-cyan);
-        --seal-accent-rgb: 43, 124, 255;
-        --seal-surface: var(--shell-bg);
-        --seal-border: var(--shell-border);
-    }
-
+    /* Sheet kabuğu: opak yüzey, tam ekran. --safe-top çıkarılır ki yuvarlak üst köşeler
+       çentiğin altına girmesin; --keyboard-inset çıkarılır ki klavye açılınca içerik
+       klavyenin üstünde kalsın (BottomSheet'in temel kuralını !important ile ezdiğimiz için
+       burada da hesaba katılır). */
     .sheet {
-        background: var(--seal-surface) !important;
-        border-top-color: var(--seal-border) !important;
-        /* Mockup bu akisi tam ekran sunuyor — BottomSheet.module.css'in
-           varsayilan 85dvh "peek" kapagi (arkada sayfanin bir kismini
-           gorunur birakan, GelismisAyarlarSheet gibi hafif panellere uygun
-           tasarim) burada mockup'la eslesmiyordu. --safe-top cikarilir ki
-           yuvarlatilmis ust koseler gercek bir centikli/Dynamic Island'li
-           cihazda donanimin altina girmesin. --keyboard-inset de cikarilir:
-           bu !important, BottomSheet.module.css'in temel klavye-farkindalikli
-           max-height kuralini komple ezer — kullanici bulgusu: "Elle gir"
-           formunda inputa tiklayip klavye gelince input yukari kaciyor,
-           gorunmuyordu. Kok neden (Playwright ile canli olculdu): bu satir
-           --keyboard-inset'i hic hesaba katmadigi icin klavye acilinca sheet
-           tam ekran boyunda KALIYOR, --bottom (BottomSheet'ten miras) klavye
-           kadar yukseliyor — net etki: sheet'in TAMAMI klavye kadar yukari
-           kayiyor, icerik hicbir zaman tasmadigi icin BottomSheet'in
-           scrollIntoView duzeltmesinin kaydiracagi bir scroll konteyneri de
-           hic olusmuyordu. */
+        background: var(--surface) !important;
         max-height: calc(100dvh - var(--safe-top, 0px) - var(--keyboard-inset, 0px)) !important;
     }
 
-    /* Parsel henuz dogrulanmamisken (harita/elle-giris modu) sheet'i sadece
-       85dvh'e KADAR buyuyebilir degil, GERCEKTEN o yuksekliğe zorlanir —
-       icerik artik kompakt oldugu icin (bkz. onceki duzeltme) max-height tek
-       basina yetmiyordu, sheet kendi icerigine gore kuculuyordu. Dogrulama
-       sonrasi (.isVerifiedCompact) bu sinif UYGULANMAZ — kisa ozet + risk
-       karti kendi dogal boyunda kalir, altinda bos alan birakmaz.
-       --keyboard-inset burada da dusulur — ayni gerekce: height (max-height
-       degil) burada GERCEK zorlayici deger, klavye acilinca guncellenmezse
-       icerik hicbir zaman tasmaz ve BottomSheet'in odak-kaydirma duzeltmesi
-       icin scroll edilecek bir seyi olmaz. */
+    /* Parsel doğrulanmamışken (harita/elle giriş) sheet GERÇEKTEN tam yüksekliğe zorlanır;
+       doğrulama sonrası kompakt özet kendi boyunda kalır. */
     .sheetPicking {
         height: calc(100dvh - var(--safe-top, 0px) - var(--keyboard-inset, 0px)) !important;
     }
 
-    /* ParcelPicker'in .wrapper'ina eklenir — haritanin kendisi kalan dikey
-       alani doldursun diye (bkz. ParcelPicker.module.css .mapWrapper/.mapGrow). */
+    /* ParcelPicker'ın .wrapper'ına eklenir: harita kalan dikey alanı doldurur. */
     .pickerGrow {
         flex: 1;
         min-height: 0;
     }
 
-    .modeBtn {
-        background: rgba(var(--seal-accent-rgb), 0.08);
-        border-color: var(--seal-border);
-        color: var(--seal-accent);
+    /* Uzun açıklama mobilde yok: haritanın altındaki tek ipucu yeterli. */
+    .instructions {
+        display: none;
     }
 
-    .modeBtnOn {
-        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
-        color: #fff;
-        border-color: transparent;
-    }
-
-    .mobileFooter .applyBtn {
-        background: color-mix(in srgb, var(--seal-accent) 82%, #0F2A43);
-    }
-
-    .manualNote {
-        background: rgba(var(--seal-accent-rgb), 0.05);
-        border-color: var(--seal-border);
-    }
-
-    /* BottomSheet'in kendi .content'i (16px) zaten dis bosluk sagliyor — bu
-       dosyanin masaustu icin tasarlanmis 24px+20px-gap degerleri mobilde
-       BottomSheet'in ustune binip cift bosluk yaratiyordu. Canli olcum:
-       390x844 + 34px iOS safe-area'da bu tek basina "Hesaplamaya Aktar"
-       butonunu ekranin ~yarisi kadar disina itiyordu. */
+    /* BottomSheet'in kendi .content'i dış boşluğu zaten verir; masaüstü dolguları sıfırlanır. */
     .content {
         padding: 0;
-        gap: 14px;
-        /* Aradaki halka: BottomSheet'in .content'i (flex:1) ile ParcelPicker'in
-           .mapWrapper'i (flex:1) arasinda — bu esnemezse disaridan zorlanan
-           yukseklik (.sheetPicking) haritaya kadar ulasmaz. */
+        gap: 12px;
         flex: 1;
         min-height: 0;
-    }
-
-    .verifiedSummary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 16px;
-        border-radius: 10px;
-        border: 1px solid rgba(var(--green-rgb), 0.35);
-        background: rgba(var(--green-rgb), 0.06);
-    }
-
-    .verifiedSummaryText {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 0.85rem;
-        color: var(--label-color);
-    }
-
-    .verifiedSummaryText strong {
-        color: var(--card-title);
-        font-size: 0.9rem;
-    }
-
-    .changeBtn {
-        padding: 6px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--seal-border);
-        background: var(--panel);
-        color: var(--seal-accent);
-        font-weight: 700;
-        font-size: 0.78rem;
-        cursor: pointer;
-        white-space: nowrap;
     }
 }

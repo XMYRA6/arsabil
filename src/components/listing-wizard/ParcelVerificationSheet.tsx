@@ -218,7 +218,7 @@ export function ParcelVerificationSheet({ isOpen, onClose, onConfirm, hideApply 
                 <div className={styles.loadingRisk}>Risk verileri hesaplanıyor...</div>
             )}
 
-            {risk && (
+            {risk && parcelValue.status === 'verified' && (
                 <div className={styles.riskSection}>
                     <RiskSuggestionCard
                         risk={risk}

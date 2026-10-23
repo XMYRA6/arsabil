@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     z-index: var(--z-sheet-backdrop, 1100);
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(20, 16, 8, 0.45);
     touch-action: none;
 }
 
@@ -23,12 +23,12 @@
        edilmis klavyede bu satir olmadan sheet'in tepesi -26px'e (ekranin
        26px UZERINE) tasiyordu. */
     max-height: calc(85dvh - var(--keyboard-inset, 0px));
-    background: var(--panel);
-    border-top-left-radius: var(--radius-lg);
-    border-top-right-radius: var(--radius-lg);
-    border-top: 1px solid var(--border);
+    background: var(--surface);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border-top: 1px solid var(--line);
     padding-bottom: var(--safe-bottom);
-    box-shadow: var(--shadow);
+    box-shadow: 0 -12px 32px rgba(26, 20, 8, 0.16);
     overscroll-behavior: contain;
 }
 
@@ -52,17 +52,16 @@
     width: 40px;
     height: 4px;
     border-radius: 2px;
-    background: var(--muted);
-    opacity: 0.5;
+    background: var(--ink-secondary);
+    opacity: 0.4;
     flex-shrink: 0;
 }
 
 .title {
     padding: 4px 16px 12px 16px;
-    font-size: var(--font-size-title);
-    font-weight: 700;
-    color: var(--card-title);
-    border-bottom: 1px solid var(--border);
+    font: 700 18px Inter, sans-serif;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
     flex-shrink: 0;
 }
 
@@ -73,29 +72,33 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 14px 16px 12px 16px;
-    border-bottom: 1px solid var(--border);
+    padding: 10px 16px 12px 16px;
+    border-bottom: 1px solid var(--line);
     flex-shrink: 0;
 }
 
 .titleText {
-    font-size: var(--font-size-title);
-    font-weight: 700;
-    color: var(--card-title);
+    font: 700 18px Inter, sans-serif;
+    color: var(--ink);
 }
 
 .closeBtn {
     flex-shrink: 0;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: 9px;
-    background: var(--input-bg);
-    color: var(--label-color);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink);
     cursor: pointer;
+}
+
+.closeBtn:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .closeBtn svg {
