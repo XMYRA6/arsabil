@@ -10,6 +10,17 @@
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --dur-press: 140ms;
   --dur-ui: 200ms;
+
+  /* Eski modüllerin açık renk yedekli (var(--x, #fff)) kullandığı, hiçbir yerde tanımlı olmayan adlar:
+     tanımsız kalınca koyu temada beyaz yedeğe düşüyorlardı. */
+  --card-bg: var(--surface);
+  --card-bg-subtle: var(--surface-2);
+  --surface-hover: var(--surface-2);
+  --text-muted: var(--ink-secondary);
+  --panel-border: var(--line);
+  --brand-blue: var(--blue);
+  --primary-hover: var(--blue);
+  --danger: var(--bad);
 }
 
 [data-theme="light"] {
