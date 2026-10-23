@@ -192,7 +192,7 @@ export function StudioScenarioBar({
           aria-label="Geçmiş"
           aria-expanded={showHistory}
         >
-          📜 Geçmiş {historyEntries.length > 0 ? `(${historyEntries.length})` : ''}
+          Geçmiş {historyEntries.length > 0 ? `(${historyEntries.length})` : ''}
         </button>
 
         {onSaveClick && (
@@ -203,7 +203,7 @@ export function StudioScenarioBar({
             aria-label="Kaydet"
             title="Senaryoyu veya yeni versiyonu buluta kaydedin"
           >
-            💾 Kaydet
+            Kaydet
           </button>
         )}
 
@@ -215,7 +215,7 @@ export function StudioScenarioBar({
             aria-label="Kütüphane"
             title="Kayıtlı senaryolarınızı ve versiyon geçmişini görüntüleyin"
           >
-            📚 Kütüphane
+            Kütüphane
           </button>
         )}
 
@@ -227,7 +227,7 @@ export function StudioScenarioBar({
             aria-label="Paylaş"
             title="Senaryo teklifini güvenli bağlantıyla paylaşın"
           >
-            🔗 Paylaş
+            Paylaş
           </button>
         )}
 
@@ -239,7 +239,7 @@ export function StudioScenarioBar({
             aria-label="PDF Rapor"
             title="Ön fizibilite teklif raporunu PDF olarak indirin"
           >
-            📄 PDF
+            PDF
           </button>
         )}
 
@@ -262,7 +262,7 @@ export function StudioScenarioBar({
             onClick={onCompareClick}
             aria-label="Karşılaştır"
           >
-            ⚖️ Karşılaştır
+            Karşılaştır
           </button>
         )}
 

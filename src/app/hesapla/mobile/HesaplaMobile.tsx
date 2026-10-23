@@ -129,10 +129,12 @@ export function HesaplaMobile({
                     kartina (`KonumBlogu`), disli ise etiketli "Gelismis
                     ayarlar" butonuna tasindi — gelismis ayarlara TEK kapi
                     (spec K4/K5). */}
-                <header className={styles.headerRow}>
-                    <p className={styles.headerKicker}>Kat karşılığı fizibilite</p>
-                    <h1 className={styles.headerTitle}>Arsa payını ve minimum daire fiyatını hesapla</h1>
-                </header>
+                {!(studioScenarioAcik || studio2DAcik || landownerOfferAcik || programMixAcik || studioAcik || studioHubAcik || sonucDetayiAcik || karsilastirmaAcik) && (
+                    <header className={styles.headerRow}>
+                        <p className={styles.headerKicker}>Kat karşılığı fizibilite</p>
+                        <h1 className={styles.headerTitle}>Arsa payını ve minimum daire fiyatını hesapla</h1>
+                    </header>
+                )}
 
                 {studioScenarioAcik
                     ? <StudioScenarioMobileLeaf {...studioScenario} />

@@ -56,7 +56,7 @@ export const SensitivityChart: React.FC<Props> = ({ baseInput }) => {
     return (
         <div style={{ width: '100%' }}>
             <h5 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--card-title)', margin: '0 0 8px 0' }}>
-                📈 Hassasiyet Analizi
+                Hassasiyet Analizi
             </h5>
             <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: '0 0 12px 0' }}>
                 Arsa payı (x) değiştikçe daire fiyatı nasıl değişir

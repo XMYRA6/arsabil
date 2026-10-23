@@ -21,10 +21,10 @@ export function LocationHeader({ parcelContext, onOpenMap }: LocationHeaderProps
     return (
         <div className={styles.header} data-girdi-blok="konum">
             {address ? (
-                <div className={styles.address}>📍 {address}</div>
+                <div className={styles.address}>{address}</div>
             ) : (
                 <button type="button" className={styles.unselectedBtn} onClick={onOpenMap}>
-                    📍 Haritadan parsel seç
+                    Haritadan parsel seç
                 </button>
             )}
             {address && (

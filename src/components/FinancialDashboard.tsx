@@ -65,7 +65,7 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h5 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--card-title)', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                💰 Finansal Modelleme
+                Finansal Modelleme
             </h5>
 
             {/* KPI Cards */}
@@ -86,7 +86,7 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
 
             {/* Nakit Akışı Grafiği */}
             <div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--label-color)', marginBottom: '6px' }}>📈 Kümülatif Nakit Akışı</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--label-color)', marginBottom: '6px' }}>Kümülatif Nakit Akışı</div>
                 <svg width="100%" viewBox={`0 0 ${chartW} ${chartH}`} style={{ overflow: 'visible' }}>
                     {/* Zero line */}
                     <line x1={pad.l} y1={zeroY} x2={chartW - pad.r} y2={zeroY} stroke="var(--border)" strokeWidth="0.5" strokeDasharray="4,3" />
@@ -146,7 +146,7 @@ export const FinancialDashboard: React.FC<Props> = ({ totalInvestment, totalReve
             {/* Banka Kredisi */}
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--card-title)' }}>🏦 Banka Kredisi</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--card-title)' }}>Banka Kredisi</span>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
                         <input type="checkbox" checked={useLoan} onChange={e => setUseLoan(e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--muted)' }}>Aktif</span>

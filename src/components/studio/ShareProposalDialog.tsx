@@ -156,7 +156,7 @@ export function ShareProposalDialog({
             <strong>
               {readiness.status === 'ready' && '✓ Paylaşıma Hazır'}
               {readiness.status === 'attention' && '⚠️ Uyarılarla Paylaşılabilir'}
-              {readiness.status === 'blocked' && '⛔ Paylaşım Engellendi'}
+              {readiness.status === 'blocked' && 'Paylaşım Engellendi'}
             </strong>
             {readiness.blockReasons.length > 0 && (
               <ul className={styles.reasonsList}>
@@ -177,7 +177,7 @@ export function ShareProposalDialog({
 
         {/* Privacy Note */}
         <div className={styles.privacyBox}>
-          <strong>🔒 Gizlilik Garantisi</strong>
+          <strong>Gizlilik Garantisi</strong>
           <p>
             Alıcı yalnızca bu versiyonun ({versionNumber}. versiyon) yerleşim, program ve teklif parametrelerini salt okunur olarak görebilir. Özel notlarınız veya diğer taslaklarınız asla paylaşılmaz.
           </p>
@@ -241,7 +241,7 @@ export function ShareProposalDialog({
               onClick={handleCreateToken}
               disabled={isSubmitting || isInitialLoading || isBlocked}
             >
-              {isSubmitting ? '⏳ Oluşturuluyor...' : '🔗 Paylaşım Bağlantısı Oluştur'}
+              {isSubmitting ? 'Oluşturuluyor...' : 'Paylaşım Bağlantısı Oluştur'}
             </button>
           </div>
         )}

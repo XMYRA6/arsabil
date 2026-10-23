@@ -59,7 +59,7 @@ export function StudioProposalPreview({
               onClick={onDownloadPdf}
               disabled={isDownloadingPdf || warningsAndBadges.needsRebalance}
             >
-              {isDownloadingPdf ? '⏳ Hazırlanıyor...' : '📄 PDF İndir'}
+              {isDownloadingPdf ? '⏳ Hazırlanıyor...' : 'PDF İndir'}
             </button>
           </div>
         )}

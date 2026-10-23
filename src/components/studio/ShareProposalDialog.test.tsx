@@ -131,7 +131,7 @@ describe('ShareProposalDialog', () => {
 
     expect(screen.getByText('Senaryoyu Güvenle Paylaş')).toBeInTheDocument();
     expect(screen.getByText('✓ Paylaşıma Hazır')).toBeInTheDocument();
-    expect(screen.getByText('🔒 Gizlilik Garantisi')).toBeInTheDocument();
+    expect(screen.getByText('Gizlilik Garantisi')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Paylaşım Bağlantısı Oluştur/i })).toBeInTheDocument();
   });
 
@@ -155,7 +155,7 @@ describe('ShareProposalDialog', () => {
       />
     );
 
-    expect(screen.getByText('⛔ Paylaşım Engellendi')).toBeInTheDocument();
+    expect(screen.getByText('Paylaşım Engellendi')).toBeInTheDocument();
     const btn = screen.getByRole('button', { name: /Paylaşım Bağlantısı Oluştur/i });
     expect(btn).toBeDisabled();
   });

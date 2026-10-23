@@ -44,13 +44,13 @@ describe('ScenarioCompare', () => {
         expect(table.getAllByText(/Lüks/).length).toBeGreaterThan(0);
         // fdTotal'i en düşük olan (Ekonomik, 4M < 6M) best — yıldız o sütunun başlığında
         const ekonomikHeader = table.getByText(/Ekonomik/).closest('th');
-        expect(ekonomikHeader?.textContent).toContain('⭐');
+        expect(ekonomikHeader?.textContent).toContain('★');
     });
 
     it('mobil kart görünümünde de her iki senaryo adı bulunur (jsdom media query uygulamaz, DOM\'da ikisi de var olmalı)', () => {
         render(<ScenarioCompare scenarios={scenarios} />);
         const nameEls = screen.getAllByText(/Ekonomik/);
-        // Biri <th> içinde (tablo, yıldızlı best senaryo olduğu için "Ekonomik ⭐"), biri .cardName
+        // Biri <th> içinde (tablo, yıldızlı best senaryo olduğu için "Ekonomik ★"), biri .cardName
         // içinde (mobil kart, salt "Ekonomik") — ikisi de DOM'da
         expect(nameEls.length).toBeGreaterThanOrEqual(2);
     });

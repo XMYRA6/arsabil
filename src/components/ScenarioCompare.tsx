@@ -137,7 +137,7 @@ export const ScenarioCompare: React.FC<Props> = ({ scenarios, onShareRequest }) 
                             <th className={styles.thLabel}>Parametre</th>
                             {scenarios.map((s, i) => (
                                 <th key={s.id} className={`${styles.thScenario} ${i === bestIdx ? styles.thScenarioBest : ''}`}>
-                                    {s.name} {i === bestIdx && '⭐'}
+                                    {s.name} {i === bestIdx && '★'}
                                 </th>
                             ))}
                         </tr>

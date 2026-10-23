@@ -1292,6 +1292,8 @@ button.compareBtn {
 @media (max-width: 768px) {
     .stepperInput {
         height: var(--input-height-mobile);
+        background: var(--surface);
+        border: 1px solid var(--line);
     }
 
     .stepperInput input {
@@ -1493,9 +1495,16 @@ button.compareBtn {
     transform: none;
 }
 
-.stepperInput,
-[data-theme="dark"] .stepperInput {
-    background: var(--surface-2);
+@media (min-width: 769px) {
+    .stepperInput,
+    [data-theme="dark"] .stepperInput {
+        background: var(--surface-2);
+        box-shadow: none;
+        border-radius: 16px;
+    }
+}
+
+.stepperInput {
     box-shadow: none;
     border-radius: 16px;
 }

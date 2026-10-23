@@ -1557,9 +1557,9 @@ export default function Home() {
 
             {/* Page label */}
             <div className={styles.pagerLabel}>
-              {summaryPage === 0 && '📊 Maliyet Dağılımı'}
-              {summaryPage === 1 && '📈 Hassasiyet & Kırılma'}
-              {summaryPage === 2 && '💰 Finansal Modelleme'}
+              {summaryPage === 0 && 'Maliyet Dağılımı'}
+              {summaryPage === 1 && 'Hassasiyet & Kırılma'}
+              {summaryPage === 2 && 'Finansal Modelleme'}
             </div>
           </aside>
 

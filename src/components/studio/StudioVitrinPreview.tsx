@@ -94,7 +94,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
             onClick={() => setIsOpen(true)}
             aria-label="3D Vitrini Göster"
           >
-            🏢 3D Vitrini Göster
+            3D Vitrini Göster
           </button>
         </div>
       ) : !webglSupported ? (
@@ -107,7 +107,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
       ) : (
         <div className={styles.sceneWrapper}>
           <div className={styles.topBar}>
-            <span className={styles.badge}>✨ 3D Vitrin Önizleme</span>
+            <span className={styles.badge}>3D Vitrin Önizleme</span>
             <button
               type="button"
               className={styles.hideButton}
@@ -126,7 +126,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
 
       {isOpen && hasRenderTarget && !isPro && (
         <div className={styles.renderLockedCta} data-testid="studio-render-locked-cta">
-          <p className={styles.lockedTitle}>✨ Fotogerçekçi Görsel — PRO plana özel</p>
+          <p className={styles.lockedTitle}>Fotogerçekçi Görsel — PRO plana özel</p>
           <p className={styles.lockedText}>
             Kütlenizin arsanızdaki fotogerçekçi görselini saniyeler içinde üretin — ortağınıza
             ve arsa sahibine göstermek için.
@@ -145,7 +145,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
             onClick={handleGenerateRender}
             disabled={renderState.status === 'loading'}
           >
-            {renderState.status === 'loading' ? 'Fotogerçekçi görsel hazırlanıyor…' : '✨ Fotogerçekçi Görsel'}
+            {renderState.status === 'loading' ? 'Fotogerçekçi görsel hazırlanıyor…' : 'Fotogerçekçi Görsel'}
           </button>
           {renderState.status === 'error' && <p className={styles.renderError}>{renderState.message}</p>}
           {renderState.status === 'success' && (

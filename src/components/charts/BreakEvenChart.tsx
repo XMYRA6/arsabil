@@ -29,7 +29,7 @@ export const BreakEvenChart: React.FC<Props> = ({ baseInput, marketPrice }) => {
     return (
         <div style={{ width: '100%' }}>
             <h5 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--card-title)', margin: '0 0 8px 0' }}>
-                📊 Kırılma Noktası Analizi
+                Kırılma Noktası Analizi
             </h5>
 
             {/* Summary cards */}
