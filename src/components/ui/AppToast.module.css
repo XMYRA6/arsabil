@@ -1,0 +1,25 @@
+/* Uygulama bildirimi — Arazi tokenları. */
+.kart { display: flex; align-items: center; gap: 12px; width: min(calc(100vw - 24px), 420px); box-sizing: border-box; padding: 12px 12px 12px 14px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(26, 20, 8, 0.16); color: var(--ink); pointer-events: auto; }
+.gir { animation: toastGir 320ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.cik { animation: toastCik 200ms ease-in both; }
+
+.ikon { flex: none; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+.kart[data-tip='basari'] .ikon { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+.kart[data-tip='hata'] .ikon { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+.tik { stroke-dasharray: 24; stroke-dashoffset: 24; animation: tikCiz 360ms 140ms ease-out forwards; }
+
+.metin { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.baslik { font: 600 14.5px Inter, sans-serif; }
+.aciklama { font: 400 12.5px/1.35 Inter, sans-serif; color: var(--ink-secondary); }
+.eylem { flex: none; padding: 6px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 13px Inter, sans-serif; text-decoration: none; }
+.kapat { flex: none; width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-secondary); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.eylem:focus-visible, .kapat:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+@keyframes toastGir { from { opacity: 0; transform: translateY(-16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toastCik { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-12px); } }
+@keyframes tikCiz { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .gir, .cik { animation: none; }
+  .tik { animation: none; stroke-dashoffset: 0; }
+}

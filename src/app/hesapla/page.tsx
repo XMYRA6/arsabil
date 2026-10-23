@@ -8,7 +8,7 @@ import { CalculatorEngineV2, CalculationInput, CalculationOutput, type LandCostM
 import type { DistrictPriceEntry } from '@/components/LocationSelector';
 import { computeEffectiveLandShareX, clampOwnerApartmentShare, parseMarketPrice, ornekProjeIleDeneDoldur, mergeQualityLevels, DEFAULT_QUALITY_LEVELS, buildCalculationInput, type QualityTier } from './calculatorUiHelpers';
 import { AuthModal } from '@/components/auth/AuthModal';
-import { toast } from 'react-hot-toast';
+import { bildirimGoster } from '@/components/ui/AppToast';
 // Dynamically imported to avoid SSR issues with @react-pdf/renderer
 type GeneratePdfFn = typeof import('@/lib/pdf/report_generator').generatePdfReport;
 import { ScenarioCompare, type Scenario as ScenarioItem } from '@/components/ScenarioCompare';
@@ -439,16 +439,18 @@ export default function Home() {
         })
       });
       if (response.ok) {
-        toast.success('Rapor başarıyla kaydedildi ve teklife açıldı!', {
-          position: 'top-right',
-          style: { borderRadius: '12px', background: 'var(--panel)', color: 'var(--text)', border: '1px solid var(--border)' }
+        bildirimGoster({
+          tip: 'basari',
+          baslik: 'Rapor kaydedildi',
+          aciklama: 'Teklife açıldı.',
+          eylem: { etiket: 'Raporlarım', href: '/dashboard/reports' },
         });
       } else {
-        toast.error('Kaydetme başarısız oldu.', { position: 'top-right' });
+        bildirimGoster({ tip: 'hata', baslik: 'Kaydedilemedi', aciklama: 'Lütfen tekrar dene.' });
       }
     } catch (error) {
       console.error(error);
-      toast.error('Bir hata oluştu.', { position: 'top-right' });
+      bildirimGoster({ tip: 'hata', baslik: 'Bir hata oluştu', aciklama: 'Bağlantını kontrol edip tekrar dene.' });
     } finally {
       setIsSaving(false);
     }

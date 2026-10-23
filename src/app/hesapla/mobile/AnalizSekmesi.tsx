@@ -4,7 +4,7 @@ import { SensitivityChart } from '@/components/charts/SensitivityChart';
 import { BreakEvenChart } from '@/components/charts/BreakEvenChart';
 import { FinancialDashboard } from '@/components/FinancialDashboard';
 import type { CalculationInput, CalculationOutput } from '@/lib/calculator/engine_v2';
-import styles from './mobile.module.css';
+import styles from './sonucDetay.module.css';
 
 // `4n` analiz paneli — Task 2 (2026-08-23): baslik ve Kapat butonu kaldirildı.
 // Bu veri artık Task 3'te FiyatAciklamasi'nin "Özet" sekmesi ile
@@ -31,8 +31,8 @@ export type AnalizSekmesiProps = {
 export function AnalizSekmesi({ result, baseInput, marketPrice }: AnalizSekmesiProps) {
     if (!result) {
         return (
-            <section className={styles.analizBos}>
-                <p className={styles.analizBosMetin}>
+            <section className={styles.bos}>
+                <p className={styles.bosMetin}>
                     Hesap sonucu oluşunca grafikler burada görünecek. Girdileri
                     tamamlayıp sonucun hesaplanmasını bekleyin.
                 </p>
@@ -41,14 +41,14 @@ export function AnalizSekmesi({ result, baseInput, marketPrice }: AnalizSekmesiP
     }
 
     return (
-        <div className={styles.analizGovde}>
-            <section className={styles.analizKart} role="group" aria-label="Hassasiyet">
-                <h3 className={styles.analizBaslik}>Hassasiyet</h3>
+        <div className={styles.grafikGovde}>
+            <section className={styles.grafikKart} role="group" aria-label="Hassasiyet">
+                <h3 className={styles.gizliBaslik}>Hassasiyet</h3>
                 <SensitivityChart baseInput={baseInput} />
             </section>
 
-            <section className={styles.analizKart} role="group" aria-label="Kırılma noktası">
-                <h3 className={styles.analizBaslik}>Kırılma noktası</h3>
+            <section className={styles.grafikKart} role="group" aria-label="Kırılma noktası">
+                <h3 className={styles.gizliBaslik}>Kırılma noktası</h3>
                 <BreakEvenChart baseInput={baseInput} marketPrice={marketPrice} />
             </section>
 
@@ -56,8 +56,8 @@ export function AnalizSekmesi({ result, baseInput, marketPrice }: AnalizSekmesiP
                 motor `x_max` döndürür (masaüstüyle aynı; denetim bulgusu C6'nın
                 mobil karşılığı). */}
             {result.x_max != null && (
-                <section className={styles.analizKart} role="group" aria-label="Maksimum sürdürülebilir arsa payı">
-                    <h3 className={styles.analizBaslik}>Maks. Sürdürülebilir Arsa Payı</h3>
+                <section className={styles.grafikKart} role="group" aria-label="Maksimum sürdürülebilir arsa payı">
+                    <h3 className={styles.grafikBaslik}>Maks. Sürdürülebilir Arsa Payı</h3>
                     {result.x_max >= 0 ? (
                         <>
                             <div className={styles.xmaxDeger}>%{(result.x_max * 100).toFixed(1)}</div>
@@ -74,8 +74,8 @@ export function AnalizSekmesi({ result, baseInput, marketPrice }: AnalizSekmesiP
                 </section>
             )}
 
-            <section className={styles.analizKart} role="group" aria-label="Finansal özet">
-                <h3 className={styles.analizBaslik}>Finansal özet</h3>
+            <section className={styles.grafikKart} role="group" aria-label="Finansal özet">
+                <h3 className={styles.gizliBaslik}>Finansal özet</h3>
                 <FinancialDashboard totalInvestment={result.M} totalRevenue={result.FD_total} />
             </section>
         </div>

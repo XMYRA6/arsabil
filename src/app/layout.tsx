@@ -69,7 +69,7 @@ export default function RootLayout({
           }}
         />
         <AuthProvider>
-          <Toaster position="bottom-right" />
+          <Toaster position="top-center" containerStyle={{ top: 'calc(12px + env(safe-area-inset-top, 0px))' }} />
           <ServiceWorkerRegister />
           <InstallPrompt />
           <UpdateBanner />

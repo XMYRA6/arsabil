@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FiyatAciklamasi, type FiyatAciklamasiProps } from './FiyatAciklamasi';
 import { AnalizSekmesi, type AnalizSekmesiProps } from './AnalizSekmesi';
-import styles from './mobile.module.css';
+import styles from './sonucDetay.module.css';
 
 export type SonucDetayiMobileLeafProps = {
     fiyatAciklamasi: FiyatAciklamasiProps;
@@ -26,21 +26,21 @@ export function SonucDetayiMobileLeaf({ fiyatAciklamasi, analiz, onKapat }: Sonu
 
     return (
         <>
-            <header className={styles.analizKapatSatiri}>
-                <h2 className={styles.aciklamaBaslikMetin}>Sonuç Detayı</h2>
-                <button type="button" className={styles.aciklamaKapat} onClick={onKapat}>
+            <header className={styles.baslikSatir}>
+                <h2 className={styles.baslik}>Sonuç Detayı</h2>
+                <button type="button" className={styles.kapat} onClick={onKapat}>
                     Kapat
                 </button>
             </header>
 
-            <div className={styles.segmentKap2} role="tablist" aria-label="Sonuç Detayı görünümü">
+            <div className={styles.sekmeSerit} role="tablist" aria-label="Sonuç Detayı görünümü">
                 <button
                     type="button"
                     role="tab"
                     id="sonuc-detayi-tab-ozet"
                     aria-selected={sekme === 'ozet'}
                     aria-controls="sonuc-detayi-panel"
-                    className={`${styles.segment} ${sekme === 'ozet' ? styles.segmentAktif : ''}`}
+                    className={sekme === 'ozet' ? styles.sekmeAktif : styles.sekme}
                     onClick={() => setSekme('ozet')}
                 >
                     Özet
@@ -51,7 +51,7 @@ export function SonucDetayiMobileLeaf({ fiyatAciklamasi, analiz, onKapat }: Sonu
                     id="sonuc-detayi-tab-grafikler"
                     aria-selected={sekme === 'grafikler'}
                     aria-controls="sonuc-detayi-panel"
-                    className={`${styles.segment} ${sekme === 'grafikler' ? styles.segmentAktif : ''}`}
+                    className={sekme === 'grafikler' ? styles.sekmeAktif : styles.sekme}
                     onClick={() => setSekme('grafikler')}
                 >
                     Grafikler
@@ -59,6 +59,7 @@ export function SonucDetayiMobileLeaf({ fiyatAciklamasi, analiz, onKapat }: Sonu
             </div>
 
             <div
+                className={styles.panel}
                 role="tabpanel"
                 id="sonuc-detayi-panel"
                 aria-labelledby={sekme === 'ozet' ? 'sonuc-detayi-tab-ozet' : 'sonuc-detayi-tab-grafikler'}

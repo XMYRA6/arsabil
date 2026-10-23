@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { IconChevronRight, IconMoney, IconRuler } from '@/components/icons';
 import { HesapFisi } from '../HesapFisi';
-import { formatTRCurrency } from '../trNumberFormat';
 import type { CalculationOutput } from '@/lib/calculator/engine_v2';
-import styles from './mobile.module.css';
+import styles from './sonucDetay.module.css';
 
 export type FiyatAciklamasiProps = {
     result: CalculationOutput | null;
@@ -28,23 +26,21 @@ function fmt(n: number | null): string {
     return n === null ? '—' : trFormat.format(n);
 }
 
-/** Satirlardaki TUTAR (₺) alanlari icin — `fmt`den ayri: `fmt` m²/TL/m² gibi
-    birimsiz/farkli-birimli degerler icin de kullaniliyor, oraya "₺" eklemek
-    yanlis olurdu (bkz. satir 89'daki "{fmt(apartmentSize)} m² × ..."). */
+/** Tutarlar tam lira olarak gösterilir (kuruş mobilde gürültü): "2.352.000 ₺". */
 function fmtTutar(n: number | null): string {
-    return n === null ? '—' : formatTRCurrency(n);
+    return n === null ? '—' : `${trFormat.format(n)} ₺`;
 }
 
 /**
- * `4a` "Bu fiyat nereden geliyor?" ekrani (tasarim kaynagi:
- * docs/tasarim/mobil-2026-07-28/kartlar/4a.html).
+ * "Bu fiyat nereden geliyor?" — Sonuç Detayı > Özet sekmesi.
  *
- * Satirlar motorun ciktisindan TURETILIR, motor DEGISMEZ:
- *   insaat = Mi · arsa sahibinin payi = Ma · muteahhidin kazanci = FD_total − M
+ * Satırlar motorun çıktısından TÜRETİLİR, motor DEĞİŞMEZ:
+ *   inşaat = Mi · arsa sahibinin payı = Ma · müteahhidin kazancı = FD_total − M
  *   toplam = FD_total
+ * Üstteki oransal çubuk bu üç kalemin toplam içindeki payını gösterir.
  *
- * "Muhendis gorunumu" acikken mevcut `HesapFisi` bileseni render edilir —
- * sembolik gosterim KOPYALANMAZ, tek kaynak odur.
+ * "Mühendis görünümü" açıkken mevcut `HesapFisi` bileşeni render edilir —
+ * sembolik gösterim KOPYALANMAZ, tek kaynak odur.
  */
 export function FiyatAciklamasi({
     result,
@@ -55,11 +51,9 @@ export function FiyatAciklamasi({
     profitMultiplier,
     onKarDegistir,
 }: FiyatAciklamasiProps) {
-    // Tercih localStorage'da yasar ve DOGRUDAN baslangic degerinde okunur.
-    // Hydration uyusmazligi riski YOK: bu bilesen sunucuda hic render
-    // edilmez — `page.tsx` viewport olculene kadar notr bir iskelet donuyor,
-    // yani buraya yalnizca istemcide, mount sonrasi gelinir. Efekt icinde
-    // setState etmek ayni sonucu ekstra bir render turuyla uretirdi.
+    // Tercih localStorage'da yaşar ve DOĞRUDAN başlangıç değerinde okunur.
+    // Hydration uyuşmazlığı riski YOK: bu bileşen sunucuda hiç render edilmez
+    // (`page.tsx` viewport ölçülene kadar nötr bir iskelet döner).
     const [muhendisGorunumu, setMuhendisGorunumu] = useState<boolean>(
         () => typeof window !== 'undefined'
             && localStorage.getItem(MUHENDIS_ANAHTARI) === 'true',
@@ -73,65 +67,90 @@ export function FiyatAciklamasi({
         });
     };
 
-    const muteahhitKazanci = result ? result.FD_total - result.M : null;
+    const insaat = result?.Mi ?? null;
+    const arsa = result?.Ma ?? null;
+    const kazanc = result ? result.FD_total - result.M : null;
+    const toplam = result?.FD_total ?? null;
+
+    const pay = (n: number | null) =>
+        n !== null && toplam ? Math.max(0, Math.round((n / toplam) * 100)) : null;
+
+    const kalemler = [
+        {
+            anahtar: 'insaat',
+            renk: styles.renkInsaat,
+            ad: 'Daireyi inşa etmek',
+            alt: <>{fmt(apartmentSize)} m² × {fmt(unitPrice)} TL/m²</>,
+            tutar: insaat,
+        },
+        {
+            anahtar: 'arsa',
+            renk: styles.renkArsa,
+            ad: 'Arsa sahibinin payı',
+            alt: <>Anlaşılan arsa payı %{landSharePercent}</>,
+            tutar: arsa,
+        },
+        {
+            anahtar: 'kazanc',
+            renk: styles.renkKazanc,
+            ad: 'Müteahhidin kazancı',
+            alt: (
+                <>
+                    ‘{profitLabel}’ kazanç seviyesi · maliyetin{' '}
+                    {profitMultiplier.toLocaleString('tr-TR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    })} katı
+                </>
+            ),
+            tutar: kazanc,
+        },
+    ];
 
     return (
-        <section className={styles.fiyatAciklamasi} aria-label="Bu fiyat nereden geliyor?">
-            <ol className={styles.aciklamaSatirlar}>
-                <li className={styles.aciklamaSatir}>
-                    <span className={`${styles.aciklamaIkon} ${styles.aciklamaIkonMavi}`} aria-hidden="true">
-                        <IconRuler size={18} />
-                    </span>
-                    <span className={styles.aciklamaMetin}>
-                        <span className={styles.aciklamaAd}>Daireyi inşa etmek</span>
-                        <span className={styles.aciklamaAlt}>
-                            {fmt(apartmentSize)} m² × {fmt(unitPrice)} TL/m²
-                        </span>
-                    </span>
-                    <span className={`${styles.aciklamaTutar}`}>{fmtTutar(result?.Mi ?? null)}</span>
-                </li>
-
-                <li className={styles.aciklamaSatir}>
-                    <span className={`${styles.aciklamaIkon} ${styles.aciklamaIkonCamgobegi}`} aria-hidden="true">
-                        <IconMoney size={18} />
-                    </span>
-                    <span className={styles.aciklamaMetin}>
-                        <span className={styles.aciklamaAd}>Arsa sahibinin payı</span>
-                        <span className={styles.aciklamaAlt}>
-                            Anlaşılan arsa payı %{landSharePercent}
-                        </span>
-                    </span>
-                    <span className={`${styles.aciklamaTutar}`}>{fmtTutar(result?.Ma ?? null)}</span>
-                </li>
-
-                <li className={styles.aciklamaSatir}>
-                    <span className={`${styles.aciklamaIkon} ${styles.aciklamaIkonYesil}`} aria-hidden="true">
-                        <IconChevronRight size={18} />
-                    </span>
-                    <span className={styles.aciklamaMetin}>
-                        <span className={styles.aciklamaAd}>Müteahhidin kazancı</span>
-                        <span className={styles.aciklamaAlt}>
-                            ‘{profitLabel}’ kazanç seviyesi · maliyetin{' '}
-                            {profitMultiplier.toLocaleString('tr-TR', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                            })} katı
-                            <button type="button" className={styles.aciklamaDegistir} onClick={onKarDegistir}>
-                                · değiştir
-                            </button>
-                        </span>
-                    </span>
-                    <span className={`${styles.aciklamaTutar}`}>{fmtTutar(muteahhitKazanci)}</span>
-                </li>
-            </ol>
-
-            <div className={styles.aciklamaToplam}>
-                <span className={styles.aciklamaToplamAd}>Toplam · satış fiyatı</span>
-                <span className={`${styles.aciklamaToplamTutar}`}>{fmtTutar(result?.FD_total ?? null)}</span>
+        <section className={styles.kok} aria-label="Bu fiyat nereden geliyor?">
+            <div className={styles.ozet}>
+                <span className={styles.ozetEtiket}>Toplam · satış fiyatı</span>
+                <span className={styles.ozetTutar}>{fmtTutar(toplam)}</span>
+                {toplam !== null && (
+                    <div className={styles.cubuk} role="img" aria-label="Maliyet dağılımı">
+                        {kalemler.map(k => (
+                            <span
+                                key={k.anahtar}
+                                className={`${styles.cubukParca} ${k.renk}`}
+                                style={{ width: `${pay(k.tutar) ?? 0}%` }}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
+            <ol className={styles.liste}>
+                {kalemler.map(k => (
+                    <li key={k.anahtar} className={styles.satir}>
+                        <span className={`${styles.nokta} ${k.renk}`} aria-hidden="true" />
+                        <span className={styles.metin}>
+                            <span className={styles.ad}>{k.ad}</span>
+                            <span className={styles.alt}>{k.alt}</span>
+                            {k.anahtar === 'kazanc' && (
+                                <button type="button" className={styles.degistir} onClick={onKarDegistir}>
+                                    Kazanç seviyesini değiştir
+                                </button>
+                            )}
+                        </span>
+                        <span className={styles.sag}>
+                            <span className={styles.tutar}>{fmtTutar(k.tutar)}</span>
+                            {pay(k.tutar) !== null && <span className={styles.yuzde}>%{pay(k.tutar)}</span>}
+                        </span>
+                    </li>
+                ))}
+            </ol>
+
             <div className={styles.muhendisSatir}>
-                <span className={styles.muhendisEtiket}>Mühendis görünümü</span>
+                <span className={styles.muhendisMetin}>
+                    <span className={styles.ad}>Mühendis görünümü</span>
+                    <span className={styles.alt}>Formül ve sembolleri (M, Mi, Ma, FD_total) gösterir.</span>
+                </span>
                 <button
                     type="button"
                     role="switch"
@@ -143,9 +162,6 @@ export function FiyatAciklamasi({
                     <span className={styles.anahtarTopu} />
                 </button>
             </div>
-            <p className={styles.muhendisIpucu}>
-                Hesabın formülünü ve sembollerini (M, Mi, Ma, FD_total) gösterir — çoğu kullanıcı için gerekli değil.
-            </p>
 
             {muhendisGorunumu && <HesapFisi result={result} />}
         </section>
