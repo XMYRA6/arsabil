@@ -17,7 +17,7 @@ const baseTurn: AkifTurn = {
 it('boş transkript → tanıtım + örnek çip', () => {
   const onSend = jest.fn()
   render(<AkifChat entries={[]} pending={false} onSend={onSend} />)
-  expect(screen.getByText(/Akif Usta/)).toBeInTheDocument()
+  expect(screen.getByText(/Ne öğrenmek istersin/)).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: /emsal nedir/i }))
   expect(onSend).toHaveBeenCalledWith('emsal nedir?')
 })

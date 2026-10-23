@@ -100,8 +100,8 @@ export default function AkifPage() {
         <div className={styles.identity}>
           <span className={styles.avatar} aria-hidden="true">A</span>
           <div>
-            <h1 className={styles.title}>Akif Usta&apos;ya sor</h1>
-            <p className={styles.tagline}>Yapay zekâ asistanı · iki senaryoyu hesaplayıp anlatır</p>
+            <h1 className={styles.title}>Akif Usta</h1>
+            <p className={styles.tagline}>Kat karşılığı danışmanı</p>
           </div>
         </div>
         <div className={styles.headActions}>
@@ -145,10 +145,6 @@ export default function AkifPage() {
           )}
         </div>
       </div>
-      <p className={styles.sub}>
-        Arsanı, emsali ve müteahhit payını {mode === 'voice' ? 'söyle' : 'yaz'} — iki senaryoyu
-        hesaplayıp anlatayım. Sayılar deterministik motordan gelir, uydurma yok.
-      </p>
       <div className={styles.chatCard}>
         {mode === 'voice' && (
           <div className={styles.modeSwitch} role="group" aria-label="Akif modu">

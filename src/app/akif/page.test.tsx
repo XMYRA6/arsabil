@@ -127,7 +127,7 @@ it('sesli konuş → panel açılır, metin composer gizlenir', () => {
   render(<AkifPage />)
   fireEvent.click(screen.getByRole('button', { name: /sesli konuş/i }))
   expect(screen.getByText('SESLI PANEL')).toBeInTheDocument()
-  expect(screen.queryByPlaceholderText(/Arsanı ve payı yaz/i)).not.toBeInTheDocument()
+  expect(screen.queryByPlaceholderText(/Mesaj yaz/i)).not.toBeInTheDocument()
 })
 
 it('panelden çık → metin moduna döner', () => {

@@ -21,7 +21,7 @@ export interface AkifChatProps {
   onVoice?: () => void
 }
 
-const EXAMPLES = ['900 m² arsa, emsal 1.5, müteahhit %50', 'emsal nedir?']
+const EXAMPLES = ['900 m² arsa, emsal 1.5, müteahhit %50', 'emsal nedir?', 'Arsa payı nasıl hesaplanır?']
 
 export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
   const [draft, setDraft] = useState('')
@@ -51,10 +51,14 @@ export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
       <div className={styles.transcript}>
         {entries.length === 0 && (
           <div className={styles.intro}>
-            <p>
-              Merhaba, ben Akif Usta. Arsanın alanını, emsali ve müteahhit payını yaz; iki
-              senaryoyu hesaplayıp anlatayım.
-            </p>
+            <p className={styles.introTitle}>Ne öğrenmek istersin?</p>
+            <div className={styles.examples}>
+              {EXAMPLES.map((ex) => (
+                <button key={ex} type="button" className={styles.example} onClick={() => onSend(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -111,7 +115,7 @@ export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) submit()
           }}
-          placeholder="Arsanı ve payı yaz…"
+          placeholder="Mesaj yaz…"
           rows={1}
           disabled={pending}
         />
@@ -129,18 +133,6 @@ export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
           </svg>
         </button>
       </form>
-      <div className={styles.hints}>
-              {EXAMPLES.map((ex) => (
-                <button
-                  key={ex}
-                  type="button"
-                  className={styles.example}
-                  onClick={() => onSend(ex)}
-                >
-                  {ex}
-                </button>
-              ))}
-      </div>
     </div>
   )
 }
