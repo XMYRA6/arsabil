@@ -1,24 +1,33 @@
 .field {
     position: relative;
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
 .label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--label-color);
+    font: 500 12.5px Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .input {
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
     background: var(--input-bg);
-    color: var(--text);
-    font-size: 0.9rem;
+    color: var(--ink);
+    font: 500 15px Inter, sans-serif;
+}
+
+.input:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .input:disabled {

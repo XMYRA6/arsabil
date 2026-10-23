@@ -1,14 +1,13 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .instructions {
     margin: 0;
-    font-size: 0.85rem;
-    line-height: 1.5;
-    color: var(--label-color);
+    font: 500 13px/1.5 Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .row {
@@ -21,40 +20,49 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 }
 
 .label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--label-color);
+    font: 500 12.5px Inter, sans-serif;
+    color: var(--ink-secondary);
 }
 
 .input {
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
     background: var(--input-bg);
-    color: var(--text);
-    font-size: 0.9rem;
+    color: var(--ink);
+    font: 500 15px Inter, sans-serif;
+}
+
+.input:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .errorNote {
     padding: 10px 14px;
     border-radius: 12px;
-    border: 1px solid rgba(var(--orange-rgb), 0.35);
-    background: rgba(var(--orange-rgb), 0.07);
-    font-size: 0.82rem;
-    color: var(--label-color);
+    border: 1px solid color-mix(in srgb, var(--bad) 35%, transparent);
+    background: color-mix(in srgb, var(--bad) 8%, transparent);
+    font: 500 13px Inter, sans-serif;
+    color: var(--ink);
 }
 
 .searchBtn {
-    padding: 10px 16px;
-    border-radius: 10px;
-    border: none;
-    background: var(--brand-gradient);
-    color: #fff;
-    font-weight: 800;
-    font-size: 0.85rem;
+    min-height: 50px;
+    padding: 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--blue);
+    color: var(--blue-on);
+    font: 600 15px Inter, sans-serif;
     cursor: pointer;
 }
 
@@ -67,9 +75,5 @@
     .row {
         flex-direction: column;
         gap: 14px;
-    }
-
-    .searchBtn {
-        min-height: 44px;
     }
 }

@@ -115,11 +115,6 @@ it('risk unavailable → tek çip "risk verisi alınamadı"', () => {
   expect(screen.queryByText(/Faya/)).not.toBeInTheDocument()
 })
 
-it('yakında metni her zaman var', () => {
-  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
-  expect(screen.getByText(/Yakında/i)).toBeInTheDocument()
-})
-
 it('üye: emsal listesi render (₺/m², link, ~ approx)', () => {
   const card: DegerCardDTO = { ...baseCard, comparables: { count: 2, items: [
     { pricePerSqm: 2500, areaSqm: 480, price: 1200000, distanceM: 1200, approxDistance: true, lat: 41, lng: 39.7, listedAt: '2026-08-21T00:00:00.000Z', source: 'emlakjet', sourceUrl: 'https://emlakjet.com/ilan/c1' },
@@ -157,11 +152,6 @@ it('"haritada gör" → EmsalMap lazy mount', () => {
   expect(screen.getByTestId('emsal-map')).toBeInTheDocument()
 })
 
-it('".soon" artık "Emsal ilanlar" içermiyor', () => {
-  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
-  expect(screen.getByText(/Yakında/)).not.toHaveTextContent('Emsal ilanlar')
-})
-
 it('üye + priceTrend → trend bloğu render', () => {
   const card: DegerCardDTO = { ...baseCard, priceTrend: {
     basis: 'il' as const,
@@ -183,13 +173,6 @@ it('anonim + priceTrend (imkânsız ama) → trend bloğu YOK', () => {
   const card: DegerCardDTO = { ...baseCard, priceTrend: { basis: 'il' as const, points: [], changePct3m: null, thinTrend: true } }
   render(<DegerKarti card={card} isLoggedIn={false} parcelQuery="q=1" />)
   expect(screen.queryByText(/Bölge Fiyat Eğilimi/)).not.toBeInTheDocument()
-})
-
-it('.soon artık "Fiyat trendi" içermiyor, "Uzman görüşü" içeriyor', () => {
-  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
-  const soon = screen.getByText(/Yakında/)
-  expect(soon).not.toHaveTextContent('Fiyat trendi')
-  expect(soon).toHaveTextContent('Uzman görüşü')
 })
 
 const demographics = {
@@ -251,4 +234,16 @@ it('null metrik satırı render edilmez', () => {
 it('üye + demographics ama tüm metrikler null → blok hiç render edilmez', () => {
   render(<DegerKarti card={{ ...baseCard, value: memberValue, demographics: { dataYear: 2024, population: null, populationGrowthPerMille: null, medianAge: null, avgHouseholdSize: null, summary: null } }} isLoggedIn={true} parcelQuery="x" />)
   expect(screen.queryByText(/Bölge Demografisi/)).not.toBeInTheDocument()
+})
+
+it('"Yakında (üyelere): Uzman görüşü" satırı Figma 06\'da yok; kartta artık gösterilmez', () => {
+  render(<DegerKarti card={baseCard} isLoggedIn={false} parcelQuery="q=1" />)
+  expect(screen.queryByText(/Yakında/i)).toBeNull()
+})
+
+it('showMiniMap=false iken kart içinde mini harita çizilmez (sayfa sol kolonda gösterir)', () => {
+  const { container } = render(
+    <DegerKarti card={{ ...baseCard, neighborhood: { geojson: { type: 'Polygon', coordinates: [] } } }} isLoggedIn={false} parcelQuery="q=1" showMiniMap={false} />,
+  )
+  expect(container.querySelector('[data-testid="mini-map"]')).toBeNull()
 })

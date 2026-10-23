@@ -18,6 +18,8 @@ export type ManualParcelReference = {
 
 interface Props {
     onLocationFound: (lat: number, lng: number, reference: ManualParcelReference, exactParcel?: ParcelInfo) => void
+    /** Arama düğmesinin metni (varsayılan: "Sorgula"). */
+    submitLabel?: string
 }
 
 /** TKGM idari-yapi fetch'lerinde 429 (rate limit) durumunu ayirt etmek icin. */
@@ -72,7 +74,7 @@ export function __resetIlListCacheForTests(): void {
     cachedIlListPromise = null
 }
 
-export function ManualParcelEntryForm({ onLocationFound }: Props) {
+export function ManualParcelEntryForm({ onLocationFound, submitLabel = 'Sorgula' }: Props) {
     const [ilText, setIlText] = useState('')
     const [il, setIl] = useState<IdariYapiItem | null>(null)
     const [ilceText, setIlceText] = useState('')
@@ -392,7 +394,7 @@ export function ManualParcelEntryForm({ onLocationFound }: Props) {
             {error && <div className={styles.errorNote}>{error}</div>}
 
             <button type="button" className={styles.searchBtn} onClick={handleSearch} disabled={!canSearch}>
-                {searching ? 'Aranıyor…' : 'Sorgula'}
+                {searching ? 'Aranıyor…' : submitLabel}
             </button>
         </div>
     )

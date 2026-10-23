@@ -42,7 +42,7 @@ function label(month: string): string {
 }
 
 export function PriceTrendChart({ points, changePct3m, thinTrend }: PriceTrendChartProps) {
-  const primary = useCssVar('--primary', '#0a5cff')
+  const primary = useCssVar('--amber', '#e5a52b')
   const green = useCssVar('--green', '#1e7a3c')
   const red = useCssVar('--red', '#b3261e')
   const muted = useCssVar('--muted', '#8a8a8e')

@@ -16,9 +16,15 @@ export interface DegerKartiProps {
   card: DegerCardDTO
   isLoggedIn: boolean
   parcelQuery: string
+  /** `false` ise kart içindeki mini harita çizilmez (sayfa sol kolonda kendisi gösterir). Varsayılan `true`. */
+  showMiniMap?: boolean
 }
 
 const tl = (n: number) => `${n.toLocaleString('tr-TR')} ₺`
+
+/** 1.000.000 ve üstü "2,9 M ₺", altı tam sayı — emsal satırları için kısa gösterim. */
+const tlKisa = (n: number) =>
+  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1).replace('.', ',')} M ₺` : tl(n)
 
 const fmtPerMille = (n: number) => {
   const sign = n > 0 ? '+' : n < 0 ? '−' : ''
@@ -31,7 +37,7 @@ const CONFIDENCE_LABEL: Record<string, string> = {
   dusuk: 'Düşük',
 }
 
-export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
+export function DegerKarti({ card, isLoggedIn, parcelQuery, showMiniMap = true }: DegerKartiProps) {
   const { parcel, risk, value } = card
   const isMember = isLoggedIn
   const [showMap, setShowMap] = useState(false)
@@ -43,16 +49,29 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
       card.demographics.medianAge != null ||
       card.demographics.avgHouseholdSize != null)
 
+  const registerHref = `/register?callbackUrl=${encodeURIComponent('/deger?' + parcelQuery)}`
+
   return (
     <div className={styles.card}>
-      <div className={styles.parcel}>
-        {parcel.il} / {parcel.ilce} {parcel.mahalle} — Ada {parcel.ada}, Parsel {parcel.parsel} · {parcel.areaSqm.toLocaleString('tr-TR')} m²
-      </div>
-      {card.neighborhood.geojson ? (
-        <DegerMiniMap parcelGeometry={parcel.geometry} neighborhoodGeojson={card.neighborhood.geojson} />
-      ) : (
-        <div className={styles.map} data-testid="deger-map" />
+      <header className={styles.header}>
+        <div>
+          <h2 className={styles.title}>{parcel.ilce} · {parcel.mahalle}</h2>
+          <p className={styles.parcel}>
+            {parcel.il} · Ada {parcel.ada} · Parsel {parcel.parsel} · {parcel.areaSqm.toLocaleString('tr-TR')} m²
+          </p>
+        </div>
+        <span className={styles.badge}>Resmi parsel verisi</span>
+      </header>
+
+      {showMiniMap && (
+        card.neighborhood.geojson ? (
+          <DegerMiniMap parcelGeometry={parcel.geometry} neighborhoodGeojson={card.neighborhood.geojson} />
+        ) : (
+          <div className={styles.map} data-testid="deger-map" />
+        )
       )}
+
+      <div className={styles.divider} />
 
       {value.insufficientData ? (
         <p className={styles.insufficient}>Bu bölge için yeterli emsal verisi yok.</p>
@@ -88,44 +107,50 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
           <div className={styles.divider} />
           {isLoggedIn ? (
             value.estimate != null && (
-            <div>
-              <div className={styles.label}>Net Tahmini Değer</div>
-              <div className={styles.range}>{tl(value.estimate!)}</div>
-              <div className={styles.sub}>
-                {tl(value.memberRangeLow!)} – {tl(value.memberRangeHigh!)} · Güven: {CONFIDENCE_LABEL[value.confidence!] ?? value.confidence}
+              <div>
+                <div className={styles.label}>Net Tahmini Değer</div>
+                <div className={styles.range}>{tl(value.estimate!)}</div>
+                <div className={styles.sub}>
+                  {tl(value.memberRangeLow!)} – {tl(value.memberRangeHigh!)} · Güven: {CONFIDENCE_LABEL[value.confidence!] ?? value.confidence}
+                </div>
+                {(value.pricePerSqm?.mahalle != null || value.pricePerSqm?.ilce != null) && (
+                  <div className={styles.statRow}>
+                    {value.pricePerSqm?.mahalle != null && (
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>Mahalle ₺/m²</span>
+                        <span className={styles.statValue}>{value.pricePerSqm.mahalle.toLocaleString('tr-TR')}</span>
+                        {value.sampleCount?.mahalle != null && (
+                          <span className={styles.statSub}>{value.sampleCount.mahalle} emsal</span>
+                        )}
+                      </div>
+                    )}
+                    {value.pricePerSqm?.ilce != null && (
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>İlçe ₺/m²</span>
+                        <span className={styles.statValue}>{value.pricePerSqm.ilce.toLocaleString('tr-TR')}</span>
+                        {value.sampleCount?.ilce != null && (
+                          <span className={styles.statSub}>{value.sampleCount.ilce} emsal</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <Link href={value.feasibilityHref ?? '/hesapla'} className={styles.feasLink}>
+                  Bu parselle fizibilite hesapla →
+                </Link>
               </div>
-              {value.pricePerSqm?.mahalle != null && (
-                <div className={styles.memberRow}>
-                  Mahalle ₺/m²: {value.pricePerSqm.mahalle.toLocaleString('tr-TR')}
-                  {value.sampleCount?.mahalle != null && ` (${value.sampleCount.mahalle} emsal)`}
-                </div>
-              )}
-              {value.pricePerSqm?.ilce != null && (
-                <div className={styles.memberRow}>
-                  İlçe ₺/m²: {value.pricePerSqm.ilce.toLocaleString('tr-TR')}
-                  {value.sampleCount?.ilce != null && ` (${value.sampleCount.ilce} emsal)`}
-                </div>
-              )}
-              <Link href={value.feasibilityHref ?? '/hesapla'} className={styles.feasLink}>
-                Bu parselle fizibilite hesapla →
-              </Link>
-            </div>
             )
           ) : (
             <div className={styles.gatedWrap}>
               <div className={styles.blurred} aria-hidden="true">
-                <div className={styles.label}>Net Değer</div>
-                <div className={styles.range}>₺••••••</div>
-                <div className={styles.memberRow}>Mahalle ₺/m²: ••••</div>
-                <div className={styles.memberRow}>İlçe ₺/m²: ••••</div>
+                <div>Net değer ₺••••••</div>
+                <div>Mahalle ₺/m²: ••••</div>
+                <div>İlçe ₺/m²: ••••</div>
               </div>
               <div className={styles.overlay}>
                 <strong>Net değer + mahalle kırılımı</strong>
                 <span className={styles.sub}>Ücretsiz üyelikle aç</span>
-                <Link
-                  href={`/register?callbackUrl=${encodeURIComponent('/deger?' + parcelQuery)}`}
-                  className={styles.cta}
-                >
+                <Link href={registerHref} className={styles.cta}>
                   Üye Ol
                 </Link>
               </div>
@@ -137,35 +162,38 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
       {card.comparables.count > 0 ? (
         <div className={styles.emsalBlock}>
           <div className={styles.divider} />
-          <div className={styles.label}>Bölgedeki Emsal İlanlar ({card.comparables.count})</div>
+          <h3 className={styles.sectionTitle}>Bölgedeki Emsal İlanlar ({card.comparables.count})</h3>
           {isMember && card.comparables.items ? (
             <>
-              {card.comparables.items.map((c, i) => (
-                <div key={i} className={styles.emsalRow}>
-                  <strong>{c.pricePerSqm != null ? `${c.pricePerSqm.toLocaleString('tr-TR')} ₺/m²` : '—'}</strong>
-                  {c.areaSqm != null && <span> · {c.areaSqm.toLocaleString('tr-TR')} m²</span>}
-                  {c.price != null && <span> · {c.price.toLocaleString('tr-TR')} ₺</span>}
-                  <span> · {c.approxDistance ? '~' : ''}{(c.distanceM / 1000).toFixed(1).replace('.', ',')} km</span>
-                  {c.listedAt && <span> · {new Date(c.listedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span>}
-                  {' '}
-                  <a href={c.sourceUrl} target="_blank" rel="noopener nofollow" className={styles.emsalLink}>Emlakjet ↗</a>
-                </div>
-              ))}
+              <div className={styles.emsalList}>
+                {card.comparables.items.map((c, i) => (
+                  <div key={i} className={styles.emsalRow}>
+                    <span>
+                      <strong>{c.pricePerSqm != null ? `${c.pricePerSqm.toLocaleString('tr-TR')} ₺/m²` : '—'}</strong>
+                      {c.areaSqm != null && <span> · {c.areaSqm.toLocaleString('tr-TR')} m²</span>}
+                      {c.price != null && <span> · {tlKisa(c.price)}</span>}
+                      <span> · {c.approxDistance ? '~' : ''}{(c.distanceM / 1000).toFixed(1).replace('.', ',')} km</span>
+                      {c.listedAt && <span> · {new Date(c.listedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}</span>}
+                    </span>
+                    <a href={c.sourceUrl} target="_blank" rel="noopener nofollow" className={styles.emsalLink} aria-label="İlana git (Emlakjet)">İlana git ↗</a>
+                  </div>
+                ))}
+              </div>
               <button type="button" className={styles.mapToggle} onClick={() => setShowMap(true)}>
-                Emsalları haritada gör →
+                Emsalleri haritada gör →
               </button>
             </>
           ) : (
             <div className={styles.gatedWrap}>
               <div className={styles.blurred} aria-hidden="true">
-                <div className={styles.emsalRow}><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
-                <div className={styles.emsalRow}><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
-                <div className={styles.emsalRow}><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
+                <div><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
+                <div><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
+                <div><strong>•••• ₺/m²</strong> · •••• m² · •••• km</div>
               </div>
               <div className={styles.overlay}>
                 <strong>{card.comparables.count} emsal ilan</strong>
                 <span className={styles.sub}>Ücretsiz üyelikle aç</span>
-                <Link href={`/register?callbackUrl=${encodeURIComponent('/deger?' + parcelQuery)}`} className={styles.cta}>Üye Ol</Link>
+                <Link href={registerHref} className={styles.cta}>Üye Ol</Link>
               </div>
             </div>
           )}
@@ -192,12 +220,12 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
       {isMember && card.priceTrend && (
         <div className={styles.trendBlock}>
           <div className={styles.divider} />
-          <div className={styles.label}>
+          <h3 className={styles.sectionTitle}>
             Bölge Fiyat Eğilimi{' '}
             <span className={styles.trendScope}>
               · {card.priceTrend.basis === 'mahalle' ? 'Mahalle' : card.priceTrend.basis === 'ilce' ? 'İlçe geneli' : 'İl geneli'}
             </span>
-          </div>
+          </h3>
           <PriceTrendChart
             points={card.priceTrend.points}
             changePct3m={card.priceTrend.changePct3m}
@@ -209,29 +237,37 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
       {isMember && card.demographics && hasDemografiMetric ? (
         <div className={styles.demografiBlock}>
           <div className={styles.divider} />
-          <div className={styles.label}>
+          <h3 className={styles.sectionTitle}>
             Bölge Demografisi <span className={styles.trendScope}>· İlçe geneli</span>
-          </div>
+          </h3>
           {card.demographics.summary && (
             <p className={styles.demografiSummary}>{card.demographics.summary}</p>
           )}
           <div className={styles.demografiGrid}>
             {card.demographics.population != null && (
-              <div className={styles.memberRow}>Nüfus: {card.demographics.population.toLocaleString('tr-TR')}</div>
+              <div className={styles.stat}>
+                <span className={styles.statLabel}>Nüfus</span>
+                <span className={styles.statValue}>{card.demographics.population.toLocaleString('tr-TR')}</span>
+              </div>
             )}
             {card.demographics.populationGrowthPerMille != null && (
-              <div className={styles.memberRow}>Yıllık nüfus artışı: {fmtPerMille(card.demographics.populationGrowthPerMille)}</div>
+              <div className={styles.stat}>
+                <span className={styles.statLabel}>Yıllık nüfus artışı</span>
+                <span className={styles.statValue}>{fmtPerMille(card.demographics.populationGrowthPerMille)}</span>
+              </div>
             )}
             {card.demographics.medianAge != null && (
-              <div className={styles.memberRow}>
-                Medyan yaş: {card.demographics.medianAge.toLocaleString('tr-TR')}{' '}
-                <span className={styles.demografiScope}>(il geneli)</span>
+              <div className={styles.stat}>
+                <span className={styles.statLabel}>Medyan yaş</span>
+                <span className={styles.statValue}>{card.demographics.medianAge.toLocaleString('tr-TR')}</span>
+                <span className={styles.statSub}>il geneli</span>
               </div>
             )}
             {card.demographics.avgHouseholdSize != null && (
-              <div className={styles.memberRow}>
-                Ortalama hane: {card.demographics.avgHouseholdSize.toLocaleString('tr-TR')} kişi{' '}
-                <span className={styles.demografiScope}>(il geneli)</span>
+              <div className={styles.stat}>
+                <span className={styles.statLabel}>Ortalama hane</span>
+                <span className={styles.statValue}>{card.demographics.avgHouseholdSize.toLocaleString('tr-TR')} kişi</span>
+                <span className={styles.statSub}>il geneli</span>
               </div>
             )}
           </div>
@@ -240,26 +276,25 @@ export function DegerKarti({ card, isLoggedIn, parcelQuery }: DegerKartiProps) {
       ) : !isMember && card.demographicsAvailable ? (
         <div className={styles.demografiBlock}>
           <div className={styles.divider} />
-          <div className={styles.label}>
+          <h3 className={styles.sectionTitle}>
             Bölge Demografisi <span className={styles.trendScope}>· İlçe geneli</span>
-          </div>
+          </h3>
           <div className={styles.gatedWrap}>
             <div className={styles.blurred} aria-hidden="true">
-              <div className={styles.memberRow}>Nüfus: ••••••</div>
-              <div className={styles.memberRow}>Yıllık nüfus artışı: ••••</div>
-              <div className={styles.memberRow}>Medyan yaş: ••••</div>
+              <div>Nüfus: ••••••</div>
+              <div>Yıllık nüfus artışı: ••••</div>
+              <div>Medyan yaş: ••••</div>
             </div>
             <div className={styles.overlay}>
               <strong>İlçe demografik profili</strong>
               <span className={styles.sub}>Ücretsiz üyelikle aç</span>
-              <Link href={`/register?callbackUrl=${encodeURIComponent('/deger?' + parcelQuery)}`} className={styles.cta}>Üye Ol</Link>
+              <Link href={registerHref} className={styles.cta}>Üye Ol</Link>
             </div>
           </div>
         </div>
       ) : null}
 
-      <p className={styles.disclaimer}>v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç.</p>
-      <p className={styles.soon}>Yakında (üyelere): Uzman görüşü</p>
+      <p className={styles.disclaimer}>v1 tahmini; imar, cephe, eğim gibi parsel özellikleri hariç. Resmi değerleme yerine geçmez.</p>
     </div>
   )
 }

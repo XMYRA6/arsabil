@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ManualParcelEntryForm } from '@/components/listing-wizard/ManualParcelEntryForm'
 import { ParcelPicker, type ParcelPickerValue } from '@/components/listing-wizard/ParcelPicker'
 import { DegerKarti } from '@/components/deger/DegerKarti'
+import { DegerMiniMap } from '@/components/deger/DegerMiniMap'
 import type { DegerCardDTO } from '@/lib/deger/card'
 import styles from './page.module.css'
 
@@ -100,35 +101,49 @@ function DegerPageContent() {
         </button>
       </div>
 
-      {tab === 'adaParsel' && (
-        <ManualParcelEntryForm
-          onLocationFound={(lat, lng, _ref, exactParcel) =>
-            exactParcel
-              ? void fetchCard(lat, lng)
-              : setError('Bu ada/parsel için TKGM kaydı bulunamadı. Haritadan seçmeyi deneyin.')
-          }
-        />
-      )}
-      {tab === 'harita' && (
-        <ParcelPicker
-          value={picker}
-          onChange={(patch) => setPicker((prev) => ({ ...prev, ...patch }))}
-          hint="Arsanızın bulunduğu noktaya haritadan tıklayın."
-          notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın."
-          unavailableText="TKGM servisi şu an yanıt vermiyor, biraz sonra tekrar deneyin."
-        />
-      )}
+      <div className={styles.grid}>
+        <section className={styles.formCard} aria-label="Parsel bilgisi">
+          <h2 className={styles.formTitle}>Parsel bilgisi</h2>
+          {tab === 'adaParsel' && (
+            <ManualParcelEntryForm
+              submitLabel="Değeri göster →"
+              onLocationFound={(lat, lng, _ref, exactParcel) =>
+                exactParcel
+                  ? void fetchCard(lat, lng)
+                  : setError('Bu ada/parsel için TKGM kaydı bulunamadı. Haritadan seçmeyi deneyin.')
+              }
+            />
+          )}
+          {tab === 'harita' && (
+            <ParcelPicker
+              value={picker}
+              onChange={(patch) => setPicker((prev) => ({ ...prev, ...patch }))}
+              hint="Arsanızın bulunduğu noktaya haritadan tıklayın."
+              notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın."
+              unavailableText="TKGM servisi şu an yanıt vermiyor, biraz sonra tekrar deneyin."
+            />
+          )}
+          {card?.neighborhood.geojson ? (
+            <div className={styles.miniMap}>
+              <DegerMiniMap parcelGeometry={card.parcel.geometry} neighborhoodGeojson={card.neighborhood.geojson} />
+            </div>
+          ) : null}
+        </section>
 
-      {pending && <p className={styles.loading}>Yükleniyor…</p>}
-      {error && <p className={styles.error}>{error}</p>}
-      {card && (
-        <DegerKarti
-          key={parcelQuery}
-          card={card}
-          isLoggedIn={card.value.tier === 'member'}
-          parcelQuery={parcelQuery}
-        />
-      )}
+        <div className={styles.resultCol}>
+          {pending && <p className={styles.loading}>Yükleniyor…</p>}
+          {error && <p className={styles.error}>{error}</p>}
+          {card && (
+            <DegerKarti
+              key={parcelQuery}
+              card={card}
+              isLoggedIn={card.value.tier === 'member'}
+              parcelQuery={parcelQuery}
+              showMiniMap={false}
+            />
+          )}
+        </div>
+      </div>
     </>
   )
 }
@@ -136,6 +151,7 @@ function DegerPageContent() {
 export default function DegerPage() {
   return (
     <div className={styles.wrap}>
+      <p className={styles.eyebrow}>Arsa değerleme</p>
       <h1 className={styles.title}>Arsanın tahmini değerini öğren</h1>
       <p className={styles.subtitle}>Ada/parsel gir veya haritadan seç — tahmini değer, ₺/m² ve deprem/taşkın riski.</p>
       <Suspense fallback={null}>

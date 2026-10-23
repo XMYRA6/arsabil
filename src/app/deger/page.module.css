@@ -1,8 +1,28 @@
-.wrap { max-width: 480px; margin: 0 auto; padding: 16px; }
-.title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-.subtitle { font-size: 14px; color: #6e6e73; margin-bottom: 16px; }
-.tabs { display: flex; gap: 4px; margin-bottom: 16px; }
-.tab { flex: 1; padding: 8px; border: 1px solid #e5e5e7; background: #fff; border-radius: 8px; font-size: 13px; cursor: pointer; }
-.tabActive { background: #f0f0f2; font-weight: 600; }
-.error { color: #b3261e; font-size: 13px; margin: 12px 0; }
-.loading { color: #6e6e73; font-size: 13px; margin: 12px 0; }
+/* /deger — Figma 06 (Değer · Masaüstü/Mobil). Arazi tokenları. */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; }
+.eyebrow { margin: 0 0 12px; font: 600 12px Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); }
+.title { margin: 0 0 14px; font: 700 44px/1.1 Inter, sans-serif; letter-spacing: -0.5px; color: var(--ink); }
+.subtitle { margin: 0 0 28px; font: 500 16px Inter, sans-serif; color: var(--ink-secondary); }
+
+.tabs { display: inline-flex; gap: 2px; padding: 4px; margin-bottom: 24px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+.tab { min-height: 36px; padding: 0 20px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 14px Inter, sans-serif; cursor: pointer; }
+.tabActive { background: var(--amber); color: var(--ink); font-weight: 600; }
+[data-theme='dark'] .tabActive { color: #0f1a2e; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.formCard { display: flex; flex-direction: column; gap: 16px; padding: 24px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); color: var(--ink); }
+.formTitle { margin: 0; font: 700 18px Inter, sans-serif; color: var(--ink); }
+.miniMap { border-radius: 14px; overflow: hidden; }
+.resultCol { min-width: 0; }
+
+.error { margin: 0 0 12px; font: 500 13px Inter, sans-serif; color: var(--bad); }
+.loading { margin: 0 0 12px; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
+
+@media (max-width: 900px) {
+  .wrap { padding: 24px 16px 48px; }
+  .title { font-size: 30px; }
+  .subtitle { font-size: 14px; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .tabs { display: flex; }
+  .tab { flex: 1; }
+}
