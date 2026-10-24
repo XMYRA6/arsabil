@@ -107,7 +107,7 @@ interface ProfitLevel {
  */
 const AYAR_VARSAYILANLARI = {
   builderProfit: 1.30,
-  riskLevel: 10,
+  riskLevel: 0, // sunucudaki varsayılan (Risksiz) ile aynı; ayarlar gelince değişmez, ilk hesap ile son hesap ayrışmaz
   iksaMode: 'off' as const,
   iksaPercentage: 5,
   iksaManualTL: 0,
