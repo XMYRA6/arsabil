@@ -12,6 +12,27 @@ export function isaretliYuzde(n: number): string {
   return `${n >= 0 ? '+' : '−'}%${trPct.format(Math.abs(n))}`
 }
 
+/**
+ * Medyan fiyatın güven düzeyi emsal sayısından türetilir (PRODUCT.md ilke #4: şeffaflık).
+ * Eşikler: 30+ yüksek, 10–29 orta, 10 altı düşük (az emsalde medyan tek ilandan etkilenir).
+ */
+export function guvenDuzeyi(emsal: number): 'yüksek' | 'orta' | 'düşük' {
+  if (emsal >= 30) return 'yüksek'
+  if (emsal >= 10) return 'orta'
+  return 'düşük'
+}
+
+export function emsalAlt(emsal: number, onEk?: string): string {
+  return `${onEk ? `${onEk} · ` : ''}${emsal} emsal · güven ${guvenDuzeyi(emsal)}`
+}
+
+/** 3 aylık değişimin hangi kapsamdan hesaplandığı (mahalle verisi yetmezse ilçe/il verisi kullanılır). */
+export function degisimAlt(trend: AreaSeoCardDTO['priceTrend']): string | undefined {
+  if (!trend) return undefined
+  const kapsam = trend.basis === 'mahalle' ? 'Mahalle verisi' : trend.basis === 'ilce' ? 'İlçe geneli verisi' : 'İl geneli verisi'
+  return trend.thinTrend ? `${kapsam} · az örnek` : kapsam
+}
+
 export function SayfaBasligi({ baslik, aciklama }: { baslik: string; aciklama: string }) {
   return (
     <>
@@ -60,8 +81,23 @@ export function TrendKarti({ trend, ince }: { trend: AreaSeoCardDTO['priceTrend'
         12 aylık fiyat trendi <span className={styles.kapsam}>· {kapsam}</span>
       </h2>
       <PriceTrendChart points={trend.points} changePct3m={trend.changePct3m} thinTrend={trend.thinTrend} />
+      <AylikOrnekNotu points={trend.points} />
       {trend.thinTrend && ince && <p className={styles.note}>{ince}</p>}
     </section>
+  )
+}
+
+/** Aylık örnek sayısı aralığı; bazı aylar çok azsa trendin oynak olabileceği söylenir. */
+function AylikOrnekNotu({ points }: { points: NonNullable<AreaSeoCardDTO['priceTrend']>['points'] }) {
+  if (points.length === 0) return null
+  const sayilar = points.map(p => p.sampleCount)
+  const min = Math.min(...sayilar)
+  const max = Math.max(...sayilar)
+  return (
+    <p className={styles.note}>
+      Aylık örnek sayısı: {min === max ? `${min}` : `${min}–${max}`} ilan.
+      {min < 5 && ' Bazı aylarda 5 ilanın altında örnek olduğu için aylık değişimler oynak olabilir.'}
+    </p>
   )
 }
 

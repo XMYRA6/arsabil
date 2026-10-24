@@ -7,7 +7,7 @@ import { buildAreaSeoCard } from '@/lib/areaSeo/areaSeoCard'
 import { createAreaSeoCardDeps } from '@/lib/areaSeo/areaSeoCardDeps'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { faultRiskLevel, floodRiskLevel, RISK_LEVEL_LABEL } from '@/lib/areaSeo/riskLevel'
-import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, DegerBandi, trNum, isaretliYuzde } from '../../../areaSeoParts'
+import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, DegerBandi, trNum, isaretliYuzde, emsalAlt, degisimAlt } from '../../../areaSeoParts'
 import styles from '../../../areaSeo.module.css'
 
 type Params = { il: string; ilce: string; mahalle: string }
@@ -63,7 +63,7 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
       />
       <SayfaBasligi
         baslik={`${entry.mahalleDisplay} Mahallesi arsa fiyatları`}
-        aciklama={`${entry.ilceDisplay}, ${entry.ilDisplay} — ${entry.sampleCount} ilan verisine dayanıyor.`}
+        aciklama={`${entry.ilceDisplay}, ${entry.ilDisplay} — ${card.stat.sampleCount} emsal verisine dayanıyor.`}
       />
 
       <StatSatiri>
@@ -71,7 +71,7 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
           etiket="Medyan m² fiyatı"
           deger={trNum.format(Math.round(card.stat.medianPricePerSqm))}
           birim="₺"
-          alt={`${card.stat.sampleCount} emsal`}
+          alt={emsalAlt(card.stat.sampleCount)}
         />
         <StatKarti
           etiket="Aralık (p25–p75)"
@@ -79,7 +79,7 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
           birim="₺"
         />
         {degisim != null && (
-          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} />
+          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} alt={degisimAlt(card.priceTrend)} />
         )}
         {card.risk?.faultDistanceM != null && (
           <StatKarti
@@ -109,7 +109,7 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
         </section>
       )}
 
-      <p className={styles.note}>Son dönemde bu mahallede {card.comparableCount} satılık arsa ilanı gözlemlendi.</p>
+      <p className={styles.note}>Şu anda bu mahallede {card.comparableCount} satılık arsa ilanı yayında.</p>
 
       {siblings.length > 0 && (
         <section className={styles.section} aria-label="Diğer mahalleler">

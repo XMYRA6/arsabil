@@ -5,7 +5,7 @@ import { findBySlug } from '@/lib/areaSeo/listSeoAreas'
 import { buildAreaSeoCard } from '@/lib/areaSeo/areaSeoCard'
 import { createAreaSeoCardDeps } from '@/lib/areaSeo/areaSeoCardDeps'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, AlanTablosu, DegerBandi, trNum, isaretliYuzde } from '../areaSeoParts'
+import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, AlanTablosu, DegerBandi, trNum, isaretliYuzde, emsalAlt, degisimAlt } from '../areaSeoParts'
 import styles from '../areaSeo.module.css'
 
 type Params = { il: string }
@@ -55,15 +55,15 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
       />
       <SayfaBasligi
         baslik={`${entry.ilDisplay} arsa fiyatları`}
-        aciklama={`${entry.ilDisplay} genelinde ilçe bazında güncel arsa m² fiyatları ve 12 aylık trend. ${entry.sampleCount} ilan verisine dayanıyor.`}
+        aciklama={`${entry.ilDisplay} genelinde ilçe bazında güncel arsa m² fiyatları ve 12 aylık trend. ${card.stat.sampleCount} emsal verisine dayanıyor.`}
       />
 
       <StatSatiri>
         <StatKarti
-          etiket="Ortalama m² fiyatı"
+          etiket="Medyan m² fiyatı"
           deger={trNum.format(Math.round(card.stat.medianPricePerSqm))}
           birim="₺"
-          alt={`İl medyanı · ${card.stat.sampleCount} emsal`}
+          alt={emsalAlt(card.stat.sampleCount, 'İl medyanı')}
         />
         <StatKarti
           etiket="Aralık (p25–p75)"
@@ -71,7 +71,7 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
           birim="₺"
         />
         {degisim != null && (
-          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} />
+          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} alt={degisimAlt(card.priceTrend)} />
         )}
         {enPahali && (
           <StatKarti
@@ -80,7 +80,7 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
             alt={`${trNum.format(Math.round(enPahali.medianPricePerSqm!))} ₺/m²`}
           />
         )}
-        <StatKarti etiket="Veri kapsamı" deger={card.comparableCount} alt="aktif emsal ilan" />
+        <StatKarti etiket="Veri kapsamı" deger={card.comparableCount} alt="şu an yayında" />
       </StatSatiri>
 
       <TrendKarti trend={card.priceTrend} />

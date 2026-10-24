@@ -5,7 +5,7 @@ import { findBySlug } from '@/lib/areaSeo/listSeoAreas'
 import { buildAreaSeoCard } from '@/lib/areaSeo/areaSeoCard'
 import { createAreaSeoCardDeps } from '@/lib/areaSeo/areaSeoCardDeps'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, AlanTablosu, DegerBandi, trNum, isaretliYuzde } from '../../areaSeoParts'
+import { SayfaBasligi, StatSatiri, StatKarti, TrendKarti, AlanTablosu, DegerBandi, trNum, isaretliYuzde, emsalAlt, degisimAlt } from '../../areaSeoParts'
 import styles from '../../areaSeo.module.css'
 
 type Params = { il: string; ilce: string }
@@ -59,7 +59,7 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
       />
       <SayfaBasligi
         baslik={`${entry.ilceDisplay} arsa fiyatları`}
-        aciklama={`${entry.ilceDisplay} ilçesinde (${entry.ilDisplay}) mahalle bazında güncel arsa m² fiyatları. ${entry.sampleCount} ilan verisine dayanıyor.`}
+        aciklama={`${entry.ilceDisplay} ilçesinde (${entry.ilDisplay}) mahalle bazında güncel arsa m² fiyatları. ${card.stat.sampleCount} emsal verisine dayanıyor.`}
       />
 
       <StatSatiri>
@@ -67,7 +67,7 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
           etiket="Medyan m² fiyatı"
           deger={trNum.format(Math.round(card.stat.medianPricePerSqm))}
           birim="₺"
-          alt={`${card.stat.sampleCount} emsal`}
+          alt={emsalAlt(card.stat.sampleCount)}
         />
         <StatKarti
           etiket="Aralık (p25–p75)"
@@ -75,9 +75,9 @@ export default async function IlcePage({ params }: { params: Promise<Params> }) 
           birim="₺"
         />
         {degisim != null && (
-          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} />
+          <StatKarti etiket="3 aylık değişim" deger={isaretliYuzde(degisim)} ton={degisim >= 0 ? 'iyi' : 'kotu'} alt={degisimAlt(card.priceTrend)} />
         )}
-        <StatKarti etiket="Veri kapsamı" deger={card.comparableCount} alt="aktif emsal ilan" />
+        <StatKarti etiket="Veri kapsamı" deger={card.comparableCount} alt="şu an yayında" />
       </StatSatiri>
 
       <TrendKarti trend={card.priceTrend} />
