@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import type { AkifTurn, ScenarioCard } from '@/lib/ai/akif/contract'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { AkifTurn, ScenarioCard, ParcelCard, ProjectCard } from '@/lib/ai/akif/contract'
 import { useKeyboardInset } from '@/components/mobile/useKeyboardInset'
 import { AkifMessageBubble } from './AkifMessageBubble'
 import { AkifAssumptionsBar } from './AkifAssumptionsBar'
 import { AkifScenarioCard } from './AkifScenarioCard'
+import { AkifParcelCard } from './AkifParcelCard'
+import { AkifProjectCard } from './AkifProjectCard'
 import styles from './AkifChat.module.css'
 
 export type AkifChatEntry =
@@ -24,6 +26,8 @@ export interface AkifChatProps {
 }
 
 const EXAMPLES = ['900 m² arsa, emsal 1.5, müteahhit %50', 'emsal nedir?', 'Arsa payı nasıl hesaplanır?']
+
+const MAX_INPUT_PX = 144 // ≈ 6 satır
 
 export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: AkifChatProps) {
   const [draft, setDraft] = useState('')
@@ -50,6 +54,14 @@ export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: Ak
     }
   }, [initialDraft])
 
+  // Metin kutusu içeriğe göre büyür (en fazla ~6 satır), sonra kayar.
+  useLayoutEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, MAX_INPUT_PX)}px`
+  }, [draft])
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' })
   }, [entries.length, pending, keyboardInset])
@@ -71,6 +83,9 @@ export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: Ak
         {entries.length === 0 && (
           <div className={styles.intro}>
             <p className={styles.introTitle}>Ne öğrenmek istersin?</p>
+            <p className={styles.introText} data-testid="akif-intro-text">
+              Arsa, emsal, müteahhit payı gibi konuları sor; birlikte hesaplayalım.
+            </p>
             <div className={styles.examples}>
               {EXAMPLES.map((ex) => (
                 <button key={ex} type="button" className={styles.example} onClick={() => onSend(ex)}>
@@ -104,7 +119,11 @@ export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: Ak
                   <div className={styles.termEx}>Örnek: {tr.example}</div>
                 </div>
               )}
-              {tr && tr.kind !== 'term' && <AkifScenarioCard card={tr as ScenarioCard} />}
+              {(tr?.kind === 'contractor_offers' || tr?.kind === 'apartment_sizes') && (
+                <AkifScenarioCard card={tr as ScenarioCard} />
+              )}
+              {tr?.kind === 'parcel' && <AkifParcelCard card={tr as ParcelCard} />}
+              {tr?.kind === 'project' && <AkifProjectCard card={tr as ProjectCard} />}
               {turn.needs_confirmation && (
                 <div className={styles.confirm}>
                   <span>{turn.needs_confirmation.question}</span>
@@ -122,7 +141,11 @@ export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: Ak
           )
         })}
 
-        {pending && <p className={styles.thinking}>Akif düşünüyor…</p>}
+        {pending && (
+          <p className={styles.thinking}>
+            Akif düşünüyor<span className={styles.dots} aria-hidden="true"><i>.</i><i>.</i><i>.</i></span>
+          </p>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -147,7 +170,7 @@ export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: Ak
             </svg>
           </button>
         )}
-        <button type="submit" className={styles.send} disabled={pending} aria-label="Gönder">
+        <button type="submit" className={styles.send} disabled={pending || !draft.trim()} aria-label="Gönder">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" />
           </svg>

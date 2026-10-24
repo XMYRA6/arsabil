@@ -17,7 +17,7 @@ export interface AkifScenarioCardProps {
 export function AkifScenarioCard({ card }: AkifScenarioCardProps) {
   return (
     <div className={styles.card}>
-      <div className={styles.title}>{TITLE[card.kind]}</div>
+      <div className={styles.title}>{TITLE[card.kind] ?? ''}</div>
       <div className={styles.scroll}>
         <table className={styles.table}>
           <thead>
@@ -30,7 +30,7 @@ export function AkifScenarioCard({ card }: AkifScenarioCardProps) {
             </tr>
           </thead>
           <tbody>
-            {card.rows.map((r, i) => (
+            {(card.rows ?? []).map((r, i) => (
               <tr key={i}>
                 <td>{r.label}</td>
                 <td>%{Math.round(r.arsaPayiX * 100)}</td>

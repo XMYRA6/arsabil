@@ -1,5 +1,5 @@
 .card { margin: 12px 0 0 46px; }
-.title { margin: 0 0 8px; font: 600 11px Inter, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-secondary); }
+.title { margin: 0 0 8px; font: 600 12px Inter, sans-serif; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-secondary); }
 .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .table { border-collapse: collapse; width: 100%; font: 500 13.5px Inter, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); }
 .table th { text-align: left; color: var(--ink-secondary); font: 600 12px Inter, sans-serif; padding: 12px 16px; background: var(--surface-2); }

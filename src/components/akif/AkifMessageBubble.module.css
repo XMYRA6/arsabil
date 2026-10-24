@@ -2,7 +2,15 @@
 .row[data-role='user'] { justify-content: flex-end; }
 .row[data-role='akif'] { justify-content: flex-start; }
 .avatar { flex: none; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--amber); color: var(--ink); font: 700 14px Inter, sans-serif; }
-[data-theme='dark'] .avatar { color: #0f1a2e; }
-.bubble { max-width: 82%; padding: 12px 18px; border-radius: 18px; font: 500 15px/1.5 Inter, sans-serif; white-space: pre-wrap; word-break: break-word; }
-.user { background: var(--blue); color: var(--blue-on); border-bottom-right-radius: 6px; }
+.bubble { max-width: min(82%, 640px); padding: 12px 18px; border-radius: 18px; font: 500 15px/1.5 Inter, sans-serif; white-space: pre-wrap; word-break: break-word; }
+.user { background: color-mix(in srgb, var(--ok) 22%, var(--surface)); border: 1px solid color-mix(in srgb, var(--ok) 30%, var(--surface)); color: var(--ink); border-bottom-right-radius: 6px; }
 .akif { background: var(--surface); border: 1px solid var(--line); color: var(--ink); border-top-left-radius: 6px; }
+
+.enter { animation: bubbleRise var(--dur-ui, 200ms) var(--ease-out, ease-out) both; }
+@keyframes bubbleRise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enter { animation: none; }
+}
