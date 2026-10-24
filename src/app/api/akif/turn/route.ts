@@ -22,6 +22,12 @@ import {
 import type { AkifMessage } from '@/lib/ai/akif/contract'
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
+import {
+  ConversationOwnershipError,
+  assertConversationFree,
+  getChatDb,
+  saveTurnPair,
+} from '@/lib/akif/chat/conversationStore'
 
 export const runtime = 'nodejs'
 
@@ -85,22 +91,41 @@ export async function POST(req: Request) {
   let validatedProjectId: string | undefined
   let validatedUserId: string | undefined
   let projectMemory: string | null | undefined
-  if (typeof projectId === 'string' && projectId.length > 0) {
+  // Oturum kullanıcısı tek seferde alınır (proje doğrulama + sohbet kalıcılığı
+  // için). Auth/DB hatası "oturum yok" olarak ele alınır, tur çökmez.
+  let sessionUserId: string | undefined
+  try {
+    const session = await getServerSession(authOptions)
+    if (session?.user?.id) sessionUserId = session.user.id
+  } catch (e) {
+    console.error('[akif] session lookup', e)
+  }
+  if (sessionUserId && typeof projectId === 'string' && projectId.length > 0) {
     try {
-      const session = await getServerSession(authOptions)
-      if (session?.user?.id) {
-        const project = await prisma.project.findFirst({
-          where: { id: projectId, userId: session.user.id },
-          select: { akifMemory: true },
-        })
-        if (project) {
-          validatedProjectId = projectId
-          validatedUserId = session.user.id
-          projectMemory = project.akifMemory ?? null
-        }
+      const project = await prisma.project.findFirst({
+        where: { id: projectId, userId: sessionUserId },
+        select: { akifMemory: true },
+      })
+      if (project) {
+        validatedProjectId = projectId
+        validatedUserId = sessionUserId
+        projectMemory = project.akifMemory ?? null
       }
     } catch (e) {
       console.error('[akif] project ownership check', e)
+    }
+  }
+
+  // 3b. Sohbet sahipliği — oturum varken conversationId başkasınınsa LLM/bütçe
+  // adımlarından ÖNCE 409. Beklenmedik DB hatası turu engellemez.
+  if (sessionUserId) {
+    try {
+      await assertConversationFree(getChatDb(), { userId: sessionUserId, conversationId })
+    } catch (e) {
+      if (e instanceof ConversationOwnershipError) {
+        return Response.json({ error: 'conversation_conflict' }, { status: 409 })
+      }
+      console.error('[akif] conversation ownership check', e)
     }
   }
 
@@ -160,6 +185,21 @@ export async function POST(req: Request) {
         })
       } catch (e) {
         console.error('[akif] memory write-back', e)
+      }
+    }
+
+    // 9. Sohbet kalıcılığı — yalnız oturumlu kullanıcı; başarısızlık yanıtı bozmaz.
+    if (sessionUserId) {
+      try {
+        await saveTurnPair(getChatDb(), {
+          userId: sessionUserId,
+          conversationId,
+          userMessage,
+          turn,
+          projectId: validatedProjectId,
+        })
+      } catch (e) {
+        console.error('[akif] conversation persist', e)
       }
     }
 

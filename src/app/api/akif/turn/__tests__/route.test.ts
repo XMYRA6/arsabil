@@ -11,7 +11,16 @@ const openAICtor = jest.fn()
 const getServerSessionMock = jest.fn()
 const projectFindFirstMock = jest.fn()
 const projectUpdateManyMock = jest.fn()
+const assertConversationFreeMock = jest.fn()
+const saveTurnPairMock = jest.fn()
 
+jest.mock('@/lib/akif/chat/conversationStore', () => ({
+  ConversationOwnershipError: jest.requireActual('@/lib/akif/chat/conversationStore')
+    .ConversationOwnershipError,
+  getChatDb: () => ({ __brand: 'chatDb' }),
+  assertConversationFree: (...a: unknown[]) => assertConversationFreeMock(...a),
+  saveTurnPair: (...a: unknown[]) => saveTurnPairMock(...a),
+}))
 jest.mock('openai', () => ({
   __esModule: true,
   default: class {
@@ -60,6 +69,7 @@ jest.mock('@/lib/rate-limit', () => ({
 }))
 
 import { POST } from '../route'
+import { ConversationOwnershipError } from '@/lib/akif/chat/conversationStore'
 
 const TURN = {
   intent: 'consult',
@@ -107,6 +117,8 @@ describe('POST /api/akif/turn', () => {
     getServerSessionMock.mockReset().mockResolvedValue(null)
     projectFindFirstMock.mockReset().mockResolvedValue(null)
     projectUpdateManyMock.mockReset().mockResolvedValue({ count: 1 })
+    assertConversationFreeMock.mockReset().mockResolvedValue(undefined)
+    saveTurnPairMock.mockReset().mockResolvedValue(undefined)
   })
 
   it('gecerli POST -> 200, runAkifTurn bir kez, donen turn body', async () => {
@@ -212,11 +224,12 @@ describe('POST /api/akif/turn — Arsa Dosyası (Akif-3)', () => {
     getServerSessionMock.mockReset().mockResolvedValue(null)
     projectFindFirstMock.mockReset().mockResolvedValue(null)
     projectUpdateManyMock.mockReset().mockResolvedValue({ count: 1 })
+    assertConversationFreeMock.mockReset().mockResolvedValue(undefined)
+    saveTurnPairMock.mockReset().mockResolvedValue(undefined)
   })
 
-  it('projectId gönderilmezse oturum/proje sorgusu hiç yapılmaz', async () => {
+  it('projectId gönderilmezse proje sorgusu hiç yapılmaz', async () => {
     await POST(req(validBody))
-    expect(getServerSessionMock).not.toHaveBeenCalled()
     expect(projectFindFirstMock).not.toHaveBeenCalled()
     expect(runAkifTurnMock.mock.calls[0][0].projectMemory).toBeUndefined()
   })
@@ -301,6 +314,99 @@ describe('POST /api/akif/turn — Arsa Dosyası (Akif-3)', () => {
     const res = await POST(req({ ...validBody, projectId: 'p1' }))
     expect(res.status).toBe(200)
     expect(await res.json()).toEqual({ ...TURN, memory_updates: 'yeni özet' })
+    errSpy.mockRestore()
+  })
+})
+
+describe('POST /api/akif/turn — sohbet kalıcılığı', () => {
+  beforeEach(() => {
+    checkRateLimitMock.mockReset().mockReturnValue({ ok: true })
+    runAkifTurnMock.mockReset().mockResolvedValue(TURN)
+    readAkifEnvMock
+      .mockReset()
+      .mockReturnValue({ apiKey: 'sk-x', model: 'gpt-4o-mini', maxTurnTokens: 6000, monthlyBudgetUsd: 20 })
+    createAkifModelMock.mockReset().mockReturnValue({ chatWithTools: jest.fn(), finalStructured: jest.fn() })
+    createAuditLoggerMock
+      .mockReset()
+      .mockReturnValue({ logTurn: jest.fn(), monthSpendUsd: jest.fn().mockResolvedValue(0) })
+    checkMonthlyBudgetMock.mockReset().mockResolvedValue({ ok: true, spent: 0 })
+    checkConversationBudgetMock.mockReset().mockReturnValue({ ok: true })
+    getServerSessionMock.mockReset().mockResolvedValue({ user: { id: 'u1' } })
+    projectFindFirstMock.mockReset().mockResolvedValue(null)
+    projectUpdateManyMock.mockReset().mockResolvedValue({ count: 1 })
+    assertConversationFreeMock.mockReset().mockResolvedValue(undefined)
+    saveTurnPairMock.mockReset().mockResolvedValue(undefined)
+  })
+
+  it('oturumlu + başarılı tur -> saveTurnPair doğru argümanlarla, yanıt AkifTurn', async () => {
+    const res = await POST(req(validBody))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual(TURN)
+    expect(assertConversationFreeMock).toHaveBeenCalledWith(expect.anything(), {
+      userId: 'u1',
+      conversationId: 'c1',
+    })
+    expect(saveTurnPairMock).toHaveBeenCalledTimes(1)
+    expect(saveTurnPairMock).toHaveBeenCalledWith(expect.anything(), {
+      userId: 'u1',
+      conversationId: 'c1',
+      userMessage: validBody.userMessage,
+      turn: TURN,
+      projectId: undefined,
+    })
+  })
+
+  it('doğrulanmış projectId saveTurnPair icine geçer', async () => {
+    projectFindFirstMock.mockResolvedValue({ akifMemory: null })
+    await POST(req({ ...validBody, projectId: 'p1' }))
+    expect(saveTurnPairMock.mock.calls[0][1].projectId).toBe('p1')
+    expect(getServerSessionMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('oturumsuz -> hiçbir şey kaydedilmez, DB kontrolü yok, yanıt aynı', async () => {
+    getServerSessionMock.mockResolvedValue(null)
+    const res = await POST(req(validBody))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual(TURN)
+    expect(assertConversationFreeMock).not.toHaveBeenCalled()
+    expect(saveTurnPairMock).not.toHaveBeenCalled()
+  })
+
+  it('başkasının conversationId değeri -> 409, runAkifTurn çağrılmaz', async () => {
+    assertConversationFreeMock.mockRejectedValue(new ConversationOwnershipError())
+    const res = await POST(req(validBody))
+    expect(res.status).toBe(409)
+    expect(await res.json()).toEqual({ error: 'conversation_conflict' })
+    expect(runAkifTurnMock).not.toHaveBeenCalled()
+    expect(readAkifEnvMock).not.toHaveBeenCalled()
+    expect(saveTurnPairMock).not.toHaveBeenCalled()
+  })
+
+  it('runAkifTurn throw -> 502 ve saveTurnPair çağrılmaz', async () => {
+    runAkifTurnMock.mockRejectedValue(new Error('boom'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await POST(req(validBody))
+    expect(res.status).toBe(502)
+    expect(saveTurnPairMock).not.toHaveBeenCalled()
+    errSpy.mockRestore()
+  })
+
+  it('saveTurnPair throw -> yanıt yine 200, hata loglanır', async () => {
+    saveTurnPairMock.mockRejectedValue(new Error('db down'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await POST(req(validBody))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual(TURN)
+    expect(errSpy).toHaveBeenCalledWith('[akif] conversation persist', expect.any(Error))
+    errSpy.mockRestore()
+  })
+
+  it('assertConversationFree beklenmedik hata -> tur yine çalışır', async () => {
+    assertConversationFreeMock.mockRejectedValue(new Error('db down'))
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const res = await POST(req(validBody))
+    expect(res.status).toBe(200)
+    expect(runAkifTurnMock).toHaveBeenCalledTimes(1)
     errSpy.mockRestore()
   })
 })
