@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { IconPin, IconFile, IconChart } from '@/components/icons'
 import { listTurler, resolveScene, type Tur } from '@/lib/dioramas/scene'
+import { TurkiyeHaritasi } from './TurkiyeHaritasi'
 import { useThemeZaman } from './useThemeZaman'
 import styles from './HomeSections.module.css'
 
@@ -228,13 +229,14 @@ export function LandTypesSection() {
   )
 }
 
-/** Haritaya geçiş bandı: il sınırı verisi yayına alınana kadar fiyat sayfasına bağlanır. */
+/** Türkiye il haritası: medyan m² fiyatına göre tonlanır, il tıklanınca fiyat sayfasına gider. */
 export function PriceMapTeaser() {
   return (
     <section className={styles.section} aria-labelledby="harita-baslik">
       <div className={styles.inner}>
         <h2 id="harita-baslik" className={styles.h2}>Türkiye arsa fiyat haritası</h2>
         <p className={styles.lead}>81 ilde metrekare fiyatı. İl, ilçe ve mahalle bazında emsal fiyatlara bak.</p>
+        <TurkiyeHaritasi />
         <div className={styles.cta}>
           <Link href="/arsa-fiyatlari" className={styles.btnPrimary}>Arsa fiyatlarını gör <Arrow /></Link>
         </div>
