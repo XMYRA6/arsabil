@@ -147,6 +147,7 @@ export function HesaplaMobile({
             `hasStickyCta` ise asagidaki sabit CTA'nin yuksekligini ekler. */}
         <MobileScreen hasBottomNav={false} hasStickyCta>
             <div className={styles.hesaplaMobilKok}>
+                <h1 className="sr-only">Kat karşılığı hesaplama</h1>
                 {/* Kompakt üst satır: yalnızca küçük "Örnek proje" bağlantısı. Eski
                     kicker/başlık ve büyük örnek-proje kartı mobilde yer yiyordu (alt menüde
                     sekme adı zaten var). */}

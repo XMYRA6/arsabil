@@ -72,6 +72,14 @@
 
 .locate {
   color: var(--blue-text);
+  position: relative;
+}
+
+/* Görsel 30px kalır; dokunma alanı 44px */
+.locate::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
 }
 
 .locate:disabled {

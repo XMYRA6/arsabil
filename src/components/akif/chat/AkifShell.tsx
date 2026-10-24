@@ -235,6 +235,7 @@ export function AkifShell(p: AkifShellProps) {
             A
           </span>
           <div className={s.titleBox}>
+            <h1 className="sr-only">Akif</h1>
             <span className={s.kicker}>Akif Usta</span>
             {editing ? (
               <input

@@ -1473,12 +1473,20 @@
     }
 
     .ornekProjeBtnMobil {
+        position: relative;
         border: none;
         background: var(--blue-soft);
         color: var(--blue-text);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         font-weight: 600;
+    }
+
+    /* Görsel yükseklik korunur; dokunma alanı 44px'e uzar */
+    .ornekProjeBtnMobil::after {
+        content: '';
+        position: absolute;
+        inset: -6px -4px;
     }
 
     .ornekVeriRozeti {

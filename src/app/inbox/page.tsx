@@ -194,6 +194,7 @@ function InboxContent() {
 
     return (
         <div className={styles.inboxContainer}>
+            <h1 className="sr-only">Mesajlar</h1>
             {/* Sidebar */}
             <aside className={`${styles.sidebar} ${isMobileChatActive ? styles.sidebarHidden : ''}`}>
                 <div className={styles.sidebarHeader}>

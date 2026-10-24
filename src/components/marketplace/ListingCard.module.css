@@ -230,7 +230,7 @@
 .actionSoft,
 .actionPrimary {
     flex: 1;
-    min-height: 38px;
+    min-height: 44px;
     border: 0;
     border-radius: 999px;
     font: 600 13.5px Inter, sans-serif;

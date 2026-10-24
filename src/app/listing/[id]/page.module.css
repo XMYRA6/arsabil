@@ -30,7 +30,7 @@
 
 /* ── Sekmeler ── */
 .tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px; }
-.tab { flex: none; min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 15px Inter, sans-serif; cursor: pointer; }
+.tab { flex: none; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-secondary); font: 500 15px Inter, sans-serif; cursor: pointer; }
 .tabActive { background: var(--amber-soft); color: var(--amber-text); font-weight: 600; }
 
 .panel { display: flex; flex-direction: column; gap: 20px; }
