@@ -5,7 +5,7 @@ import Link from 'next/link'
 import harita from '@/data/tr-il-harita.json'
 import { kademeHesapla, MIN_EMSAL } from '@/components/home/TurkiyeHaritasi'
 import haritaStyles from '@/components/home/TurkiyeHaritasi.module.css'
-import { guvenDuzeyi } from './areaSeoParts'
+import { guvenDuzeyi, Guven } from './areaSeoParts'
 import styles from './iller.module.css'
 
 export type IlKarti = { slug: string; ad: string; medyan: number | null; emsal: number }
@@ -28,17 +28,6 @@ function sadelestir(s: string): string {
     .toLocaleLowerCase('tr-TR')
     .replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g')
     .replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c')
-}
-
-const guvenNokta = { düşük: 1, orta: 2, yüksek: 3 } as const
-
-function Guven({ emsal }: { emsal: number }) {
-  const d = guvenDuzeyi(emsal)
-  return (
-    <span className={styles.guven} role="img" aria-label={`Güven ${d}`} title={`Güven ${d} (${emsal} emsal)`}>
-      {[1, 2, 3].map((n) => <i key={n} className={n <= guvenNokta[d] ? styles.nokta : styles.noktaBos} />)}
-    </span>
-  )
 }
 
 const yeterliMi = (i: IlKarti) => i.medyan != null && i.medyan > 0 && i.emsal >= MIN_EMSAL
@@ -283,7 +272,8 @@ export function IllerListesi({ iller }: { iller: IlKarti[] }) {
           </button>
         )}
         <p className={styles.dipnot}>
-          Fiyatlar yayındaki ilanların medyanıdır; resmî değerleme değildir. Güven noktaları emsal sayısına göre
+          Fiyatlar yayındaki ilanların medyanıdır; resmî değerleme değildir. İmarlı arsanın yanında tarla, bağ ve arazi
+          ilanlarını da kapsar, bu yüzden kırsal illerde medyan düşük çıkabilir. Güven noktaları emsal sayısına göre
           verilir (10 altı düşük, 30 ve üstü yüksek).
         </p>
       </section>

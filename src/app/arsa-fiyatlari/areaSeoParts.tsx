@@ -22,6 +22,18 @@ export function guvenDuzeyi(emsal: number): 'yüksek' | 'orta' | 'düşük' {
   return 'düşük'
 }
 
+const GUVEN_NOKTA = { düşük: 1, orta: 2, yüksek: 3 } as const
+
+/** Emsal sayısından türeyen 3 noktalı güven göstergesi (erişilebilir etiketli). */
+export function Guven({ emsal }: { emsal: number }) {
+  const d = guvenDuzeyi(emsal)
+  return (
+    <span className={styles.guven} role="img" aria-label={`Güven ${d}`} title={`Güven ${d} (${emsal} emsal)`}>
+      {[1, 2, 3].map((n) => <i key={n} className={n <= GUVEN_NOKTA[d] ? styles.nokta : styles.noktaBos} />)}
+    </span>
+  )
+}
+
 export function emsalAlt(emsal: number, onEk?: string): string {
   return `${onEk ? `${onEk} · ` : ''}${emsal} emsal · güven ${guvenDuzeyi(emsal)}`
 }
@@ -48,15 +60,18 @@ export function StatKarti({
   birim,
   alt,
   ton,
+  genis,
 }: {
   etiket: string
   deger: ReactNode
   birim?: string
   alt?: string
   ton?: 'iyi' | 'kotu'
+  /** Geniş değerler (örn. aralık) için iki sütun kaplar. */
+  genis?: boolean
 }) {
   return (
-    <div className={styles.statKart}>
+    <div className={`${styles.statKart} ${genis ? styles.statGenis : ''}`}>
       <span className={styles.statLabel}>{etiket}</span>
       <span className={`${styles.statValue} ${ton === 'iyi' ? styles.iyi : ton === 'kotu' ? styles.kotu : ''}`}>
         {deger}
@@ -105,6 +120,7 @@ export type TabloSatiri = { ad: string; href: string; medyan: number | null; ems
 
 /** İl → ilçe, ilçe → mahalle tablosu: ad | medyan ₺/m² | emsal sayısı. */
 export function AlanTablosu({ baslik, ilkKolon, satirlar, bos }: { baslik: string; ilkKolon: string; satirlar: TabloSatiri[]; bos: string }) {
+  const enYuksek = Math.max(1, ...satirlar.map(r => r.medyan ?? 0))
   return (
     <section aria-label={baslik}>
       <h2 className={styles.bolumBaslik}>{baslik}</h2>
@@ -116,16 +132,27 @@ export function AlanTablosu({ baslik, ilkKolon, satirlar, bos }: { baslik: strin
             <thead>
               <tr>
                 <th>{ilkKolon}</th>
-                <th className={styles.sayi}>Medyan ₺/m²</th>
-                <th className={styles.sayi}>Emsal sayısı</th>
+                <th className={styles.sayi}>₺/m²</th>
+                <th className={styles.sayi}>Emsal</th>
+                <th className={styles.sayi}>Güven</th>
               </tr>
             </thead>
             <tbody>
               {satirlar.map(r => (
-                <tr key={r.href}>
-                  <td><Link href={r.href}>{r.ad}</Link></td>
-                  <td className={styles.sayi}>{r.medyan != null ? trNum.format(Math.round(r.medyan)) : '—'}</td>
+                <tr key={r.href} className={r.emsal < 10 ? styles.soluk : undefined}>
+                  <td><Link href={r.href}>{r.ad.replace(/ Mahallesi$/, '')}</Link></td>
+                  <td className={styles.sayi}>
+                    <span className={styles.fiyatHucre}>
+                      {r.medyan != null && (
+                        <span className={styles.fiyatCubukKap} aria-hidden="true">
+                          <span className={styles.fiyatCubuk} style={{ width: `${Math.max(3, (r.medyan / enYuksek) * 100)}%` }} />
+                        </span>
+                      )}
+                      <span>{r.medyan != null ? trNum.format(Math.round(r.medyan)) : '—'}</span>
+                    </span>
+                  </td>
                   <td className={styles.sayi}>{r.emsal}</td>
+                  <td className={styles.sayi}><Guven emsal={r.emsal} /></td>
                 </tr>
               ))}
             </tbody>

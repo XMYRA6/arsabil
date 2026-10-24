@@ -28,8 +28,17 @@
 @media (prefers-reduced-motion: reduce) { .linkCard { transition: none; } .linkCard:hover { transform: none; } }
 
 /* ── Stat kartları ── */
-.statSatir { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.statSatir { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 16px; margin-bottom: 24px; }
 .statKart { display: flex; flex-direction: column; gap: 6px; padding: 20px 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); min-width: 0; }
+.statGenis { grid-column: span 2; }
+.guven { display: inline-flex; gap: 3px; vertical-align: middle; }
+.nokta, .noktaBos { width: 8px; height: 8px; border-radius: 50%; }
+.nokta { background: var(--amber); }
+.noktaBos { background: var(--line); }
+.soluk td { color: var(--ink-secondary); }
+.fiyatHucre { display: inline-flex; align-items: center; justify-content: flex-end; gap: 12px; width: 100%; }
+.fiyatCubukKap { display: inline-block; width: min(160px, 30%); height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.fiyatCubuk { display: block; height: 100%; border-radius: 999px; background: var(--amber); }
 .statLabel { font: 500 12.5px Inter, sans-serif; color: var(--ink-secondary); }
 .statValue { font: 700 32px/1.1 Inter, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink); }
 .statBirim { margin-left: 6px; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
@@ -83,6 +92,9 @@
   .linkCard { padding: 16px; }
   .linkFiyat { font-size: 24px; }
   .statSatir { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .statGenis, .statSatir > :first-child { grid-column: 1 / -1; }
+  .table th, .table td { padding-left: 10px; padding-right: 10px; }
+  .fiyatCubukKap { display: none; }
   .statValue { font-size: 26px; }
   .cta { padding: 20px; }
   .ctaRow { width: 100%; }

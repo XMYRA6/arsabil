@@ -41,7 +41,7 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
   if (!card) notFound()
 
   const ilceler = ilceEntries.filter((e) => e.ilNorm === entry.ilNorm).sort((a, b) => b.sampleCount - a.sampleCount)
-  const enPahali = [...ilceler].filter((e) => e.medianPricePerSqm != null).sort((a, b) => b.medianPricePerSqm! - a.medianPricePerSqm!)[0]
+  const enPahali = [...ilceler].filter((e) => e.medianPricePerSqm != null && e.sampleCount >= 10).sort((a, b) => b.medianPricePerSqm! - a.medianPricePerSqm!)[0]
   const degisim = card.priceTrend?.changePct3m ?? null
 
   return (
@@ -66,6 +66,7 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
           alt={emsalAlt(card.stat.sampleCount, 'İl medyanı')}
         />
         <StatKarti
+          genis
           etiket="Aralık (p25–p75)"
           deger={`${trNum.format(Math.round(card.stat.p25))} – ${trNum.format(Math.round(card.stat.p75))}`}
           birim="₺"
@@ -77,7 +78,7 @@ export default async function IlPage({ params }: { params: Promise<Params> }) {
           <StatKarti
             etiket="En pahalı ilçe"
             deger={enPahali.ilceDisplay}
-            alt={`${trNum.format(Math.round(enPahali.medianPricePerSqm!))} ₺/m²`}
+            alt={`${trNum.format(Math.round(enPahali.medianPricePerSqm!))} ₺/m² · ${enPahali.sampleCount} emsal`}
           />
         )}
         <StatKarti etiket="Veri kapsamı" deger={card.comparableCount} alt="şu an yayında" />

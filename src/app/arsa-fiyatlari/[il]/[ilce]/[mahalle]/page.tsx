@@ -74,6 +74,7 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
           alt={emsalAlt(card.stat.sampleCount)}
         />
         <StatKarti
+          genis
           etiket="Aralık (p25–p75)"
           deger={`${trNum.format(Math.round(card.stat.p25))} – ${trNum.format(Math.round(card.stat.p75))}`}
           birim="₺"
