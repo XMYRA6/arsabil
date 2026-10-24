@@ -40,6 +40,7 @@ model User {
   whatsappPhone     String?            @unique
   parselDosyalari   ParselDosyasi[]
   projeKartlari     ProjeKarti[]
+  akifConversations AkifConversation[]
 }
 
 model Account {
@@ -683,4 +684,36 @@ model PhoneClaim {
   createdAt DateTime  @default(now())
 
   @@index([phone])
+}
+
+model AkifConversation {
+  id            String            @id
+  userId        String
+  title         String
+  searchText    String
+  projectId     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  lastMessageAt DateTime          @default(now())
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages      AkifChatMessage[]
+
+  @@index([userId, lastMessageAt])
+}
+
+model AkifChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  searchText     String
+  turn           Json?
+  card           Json?
+  channel        String           @default("text")
+  clientId       String?
+  createdAt      DateTime         @default(now())
+  conversation   AkifConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, clientId])
+  @@index([conversationId, createdAt])
 }
