@@ -16,7 +16,7 @@
 
 .ok {
   background-color: color-mix(in srgb, var(--ok) 16%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 .bad {
@@ -31,7 +31,7 @@
 
 .blue {
   background-color: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 @media (prefers-reduced-motion: reduce) {

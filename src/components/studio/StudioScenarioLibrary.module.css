@@ -176,7 +176,7 @@
 
 .badgeVerified {
   background: color-mix(in srgb, var(--ok) 15%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 .badgeDemo {
@@ -186,7 +186,7 @@
 
 .badgeVersion {
   background: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 .badgeWarning {
@@ -276,7 +276,7 @@
   padding: 4px 10px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--blue);
+  color: var(--blue-text);
   background: var(--surface);
   border: 1px solid var(--blue-soft);
   border-radius: 4px;
@@ -298,7 +298,7 @@
   padding: 6px 12px;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--blue);
+  color: var(--blue-text);
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 6px;

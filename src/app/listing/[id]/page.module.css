@@ -17,14 +17,14 @@
 .heroBadges { position: absolute; top: 18px; left: 18px; display: flex; gap: 8px; flex-wrap: wrap; }
 
 .pill { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
-.pillOk { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); color: var(--ok); }
+.pillOk { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); color: var(--ok-text); }
 .pillMuted { background: var(--surface-2); color: var(--ink-secondary); }
 
 .titleBlock { margin: 22px 0 18px; }
 .titleRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .title { margin: 0; font: 700 32px/1.15 Inter, sans-serif; letter-spacing: -0.3px; color: var(--ink); }
 .subtitle { margin: 8px 0 0; font: 500 15.5px Inter, sans-serif; color: var(--ink-secondary); }
-.editBtn { min-height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
+.editBtn { min-height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 14px Inter, sans-serif; cursor: pointer; }
 
 .mobilePrice { display: none; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 
@@ -62,7 +62,7 @@
 .scoreBlock { padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
 .scoreHead { display: flex; align-items: center; justify-content: space-between; font: 600 14.5px Inter, sans-serif; color: var(--ink); }
 .scorePill { padding: 4px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
-.score_good { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.score_good { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); }
 .score_mid { background: var(--amber-soft); color: var(--amber-text); }
 .score_bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
 .progressTrack { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
@@ -76,16 +76,16 @@
 .offerBtn, .primaryBtn, .offerSubmit { min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; cursor: pointer; }
 .primaryBtn { min-height: 44px; font-size: 15px; }
 .offerSubmit:disabled { opacity: .5; cursor: not-allowed; }
-.softBtnWide { min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 16px Inter, sans-serif; cursor: pointer; }
+.softBtnWide { min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 16px Inter, sans-serif; cursor: pointer; }
 .softRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.softBtn { min-height: 42px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
+.softBtn { min-height: 42px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 14px Inter, sans-serif; cursor: pointer; }
 .softBtn[aria-pressed='true'] { background: var(--amber-soft); color: var(--amber-text); }
 
 .ownerRow { display: flex; align-items: center; gap: 12px; }
-.avatar { width: 48px; height: 48px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage); font: 700 16px Inter, sans-serif; }
+.avatar { width: 48px; height: 48px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage-text); font: 700 16px Inter, sans-serif; }
 .ownerText { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
 .ownerText strong { font: 700 16px Inter, sans-serif; color: var(--ink); }
-.ownerLink, .relatedLink { display: inline-block; margin-top: 12px; color: var(--blue); font: 600 14px Inter, sans-serif; text-decoration: none; }
+.ownerLink, .relatedLink { display: inline-block; margin-top: 12px; color: var(--blue-text); font: 600 14px Inter, sans-serif; text-decoration: none; }
 .mapWrap { margin-top: 12px; border-radius: 14px; overflow: hidden; }
 .noLocationNote { font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
 .footnote { margin: 4px 0 0; font: 500 12px Inter, sans-serif; color: var(--ink-secondary); }

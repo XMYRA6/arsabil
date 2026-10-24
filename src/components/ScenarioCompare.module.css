@@ -4,9 +4,9 @@
 .emptyMessage { padding: 20px; border-radius: 14px; background: var(--surface-2); color: var(--ink-secondary); font: 500 14px Inter, sans-serif; text-align: center; }
 
 .actions { display: flex; justify-content: flex-end; gap: 8px; }
-.actionBtn, .copyBtn { min-width: 40px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.actionBtn, .copyBtn { min-width: 40px; min-height: 40px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .actionBtn:disabled { opacity: .6; cursor: wait; }
-.actionBtnSharing { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.actionBtnSharing { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); }
 .actionBtn:focus-visible, .copyBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .shareBox { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line); }
 .shareUrlText { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
@@ -16,7 +16,7 @@
 .thLabel, .thScenario { padding: 18px 24px; background: var(--surface-2); text-align: left; vertical-align: top; font: 700 14px Inter, sans-serif; color: var(--ink); white-space: nowrap; }
 .thLabel { color: var(--ink-secondary); font-weight: 600; font-size: 12.5px; }
 .thScenarioBest { color: var(--ink); }
-.thScenarioBest::after { content: 'Önerilen'; display: block; width: fit-content; margin-top: 6px; padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font: 600 12px Inter, sans-serif; }
+.thScenarioBest::after { content: 'Önerilen'; display: block; width: fit-content; margin-top: 6px; padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); font: 600 12px Inter, sans-serif; }
 .tdLabel, .tdValue { padding: 16px 24px; border-top: 1px solid var(--line); text-align: left; }
 .tdLabel { color: var(--ink-secondary); white-space: nowrap; }
 .tdValue { color: var(--ink); font-weight: 700; }
@@ -38,7 +38,7 @@
   .scenarioCardBest { border-color: var(--ok); }
   .cardHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
   .cardName { font: 700 17px Inter, sans-serif; color: var(--ink); }
-  .cardBadge { padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); font: 600 12px Inter, sans-serif; }
+  .cardBadge { padding: 3px 12px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); font: 600 12px Inter, sans-serif; }
   .cardRow { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
   .cardLabel { color: var(--ink-secondary); font: 500 14px Inter, sans-serif; }
   .cardValue { color: var(--ink); font: 700 15px Inter, sans-serif; font-variant-numeric: tabular-nums; text-align: right; }

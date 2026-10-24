@@ -45,7 +45,7 @@
 
 .verifiedTag {
   background: color-mix(in srgb, var(--ok) 15%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
   font-size: 12px;
   font-weight: 600;
   padding: 3px 8px;
@@ -226,14 +226,14 @@
 
 .offerMainLabel {
   font-size: 13px;
-  color: var(--blue);
+  color: var(--blue-text);
   font-weight: 600;
 }
 
 .offerMainValue {
   font-size: 22px;
   font-weight: 800;
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 .offerDetailsColumn {
@@ -251,7 +251,7 @@
 }
 
 .cashHighlight {
-  color: var(--ok);
+  color: var(--ok-text);
   font-weight: 700;
 }
 
@@ -358,7 +358,7 @@
 .heroStatLabel { font-size: 13px; color: var(--ink-secondary); font-weight: 500; }
 .heroStatValue { font-size: 36px; line-height: 1.1; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 .heroStatValue small { font-size: 16px; font-weight: 500; color: var(--ink-secondary); }
-.heroCta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font-weight: 600; font-size: 15px; text-decoration: none; }
+.heroCta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font-weight: 600; font-size: 15px; text-decoration: none; }
 .mixBars { display: flex; flex-direction: column; gap: 14px; margin-bottom: 8px; }
 .mixLabelRow { display: flex; justify-content: space-between; font-size: 14px; color: var(--ink); font-weight: 600; margin-bottom: 6px; }
 .mixTrack { height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; }

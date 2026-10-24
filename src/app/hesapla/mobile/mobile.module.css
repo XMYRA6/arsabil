@@ -1423,7 +1423,7 @@
         font: 600 11px Inter, sans-serif;
         letter-spacing: .08em;
         text-transform: uppercase;
-        color: var(--sage);
+        color: var(--sage-text);
     }
 
     .headerTitle {
@@ -1475,7 +1475,7 @@
     .ornekProjeBtnMobil {
         border: none;
         background: var(--blue-soft);
-        color: var(--blue);
+        color: var(--blue-text);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         font-weight: 600;
@@ -1530,7 +1530,7 @@
         background: var(--blue-soft);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        color: var(--blue);
+        color: var(--blue-text);
         font: 600 13px Inter, sans-serif;
     }
 
@@ -1654,7 +1654,7 @@
     }
 
     .gelismisAyarlarIkon {
-        color: var(--blue);
+        color: var(--blue-text);
     }
 
     .mobilCta {
@@ -1673,7 +1673,7 @@
         background: var(--blue-soft);
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        color: var(--blue);
+        color: var(--blue-text);
         font-weight: 600;
     }
 
@@ -1690,7 +1690,7 @@
 
     .ayarlarSifirla {
         background: var(--blue-soft);
-        color: var(--blue);
+        color: var(--blue-text);
     }
 
     .ayarlarUygula {

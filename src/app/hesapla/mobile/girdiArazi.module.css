@@ -63,7 +63,7 @@
 
 .konumIkon {
     flex: none;
-    color: var(--sage);
+    color: var(--sage-text);
 }
 
 .konumMetin {
@@ -75,7 +75,7 @@
 }
 
 .konumBos {
-    color: var(--blue);
+    color: var(--blue-text);
     font-weight: 600;
 }
 
@@ -89,7 +89,7 @@
     padding: 3px 10px;
     border-radius: var(--radius-pill);
     background: color-mix(in srgb, var(--ok) 14%, transparent);
-    color: var(--ok);
+    color: var(--ok-text);
     font: 600 11.5px Inter, sans-serif;
 }
 

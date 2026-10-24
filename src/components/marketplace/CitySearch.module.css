@@ -11,7 +11,7 @@
 .empty { padding: 12px 14px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
 .option { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 10px; font: 500 14.5px Inter, sans-serif; color: var(--ink); cursor: pointer; }
 .option:hover, .option:focus-visible { outline: none; background: var(--surface-2); }
-.optionActive { color: var(--blue); font-weight: 700; }
+.optionActive { color: var(--blue-text); font-weight: 700; }
 .districtCount { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-secondary); font: 600 11.5px Inter, sans-serif; }
 .districtBox { position: relative; flex: none; }
 .districtBtn { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 600 15px Inter, sans-serif; cursor: pointer; white-space: nowrap; }

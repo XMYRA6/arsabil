@@ -34,7 +34,7 @@
 .statValue { font: 700 32px/1.1 Inter, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink); }
 .statBirim { margin-left: 6px; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
 .statAlt { font: 500 12.5px Inter, sans-serif; color: var(--ink-secondary); }
-.iyi { color: var(--ok); }
+.iyi { color: var(--ok-text); }
 .kotu { color: var(--bad); }
 
 /* ── Kartlar / bölümler ── */
@@ -55,14 +55,14 @@
 .table th { text-align: left; padding: 14px 20px; background: var(--surface-2); color: var(--ink-secondary); font: 600 12.5px Inter, sans-serif; white-space: nowrap; }
 .table td { padding: 14px 20px; border-top: 1px solid var(--line); color: var(--ink); }
 .table td:first-child a { color: var(--ink); font-weight: 700; text-decoration: none; }
-.table td:first-child a:hover { color: var(--blue); }
+.table td:first-child a:hover { color: var(--blue-text); }
 .sayi { text-align: right !important; }
 
 /* ── Risk rozeti ── */
 .riskBadge { display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 999px; font: 700 11px Inter, sans-serif; }
 .riskBadgeHigh { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); }
 .riskBadgeMedium { color: var(--amber-text); background: var(--amber-soft); }
-.riskBadgeLow { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.riskBadgeLow { color: var(--ok-text); background: color-mix(in srgb, var(--ok) 14%, transparent); }
 
 /* ── Alt eylem bandı ── */
 .cta { margin-top: 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 24px 28px; border-radius: var(--radius-card); background: var(--amber-soft); border: 1px solid var(--amber); box-shadow: var(--shadow-card); }
@@ -71,7 +71,7 @@
 .ctaRow { display: flex; flex-wrap: wrap; gap: 12px; }
 .ctaButton, .ctaButtonSecondary { display: inline-flex; align-items: center; min-height: 51px; padding: 0 28px; border-radius: 999px; text-decoration: none; font: 600 16px Inter, sans-serif; }
 .ctaButton { background: var(--blue); color: var(--blue-on); }
-.ctaButtonSecondary { background: var(--blue-soft); color: var(--blue); }
+.ctaButtonSecondary { background: var(--blue-soft); color: var(--blue-text); }
 
 @media (max-width: 768px) {
   .wrap { padding: 16px 16px 48px; }

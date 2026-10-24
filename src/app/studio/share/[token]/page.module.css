@@ -38,7 +38,7 @@
 }
 
 .brandDot {
-  color: var(--blue);
+  color: var(--blue-text);
   font-size: 16px;
 }
 
@@ -51,7 +51,7 @@
 .brandStudio {
   font-size: 14px;
   font-weight: 600;
-  color: var(--blue);
+  color: var(--blue-text);
   background: var(--blue-soft);
   padding: 2px 6px;
   border-radius: 4px;
@@ -104,7 +104,7 @@
   border-radius: 8px;
   padding: 10px 16px;
   font-size: 13px;
-  color: var(--blue);
+  color: var(--blue-text);
   text-align: center;
 }
 

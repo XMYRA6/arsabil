@@ -29,7 +29,7 @@
 .confirmBtns { display: flex; gap: 8px; }
 .confirmBtns button { min-height: 34px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer; font: 600 13.5px Inter, sans-serif; }
 .confirmBtns button:first-child { background: var(--surface); color: var(--amber-text); box-shadow: inset 0 0 0 1px var(--amber); }
-.confirmBtns button:last-child { background: var(--blue-soft); color: var(--blue); }
+.confirmBtns button:last-child { background: var(--blue-soft); color: var(--blue-text); }
 .composer { display: flex; align-items: flex-end; gap: 8px; margin-top: 16px; padding: 8px 8px 8px 20px; border-radius: 28px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 .composer:focus-within { box-shadow: var(--focus-ring); }
 .input { flex: 1; min-width: 0; resize: none; border: 0; background: transparent; outline: 0; padding: 9px 0; max-height: 144px; line-height: 1.5; color: var(--ink); font: 500 15px/1.5 Inter, sans-serif; }

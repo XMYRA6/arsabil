@@ -4,8 +4,8 @@
 .heroCard h1 { margin: 0 0 6px; font: 700 36px/1.15 Inter, sans-serif; letter-spacing: -0.4px; color: var(--ink); }
 .heroCard p { margin: 0; font: 500 15px Inter, sans-serif; color: var(--ink-secondary); }
 .heroSide { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.unreadMetric { padding: 4px 12px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 12.5px Inter, sans-serif; }
-.markAllButton { min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
+.unreadMetric { padding: 4px 12px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 12.5px Inter, sans-serif; }
+.markAllButton { min-height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 14px Inter, sans-serif; cursor: pointer; }
 .markAllButton:disabled { opacity: .5; cursor: default; }
 .markAllButton:focus-visible, .markButton:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
@@ -15,11 +15,11 @@
 .notificationCard { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 .notificationRead { opacity: .85; }
 .notificationIcon { flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--surface-2); }
-.iconBlue { color: var(--blue); }
+.iconBlue { color: var(--blue-text); }
 .iconAmber { color: var(--amber); }
-.iconGreen { color: var(--ok); }
+.iconGreen { color: var(--ok-text); }
 .iconRed { color: var(--bad); }
-.iconSage { color: var(--sage); }
+.iconSage { color: var(--sage-text); }
 .notificationBody { flex: 1; min-width: 0; }
 .notificationBody h2 { margin: 0 0 2px; font: 700 16px Inter, sans-serif; color: var(--ink); }
 .notificationBody p { margin: 0; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); overflow-wrap: anywhere; }

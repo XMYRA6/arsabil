@@ -54,7 +54,7 @@
 
 .secondary {
   background-color: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 .tertiary {
@@ -64,7 +64,7 @@
 
 .amber {
   background-color: var(--amber);
-  color: var(--canvas);
+  color: var(--on-amber);
 }
 
 .sizeS {

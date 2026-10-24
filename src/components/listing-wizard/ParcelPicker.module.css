@@ -107,7 +107,7 @@
     border-radius: 999px;
     border: 0;
     background: var(--blue-soft);
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 14px Inter, sans-serif;
     cursor: pointer;
 }

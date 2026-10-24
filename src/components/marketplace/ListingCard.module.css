@@ -60,12 +60,12 @@
 
 .badgeKat {
     background: color-mix(in srgb, var(--ok) 16%, var(--surface));
-    color: var(--ok);
+    color: var(--ok-text);
 }
 
 .badgeSale {
     background: var(--blue-soft);
-    color: var(--blue);
+    color: var(--blue-text);
 }
 
 .badgeNew {
@@ -138,7 +138,7 @@
 
 .score_good {
     background: color-mix(in srgb, var(--ok) 15%, transparent);
-    color: var(--ok);
+    color: var(--ok-text);
 }
 
 .score_mid {
@@ -195,7 +195,7 @@
 }
 
 .up {
-    color: var(--ok);
+    color: var(--ok-text);
     font-weight: 600;
 }
 
@@ -239,7 +239,7 @@
 
 .actionSoft {
     background: var(--blue-soft);
-    color: var(--blue);
+    color: var(--blue-text);
 }
 
 .actionPrimary {

@@ -8,9 +8,9 @@
 .btn { min-height: 44px; padding: 0 22px; background: var(--blue); color: var(--blue-on); }
 .btnAmber { min-height: 44px; padding: 0 22px; background: var(--amber); color: var(--ink); }
 [data-theme='dark'] .btnAmber { color: #0f1a2e; }
-.btnSoft { min-height: 44px; padding: 0 20px; background: var(--blue-soft); color: var(--blue); }
+.btnSoft { min-height: 44px; padding: 0 20px; background: var(--blue-soft); color: var(--blue-text); }
 .btnSm { min-height: 38px; padding: 0 18px; font-size: 14px; background: var(--blue); color: var(--blue-on); }
-.btnSmSoft { min-height: 38px; padding: 0 16px; font-size: 14px; background: var(--blue-soft); color: var(--blue); }
+.btnSmSoft { min-height: 38px; padding: 0 16px; font-size: 14px; background: var(--blue-soft); color: var(--blue-text); }
 .btn:focus-visible, .btnAmber:focus-visible, .btnSoft:focus-visible, .btnSm:focus-visible, .btnSmSoft:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .btnSm:disabled, .btnSmSoft:disabled { opacity: .6; cursor: wait; }
 
@@ -61,7 +61,7 @@
 .rowTitleLine { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rowTitle { font: 700 17px Inter, sans-serif; color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
 .badge { padding: 3px 10px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
-.badgeOk { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.badgeOk { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); }
 .badgeWait { background: var(--amber-soft); color: var(--amber-text); }
 .badgeOff { background: var(--surface-2); color: var(--ink-secondary); }
 .rowSub { margin: 0; font: 500 13.5px Inter, sans-serif; color: var(--ink-secondary); }

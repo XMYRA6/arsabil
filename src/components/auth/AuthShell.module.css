@@ -152,7 +152,7 @@
   border: 0;
   background: none;
   padding: 0;
-  color: var(--blue);
+  color: var(--blue-text);
   font: 600 13.5px Inter, sans-serif;
   cursor: pointer;
   text-decoration: none;
@@ -198,7 +198,7 @@
   border: 0;
   background: none;
   padding: 0;
-  color: var(--blue);
+  color: var(--blue-text);
   font: 600 14px Inter, sans-serif;
   cursor: pointer;
   text-decoration: none;
@@ -220,7 +220,7 @@
 
 .bannerSuccess {
   background: color-mix(in srgb, var(--ok) 14%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 /* ── Sonuç ekranı (e-posta doğrula) ── */
@@ -249,7 +249,7 @@
 
 .resultIconOk {
   background: color-mix(in srgb, var(--ok) 16%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 .result .title {

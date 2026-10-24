@@ -223,7 +223,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--blue);
+  color: var(--blue-text);
   font: 600 14px Inter, sans-serif;
   cursor: pointer;
 }
@@ -322,7 +322,7 @@
   border-radius: 16px;
   border: 1.5px dashed var(--blue);
   background: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
   font: 600 15px Inter, sans-serif;
   cursor: pointer;
   text-align: left;
@@ -361,7 +361,7 @@
   border-radius: 999px;
   border: 0;
   background: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
   font: 600 13px Inter, sans-serif;
   cursor: pointer;
   white-space: nowrap;

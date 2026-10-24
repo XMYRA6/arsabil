@@ -137,7 +137,7 @@
     align-self: flex-start;
     gap: 6px;
     min-height: 40px;
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 15px Inter, sans-serif;
     text-decoration: none;
   }

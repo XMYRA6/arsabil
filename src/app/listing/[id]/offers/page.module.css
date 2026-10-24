@@ -17,14 +17,14 @@
 
 .offerCard { padding: 22px 24px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 .offerHead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.avatar { width: 44px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage); font: 700 15px Inter, sans-serif; }
+.avatar { width: 44px; height: 44px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage-text); font: 700 15px Inter, sans-serif; }
 .offerWho { flex: 1; min-width: 0; }
 .offerWho h2 { margin: 0; font: 700 17px Inter, sans-serif; color: var(--ink); }
 .offerWho time { font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
 .shareValue { font: 700 24px Inter, sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
 .statusBadge { padding: 4px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; white-space: nowrap; }
 .statusPENDING { background: var(--amber-soft); color: var(--amber-text); }
-.statusACCEPTED { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.statusACCEPTED { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); }
 .statusREJECTED { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
 .offerMessage { margin: 14px 0 0; font: 500 15px/1.5 Inter, sans-serif; color: var(--ink-secondary); }
 

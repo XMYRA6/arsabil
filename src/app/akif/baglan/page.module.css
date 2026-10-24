@@ -7,6 +7,6 @@
 .button { display: inline-flex; align-items: center; justify-content: center; align-self: stretch; min-height: 51px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; text-decoration: none; cursor: pointer; }
 .button:disabled { opacity: .6; cursor: default; }
 .button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.success { color: var(--ok) !important; font-weight: 600 !important; }
+.success { color: var(--ok-text) !important; font-weight: 600 !important; }
 .error { color: var(--bad) !important; font-weight: 600 !important; }
 @media (max-width: 768px) { .card { padding: 24px 20px; } .title { font-size: 22px; } }

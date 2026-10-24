@@ -1,6 +1,6 @@
 /* /deger — Figma 06 (Değer · Masaüstü/Mobil). Arazi tokenları. */
 .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px 64px; }
-.eyebrow { margin: 0 0 12px; font: 600 12px Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); }
+.eyebrow { margin: 0 0 12px; font: 600 12px Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--sage-text); }
 .title { margin: 0 0 14px; font: 700 44px/1.1 Inter, sans-serif; letter-spacing: -0.5px; color: var(--ink); }
 .subtitle { margin: 0 0 28px; font: 500 16px Inter, sans-serif; color: var(--ink-secondary); }
 

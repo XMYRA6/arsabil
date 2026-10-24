@@ -16,10 +16,10 @@
 .convItem:hover { background: var(--surface-2); }
 .convItem:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--blue); }
 .convItemActive, .convItem.convItemActive { background: var(--amber-soft); }
-.avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage); font: 700 14px Inter, sans-serif; }
+.avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: color-mix(in srgb, var(--sage) 22%, var(--surface)); color: var(--sage-text); font: 700 14px Inter, sans-serif; }
 .avatarSidebar { width: 40px; height: 40px; }
 .avatarChatHeader { width: 44px; height: 44px; }
-.avatarUnread { background: var(--blue-soft); color: var(--blue); }
+.avatarUnread { background: var(--blue-soft); color: var(--blue-text); }
 .convText { flex: 1; min-width: 0; }
 .convNameRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .convName { font: 700 15px Inter, sans-serif; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -29,7 +29,7 @@
 .unreadCountBadge { flex: none; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 700 11.5px Inter, sans-serif; }
 .emptyConvList, .loadingList { padding: 24px 18px; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
 .emptyConvList p { margin: 0 0 8px; }
-.emptyConvCta { color: var(--blue); font-weight: 600; text-decoration: none; }
+.emptyConvCta { color: var(--blue-text); font-weight: 600; text-decoration: none; }
 
 .chatHeader { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); flex: none; }
 .backButton { display: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--ink); cursor: pointer; align-items: center; justify-content: center; }

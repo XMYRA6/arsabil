@@ -27,7 +27,7 @@
 :root,
 [data-theme="light"] {
   --ink: #2f3b34;
-  --ink-secondary: #6a7268;
+  --ink-secondary: #565e55;
   --line: #ddd6c6;
   --surface: #ffffff;
   --surface-2: #ece7dc;
@@ -39,8 +39,12 @@
   --blue-rgb: 31, 111, 235;
   --blue-on: #ffffff;
   --blue-soft: #dce8fb;
+  --blue-text: #1554c0;
+  --on-amber: #2f3b34;
   --sage: #6f8f72;
+  --sage-text: #4f6f53;
   --ok: #2e8b57;
+  --ok-text: #26774a;
   --bad: #c4553b;
   --shadow-card: 0 8px 24px rgba(47, 59, 52, 0.08);
 
@@ -84,8 +88,12 @@
   --blue-rgb: 76, 141, 255;
   --blue-on: #0b1220;
   --blue-soft: #1c3258;
+  --blue-text: var(--blue);
+  --on-amber: #0f1a2e;
   --sage: #7fa383;
+  --sage-text: var(--sage);
   --ok: #4cc38a;
+  --ok-text: var(--ok);
   --bad: #f08a72;
   --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35);
 

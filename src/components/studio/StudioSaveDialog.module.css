@@ -117,7 +117,7 @@
 
 .sourceVerified {
   background: color-mix(in srgb, var(--ok) 15%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 .sourceDemo {

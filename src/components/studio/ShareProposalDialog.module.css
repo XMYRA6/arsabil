@@ -82,7 +82,7 @@
 .statusReady {
   background: color-mix(in srgb, var(--ok) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--ok) 15%, transparent);
-  color: var(--ok);
+  color: var(--ok-text);
   padding: 12px 14px;
   border-radius: 8px;
   font-size: 13px;
@@ -232,7 +232,7 @@
 }
 
 .previewLink {
-  color: var(--blue);
+  color: var(--blue-text);
   text-decoration: none;
   font-weight: 600;
 }

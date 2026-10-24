@@ -125,7 +125,7 @@
   border: 0;
   border-radius: var(--radius-pill, 999px);
   background: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
   font: 600 14px Inter, sans-serif;
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out);

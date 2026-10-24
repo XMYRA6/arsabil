@@ -9,7 +9,7 @@
 .body :global(ul) { margin: 0 0 16px; padding-left: 22px; }
 .body :global(li) { margin: 6px 0; }
 .body :global(strong) { color: var(--ink); font-weight: 600; }
-.body :global(a) { color: var(--blue); text-decoration: none; font-weight: 500; }
+.body :global(a) { color: var(--blue-text); text-decoration: none; font-weight: 500; }
 .body :global(a:hover) { text-decoration: underline; }
 @media (max-width: 768px) {
   .wrap { padding: 24px 16px 56px; }

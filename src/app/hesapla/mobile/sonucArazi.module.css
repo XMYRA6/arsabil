@@ -51,7 +51,7 @@
 
 .rozetYesil {
     background: color-mix(in srgb, var(--ok) 15%, transparent);
-    color: var(--ok);
+    color: var(--ok-text);
 }
 
 .rozetKirmizi {
@@ -97,7 +97,7 @@
     border: 0;
     background: transparent;
     padding: 0;
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 13px Inter, sans-serif;
     cursor: pointer;
 }
@@ -241,7 +241,7 @@
     border: 0;
     background: transparent;
     padding: 0;
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 13.5px Inter, sans-serif;
     cursor: pointer;
 }
@@ -276,7 +276,7 @@
     border: 0;
     border-radius: var(--radius-pill);
     background: var(--blue-soft);
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 13px Inter, sans-serif;
     cursor: pointer;
 }

@@ -4,14 +4,14 @@
 .cik { animation: toastCik 200ms ease-in both; }
 
 .ikon { flex: none; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
-.kart[data-tip='basari'] .ikon { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+.kart[data-tip='basari'] .ikon { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok-text); }
 .kart[data-tip='hata'] .ikon { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
 .tik { stroke-dasharray: 24; stroke-dashoffset: 24; animation: tikCiz 360ms 140ms ease-out forwards; }
 
 .metin { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .baslik { font: 600 14.5px Inter, sans-serif; }
 .aciklama { font: 400 12.5px/1.35 Inter, sans-serif; color: var(--ink-secondary); }
-.eylem { flex: none; padding: 6px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 13px Inter, sans-serif; text-decoration: none; }
+.eylem { flex: none; padding: 6px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 13px Inter, sans-serif; text-decoration: none; }
 .kapat { flex: none; width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-secondary); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .eylem:focus-visible, .kapat:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 

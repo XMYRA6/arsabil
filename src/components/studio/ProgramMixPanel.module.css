@@ -109,7 +109,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(31, 111, 235, 0.14);
-  color: var(--blue);
+  color: var(--blue-text);
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
@@ -173,7 +173,7 @@
   border: 1px dashed rgba(31, 111, 235, 0.4);
   border-radius: 999px;
   background: transparent;
-  color: var(--blue);
+  color: var(--blue-text);
   font-size: 12px;
   font-weight: 800;
   padding: 0 16px;

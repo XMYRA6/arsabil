@@ -409,7 +409,7 @@
   font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--blue);
+  color: var(--blue-text);
   opacity: 0;
   transform: scale(0.8);
 }
@@ -460,7 +460,7 @@
 }
 .blue {
   background-color: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 /* Arazi türleri */
@@ -551,7 +551,7 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--sage);
+  color: var(--sage-text);
 }
 
 .panelTitle {
@@ -793,7 +793,7 @@
   min-height: 46px;
   padding: 0 22px;
   border-radius: var(--radius-pill);
-  background-color: #25a05a;
+  background-color: #1f7f47;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
@@ -816,7 +816,7 @@
   align-items: center;
   gap: 12px;
   padding: 18px 22px;
-  background-color: #2b8a6a;
+  background-color: #1f7a5c;
   color: #fff;
 }
 
@@ -884,7 +884,7 @@
   border: 1px solid var(--ok);
   border-radius: var(--radius-pill);
   font-size: 14px;
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 /* Mesajlar telefon ekrana girince sırayla belirir */
@@ -929,7 +929,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background-color: #2b8a6a;
+  background-color: #1f7a5c;
   color: #fff;
 }
 
@@ -938,7 +938,7 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 2px solid #2b8a6a;
+  border: 2px solid #1f7a5c;
   opacity: 0;
 }
 

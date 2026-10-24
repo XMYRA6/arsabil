@@ -45,7 +45,7 @@
   border: none;
   border-radius: var(--radius-pill);
   background-color: var(--amber);
-  color: var(--canvas);
+  color: var(--on-amber);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;

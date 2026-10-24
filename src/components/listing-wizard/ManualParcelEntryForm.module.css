@@ -61,7 +61,7 @@
     border: 1px solid var(--blue);
     border-radius: 999px;
     background: transparent;
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 12px Inter, sans-serif;
     cursor: pointer;
 }

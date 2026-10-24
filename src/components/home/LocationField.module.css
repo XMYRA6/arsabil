@@ -71,7 +71,7 @@
 }
 
 .locate {
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 .locate:disabled {
@@ -112,7 +112,7 @@
 
 .optOn {
   background-color: var(--blue-soft);
-  color: var(--blue);
+  color: var(--blue-text);
 }
 
 .empty {

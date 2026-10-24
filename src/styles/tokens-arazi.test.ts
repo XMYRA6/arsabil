@@ -16,7 +16,7 @@ const val = (b: string, name: string) => new RegExp(`${name}\s*:\s*([^;]+);`).ex
 describe('Arazi paleti: açık tema', () => {
   const b = block('[data-theme="light"]')
   it.each([
-    ['--ink', '#2f3b34'], ['--ink-secondary', '#6a7268'], ['--line', '#ddd6c6'],
+    ['--ink', '#2f3b34'], ['--ink-secondary', '#565e55'], ['--line', '#ddd6c6'],
     ['--surface', '#ffffff'], ['--surface-2', '#ece7dc'], ['--canvas', '#f4f1ea'],
     ['--amber', '#e5a52b'], ['--amber-text', '#8a5a00'], ['--amber-soft', '#f6e7c4'],
     ['--blue', '#1f6feb'], ['--blue-on', '#ffffff'], ['--blue-soft', '#dce8fb'],

@@ -121,7 +121,7 @@
 }
 
 .riskAppliedNote {
-    color: var(--ok);
+    color: var(--ok-text);
     font: 600 13.5px Inter, sans-serif;
     display: flex;
     align-items: center;

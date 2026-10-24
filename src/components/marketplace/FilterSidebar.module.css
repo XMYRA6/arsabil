@@ -47,7 +47,7 @@
     border: 0;
     background: transparent;
     padding: 0;
-    color: var(--blue);
+    color: var(--blue-text);
     font: 600 13.5px Inter, sans-serif;
     cursor: pointer;
 }
@@ -298,5 +298,5 @@
 
 .resetBtn {
     background: var(--blue-soft);
-    color: var(--blue);
+    color: var(--blue-text);
 }

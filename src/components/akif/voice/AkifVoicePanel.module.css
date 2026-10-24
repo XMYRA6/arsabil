@@ -4,7 +4,7 @@
 .transcript { flex: 1; overflow-y: auto; min-height: 160px; padding: 16px 18px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
 .controls { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 4px 0; }
 .start { min-height: 51px; padding: 0 28px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 16px Inter, sans-serif; cursor: pointer; }
-.stop { width: 100%; min-height: 51px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 16px Inter, sans-serif; cursor: pointer; }
+.stop { width: 100%; min-height: 51px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 16px Inter, sans-serif; cursor: pointer; }
 .exit { background: none; border: none; color: var(--ink-secondary); font: 500 13px Inter, sans-serif; cursor: pointer; text-decoration: underline; }
 .orbWrap { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 0 18px; }
 .orb { display: inline-flex; align-items: center; justify-content: center; color: var(--ink); width: 96px; height: 96px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 0 14px color-mix(in srgb, var(--amber) 25%, transparent), 0 0 0 28px color-mix(in srgb, var(--amber) 12%, transparent); }

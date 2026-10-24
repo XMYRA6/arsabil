@@ -61,7 +61,7 @@
 
 .chipTur {
   background: color-mix(in srgb, var(--ok) 16%, var(--surface));
-  color: var(--ok);
+  color: var(--ok-text);
 }
 
 .note {

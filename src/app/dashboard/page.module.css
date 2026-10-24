@@ -19,16 +19,16 @@
 .section { padding: 22px; border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); min-width: 0; }
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .sectionTitle { margin: 0; font: 700 18px Inter, sans-serif; color: var(--ink); }
-.sectionLink { color: var(--blue); font: 600 13.5px Inter, sans-serif; text-decoration: none; }
+.sectionLink { color: var(--blue-text); font: 600 13.5px Inter, sans-serif; text-decoration: none; }
 .empty { margin: 0; font: 500 14px Inter, sans-serif; color: var(--ink-secondary); }
-.empty a { color: var(--blue); font-weight: 600; text-decoration: none; }
+.empty a { color: var(--blue-text); font-weight: 600; text-decoration: none; }
 
 .reportList, .messageList, .offerList { display: flex; flex-direction: column; gap: 10px; }
 .reportRow, .messageRow, .offerRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 14px; background: var(--surface-2); text-decoration: none; color: inherit; }
 .reportInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .reportTitle { font: 700 15px Inter, sans-serif; color: var(--ink); overflow-wrap: anywhere; }
 .reportMeta { font: 500 12.5px Inter, sans-serif; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
-.actionLink { color: var(--blue); font: 600 14px Inter, sans-serif; text-decoration: none; }
+.actionLink { color: var(--blue-text); font: 600 14px Inter, sans-serif; text-decoration: none; }
 
 .messageRow { flex-direction: column; align-items: flex-start; gap: 2px; }
 .messageSender { font: 700 15px Inter, sans-serif; color: var(--ink); }
@@ -39,11 +39,11 @@
 .offerListing { font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
 .offerStatus { flex: none; padding: 4px 12px; border-radius: 999px; font: 600 12px Inter, sans-serif; }
 .statusPending { background: var(--amber-soft); color: var(--amber-text); }
-.statusAccepted { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.statusAccepted { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok-text); }
 .statusRejected { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
 
 .quickActions { display: flex; flex-wrap: wrap; gap: 12px; }
-.qaBtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 15px Inter, sans-serif; text-decoration: none; }
+.qaBtn { display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 15px Inter, sans-serif; text-decoration: none; }
 .qaPrimary { background: var(--blue); color: var(--blue-on); }
 
 @media (max-width: 900px) {

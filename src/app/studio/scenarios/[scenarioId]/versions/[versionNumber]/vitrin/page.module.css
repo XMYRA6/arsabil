@@ -2,22 +2,22 @@
 .page { min-height: calc(100dvh - var(--topbar-height, 72px)); background: var(--bg); color: var(--ink); padding: 24px 24px 72px; }
 .inner { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
 .topBar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.backLink { color: var(--blue); font: 600 14px Inter, sans-serif; text-decoration: none; }
+.backLink { color: var(--blue-text); font: 600 14px Inter, sans-serif; text-decoration: none; }
 .backLink:hover { text-decoration: underline; }
 .topRight { display: flex; align-items: center; gap: 10px; }
-.shareBtn { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 13px Inter, sans-serif; cursor: pointer; }
+.shareBtn { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 13px Inter, sans-serif; cursor: pointer; }
 .shareBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .badge { padding: 4px 12px; border-radius: 999px; background: var(--amber-soft); color: var(--amber-text); font: 600 12px Inter, sans-serif; }
 
 .hero { display: flex; align-items: center; gap: 48px; }
 .heroCopy { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
-.kicker { margin: 0; font: 600 12px Inter, sans-serif; letter-spacing: .08em; color: var(--sage); }
+.kicker { margin: 0; font: 600 12px Inter, sans-serif; letter-spacing: .08em; color: var(--sage-text); }
 .title { margin: 0; font: 700 48px/1.1 Inter, sans-serif; letter-spacing: -0.02em; color: var(--ink); overflow-wrap: anywhere; }
 .lead { margin: 0; max-width: 52ch; font: 400 17px/1.6 Inter, sans-serif; color: var(--ink-secondary); }
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .primary, .soft { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 51px; padding: 0 28px; border-radius: 999px; font: 600 16px Inter, sans-serif; text-decoration: none; }
 .primary { background: var(--blue); color: var(--blue-on); }
-.soft { background: var(--blue-soft); color: var(--blue); }
+.soft { background: var(--blue-soft); color: var(--blue-text); }
 .primary:focus-visible, .soft:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 .visual { flex: 0 0 min(620px, 50%); height: 520px; border-radius: 28px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; overflow: hidden; }

@@ -7,7 +7,7 @@
 .actions { display: flex; gap: 10px; padding-top: 4px; }
 .primary { flex: 1; min-height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--blue); color: var(--blue-on); font: 600 14px Inter, sans-serif; cursor: pointer; }
 .primary:disabled { opacity: 0.45; cursor: not-allowed; }
-.secondary { flex: 1; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue); font: 600 14px Inter, sans-serif; cursor: pointer; }
+.secondary { flex: 1; min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--blue-soft); color: var(--blue-text); font: 600 14px Inter, sans-serif; cursor: pointer; }
 .secondary:disabled { opacity: 0.45; cursor: not-allowed; }
 .hint { margin: 0; font: 500 13px Inter, sans-serif; color: var(--ink-secondary); }
 .savedText { margin: 0; font: 500 13px Inter, sans-serif; color: var(--ink); }
