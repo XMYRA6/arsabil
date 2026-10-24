@@ -167,8 +167,7 @@ export function StudioScenarioBar({
           aria-label="Geri al"
           title="Geri al (Ctrl+Z)"
         >
-          ↶ Geri al
-          <span className={styles.shortcutHint}>Ctrl+Z</span>
+          ↶
         </button>
 
         <button
@@ -179,8 +178,7 @@ export function StudioScenarioBar({
           aria-label="İleri al"
           title="İleri al (Ctrl+Shift+Z)"
         >
-          ↷ İleri al
-          <span className={styles.shortcutHint}>Ctrl+Y</span>
+          ↷
         </button>
       </div>
 
@@ -236,10 +234,10 @@ export function StudioScenarioBar({
             type="button"
             className={styles.actionBtn}
             onClick={onPdfClick}
-            aria-label="PDF Rapor"
+            aria-label="Teklif PDF'i"
             title="Ön fizibilite teklif raporunu PDF olarak indirin"
           >
-            PDF
+            Teklif PDF'i
           </button>
         )}
 
@@ -255,7 +253,7 @@ export function StudioScenarioBar({
           </button>
         )}
 
-        {onCompareClick && (
+        {onCompareClick && allScenarios.length > 1 && (
           <button
             type="button"
             className={styles.actionBtn}

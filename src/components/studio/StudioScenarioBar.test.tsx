@@ -110,8 +110,15 @@ describe('StudioScenarioBar', () => {
     expect(screen.getByText('Program dağılımı değiştirildi')).toBeInTheDocument();
   });
 
+  it('Karsilastir tek senaryoda gizli, birden cok senaryoda gorunur', () => {
+    const { rerender } = render(<StudioScenarioBar {...defaultProps} />);
+    expect(screen.queryByRole('button', { name: /Karşılaştır/i })).not.toBeInTheDocument();
+    rerender(<StudioScenarioBar {...defaultProps} allScenarios={[mockScenario, { ...mockScenario, id: 's2', name: 'Alt' }]} />);
+    expect(screen.getByRole('button', { name: /Karşılaştır/i })).toBeInTheDocument();
+  });
+
   it('Alternatif Ekle ve Karsilastir butonlari dogru calisir', () => {
-    render(<StudioScenarioBar {...defaultProps} />);
+    render(<StudioScenarioBar {...defaultProps} allScenarios={[mockScenario, { ...mockScenario, id: 's2', name: 'Alt' }]} />);
 
     const addAltBtn = screen.getByRole('button', { name: /Alternatif Oluştur/i });
     fireEvent.click(addAltBtn);
@@ -162,7 +169,7 @@ describe('StudioScenarioBar', () => {
     fireEvent.click(shareBtn);
     expect(onShareClick).toHaveBeenCalledTimes(1);
 
-    const pdfBtn = screen.getByRole('button', { name: /PDF Rapor/i });
+    const pdfBtn = screen.getByRole('button', { name: /Teklif PDF/i });
     fireEvent.click(pdfBtn);
     expect(onPdfClick).toHaveBeenCalledTimes(1);
   });

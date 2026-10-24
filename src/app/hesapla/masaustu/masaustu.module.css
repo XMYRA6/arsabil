@@ -250,6 +250,45 @@
     cursor: pointer;
 }
 
+.dahaFazlaKap {
+    position: relative;
+}
+
+.dahaFazlaMenu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 20;
+    display: grid;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+}
+
+.dahaFazlaOge {
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink);
+    font: 500 14px Inter, sans-serif;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dahaFazlaOge:hover:not(:disabled) {
+    background: var(--surface-2);
+}
+
+.dahaFazlaOge:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .eylemBirincil:disabled,
 .eylemIkincil:disabled {
     opacity: 0.5;

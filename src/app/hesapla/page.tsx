@@ -27,6 +27,7 @@ import { SonucPaneli } from './masaustu/SonucPaneli';
 import { YapiKutlesiPaneli } from './masaustu/YapiKutlesiPaneli';
 import { AcilirBolum } from './masaustu/AcilirBolum';
 import { HesapOzetiPaneli } from './masaustu/HesapOzetiPaneli';
+import { DahaFazlaMenu } from './masaustu/DahaFazlaMenu';
 import arazi from './masaustu/masaustu.module.css';
 import { type BirimMaliyetKaynagi } from './mobile/unitPriceSource';
 import { type RiskKaynagi } from './mobile/riskSource';
@@ -958,18 +959,19 @@ export default function Home() {
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg>
           {isSaving ? 'Kaydediliyor...' : 'Özet rapor oluştur'}
         </button>
-        <button type="button" className={arazi.eylemIkincil} onClick={handlePdfDownload} disabled={!result}>PDF</button>
-        <button type="button" className={arazi.eylemIkincil} onClick={handleOpenShareDialog} disabled={!result}>Paylaş</button>
         <button type="button" className={arazi.eylemIkincil} onClick={handleOpenSaveDialog} disabled={!result}>Kaydet</button>
-        <button
-          type="button"
-          className={arazi.eylemIkincil}
-          onClick={handleAddScenario}
-          disabled={!result || savedScenarios.length >= 3}
-          title={savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined}
-        >
-          + Karşılaştır
-        </button>
+        <button type="button" className={arazi.eylemIkincil} onClick={handleOpenShareDialog} disabled={!result}>Paylaş</button>
+        <DahaFazlaMenu
+          ogeler={[
+            { etiket: 'Hesap raporu (PDF)', onClick: handlePdfDownload, disabled: !result },
+            {
+              etiket: '+ Hızlı karşılaştırma',
+              onClick: handleAddScenario,
+              disabled: !result || savedScenarios.length >= 3,
+              title: savedScenarios.length >= 3 ? 'Maksimum 3 senaryo' : undefined,
+            },
+          ]}
+        />
       </div>
       {savedScenarios.length > 0 && (
         <div className={styles.scenarioPills}>
@@ -1250,11 +1252,11 @@ export default function Home() {
     <div className={styles.container}>
       <header className={styles.pageHead}>
         <div>
-          <p className={styles.pageKicker}>Kat karşılığı fizibilite</p>
           <h1 className={styles.pageTitle}>Arsa payını ve minimum daire fiyatını hesapla</h1>
           <p className={styles.pageSub}>Girdilerini düzenle, sonuç anında güncellensin. Sayılar deterministik motordan gelir.</p>
         </div>
         <div className={styles.pageActions}>
+          <Button variant="secondary" onClick={handleOpenLibrary}>Kütüphane</Button>
           <Button variant="secondary" onClick={() => window.location.assign('/hesapla')}>+ Yeni hesaplama</Button>
         </div>
       </header>
@@ -1310,20 +1312,22 @@ export default function Home() {
               onManualMarketPrice={setManualMarketPrice}
               onOrnekProjeIleDene={handleOrnekProjeIleDene}
             />
-            {actionsSection}
-            <HesapOzetiPaneli
-              result={result}
-              hasEnoughDataForResult={hasEnoughDataForResult}
-              chartBaseInput={chartBaseInput}
-              marketPriceNum={marketPriceNum}
-            />
+            {result && actionsSection}
+            {result && (
+              <HesapOzetiPaneli
+                result={result}
+                hasEnoughDataForResult={hasEnoughDataForResult}
+                chartBaseInput={chartBaseInput}
+                marketPriceNum={marketPriceNum}
+              />
+            )}
           </div>
 
         </section>
       </div >
 
+      {result && (
       <section className={styles.studio} aria-labelledby="studio-baslik">
-        <p className={styles.pageKicker}>Stüdyo</p>
         <h2 id="studio-baslik" className={styles.studioTitle}>Senaryolar, kütle ve program</h2>
         <div className={styles.studioGrid}>
           <div className={styles.studioBar}>
@@ -1341,9 +1345,6 @@ export default function Home() {
               onAddAlternative={handleAddAlternative}
               onCompareClick={() => setShowScenarioComparison((prev) => !prev)}
               onSelectScenario={handleSelectScenario}
-              onSaveClick={handleOpenSaveDialog}
-              onLibraryClick={handleOpenLibrary}
-              onShareClick={handleOpenShareDialog}
               onPdfClick={handleDownloadStudioPdf}
               savedScenarioId={savedScenarioId}
               savedScenarioVersionNumber={savedScenarioVersionNumber}
@@ -1444,6 +1445,7 @@ export default function Home() {
 
         </div>
       </section>
+      )}
 
       <StickyActionBar aboveBottomNav>
         <button className={styles.stickyCta} onClick={handleSaveReport} disabled={!result || isSaving}>
