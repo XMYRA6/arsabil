@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { IconPin, IconFile, IconChart } from '@/components/icons'
 import { listTurler, resolveScene, type Tur } from '@/lib/dioramas/scene'
 import { useThemeZaman } from './useThemeZaman'
 import styles from './HomeSections.module.css'
@@ -68,17 +69,17 @@ export function ProductsSection() {
 
         <div className={styles.miniGrid}>
           <Link href="/marketplace" className={styles.mini}>
-            <span className={`${styles.miniIcon} ${styles.sage}`} aria-hidden="true" />
+            <span className={`${styles.miniIcon} ${styles.sage}`} aria-hidden="true"><IconPin size={22} /></span>
             <h3>Pazar yeri</h3>
             <p>Haritada kabartma görünümüyle ilan ve teklifler; fiyat çipleri.</p>
           </Link>
           <Link href="/hesapla" className={styles.mini}>
-            <span className={`${styles.miniIcon} ${styles.amber}`} aria-hidden="true" />
+            <span className={`${styles.miniIcon} ${styles.amber}`} aria-hidden="true"><IconFile size={22} /></span>
             <h3>Akıllı rapor</h3>
             <p>Tek tıkla PDF: emsal, risk, kat karşılığı özeti.</p>
           </Link>
           <Link href="/arsa-fiyatlari" className={styles.mini}>
-            <span className={`${styles.miniIcon} ${styles.blue}`} aria-hidden="true" />
+            <span className={`${styles.miniIcon} ${styles.blue}`} aria-hidden="true"><IconChart size={22} /></span>
             <h3>Fiyat bildirimi</h3>
             <p>Takip ettiğin bölgede fiyat değişince WhatsApp’tan haber.</p>
           </Link>

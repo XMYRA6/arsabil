@@ -217,7 +217,8 @@
 }
 
 .miniIcon {
-  display: block;
+  display: grid;
+  place-items: center;
   width: 44px;
   height: 44px;
   border-radius: 14px;
@@ -225,12 +226,15 @@
 
 .sage {
   background-color: color-mix(in srgb, var(--sage) 30%, var(--surface));
+  color: color-mix(in srgb, var(--sage) 70%, var(--ink));
 }
 .amber {
   background-color: var(--amber-soft);
+  color: var(--amber-text);
 }
 .blue {
   background-color: var(--blue-soft);
+  color: var(--blue);
 }
 
 /* Arazi türleri */
@@ -727,6 +731,58 @@
   .product .btnPrimary {
     left: 28px;
   }
+  /* globals.css mobilde h2'yi !important ile 1.25rem'e indiriyor; ana sayfa başlıkları büyük kalmalı */
+  .h2,
+  .h2big {
+    font-size: 30px !important;
+    line-height: 1.12;
+  }
+  .lead {
+    margin-bottom: 28px;
+    font-size: 16px;
+  }
+  .miniGrid,
+  .steps {
+    gap: 12px;
+  }
+  .mini {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: center;
+    padding: 18px 20px;
+    border-radius: 22px;
+  }
+  .mini h3 {
+    margin: 0 0 2px;
+    font-size: 17px;
+  }
+  .mini p {
+    font-size: 13px;
+  }
+  .miniIcon {
+    grid-row: 1 / span 2;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 18px;
+    align-items: center;
+    padding: 20px 22px;
+    border-radius: 22px;
+  }
+  .stepNum {
+    grid-row: 1 / span 2;
+    margin: 0;
+    font-size: 34px;
+  }
+  .step h3 {
+    margin: 0 0 2px;
+    font-size: 18px;
+  }
+  .step p {
+    font-size: 14px;
+  }
   .turGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -734,7 +790,17 @@
     min-height: 240px;
   }
   .feat {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .feat li {
+    padding: 14px 16px;
+  }
+  .feat strong {
+    font-size: 14px;
+  }
+  .feat small {
+    font-size: 12px;
   }
   .criteria li {
     grid-template-columns: minmax(0, 1fr);
