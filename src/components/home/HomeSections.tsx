@@ -302,13 +302,9 @@ export function LandTypesSection() {
           </div>
           <div className={styles.dots} aria-hidden="true">
             {turler.map((t) => <i key={t.key} className={t.key === secili ? styles.dotOn : undefined} />)}
-            {!secildi && <small>Seçmezsen 5 sn’de bir değişir</small>}
           </div>
         </div>
 
-        <p className={styles.caption}>
-          Sahne seçilen türe göre değişir: toprak kesiti, ekin sırası, çatı, otopark, vinç… Güneş, bulut ve hava durumu canlı animasyonlu.
-        </p>
       </div>
     </section>
   )
@@ -406,7 +402,7 @@ export function AkifSection() {
 export function StepsSection() {
   const adimlar = [
     ['01', 'Konumu seç', 'İl, ilçe, mahalle; ya da haritada parseline dokun.'],
-    ['02', 'Türü ve metrekareyi gir', 'Arsa, tarla, villa, ticari ya da bağ-bahçe. Sahne ona göre değişir.'],
+    ['02', 'Türü ve metrekareyi gir', 'Arsa, tarla, villa, ticari ya da bağ-bahçe.'],
     ['03', 'Raporunu al', 'Fiyat, risk, imar özeti ve kat karşılığı fizibilitesi; PDF veya WhatsApp.'],
   ]
   return (
