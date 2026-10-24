@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { AkifShell } from './AkifShell'
 
@@ -149,5 +149,58 @@ describe('AkifShell', () => {
     fireEvent.click(chip)
     fireEvent.click(screen.getByRole('button', { name: 'Paneli kapat' }))
     expect(container.querySelector('[data-sheet-open]')).toBeNull()
+  })
+
+  it('Esc "Sohbetlerde ara" alanındayken de çekmeceyi kapatır; yeniden adlandırma alanında kapatmaz', () => {
+    const { container } = render(
+      <AkifShell
+        title="t"
+        onTitle={() => {}}
+        onVoice={() => {}}
+        sidebar={
+          <nav aria-label="Sohbetler">
+            <input type="search" aria-label="Sohbetlerde ara" />
+            <input aria-label="Sohbet adı" />
+          </nav>
+        }
+        panel={<aside />}
+      >
+        <div />
+      </AkifShell>,
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Sohbetleri aç' }))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Sohbet adı' }), { key: 'Escape' })
+    expect(container.querySelector('[data-drawer-open]')).toBeTruthy()
+    fireEvent.keyDown(screen.getByRole('searchbox', { name: 'Sohbetlerde ara' }), { key: 'Escape' })
+    expect(container.querySelector('[data-drawer-open]')).toBeNull()
+  })
+
+  it('genişlik 900px üstüne çıkınca açık çekmece ve alt sayfa kapanır', () => {
+    type L = (e: { matches: boolean }) => void
+    const listeners: L[] = []
+    const original = window.matchMedia
+    window.matchMedia = ((q: string) => ({
+      matches: false,
+      media: q,
+      addEventListener: (_: string, fn: L) => listeners.push(fn),
+      removeEventListener: (_: string, fn: L) => {
+        const i = listeners.indexOf(fn)
+        if (i >= 0) listeners.splice(i, 1)
+      },
+    })) as unknown as typeof window.matchMedia
+    try {
+      const { container } = setup()
+      fireEvent.click(screen.getByRole('button', { name: 'Sohbetleri aç' }))
+      expect(container.querySelector('[data-drawer-open]')).toBeTruthy()
+      act(() => listeners.slice().forEach((fn) => fn({ matches: true })))
+      expect(container.querySelector('[data-drawer-open]')).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Senaryo' }))
+      expect(container.querySelector('[data-sheet-open]')).toBeTruthy()
+      act(() => listeners.slice().forEach((fn) => fn({ matches: true })))
+      expect(container.querySelector('[data-sheet-open]')).toBeNull()
+      expect(listeners.length).toBe(0)
+    } finally {
+      window.matchMedia = original
+    }
   })
 })

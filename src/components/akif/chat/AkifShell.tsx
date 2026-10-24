@@ -117,7 +117,9 @@ export function AkifShell(p: AkifShellProps) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
       const t = e.target as Element | null
-      if (t?.closest?.('[data-akif-menu]') || t?.tagName === 'INPUT') return
+      // Yalnız kendi Esc'ini işleyen alanlar: satır menüsü ve yeniden adlandırma girdileri.
+      if (t?.closest?.('[data-akif-menu]')) return
+      if (t?.matches?.('input[aria-label="Sohbet adı"], input[aria-label="Sohbet başlığı"]')) return
       if (drawerOpen) {
         setDrawerOpen(false)
         menuBtnRef.current?.focus()
@@ -128,6 +130,21 @@ export function AkifShell(p: AkifShellProps) {
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
+  }, [drawerOpen, sheetOpen])
+
+  // Masaüstü genişliğine (≥900px) geçilince çekmece ve alt sayfa kapanır; Esc dinleyicisi
+  // ve odak tuzağı da bu durumlara bağlı olduğundan birlikte bırakılır.
+  useEffect(() => {
+    if (!drawerOpen && !sheetOpen) return
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const mq = window.matchMedia('(min-width: 900px)')
+    const onChange = (e: { matches: boolean }) => {
+      if (!e.matches) return
+      setDrawerOpen(false)
+      setSheetOpen(false)
+    }
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
   }, [drawerOpen, sheetOpen])
 
   // Sohbet açılınca / yeni sohbette çekmece kapanır.

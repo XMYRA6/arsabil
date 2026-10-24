@@ -112,6 +112,9 @@ export default function AkifPage() {
   const [title, setTitle] = useState(NEW_TITLE)
   const [draft, setDraft] = useState<string | undefined>(undefined)
   const [navTick, setNavTick] = useState(0)
+  // Sunucuda var olduğu bilinen sohbet (yüklendi ya da oturumluyken başarılı tur aldı).
+  // Liste süzgeci/sayfalaması onu gizleyebileceği için listeden aranmaz.
+  const [persistedId, setPersistedId] = useState<string | null>(null)
 
   // Çalışma paneli: yükleme anında türetilir (vurgu yok); yalnız canlı turlar diff'lenir.
   const [ws, setWs] = useState<WorkspaceState>(EMPTY_WS)
@@ -161,6 +164,7 @@ export default function AkifPage() {
     setEntries([])
     setConversationId(makeId())
     setTitle(NEW_TITLE)
+    setPersistedId(null)
     setProjectId('')
     setDraft(undefined)
     setWorkspace([], null)
@@ -183,6 +187,7 @@ export default function AkifPage() {
       if (seq !== loadSeq.current) return
       const messages = data.messages ?? []
       setConversationId(id)
+      setPersistedId(id)
       setTitle(data.conversation?.title || NEW_TITLE)
       setProjectId(data.conversation?.projectId ?? '')
       setDraft(undefined)
@@ -208,9 +213,14 @@ export default function AkifPage() {
   }
 
   const deleteConversation = async (id: string) => {
+    // Tur sürerken etkin sohbet silinmez: yanıt silinmiş bir sohbetin görünümüne düşerdi.
+    if (pending && id === conversationId) {
+      bildirimGoster({ tip: 'hata', baslik: 'Akif yanıtlarken bu sohbet silinemez', aciklama: 'Yanıt gelince tekrar dene.' })
+      return
+    }
     try {
       await convs.remove(id)
-      if (id === conversationId && !pending) startFresh()
+      if (id === conversationId) startFresh()
     } catch {
       bildirimGoster({ tip: 'hata', baslik: 'Sohbet silinemedi', aciklama: 'Bağlantını kontrol edip tekrar dene.' })
     } finally {
@@ -229,11 +239,11 @@ export default function AkifPage() {
     }
   }
 
-  const persisted = convs.items.find((c) => c.id === conversationId)
-  const shownTitle = persisted?.title ?? title
+  const listed = convs.items.find((c) => c.id === conversationId)
+  const shownTitle = listed?.title ?? title
 
   const renameActive = (next: string) => {
-    if (signedIn && persisted) void renameConversation(conversationId, next)
+    if (signedIn && persistedId === conversationId) void renameConversation(conversationId, next)
     else setTitle(next)
   }
 
@@ -251,6 +261,11 @@ export default function AkifPage() {
 
   const send = async (text: string) => {
     if (pending) return
+    // Bu gönderimin görünüm sırası: devam eden bir sohbet yüklemesini düşürür; yanıt
+    // gelene kadar kullanıcı başka sohbete geçerse yanıt bu görünüme yazılmaz
+    // (sunucu zaten doğru sohbete kaydetti).
+    const seq = ++loadSeq.current
+    const current = () => seq === loadSeq.current
     const history = toHistory(entries)
     setDraft(undefined)
     setEntries((prev) => [...prev, { id: makeId(), role: 'user', content: text }])
@@ -267,12 +282,17 @@ export default function AkifPage() {
         }),
       })
     try {
-      let res = await post(conversationId)
+      let cid = conversationId
+      let res = await post(cid)
       // Kimlik başka kullanıcıya aitse (409) yeni kimlikle BİR kez yeniden dene; geçmiş aynı kalır.
       if (await isConflict(res)) {
-        const fresh = makeId()
-        setConversationId(fresh)
-        res = await post(fresh)
+        cid = makeId()
+        if (current()) setConversationId(cid)
+        res = await post(cid)
+      }
+      if (!current()) {
+        if (signedIn) void convs.refresh()
+        return
       }
       if (!res.ok) {
         setEntries((prev) => [
@@ -286,11 +306,14 @@ export default function AkifPage() {
         return
       }
       const turn = (await res.json()) as AkifTurn
+      if (signedIn) void convs.refresh()
+      if (!current()) return
       setEntries((prev) => [...prev, { id: makeId(), role: 'akif', turn }])
       applyLiveTurn(turn)
-      // Sunucu çifti kaydetti (oturum varsa); başlık/sıra için listeyi yenile.
-      if (signedIn) void convs.refresh()
+      // Sunucu çifti kaydetti (oturum varsa); başlık/sıra için liste yukarıda yenilendi.
+      if (signedIn) setPersistedId(cid)
     } catch {
+      if (!current()) return
       setEntries((prev) => [
         ...prev,
         { id: makeId(), role: 'error', content: 'Bağlantı hatası, tekrar deneyin.' },
