@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AkifSidebar } from './AkifSidebar'
 import type { ConversationSummary } from '@/lib/akif/chat/conversationStore'
@@ -99,6 +99,26 @@ describe('AkifSidebar', () => {
     await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
     await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
     await userEvent.tab()
+    expect(p.onRename).toHaveBeenCalledTimes(1)
+  })
+
+  it('Esc sonrası gelen blur iptal edilen düzenlemeyi kaydetmez', async () => {
+    const p = setup()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
+    await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
+    const input = screen.getByLabelText('Sohbet adı')
+    await userEvent.type(input, ' x{Escape}')
+    fireEvent.blur(input)
+    expect(p.onRename).not.toHaveBeenCalled()
+  })
+
+  it('Enter sonrası gelen blur ikinci kez onRename çağırmaz', async () => {
+    const p = setup()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
+    await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
+    const input = screen.getByLabelText('Sohbet adı')
+    await userEvent.type(input, ' x{Enter}')
+    fireEvent.blur(input)
     expect(p.onRename).toHaveBeenCalledTimes(1)
   })
 

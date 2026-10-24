@@ -81,6 +81,7 @@ export function AkifSidebar(p: AkifSidebarProps) {
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
   const rootRef = useRef<HTMLElement>(null)
+  const editDone = useRef(false)
   const pending = useRef<{ kind: 'trigger' | 'cancel' | 'title'; id: string } | null>(null)
   const requestFocus = (kind: 'trigger' | 'cancel' | 'title', id: string) => {
     pending.current = { kind, id }
@@ -119,6 +120,8 @@ export function AkifSidebar(p: AkifSidebarProps) {
   const groups = useMemo(() => groupByDate(p.conversations, new Date()), [p.conversations])
 
   const finishEdit = (c: ConversationSummary, save: boolean, refocus: boolean) => {
+    if (editDone.current) return
+    editDone.current = true
     const v = draft.trim()
     setEditId(null)
     if (refocus) requestFocus('trigger', c.id)
@@ -207,6 +210,7 @@ export function AkifSidebar(p: AkifSidebarProps) {
                 onClick={() => {
                   setMenuId(null)
                   setDraft(c.title)
+                  editDone.current = false
                   setEditId(c.id)
                 }}
               >
