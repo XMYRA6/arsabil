@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { IconPin, IconFile, IconChart } from '@/components/icons'
 import { listTurler, resolveScene, type Tur } from '@/lib/dioramas/scene'
@@ -245,8 +245,26 @@ export function PriceMapTeaser() {
   )
 }
 
+/** Eleman ekrana girince bir kez true olur (IntersectionObserver yoksa hemen true). */
+function useInViewOnce<T extends Element>(): [React.RefObject<T | null>, boolean] {
+  const ref = useRef<T | null>(null)
+  const [gorundu, setGorundu] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined') { setGorundu(true); return }
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting)) { setGorundu(true); io.disconnect() }
+    }, { threshold: 0.35 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return [ref, gorundu]
+}
+
 /** Akif: yapay zekâ asistanı + WhatsApp. */
 export function AkifSection() {
+  const [phoneRef, gorundu] = useInViewOnce<HTMLDivElement>()
   return (
     <section className={`${styles.section} ${styles.tintDeep}`} aria-labelledby="akif-baslik">
       <div className={`${styles.inner} ${styles.akifGrid}`}>
@@ -275,13 +293,22 @@ export function AkifSection() {
           </div>
         </div>
 
-        <div className={styles.phone} aria-hidden="true">
-          <div className={styles.phoneBar}><b>Akif · ArsaBil</b><small>çevrimiçi</small></div>
+        <div ref={phoneRef} className={styles.phone} data-play={gorundu ? '' : undefined} aria-hidden="true">
+          <div className={styles.phoneBar}>
+            <span className={styles.avatar}>A</span>
+            <span><b>Akif · ArsaBil</b><small>çevrimiçi</small></span>
+          </div>
           <div className={styles.chat}>
-            <p className={styles.me}>Akçaabat’ta 1.250 m² imarlı arsa ne eder?</p>
-            <p className={styles.bot}>Yıldızlı Mah. emsallerine göre yaklaşık ₺2.450/m² · toplam ≈ ₺3,06 M. Fay riski düşük.</p>
-            <p className={styles.bot}>Kat karşılığı için arsa payı önerisi %46. Fizibiliteyi hesaplayayım mı?</p>
-            <div className={styles.quick}><span>Evet, hesapla</span><span>Emsalleri göster</span></div>
+            <p className={`${styles.me} ${styles.msg}`} style={{ '--i': 0 } as React.CSSProperties}>Akçaabat’ta 1.250 m² imarlı arsa ne eder?</p>
+            <p className={`${styles.bot} ${styles.msg}`} style={{ '--i': 1 } as React.CSSProperties}>Yıldızlı Mah. emsallerine göre yaklaşık <b>₺2.450/m²</b> · toplam ≈ <b>₺3,06 M</b>. Fay riski düşük.</p>
+            <p className={`${styles.bot} ${styles.msg}`} style={{ '--i': 2 } as React.CSSProperties}>Kat karşılığı için arsa payı önerisi <b>%46</b>. Fizibiliteyi hesaplayayım mı?</p>
+            <div className={`${styles.quick} ${styles.msg}`} style={{ '--i': 3 } as React.CSSProperties}><span>Evet, hesapla</span><span>Emsalleri göster</span></div>
+          </div>
+          <div className={styles.composer}>
+            <span className={styles.composerInput}>Akif’e sor…</span>
+            <span className={styles.mic}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+            </span>
           </div>
         </div>
       </div>
