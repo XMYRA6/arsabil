@@ -11,10 +11,14 @@ const trNum = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 })
 const KADEME = 5
 
 /** Medyanları KADEME eşit sayıda gruba böler (kantil); veri yoksa 0 = "veri yok". */
+export const MIN_EMSAL = 10
+
 export function kademeHesapla(fiyatlar: IlFiyat[]): (slug: string) => number {
-  const degerler = fiyatlar.map((f) => f.medyan).filter((m): m is number => m != null && m > 0).sort((a, b) => a - b)
+  // Az emsalli iller (örn. 5 ilan) medyanı yanıltır: boyanmaz, "yeterli emsal yok" kalır.
+  const yeterli = fiyatlar.filter((f) => f.emsal >= MIN_EMSAL)
+  const degerler = yeterli.map((f) => f.medyan).filter((m): m is number => m != null && m > 0).sort((a, b) => a - b)
   const esikler = Array.from({ length: KADEME - 1 }, (_, i) => degerler[Math.floor(((i + 1) * degerler.length) / KADEME)])
-  const harf = new Map(fiyatlar.map((f) => [f.slug, f.medyan]))
+  const harf = new Map(yeterli.map((f) => [f.slug, f.medyan]))
   return (slug) => {
     const m = harf.get(slug)
     if (m == null || m <= 0) return 0
@@ -66,7 +70,7 @@ export function TurkiyeHaritasi() {
           <>
             <strong>{secili.ad}</strong>
             <span>
-              {seciliFiyat?.medyan ? `₺${trNum.format(seciliFiyat.medyan)} / m² · ${trNum.format(seciliFiyat.emsal)} emsal` : 'Henüz yeterli emsal yok'}
+              {seciliFiyat?.medyan && seciliFiyat.emsal >= MIN_EMSAL ? `₺${trNum.format(seciliFiyat.medyan)} / m² · ${trNum.format(seciliFiyat.emsal)} emsal` : 'Henüz yeterli emsal yok'}
             </span>
           </>
         ) : (

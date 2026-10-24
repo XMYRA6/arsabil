@@ -25,9 +25,79 @@ function Arrow() {
   return <span aria-hidden="true">→</span>
 }
 
+/** Hedef değere, görünür olunca bir kez sayarak çıkar (azaltılmış harekette doğrudan hedef). */
+function useCountUp(hedef: number, oynat: boolean, ms = 1400): number {
+  const [deger, setDeger] = useState(0)
+  useEffect(() => {
+    if (!oynat) return
+    const azalt = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (azalt) { setDeger(hedef); return }
+    const t0 = performance.now()
+    let raf = 0
+    const adim = (t: number) => {
+      const k = Math.min(1, (t - t0) / ms)
+      setDeger(hedef * (1 - Math.pow(1 - k, 3)))
+      if (k < 1) raf = requestAnimationFrame(adim)
+    }
+    raf = requestAnimationFrame(adim)
+    return () => cancelAnimationFrame(raf)
+  }, [hedef, oynat, ms])
+  return deger
+}
+
+const trNum = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 })
+
+/** Ürün kartı: görünür olunca içindeki örnek çıktı canlanır. */
+function ProductCard({ children, tur, zaman }: { children: (oynat: boolean) => React.ReactNode; tur: Tur; zaman: 'gunduz' | 'gece' }) {
+  const [ref, gorundu] = useInViewOnce<HTMLElement>()
+  return (
+    <article ref={ref} className={styles.product} data-play={gorundu ? '' : undefined}>
+      {children(gorundu)}
+      <div className={styles.productStage} aria-hidden="true">
+        <span className={styles.productGround} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={styles.productImg} src={sceneSrc(tur, zaman)} alt="" loading="lazy" />
+      </div>
+    </article>
+  )
+}
+
+function DegerOzet({ oynat }: { oynat: boolean }) {
+  const fiyat = useCountUp(2450, oynat)
+  return (
+    <div className={styles.readout} aria-label="Örnek değerleme çıktısı">
+      <small>Örnek çıktı</small>
+      <strong className={styles.readoutBig}>₺{trNum.format(fiyat)}<em> / m²</em></strong>
+      <div className={styles.readoutRow}>
+        <span><i className={styles.okDot} />Fay riski düşük</span>
+        <span><i className={styles.okDot} />İmar: konut</span>
+      </div>
+    </div>
+  )
+}
+
+function KatOzet({ oynat }: { oynat: boolean }) {
+  const pay = useCountUp(46, oynat)
+  return (
+    <div className={styles.readout} aria-label="Örnek arsa payı dağılımı">
+      <small>Örnek çıktı</small>
+      <strong className={styles.readoutBig}>Arsa payı %{Math.round(pay)}</strong>
+      <div className={styles.split} aria-hidden="true">
+        <i className={styles.splitA} />
+        <i className={styles.splitB} />
+      </div>
+      <div className={styles.readoutRow}>
+        <span><i className={styles.dotAmber} />Arsa sahibi %46</span>
+        <span><i className={styles.dotInk} />Müteahhit %54</span>
+      </div>
+    </div>
+  )
+}
+
 /** "Arsanı değerle. Sonra kat karşılığına karar ver." — iki ürün kartı + üç küçük özellik. */
 export function ProductsSection() {
   const zaman = useThemeZaman()
+  const [miniRef, miniGorundu] = useInViewOnce<HTMLDivElement>()
   return (
     <section className={styles.section} aria-labelledby="urunler-baslik">
       <div className={styles.inner}>
@@ -37,52 +107,67 @@ export function ProductsSection() {
         </h2>
 
         <div className={styles.productGrid}>
-          <article className={styles.product}>
-            <div className={styles.productText}>
-              <h3>Arsa Değerleme</h3>
-              <p>Konum, arazi türü ve m² ile gerçek piyasa değeri.</p>
-              <ul>
-                <li>Emsal ilan ve fiyat</li>
-                <li>Fay ve taşkın riski</li>
-                <li>İmar durumu özeti</li>
-              </ul>
-            </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.productImg} src={sceneSrc('arsa', zaman)} alt="" loading="lazy" />
-            <Link href="/deger" className={styles.btnPrimary}>Değerini hesapla <Arrow /></Link>
-          </article>
+          <ProductCard tur="arsa" zaman={zaman}>
+            {(oynat) => (
+              <>
+                <div className={styles.productText}>
+                  <h3>Arsa Değerleme</h3>
+                  <p>Konum, arazi türü ve m² ile gerçek piyasa değeri; emsal, risk ve imar özeti tek ekranda.</p>
+                  <DegerOzet oynat={oynat} />
+                </div>
+                <Link href="/deger" className={styles.btnPrimary}>Değerini hesapla <Arrow /></Link>
+              </>
+            )}
+          </ProductCard>
 
-          <article className={styles.product}>
-            <div className={styles.productText}>
-              <h3>Kat Karşılığı Fizibilite</h3>
-              <p>Arsa payı, müteahhit kâr marjı ve risk: adil teklif.</p>
-              <ul>
-                <li>Arsa payı önerisi</li>
-                <li>Kâr marjı ve maliyet</li>
-                <li>PDF rapor</li>
-              </ul>
-            </div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.productImg} src={sceneSrc('kat', zaman)} alt="" loading="lazy" />
-            <Link href="/hesapla" className={styles.btnPrimary}>Fizibilite hesapla <Arrow /></Link>
-          </article>
+          <ProductCard tur="kat" zaman={zaman}>
+            {(oynat) => (
+              <>
+                <div className={styles.productText}>
+                  <h3>Kat Karşılığı Fizibilite</h3>
+                  <p>Arsa payı, müteahhit kâr marjı ve risk: iki tarafın da kabul edeceği adil teklif.</p>
+                  <KatOzet oynat={oynat} />
+                </div>
+                <Link href="/hesapla" className={styles.btnPrimary}>Fizibilite hesapla <Arrow /></Link>
+              </>
+            )}
+          </ProductCard>
         </div>
 
-        <div className={styles.miniGrid}>
+        <div ref={miniRef} className={styles.miniGrid} data-play={miniGorundu ? '' : undefined}>
           <Link href="/marketplace" className={styles.mini}>
             <span className={`${styles.miniIcon} ${styles.sage}`} aria-hidden="true"><IconPin size={22} /></span>
             <h3>Pazar yeri</h3>
             <p>Haritada kabartma görünümüyle ilan ve teklifler; fiyat çipleri.</p>
+            <div className={styles.miniViz} aria-hidden="true">
+              {['₺2,4 M', '₺860 B', '₺1,2 M'].map((t, i) => (
+                <span key={t} className={styles.priceChip} style={{ '--i': i } as React.CSSProperties}>{t}</span>
+              ))}
+            </div>
           </Link>
           <Link href="/hesapla" className={styles.mini}>
             <span className={`${styles.miniIcon} ${styles.amber}`} aria-hidden="true"><IconFile size={22} /></span>
             <h3>Akıllı rapor</h3>
             <p>Tek tıkla PDF: emsal, risk, kat karşılığı özeti.</p>
+            <div className={styles.miniViz} aria-hidden="true">
+              <div className={styles.sheet}>
+                <i className={styles.sheetLine} style={{ '--i': 0, width: '55%' } as React.CSSProperties} />
+                <i className={styles.sheetLine} style={{ '--i': 1, width: '90%' } as React.CSSProperties} />
+                <i className={styles.sheetLine} style={{ '--i': 2, width: '72%' } as React.CSSProperties} />
+              </div>
+              <span className={styles.pdfTag}>PDF</span>
+            </div>
           </Link>
           <Link href="/arsa-fiyatlari" className={styles.mini}>
             <span className={`${styles.miniIcon} ${styles.blue}`} aria-hidden="true"><IconChart size={22} /></span>
             <h3>Fiyat bildirimi</h3>
             <p>Takip ettiğin bölgede fiyat değişince WhatsApp’tan haber.</p>
+            <div className={styles.miniViz} aria-hidden="true">
+              <svg className={styles.sparkSvg} viewBox="0 0 200 48" preserveAspectRatio="none">
+                <path className={styles.spark} pathLength={1} d="M2 40 L36 33 L70 37 L104 22 L138 27 L196 6" />
+              </svg>
+              <span className={styles.deltaChip}>+%6,2</span>
+            </div>
           </Link>
         </div>
       </div>
@@ -228,6 +313,7 @@ export function LandTypesSection() {
     </section>
   )
 }
+
 
 /** Türkiye il haritası: medyan m² fiyatına göre tonlanır, il tıklanınca fiyat sayfasına gider. */
 export function PriceMapTeaser() {

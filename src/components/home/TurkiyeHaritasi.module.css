@@ -1,4 +1,7 @@
 .wrap {
+  /* altın değerinde: düşük → soluk sarı, yüksek → koyu altın */
+  --gold: #e0a526;
+  --gold-deep: #a86f00;
   display: grid;
   gap: 16px;
   margin-bottom: 32px;
@@ -20,18 +23,18 @@
 }
 
 .k0 { fill: color-mix(in srgb, var(--ink) 8%, var(--surface)); }
-.k1 { fill: color-mix(in srgb, var(--blue) 14%, var(--surface)); }
-.k2 { fill: color-mix(in srgb, var(--blue) 32%, var(--surface)); }
-.k3 { fill: color-mix(in srgb, var(--blue) 52%, var(--surface)); }
-.k4 { fill: color-mix(in srgb, var(--blue) 74%, var(--surface)); }
-.k5 { fill: var(--blue); }
+.k1 { fill: color-mix(in srgb, var(--gold) 14%, var(--surface)); }
+.k2 { fill: color-mix(in srgb, var(--gold) 32%, var(--surface)); }
+.k3 { fill: color-mix(in srgb, var(--gold) 52%, var(--surface)); }
+.k4 { fill: color-mix(in srgb, var(--gold) 74%, var(--surface)); }
+.k5 { fill: var(--gold-deep); }
 
 .aktif {
-  fill: var(--amber);
+  fill: var(--ink);
 }
 
 a:focus-visible .il {
-  stroke: var(--amber);
+  stroke: var(--ink);
   stroke-width: 2.5;
 }
 
@@ -64,14 +67,29 @@ a:focus-visible .il {
   height: 10px;
   border-radius: 3px;
 }
-.sw.k1 { background-color: color-mix(in srgb, var(--blue) 14%, var(--surface)); }
-.sw.k2 { background-color: color-mix(in srgb, var(--blue) 32%, var(--surface)); }
-.sw.k3 { background-color: color-mix(in srgb, var(--blue) 52%, var(--surface)); }
-.sw.k4 { background-color: color-mix(in srgb, var(--blue) 74%, var(--surface)); }
-.sw.k5 { background-color: var(--blue); }
+.sw.k1 { background-color: color-mix(in srgb, var(--gold) 14%, var(--surface)); }
+.sw.k2 { background-color: color-mix(in srgb, var(--gold) 32%, var(--surface)); }
+.sw.k3 { background-color: color-mix(in srgb, var(--gold) 52%, var(--surface)); }
+.sw.k4 { background-color: color-mix(in srgb, var(--gold) 74%, var(--surface)); }
+.sw.k5 { background-color: var(--gold-deep); }
 
 @media (max-width: 768px) {
   .wrap {
     margin-bottom: 24px;
   }
 }
+
+/* Koyu tema: soluk tonlar zemine karışmasın, parlak altın en yüksek fiyat olsun */
+:global([data-theme='dark']) .k0 { fill: #1b2a45; }
+:global([data-theme='dark']) .k1 { fill: #4a3d1c; }
+:global([data-theme='dark']) .k2 { fill: #6f5719; }
+:global([data-theme='dark']) .k3 { fill: #9c7516; }
+:global([data-theme='dark']) .k4 { fill: #cf9a1c; }
+:global([data-theme='dark']) .k5 { fill: #ffc94d; }
+:global([data-theme='dark']) .sw.k1 { background-color: #4a3d1c; }
+:global([data-theme='dark']) .sw.k2 { background-color: #6f5719; }
+:global([data-theme='dark']) .sw.k3 { background-color: #9c7516; }
+:global([data-theme='dark']) .sw.k4 { background-color: #cf9a1c; }
+:global([data-theme='dark']) .sw.k5 { background-color: #ffc94d; }
+:global([data-theme='dark']) .il { stroke: #0f1a2e; }
+:global([data-theme='dark']) .aktif { fill: #ffffff; }

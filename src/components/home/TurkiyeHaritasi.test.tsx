@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { TurkiyeHaritasi, kademeHesapla } from './TurkiyeHaritasi'
 
 describe('kademeHesapla', () => {
-  const f = (slug: string, medyan: number | null) => ({ slug, medyan, emsal: 10 })
+  const f = (slug: string, medyan: number | null, emsal = 10) => ({ slug, medyan, emsal })
 
   it('veri yoksa 0, varsa 1-5 arası kademe verir', () => {
     const k = kademeHesapla([f('a', 100), f('b', 200), f('c', 300), f('d', 400), f('e', 500), f('x', null)])
@@ -11,6 +11,11 @@ describe('kademeHesapla', () => {
     expect(k('yok')).toBe(0)
     expect(k('a')).toBe(1)
     expect(k('e')).toBe(5)
+  })
+
+  it('emsalı yetersiz il boyanmaz', () => {
+    const k = kademeHesapla([f('a', 100), f('b', 200), f('az', 9999, 3)])
+    expect(k('az')).toBe(0)
   })
 })
 

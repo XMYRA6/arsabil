@@ -118,18 +118,21 @@
 
 .product {
   position: relative;
-  min-height: 460px;
+  min-height: 480px;
   padding: 40px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 40px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--blue) 7%, var(--surface)) 0%, var(--surface) 70%);
+  background:
+    radial-gradient(90% 70% at 85% 100%, color-mix(in srgb, var(--amber) 10%, transparent), transparent 70%),
+    var(--surface);
+  transition: border-color var(--dur-ui) var(--ease-out), box-shadow var(--dur-ui) var(--ease-out);
 }
 
 .productText {
   position: relative;
   z-index: 1;
-  max-width: 300px;
+  max-width: 280px;
 }
 
 .productText h3 {
@@ -141,43 +144,154 @@
 }
 
 .productText p {
-  margin: 0 0 24px;
+  margin: 0 0 28px;
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink-secondary);
 }
 
-.productText ul {
+/* Örnek çıktı: ürünün ne ürettiğini sayıyla gösterir */
+.readout {
+  max-width: 260px;
   display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: 14px;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background-color: color-mix(in srgb, var(--surface) 82%, var(--canvas));
+  backdrop-filter: blur(6px);
+}
+
+.readout small {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.readoutBig {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
 
-.productText li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.readoutBig em {
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  color: var(--ink-secondary);
 }
 
-.productText li::before {
-  content: '';
-  width: 7px;
-  height: 7px;
+.readoutRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.readoutRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.okDot,
+.dotAmber,
+.dotInk {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  background-color: var(--ok);
+}
+.dotAmber {
   background-color: var(--amber);
+}
+.dotInk {
+  background-color: var(--ink);
+}
+
+.split {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--line);
+}
+
+.splitA,
+.splitB {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.splitA {
+  width: 46%;
+  background-color: var(--amber);
+}
+.splitB {
+  width: 54%;
+  background-color: var(--ink);
+  opacity: 0.85;
+}
+
+.product[data-play] .splitA {
+  animation: barIn 900ms var(--ease-out) 200ms forwards;
+}
+.product[data-play] .splitB {
+  animation: barIn 900ms var(--ease-out) 450ms forwards;
+}
+
+@keyframes barIn {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Diorama sahnesi: kırpılmaz, zemin gölgesi üstünde süzülür */
+.productStage {
+  position: absolute;
+  right: 2%;
+  bottom: 84px;
+  width: 50%;
+  pointer-events: none;
+}
+
+.productGround {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -2%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(15, 26, 46, 0.28), transparent);
+  filter: blur(6px);
+  transition: transform 600ms var(--ease-out), opacity 600ms var(--ease-out);
 }
 
 .productImg {
-  position: absolute;
-  right: -6%;
-  bottom: 70px;
-  width: 62%;
+  position: relative;
+  display: block;
+  width: 100%;
   height: auto;
-  pointer-events: none;
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  transition: transform 700ms var(--ease-out);
+}
+
+.product[data-play] .productImg {
+  animation: sceneIn 900ms var(--ease-out) 100ms forwards;
+}
+
+@keyframes sceneIn {
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .product .btnPrimary {
@@ -214,6 +328,118 @@
   font-size: 14px;
   line-height: 1.5;
   color: var(--ink-secondary);
+}
+
+.miniViz {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  margin-top: 20px;
+}
+
+.priceChip {
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--amber) 55%, var(--line));
+  border-radius: 999px;
+  background-color: var(--amber-soft);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber-text);
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+}
+
+.sheet {
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  width: 62%;
+  height: 100%;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--surface) 60%, var(--canvas));
+}
+
+.sheetLine {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background-color: var(--line);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.pdfTag {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background-color: var(--amber-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--amber-text);
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.sparkSvg {
+  width: 62%;
+  height: 100%;
+  overflow: visible;
+}
+
+.spark {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.deltaChip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background-color: var(--blue-soft);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--blue);
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.miniGrid[data-play] .priceChip {
+  animation: chipIn 520ms var(--ease-out) calc(var(--i, 0) * 180ms + 250ms) forwards;
+}
+.miniGrid[data-play] .sheetLine {
+  animation: barIn 650ms var(--ease-out) calc(var(--i, 0) * 140ms + 300ms) forwards;
+}
+.miniGrid[data-play] .pdfTag {
+  animation: chipIn 450ms var(--ease-out) 900ms forwards;
+}
+.miniGrid[data-play] .spark {
+  animation: drawSpark 1100ms var(--ease-out) 350ms forwards;
+}
+.miniGrid[data-play] .deltaChip {
+  animation: chipIn 450ms var(--ease-out) 1200ms forwards;
+}
+
+@keyframes chipIn {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drawSpark {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .miniIcon {
@@ -782,6 +1008,17 @@
   .turCard:hover {
     transform: translateY(-3px);
   }
+  .product:hover {
+    border-color: color-mix(in srgb, var(--amber) 45%, var(--line));
+    box-shadow: var(--shadow-card);
+  }
+  .product:hover .productImg {
+    transform: translateY(-8px) scale(1.015);
+  }
+  .product:hover .productGround {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
 }
 
 @media (max-width: 1100px) {
@@ -813,12 +1050,26 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .product {
-    min-height: 420px;
-    padding: 28px;
+    min-height: 0;
+    padding: 28px 24px 96px;
     border-radius: 28px;
   }
   .product .btnPrimary {
-    left: 28px;
+    left: 24px;
+    bottom: 24px;
+  }
+  .productStage {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .productText {
+    max-width: none;
+  }
+  .miniViz {
+    display: none;
   }
   /* globals.css mobilde h2'yi !important ile 1.25rem'e indiriyor; ana sayfa başlıkları büyük kalmalı */
   .h2,
@@ -911,6 +1162,31 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .productImg,
+  .splitA,
+  .splitB,
+  .priceChip,
+  .pdfTag,
+  .deltaChip {
+    opacity: 1;
+    transform: none;
+  }
+  .sheetLine {
+    transform: none;
+  }
+  .spark {
+    stroke-dashoffset: 0;
+  }
+  .product[data-play] .productImg,
+  .product[data-play] .splitA,
+  .product[data-play] .splitB,
+  .miniGrid[data-play] .priceChip,
+  .miniGrid[data-play] .sheetLine,
+  .miniGrid[data-play] .pdfTag,
+  .miniGrid[data-play] .spark,
+  .miniGrid[data-play] .deltaChip {
+    animation: none;
+  }
   .msg {
     opacity: 1;
     transform: none;
