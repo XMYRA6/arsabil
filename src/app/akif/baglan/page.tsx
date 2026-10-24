@@ -15,7 +15,14 @@ function BaglanInner() {
   const [message, setMessage] = useState('')
 
   if (!token) {
-    return <p className={styles.error}>Bağlantı geçersiz. WhatsApp&apos;tan Akif&apos;ten yeni bir bağlantı iste.</p>
+    return (
+      <>
+        <p className={styles.error}>Bağlantı geçersiz. WhatsApp&apos;tan Akif&apos;ten yeni bir bağlantı iste.</p>
+        <Link className={styles.button} href="/akif">
+          Akif&apos;e git
+        </Link>
+      </>
+    )
   }
 
   if (status === 'loading') return <p>Yükleniyor…</p>
@@ -75,7 +82,15 @@ function BaglanInner() {
       <button className={styles.button} onClick={connect} disabled={phase === 'loading'}>
         {phase === 'loading' ? 'Bağlanıyor…' : "WhatsApp'a bağla"}
       </button>
-      {phase === 'error' && <p className={styles.error}>{message}</p>}
+      {phase === 'error' && (
+        <>
+          <p className={styles.error}>{message}</p>
+          <p>Bağlantı süresi dolmuş olabilir. Yeni bir bağlantı için WhatsApp&apos;tan Akif&apos;e yaz.</p>
+          <Link className={styles.button} href="/akif">
+            Akif&apos;e git
+          </Link>
+        </>
+      )}
     </>
   )
 }

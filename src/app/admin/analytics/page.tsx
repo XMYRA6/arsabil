@@ -1,5 +1,6 @@
 "use client";
 
+import { IconUser, IconFile, IconBox, IconMessage } from '@/components/icons';
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
 
@@ -43,23 +44,24 @@ export default function AdminAnalytics() {
     if (loading) return <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>Yükleniyor...</div>;
     if (!data) return null;
 
-    const conversionRate = data.totalReports > 0 ? ((data.totalListings / data.totalReports) * 100).toFixed(1) : '0';
-    const offerRate = data.totalListings > 0 ? ((data.totalOffers / data.totalListings) * 100).toFixed(1) : '0';
+    const trOndalik = (n: number) => n.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const conversionRate = data.totalReports > 0 ? (data.totalListings / data.totalReports) * 100 : 0;
+    const offerRate = data.totalListings > 0 ? (data.totalOffers / data.totalListings) * 100 : 0;
 
     return (
         <>
             <div className={styles.pageHeader}>
-                <h1>📈 Platform Analitiği</h1>
+                <h1>Platform Analitiği</h1>
                 <p>ArsaBil kullanım istatistikleri ve dönüşüm metrikleri</p>
             </div>
 
             {/* KPI Cards */}
             <div className={styles.statsGrid}>
                 {[
-                    { icon: '👥', value: data.totalUsers, label: 'Toplam Kullanıcı' },
-                    { icon: '📄', value: data.totalReports, label: 'Hesaplama' },
-                    { icon: '🏗️', value: data.totalListings, label: 'İlan' },
-                    { icon: '📩', value: data.totalOffers, label: 'Teklif' },
+                    { icon: <IconUser size={22} />, value: data.totalUsers, label: 'Toplam Kullanıcı' },
+                    { icon: <IconFile size={22} />, value: data.totalReports, label: 'Hesaplama' },
+                    { icon: <IconBox size={22} />, value: data.totalListings, label: 'İlan' },
+                    { icon: <IconMessage size={22} />, value: data.totalOffers, label: 'Teklif' },
                 ].map(s => (
                     <div key={s.label} className={styles.statBox}>
                         <div className={styles.icon}>{s.icon}</div>
@@ -71,12 +73,12 @@ export default function AdminAnalytics() {
 
             {/* Funnel */}
             <div className={styles.settingsCard}>
-                <h3>📊 Dönüşüm Hunisi</h3>
+                <h3>Dönüşüm Hunisi</h3>
                 <div className={styles.funnelGrid}>
                     {[
-                        { label: 'Hesaplama → İlan', value: `%${conversionRate}`, color: 'var(--info)', width: conversionRate },
-                        { label: 'İlan → Teklif', value: `%${offerRate}`, color: 'var(--green)', width: offerRate },
-                        { label: 'Ortalama Teklif/İlan', value: data.totalListings > 0 ? (data.totalOffers / data.totalListings).toFixed(1) : '0', color: 'var(--orange)', width: String(Math.min(100, data.totalListings > 0 ? (data.totalOffers / data.totalListings) * 20 : 0)) },
+                        { label: 'Hesaplama → İlan', value: `%${trOndalik(conversionRate)}`, color: 'var(--info)', width: String(conversionRate) },
+                        { label: 'İlan → Teklif', value: `%${trOndalik(offerRate)}`, color: 'var(--green)', width: String(offerRate) },
+                        { label: 'Ortalama Teklif/İlan', value: data.totalListings > 0 ? trOndalik(data.totalOffers / data.totalListings) : '0', color: 'var(--orange)', width: String(Math.min(100, data.totalListings > 0 ? (data.totalOffers / data.totalListings) * 20 : 0)) },
                     ].map(f => (
                         <div key={f.label} style={{
                             background: 'var(--bg)', borderRadius: 14, padding: '16px 18px',
@@ -95,7 +97,7 @@ export default function AdminAnalytics() {
             <div className={styles.distributionGrid}>
                 {/* Role Distribution */}
                 <div className={styles.settingsCard}>
-                    <h3>👥 Rol Dağılımı</h3>
+                    <h3>Rol Dağılımı</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {(data.roleDistribution || []).map(r => (
                             <div key={r.role} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -122,7 +124,7 @@ export default function AdminAnalytics() {
 
                 {/* City Distribution */}
                 <div className={styles.settingsCard}>
-                    <h3>🏙️ İl Dağılımı</h3>
+                    <h3>İl Dağılımı</h3>
                     {(data.cityDistribution || []).length === 0 ? (
                         <div style={{ color: 'var(--muted)', fontSize: '0.85rem', padding: '1rem 0' }}>Henüz ilan verisi yok</div>
                     ) : (
@@ -140,7 +142,7 @@ export default function AdminAnalytics() {
 
             {/* Recent Users */}
             <div className={styles.settingsCard} style={{ marginTop: 14 }}>
-                <h3>🕐 Son Kayıtlar</h3>
+                <h3>Son Kayıtlar</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {(data.recentUsers || []).map((u, i) => (
                         <div key={i} style={{

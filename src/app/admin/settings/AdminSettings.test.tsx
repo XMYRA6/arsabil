@@ -12,8 +12,8 @@ beforeEach(() => {
 describe('AdminSettings — pirinç birincil butonlar (Faz 4 task 8)', () => {
     it('"Genel Ayarları Kaydet" butonu adminPrimaryBtn class\'ını taşır', async () => {
         render(<AdminSettings />)
-        await waitFor(() => screen.getByText('💾 Genel Ayarları Kaydet'))
-        expect(screen.getByText('💾 Genel Ayarları Kaydet').className).toMatch(/adminPrimaryBtn/)
+        await waitFor(() => screen.getByText('Genel Ayarları Kaydet'))
+        expect(screen.getByText('Genel Ayarları Kaydet').className).toMatch(/adminPrimaryBtn/)
     })
 })
 
@@ -25,7 +25,7 @@ describe('AdminSettings — İksa Maliyeti Katsayıları kaldırıldı (denetim 
     // hiçbir hesaba yansımadığını göremezdi. Yanıltıcı alan kaldırıldı.
     it('"İksa Maliyeti Katsayıları" kartı artık render edilmiyor', async () => {
         render(<AdminSettings />)
-        await waitFor(() => screen.getByText('💾 Genel Ayarları Kaydet'))
+        await waitFor(() => screen.getByText('Genel Ayarları Kaydet'))
         expect(screen.queryByText(/İksa Maliyeti Katsayıları/)).toBeNull()
         expect(screen.queryByText('Düşük İksa Oranı (Z)')).toBeNull()
         expect(screen.queryByText('Orta İksa Oranı (Z)')).toBeNull()
@@ -33,7 +33,7 @@ describe('AdminSettings — İksa Maliyeti Katsayıları kaldırıldı (denetim 
 
     it('Kalite Sınıfı Katsayıları kartı KALIR (C3 kapsamında hesap motoruna bağlanıyor, kaldırılmıyor)', async () => {
         render(<AdminSettings />)
-        await waitFor(() => screen.getByText('💾 Genel Ayarları Kaydet'))
+        await waitFor(() => screen.getByText('Genel Ayarları Kaydet'))
         expect(screen.getByText(/Kalite Sınıfı Katsayıları/)).toBeInTheDocument()
     })
 })

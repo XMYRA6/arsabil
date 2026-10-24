@@ -1,5 +1,6 @@
 "use client";
 
+import { IconBox, IconClock, IconCheckCircle, IconMessage, IconPause, IconPlay, IconTrash } from '@/components/icons';
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
 import { DataCard, CardList } from '@/components/mobile/DataCard';
@@ -42,7 +43,7 @@ export default function AdminListings() {
                 body: JSON.stringify({ listingId: id, isActive }),
             });
             if (res.ok) {
-                setMessage({ type: 'success', text: isActive ? '✅ İlan aktif edildi.' : '⏸️ İlan pasife alındı.' });
+                setMessage({ type: 'success', text: isActive ? 'İlan aktif edildi.' : 'İlan pasife alındı.' });
                 fetchListings();
             }
         } catch {
@@ -60,7 +61,7 @@ export default function AdminListings() {
                 body: JSON.stringify({ listingId: id }),
             });
             if (res.ok) {
-                setMessage({ type: 'success', text: '🗑️ İlan silindi.' });
+                setMessage({ type: 'success', text: 'İlan silindi.' });
                 fetchListings();
             }
         } catch {
@@ -77,7 +78,7 @@ export default function AdminListings() {
                 body: JSON.stringify({ listingId: id, action }),
             });
             if (res.ok) {
-                setMessage({ type: 'success', text: action === 'approve' ? '✅ İlan onaylandı.' : '❌ İlan reddedildi.' });
+                setMessage({ type: 'success', text: action === 'approve' ? 'İlan onaylandı.' : 'İlan reddedildi.' });
                 fetchListings();
             }
         } catch {
@@ -103,20 +104,20 @@ export default function AdminListings() {
     return (
         <>
             <div className={styles.pageHeader}>
-                <h1>🏗️ İlan Yönetimi</h1>
+                <h1>İlan Yönetimi</h1>
                 <p>Platformdaki tüm ilanları görüntüleyin, düzenleyin veya kaldırın</p>
             </div>
 
             <div className={styles.statsGrid}>
                 {[
-                    { icon: '🏗️', value: listings.length, label: 'Toplam İlan' },
-                    { icon: '⏳', value: pendingCount, label: 'Bekliyor' },
-                    { icon: '✅', value: activeCount, label: 'Aktif' },
-                    { icon: '📩', value: totalOffers, label: 'Toplam Teklif' },
+                    { icon: <IconBox size={22} />, value: listings.length, label: 'Toplam İlan' },
+                    { icon: <IconClock size={22} />, value: pendingCount, label: 'Bekliyor' },
+                    { icon: <IconCheckCircle size={22} />, value: activeCount, label: 'Aktif' },
+                    { icon: <IconMessage size={22} />, value: totalOffers, label: 'Toplam Teklif' },
                 ].map(s => (
                     <div key={s.label} className={styles.statBox}>
                         <div className={styles.icon}>{s.icon}</div>
-                        <div className={styles.value}>{s.value}</div>
+                        <div className={styles.value}>{loading ? '—' : s.value}</div>
                         <div className={styles.label}>{s.label}</div>
                     </div>
                 ))}
@@ -126,9 +127,9 @@ export default function AdminListings() {
                 <div className={styles.segmentTabs}>
                     {([
                         { value: 'all', label: 'Tümü' },
-                        { value: 'pending', label: '⏳ Bekliyor' },
-                        { value: 'active', label: '✅ Aktif' },
-                        { value: 'inactive', label: '⏸️ Pasif' },
+                        { value: 'pending', label: 'Bekliyor' },
+                        { value: 'active', label: 'Aktif' },
+                        { value: 'inactive', label: 'Pasif' },
                     ] as const).map(f => (
                         <button
                             key={f.value}
@@ -154,7 +155,7 @@ export default function AdminListings() {
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>Yükleniyor...</div>
             ) : filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 8 }}>🏗️</div>
+                    <div style={{ marginBottom: 8, color: 'var(--muted)' }}><IconBox size={32} /></div>
                     Henüz ilan bulunmuyor
                 </div>
             ) : (
@@ -209,7 +210,7 @@ export default function AdminListings() {
                                             ? { background: 'rgba(var(--green-rgb),.12)', color: 'var(--green)', border: '1px solid rgba(var(--green-rgb),.25)' }
                                             : { background: 'rgba(107,114,128,.12)', color: '#6b7280', border: '1px solid rgba(107,114,128,.25)' }
                                     }>
-                                        {listing.status === 'PENDING' ? '⏳ Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif'}
+                                        {listing.status === 'PENDING' ? 'Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif'}
                                     </span>
                                 </td>
                                 <td style={{ fontSize: '0.82rem' }}>{formatDate(listing.createdAt)}</td>
@@ -222,13 +223,13 @@ export default function AdminListings() {
                                                     className={styles.iconBtn}
                                                     style={{ color: 'var(--green)', fontSize: '0.75rem', padding: '2px 8px' }}
                                                     title="Onayla"
-                                                >✅ Onayla</button>
+                                                >Onayla</button>
                                                 <button
                                                     onClick={() => approveAction(listing.id, 'reject')}
                                                     className={styles.iconBtn}
                                                     style={{ color: 'var(--red)', fontSize: '0.75rem', padding: '2px 8px' }}
                                                     title="Reddet"
-                                                >❌ Reddet</button>
+                                                >Reddet</button>
                                             </>
                                         ) : (
                                             <button
@@ -237,7 +238,7 @@ export default function AdminListings() {
                                                 className={styles.iconBtn}
                                                 style={{ color: listing.isActive ? 'var(--orange)' : 'var(--green)' }}
                                             >
-                                                {listing.isActive ? '⏸️' : '▶️'}
+                                                {listing.isActive ? <IconPause size={16} /> : <IconPlay size={16} />}
                                             </button>
                                         )}
                                         <button
@@ -245,7 +246,7 @@ export default function AdminListings() {
                                             title="Sil"
                                             className={styles.iconBtn}
                                             style={{ color: 'var(--red)' }}
-                                        >🗑️</button>
+                                        ><IconTrash size={16} /></button>
                                     </div>
                                 </td>
                             </tr>
@@ -276,15 +277,15 @@ export default function AdminListings() {
                                     { label: 'Teklif', value: <span className={styles.tabularNums}>{listing._count.offers}</span> },
                                     {
                                         label: 'Durum',
-                                        value: listing.status === 'PENDING' ? '⏳ Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif',
+                                        value: listing.status === 'PENDING' ? 'Bekliyor' : listing.isActive ? 'Aktif' : 'Pasif',
                                     },
                                     { label: 'Tarih', value: formatDate(listing.createdAt) },
                                 ]}
                                 actions={
                                     listing.status === 'PENDING' ? (
                                         <>
-                                            <button onClick={() => approveAction(listing.id, 'approve')} className={styles.iconBtn} style={{ color: 'var(--green)' }} title="Onayla">✅ Onayla</button>
-                                            <button onClick={() => approveAction(listing.id, 'reject')} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Reddet">❌ Reddet</button>
+                                            <button onClick={() => approveAction(listing.id, 'approve')} className={styles.iconBtn} style={{ color: 'var(--green)' }} title="Onayla">Onayla</button>
+                                            <button onClick={() => approveAction(listing.id, 'reject')} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Reddet">Reddet</button>
                                         </>
                                     ) : (
                                         <>
@@ -294,9 +295,9 @@ export default function AdminListings() {
                                                 className={styles.iconBtn}
                                                 style={{ color: listing.isActive ? 'var(--orange)' : 'var(--green)' }}
                                             >
-                                                {listing.isActive ? '⏸️ Pasife Al' : '▶️ Aktif Et'}
+                                                {listing.isActive ? 'Pasife Al' : 'Aktif Et'}
                                             </button>
-                                            <button onClick={() => deleteListing(listing.id)} title="Sil" className={styles.iconBtn} style={{ color: 'var(--red)' }}>🗑️ Sil</button>
+                                            <button onClick={() => deleteListing(listing.id)} title="Sil" className={styles.iconBtn} style={{ color: 'var(--red)' }}>Sil</button>
                                         </>
                                     )
                                 }

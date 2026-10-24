@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+import { GecersizBaglanti } from '@/components/layout/GecersizBaglanti'
 import { ScenarioCompare } from '@/components/ScenarioCompare'
 import styles from './page.module.css'
 
@@ -21,6 +22,8 @@ interface Scenario {
     sdx?: number | null
 }
 
+export const metadata: Metadata = { robots: { index: false } }
+
 async function getCompare(token: string): Promise<{ scenarios: Scenario[]; createdAt: string } | null> {
     try {
         const base = process.env.NEXTAUTH_URL || 'http://localhost:3000'
@@ -35,7 +38,7 @@ async function getCompare(token: string): Promise<{ scenarios: Scenario[]; creat
 export default async function ComparePage({ params }: { params: Promise<{ token: string }> }) {
     const { token } = await params
     const data = await getCompare(token)
-    if (!data) notFound()
+    if (!data) return <GecersizBaglanti konu="Paylaşılan karşılaştırma" />
 
     const dateStr = new Date(data.createdAt).toLocaleDateString('tr-TR', {
         day: 'numeric', month: 'long', year: 'numeric',

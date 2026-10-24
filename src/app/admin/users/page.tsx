@@ -1,5 +1,6 @@
 "use client";
 
+import { IconUser, IconHome, IconBox, IconBan, IconSearch, IconCheckCircle } from '@/components/icons';
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
 import { DataCard, CardList } from '@/components/mobile/DataCard';
@@ -58,7 +59,7 @@ export default function AdminUsers() {
                 body: JSON.stringify({ userId, role: newRole }),
             });
             if (res.ok) {
-                setMessage({ type: 'success', text: '✅ Rol güncellendi.' });
+                setMessage({ type: 'success', text: 'Rol güncellendi.' });
                 fetchUsers();
             } else {
                 const data = await res.json();
@@ -80,7 +81,7 @@ export default function AdminUsers() {
                 body: JSON.stringify({ userId, isBanned: ban }),
             });
             if (res.ok) {
-                setMessage({ type: 'success', text: ban ? '🚫 Kullanıcı askıya alındı.' : '✅ Askı kaldırıldı.' });
+                setMessage({ type: 'success', text: ban ? 'Kullanıcı askıya alındı.' : 'Askı kaldırıldı.' });
                 fetchUsers();
             }
         } catch {
@@ -111,7 +112,7 @@ export default function AdminUsers() {
                 body: JSON.stringify({ userId, plan }),
             });
             if (res.ok) {
-                setMessage({ type: 'success', text: `✅ Plan güncellendi: ${plan}` });
+                setMessage({ type: 'success', text: `Plan güncellendi: ${plan}` });
                 fetchUsers();
             }
         } catch {
@@ -133,21 +134,21 @@ export default function AdminUsers() {
     return (
         <>
             <div className={styles.pageHeader}>
-                <h1>👥 Kullanıcılar</h1>
+                <h1>Kullanıcılar</h1>
                 <p>Platformdaki tüm kullanıcıları yönetin, rollerini değiştirin ve hesapları askıya alın</p>
             </div>
 
             {/* Stats row */}
             <div className={styles.statsGrid}>
                 {[
-                    { icon: '👥', value: users.length, label: 'Toplam' },
-                    { icon: '🏠', value: users.filter(u => u.role === 'ARSA_SAHIBI').length, label: 'Arsa Sahibi' },
-                    { icon: '🏗️', value: users.filter(u => u.role === 'MUTEAHHIT').length, label: 'Müteahhit' },
-                    { icon: '🚫', value: users.filter(u => u.isBanned).length, label: 'Askıda' },
+                    { icon: <IconUser size={22} />, value: users.length, label: 'Toplam' },
+                    { icon: <IconHome size={22} />, value: users.filter(u => u.role === 'ARSA_SAHIBI').length, label: 'Arsa Sahibi' },
+                    { icon: <IconBox size={22} />, value: users.filter(u => u.role === 'MUTEAHHIT').length, label: 'Müteahhit' },
+                    { icon: <IconBan size={22} />, value: users.filter(u => u.isBanned).length, label: 'Askıda' },
                 ].map(s => (
                     <div key={s.label} className={styles.statBox}>
                         <div className={styles.icon}>{s.icon}</div>
-                        <div className={styles.value}>{s.value}</div>
+                        <div className={styles.value}>{loading ? '—' : s.value}</div>
                         <div className={styles.label}>{s.label}</div>
                     </div>
                 ))}
@@ -156,7 +157,7 @@ export default function AdminUsers() {
             {/* Toolbar: Search + Filter */}
             <div className={styles.toolbar}>
                 <div className={styles.searchBox}>
-                    <span>🔍</span>
+                    <span aria-hidden="true"><IconSearch size={18} /></span>
                     <input
                         type="text"
                         placeholder="İsim veya e-posta ara..."
@@ -234,7 +235,7 @@ export default function AdminUsers() {
                                             ? { background: 'rgba(var(--red-rgb),.12)', color: 'var(--red)', border: '1px solid rgba(var(--red-rgb),.25)' }
                                             : { background: 'rgba(var(--green-rgb),.12)', color: 'var(--green)', border: '1px solid rgba(var(--green-rgb),.25)' }
                                     }>
-                                        {user.isBanned ? '🚫 Askıda' : '✅ Aktif'}
+                                        {user.isBanned ? 'Askıda' : 'Aktif'}
                                     </span>
                                 </td>
                                 <td>
@@ -299,7 +300,7 @@ export default function AdminUsers() {
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                             }}
                                         >
-                                            {user.isBanned ? '✓' : '⛔'}
+                                            {user.isBanned ? <IconCheckCircle size={16} /> : <IconBan size={16} />}
                                         </button>
                                     </div>
                                 </td>
@@ -327,7 +328,7 @@ export default function AdminUsers() {
                                     },
                                     {
                                         label: 'Durum',
-                                        value: user.isBanned ? '🚫 Askıda' : '✅ Aktif',
+                                        value: user.isBanned ? 'Askıda' : 'Aktif',
                                     },
                                     {
                                         label: 'Doğrulandı',
@@ -393,7 +394,7 @@ export default function AdminUsers() {
                                                 color: user.isBanned ? 'var(--green)' : 'var(--red)',
                                             }}
                                         >
-                                            {user.isBanned ? '✓' : '⛔'}
+                                            {user.isBanned ? <IconCheckCircle size={16} /> : <IconBan size={16} />}
                                         </button>
                                     </>
                                 }

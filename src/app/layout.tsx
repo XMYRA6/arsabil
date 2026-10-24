@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "../styles/tokens-arazi.css";
+import { TemaKoru } from "@/components/ui/TemaKoru";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
@@ -58,6 +59,7 @@ export default function RootLayout({
         className="antialiased"
         suppressHydrationWarning
       >
+        <TemaKoru />
         <AuthProvider>
           <Toaster position="top-center" containerStyle={{ top: 'calc(12px + env(safe-area-inset-top, 0px))' }} />
           <ServiceWorkerRegister />

@@ -1,5 +1,6 @@
 "use client";
 
+import { IconMessage, IconClock, IconCheckCircle, IconXCircle } from '@/components/icons';
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
 import { DataCard, CardList } from '@/components/mobile/DataCard';
@@ -35,25 +36,25 @@ export default function AdminOffers() {
         if (s === 'REJECTED') return { background: 'rgba(var(--red-rgb),.12)', color: 'var(--red)', border: '1px solid rgba(var(--red-rgb),.25)' };
         return { background: 'rgba(var(--orange-rgb),.12)', color: 'var(--orange)', border: '1px solid rgba(var(--orange-rgb),.25)' };
     };
-    const statusLabel = (s: string) => s === 'ACCEPTED' ? '✅ Kabul' : s === 'REJECTED' ? '❌ Red' : '⏳ Bekliyor';
+    const statusLabel = (s: string) => s === 'ACCEPTED' ? 'Kabul' : s === 'REJECTED' ? 'Red' : 'Bekliyor';
 
     return (
         <>
             <div className={styles.pageHeader}>
-                <h1>📩 Teklifler</h1>
+                <h1>Teklifler</h1>
                 <p>Platformdaki tüm arsa payı tekliflerini izleyin</p>
             </div>
 
             <div className={styles.statsGrid}>
                 {[
-                    { icon: '📩', value: offers.length, label: 'Toplam' },
-                    { icon: '⏳', value: offers.filter(o => o.status === 'PENDING').length, label: 'Bekleyen' },
-                    { icon: '✅', value: offers.filter(o => o.status === 'ACCEPTED').length, label: 'Kabul' },
-                    { icon: '❌', value: offers.filter(o => o.status === 'REJECTED').length, label: 'Red' },
+                    { icon: <IconMessage size={22} />, value: offers.length, label: 'Toplam' },
+                    { icon: <IconClock size={22} />, value: offers.filter(o => o.status === 'PENDING').length, label: 'Bekleyen' },
+                    { icon: <IconCheckCircle size={22} />, value: offers.filter(o => o.status === 'ACCEPTED').length, label: 'Kabul' },
+                    { icon: <IconXCircle size={22} />, value: offers.filter(o => o.status === 'REJECTED').length, label: 'Red' },
                 ].map(s => (
                     <div key={s.label} className={styles.statBox}>
                         <div className={styles.icon}>{s.icon}</div>
-                        <div className={styles.value}>{s.value}</div>
+                        <div className={styles.value}>{loading ? '—' : s.value}</div>
                         <div className={styles.label}>{s.label}</div>
                     </div>
                 ))}
@@ -77,7 +78,7 @@ export default function AdminOffers() {
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>Yükleniyor...</div>
             ) : filtered.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--muted)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 8 }}>📩</div>
+                    <div style={{ marginBottom: 8, color: 'var(--muted)' }}><IconMessage size={32} /></div>
                     Henüz teklif bulunmuyor
                 </div>
             ) : (

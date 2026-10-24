@@ -10,14 +10,15 @@ export async function GET() {
             return NextResponse.json({ message: "Yetkisiz." }, { status: 403 });
         }
 
-        const [users, reports, listings, offers] = await Promise.all([
+        const [users, reports, listings, offers, pendingListings] = await Promise.all([
             prisma.user.count(),
             prisma.report.count(),
             prisma.listing.count({ where: { isActive: true } }),
             prisma.offer.count(),
+            prisma.listing.count({ where: { status: 'PENDING' } }),
         ]);
 
-        return NextResponse.json({ users, reports, listings, offers });
+        return NextResponse.json({ users, reports, listings, offers, pendingListings });
     } catch (error) {
         console.error("Admin stats error:", error);
         return NextResponse.json({ message: "Hata oluştu." }, { status: 500 });

@@ -25,7 +25,8 @@ export default async function StudioVitrinPage({
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    redirect('/auth/signin');
+    // Giriş sayfası /login; döndükten sonra aynı vitrine dönülür.
+    redirect(`/login?callbackUrl=${encodeURIComponent(`/studio/scenarios/${scenarioId}/versions/${versionNumber}/vitrin`)}`);
   }
 
   const userId = session.user.id as string;

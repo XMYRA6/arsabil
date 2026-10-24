@@ -36,7 +36,7 @@ describe('AdminListings — mobil DataCard görünümü', () => {
         render(<AdminListings />)
         await waitFor(() => expect(screen.getAllByText('Test Arsa İlanı')).toHaveLength(2))
 
-        const approveButtons = screen.getAllByText('✅ Onayla')
+        const approveButtons = screen.getAllByText('Onayla')
         fireEvent.click(approveButtons[approveButtons.length - 1])
 
         await waitFor(() => {

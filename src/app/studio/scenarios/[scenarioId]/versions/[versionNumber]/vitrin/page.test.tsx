@@ -7,9 +7,9 @@ const view = fs.readFileSync(path.join(dir, 'VitrinProje.tsx'), 'utf8');
 const css = fs.readFileSync(path.join(dir, 'page.module.css'), 'utf8');
 
 describe('studio proje vitrini (Figma 11)', () => {
-  it('owner-only: oturum yoksa signin sayfasina yonlendirir', () => {
+  it('owner-only: oturum yoksa giris sayfasina (donus adresiyle) yonlendirir', () => {
     expect(page).toMatch(/getServerSession\(authOptions\)/);
-    expect(page).toMatch(/redirect\('\/auth\/signin'\)/);
+    expect(page).toMatch(/redirect\(`\/login\?callbackUrl=/);
   });
 
   it('gecersiz veya eksik versiyon icin notFound dondurur', () => {

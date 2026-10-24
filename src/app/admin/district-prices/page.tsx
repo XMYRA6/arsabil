@@ -1,5 +1,6 @@
 "use client";
 
+import { IconEdit, IconClose } from '@/components/icons';
 import { useEffect, useState } from "react";
 import styles from "../admin.module.css";
 import { Button } from "@/components/ui/Button";
@@ -191,15 +192,17 @@ export default function AdminDistrictPrices() {
             gap: "10px",
             marginBottom: "16px",
             alignItems: "center",
+            flexWrap: "wrap",
           }}
         >
           <input
             type="text"
-            placeholder="🔍 İl ara..."
+            placeholder="İl ara..."
             value={filterIl}
             onChange={(e) => setFilterIl(e.target.value)}
             style={{
-              flex: 1,
+              flex: "1 1 160px",
+              minWidth: 0,
               padding: "8px 12px",
               borderRadius: 8,
               border: "1px solid var(--border)",
@@ -347,7 +350,7 @@ export default function AdminDistrictPrices() {
                         }}
                         title="Düzenle"
                       >
-                        ✏️
+                        <IconEdit size={16} />
                       </button>
                       {deleteId === p.id ? (
                         <>
@@ -393,7 +396,7 @@ export default function AdminDistrictPrices() {
                           }}
                           title="Sil"
                         >
-                          ✕
+                          <IconClose size={16} />
                         </button>
                       )}
                     </td>
@@ -423,14 +426,14 @@ export default function AdminDistrictPrices() {
                     ]}
                     actions={
                       <>
-                        <button onClick={() => openEdit(p)} className={styles.iconBtn} title="Düzenle">✏️ Düzenle</button>
+                        <button onClick={() => openEdit(p)} className={styles.iconBtn} title="Düzenle">Düzenle</button>
                         {deleteId === p.id ? (
                           <>
                             <button onClick={() => handleDelete(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }}>Evet, sil</button>
                             <button onClick={() => setDeleteId(null)} className={styles.iconBtn}>İptal</button>
                           </>
                         ) : (
-                          <button onClick={() => setDeleteId(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Sil">🗑️ Sil</button>
+                          <button onClick={() => setDeleteId(p.id)} className={styles.iconBtn} style={{ color: 'var(--red)' }} title="Sil">Sil</button>
                         )}
                       </>
                     }

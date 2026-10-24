@@ -121,3 +121,29 @@ export const IconFlame = (p: IconProps) => (
 export const IconBell = (p: IconProps) => (
     <Svg {...p}><path d="M6 17V11a6 6 0 1 1 12 0v6l1.5 2h-15z" /><path d="M10 21h4" /></Svg>
 )
+
+/* ── Yönetim paneli ve durum göstergeleri (emoji yerine çizili ikonlar) ── */
+export const IconClock = (p: IconProps) => (
+    <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Svg>
+)
+export const IconBan = (p: IconProps) => (
+    <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M5.6 5.6l12.8 12.8" /></Svg>
+)
+export const IconXCircle = (p: IconProps) => (
+    <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></Svg>
+)
+export const IconClose = (p: IconProps) => (<Svg {...p}><path d="M6 6l12 12M18 6L6 18" /></Svg>)
+export const IconTrash = (p: IconProps) => (
+    <Svg {...p}><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13h10l1-13" /><path d="M10 11v6M14 11v6" /></Svg>
+)
+export const IconSearch = (p: IconProps) => (
+    <Svg {...p}><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></Svg>
+)
+export const IconStar = (p: IconProps) => (
+    <Svg {...p}><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" /></Svg>
+)
+export const IconStarFilled = (p: IconProps) => (
+    <Svg {...p}><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" fill="currentColor" /></Svg>
+)
+export const IconPause = (p: IconProps) => (<Svg {...p}><path d="M9 5v14M15 5v14" /></Svg>)
+export const IconPlay = (p: IconProps) => (<Svg {...p}><path d="M7 4.5v15l12-7.5z" /></Svg>)

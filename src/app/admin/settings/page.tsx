@@ -1,5 +1,6 @@
 "use client";
 
+import { IconStar, IconStarFilled, IconTrash } from '@/components/icons';
 import { useEffect, useState } from "react";
 import styles from '../admin.module.css';
 import { Button } from "@/components/ui/Button";
@@ -390,7 +391,7 @@ export default function AdminSettings() {
 
             {/* Müteahhit Kâr Katsayıları — CRUD */}
             <div className={styles.settingsCard}>
-                <h3>📊 Müteahhit Kâr Katsayıları (K)</h3>
+                <h3>Müteahhit Kâr Katsayıları (K)</h3>
 
                 {profitLoading ? (
                     <div style={{ padding: '1rem', color: 'var(--muted)', textAlign: 'center' }}>Yükleniyor...</div>
@@ -427,14 +428,14 @@ export default function AdminSettings() {
                                     onClick={() => handleProfitLevelChange(i, 'isDefault', true)}
                                     title="Varsayılan yap"
                                 >
-                                    {level.isDefault ? '⭐' : '☆'}
+                                    {level.isDefault ? <IconStarFilled size={16} /> : <IconStar size={16} />}
                                 </button>
                                 <button
                                     className={styles.deleteBtn}
                                     onClick={() => handleDeleteLevel(i)}
                                     title="Sil"
                                 >
-                                    🗑️
+                                    <IconTrash size={16} />
                                 </button>
                             </div>
                         ))}
@@ -445,7 +446,7 @@ export default function AdminSettings() {
 
                         <div style={{ marginTop: '1rem' }}>
                             <Button variant="primary" onClick={handleSaveProfitLevels} disabled={loading} className={styles.adminPrimaryBtn}>
-                                {loading ? 'Kaydediliyor...' : '💾 Kâr Katsayılarını Kaydet'}
+                                {loading ? 'Kaydediliyor...' : 'Kâr Katsayılarını Kaydet'}
                             </Button>
                         </div>
                     </>
@@ -454,7 +455,7 @@ export default function AdminSettings() {
 
             {/* Risk Payı Katsayıları — CRUD */}
             <div className={styles.settingsCard}>
-                <h3>🛡️ Risk Payı Katsayıları (R)</h3>
+                <h3>Risk Payı Katsayıları (R)</h3>
 
                 {riskLoading ? (
                     <div style={{ padding: '1rem', color: 'var(--muted)', textAlign: 'center' }}>Yükleniyor...</div>
@@ -491,14 +492,14 @@ export default function AdminSettings() {
                                     onClick={() => handleRiskLevelChange(i, 'isDefault', true)}
                                     title="Varsayılan yap"
                                 >
-                                    {level.isDefault ? '⭐' : '☆'}
+                                    {level.isDefault ? <IconStarFilled size={16} /> : <IconStar size={16} />}
                                 </button>
                                 <button
                                     className={styles.deleteBtn}
                                     onClick={() => handleDeleteRiskLevel(i)}
                                     title="Sil"
                                 >
-                                    🗑️
+                                    <IconTrash size={16} />
                                 </button>
                             </div>
                         ))}
@@ -509,7 +510,7 @@ export default function AdminSettings() {
 
                         <div style={{ marginTop: '1rem' }}>
                             <Button variant="primary" onClick={handleSaveRiskLevels} disabled={loading} className={styles.adminPrimaryBtn}>
-                                {loading ? 'Kaydediliyor...' : '💾 Risk Katsayılarını Kaydet'}
+                                {loading ? 'Kaydediliyor...' : 'Risk Katsayılarını Kaydet'}
                             </Button>
                         </div>
                     </>
@@ -517,7 +518,7 @@ export default function AdminSettings() {
             </div>
 
             <div className={styles.settingsCard}>
-                <h3>🏠 Kalite Sınıfı Katsayıları (L)</h3>
+                <h3>Kalite Sınıfı Katsayıları (L)</h3>
                 <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                         <label>Standart</label>
@@ -535,7 +536,7 @@ export default function AdminSettings() {
             </div>
 
             <div className={styles.settingsCard}>
-                <h3>💰 Birim İnşaat Fiyatı (P)</h3>
+                <h3>Birim İnşaat Fiyatı (P)</h3>
                 <div className={styles.formGrid}>
                     <div className={styles.formGroup}>
                         <label>Varsayılan Birim Fiyat (TL/m²)</label>
@@ -545,7 +546,7 @@ export default function AdminSettings() {
             </div>
 
             <Button variant="primary" onClick={handleSave} disabled={loading} className={styles.adminPrimaryBtn}>
-                {loading ? 'Kaydediliyor...' : '💾 Genel Ayarları Kaydet'}
+                {loading ? 'Kaydediliyor...' : 'Genel Ayarları Kaydet'}
             </Button>
         </>
     );
