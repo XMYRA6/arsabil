@@ -20,8 +20,10 @@ function mobileBlock(): string {
 }
 
 describe('mobil token katmani', () => {
-    it('JetBrains Mono import edilmis', () => {
-        expect(css).toMatch(/fonts\.googleapis\.com[^'"]*JetBrains\+Mono/)
+    it('Inter yerel @font-face ile yuklenir (latin + latin-ext), harici @import yok', () => {
+        expect(css).toMatch(/@font-face[^}]*font-family:\s*'Inter'[^}]*inter-latin-ext\.woff2/)
+        expect(css).toMatch(/@font-face[^}]*font-family:\s*'Inter'[^}]*inter-latin\.woff2/)
+        expect(css).not.toMatch(/@import\s+url\(['"]?https:\/\/fonts\.googleapis/)
     })
 
     it('--m-* token tanimlarinin TAMAMI mobil media query icinde', () => {

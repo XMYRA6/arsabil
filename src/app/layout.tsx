@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/tokens-arazi.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
@@ -10,20 +9,9 @@ import { UpdateBanner } from "@/components/pwa/UpdateBanner";
 import { Toaster } from "react-hot-toast";
 
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: "cover",
   themeColor: "#1f6feb",
 };
@@ -55,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="tr" data-theme="light" suppressHydrationWarning>
       <head>
         {/* Tema, ilk boyamadan ÖNCE eşzamanlı uygulanır: sunucu varsayılanı açık (data-theme="light"),
             kayıtlı tercih koyuysa bu betik boyamadan önce koyuya çevirir. Böylece sayfa yenilenirken
@@ -67,7 +55,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="antialiased"
         suppressHydrationWarning
       >
         <AuthProvider>
