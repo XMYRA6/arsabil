@@ -1,6 +1,7 @@
 import {
   ConversationOwnershipError,
   titleFromMessage,
+  normalizeTitle,
   saveTurnPair,
   saveVoiceTranscript,
   assertConversationFree,
@@ -38,8 +39,10 @@ function makeFake() {
     akifConversation: {
       findUnique: async ({ where }: any) => convs.find((c) => c.id === where.id) ?? null,
       findFirst: async ({ where }: any) => convs.find((c) => matchConv(c, where)) ?? null,
-      create: async ({ data }: any) => {
-        const c = { projectId: null, createdAt: new Date(clock++), lastMessageAt: new Date(clock++), ...data } as Conv
+      upsert: async ({ where, create }: any) => {
+        const ex = convs.find((c) => c.id === where.id)
+        if (ex) return ex
+        const c = { projectId: null, createdAt: new Date(clock++), ...create } as Conv
         convs.push(c)
         return c
       },
@@ -93,6 +96,15 @@ describe('titleFromMessage', () => {
     expect(t.length).toBeLessThanOrEqual(40)
     expect(t).toBe(t.trim())
     expect(t.startsWith('Akçaabat')).toBe(true)
+  })
+  it('vekil çifti bölmez', () => {
+    const t = titleFromMessage('😀'.repeat(60))
+    expect(Array.from(t)).toHaveLength(40)
+    expect(t).toBe('😀'.repeat(40))
+  })
+  it('normalizeTitle: 120 sınır, boşta boş', () => {
+    expect(normalizeTitle('   ')).toBe('')
+    expect(normalizeTitle('a'.repeat(200))).toHaveLength(120)
   })
   it('boşta Yeni sohbet', () => {
     expect(titleFromMessage('   ')).toBe('Yeni sohbet')
@@ -148,6 +160,39 @@ describe('saveVoiceTranscript', () => {
   })
 })
 
+describe('eşzamanlılık', () => {
+  it('aynı yeni id, iki saveTurnPair', async () => {
+    const { db, convs, msgs } = makeFake()
+    await Promise.all([
+      saveTurnPair(db, { userId: 'u1', conversationId: 'n1', userMessage: 'a', turn: turn('x') }),
+      saveTurnPair(db, { userId: 'u1', conversationId: 'n1', userMessage: 'b', turn: turn('y') }),
+    ])
+    expect(convs).toHaveLength(1)
+    expect(msgs).toHaveLength(4)
+  })
+  it('aynı yeni id, iki saveVoiceTranscript', async () => {
+    const { db, convs, msgs } = makeFake()
+    const items = [{ id: 'a', role: 'user' as const, text: 'merhaba' }]
+    const r = await Promise.all([
+      saveVoiceTranscript(db, { userId: 'u1', conversationId: 'n2', items }),
+      saveVoiceTranscript(db, { userId: 'u1', conversationId: 'n2', items }),
+    ])
+    expect(r.map((x) => x.saved).sort()).toEqual([0, 1])
+    expect(convs).toHaveLength(1)
+    expect(msgs).toHaveLength(1)
+  })
+  it('başkasının satırı: yazma yok, lastMessageAt değişmez', async () => {
+    const { db, convs, msgs } = makeFake()
+    await saveVoiceTranscript(db, { userId: 'u1', conversationId: 'n3', items: [{ id: 'a', role: 'user', text: 'x' }] })
+    const before = convs[0].lastMessageAt.getTime()
+    await expect(
+      saveVoiceTranscript(db, { userId: 'u2', conversationId: 'n3', items: [{ id: 'b', role: 'user', text: 'y' }] }),
+    ).rejects.toBeInstanceOf(ConversationOwnershipError)
+    expect(msgs).toHaveLength(1)
+    expect(convs[0].lastMessageAt.getTime()).toBe(before)
+  })
+})
+
 describe('list/get/rename/delete', () => {
   it('arama, sahiplik, take', async () => {
     const { db } = makeFake()
@@ -177,6 +222,11 @@ describe('list/get/rename/delete', () => {
     expect(await deleteConversation(db, { userId: 'u2', id: 'c1' })).toBe(false)
     expect(await renameConversation(db, { userId: 'u1', id: 'c1', title: 'Yeni' })).toBe(true)
     expect(convs[0].title).toBe('Yeni')
+    const long = 'b'.repeat(100)
+    expect(await renameConversation(db, { userId: 'u1', id: 'c1', title: long })).toBe(true)
+    expect(convs[0].title).toHaveLength(100)
+    expect(await renameConversation(db, { userId: 'u1', id: 'c1', title: '   ' })).toBe(false)
+    expect(convs[0].title).toBe(long)
     expect(await deleteConversation(db, { userId: 'u1', id: 'c1' })).toBe(true)
     expect(convs).toHaveLength(0)
   })

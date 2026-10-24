@@ -9,7 +9,7 @@ export interface ChatTx {
   akifConversation: {
     findUnique(args: any): Promise<any>
     findFirst(args: any): Promise<any>
-    create(args: any): Promise<any>
+    upsert(args: any): Promise<any>
     update(args: any): Promise<any>
     findMany(args: any): Promise<any[]>
     deleteMany(args: any): Promise<{ count: number }>
@@ -60,7 +60,14 @@ const TITLE_MAX = 40
 export function titleFromMessage(text: string): string {
   const t = text.trim().replace(/\s+/g, ' ')
   if (!t) return 'Yeni sohbet'
-  return t.length <= TITLE_MAX ? t : t.slice(0, TITLE_MAX).trim()
+  const chars = Array.from(t)
+  return chars.length <= TITLE_MAX ? t : chars.slice(0, TITLE_MAX).join('').trim()
+}
+
+/** Elle verilen başlık (yeniden adlandırma): kırp + boşlukları sadeleştir; boşsa ''. */
+export function normalizeTitle(text: string, max = 120): string {
+  const chars = Array.from(text.trim().replace(/\s+/g, ' '))
+  return chars.slice(0, max).join('').trim()
 }
 
 /* ---------- yardımcılar ---------- */
@@ -79,15 +86,12 @@ async function ensureConversation(
   a: { userId: string; conversationId: string; firstText: string; projectId?: string },
   now: Date,
 ): Promise<void> {
-  const existing = await tx.akifConversation.findUnique({ where: { id: a.conversationId } })
-  if (existing) {
-    if (existing.userId !== a.userId) throw new ConversationOwnershipError()
-    await tx.akifConversation.update({ where: { id: a.conversationId }, data: { lastMessageAt: now } })
-    return
-  }
   const title = titleFromMessage(a.firstText)
-  await tx.akifConversation.create({
-    data: {
+  // upsert (update boş): eşzamanlı iki istek aynı yeni id için P2002 almaz,
+  // başkasının satırına da yazılmaz.
+  const row = await tx.akifConversation.upsert({
+    where: { id: a.conversationId },
+    create: {
       id: a.conversationId,
       userId: a.userId,
       title,
@@ -95,7 +99,13 @@ async function ensureConversation(
       projectId: a.projectId ?? null,
       lastMessageAt: now,
     },
+    update: {},
   })
+  if (row.userId !== a.userId) throw new ConversationOwnershipError()
+}
+
+async function touch(tx: ChatTx, id: string, now: Date): Promise<void> {
+  await tx.akifConversation.update({ where: { id }, data: { lastMessageAt: now } })
 }
 
 function toRows(conversationId: string, msgs: MsgInput[], base: Date) {
@@ -135,6 +145,7 @@ export async function saveTurnPair(
         now,
       ),
     })
+    await touch(tx, a.conversationId, new Date(now.getTime() + 2))
   })
 }
 
@@ -143,6 +154,7 @@ export async function saveVoiceTranscript(
   a: {
     userId: string
     conversationId: string
+    projectId?: string
     items: { id: string; role: 'user' | 'akif'; text: string; card?: ToolResultCard }[]
   },
 ): Promise<{ saved: number }> {
@@ -152,7 +164,7 @@ export async function saveVoiceTranscript(
   return db.$transaction(async (tx) => {
     await ensureConversation(
       tx,
-      { userId: a.userId, conversationId: a.conversationId, firstText: firstUser.text },
+      { userId: a.userId, conversationId: a.conversationId, firstText: firstUser.text, projectId: a.projectId },
       new Date(now.getTime() + a.items.length),
     )
     const res = await tx.akifChatMessage.createMany({
@@ -163,6 +175,7 @@ export async function saveVoiceTranscript(
       ),
       skipDuplicates: true,
     })
+    if (res.count > 0) await touch(tx, a.conversationId, new Date(now.getTime() + a.items.length))
     return { saved: res.count }
   })
 }
@@ -235,7 +248,8 @@ export async function renameConversation(
   db: ChatDb,
   a: { userId: string; id: string; title: string },
 ): Promise<boolean> {
-  const title = titleFromMessage(a.title)
+  const title = normalizeTitle(a.title)
+  if (!title) return false
   const r = await db.akifConversation.updateMany({
     where: { id: a.id, userId: a.userId },
     data: { title, searchText: foldTr(title) },
