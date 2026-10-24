@@ -340,12 +340,12 @@ export function ManualParcelEntryForm({ onLocationFound, submitLabel = 'Sorgula'
 
             {ilFetchError && (
                 <div className={styles.errorNote}>
-                    {errorNoteText(ilFetchError, 'İl listesi yüklenemedi.')} <button type="button" onClick={loadIller}>Tekrar dene</button>
+                    {errorNoteText(ilFetchError, 'İl listesi yüklenemedi.')} <button type="button" className={styles.retryBtn} onClick={loadIller}>Tekrar dene</button>
                 </div>
             )}
             {ilceFetchError && (
                 <div className={styles.errorNote}>
-                    {errorNoteText(ilceFetchError, 'İlçe listesi yüklenemedi.')} <button type="button" onClick={() => il && loadIlceler(il.id)}>Tekrar dene</button>
+                    {errorNoteText(ilceFetchError, 'İlçe listesi yüklenemedi.')} <button type="button" className={styles.retryBtn} onClick={() => il && loadIlceler(il.id)}>Tekrar dene</button>
                 </div>
             )}
 
@@ -362,7 +362,7 @@ export function ManualParcelEntryForm({ onLocationFound, submitLabel = 'Sorgula'
 
             {mahalleFetchError && (
                 <div className={styles.errorNote}>
-                    {errorNoteText(mahalleFetchError, 'Mahalle listesi yüklenemedi.')} <button type="button" onClick={() => ilce && loadMahalleler(ilce.id)}>Tekrar dene</button>
+                    {errorNoteText(mahalleFetchError, 'Mahalle listesi yüklenemedi.')} <button type="button" className={styles.retryBtn} onClick={() => ilce && loadMahalleler(ilce.id)}>Tekrar dene</button>
                 </div>
             )}
 

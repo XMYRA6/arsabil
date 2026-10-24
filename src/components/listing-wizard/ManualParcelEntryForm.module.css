@@ -55,6 +55,17 @@
     color: var(--ink);
 }
 
+.retryBtn {
+    margin-left: 6px;
+    padding: 2px 10px;
+    border: 1px solid var(--blue);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--blue);
+    font: 600 12px Inter, sans-serif;
+    cursor: pointer;
+}
+
 .searchBtn {
     min-height: 50px;
     padding: 0 22px;
