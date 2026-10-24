@@ -76,23 +76,65 @@ describe('AkifSidebar', () => {
   it('yeniden adlandır: Enter onRename, Esc iptal', async () => {
     const p = setup()
     await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Yeniden adlandır' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
     const input = screen.getByLabelText('Sohbet adı')
     await userEvent.clear(input)
     await userEvent.type(input, 'Yeni ad{Enter}')
     expect(p.onRename).toHaveBeenCalledWith('b', 'Yeni ad')
 
     await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[0])
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Yeniden adlandır' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
     await userEvent.type(screen.getByLabelText('Sohbet adı'), 'zzz{Escape}')
     expect(p.onRename).toHaveBeenCalledTimes(1)
     expect(screen.queryByLabelText('Sohbet adı')).toBeNull()
   })
 
+  it('yeniden adlandır: blur değişmiş değeri kaydeder, değişmemişi iptal eder', async () => {
+    const p = setup()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
+    await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
+    await userEvent.type(screen.getByLabelText('Sohbet adı'), ' 2')
+    await userEvent.tab()
+    expect(p.onRename).toHaveBeenCalledWith('b', 'Emsal nedir? 2')
+    await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
+    await userEvent.click(screen.getByRole('button', { name: 'Yeniden adlandır' }))
+    await userEvent.tab()
+    expect(p.onRename).toHaveBeenCalledTimes(1)
+  })
+
+  it('Esc menüyü kapatır ve odağı tetikleyiciye döndürür', async () => {
+    setup()
+    const trig = screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[0]
+    await userEvent.click(trig)
+    expect(trig.getAttribute('aria-expanded')).toBe('true')
+    await userEvent.keyboard('{Escape}')
+    expect(trig.getAttribute('aria-expanded')).toBe('false')
+    expect(document.activeElement).toBe(trig)
+  })
+
+  it('Sil odağı Vazgeç düğmesine taşır', async () => {
+    setup()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[0])
+    await userEvent.click(screen.getByRole('button', { name: 'Sil' }))
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Vazgeç' }))
+  })
+
+  it('arama sonucu yokken Sonuç bulunamadı', () => {
+    setup({ conversations: [], q: 'xyz' })
+    expect(screen.getByText('Sonuç bulunamadı')).toBeTruthy()
+  })
+
+  it('kullanıcı kartı Profil bağlantısı', () => {
+    setup()
+    const l = screen.getByRole('link', { name: 'Profil' })
+    expect(l.getAttribute('href')).toBe('/dashboard/profile')
+    expect(l.getAttribute('title')).toBe('Test Kullanıcı')
+  })
+
   it('sil: onay sonrası onDelete', async () => {
     const p = setup()
     await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[1])
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Sil' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Sil' }))
     expect(p.onDelete).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole('button', { name: 'Evet, sil' }))
     expect(p.onDelete).toHaveBeenCalledWith('b')
@@ -101,7 +143,7 @@ describe('AkifSidebar', () => {
   it('sil: vazgeç', async () => {
     const p = setup()
     await userEvent.click(screen.getAllByRole('button', { name: 'Sohbet işlemleri' })[0])
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Sil' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Sil' }))
     await userEvent.click(screen.getByRole('button', { name: 'Vazgeç' }))
     expect(p.onDelete).not.toHaveBeenCalled()
   })

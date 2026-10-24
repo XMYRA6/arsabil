@@ -223,7 +223,12 @@
   padding: 10px 8px 2px;
   border-top: 1px solid var(--line);
   font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: 8px;
 }
+.me:hover { background: var(--surface-2); }
+.me:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .avatar {
   flex: none;
   display: grid;

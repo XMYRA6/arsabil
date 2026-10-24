@@ -1,6 +1,6 @@
 // Akif sohbet arayüzü — sol kenar çubuğu (yeni sohbet, arama, senaryolar, tarihe göre geçmiş, kullanıcı).
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { ConversationSummary } from '@/lib/akif/chat/conversationStore'
 import type { ScenarioItem } from '@/lib/akif/chat/scenarios'
@@ -80,28 +80,49 @@ export function AkifSidebar(p: AkifSidebarProps) {
   const [draft, setDraft] = useState('')
   const [confirmId, setConfirmId] = useState<string | null>(null)
 
+  const rootRef = useRef<HTMLElement>(null)
+  const pending = useRef<{ kind: 'trigger' | 'cancel' | 'title'; id: string } | null>(null)
+  const requestFocus = (kind: 'trigger' | 'cancel' | 'title', id: string) => {
+    pending.current = { kind, id }
+  }
+
+  useEffect(() => {
+    const pf = pending.current
+    if (!pf) return
+    pending.current = null
+    const root = rootRef.current
+    if (!root) return
+    const pick = (k: string) => root.querySelector<HTMLElement>(`[data-focus="${k}:${pf.id}"]`)
+    const el = pick(pf.kind) ?? (pf.kind === 'trigger' ? pick('title') : null)
+    el?.focus()
+  })
+
   useEffect(() => {
     if (!menuId) return
-    const close = (e: MouseEvent) => {
+    const close = (e: PointerEvent) => {
       if (!(e.target as Element).closest?.('[data-akif-menu]')) setMenuId(null)
     }
     const esc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuId(null)
+      if (e.key === 'Escape') {
+        requestFocus('trigger', menuId)
+        setMenuId(null)
+      }
     }
-    document.addEventListener('mousedown', close)
+    document.addEventListener('pointerdown', close)
     document.addEventListener('keydown', esc)
     return () => {
-      document.removeEventListener('mousedown', close)
+      document.removeEventListener('pointerdown', close)
       document.removeEventListener('keydown', esc)
     }
   }, [menuId])
 
   const groups = useMemo(() => groupByDate(p.conversations, new Date()), [p.conversations])
 
-  const commit = (id: string) => {
-    const t = draft.trim()
+  const finishEdit = (c: ConversationSummary, save: boolean, refocus: boolean) => {
+    const v = draft.trim()
     setEditId(null)
-    if (t) p.onRename(id, t)
+    if (refocus) requestFocus('trigger', c.id)
+    if (save && v && v !== c.title) p.onRename(c.id, v)
   }
 
   const renderRow = (c: ConversationSummary) => {
@@ -116,10 +137,10 @@ export function AkifSidebar(p: AkifSidebarProps) {
             maxLength={120}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') commit(c.id)
-              else if (e.key === 'Escape') setEditId(null)
+              if (e.key === 'Enter') finishEdit(c, true, true)
+              else if (e.key === 'Escape') finishEdit(c, false, true)
             }}
-            onBlur={() => setEditId(null)}
+            onBlur={() => finishEdit(c, true, false)}
           />
         </li>
       )
@@ -133,12 +154,21 @@ export function AkifSidebar(p: AkifSidebarProps) {
             className={s.danger}
             onClick={() => {
               setConfirmId(null)
+              requestFocus('title', c.id)
               p.onDelete(c.id)
             }}
           >
             Evet, sil
           </button>
-          <button type="button" className={s.ghost} onClick={() => setConfirmId(null)}>
+          <button
+            type="button"
+            className={s.ghost}
+            data-focus={`cancel:${c.id}`}
+            onClick={() => {
+              requestFocus('trigger', c.id)
+              setConfirmId(null)
+            }}
+          >
             Vazgeç
           </button>
         </li>
@@ -152,6 +182,7 @@ export function AkifSidebar(p: AkifSidebarProps) {
           className={s.open}
           aria-current={active ? 'true' : undefined}
           title={c.title}
+          data-focus={`title:${c.id}`}
           onClick={() => p.onOpen(c.id)}
         >
           <span className={s.ellipsis}>{c.title}</span>
@@ -161,17 +192,17 @@ export function AkifSidebar(p: AkifSidebarProps) {
             type="button"
             className={s.more}
             aria-label="Sohbet işlemleri"
-            aria-haspopup="menu"
             aria-expanded={menuId === c.id}
+            aria-controls={`akif-menu-${c.id}`}
+            data-focus={`trigger:${c.id}`}
             onClick={() => setMenuId(menuId === c.id ? null : c.id)}
           >
             <MoreIcon />
           </button>
           {menuId === c.id && (
-            <div className={s.menu} role="menu">
+            <div className={s.menu} id={`akif-menu-${c.id}`}>
               <button
                 type="button"
-                role="menuitem"
                 className={s.menuItem}
                 onClick={() => {
                   setMenuId(null)
@@ -184,10 +215,10 @@ export function AkifSidebar(p: AkifSidebarProps) {
               </button>
               <button
                 type="button"
-                role="menuitem"
                 className={s.menuItem}
                 onClick={() => {
                   setMenuId(null)
+                  requestFocus('cancel', c.id)
                   setConfirmId(c.id)
                 }}
               >
@@ -202,7 +233,7 @@ export function AkifSidebar(p: AkifSidebarProps) {
   }
 
   return (
-    <nav className={s.side} aria-label="Sohbetler">
+    <nav ref={rootRef} className={s.side} aria-label="Sohbetler">
       <button type="button" className={s.newChat} onClick={p.onNew}>
         <PlusIcon />
         Yeni sohbet
@@ -252,7 +283,7 @@ export function AkifSidebar(p: AkifSidebarProps) {
 
         {p.signedIn ? (
           p.conversations.length === 0 ? (
-            <p className={s.empty}>Henüz sohbet yok</p>
+            <p className={s.empty}>{p.q.trim() ? 'Sonuç bulunamadı' : 'Henüz sohbet yok'}</p>
           ) : (
             <>
               {groups.map((g) => (
@@ -275,13 +306,13 @@ export function AkifSidebar(p: AkifSidebarProps) {
         )}
       </div>
 
-      {p.user && (
-        <div className={s.me}>
+      {p.signedIn && p.user && (
+        <Link href="/dashboard/profile" className={s.me} aria-label="Profil" title={p.user.name ?? 'Hesabım'}>
           <span className={s.avatar} aria-hidden="true">
             {initials(p.user.name)}
           </span>
           <span className={s.ellipsis}>{p.user.name ?? 'Hesabım'}</span>
-        </div>
+        </Link>
       )}
     </nav>
   )
