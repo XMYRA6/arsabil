@@ -86,4 +86,46 @@ describe('WorkspacePanel', () => {
     const { container } = render(<WorkspacePanel state={full} changes={{}} onReport={() => {}} />)
     expect(container.querySelector('[aria-live="polite"]')).toBeTruthy()
   })
+
+  it('ayni alan ikinci kez degisince satir yeniden mount olur', () => {
+    const st = { ...full, arsaSahibiPct: 50, muteahhitPct: 50 }
+    const { rerender } = render(
+      <WorkspacePanel state={st} changes={{ arsaSahibiPct: { from: 46, to: 50 } }} onReport={() => {}} />,
+    )
+    const first = screen.getByText('%46 → %50').closest('[data-changed]')
+    rerender(
+      <WorkspacePanel
+        state={{ ...st, arsaSahibiPct: 55, muteahhitPct: 45 }}
+        changes={{ arsaSahibiPct: { from: 50, to: 55 } }}
+        onReport={() => {}}
+      />,
+    )
+    const second = screen.getByText('%50 → %55').closest('[data-changed]')
+    expect(second).toBeTruthy()
+    expect(second).not.toBe(first)
+  })
+
+  it('degisen konum eski → yeni gosterir', () => {
+    render(
+      <WorkspacePanel
+        state={full}
+        changes={{ konum: { from: 'Ortahisar', to: 'Yıldızlı, Akçaabat/Trabzon' } }}
+        onReport={() => {}}
+      />,
+    )
+    expect(screen.getByText('Ortahisar → Yıldızlı, Akçaabat/Trabzon').closest('[data-changed]')).toBeTruthy()
+  })
+
+  it('emsalNotu varsa gosterilir, yoksa gosterilmez', () => {
+    const { rerender } = render(<WorkspacePanel state={full} changes={{}} onReport={() => {}} />)
+    expect(screen.getByText('Emsal notu')).toBeTruthy()
+    rerender(<WorkspacePanel state={{ ...full, emsalNotu: null }} changes={{}} onReport={() => {}} />)
+    expect(screen.queryByText('Emsal notu')).toBeNull()
+  })
+
+  it('bos durumda da aria-live sarmalayicisi vardir', () => {
+    const { container } = render(<WorkspacePanel state={empty} changes={{}} onReport={() => {}} />)
+    const live = container.querySelector('[aria-live="polite"]')
+    expect(live?.textContent).toContain('Bir arsa söyle')
+  })
 })
