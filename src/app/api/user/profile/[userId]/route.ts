@@ -25,7 +25,9 @@ export async function GET(
             isVerified: true,
             createdAt: true,
             ...(isOwner ? { emailPrefs: true } : {}),
+            // Hesaplamalar özeldir: başkası yalnız yayındaki bir ilana bağlı olanları görür.
             reports: {
+                where: isOwner ? undefined : { listing: { is: { status: 'APPROVED', isActive: true } } },
                 orderBy: { createdAt: 'desc' },
                 take: 20,
                 select: { id: true, title: true, landShareRatio: true, createdAt: true },

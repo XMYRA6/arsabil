@@ -122,7 +122,7 @@ function ToolBtn({ icon, label, active, onClick, disabled, badge }: {
 export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listings, highlightedId, onHighlight }, ref) {
     const router = useRouter();
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const markersRef = useRef<Record<string, { marker: Marker; lat: number; lng: number; score: number }>>({});
+    const markersRef = useRef<Record<string, { marker: Marker; lat: number; lng: number; score: number | null }>>({});
     const clusterGroupRef = useRef<FeatureGroup | LayerGroup | null>(null);
     const tileLayerRef = useRef<TileLayer | null>(null);
     const heatLayerRef = useRef<LayerGroup | null>(null);
@@ -194,9 +194,11 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 iconCreateFunction: (cluster: { getAllChildMarkers: () => (Marker & { options: MarkerOptions & { score?: number } })[] }) => {
                     const markers = cluster.getAllChildMarkers();
                     const count = markers.length;
-                    const avgScore = markers.reduce((s: number, m) => s + (m.options.score || 70), 0) / count;
-                    const color = avgScore >= 80 ? 'var(--green)' : avgScore >= 60 ? 'var(--orange)' : 'var(--red)';
-                    const rgb = avgScore >= 80 ? 'var(--green-rgb)' : avgScore >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
+                    // Skor yoksa uydurma ortalama üretilmez; küme nötr (mavi) kalır.
+                    const scored = markers.map(m => m.options.score).filter((v): v is number => typeof v === 'number');
+                    const avgScore = scored.length > 0 ? scored.reduce((a, b) => a + b, 0) / scored.length : null;
+                    const color = avgScore === null ? 'var(--blue)' : avgScore >= 80 ? 'var(--green)' : avgScore >= 60 ? 'var(--orange)' : 'var(--red)';
+                    const rgb = avgScore === null ? 'var(--blue-rgb)' : avgScore >= 80 ? 'var(--green-rgb)' : avgScore >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
                     return L.divIcon({
                         html: `<div style="
                             background:${color};color:white;
@@ -246,14 +248,15 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
         placed.forEach((listing) => {
             const lat = listing.lat;
             const lng = listing.lng;
-            const score = listing.fizibiliteSkoru ?? 70;
-            const color = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
-            const rgb = score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
-            const payiMin = listing.arsaPayiMin ?? 28;
-            const payiMax = listing.arsaPayiMax ?? 42;
+            // Skor/arsa payı yalnız gerçek veri varsa gösterilir; eksikse uydurma varsayılan yok.
+            const score = listing.fizibiliteSkoru ?? null;
+            const color = score === null ? 'var(--blue)' : score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--orange)' : 'var(--red)';
+            const rgb = score === null ? 'var(--blue-rgb)' : score >= 80 ? 'var(--green-rgb)' : score >= 60 ? 'var(--orange-rgb)' : 'var(--red-rgb)';
+            const payiMin = listing.arsaPayiMin ?? null;
+            const payiMax = listing.arsaPayiMax ?? null;
             const displayText = listing.type === 'SALE'
                 ? (listing.price ? (listing.price / 1000000).toFixed(1) + 'M' : '₺')
-                : `${payiMin}%`;
+                : payiMin !== null ? `${payiMin}%` : 'Kat k.';
 
             const divIcon = L.divIcon({
                 className: '',
@@ -275,12 +278,12 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                 popupAnchor: [0, -35],
             });
 
-            const marker = L.marker([lat, lng], { icon: divIcon, score } as MarkerOptions & { score?: number });
+            const marker = L.marker([lat, lng], { icon: divIcon, score: score ?? undefined } as MarkerOptions & { score?: number });
             markersRef.current[listing.id] = { marker, lat, lng, score };
 
             const payStr = listing.type === 'SALE'
                 ? `${(listing.price ?? 0).toLocaleString('tr-TR')} TL`
-                : `%${payiMin}–${payiMax}`;
+                : payiMin !== null && payiMax !== null ? `%${payiMin}–${payiMax}` : 'Arsa payı belirtilmemiş';
 
             // Baslik/ilce/il gercekten yoksa uydurma degil, notr metin yazilir.
             const popupHtml = `
@@ -292,7 +295,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
                         📍 ${[listing.district, listing.city].filter(Boolean).join(', ') || 'Konum belirtilmemiş'}
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                        <span style="background:rgba(${rgb},0.13);color:${color};border:1.5px solid ${color};border-radius:6px;padding:2px 8px;font-size:0.75rem;font-weight:800;">${score}/100</span>
+                        ${score !== null ? `<span style="background:rgba(${rgb},0.13);color:${color};border:1.5px solid ${color};border-radius:6px;padding:2px 8px;font-size:0.75rem;font-weight:800;">${score}/100</span>` : ''}
                         <span style="font-size:0.8rem;font-weight:700;color:#0b2443;">${payStr}</span>
                     </div>
                     <div style="display:flex;gap:6px;margin-top:8px;">
@@ -328,7 +331,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             import('leaflet.heat').then(() => {
                 const L = LRef.current;
                 const points = Object.values(markersRef.current).map((e) => [
-                    e.lat, e.lng, (e.score || 70) / 100,
+                    e.lat, e.lng, (e.score ?? 60) / 100,
                 ]);
                 // leaflet.heat @types paketi yok; runtime'da L.heatLayer ekleniyor
                 type LWithHeat = typeof L & { heatLayer?: (pts: number[][], opts: Record<string, unknown>) => LayerGroup };

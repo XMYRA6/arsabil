@@ -12,7 +12,6 @@ import { StickyActionBar } from '@/components/mobile/StickyActionBar';
 import { useThemeZaman } from '@/components/home/useThemeZaman';
 import { resolveScene, type Tur } from '@/lib/dioramas/scene';
 import { formatParcelIdentity, formatAreaCells, formatZoningLabel } from '@/lib/listing/listingDisplay';
-import { mergeDemoOverlay } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
 
 const MiniMap = dynamic(() => import('@/components/marketplace/MiniMap').then(m => m.MiniMap), { ssr: false });
@@ -33,22 +32,21 @@ const TYPE_LABEL: Record<string, string> = {
     ORTAKLIK: 'Ortaklık',
 };
 
-const MOCK_LISTING = {
+const LISTING_DEFAULTS = {
     id: '',
-    title: '820 m² Kat Karşılığı İlan',
+    title: '',
     type: 'KAT_KARSILIGI',
-    city: 'İstanbul',
-    district: 'Beşiktaş',
-    fizibiliteSkoru: 82,
-    arsaPayiMin: 30,
-    arsaPayiMax: 42,
-    changePercent: 42.5,
+    city: null as string | null,
+    district: null as string | null,
+    // Skor ve arsa payı aralığı veri modelinde yok; hesaplanana kadar boş kalır, uydurma değer yok.
+    fizibiliteSkoru: null as number | null,
+    arsaPayiMin: null as number | null,
+    arsaPayiMax: null as number | null,
     zoning: null as string | null,
-    emsal: 2.0,
-    price: 5171642,
-    netKar: 34,
+    emsal: null as number | null,
+    price: null as number | null,
     photos: [] as string[],
-    description: 'Beşiktaş merkezi konumda, ulaşıma yakın, imar planlı arsa. Kat karşılığı veya satış seçenekleri görüşmeye açık.',
+    description: null as string | null,
     // Gerçek veriden gelmesi gereken alanlar burada SABİT DEĞER TAŞIMAZ.
     // Daha önce m2:820 ve lat/lng:Beşiktaş sabitleri vardı; API bu alanları
     // döndürmediği için her ilan detayında sabit "820 m²" ve Beşiktaş konumu
@@ -99,7 +97,7 @@ export default function ListingDetailPage() {
 
     const initialTab = (searchParams.get('tab') as Tab) ?? 'genel';
     const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-    const [listing, setListing] = useState<typeof MOCK_LISTING | null>(null);
+    const [listing, setListing] = useState<typeof LISTING_DEFAULTS | null>(null);
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -114,13 +112,12 @@ export default function ListingDetailPage() {
         // sessizce MOCK_LISTING'e (uydurma başlık/fiyat) düşülüyordu, kullanıcı
         // gerçek bir ilan gördüğünü sanabiliyordu — PRODUCT.md ilke #1'i
         // ("gerçek veri, uydurma yok") ihlal ediyordu. Artık görünür bir hata
-        // durumu var; MOCK_LISTING yalnızca `mergeDemoOverlay`'in eksik
-        // (Prisma şemasında olmayan) alanları doldurmak için kullanılıyor.
+        // durumu var; LISTING_DEFAULTS yalnızca eksik alanları boş (null) bırakır.
         fetch(`/api/listings/${id}`)
             .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
             .then(data => {
                 if (data && data.id) {
-                    setListing({ ...mergeDemoOverlay(data, MOCK_LISTING), id });
+                    setListing({ ...LISTING_DEFAULTS, ...data, id });
                 } else {
                     setFetchError(true);
                 }
@@ -201,13 +198,13 @@ export default function ListingDetailPage() {
         </div>
     );
 
-    const score = listing.fizibiliteSkoru ?? 82;
-    const scoreTone = score >= 80 ? 'good' : score >= 60 ? 'mid' : 'bad';
-    const scoreLabel = score >= 80 ? 'Yüksek' : score >= 60 ? 'Orta' : 'Riskli';
+    const score = listing.fizibiliteSkoru;
+    const scoreTone = score == null ? 'mid' : score >= 80 ? 'good' : score >= 60 ? 'mid' : 'bad';
+    const scoreLabel = score == null ? '' : score >= 80 ? 'Yüksek' : score >= 60 ? 'Orta' : 'Riskli';
     const areaCells = formatAreaCells(listing);
     const parcelId = formatParcelIdentity(listing);
-    const price = listing.price ?? 5171642;
-    const perM2 = listing.landSizeSqm ? Math.round(price / listing.landSizeSqm) : null;
+    const price = listing.price && listing.price > 0 ? listing.price : null;
+    const perM2 = price !== null && listing.landSizeSqm ? Math.round(price / listing.landSizeSqm) : null;
     const diorama = listing.photos.length === 0
         ? resolveScene({ ...sahneSec(listing), egim: 'duz', zaman })
         : null;
@@ -218,28 +215,43 @@ export default function ListingDetailPage() {
     const sidePanel = (
         <aside className={styles.sidebar}>
             <div className={`${styles.card} ${styles.priceCard}`}>
-                <span className={styles.priceLabel}>Tahmini değer</span>
+                <span className={styles.priceLabel}>{price !== null ? 'İstenen fiyat' : 'Fiyat'}</span>
                 <div className={styles.priceRow}>
-                    <span className={styles.priceValue}>₺{trNum.format(price)}</span>
+                    <span className={styles.priceValue}>{price !== null ? `₺${trNum.format(price)}` : 'Belirtilmemiş'}</span>
                     {perM2 !== null && <span className={styles.perM2}>₺{trNum.format(perM2)}/m²</span>}
                 </div>
 
-                <div className={styles.scoreBlock}>
-                    <div className={styles.scoreHead}>
-                        <span>Fizibilite skoru</span>
-                        <span className={`${styles.scorePill} ${styles[`score_${scoreTone}`]}`}>{score} · {scoreLabel}</span>
+                {score != null ? (
+                    <div className={styles.scoreBlock}>
+                        <div className={styles.scoreHead}>
+                            <span>Fizibilite skoru</span>
+                            <span className={`${styles.scorePill} ${styles[`score_${scoreTone}`]}`}>{score} · {scoreLabel}</span>
+                        </div>
+                        <div className={styles.progressTrack} role="img" aria-label={`Fizibilite skoru ${score}/100`}>
+                            <div className={`${styles.progressFill} ${styles[`fill_${scoreTone}`]}`} style={{ width: `${score}%` }} />
+                        </div>
+                        <p className={styles.scoreNote}>Arsa payı, risk ve piyasa verisinden hesaplanır.</p>
                     </div>
-                    <div className={styles.progressTrack} role="img" aria-label={`Fizibilite skoru ${score}/100`}>
-                        <div className={`${styles.progressFill} ${styles[`fill_${scoreTone}`]}`} style={{ width: `${score}%` }} />
+                ) : (
+                    <div className={styles.scoreBlock}>
+                        <p className={styles.scoreNote}>Fizibilite henüz hesaplanmadı. Senaryo hesaplayarak kendi sonucunu çıkarabilirsin.</p>
                     </div>
-                    <p className={styles.scoreNote}>Arsa payı, risk ve piyasa verisinden hesaplanır.</p>
-                </div>
+                )}
 
                 <div className={styles.sidebarActions}>
-                    <button type="button" onClick={() => setActiveTab('teklifler')} className={styles.offerBtn}>Teklif ver</button>
-                    <button type="button" onClick={() => setActiveTab('senaryo')} className={styles.softBtnWide}>Senaryo hesapla</button>
+                    {isOwner ? (
+                        <>
+                            <button type="button" onClick={() => router.push(`/listing/${id}/offers`)} className={styles.offerBtn}>Gelen teklifler</button>
+                            <button type="button" onClick={() => setActiveTab('senaryo')} className={styles.softBtnWide}>Senaryo hesapla</button>
+                        </>
+                    ) : (
+                        <>
+                            <button type="button" onClick={() => setActiveTab('teklifler')} className={styles.offerBtn}>Teklif ver</button>
+                            <button type="button" onClick={() => setActiveTab('senaryo')} className={styles.softBtnWide}>Senaryo hesapla</button>
+                        </>
+                    )}
                     <div className={styles.softRow}>
-                        <button type="button" onClick={() => setActiveTab('mesajlar')} className={styles.softBtn}>Mesaj</button>
+                        {!isOwner && <button type="button" onClick={() => setActiveTab('mesajlar')} className={styles.softBtn}>Mesaj</button>}
                         <button
                             type="button"
                             onClick={() => {
@@ -249,9 +261,11 @@ export default function ListingDetailPage() {
                             }}
                             className={styles.softBtn}
                         >Paylaş</button>
-                        <button type="button" onClick={toggleFavorite} aria-pressed={isFavorite} className={styles.softBtn}>
-                            {isFavorite ? 'Favoride' : 'Favori'}
-                        </button>
+                        {!isOwner && (
+                            <button type="button" onClick={toggleFavorite} aria-pressed={isFavorite} className={styles.softBtn}>
+                                {isFavorite ? 'Favoride' : 'Favori'}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -298,7 +312,7 @@ export default function ListingDetailPage() {
             )}
 
             <p className={styles.footnote}>
-                Tüm anlaşmalar ArsaBil güvencesindedir. İlan No: {id?.slice(0, 8).toUpperCase()}
+                İlan No: {id?.slice(0, 8).toUpperCase()}
             </p>
         </aside>
     );
@@ -346,9 +360,9 @@ export default function ListingDetailPage() {
 
                     {/* Mobil fiyat özeti: Figma mobilde fiyat başlığın hemen altında, yan kart yok. */}
                     <div className={styles.mobilePrice}>
-                        <span className={styles.priceValue}>₺{trNum.format(price)}</span>
+                        <span className={styles.priceValue}>{price !== null ? `₺${trNum.format(price)}` : 'Fiyat belirtilmemiş'}</span>
                         {perM2 !== null && <span className={styles.perM2}>₺{trNum.format(perM2)}/m²</span>}
-                        <span className={`${styles.scorePill} ${styles[`score_${scoreTone}`]}`}>{score} · {scoreLabel}</span>
+                        {score != null && <span className={`${styles.scorePill} ${styles[`score_${scoreTone}`]}`}>{score} · {scoreLabel}</span>}
                     </div>
 
                     <div className={styles.tabs} role="tablist">
@@ -385,8 +399,8 @@ export default function ListingDetailPage() {
                                             ['Alan (beyan)', areaCells.declared],
                                             ...(areaCells.official ? [['Alan (tapu)', areaCells.official] as [string, string]] : []),
                                             ['İmar durumu', formatZoningLabel(listing.zoning)],
-                                            ['Emsal', listing.emsal?.toString() ?? '2.0'],
-                                            ['Arsa payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`],
+                                            ...(listing.emsal != null ? [['Emsal', String(listing.emsal)] as [string, string]] : []),
+                                            ...(listing.arsaPayiMin != null && listing.arsaPayiMax != null ? [['Arsa payı', `%${listing.arsaPayiMin}–${listing.arsaPayiMax}`] as [string, string]] : []),
                                             ...(listing.riskSnapshotAt != null
                                                 ? [
                                                     ['Fay mesafesi', faultText ? `${faultText}` : '25 km içinde diri fay yok'] as [string, string],
@@ -412,12 +426,7 @@ export default function ListingDetailPage() {
                                 <section className={styles.card}>
                                     <h3 className={styles.cardTitle}>Açıklama</h3>
                                     {listing.description && <p className={styles.description}>{listing.description}</p>}
-                                    {/* emsal / arsaPayi alanları Prisma şemasında HİÇ yok; API onları
-                                        döndüremez, dolayısıyla her ilanda aynı örnek değerler görünür. */}
-                                    <p className={styles.demoNote} role="note">
-                                        <strong>Örnek veri</strong> — Emsal ve arsa payı bilgileri henüz
-                                        toplanmadığı için tanıtım amaçlı örnek değerlerdir; bu ilana ait değildir.
-                                    </p>
+                                    {!listing.description && <p className={styles.description}>İlan sahibi açıklama eklememiş.</p>}
                                 </section>
                             </>
                         )}
@@ -448,7 +457,17 @@ export default function ListingDetailPage() {
                             </section>
                         )}
 
-                        {activeTab === 'teklifler' && (
+                        {activeTab === 'teklifler' && isOwner && (
+                            <section className={`${styles.card} ${styles.centerCta}`}>
+                                <h3 className={styles.cardTitle}>Bu senin ilanın</h3>
+                                <p className={styles.description}>Kendi ilanına teklif veremezsin. Gelen teklifleri ayrı sayfada görebilirsin.</p>
+                                <button onClick={() => router.push(`/listing/${id}/offers`)} className={styles.primaryBtn}>
+                                    Gelen teklifler →
+                                </button>
+                            </section>
+                        )}
+
+                        {activeTab === 'teklifler' && !isOwner && (
                             <section className={styles.card}>
                                 <div className={styles.cardHead}>
                                     <h3 className={styles.cardTitle}>Teklif ver</h3>

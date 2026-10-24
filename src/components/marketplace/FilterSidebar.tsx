@@ -106,40 +106,6 @@ export function FilterSidebar({ filters, onChange, totalCount, inSheet = false, 
                 </div>
             </div>
 
-            <div className={styles.section}>
-                <div className={styles.toggleRow}>
-                    <span className={styles.sectionLabel}>Fizibilite skoru</span>
-                    <button
-                        type="button"
-                        role="switch"
-                        aria-checked={filters.fizibiliteOnly}
-                        aria-label="Fizibilite Skoru Olanlar"
-                        onClick={() => set({ fizibiliteOnly: !filters.fizibiliteOnly })}
-                        className={`${styles.toggleTrack} ${filters.fizibiliteOnly ? styles.toggleTrackActive : ''}`}
-                    >
-                        <span className={`${styles.toggleThumb} ${filters.fizibiliteOnly ? styles.toggleThumbActive : ''}`} />
-                    </button>
-                </div>
-                {filters.fizibiliteOnly && (
-                    <div>
-                        <div className={styles.scoreHeader}>
-                            <span className={styles.scoreLabel}>Min skor</span>
-                            <span className={styles.scoreValue}>{filters.minScore}+</span>
-                        </div>
-                        <input
-                            type="range"
-                            min={10}
-                            max={90}
-                            value={filters.minScore}
-                            aria-label="Min skor"
-                            onChange={e => set({ minScore: +e.target.value })}
-                            className={styles.scoreRange}
-                            style={{ '--progress': `${((filters.minScore - 10) / 80) * 100}%` } as React.CSSProperties}
-                        />
-                    </div>
-                )}
-            </div>
-
             <div className={styles.footer}>
                 {inSheet && (
                     <button type="button" onClick={resetAll} className={styles.resetBtn}>Temizle</button>

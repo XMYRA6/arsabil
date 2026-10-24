@@ -36,6 +36,7 @@
   --amber-text: #8a5a00;
   --amber-soft: #f6e7c4;
   --blue: #1f6feb;
+  --blue-rgb: 31, 111, 235;
   --blue-on: #ffffff;
   --blue-soft: #dce8fb;
   --sage: #6f8f72;
@@ -80,6 +81,7 @@
   --amber-text: #f2b84b;
   --amber-soft: #3a3320;
   --blue: #4c8dff;
+  --blue-rgb: 76, 141, 255;
   --blue-on: #0b1220;
   --blue-soft: #1c3258;
   --sage: #7fa383;

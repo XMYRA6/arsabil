@@ -56,6 +56,7 @@ export default function ListingOffersPage() {
     const listingId = params.id
     const [listing, setListing] = useState<Listing | null>(null)
     const [offers, setOffers] = useState<Offer[]>([])
+    const [isOwner, setIsOwner] = useState(false)
     const [offeredShare, setOfferedShare] = useState(33)
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(true)
@@ -71,6 +72,7 @@ export default function ListingOffersPage() {
         if (offersRes.ok) {
             const data = await offersRes.json()
             setOffers(data.offers ?? [])
+            setIsOwner(!!data.isOwner)
         }
         setLoading(false)
     }
@@ -141,6 +143,7 @@ export default function ListingOffersPage() {
                     ))}
                 </section>
 
+                {!isOwner && (
                 <section className={styles.createPanel} aria-label="Teklif gönder">
                     <h2 className={styles.panelTitle}>Teklif gönder</h2>
                     <p className={styles.panelSub}>Bu ilana kendi payını öner.</p>
@@ -186,6 +189,7 @@ export default function ListingOffersPage() {
                     </button>
                     <p className={styles.panelNote}>Teklif ilan sahibine bildirim olarak gider.</p>
                 </section>
+                )}
             </div>
         </main>
     )

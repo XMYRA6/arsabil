@@ -7,12 +7,6 @@ import { resolveScene, type Tur } from '@/lib/dioramas/scene';
 import { useThemeZaman } from '@/components/home/useThemeZaman';
 import styles from './ListingCard.module.css';
 
-function seededInt(seed: string, min: number, max: number): number {
-    let h = 0;
-    for (let i = 0; i < seed.length; i++) { h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0; }
-    return min + (Math.abs(h) % (max - min + 1));
-}
-
 export interface Listing {
     id: string;
     title: string;
@@ -81,14 +75,17 @@ export function ListingCard({ listing, highlighted, onHover, isFavorite, onFavor
     const router = useRouter();
     const zaman = useThemeZaman();
     const photoUrl = listing.photos?.[0];
-    const score = listing.fizibiliteSkoru ?? seededInt(listing.id, 50, 90);
+    // Skor, arsa payı aralığı ve değişim yüzdesi yalnız gerçekten hesaplanmışsa gösterilir;
+    // eksikse uydurma varsayılan üretilmez (PRODUCT.md ilke #1).
+    const score = listing.fizibiliteSkoru ?? null;
     const price = listing.price ?? listing.report?.minApartmentPrice ?? 0;
-    const payiMin = listing.arsaPayiMin ?? (listing.report?.landShareRatio ? listing.report.landShareRatio * 100 * 0.85 : 28);
-    const payiMax = listing.arsaPayiMax ?? (listing.report?.landShareRatio ? listing.report.landShareRatio * 100 * 1.15 : 42);
-    const change = listing.changePercent ?? (seededInt(listing.id + 'c', 0, 9) > 2
-        ? +(seededInt(listing.id + 'v', 5, 60) / 10).toFixed(1)
-        : -(seededInt(listing.id + 'n', 1, 15) / 10).toFixed(1));
-    const etiket = skorEtiketi(score);
+    const payiMetni = listing.arsaPayiMin != null && listing.arsaPayiMax != null
+        ? `%${listing.arsaPayiMin.toFixed(0)}–${listing.arsaPayiMax.toFixed(0)}`
+        : listing.report?.landShareRatio
+            ? `%${(listing.report.landShareRatio * 100).toFixed(0)}`
+            : null;
+    const change = listing.changePercent ?? null;
+    const etiket = score !== null ? skorEtiketi(score) : null;
     const perM2 = price > 0 && listing.landSizeSqm ? Math.round(price / listing.landSizeSqm) : null;
     const imarMetni = listing.zoning
         ? (listing.zoning === 'KONUT' ? 'İmarlı konut' : IMAR_LABEL[listing.zoning] ?? listing.zoning)
@@ -162,9 +159,11 @@ export function ListingCard({ listing, highlighted, onHover, isFavorite, onFavor
                         <h3 className={styles.title}>{baslik}</h3>
                         <p className={styles.sub}>{listing.city || 'İstanbul'}</p>
                     </div>
-                    <span className={`${styles.score} ${styles[`score_${etiket.tone}`]}`} title={`Fizibilite Skoru ${score}/100 (${etiket.text}) — arsa payı, risk ve piyasa verisinden hesaplanır`}>
-                        {score} · {etiket.text}
-                    </span>
+                    {score !== null && etiket && (
+                        <span className={`${styles.score} ${styles[`score_${etiket.tone}`]}`} title={`Fizibilite Skoru ${score}/100 (${etiket.text}) — arsa payı, risk ve piyasa verisinden hesaplanır`}>
+                            {score} · {etiket.text}
+                        </span>
+                    )}
                 </div>
 
                 <div className={styles.priceRow}>
@@ -173,23 +172,27 @@ export function ListingCard({ listing, highlighted, onHover, isFavorite, onFavor
                             <span className={styles.price}>₺{trNum.format(price)}</span>
                             {perM2 !== null && <span className={styles.perM2}>₺{trNum.format(perM2)}/m²</span>}
                         </>
+                    ) : payiMetni ? (
+                        <span className={styles.price}>{payiMetni}</span>
                     ) : (
-                        <span className={styles.price}>%{payiMin.toFixed(0)}–{payiMax.toFixed(0)}</span>
+                        <span className={styles.price}>Fiyat belirtilmemiş</span>
                     )}
                 </div>
 
                 <p className={styles.meta}>
                     {listing.landSizeSqm != null && <span>{trNum.format(listing.landSizeSqm)} m²</span>}
                     {imarMetni && <span>{imarMetni}</span>}
-                    <span className={change >= 0 ? styles.up : styles.down}>
-                        {change >= 0 ? '+' : '−'}%{trPct.format(Math.abs(change))}
-                    </span>
+                    {change !== null && (
+                        <span className={change >= 0 ? styles.up : styles.down}>
+                            {change >= 0 ? '+' : '−'}%{trPct.format(Math.abs(change))}
+                        </span>
+                    )}
                 </p>
 
-                {listing.type !== 'SALE' && (
+                {listing.type !== 'SALE' && payiMetni && (
                     <div className={styles.payi}>
                         <span>Arsa payı</span>
-                        <strong>%{payiMin.toFixed(0)}–{payiMax.toFixed(0)}</strong>
+                        <strong>{payiMetni}</strong>
                     </div>
                 )}
 
@@ -208,7 +211,11 @@ export function ListingCard({ listing, highlighted, onHover, isFavorite, onFavor
                     >
                         Detay
                     </button>
-                    <button type="button" className={styles.actionPrimary} onClick={e => e.stopPropagation()}>
+                    <button
+                        type="button"
+                        className={styles.actionPrimary}
+                        onClick={e => { e.stopPropagation(); router.push(`/listing/${listing.id}?tab=teklifler`); }}
+                    >
                         Teklif ver
                     </button>
                 </div>

@@ -11,7 +11,7 @@ import { CitySearch } from '@/components/marketplace/CitySearch';
 import type { MapViewHandle, MapViewProps } from '@/components/marketplace/MapView';
 import { BottomSheet } from '@/components/mobile/BottomSheet';
 import { MobileState } from '@/components/mobile/MobileState';
-import { filterListings, sortListings, mergeDemoOverlay, LISTING_TYPE_GROUPS, isTypeGroupActive, toggleTypeGroup, type ListingFilters } from '@/lib/listing/marketplaceFilters';
+import { filterListings, sortListings, LISTING_TYPE_GROUPS, isTypeGroupActive, toggleTypeGroup, type ListingFilters } from '@/lib/listing/marketplaceFilters';
 import styles from './page.module.css';
 
 // SSR-safe map import — dynamic + forwardRef birlikte ForwardRefExoticComponent olarak tip verilmeli
@@ -30,20 +30,6 @@ const DEFAULT_FILTERS: ListingFilters = {
     fizibiliteOnly: false,
     minScore: 10,
 };
-
-// Mock listings enriched with fizibilite data
-const MOCK_LISTINGS_EXTRA = [
-    { fizibiliteSkoru: 83, arsaPayiMin: 30, arsaPayiMax: 46, changePercent: 42.8, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 82, arsaPayiMin: 34, arsaPayiMax: 48, changePercent: 44.3, zoning: 'KARMA', isNew: false },
-    { fizibiliteSkoru: 82, arsaPayiMin: 35, arsaPayiMax: 48, changePercent: 48.8, zoning: 'TICARI', isNew: true },
-    { fizibiliteSkoru: 88, arsaPayiMin: 23, arsaPayiMax: 34, changePercent: 36.1, zoning: 'KONUT', isNew: true },
-    { fizibiliteSkoru: 76, arsaPayiMin: 28, arsaPayiMax: 40, changePercent: 28.5, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 64, arsaPayiMin: 25, arsaPayiMax: 38, changePercent: 18.2, zoning: 'TARIM', isNew: false },
-    { fizibiliteSkoru: 91, arsaPayiMin: 32, arsaPayiMax: 45, changePercent: 55.3, zoning: 'KARMA', isNew: true },
-    { fizibiliteSkoru: 58, arsaPayiMin: 22, arsaPayiMax: 35, changePercent: -8.4, zoning: 'KONUT', isNew: false },
-    { fizibiliteSkoru: 79, arsaPayiMin: 30, arsaPayiMax: 42, changePercent: 31.7, zoning: 'TICARI', isNew: false },
-    { fizibiliteSkoru: 86, arsaPayiMin: 33, arsaPayiMax: 46, changePercent: 46.2, zoning: 'KONUT', isNew: true },
-];
 
 export default function MarketplacePage() {
     return (
@@ -64,15 +50,9 @@ function MarketplaceContent() {
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState(true);
-    // Ekranda uydurma veri var mi, ve ne kadari?
-    //   'all'         → ilanlarin TAMAMI ornek (API bos dondu veya hata verdi)
-    //   'fizibilite'  → ilanlar gercek, ama skor/arsa payi/imar alanlari ornek
-    // Bu alanlar (fizibiliteSkoru, arsaPayiMin/Max) Prisma semasinda HIC yok;
-    // API onlari donduremez. Veriler gercekten toplanana kadar ekranda
-    // acikca isaretleniyorlar.
-    const [demoData, setDemoData] = useState<'none' | 'fizibilite' | 'all'>('none');
+    const [loadError, setLoadError] = useState(false);
     const [highlightedId, setHighlightedId] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState('score_desc');
+    const [sortBy, setSortBy] = useState('newest');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedCity, setSelectedCity] = useState('İstanbul');
     const mapRef = useRef<MapViewHandle>(null);
@@ -95,48 +75,13 @@ function MarketplaceContent() {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- bileşen montajında ilan listesi çekiliyor
         setLoading(true);
         fetch('/api/listings')
-            .then(r => r.json())
+            .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
             .then(data => {
-                const arr = Array.isArray(data) ? data : [];
-                // Enrich API data with mock fizibilite fields for demo
-                const enriched = (arr as Listing[]).map((l, i): Listing =>
-                    mergeDemoOverlay(l, MOCK_LISTINGS_EXTRA[i % MOCK_LISTINGS_EXTRA.length] || {})
-                );
-                // If no listings from API, add mock data
-                if (enriched.length === 0) {
-                    const mock: Listing[] = Array.from({ length: 10 }, (_, i) => ({
-                        id: `mock-${i}`,
-                        title: `${600 + i * 80} m² Arsa`,
-                        type: (i % 3 === 0 ? 'SALE' : 'KAT_KARSILIGI') as Listing['type'],
-                        city: 'İstanbul',
-                        district: ['Beşiktaş', 'Kadıköy', 'Şişli', 'Ümraniye', 'Maltepe'][i % 5],
-                        price: i % 3 === 0 ? (5000000 + i * 500000) : 0,
-                        report: { landShareRatio: 0.35, minApartmentPrice: 5000000 + i * 500000 },
-                        ...MOCK_LISTINGS_EXTRA[i],
-                    }));
-                    setListings(mock);
-                    setDemoData('all');
-                } else {
-                    setListings(enriched);
-                    setDemoData('fizibilite');
-                }
-                setLoading(false);
+                setListings(Array.isArray(data) ? (data as Listing[]) : []);
+                setLoadError(false);
             })
-            .catch(() => {
-                const mock: Listing[] = Array.from({ length: 10 }, (_, i) => ({
-                    id: `mock-${i}`,
-                    title: `${600 + i * 80} m² Arsa`,
-                    type: (i % 3 === 0 ? 'SALE' : 'KAT_KARSILIGI') as Listing['type'],
-                    city: 'İstanbul',
-                    district: ['Beşiktaş', 'Kadıköy', 'Şişli', 'Ümraniye', 'Maltepe'][i % 5],
-                    price: i % 3 === 0 ? (5000000 + i * 500000) : 0,
-                    report: { landShareRatio: 0.35, minApartmentPrice: 5000000 + i * 500000 },
-                    ...MOCK_LISTINGS_EXTRA[i],
-                }));
-                setListings(mock);
-                setDemoData('all');
-                setLoading(false);
-            });
+            .catch(() => setLoadError(true))
+            .finally(() => setLoading(false));
     }, []);
 
     const filtered = filterListings(listings, filters);
@@ -154,20 +99,9 @@ function MarketplaceContent() {
                     <p className={styles.eyebrow}>Pazar yeri</p>
                     <h1 className={styles.title}>Kat karşılığı ve satılık arsalar</h1>
                     <p className={styles.subtitle}>
-                        Fizibilite skoruyla sıralanmış ilanlar. Her ilan için senaryo hesapla, teklif ver.
+                        Her ilan için senaryo hesapla, teklif ver.
                     </p>
                 </div>
-                {!loading && demoData !== 'none' && (
-                    <span
-                        className={styles.demoBadge}
-                        role="status"
-                        title={demoData === 'all'
-                            ? 'Şu anda yayında ilan bulunmadığı için bu listedeki ilanların tamamı tanıtım amaçlı örnektir.'
-                            : 'İlanlar gerçek, ancak fizibilite skoru ve arsa payı aralığı henüz toplanmadığı için örnek değerlerle gösteriliyor.'}
-                    >
-                        Örnek veri
-                    </span>
-                )}
             </header>
 
             {/* ── Araç çubuğu: şehir/ilçe arama, sıralama, görünüm ── */}
@@ -184,9 +118,8 @@ function MarketplaceContent() {
                 </div>
 
                 <select aria-label="Sıralama" value={sortBy} onChange={e => setSortBy(e.target.value)} className={styles.sortSelect}>
-                    <option value="score_desc">En yüksek skor</option>
-                    <option value="price_asc">En uygun fiyat</option>
                     <option value="newest">En yeniler</option>
+                    <option value="price_asc">En uygun fiyat</option>
                 </select>
 
                 <div className={styles.viewToggle}>
@@ -226,19 +159,25 @@ function MarketplaceContent() {
                                     <div key={i} className={styles.skeletonItem} />
                                 ))}
                             </div>
+                        ) : loadError ? (
+                            <MobileState
+                                variant="error"
+                                title="İlanlar yüklenemedi"
+                                description="Bağlantını kontrol edip sayfayı yenile."
+                                className={styles.emptyState}
+                            />
                         ) : paginated.length === 0 ? (
                             <MobileState
                                 variant="empty"
-                                title="Kriterlere uyan ilan bulunamadı"
-                                description="Filtreleri genişleterek daha fazla arsayı görebilirsiniz."
+                                title={listings.length === 0 ? 'Henüz yayında ilan yok' : 'Kriterlere uyan ilan bulunamadı'}
+                                description={listings.length === 0 ? 'İlk ilan yayınlandığında burada görünecek.' : 'Filtreleri genişleterek daha fazla arsayı görebilirsin.'}
                                 className={styles.emptyState}
                             />
                         ) : (
                             <>
                                 <p className={styles.countLabel}>
                                     {sorted.length.toLocaleString('tr-TR')} ilan · {selectedCity}
-                                    {demoData !== 'none' && <span className={styles.countDemo}> · örnek veri</span>}
-                                </p>
+                                                </p>
                                 <div className={styles.grid}>
                                     {paginated.map(listing => (
                                         <ListingCard

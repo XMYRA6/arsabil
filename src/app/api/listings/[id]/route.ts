@@ -15,6 +15,7 @@ export async function GET(
 ) {
     try {
         const { id } = await context.params
+        const session = await getServerSession(authOptions)
 
         const listing = await prisma.listing.findUnique({
             where: { id },
@@ -26,6 +27,16 @@ export async function GET(
         })
 
         if (!listing) {
+            return NextResponse.json({ message: 'İlan bulunamadı.' }, { status: 404 })
+        }
+
+        // Onay bekleyen / kapalı ilan yalnız sahibine ve yöneticiye görünür;
+        // listeleme ucu da yalnız APPROVED+aktif ilanları döndürüyor.
+        const yayinda = listing.status === 'APPROVED' && listing.isActive
+        const gorebilir = yayinda
+            || session?.user?.id === listing.userId
+            || session?.user?.role === 'ADMIN'
+        if (!gorebilir) {
             return NextResponse.json({ message: 'İlan bulunamadı.' }, { status: 404 })
         }
 

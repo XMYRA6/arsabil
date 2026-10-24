@@ -28,6 +28,7 @@ describe('marketplace/page — filtre/harita senkronu', () => {
     beforeEach(() => {
         lastMapViewListings = []
         global.fetch = jest.fn().mockResolvedValue({
+            ok: true,
             json: () => Promise.resolve([
                 { id: '1', title: 'Kalır', type: 'KAT_KARSILIGI', city: 'İstanbul', district: 'Beşiktaş', landSizeSqm: 500, zoning: 'KONUT', createdAt: '2026-01-01' },
                 { id: '2', title: 'Filtrelenir', type: 'SALE', city: 'İstanbul', district: 'Kadıköy', landSizeSqm: 500, zoning: 'KONUT', createdAt: '2026-01-01' },
