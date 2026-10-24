@@ -410,6 +410,9 @@ function ParticlesCanvas({
   return <canvas ref={canvasRef} data-layer="particles" className={styles.particles} />
 }
 
+/** Poster mobilde tam genişlik, masaüstünde ~680px sütun; `sizes` olmadan tarayıcı 100vw varsayıp hep 1600'ü seçiyordu. */
+const POSTER_SIZES = '(max-width: 860px) 100vw, 680px'
+
 export function DioramaStage({
   scene,
   weather,
@@ -478,8 +481,9 @@ export function DioramaStage({
         <div className={styles.pic} style={{ aspectRatio: String(resolved.aspect) }}>
           <img
             className={styles.poster}
-            src={resolved.src1600}
+            src={resolved.src800}
             srcSet={`${resolved.src800} 800w, ${resolved.src1600} 1600w`}
+            sizes={POSTER_SIZES}
             alt={cur.alt}
           />
 
@@ -490,7 +494,8 @@ export function DioramaStage({
               const [cx, cy] = t.c
               const [rx, ry] = t.r
               const mask = `radial-gradient(ellipse ${rx * 100}% ${ry * 100}% at ${cx * 100}% ${cy * 100}%, #000 58%, transparent 100%)`
-              const bg = variantSrc ?? resolved.src1600
+              // Ağaç kopyası 1x ekranda 800, 2x+ ekranda 1600 indirir (poster ile aynı mantık).
+              const bg = variantSrc ? `url(${variantSrc})` : `image-set(url(${resolved.src800}) 1x, url(${resolved.src1600}) 2x)`
               return (
                 <div
                   key={i}
@@ -500,7 +505,7 @@ export function DioramaStage({
                     transformOrigin: `${t.b[0] * 100}% ${t.b[1] * 100}%`,
                     WebkitMaskImage: mask,
                     maskImage: mask,
-                    backgroundImage: `url(${bg})`,
+                    backgroundImage: bg,
                     '--a': t.a,
                     '--w': w,
                     '--spd': spd,
@@ -515,8 +520,9 @@ export function DioramaStage({
               data-layer="cloud"
               className={styles.cloud}
               style={{
-                WebkitMaskImage: `url(${resolved.src1600})`,
-                maskImage: `url(${resolved.src1600})`,
+                // Bulut maskesi yalnız silüet; 800px yeterli (mask-size: 100% 100%).
+                WebkitMaskImage: `url(${resolved.src800})`,
+                maskImage: `url(${resolved.src800})`,
               }}
             >
               <i className={styles.cloudInner} />
@@ -580,7 +586,7 @@ export function DioramaStage({
 
           {ghost && (
             <div data-layer="ghost" className={styles.ghost} aria-hidden="true">
-              <img className={styles.poster} src={ghost.src1600} srcSet={`${ghost.src800} 800w, ${ghost.src1600} 1600w`} alt="" />
+              <img className={styles.poster} src={ghost.src800} srcSet={`${ghost.src800} 800w, ${ghost.src1600} 1600w`} sizes={POSTER_SIZES} alt="" />
               {ghost.weatherSrc && <img className={styles.weatherVariant} data-on="" src={ghost.weatherSrc} alt="" />}
             </div>
           )}

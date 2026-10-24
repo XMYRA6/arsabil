@@ -23,13 +23,13 @@
               "file": "arsa_agacli_duz_gece-800.webp",
               "width": 800,
               "height": 569,
-              "bytes": 87374
+              "bytes": 53012
             },
             "1600": {
               "file": "arsa_agacli_duz_gece-1600.webp",
               "width": 1600,
               "height": 1137,
-              "bytes": 330576
+              "bytes": 189420
             }
           }
         },
@@ -44,13 +44,13 @@
               "file": "arsa_agacli_duz_gunduz-800.webp",
               "width": 800,
               "height": 566,
-              "bytes": 109788
+              "bytes": 71536
             },
             "1600": {
               "file": "arsa_agacli_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1133,
-              "bytes": 409858
+              "bytes": 274428
             }
           }
         },
@@ -65,13 +65,13 @@
               "file": "arsa_agacli_yamac2_gece-800.webp",
               "width": 800,
               "height": 511,
-              "bytes": 85160
+              "bytes": 51092
             },
             "1600": {
               "file": "arsa_agacli_yamac2_gece-1600.webp",
               "width": 1600,
               "height": 1021,
-              "bytes": 321734
+              "bytes": 192358
             }
           }
         },
@@ -86,13 +86,13 @@
               "file": "arsa_agacli_yamac2_gunduz-800.webp",
               "width": 800,
               "height": 512,
-              "bytes": 97682
+              "bytes": 62884
             },
             "1600": {
               "file": "arsa_agacli_yamac2_gunduz-1600.webp",
               "width": 1600,
               "height": 1025,
-              "bytes": 374374
+              "bytes": 252636
             }
           }
         },
@@ -107,13 +107,13 @@
               "file": "arsa_agacli_yamac_gece-800.webp",
               "width": 800,
               "height": 560,
-              "bytes": 92204
+              "bytes": 55932
             },
             "1600": {
               "file": "arsa_agacli_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1120,
-              "bytes": 346816
+              "bytes": 206020
             }
           }
         },
@@ -128,13 +128,13 @@
               "file": "arsa_agacli_yamac_gunduz-800.webp",
               "width": 800,
               "height": 563,
-              "bytes": 110174
+              "bytes": 70926
             },
             "1600": {
               "file": "arsa_agacli_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1127,
-              "bytes": 408438
+              "bytes": 268226
             }
           }
         },
@@ -149,13 +149,13 @@
               "file": "arsa_agacsiz_duz_gece-800.webp",
               "width": 800,
               "height": 528,
-              "bytes": 73712
+              "bytes": 43048
             },
             "1600": {
               "file": "arsa_agacsiz_duz_gece-1600.webp",
               "width": 1600,
               "height": 1056,
-              "bytes": 283946
+              "bytes": 167516
             }
           }
         },
@@ -170,13 +170,13 @@
               "file": "arsa_agacsiz_duz_gunduz-800.webp",
               "width": 800,
               "height": 525,
-              "bytes": 94452
+              "bytes": 61260
             },
             "1600": {
               "file": "arsa_agacsiz_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1050,
-              "bytes": 364148
+              "bytes": 241288
             }
           }
         },
@@ -191,13 +191,13 @@
               "file": "arsa_agacsiz_yamac_gece-800.webp",
               "width": 800,
               "height": 578,
-              "bytes": 82394
+              "bytes": 51696
             },
             "1600": {
               "file": "arsa_agacsiz_yamac_gece-1600.webp",
               "width": 1031,
               "height": 745,
-              "bytes": 136014
+              "bytes": 87072
             }
           }
         },
@@ -212,13 +212,13 @@
               "file": "arsa_agacsiz_yamac_gunduz-800.webp",
               "width": 800,
               "height": 571,
-              "bytes": 96706
+              "bytes": 62322
             },
             "1600": {
               "file": "arsa_agacsiz_yamac_gunduz-1600.webp",
               "width": 1029,
               "height": 735,
-              "bytes": 158640
+              "bytes": 103670
             }
           }
         }
@@ -243,13 +243,13 @@
               "file": "bag_asma_duz_gece-800.webp",
               "width": 800,
               "height": 455,
-              "bytes": 86986
+              "bytes": 54730
             },
             "1600": {
               "file": "bag_asma_duz_gece-1600.webp",
               "width": 1600,
               "height": 909,
-              "bytes": 321318
+              "bytes": 192694
             }
           }
         },
@@ -264,13 +264,13 @@
               "file": "bag_asma_duz_gunduz-800.webp",
               "width": 800,
               "height": 432,
-              "bytes": 114926
+              "bytes": 77660
             },
             "1600": {
               "file": "bag_asma_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 864,
-              "bytes": 413194
+              "bytes": 278124
             }
           }
         },
@@ -285,13 +285,13 @@
               "file": "bag_asma_yamac2_gece-800.webp",
               "width": 800,
               "height": 433,
-              "bytes": 76800
+              "bytes": 48448
             },
             "1600": {
               "file": "bag_asma_yamac2_gece-1600.webp",
               "width": 1600,
               "height": 867,
-              "bytes": 278834
+              "bytes": 169110
             }
           }
         },
@@ -306,13 +306,13 @@
               "file": "bag_asma_yamac2_gunduz-800.webp",
               "width": 800,
               "height": 431,
-              "bytes": 96868
+              "bytes": 65808
             },
             "1600": {
               "file": "bag_asma_yamac2_gunduz-1600.webp",
               "width": 1600,
               "height": 861,
-              "bytes": 339796
+              "bytes": 229486
             }
           }
         },
@@ -327,13 +327,13 @@
               "file": "bag_asma_yamac_gece-800.webp",
               "width": 800,
               "height": 420,
-              "bytes": 86330
+              "bytes": 54050
             },
             "1600": {
               "file": "bag_asma_yamac_gece-1600.webp",
               "width": 1600,
               "height": 841,
-              "bytes": 325196
+              "bytes": 205220
             }
           }
         },
@@ -348,13 +348,13 @@
               "file": "bag_asma_yamac_gunduz-800.webp",
               "width": 800,
               "height": 419,
-              "bytes": 102726
+              "bytes": 69594
             },
             "1600": {
               "file": "bag_asma_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 839,
-              "bytes": 371278
+              "bytes": 251034
             }
           }
         },
@@ -369,13 +369,13 @@
               "file": "bag_findik_duz_gece-800.webp",
               "width": 800,
               "height": 515,
-              "bytes": 85546
+              "bytes": 52114
             },
             "1600": {
               "file": "bag_findik_duz_gece-1600.webp",
               "width": 1600,
               "height": 1030,
-              "bytes": 314206
+              "bytes": 190576
             }
           }
         },
@@ -390,13 +390,13 @@
               "file": "bag_findik_duz_gunduz-800.webp",
               "width": 800,
               "height": 515,
-              "bytes": 110244
+              "bytes": 73582
             },
             "1600": {
               "file": "bag_findik_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1031,
-              "bytes": 386276
+              "bytes": 254452
             }
           }
         },
@@ -411,13 +411,13 @@
               "file": "bag_findik_yamac_gece-800.webp",
               "width": 800,
               "height": 515,
-              "bytes": 84100
+              "bytes": 52004
             },
             "1600": {
               "file": "bag_findik_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1030,
-              "bytes": 316096
+              "bytes": 186528
             }
           }
         },
@@ -432,13 +432,13 @@
               "file": "bag_findik_yamac_gunduz-800.webp",
               "width": 800,
               "height": 516,
-              "bytes": 109702
+              "bytes": 74274
             },
             "1600": {
               "file": "bag_findik_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1031,
-              "bytes": 382782
+              "bytes": 251718
             }
           }
         },
@@ -453,13 +453,13 @@
               "file": "bag_zeytin_duz_gece-800.webp",
               "width": 800,
               "height": 434,
-              "bytes": 78698
+              "bytes": 49288
             },
             "1600": {
               "file": "bag_zeytin_duz_gece-1600.webp",
               "width": 1600,
               "height": 867,
-              "bytes": 303596
+              "bytes": 191048
             }
           }
         },
@@ -474,13 +474,13 @@
               "file": "bag_zeytin_duz_gunduz-800.webp",
               "width": 800,
               "height": 431,
-              "bytes": 95812
+              "bytes": 63898
             },
             "1600": {
               "file": "bag_zeytin_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 863,
-              "bytes": 344232
+              "bytes": 230352
             }
           }
         },
@@ -495,13 +495,13 @@
               "file": "bag_zeytin_yamac_gece-800.webp",
               "width": 800,
               "height": 443,
-              "bytes": 77936
+              "bytes": 49250
             },
             "1600": {
               "file": "bag_zeytin_yamac_gece-1600.webp",
               "width": 1269,
               "height": 703,
-              "bytes": 186064
+              "bytes": 117798
             }
           }
         },
@@ -516,13 +516,13 @@
               "file": "bag_zeytin_yamac_gunduz-800.webp",
               "width": 800,
               "height": 438,
-              "bytes": 94206
+              "bytes": 65426
             },
             "1600": {
               "file": "bag_zeytin_yamac_gunduz-1600.webp",
               "width": 1268,
               "height": 695,
-              "bytes": 234308
+              "bytes": 166860
             }
           }
         }
@@ -546,13 +546,13 @@
               "file": "kat_bitmis_duz_gece-800.webp",
               "width": 800,
               "height": 645,
-              "bytes": 88944
+              "bytes": 54728
             },
             "1600": {
               "file": "kat_bitmis_duz_gece-1600.webp",
               "width": 1600,
               "height": 1290,
-              "bytes": 296262
+              "bytes": 171862
             }
           }
         },
@@ -567,13 +567,13 @@
               "file": "kat_bitmis_duz_gunduz-800.webp",
               "width": 800,
               "height": 638,
-              "bytes": 106650
+              "bytes": 70278
             },
             "1600": {
               "file": "kat_bitmis_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1275,
-              "bytes": 356244
+              "bytes": 226094
             }
           }
         },
@@ -588,13 +588,13 @@
               "file": "kat_insaat_duz_gece-800.webp",
               "width": 800,
               "height": 675,
-              "bytes": 94178
+              "bytes": 57172
             },
             "1600": {
               "file": "kat_insaat_duz_gece-1600.webp",
               "width": 1600,
               "height": 1351,
-              "bytes": 319114
+              "bytes": 186106
             }
           }
         },
@@ -609,13 +609,13 @@
               "file": "kat_insaat_duz_gunduz-800.webp",
               "width": 800,
               "height": 664,
-              "bytes": 112886
+              "bytes": 70952
             },
             "1600": {
               "file": "kat_insaat_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1328,
-              "bytes": 374890
+              "bytes": 231560
             }
           }
         }
@@ -640,13 +640,13 @@
               "file": "tarla_aycicegi_duz_gece-800.webp",
               "width": 800,
               "height": 518,
-              "bytes": 107608
+              "bytes": 68346
             },
             "1600": {
               "file": "tarla_aycicegi_duz_gece-1600.webp",
               "width": 1600,
               "height": 1035,
-              "bytes": 378644
+              "bytes": 227472
             }
           }
         },
@@ -661,13 +661,13 @@
               "file": "tarla_aycicegi_duz_gunduz-800.webp",
               "width": 800,
               "height": 505,
-              "bytes": 116498
+              "bytes": 79766
             },
             "1600": {
               "file": "tarla_aycicegi_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1010,
-              "bytes": 405576
+              "bytes": 269716
             }
           }
         },
@@ -682,13 +682,13 @@
               "file": "tarla_aycicegi_yamac_gece-800.webp",
               "width": 800,
               "height": 506,
-              "bytes": 93002
+              "bytes": 58542
             },
             "1600": {
               "file": "tarla_aycicegi_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1011,
-              "bytes": 321398
+              "bytes": 196358
             }
           }
         },
@@ -703,13 +703,13 @@
               "file": "tarla_aycicegi_yamac_gunduz-800.webp",
               "width": 800,
               "height": 505,
-              "bytes": 114530
+              "bytes": 79026
             },
             "1600": {
               "file": "tarla_aycicegi_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1011,
-              "bytes": 390162
+              "bytes": 257150
             }
           }
         },
@@ -724,13 +724,13 @@
               "file": "tarla_bugday_duz_gece-800.webp",
               "width": 800,
               "height": 512,
-              "bytes": 84968
+              "bytes": 51698
             },
             "1600": {
               "file": "tarla_bugday_duz_gece-1600.webp",
               "width": 1600,
               "height": 1025,
-              "bytes": 305712
+              "bytes": 185854
             }
           }
         },
@@ -745,13 +745,13 @@
               "file": "tarla_bugday_duz_gunduz-800.webp",
               "width": 800,
               "height": 491,
-              "bytes": 109656
+              "bytes": 74002
             },
             "1600": {
               "file": "tarla_bugday_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 982,
-              "bytes": 398888
+              "bytes": 266490
             }
           }
         },
@@ -766,13 +766,13 @@
               "file": "tarla_bugday_yamac_gece-800.webp",
               "width": 800,
               "height": 525,
-              "bytes": 91744
+              "bytes": 56800
             },
             "1600": {
               "file": "tarla_bugday_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1051,
-              "bytes": 336396
+              "bytes": 207110
             }
           }
         },
@@ -787,13 +787,13 @@
               "file": "tarla_bugday_yamac_gunduz-800.webp",
               "width": 800,
               "height": 547,
-              "bytes": 110762
+              "bytes": 74238
             },
             "1600": {
               "file": "tarla_bugday_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1093,
-              "bytes": 392492
+              "bytes": 258484
             }
           }
         },
@@ -808,13 +808,13 @@
               "file": "tarla_surulu_duz_gece-800.webp",
               "width": 800,
               "height": 522,
-              "bytes": 91212
+              "bytes": 54488
             },
             "1600": {
               "file": "tarla_surulu_duz_gece-1600.webp",
               "width": 1600,
               "height": 1044,
-              "bytes": 343784
+              "bytes": 209224
             }
           }
         },
@@ -829,13 +829,13 @@
               "file": "tarla_surulu_duz_gunduz-800.webp",
               "width": 800,
               "height": 541,
-              "bytes": 104406
+              "bytes": 68358
             },
             "1600": {
               "file": "tarla_surulu_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1082,
-              "bytes": 361286
+              "bytes": 233986
             }
           }
         },
@@ -850,13 +850,13 @@
               "file": "tarla_surulu_yamac_gece-800.webp",
               "width": 800,
               "height": 529,
-              "bytes": 72692
+              "bytes": 42460
             },
             "1600": {
               "file": "tarla_surulu_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1059,
-              "bytes": 250998
+              "bytes": 145352
             }
           }
         },
@@ -871,13 +871,13 @@
               "file": "tarla_surulu_yamac_gunduz-800.webp",
               "width": 800,
               "height": 526,
-              "bytes": 100890
+              "bytes": 66476
             },
             "1600": {
               "file": "tarla_surulu_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1053,
-              "bytes": 352284
+              "bytes": 229050
             }
           }
         }
@@ -900,13 +900,13 @@
               "file": "ticari_ofis_duz_gece-800.webp",
               "width": 800,
               "height": 520,
-              "bytes": 79046
+              "bytes": 50986
             },
             "1600": {
               "file": "ticari_ofis_duz_gece-1600.webp",
               "width": 1600,
               "height": 1041,
-              "bytes": 265832
+              "bytes": 158488
             }
           }
         },
@@ -921,13 +921,13 @@
               "file": "ticari_ofis_duz_gunduz-800.webp",
               "width": 800,
               "height": 515,
-              "bytes": 82412
+              "bytes": 53668
             },
             "1600": {
               "file": "ticari_ofis_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1031,
-              "bytes": 273888
+              "bytes": 171642
             }
           }
         }
@@ -953,13 +953,13 @@
               "file": "villa_modern_duz_gece-800.webp",
               "width": 800,
               "height": 521,
-              "bytes": 75082
+              "bytes": 45354
             },
             "1600": {
               "file": "villa_modern_duz_gece-1600.webp",
               "width": 1600,
               "height": 1042,
-              "bytes": 285420
+              "bytes": 163522
             }
           }
         },
@@ -974,13 +974,13 @@
               "file": "villa_modern_duz_gunduz-800.webp",
               "width": 800,
               "height": 502,
-              "bytes": 83586
+              "bytes": 52850
             },
             "1600": {
               "file": "villa_modern_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1003,
-              "bytes": 298600
+              "bytes": 186984
             }
           }
         },
@@ -995,13 +995,13 @@
               "file": "villa_modern_yamac_gece-800.webp",
               "width": 800,
               "height": 522,
-              "bytes": 76112
+              "bytes": 45346
             },
             "1600": {
               "file": "villa_modern_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1044,
-              "bytes": 286400
+              "bytes": 163544
             }
           }
         },
@@ -1016,13 +1016,13 @@
               "file": "villa_modern_yamac_gunduz-800.webp",
               "width": 800,
               "height": 522,
-              "bytes": 84822
+              "bytes": 53040
             },
             "1600": {
               "file": "villa_modern_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1043,
-              "bytes": 318962
+              "bytes": 197438
             }
           }
         },
@@ -1037,13 +1037,13 @@
               "file": "villa_tas1_duz_gece-800.webp",
               "width": 800,
               "height": 508,
-              "bytes": 87620
+              "bytes": 56044
             },
             "1600": {
               "file": "villa_tas1_duz_gece-1600.webp",
               "width": 1600,
               "height": 1015,
-              "bytes": 329524
+              "bytes": 200514
             }
           }
         },
@@ -1058,13 +1058,13 @@
               "file": "villa_tas1_duz_gunduz-800.webp",
               "width": 800,
               "height": 507,
-              "bytes": 94236
+              "bytes": 60958
             },
             "1600": {
               "file": "villa_tas1_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 1013,
-              "bytes": 339390
+              "bytes": 215796
             }
           }
         },
@@ -1079,13 +1079,13 @@
               "file": "villa_tas1_yamac_gece-800.webp",
               "width": 800,
               "height": 513,
-              "bytes": 85662
+              "bytes": 53552
             },
             "1600": {
               "file": "villa_tas1_yamac_gece-1600.webp",
               "width": 1089,
               "height": 699,
-              "bytes": 155410
+              "bytes": 98104
             }
           }
         },
@@ -1100,13 +1100,13 @@
               "file": "villa_tas1_yamac_gunduz-800.webp",
               "width": 800,
               "height": 513,
-              "bytes": 96210
+              "bytes": 65408
             },
             "1600": {
               "file": "villa_tas1_yamac_gunduz-1600.webp",
               "width": 1089,
               "height": 698,
-              "bytes": 182550
+              "bytes": 125828
             }
           }
         },
@@ -1121,13 +1121,13 @@
               "file": "villa_tas2_duz_gece-800.webp",
               "width": 800,
               "height": 424,
-              "bytes": 76220
+              "bytes": 48640
             },
             "1600": {
               "file": "villa_tas2_duz_gece-1600.webp",
               "width": 1600,
               "height": 848,
-              "bytes": 262460
+              "bytes": 162084
             }
           }
         },
@@ -1142,13 +1142,13 @@
               "file": "villa_tas2_duz_gunduz-800.webp",
               "width": 800,
               "height": 416,
-              "bytes": 84302
+              "bytes": 56356
             },
             "1600": {
               "file": "villa_tas2_duz_gunduz-1600.webp",
               "width": 1600,
               "height": 832,
-              "bytes": 295808
+              "bytes": 189278
             }
           }
         },
@@ -1163,13 +1163,13 @@
               "file": "villa_tas2_yamac_gece-800.webp",
               "width": 800,
               "height": 458,
-              "bytes": 77732
+              "bytes": 50670
             },
             "1600": {
               "file": "villa_tas2_yamac_gece-1600.webp",
               "width": 1231,
               "height": 704,
-              "bytes": 176806
+              "bytes": 113668
             }
           }
         },
@@ -1184,13 +1184,13 @@
               "file": "villa_tas2_yamac_gunduz-800.webp",
               "width": 800,
               "height": 447,
-              "bytes": 84792
+              "bytes": 57630
             },
             "1600": {
               "file": "villa_tas2_yamac_gunduz-1600.webp",
               "width": 1227,
               "height": 685,
-              "bytes": 198192
+              "bytes": 138034
             }
           }
         },
@@ -1205,13 +1205,13 @@
               "file": "villa_tas3_yamac_gece-800.webp",
               "width": 800,
               "height": 507,
-              "bytes": 89114
+              "bytes": 56902
             },
             "1600": {
               "file": "villa_tas3_yamac_gece-1600.webp",
               "width": 1600,
               "height": 1014,
-              "bytes": 349804
+              "bytes": 213414
             }
           }
         },
@@ -1226,13 +1226,13 @@
               "file": "villa_tas3_yamac_gunduz-800.webp",
               "width": 800,
               "height": 506,
-              "bytes": 98916
+              "bytes": 65084
             },
             "1600": {
               "file": "villa_tas3_yamac_gunduz-1600.webp",
               "width": 1600,
               "height": 1012,
-              "bytes": 355924
+              "bytes": 236068
             }
           }
         }

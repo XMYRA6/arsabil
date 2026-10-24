@@ -30,7 +30,9 @@ describe('DioramaStage · temel', () => {
     expect(root).toHaveAttribute('data-weather', 'gunesli')
     expect(root).toHaveAttribute('data-motion', 'on')
     const img = screen.getByRole('img', { name: /Villa · Modern/ })
-    expect(img.getAttribute('src')).toBe('/dioramas/villa_modern_duz_gunduz-1600.webp')
+    expect(img.getAttribute('src')).toBe('/dioramas/villa_modern_duz_gunduz-800.webp')
+    expect(img.getAttribute('srcset')).toContain('villa_modern_duz_gunduz-1600.webp 1600w')
+    expect(img.getAttribute('sizes')).toBeTruthy()
   })
   it('className kökte', () => {
     render(<DioramaStage scene={villaGunduz} weather="gunesli" className="ek" />)

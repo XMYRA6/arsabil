@@ -334,7 +334,7 @@ export default function ListingDetailPage() {
                             <SwipeGallery images={listing.photos} alt={listing.title} />
                         ) : diorama ? (
                             // eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP
-                            <img className={styles.diorama} src={diorama.src1600} alt="" />
+                            <img className={styles.diorama} src={diorama.src800} srcSet={`${diorama.src800} 800w, ${diorama.src1600} 1600w`} sizes="(max-width: 860px) 100vw, 760px" alt="" />
                         ) : null}
                         <div className={styles.heroBadges}>
                             <span className={`${styles.pill} ${styles.pillOk}`}>{TYPE_LABEL[listing.type] ?? 'Kat karşılığı'}</span>
