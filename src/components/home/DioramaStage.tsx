@@ -65,6 +65,17 @@ const SURFACE_OPACITY: Record<Weather, number> = {
   karli: 0.3,
 }
 
+const GHOST_MS = 700
+
+interface SceneSnap {
+  id: string
+  src1600: string
+  src800: string
+  aspect: number
+  weatherSrc: string | null
+  alt: string
+}
+
 const RM_QUERY = '(prefers-reduced-motion: reduce)'
 
 function subscribeReduced(cb: () => void) {
@@ -115,14 +126,46 @@ function useVisibilityAndHidden(rootRef: React.RefObject<HTMLDivElement | null>)
   return paused
 }
 
-/** Hava varyantı görseli: bağlandıktan bir kare sonra açılır (opacity geçişi için). */
-function WeatherVariant({ src }: { src: string }) {
-  const [on, setOn] = useState(false)
+const WEATHER_FADE_MS = 900
+
+interface WeatherLayer {
+  src: string
+  on: boolean
+}
+
+/**
+ * Hava varyantı katmanları: yeni varyant önceki üstünde yavaşça açılır, önceki açılma
+ * bitince kaldırılır; varyant kalkarken (yağmur → güneş) katman sönerek çıkar, aniden kaybolmaz.
+ */
+function WeatherLayers({ src }: { src: string | null }) {
+  const [layers, setLayers] = useState<WeatherLayer[]>([])
+
   useEffect(() => {
-    const t = setTimeout(() => setOn(true), 16)
-    return () => clearTimeout(t)
-  }, [])
-  return <img data-layer="weather-variant" className={styles.weatherVariant} src={src} data-on={on ? '' : undefined} alt="" />
+    let kapat: ReturnType<typeof setTimeout> | undefined
+    let ac: ReturnType<typeof setTimeout> | undefined
+    if (src) {
+      setLayers((ls) => (ls.some((l) => l.src === src) ? ls.map((l) => (l.src === src ? { ...l, on: false } : l)) : [...ls, { src, on: false }]))
+      // Bağlandıktan bir kare sonra aç (opacity geçişi için)
+      ac = setTimeout(() => setLayers((ls) => ls.map((l) => (l.src === src ? { ...l, on: true } : l))), 16)
+      // Yeni katman tamamen açılınca eskileri kaldır
+      kapat = setTimeout(() => setLayers((ls) => ls.filter((l) => l.src === src)), WEATHER_FADE_MS + 60)
+    } else {
+      setLayers((ls) => ls.map((l) => ({ ...l, on: false })))
+      kapat = setTimeout(() => setLayers([]), WEATHER_FADE_MS + 60)
+    }
+    return () => {
+      if (ac) clearTimeout(ac)
+      if (kapat) clearTimeout(kapat)
+    }
+  }, [src])
+
+  return (
+    <>
+      {layers.map((l) => (
+        <img key={l.src} data-layer="weather-variant" className={styles.weatherVariant} src={l.src} data-on={l.on ? '' : undefined} alt="" />
+      ))}
+    </>
+  )
 }
 
 interface Splash {
@@ -382,6 +425,32 @@ export function DioramaStage({
 
   const variant = VARIANT_SRC[weather]
   const hasVariant = variant !== '' && fx.weather !== null
+  const variantSrc = hasVariant ? `/dioramas/weather/${resolved.id}-${variant}.webp` : null
+
+  // Tür/varyant/zaman değişince eski sahne "hayalet" olarak üstte sönerek çıkar (sert kesme yok).
+  // Render sırasında state ayarlama: eski sahne ilk boyamada bile görünür kalır.
+  const cur: SceneSnap = {
+    id: resolved.id,
+    src1600: resolved.src1600,
+    src800: resolved.src800,
+    aspect: resolved.aspect,
+    weatherSrc: variantSrc,
+    alt: `${resolved.etiket} · ${resolved.egim === 'yamac' ? 'yamaç' : 'düz'} · ${isNight ? 'gece' : 'gündüz'}`,
+  }
+  const [last, setLast] = useState(cur)
+  const [ghost, setGhost] = useState<SceneSnap | null>(null)
+  if (last.id !== cur.id) {
+    setLast(cur)
+    if (!motionOff) setGhost(last)
+  } else if (last.weatherSrc !== cur.weatherSrc) {
+    setLast(cur)
+  }
+  useEffect(() => {
+    if (!ghost) return
+    const t = setTimeout(() => setGhost(null), GHOST_MS)
+    return () => clearTimeout(t)
+  }, [ghost])
+  const geciyor = ghost !== null
 
   const rootRef = useRef<HTMLDivElement>(null)
   const paused = useVisibilityAndHidden(rootRef)
@@ -389,11 +458,11 @@ export function DioramaStage({
   const w = WEATHER_WEIGHT[weather]
   const spd = WEATHER_SPEED[weather]
 
-  const hasCloud = !isNight
-  const hasGlint = !isNight && (weather === 'gunesli' || weather === 'bulutlu') && fx.water.length > 0
-  const hasLamp = isNight && fx.glow.length > 0
-  const hasCrop = fx.crop !== null && weather !== 'karli'
-  const hasParticles = (weather === 'yagmurlu' || weather === 'karli') && !motionOff
+  const hasCloud = !isNight && !geciyor
+  const hasGlint = !geciyor && !isNight && (weather === 'gunesli' || weather === 'bulutlu') && fx.water.length > 0
+  const hasLamp = !geciyor && isNight && fx.glow.length > 0
+  const hasCrop = !geciyor && fx.crop !== null && weather !== 'karli'
+  const hasParticles = !geciyor && (weather === 'yagmurlu' || weather === 'karli') && !motionOff
 
   return (
     <div
@@ -411,21 +480,17 @@ export function DioramaStage({
             className={styles.poster}
             src={resolved.src1600}
             srcSet={`${resolved.src800} 800w, ${resolved.src1600} 1600w`}
-            alt={`${resolved.etiket} · ${resolved.egim === 'yamac' ? 'yamaç' : 'düz'} · ${isNight ? 'gece' : 'gündüz'}`}
+            alt={cur.alt}
           />
 
-          {hasVariant && (
-            <WeatherVariant key={`${resolved.id}-${variant}`} src={`/dioramas/weather/${resolved.id}-${variant}.webp`} />
-          )}
+          <WeatherLayers key={resolved.id} src={variantSrc} />
 
-          {!motionOff &&
+          {!motionOff && !geciyor &&
             fx.trees.map((t: Tree, i: number) => {
               const [cx, cy] = t.c
               const [rx, ry] = t.r
               const mask = `radial-gradient(ellipse ${rx * 100}% ${ry * 100}% at ${cx * 100}% ${cy * 100}%, #000 58%, transparent 100%)`
-              const bg = hasVariant
-                ? `/dioramas/weather/${resolved.id}-${variant}.webp`
-                : resolved.src1600
+              const bg = variantSrc ?? resolved.src1600
               return (
                 <div
                   key={i}
@@ -511,6 +576,13 @@ export function DioramaStage({
 
           {hasParticles && (
             <ParticlesCanvas weather={weather} fx={fx} paused={paused} isNight={isNight} />
+          )}
+
+          {ghost && (
+            <div data-layer="ghost" className={styles.ghost} aria-hidden="true">
+              <img className={styles.poster} src={ghost.src1600} srcSet={`${ghost.src800} 800w, ${ghost.src1600} 1600w`} alt="" />
+              {ghost.weatherSrc && <img className={styles.weatherVariant} data-on="" src={ghost.weatherSrc} alt="" />}
+            </div>
           )}
         </div>
       </div>

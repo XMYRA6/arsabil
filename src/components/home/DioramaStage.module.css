@@ -15,6 +15,26 @@
   width: 100%;
   max-height: 100%;
   overflow: hidden;
+  /* sahneler arası oran farkı sayfayı zıplatmasın */
+  transition: aspect-ratio 600ms var(--ease-out);
+}
+
+/* Eski sahne: yeni sahnenin üstünde sönerek çıkar */
+.ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  animation: ghostOut 600ms var(--ease-out) forwards;
+}
+
+@keyframes ghostOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .poster,
@@ -202,7 +222,8 @@
   .glint,
   .lamp,
   .wave,
-  .particles {
+  .particles,
+  .ghost {
     transition: none;
     transform: none;
     animation: none;

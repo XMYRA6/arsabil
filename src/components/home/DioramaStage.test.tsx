@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import { DioramaStage } from './DioramaStage'
 import type { SceneValue } from '@/lib/dioramas/scene'
 
@@ -114,5 +114,40 @@ describe('DioramaStage · dayanıklılık', () => {
     expect(layer('particles')).toHaveLength(1)
     rerender(<DioramaStage scene={villaGunduz} weather="gunesli" />)
     expect(layer('particles')).toHaveLength(0)
+  })
+})
+
+describe('DioramaStage · yumuşak geçişler', () => {
+  beforeEach(() => jest.useFakeTimers())
+  afterEach(() => jest.useRealTimers())
+
+  it('sahne değişince eski sahne hayalet olarak kalır, süre dolunca kalkar', () => {
+    const { rerender } = render(<DioramaStage scene={villaGunduz} weather="gunesli" />)
+    expect(layer('ghost')).toHaveLength(0)
+    rerender(<DioramaStage scene={villaGece} weather="gunesli" />)
+    expect(layer('ghost')).toHaveLength(1)
+    // geçiş sırasında efekt katmanları kapalı (eski/yeni sahne oranı farklı olabilir)
+    expect(layer('lamp')).toHaveLength(0)
+    act(() => { jest.advanceTimersByTime(800) })
+    expect(layer('ghost')).toHaveLength(0)
+    expect(layer('lamp').length).toBeGreaterThan(0)
+  })
+
+  it('azaltılmış harekette hayalet katman yok', () => {
+    mockReducedMotion(true)
+    const { rerender } = render(<DioramaStage scene={villaGunduz} weather="gunesli" />)
+    rerender(<DioramaStage scene={villaGece} weather="gunesli" />)
+    expect(layer('ghost')).toHaveLength(0)
+  })
+
+  it('hava varyantı kalkınca katman sönerek çıkar, süre sonunda kaldırılır', () => {
+    const { rerender } = render(<DioramaStage scene={villaGunduz} weather="yagmurlu" />)
+    act(() => { jest.advanceTimersByTime(100) })
+    expect(layer('weather-variant')).toHaveLength(1)
+    rerender(<DioramaStage scene={villaGunduz} weather="gunesli" />)
+    expect(layer('weather-variant')).toHaveLength(1)
+    expect(layer('weather-variant')[0]).not.toHaveAttribute('data-on')
+    act(() => { jest.advanceTimersByTime(1100) })
+    expect(layer('weather-variant')).toHaveLength(0)
   })
 })
