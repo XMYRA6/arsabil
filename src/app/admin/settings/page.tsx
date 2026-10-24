@@ -380,7 +380,7 @@ export default function AdminSettings() {
         <>
             <div className={styles.pageHeader}>
                 <h1>Motor Ayarları</h1>
-                <p>Hesaplama motorunun global katsayılarını yönetin</p>
+                <p>Hesaplama motorunun global katsayılarını yönet</p>
             </div>
 
             {message && (

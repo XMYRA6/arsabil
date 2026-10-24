@@ -23,10 +23,10 @@ export const authOptions: NextAuthOptions = {
                 const ip = clientIpFromHeaders(headers["x-forwarded-for"], headers["x-real-ip"]);
                 const rl = checkRateLimit(`login:${ip}`, RATE_LIMITS.LOGIN);
                 if (!rl.ok) {
-                    throw new Error("Çok fazla giriş denemesi. Lütfen 1 dakika sonra tekrar deneyin.");
+                    throw new Error("Çok fazla giriş denemesi. Lütfen 1 dakika sonra tekrar dene.");
                 }
                 if (!credentials?.email || !credentials?.password) {
-                    throw new Error("Lütfen tüm alanları doldurun.");
+                    throw new Error("Lütfen tüm alanları doldur.");
                 }
 
                 const user = await prisma.user.findUnique({
@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 if (user.isBanned) {
-                    throw new Error("Hesabınız askıya alınmıştır.");
+                    throw new Error("Hesabın askıya alınmıştır.");
                 }
 
                 return {

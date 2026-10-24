@@ -28,7 +28,7 @@ export function WizardStep1Location({ data, onChange }: Props) {
             value={data.city}
             onChange={e => onChange({ city: e.target.value, district: '' })}
           >
-            <option value="">Seçiniz</option>
+            <option value="">Seç</option>
             {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>

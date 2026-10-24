@@ -71,7 +71,7 @@ export default function DashboardPage() {
   }
 
   if (error || !data) {
-    return <div className={styles.container}><div className={styles.loading}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</div></div>
+    return <div className={styles.container}><div className={styles.loading}>Veriler yüklenemedi. Lütfen sayfayı yenile.</div></div>
   }
 
   const { stats, recentReports, recentMessages, recentOffers } = data
@@ -95,7 +95,7 @@ export default function DashboardPage() {
   return (
     <div className={styles.container}>
       <header>
-        <h1 className={styles.pageTitle}>Dashboard</h1>
+        <h1 className={styles.pageTitle}>Genel bakış</h1>
         <p className={styles.welcome}>Hoş geldin, {ilkAd}</p>
       </header>
 

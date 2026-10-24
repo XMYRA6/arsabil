@@ -223,10 +223,10 @@ describe('StudioPreview', () => {
       await user.click(screen.getByRole('button', { name: /3D önizlemeyi göster/i }));
       await screen.findByTestId('studio-scene');
 
-      expect(screen.getByText(/etkileşimi başlatmak için tıklayın/i)).toBeInTheDocument();
+      expect(screen.getByText(/etkileşimi başlatmak için tıkla/i)).toBeInTheDocument();
 
-      await user.click(screen.getByText(/etkileşimi başlatmak için tıklayın/i));
-      expect(screen.queryByText(/etkileşimi başlatmak için tıklayın/i)).not.toBeInTheDocument();
+      await user.click(screen.getByText(/etkileşimi başlatmak için tıkla/i));
+      expect(screen.queryByText(/etkileşimi başlatmak için tıkla/i)).not.toBeInTheDocument();
     });
 
     it('kapatinca scene sokulur (GPU kaynagini birakir)', async () => {
@@ -265,7 +265,7 @@ describe('StudioPreview', () => {
       expect(toggleButton).toHaveFocus();
 
       await user.click(toggleButton);
-      const activateOverlay = await screen.findByRole('button', { name: /etkileşimi başlatmak için tıklayın/i });
+      const activateOverlay = await screen.findByRole('button', { name: /etkileşimi başlatmak için tıkla/i });
       expect(activateOverlay).not.toHaveAttribute('tabindex', '-1');
       expect(activateOverlay).toBeEnabled();
     });

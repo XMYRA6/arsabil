@@ -42,7 +42,7 @@ export default function AdminOffers() {
         <>
             <div className={styles.pageHeader}>
                 <h1>Teklifler</h1>
-                <p>Platformdaki tüm arsa payı tekliflerini izleyin</p>
+                <p>Platformdaki tüm arsa payı tekliflerini izle</p>
             </div>
 
             <div className={styles.statsGrid}>

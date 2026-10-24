@@ -32,7 +32,7 @@ interface Props {
     hint?: string
     /**
      * `not_found` / `unavailable` sonuç kartlarının metni. Varsayılanlar ilan
-     * sihirbazına ("İlanınız...") özgüdür; /hesapla gibi ilan üretmeyen
+     * sihirbazına ("İlanın...") özgüdür; /hesapla gibi ilan üretmeyen
      * bağlamlar kendi metnini geçer. Verilmezse mevcut sihirbaz çıktısı
      * bayt bayt aynı kalır.
      */
@@ -43,15 +43,15 @@ interface Props {
 }
 
 const DEFAULT_HINT =
-    'Arsanızın bulunduğu noktaya haritadan tıklayın. Konum, ilanın haritada doğru görünmesi için zorunludur.'
+    'Arsanın bulunduğu noktaya haritadan tıkla. Konum, ilanın haritada doğru görünmesi için zorunludur.'
 
 const DEFAULT_NOT_FOUND_TEXT =
-    'Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın — yol, dere veya kadastro dışı ' +
-    'bir noktaya denk gelmiş olabilir. Doğrulamadan da devam edebilirsiniz.'
+    'Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşı — yol, dere veya kadastro dışı ' +
+    'bir noktaya denk gelmiş olabilir. Doğrulamadan da devam edebilirsin.'
 
 const DEFAULT_UNAVAILABLE_TEXT =
-    'TKGM servisi şu an yanıt vermiyor. İlanınız doğrulanmadan yayınlanabilir, daha sonra tekrar ' +
-    'deneyebilirsiniz.'
+    'TKGM servisi şu an yanıt vermiyor. İlanın doğrulanmadan yayınlanabilir, daha sonra tekrar ' +
+    'deneyebilirsin.'
 
 const TURKEY_CENTER: [number, number] = [39.0, 35.0]
 
@@ -243,7 +243,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
 
     const handleUseMyLocation = () => {
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
-            setGeoError('Tarayıcınız konum tespitini desteklemiyor. Haritadan elle işaretleyebilirsiniz.')
+            setGeoError('Tarayıcın konum tespitini desteklemiyor. Haritadan elle işaretleyebilirsin.')
             return
         }
         setGeoError(null)
@@ -255,7 +255,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
             },
             () => {
                 setLocating(false)
-                setGeoError('Konum izni alınamadı. Haritadan elle işaretleyebilirsiniz.')
+                setGeoError('Konum izni alınamadı. Haritadan elle işaretleyebilirsin.')
             },
             { enableHighAccuracy: true, timeout: 10000 },
         )
@@ -343,7 +343,7 @@ export const ParcelPicker = forwardRef<ParcelPickerHandle, Props>(function Parce
 
             {value.status === 'unauthorized' && (
                 <div className={styles.warnCard}>
-                    Parsel doğrulama için giriş yapmanız gerekiyor. Giriş yaptıktan sonra tekrar deneyebilirsiniz.
+                    Parsel doğrulama için giriş yapman gerekiyor. Giriş yaptıktan sonra tekrar deneyebilirsin.
                 </div>
             )}
 

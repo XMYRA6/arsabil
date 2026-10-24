@@ -63,13 +63,13 @@ describe('AreaSection', () => {
 
     it('isAaEnabled kapaliyken alan input satırı görünmez', () => {
         render(<AreaSection parcelContext={null} arsaAlani={500} onArsaAlani={jest.fn()} isAaEnabled={false} onIsAaEnabled={jest.fn()} />)
-        expect(screen.queryByPlaceholderText('Alanı girin')).toBeNull()
+        expect(screen.queryByPlaceholderText('Alanı gir')).toBeNull()
     })
 
     it('isAaEnabled açıkken alan input satırı görünür ve anahtar çalışır', async () => {
         const onIsAaEnabled = jest.fn()
         render(<AreaSection parcelContext={null} arsaAlani={500} onArsaAlani={jest.fn()} isAaEnabled={true} onIsAaEnabled={onIsAaEnabled} />)
-        expect(screen.getByPlaceholderText('Alanı girin')).toBeInTheDocument()
+        expect(screen.getByPlaceholderText('Alanı gir')).toBeInTheDocument()
         await userEvent.click(screen.getByRole('checkbox', { name: 'Arsa alanını hesaba kat' }))
         expect(onIsAaEnabled).toHaveBeenCalledWith(false)
     })

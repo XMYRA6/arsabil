@@ -26,7 +26,7 @@ export default function VerifyEmailPage({ params }: { params: Promise<{ token: s
             .catch(() => {
                 if (!cancelled) {
                     setStatus("error");
-                    setMessage("Bağlantı hatası. Lütfen tekrar deneyin.");
+                    setMessage("Bağlantı hatası. Lütfen tekrar dene.");
                 }
             });
         return () => { cancelled = true; };

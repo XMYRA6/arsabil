@@ -72,14 +72,14 @@ export default function SettingsPage() {
             <header className={styles.headRow}>
                 <div className={styles.head}>
                     <h1>Bildirim tercihleri</h1>
-                    <p>E-posta akışını sakin, seçilebilir ve hızlı güncellenebilir tut.</p>
+                    <p>Hangi bildirimleri e-posta ile alacağını seç ve kaydet.</p>
                 </div>
                 <button type="button" onClick={save} disabled={saving} className={styles.btn}>
                     {saving ? 'Kaydediliyor...' : 'Kaydet'}
                 </button>
             </header>
 
-            {error && <div className={styles.alert} role="alert">Ayarlar kaydedilemedi. Lütfen tekrar deneyin.</div>}
+            {error && <div className={styles.alert} role="alert">Ayarlar kaydedilemedi. Lütfen tekrar dene.</div>}
             {saved && <div className={styles.success} role="status">Ayarlar kaydedildi.</div>}
 
             <section className={`${styles.card} ${styles.toggleCard}`}>

@@ -91,7 +91,7 @@ export default function ReportsPage() {
             <main className={styles.reportsShell}>
                 <section className={styles.stateCard} role="alert">
                     <span className={styles.stateKicker}>Bağlantı</span>
-                    <p>Raporlar yüklenemedi. Lütfen sayfayı yenileyin.</p>
+                    <p>Raporlar yüklenemedi. Lütfen sayfayı yenile.</p>
                 </section>
             </main>
         );

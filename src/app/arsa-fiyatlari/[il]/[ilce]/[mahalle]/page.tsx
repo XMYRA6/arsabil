@@ -99,7 +99,7 @@ export default async function MahallePage({ params }: { params: Promise<Params> 
 
       <TrendKarti
         trend={card.priceTrend}
-        ince="Bu mahallede trend verisi henüz sınırlı — yaklaşık bir gösterge olarak değerlendirin."
+        ince="Bu mahallede trend verisi henüz sınırlı — yaklaşık bir gösterge olarak değerlendir."
       />
 
       {card.demographics?.summary && (

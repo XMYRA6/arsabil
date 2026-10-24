@@ -128,7 +128,7 @@ export function LandownerOfferPanel({
         <span className={styles.degerlemeBaslik}>Değerleme varsayımı</span>
         {missingValuation && (
           <p className={styles.degerlemeNot}>
-            Nakit dengeleme için değerleme varsayımı girilmedi; aşağıdan daire değerini girin.
+            Nakit dengeleme için değerleme varsayımı girilmedi; aşağıdan daire değerini gir.
           </p>
         )}
         <div className={styles.degerlemeGirdiler}>

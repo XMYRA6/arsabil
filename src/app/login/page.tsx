@@ -76,13 +76,13 @@ export default function LoginPage() {
                 body: JSON.stringify({ email }),
             });
             const data = await res.json();
-            setError(data.message || "Şifre sıfırlama talimatları e-posta adresinize gönderildi.");
+            setError(data.message || "Şifre sıfırlama talimatları e-posta adresine gönderildi.");
             setTimeout(() => {
                 setError("");
                 setView("login");
             }, 4000);
         } catch {
-            setError("Bağlantı hatası. Lütfen tekrar deneyin.");
+            setError("Bağlantı hatası. Lütfen tekrar dene.");
         } finally {
             setLoading(false);
         }
@@ -98,8 +98,8 @@ export default function LoginPage() {
         <AuthShell>
             {view === "login" && (
                 <>
-                    <h1 className={styles.title}>Tekrar hoş geldiniz</h1>
-                    <p className={styles.subtitle}>Lütfen hesabınıza giriş yapın.</p>
+                    <h1 className={styles.title}>Tekrar hoş geldin</h1>
+                    <p className={styles.subtitle}>Lütfen hesabına giriş yap.</p>
 
                     <form onSubmit={handleLogin} className={styles.form}>
                         {banner}

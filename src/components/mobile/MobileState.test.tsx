@@ -28,12 +28,12 @@ describe('MobileState', () => {
 
         expect(screen.getByRole('alert')).toHaveAttribute('aria-live', 'assertive')
         expect(screen.getByRole('heading', { name: 'Bir sorun oluştu' })).toBeInTheDocument()
-        expect(screen.getByText('Lütfen tekrar deneyin.')).toBeInTheDocument()
+        expect(screen.getByText('Lütfen tekrar dene.')).toBeInTheDocument()
 
         rerender(<MobileState variant="offline" />)
         expect(screen.getByRole('alert')).toHaveAttribute('aria-live', 'assertive')
-        expect(screen.getByRole('heading', { name: 'Çevrimdışısınız' })).toBeInTheDocument()
-        expect(screen.getByText('Bağlantı geri geldiğinde kaldığınız yerden devam edin.')).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Çevrimdışısın' })).toBeInTheDocument()
+        expect(screen.getByText('Bağlantı geri geldiğinde kaldığın yerden devam et.')).toBeInTheDocument()
     })
 
     it('ozel baslik, aciklama, aksiyon ve className alir', () => {
@@ -42,14 +42,14 @@ describe('MobileState', () => {
             <MobileState
                 variant="error"
                 title="Kaydedilemedi"
-                description="Bağlantınızı kontrol edin."
+                description="Bağlantını kontrol et."
                 action={action}
                 className="customState"
             />,
         )
 
         expect(screen.getByRole('heading', { name: 'Kaydedilemedi' })).toBeInTheDocument()
-        expect(screen.getByText('Bağlantınızı kontrol edin.')).toBeInTheDocument()
+        expect(screen.getByText('Bağlantını kontrol et.')).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Tekrar dene' })).toBeInTheDocument()
         expect(container.firstElementChild?.className).toContain('customState')
     })

@@ -122,7 +122,7 @@ export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled
                         className={`${styles.areaStepperInput} mNum`}
                         value={arsaAlani || ''}
                         onChange={(e) => onArsaAlani(Number(e.target.value))}
-                        placeholder="Alanı girin"
+                        placeholder="Alanı gir"
                     />
                     <div className={styles.areaStepperKontrolGrup}>
                         <span className={styles.areaStepperBirim}>m²</span>
@@ -153,7 +153,7 @@ export function AreaSection({ parcelContext, arsaAlani, onArsaAlani, isAaEnabled
                         type="number"
                         value={arsaAlani || ''}
                         onChange={(e) => onArsaAlani(Number(e.target.value))}
-                        placeholder="Alanı girin"
+                        placeholder="Alanı gir"
                     />
                     <span>m²</span>
                 </div>

@@ -34,7 +34,7 @@ export function AnalizSekmesi({ result, baseInput, marketPrice }: AnalizSekmesiP
             <section className={styles.bos}>
                 <p className={styles.bosMetin}>
                     Hesap sonucu oluşunca grafikler burada görünecek. Girdileri
-                    tamamlayıp sonucun hesaplanmasını bekleyin.
+                    tamamlayıp sonucun hesaplanmasını bekle.
                 </p>
             </section>
         );

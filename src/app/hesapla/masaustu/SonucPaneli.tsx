@@ -58,7 +58,7 @@ export function SonucPaneli({
             <section aria-label="Hesap sonuçları">
                 {baslik}
                 <div className={`${styles.kart} ${styles.bosDurum}`}>
-                    <p className={styles.bosMetin}>Sonuçları görmek için daire m² ve birim maliyeti girin.</p>
+                    <p className={styles.bosMetin}>Sonuçları görmek için daire m² ve birim maliyeti gir.</p>
                     <button type="button" className={styles.birincilBtn} onClick={onOrnekProjeIleDene}>
                         Örnek proje ile dene
                     </button>

@@ -50,7 +50,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
   async function handleGenerateRender() {
     const handle = captureHandle;
     if (!handle) {
-      setRenderState({ status: 'error', message: 'Sahne henüz hazır değil, tekrar deneyin.' });
+      setRenderState({ status: 'error', message: 'Sahne henüz hazır değil, tekrar dene.' });
       return;
     }
 
@@ -76,7 +76,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
       const data = (await res.json()) as { imageUrl: string };
       setRenderState({ status: 'success', imageUrl: data.imageUrl });
     } catch {
-      setRenderState({ status: 'error', message: 'Bağlantı hatası, tekrar deneyin.' });
+      setRenderState({ status: 'error', message: 'Bağlantı hatası, tekrar dene.' });
     }
   }
 
@@ -101,7 +101,7 @@ export function StudioVitrinPreview({ snapshot, scenarioId, versionNumber, isPro
         <div className={styles.fallbackBox}>
           <h4 className={styles.fallbackTitle}>3D Sahne Desteklenmiyor</h4>
           <p className={styles.fallbackText}>
-            Tarayıcınızda veya cihazınızda WebGL donanım hızlandırması desteklenmiyor. Aşağıdaki metin özet ve 2D plan görünümünden devam edebilirsiniz.
+            Tarayıcında veya cihazında WebGL donanım hızlandırması desteklenmiyor. Aşağıdaki metin özet ve 2D plan görünümünden devam edebilirsin.
           </p>
         </div>
       ) : (

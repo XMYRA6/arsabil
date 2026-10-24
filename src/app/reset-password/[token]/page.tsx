@@ -45,7 +45,7 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
                 setError(data.message || "Bir hata oluştu.");
             }
         } catch {
-            setError("Bağlantı hatası. Lütfen tekrar deneyin.");
+            setError("Bağlantı hatası. Lütfen tekrar dene.");
         } finally {
             setLoading(false);
         }

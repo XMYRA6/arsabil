@@ -60,7 +60,7 @@ export default function FavoritesPage() {
     };
 
     if (loading) return <div className={styles.state}>Yükleniyor...</div>;
-    if (error) return <div className={`${styles.state} ${styles.error}`} role="alert">Favoriler yüklenemedi. Lütfen sayfayı yenileyin.</div>;
+    if (error) return <div className={`${styles.state} ${styles.error}`} role="alert">Favoriler yüklenemedi. Lütfen sayfayı yenile.</div>;
 
     return (
         <main className={styles.shell}>

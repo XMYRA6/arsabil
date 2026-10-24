@@ -95,7 +95,7 @@ export function StudioSaveDialog({
           const data = await res.json();
           if (!res.ok) {
             if (res.status === 409) {
-              throw new Error('Senaryo başka bir sekmede/cihazda güncellenmiş. Lütfen sayfayı yenileyip tekrar deneyin.');
+              throw new Error('Senaryo başka bir sekmede/cihazda güncellenmiş. Lütfen sayfayı yenileyip tekrar dene.');
             }
             throw new Error(data.message || 'Yeni versiyon kaydedilemedi.');
           }

@@ -6,7 +6,7 @@ import { HomeMobile } from './HomeMobile'
 const DATA = {
     stats: { reportCount: 7, activeListingCount: 2, offerCount: 3, unreadMessageCount: 1 },
     recentReports: [{ id: 'r1', title: 'Kadıköy Parseli', createdAt: '2026-08-01T10:00:00.000Z', landShareRatio: 0.42, minApartmentPrice: 8900000 }],
-    recentMessages: [{ id: 'm1', content: 'Teklifiniz hakkında görüşebilir miyiz?', createdAt: '2026-08-02T10:00:00.000Z', sender: { id: 's1', name: 'Burak Tan', image: null } }],
+    recentMessages: [{ id: 'm1', content: 'Teklifin hakkında görüşebilir miyiz?', createdAt: '2026-08-02T10:00:00.000Z', sender: { id: 's1', name: 'Burak Tan', image: null } }],
     recentOffers: [],
 }
 const BILDIRIMLER = { notifications: [{ id: 'n1', type: 'MESAJ_VAR', title: 'Yeni mesaj', body: 'Burak size yazdı', read: false, entityId: null, createdAt: '2026-08-02T10:00:00.000Z' }] }

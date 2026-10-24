@@ -257,7 +257,7 @@ export function StudioPreview({
                   className={styles.activateOverlay}
                   onClick={() => setIsSceneActive(true)}
                 >
-                  Etkileşimi başlatmak için tıklayın · aksi halde sayfa normal kayar
+                  Etkileşimi başlatmak için tıkla · aksi halde sayfa normal kayar
                 </button>
               )}
             </StudioSceneBoundary>

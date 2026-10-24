@@ -376,7 +376,7 @@ describe('ManualParcelEntryForm', () => {
 
     it('il listesi 429 ile donerse genel "yuklenemedi" yerine rate-limite ozgu mesaj gosterilir', async () => {
         global.fetch = jest.fn().mockResolvedValue({
-            status: 429, ok: false, json: async () => ({ message: 'Çok fazla istek yaptınız.' }),
+            status: 429, ok: false, json: async () => ({ message: 'Çok fazla istek yaptın.' }),
         }) as unknown as typeof fetch
 
         render(<ManualParcelEntryForm onLocationFound={jest.fn()} />)

@@ -1010,7 +1010,7 @@ export default function Home() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        message="Rapor kaydetmek ve özel finansal modellemelerinize panelinizden ulaşabilmek için lütfen giriş yapın."
+        message="Rapor kaydetmek ve özel finansal modellemelerine panelinden ulaşabilmek için lütfen giriş yap."
       />
       <ParcelVerificationSheet
         key={isParcelModalOpen ? 'open' : 'closed'}
@@ -1271,7 +1271,7 @@ export default function Home() {
               canUseComparable: canUseComparableLandCost,
               comparableTitle: canUseComparableLandCost
                 ? `${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m² arsa emsali`
-                : 'Emsal için haritadan parsel seçin ve ilçe arsa m² fiyatı tanımlı olsun',
+                : 'Emsal için haritadan parsel seç ve ilçe arsa m² fiyatı tanımlı olsun',
               comparableNote: canUseComparableLandCost
                 ? `İlçe arsa emsali: ${selectedDistrictLandPrice!.toLocaleString('tr-TR')} TL/m²`
                 : 'Emsal model için doğrulanmış arsa alanı ve ilçe arsa m² fiyatı gerekir.',

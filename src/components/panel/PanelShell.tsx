@@ -22,7 +22,7 @@ const IKONLAR: Record<Ikon, React.ReactNode> = {
 };
 
 const NAV: { href: string; label: string; ikon: Ikon; rozet?: 'mesaj' | 'bildirim' }[] = [
-    { href: '/dashboard', label: 'Dashboard', ikon: 'home' },
+    { href: '/dashboard', label: 'Genel bakış', ikon: 'home' },
     { href: '/dashboard/reports', label: 'Raporlarım', ikon: 'file' },
     { href: '/dashboard/projects', label: 'Projelerim', ikon: 'layers' },
     { href: '/dashboard/favorites', label: 'Favorilerim', ikon: 'heart' },

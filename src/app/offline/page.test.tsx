@@ -8,7 +8,7 @@ describe('/offline page', () => {
         render(<OfflinePage />)
 
         expect(screen.getByRole('alert')).toHaveAttribute('aria-live', 'assertive')
-        expect(screen.getByRole('heading', { name: 'Çevrimdışısınız' })).toBeInTheDocument()
+        expect(screen.getByRole('heading', { name: 'Çevrimdışısın' })).toBeInTheDocument()
         expect(screen.getByRole('button', { name: 'Yeniden dene' })).toBeInTheDocument()
     })
 })

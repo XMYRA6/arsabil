@@ -86,9 +86,9 @@ export function SharedProposalClient({
         />
 
         <div className={styles.bottomCtaBox}>
-          <h3>Kendi Parseliniz İçin Değerleme & Ön Teklif Senaryosu Oluşturun</h3>
+          <h3>Kendi Parselin İçin Değerleme & Ön Teklif Senaryosu Oluştur</h3>
           <p>
-            ArsaBil Studio ile parsel geometrinizi doğrulayın, TAKS/KAKS sınırlarına göre kat kütlesi türetin ve şeffaf teklif alternatifleri hazırlayın.
+            ArsaBil Studio ile parsel geometrinizi doğrula, TAKS/KAKS sınırlarına göre kat kütlesi türetin ve şeffaf teklif alternatifleri hazırla.
           </p>
           <Link href="/hesapla" className={styles.largeCtaButton}>
             Ücretsiz Hesaplamaya Başla →

@@ -20,7 +20,7 @@ export function RiskSuggestionCard({ risk, onApply, hideApply = false }: Props) 
             <h4 className={styles.title}>Yakın fay etkisi</h4>
 
             <p className={styles.line}>
-                Parseliniz diri faya yaklaşık <strong>{formatFaultDistance(risk.faultDistanceM)}</strong>.
+                Parselin diri faya yaklaşık <strong>{formatFaultDistance(risk.faultDistanceM)}</strong>.
                 {risk.floodQ100 && ' Parsel Q100 taşkın tehlike bölgesi içinde.'}
             </p>
 

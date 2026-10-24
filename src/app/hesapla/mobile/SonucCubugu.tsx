@@ -42,7 +42,7 @@ export function SonucCubugu({
                         <span className={styles.pay}>Pay %{trFormat.format(arsaPayiYuzde)}</span>
                     </span>
                 ) : (
-                    <span className={styles.bos}>Daire m² ve birim maliyet girin</span>
+                    <span className={styles.bos}>Daire m² ve birim maliyet gir</span>
                 )}
             </button>
             <button

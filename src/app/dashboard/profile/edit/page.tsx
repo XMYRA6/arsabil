@@ -68,13 +68,13 @@ export default function ProfileEditPage() {
                 <p>Hakkında metni ve profesyonel bağlantılarını portföy görünümüne taşı.</p>
             </header>
 
-            {error && <div className={styles.alert} role="alert">İşlem tamamlanamadı. Lütfen tekrar deneyin.</div>}
+            {error && <div className={styles.alert} role="alert">İşlem tamamlanamadı. Lütfen tekrar dene.</div>}
             {saved && <div className={styles.success} role="status">Profil kaydedildi.</div>}
 
             <section className={`${styles.card} ${styles.formStack}`}>
                 <label className={styles.field}>
                     <span>Hakkında</span>
-                    <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={300} placeholder="Kendinizi ve uzmanlık alanınızı anlatın." />
+                    <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={300} placeholder="Kendini ve uzmanlık alanını anlat." />
                     <small className={styles.counter}>{bio.length} / 300</small>
                 </label>
                 <label className={styles.field}>
@@ -82,7 +82,7 @@ export default function ProfileEditPage() {
                     <input value={linkedin} onChange={e => setLinkedin(e.target.value)} placeholder="https://linkedin.com/in/..." />
                 </label>
                 <label className={styles.field}>
-                    <span>Website</span>
+                    <span>Web sitesi</span>
                     <input value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://..." />
                 </label>
                 <div className={styles.btnRow}>

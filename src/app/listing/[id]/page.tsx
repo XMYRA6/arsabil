@@ -139,7 +139,7 @@ export default function ListingDetailPage() {
 
     const toggleFavorite = async () => {
         if (!session?.user?.id) {
-            toast.error('Favorilere eklemek için giriş yapın.');
+            toast.error('Favorilere eklemek için giriş yap.');
             return;
         }
         try {
@@ -170,7 +170,7 @@ export default function ListingDetailPage() {
                 }),
             });
             if (res.ok) {
-                toast.success(`%${offerShare} arsa payı teklifiniz iletildi!`);
+                toast.success(`%${offerShare} arsa payı teklifin iletildi!`);
                 setOfferMsg('');
             } else {
                 const data = await res.json();
@@ -440,7 +440,7 @@ export default function ListingDetailPage() {
                                 <h3 className={styles.cardTitle}>Ön fizibilite yakında burada</h3>
                                 <p className={styles.description}>
                                     Bu ilan için otomatik fizibilite hesabı henüz hazır değil. Gerçek verilerle
-                                    kendi hesabınızı şimdi çıkarabilirsiniz.
+                                    kendi hesabını şimdi çıkarabilirsiniz.
                                 </p>
                                 <button onClick={() => router.push(`/?listing=${listing.id}`)} className={styles.primaryBtn}>
                                     Hesapla&apos;yı Aç →
@@ -450,7 +450,7 @@ export default function ListingDetailPage() {
 
                         {activeTab === 'senaryo' && (
                             <section className={`${styles.card} ${styles.centerCta}`}>
-                                <h3 className={styles.cardTitle}>Bu ilan için özel senaryo oluşturun</h3>
+                                <h3 className={styles.cardTitle}>Bu ilan için özel senaryo oluştur</h3>
                                 <button onClick={() => router.push(`/?listing=${listing.id}`)} className={styles.primaryBtn}>
                                     Hesap Makinesini Aç →
                                 </button>
@@ -502,7 +502,7 @@ export default function ListingDetailPage() {
                                     </div>
                                 </div>
                                 <textarea
-                                    placeholder="Teklif notunuz (opsiyonel)"
+                                    placeholder="Teklif notun (opsiyonel)"
                                     value={offerMsg}
                                     onChange={e => setOfferMsg(e.target.value)}
                                     rows={3}

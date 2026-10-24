@@ -37,7 +37,7 @@ export function RaporPdfButonu({ rapor }: { rapor: Rapor }) {
             // cekiyor, cevrimdisi/CSP'li istemcide uretim patlar. Kullanici
             // yalnizca butonun titreyip geri geldigini goruyordu.
             console.error('Kayitli rapor PDF uretimi basarisiz', e);
-            toast.error('PDF oluşturulamadı. Bağlantınızı kontrol edip tekrar deneyin.');
+            toast.error('PDF oluşturulamadı. Bağlantını kontrol edip tekrar dene.');
         } finally {
             setUretiliyor(false);
         }

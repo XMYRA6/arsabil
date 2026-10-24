@@ -136,7 +136,7 @@ export function StudioScenarioLibrary({
             <div className={styles.emptyState}>
               {search.trim()
                 ? 'Aramanızla eşleşen senaryo bulunamadı.'
-                : 'Henüz kaydedilmiş bir senaryonuz bulunmuyor. "Kaydet" butonu ile ilk senaryonuzu buluta kaydedebilirsiniz.'}
+                : 'Henüz kaydedilmiş bir senaryonuz bulunmuyor. "Kaydet" butonu ile ilk senaryonuzu buluta kaydedebilirsin.'}
             </div>
           ) : (
             filteredScenarios.map((scenario) => {

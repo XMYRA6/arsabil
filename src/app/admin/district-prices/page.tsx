@@ -160,7 +160,7 @@ export default function AdminDistrictPrices() {
     <>
       <div className={styles.pageHeader}>
         <h1>İlçe Fiyatları</h1>
-        <p>İl/ilçe bazlı ortalama piyasa ve inşaat birim fiyatlarını yönetin</p>
+        <p>İl/ilçe bazlı ortalama piyasa ve inşaat birim fiyatlarını yönet</p>
       </div>
 
       {message && !modal.open && (

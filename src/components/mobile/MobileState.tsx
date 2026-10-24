@@ -31,11 +31,11 @@ const copyByVariant: Record<MobileStateVariant, { title: string; description: st
     },
     error: {
         title: 'Bir sorun oluştu',
-        description: 'Lütfen tekrar deneyin.',
+        description: 'Lütfen tekrar dene.',
     },
     offline: {
-        title: 'Çevrimdışısınız',
-        description: 'Bağlantı geri geldiğinde kaldığınız yerden devam edin.',
+        title: 'Çevrimdışısın',
+        description: 'Bağlantı geri geldiğinde kaldığın yerden devam et.',
     },
 }
 

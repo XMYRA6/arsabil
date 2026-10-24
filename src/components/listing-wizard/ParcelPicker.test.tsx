@@ -65,7 +65,7 @@ describe('ParcelPicker', () => {
 
     it('not_found durumunda kullanıcıya pini taşıması söylenir', () => {
         render(<ParcelPicker value={{ ...PINNED, status: 'not_found' }} onChange={jest.fn()} />)
-        expect(screen.getByText(/parselin içine taşıyın/i)).toBeInTheDocument()
+        expect(screen.getByText(/parselin içine taşı/i)).toBeInTheDocument()
     })
 
     it('unavailable durumunda ilanın yine yayınlanabileceği söylenir', () => {
@@ -87,7 +87,7 @@ describe('ParcelPicker', () => {
 
     it('401 yanitinda unavailable degil unauthorized durumuna gecer (giris yapmamis kullanici, servis kesintisi degil)', async () => {
         global.fetch = jest.fn().mockResolvedValue({
-            ok: false, status: 401, json: async () => ({ message: 'Giriş yapmanız gerekiyor.' }),
+            ok: false, status: 401, json: async () => ({ message: 'Giriş yapman gerekiyor.' }),
         }) as unknown as typeof fetch
         const onChange = jest.fn()
         render(<ParcelPicker value={PINNED} onChange={onChange} />)
@@ -101,15 +101,15 @@ describe('ParcelPicker', () => {
 
     it('unauthorized durumunda oturum acma mesaji gosterir', () => {
         render(<ParcelPicker value={{ ...PINNED, status: 'unauthorized' }} onChange={jest.fn()} />)
-        expect(screen.getByText(/giriş yapmanız gerekiyor/i)).toBeInTheDocument()
+        expect(screen.getByText(/giriş yapman gerekiyor/i)).toBeInTheDocument()
     })
 
     it('notFoundText / unavailableText verilmezse sihirbazin varsayilan metinleri degismeden kalir', () => {
         const { rerender } = render(<ParcelPicker value={{ ...PINNED, status: 'not_found' }} onChange={jest.fn()} />)
-        expect(screen.getByText(/Doğrulamadan da devam edebilirsiniz/)).toBeInTheDocument()
+        expect(screen.getByText(/Doğrulamadan da devam edebilirsin/)).toBeInTheDocument()
 
         rerender(<ParcelPicker value={{ ...PINNED, status: 'unavailable' }} onChange={jest.fn()} />)
-        expect(screen.getByText(/İlanınız doğrulanmadan yayınlanabilir/)).toBeInTheDocument()
+        expect(screen.getByText(/İlanın doğrulanmadan yayınlanabilir/)).toBeInTheDocument()
     })
 
     it('notFoundText / unavailableText verilirse ozellestirilmis metin gosterilir', () => {
@@ -117,23 +117,23 @@ describe('ParcelPicker', () => {
             <ParcelPicker
                 value={{ ...PINNED, status: 'not_found' }}
                 onChange={jest.fn()}
-                notFoundText="Doğrulama olmadan da hesaplama yapabilirsiniz."
-                unavailableText="Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz."
+                notFoundText="Doğrulama olmadan da hesaplama yapabilirsin."
+                unavailableText="Doğrulama olmadan da hesaplama yapabilirsin, daha sonra tekrar deneyebilirsin."
             />,
         )
-        expect(screen.getByText('Doğrulama olmadan da hesaplama yapabilirsiniz.')).toBeInTheDocument()
-        expect(screen.queryByText(/Doğrulamadan da devam edebilirsiniz/)).not.toBeInTheDocument()
+        expect(screen.getByText('Doğrulama olmadan da hesaplama yapabilirsin.')).toBeInTheDocument()
+        expect(screen.queryByText(/Doğrulamadan da devam edebilirsin/)).not.toBeInTheDocument()
 
         rerender(
             <ParcelPicker
                 value={{ ...PINNED, status: 'unavailable' }}
                 onChange={jest.fn()}
-                notFoundText="Doğrulama olmadan da hesaplama yapabilirsiniz."
-                unavailableText="Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz."
+                notFoundText="Doğrulama olmadan da hesaplama yapabilirsin."
+                unavailableText="Doğrulama olmadan da hesaplama yapabilirsin, daha sonra tekrar deneyebilirsin."
             />,
         )
-        expect(screen.getByText('Doğrulama olmadan da hesaplama yapabilirsiniz, daha sonra tekrar deneyebilirsiniz.')).toBeInTheDocument()
-        expect(screen.queryByText(/İlanınız doğrulanmadan yayınlanabilir/)).not.toBeInTheDocument()
+        expect(screen.getByText('Doğrulama olmadan da hesaplama yapabilirsin, daha sonra tekrar deneyebilirsin.')).toBeInTheDocument()
+        expect(screen.queryByText(/İlanın doğrulanmadan yayınlanabilir/)).not.toBeInTheDocument()
     })
 })
 

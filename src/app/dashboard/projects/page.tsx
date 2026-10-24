@@ -75,15 +75,15 @@ export default function ProjectsPage() {
             <header className={styles.head}>
                 <div>
                     <h1>Projelerim</h1>
-                    <p>Kayıtlı projeleriniz, senaryolarınız ve Excel çıktılarınız</p>
+                    <p>Kayıtlı projelerin, senaryoların ve Excel çıktıların</p>
                 </div>
                 <Link href="/hesapla" className={styles.btn}>+ Yeni proje</Link>
             </header>
 
             {projects.length === 0 ? (
                 <section className={styles.empty}>
-                    <h2>Henüz projeniz yok.</h2>
-                    <p>Hesap makinesindeki &quot;Rapor Kaydet&quot; butonu ile ilk projenizi oluşturun.</p>
+                    <h2>Henüz projen yok.</h2>
+                    <p>Hesapla&apos;da bir sonuç çıkarıp &quot;Kaydet&quot; ile ilk projeni oluştur.</p>
                 </section>
             ) : (
                 <div className={styles.stack}>

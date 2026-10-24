@@ -25,7 +25,7 @@ const SEKMELER: { id: Sekme; etiket: string }[] = [
 const tl0 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
 const tl = (n: number) => `${tl0.format(Math.round(n))} ₺`;
 
-const BEKLENIYOR = 'Hesap sonucu oluşunca grafikler burada görünecek. Girdileri tamamlayıp sonucun hesaplanmasını bekleyin.';
+const BEKLENIYOR = 'Hesap sonucu oluşunca grafikler burada görünecek. Girdileri tamamlayıp sonucun hesaplanmasını bekle.';
 
 /**
  * Masaüstü "Hesap özeti" + "Hassasiyet ve kırılma noktası" — Figma 05 ·

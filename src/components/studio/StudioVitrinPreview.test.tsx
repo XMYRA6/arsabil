@@ -188,7 +188,7 @@ describe('StudioVitrinPreview', () => {
   it('sağlayıcı hata döndürürse hata mesajı gösterir', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
-      json: async () => ({ message: 'Render üretilemedi, lütfen tekrar deneyin.' }),
+      json: async () => ({ message: 'Render üretilemedi, lütfen tekrar dene.' }),
     }) as unknown as typeof fetch;
 
     const user = userEvent.setup();
@@ -197,7 +197,7 @@ describe('StudioVitrinPreview', () => {
     await screen.findByTestId('vitrin-scene');
     await user.click(screen.getByRole('button', { name: /Fotogerçekçi/i }));
 
-    expect(await screen.findByText('Render üretilemedi, lütfen tekrar deneyin.')).toBeInTheDocument();
+    expect(await screen.findByText('Render üretilemedi, lütfen tekrar dene.')).toBeInTheDocument();
   });
 
   it('capture ref hazır değilse fetch ÇAĞRILMADAN hata gösterir', async () => {

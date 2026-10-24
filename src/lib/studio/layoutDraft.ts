@@ -65,7 +65,7 @@ export function validateLayoutDraft(
   if (hasUnknownReference) {
     warnings.push({
       code: 'LAYOUT_REFERENCES_UNKNOWN_PROGRAM_BAND',
-      message: 'Yerleşim taslağı artık var olmayan bir program bandına referans veriyor; program dağılımını güncelleyin.',
+      message: 'Yerleşim taslağı artık var olmayan bir program bandına referans veriyor; program dağılımını güncelle.',
     });
   }
 

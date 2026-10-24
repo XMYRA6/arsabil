@@ -316,7 +316,7 @@ export default function AkifPage() {
       if (!current()) return
       setEntries((prev) => [
         ...prev,
-        { id: makeId(), role: 'error', content: 'Bağlantı hatası, tekrar deneyin.' },
+        { id: makeId(), role: 'error', content: 'Bağlantı hatası, tekrar dene.' },
       ])
     } finally {
       setPending(false)

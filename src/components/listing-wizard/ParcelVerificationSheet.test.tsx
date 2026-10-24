@@ -263,7 +263,7 @@ describe('ParcelVerificationSheet', () => {
             viewportKur(false)
             render(<ParcelVerificationSheet isOpen onClose={jest.fn()} onConfirm={jest.fn()} />)
             await waitFor(() => expect(screen.getByTestId('parcel-picker')).toBeInTheDocument())
-            expect(screen.getByText('Arsanızın bulunduğu noktaya haritadan tıklayın.')).toBeInTheDocument()
+            expect(screen.getByText('Arsanın bulunduğu noktaya haritadan tıkla.')).toBeInTheDocument()
             expect(screen.queryByText(/Tapu ve Kadastro \(TKGM\)/)).not.toBeInTheDocument()
         })
 

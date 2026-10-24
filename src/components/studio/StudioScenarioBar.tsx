@@ -122,7 +122,7 @@ export function StudioScenarioBar({
             className={styles.scenarioSelect}
             value={activeScenario.id}
             onChange={(e) => onSelectScenario(e.target.value)}
-            aria-label="Senaryo seçin"
+            aria-label="Senaryo seç"
           >
             {allScenarios.map((sc) => (
               <option key={sc.id} value={sc.id}>
@@ -138,10 +138,10 @@ export function StudioScenarioBar({
           value={activeScenario.name}
           onChange={(e) => onNameChange(e.target.value)}
           aria-label="Senaryo adı"
-          title="Senaryo adını düzenlemek için tıklayın"
+          title="Senaryo adını düzenlemek için tıkla"
         />
 
-        <span className={styles.draftBadge} title="Bu veriler yalnızca tarayıcı oturumunuzda tutulmaktadır">
+        <span className={styles.draftBadge} title="Bu veriler yalnızca tarayıcı oturumunda tutulmaktadır">
           <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: isDirty ? '#f59e0b' : '#10b981' }} />
           Bu oturumda taslak
         </span>
@@ -151,9 +151,9 @@ export function StudioScenarioBar({
             type="button"
             className={styles.rebalanceBadge}
             onClick={onRebalanceClick}
-            title="Yerleşim veya program değişti; teklif dengesini gözden geçirin"
+            title="Yerleşim veya program değişti; teklif dengesini gözden geçir"
           >
-            ⚠️ Teklifi dengele
+            Teklifi dengele
           </button>
         )}
       </div>
@@ -199,7 +199,7 @@ export function StudioScenarioBar({
             className={`${styles.actionBtn} ${styles.primaryActionBtn}`}
             onClick={onSaveClick}
             aria-label="Kaydet"
-            title="Senaryoyu veya yeni versiyonu buluta kaydedin"
+            title="Senaryoyu veya yeni versiyonu buluta kaydet"
           >
             Kaydet
           </button>
@@ -211,7 +211,7 @@ export function StudioScenarioBar({
             className={styles.actionBtn}
             onClick={onLibraryClick}
             aria-label="Kütüphane"
-            title="Kayıtlı senaryolarınızı ve versiyon geçmişini görüntüleyin"
+            title="Kayıtlı senaryolarını ve versiyon geçmişini görüntüle"
           >
             Kütüphane
           </button>
@@ -235,7 +235,7 @@ export function StudioScenarioBar({
             className={styles.actionBtn}
             onClick={onPdfClick}
             aria-label="Teklif PDF'i"
-            title="Ön fizibilite teklif raporunu PDF olarak indirin"
+            title="Ön fizibilite teklif raporunu PDF olarak indir"
           >
             Teklif PDF'i
           </button>
@@ -247,7 +247,7 @@ export function StudioScenarioBar({
             className={styles.actionBtn}
             onClick={onAddAlternative}
             aria-label="Alternatif Oluştur"
-            title="Mevcut taslağı çoğaltarak yeni bir alternatif oluşturun"
+            title="Mevcut taslağı çoğaltarak yeni bir alternatif oluştur"
           >
             + Alternatif Oluştur
           </button>

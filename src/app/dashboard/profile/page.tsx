@@ -10,8 +10,15 @@ import styles from './profile.module.css'
 type Tab = 'portfolio' | 'listings' | 'favorites' | 'settings'
 type Theme = 'dark' | 'light'
 
+const ROL_ETIKETI: Record<string, string> = {
+    USER: 'Kullanıcı',
+    ARSA_SAHIBI: 'Arsa sahibi',
+    MUTEAHHIT: 'Müteahhit',
+    ADMIN: 'Yönetici',
+};
+
 const HUB: { href: string; etiket: string }[] = [
-    { href: '/dashboard/reports', etiket: 'Hesaplamalarım' },
+    { href: '/dashboard/reports', etiket: 'Raporlarım' },
     { href: '/dashboard/projects', etiket: 'Projelerim' },
     { href: '/dashboard/favorites', etiket: 'Favorilerim' },
     { href: '/dashboard/listings', etiket: 'İlanlarım' },
@@ -188,7 +195,7 @@ export default function ProfilePage() {
 
     const handleDeleteAccount = async () => {
         if (!deletePassword) {
-            setDeleteError('Şifrenizi girmelisiniz.')
+            setDeleteError('Şifreni girmelisin.')
             return
         }
         setDeleting(true)
@@ -257,7 +264,7 @@ export default function ProfilePage() {
                 <div className={styles.identity}>
                     <h2 className={styles.displayName}>{session.user?.name || 'Kullanıcı'}</h2>
                     <div className={styles.badges}>
-                        <span className={styles.roleTag}>{(session.user as { role?: string })?.role || 'USER'}</span>
+                        <span className={styles.roleTag}>{ROL_ETIKETI[(session.user as { role?: string })?.role ?? 'USER'] ?? 'Kullanıcı'}</span>
                         {profile?.isVerified && <span className={styles.verifiedBadge}>E-posta doğrulandı</span>}
                     </div>
                 </div>
@@ -322,7 +329,7 @@ export default function ProfilePage() {
                         <h3 className={styles.cardTitle}>Hakkımda</h3>
                         <div className={styles.formStack}>
                             <label className={styles.field}>
-                                <span>Kendinizi tanıtın</span>
+                                <span>Kendini tanıt</span>
                                 <textarea
                                     placeholder="Trabzon’da arsa ve kat karşılığı projeleriyle ilgileniyorum…"
                                     value={bio}
@@ -389,7 +396,7 @@ export default function ProfilePage() {
                     {loadingFavs ? (
                         <p className={styles.emptyNote}>Yükleniyor…</p>
                     ) : favorites.length === 0 ? (
-                        <p className={styles.emptyNote}>Henüz favori ilan eklemediniz</p>
+                        <p className={styles.emptyNote}>Henüz favori ilan eklemedin</p>
                     ) : (
                         <div className={styles.rows}>
                             {favorites.map(fav => (

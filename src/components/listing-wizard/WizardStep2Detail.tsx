@@ -38,7 +38,7 @@ export function WizardStep2Detail({ data, onChange }: Props) {
               <p className={styles.hintText}>
                 Tapu kaydı: {data.parcel.areaSqm.toLocaleString('tr-TR')} m²
                 {cmp.status === 'mismatch' && cmp.diffPct !== null && (
-                  <strong> — beyanınızla %{cmp.diffPct.toFixed(1)} fark var. Hisseli tapuda bu normaldir; emin değilseniz kontrol edin.</strong>
+                  <strong> — beyanınla %{cmp.diffPct.toFixed(1)} fark var. Hisseli tapuda bu normaldir; emin değilseniz kontrol et.</strong>
                 )}
               </p>
             )
@@ -79,9 +79,9 @@ export function WizardStep2Detail({ data, onChange }: Props) {
         {/* Jargon yardımı — Impeccable critique P2 (2026-09-17): arsa sahibi
             persona inşaat/hukuk profesyoneli değil, bu ayrımı bilmeyebilir. */}
         <p className={styles.hintText}>
-          {data.type === 'KAT_KARSILIGI' && 'Müteahhit arsanıza bina yapar, karşılığında size bina içinden daire/pay verir.'}
-          {data.type === 'SALE' && 'Arsanızı doğrudan, nakit karşılığında satarsınız.'}
-          {data.type === 'ORTAKLIK' && 'Arsanızı sermaye veya iş gücü ortaklığıyla değerlendirirsiniz, kesin bir daire payı yerine anlaşmaya bağlı bir ortaklık kurulur.'}
+          {data.type === 'KAT_KARSILIGI' && 'Müteahhit arsana bina yapar, karşılığında sana bina içinden daire/pay verir.'}
+          {data.type === 'SALE' && 'Arsanı doğrudan, nakit karşılığında satarsın.'}
+          {data.type === 'ORTAKLIK' && 'Arsanı sermaye veya iş gücü ortaklığıyla değerlendirirsin, kesin bir daire payı yerine anlaşmaya bağlı bir ortaklık kurulur.'}
         </p>
       </div>
 
@@ -110,7 +110,7 @@ export function WizardStep2Detail({ data, onChange }: Props) {
         <div className={styles.fieldGroup}>
           <label className={styles.label}>Tapu Durumu</label>
           <select className={styles.select} value={data.titleDeed} onChange={e => onChange({ titleDeed: e.target.value })}>
-            <option value="">Seçiniz</option>
+            <option value="">Seç</option>
             <option value="KAT_MULKIYETI">Kat Mülkiyeti</option>
             <option value="ARSA">Arsa Tapusu</option>
             <option value="HISSELI">Hisseli Tapu</option>
@@ -118,7 +118,7 @@ export function WizardStep2Detail({ data, onChange }: Props) {
           </select>
           {data.titleDeed === 'HISSELI' && (
             <p className={styles.hintText}>
-              Arsanın tapuda birden fazla kişi adına, pay olarak kayıtlı olması. Beyan ettiğiniz alanla tapudaki toplam alan arasında fark olması bu yüzden normaldir.
+              Arsanın tapuda birden fazla kişi adına, pay olarak kayıtlı olması. Beyan ettiğin alanla tapudaki toplam alan arasında fark olması bu yüzden normaldir.
             </p>
           )}
         </div>

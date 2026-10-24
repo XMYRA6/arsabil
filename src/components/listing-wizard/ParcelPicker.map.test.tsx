@@ -210,7 +210,7 @@ describe('ParcelPicker — Konumumu Bul (geolocation)', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /Konumumu Bul/i }))
 
-        expect(screen.getByText(/Tarayıcınız konum tespitini desteklemiyor/i)).toBeInTheDocument()
+        expect(screen.getByText(/Tarayıcın konum tespitini desteklemiyor/i)).toBeInTheDocument()
     })
 })
 

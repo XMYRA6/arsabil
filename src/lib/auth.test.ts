@@ -42,7 +42,7 @@ describe('authorize() — isBanned kontrolü', () => {
 
         await expect(
             provider.authorize({ email: 'test@test.com', password: 'Test1234!' }, { headers: {} })
-        ).rejects.toThrow('Hesabınız askıya alınmıştır.')
+        ).rejects.toThrow('Hesabın askıya alınmıştır.')
     })
 
     it('isBanned=false olan kullanıcı normal giriş yapar', async () => {

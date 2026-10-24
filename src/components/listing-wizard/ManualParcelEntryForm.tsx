@@ -40,7 +40,7 @@ type FetchErrorKind = 'generic' | 'rateLimit' | null
 // ayni desen — iki taraf da senkron tutulmali).
 const ADA_PARSEL_PATTERN = /^\d{1,7}$/
 
-const RATE_LIMIT_MESSAGE = 'Çok fazla istek yapıldı, birkaç saniye sonra tekrar deneyin.'
+const RATE_LIMIT_MESSAGE = 'Çok fazla istek yapıldı, birkaç saniye sonra tekrar dene.'
 
 function errorNoteText(kind: FetchErrorKind, generic: string): string {
     return kind === 'rateLimit' ? RATE_LIMIT_MESSAGE : generic
@@ -296,13 +296,13 @@ export function ManualParcelEntryForm({ onLocationFound, submitLabel = 'Sorgula'
             )
             const data = await res.json()
             if (!Array.isArray(data) || data.length === 0) {
-                setError('Bu adres için konum bulunamadı. Daha genel yazmayı deneyin veya haritadan elle işaretleyin.')
+                setError('Bu adres için konum bulunamadı. Daha genel yazmayı dene veya haritadan elle işaretle.')
                 return
             }
             const { lat, lon } = data[0]
             onLocationFound(parseFloat(lat), parseFloat(lon), reference)
         } catch {
-            setError('Konum aranırken bir sorun oluştu. Lütfen tekrar deneyin.')
+            setError('Konum aranırken bir sorun oluştu. Lütfen tekrar dene.')
         } finally {
             setSearching(false)
         }
@@ -311,7 +311,7 @@ export function ManualParcelEntryForm({ onLocationFound, submitLabel = 'Sorgula'
     return (
         <div className={styles.form}>
             <p className={styles.instructions}>
-                Tapu veya senette yazan bilgileri girin.
+                Tapu veya senette yazan bilgileri gir.
             </p>
 
             <div className={styles.row}>

@@ -12,9 +12,9 @@ import styles from './ParcelVerificationSheet.module.css'
 import pickerStyles from './ParcelPicker.module.css'
 
 const LONG_HINT =
-    'Arsanızın konumunu haritadan işaretleyin; Tapu ve Kadastro (TKGM) kayıtlarından alan ve nitelik, ' +
+    'Arsanın konumunu haritadan işaretle; Tapu ve Kadastro (TKGM) kayıtlarından alan ve nitelik, ' +
     'ayrıca fay hattı riski otomatik sorgulanır.'
-const SHORT_HINT = 'Arsanızın bulunduğu noktaya haritadan tıklayın.'
+const SHORT_HINT = 'Arsanın bulunduğu noktaya haritadan tıkla.'
 
 export type ParcelVerificationSheetProps = {
     isOpen: boolean

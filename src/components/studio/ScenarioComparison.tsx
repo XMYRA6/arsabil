@@ -119,7 +119,7 @@ export function ScenarioComparison({
 
               {row.needsRebalance && (
                 <div className={styles.rebalanceWarning}>
-                  ⚠️ Yerleşim/program değişti; teklif dengesini gözden geçirin.
+                  Yerleşim/program değişti; teklif dengesini gözden geçir.
                 </div>
               )}
 

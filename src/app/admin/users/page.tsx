@@ -72,7 +72,7 @@ export default function AdminUsers() {
     };
 
     const handleBan = async (userId: string, ban: boolean) => {
-        if (!confirm(ban ? 'Bu kullanıcıyı askıya almak istediğinize emin misiniz?' : 'Askıyı kaldırmak istediğinize emin misiniz?')) return;
+        if (!confirm(ban ? 'Bu kullanıcıyı askıya almak istediğinden emin misin?' : 'Askıyı kaldırmak istediğinden emin misin?')) return;
         setMessage(null);
         try {
             const res = await fetch('/api/admin/users', {
@@ -135,7 +135,7 @@ export default function AdminUsers() {
         <>
             <div className={styles.pageHeader}>
                 <h1>Kullanıcılar</h1>
-                <p>Platformdaki tüm kullanıcıları yönetin, rollerini değiştirin ve hesapları askıya alın</p>
+                <p>Platformdaki tüm kullanıcıları yönet, rollerini değiştir ve hesapları askıya al</p>
             </div>
 
             {/* Stats row */}

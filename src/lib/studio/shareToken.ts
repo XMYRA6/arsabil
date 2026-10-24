@@ -148,7 +148,7 @@ export async function revokeStudioShareToken(
   });
 
   if (!record) {
-    return { success: false, error: 'Paylaşım bağlantısı bulunamadı veya yetkiniz yok.' };
+    return { success: false, error: 'Paylaşım bağlantısı bulunamadı veya yetkin yok.' };
   }
 
   await prisma.studioShareToken.update({

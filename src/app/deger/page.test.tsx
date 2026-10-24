@@ -87,7 +87,7 @@ it('fetch reject → bağlantı hatası mesajı', async () => {
   ;(global.fetch as jest.Mock).mockRejectedValue(new Error('network'))
   render(<DegerPage />)
   fireEvent.click(screen.getByText('manuel-bul'))
-  await waitFor(() => expect(screen.getByText(/Bağlantı hatası, tekrar deneyin/i)).toBeInTheDocument())
+  await waitFor(() => expect(screen.getByText(/Bağlantı hatası, tekrar dene/i)).toBeInTheDocument())
 })
 
 it('404 → parsel bulunamadı mesajı', async () => {

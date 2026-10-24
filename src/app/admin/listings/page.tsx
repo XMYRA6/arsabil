@@ -53,7 +53,7 @@ export default function AdminListings() {
     };
 
     const deleteListing = async (id: string) => {
-        if (!confirm('Bu ilanı kalıcı olarak silmek istediğinize emin misiniz?')) return;
+        if (!confirm('Bu ilanı kalıcı olarak silmek istediğinden emin misin?')) return;
         try {
             const res = await fetch('/api/admin/listings', {
                 method: 'DELETE',
@@ -105,7 +105,7 @@ export default function AdminListings() {
         <>
             <div className={styles.pageHeader}>
                 <h1>İlan Yönetimi</h1>
-                <p>Platformdaki tüm ilanları görüntüleyin, düzenleyin veya kaldırın</p>
+                <p>Platformdaki tüm ilanları görüntüle, düzenle veya kaldır</p>
             </div>
 
             <div className={styles.statsGrid}>

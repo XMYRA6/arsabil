@@ -39,7 +39,7 @@ export function AuthModal({ isOpen, onClose, message }: { isOpen: boolean; onClo
                     </svg>
                 </div>
                 <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--card-title)', marginBottom: '8px', letterSpacing: '-0.5px' }}>
-                    Giriş Yapmanız Gerekiyor
+                    Giriş Yapman Gerekiyor
                 </h3>
                 <p style={{ fontSize: '0.95rem', color: 'var(--muted)', marginBottom: '28px', lineHeight: 1.5 }}>
                     {message}

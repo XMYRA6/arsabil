@@ -180,7 +180,7 @@ export default function ListingOffersPage() {
                     <textarea
                         id="offer-note"
                         className={styles.textarea}
-                        placeholder="Teklif notu ekleyin"
+                        placeholder="Teklif notu ekle"
                         value={message}
                         onChange={event => setMessage(event.target.value)}
                     />

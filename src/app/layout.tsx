@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "ArsaBil — Arsa Payı ve Kat Karşılığı Fizibilite Motoru",
-  description: "Arsa sahipleri ve müteahhitler için akıllı fizibilite analizi. Arsa payı, inşaat maliyeti ve kâr analizini bilimsel verilerle saniyeler içinde yapın.",
+  description: "Arsa sahipleri ve müteahhitler için akıllı fizibilite analizi. Arsa payı, inşaat maliyeti ve kâr analizini bilimsel verilerle saniyeler içinde yap.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

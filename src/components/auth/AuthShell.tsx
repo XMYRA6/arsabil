@@ -25,10 +25,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
         <div className={styles.copy}>
           <h2 className={styles.heading}>
             Geleceğinize
-            <span className={styles.accent}>zemin hazırlayın.</span>
+            <span className={styles.accent}>zemin hazırla.</span>
           </h2>
           <p className={styles.lead}>
-            Arsanızın değerini tahmin etmeyin, verilerle hesaplayın. Arsa sahipleri ve müteahhitlerin güven noktası.
+            Arsanın değerini tahmin etmeyin, verilerle hesaplayın. Arsa sahipleri ve müteahhitlerin güven noktası.
           </p>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP */}

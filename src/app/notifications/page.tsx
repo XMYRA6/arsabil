@@ -71,13 +71,13 @@ export default function NotificationsPage() {
     };
 
     if (loading) return <StateCard text="Bildirimler yükleniyor..." />;
-    if (error) return <StateCard text="Bildirimler yüklenemedi. Lütfen tekrar deneyin." alert />;
+    if (error) return <StateCard text="Bildirimler yüklenemedi. Lütfen tekrar dene." alert />;
 
     return (
         <main className={styles.notificationsShell}>
             <header className={styles.heroCard}>
                 <div>
-                    <h1>Güncel akış</h1>
+                    <h1>Bildirimler</h1>
                     <p>Mesaj, teklif ve ilan durumlarını tek ekranda takip et.</p>
                 </div>
                 <div className={styles.heroSide}>

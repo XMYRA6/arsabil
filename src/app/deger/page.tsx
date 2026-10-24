@@ -12,9 +12,9 @@ import styles from './page.module.css'
 type Tab = 'adaParsel' | 'harita'
 
 const ERR: Record<number, string> = {
-  404: 'Parsel bulunamadı. Farklı bir nokta veya ada/parsel deneyin.',
-  503: 'TKGM servisi şu an yanıt vermiyor. Biraz sonra tekrar deneyin.',
-  429: 'Çok fazla sorgu yaptınız. Lütfen biraz bekleyin.',
+  404: 'Parsel bulunamadı. Farklı bir nokta veya ada/parsel dene.',
+  503: 'TKGM servisi şu an yanıt vermiyor. Biraz sonra tekrar dene.',
+  429: 'Çok fazla sorgu yaptın. Lütfen biraz bekle.',
 }
 
 function DegerPageContent() {
@@ -46,7 +46,7 @@ function DegerPageContent() {
         router.replace(`/deger?${qs}`)
       } catch {
         setCard(null)
-        setError('Bağlantı hatası, tekrar deneyin.')
+        setError('Bağlantı hatası, tekrar dene.')
       } finally {
         setPending(false)
       }
@@ -110,7 +110,7 @@ function DegerPageContent() {
               onLocationFound={(lat, lng, _ref, exactParcel) =>
                 exactParcel
                   ? void fetchCard(lat, lng)
-                  : setError('Bu ada/parsel için TKGM kaydı bulunamadı. Haritadan seçmeyi deneyin.')
+                  : setError('Bu ada/parsel için TKGM kaydı bulunamadı. Haritadan seçmeyi dene.')
               }
             />
           )}
@@ -118,9 +118,9 @@ function DegerPageContent() {
             <ParcelPicker
               value={picker}
               onChange={(patch) => setPicker((prev) => ({ ...prev, ...patch }))}
-              hint="Arsanızın bulunduğu noktaya haritadan tıklayın."
-              notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşıyın."
-              unavailableText="TKGM servisi şu an yanıt vermiyor, biraz sonra tekrar deneyin."
+              hint="Arsanın bulunduğu noktaya haritadan tıkla."
+              notFoundText="Bu noktada kayıtlı parsel bulunamadı. Pini parselin içine taşı."
+              unavailableText="TKGM servisi şu an yanıt vermiyor, biraz sonra tekrar dene."
             />
           )}
           {card?.neighborhood.geojson ? (

@@ -57,7 +57,7 @@ export function SonucKarti({
         return (
             <section className={styles.kart} aria-label="Hesap sonucu">
                 <p className={styles.bosMetin}>
-                    Sonuçları görmek için daire m² ve birim maliyeti girin.
+                    Sonuçları görmek için daire m² ve birim maliyeti gir.
                 </p>
                 <button type="button" className={styles.birincilBtn} onClick={onOrnekProjeIleDene}>
                     Örnek proje ile dene

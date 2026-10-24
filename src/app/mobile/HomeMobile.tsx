@@ -11,7 +11,7 @@ import styles from './mobile.module.css';
 /**
  * Giriş yapmış kullanıcının mobil ana sayfası: "Özet". Üst çubuk, logo ve
  * zil yok; sayfa doğrudan içerikle başlar. Sıra: Gelen kutusu (mesajlar +
- * bildirimler), Hesaplamalarım, Senaryolarım. Alt menüdeki eylemler burada
+ * bildirimler), Raporlarım, Senaryolarım. Alt menüdeki eylemler burada
  * tekrarlanmaz.
  *
  * `hasBottomNav={false}` BİLEREK: `SiteChrome.tsx` alt-çubuk dolgusunu
@@ -48,7 +48,7 @@ export function HomeMobile() {
                 <div className={styles.homeRoot}>
                     <h1 className={styles.sayfaBaslik}>Özet</h1>
                     {error ? (
-                        <p className={styles.error}>Veriler yüklenemedi. Lütfen sayfayı yenileyin.</p>
+                        <p className={styles.error}>Veriler yüklenemedi. Lütfen sayfayı yenile.</p>
                     ) : !data ? (
                         <p className={styles.loading}>Yükleniyor...</p>
                     ) : (

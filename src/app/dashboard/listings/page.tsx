@@ -76,7 +76,7 @@ export default function DashboardListingsPage() {
     ];
 
     if (loading) return <div className={styles.state}>Yükleniyor...</div>;
-    if (error) return <div className={`${styles.state} ${styles.error}`} role="alert">İlanlar yüklenemedi. Lütfen sayfayı yenileyin.</div>;
+    if (error) return <div className={`${styles.state} ${styles.error}`} role="alert">İlanlar yüklenemedi. Lütfen sayfayı yenile.</div>;
 
     return (
         <main className={styles.shell}>

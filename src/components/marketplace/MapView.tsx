@@ -426,7 +426,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             if (measureLayerRef.current) map.removeLayer(measureLayerRef.current);
             measureLayerRef.current = L.layerGroup().addTo(map);
             // eslint-disable-next-line react-hooks/set-state-in-effect -- ölçüm modu başlangıç talimatı gösteriliyor
-            setMeasureResult('Ölçmek için haritada tıklayın');
+            setMeasureResult('Ölçmek için haritada tıkla');
 
             const handleClick = (e: LeafletMouseEvent) => {
                 const { lat, lng } = e.latlng;
@@ -478,7 +478,7 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             if (drawLayerRef.current) map.removeLayer(drawLayerRef.current);
             drawLayerRef.current = L.layerGroup().addTo(map);
             // eslint-disable-next-line react-hooks/set-state-in-effect -- çizim modu başlangıç talimatı gösteriliyor
-            setDrawResult('Bölge çizmek için tıklayın, bitirmek için çift tıklayın');
+            setDrawResult('Bölge çizmek için tıkla, bitirmek için çift tıkla');
 
             const handleClick = (e: LeafletMouseEvent) => {
                 const { lat, lng } = e.latlng;

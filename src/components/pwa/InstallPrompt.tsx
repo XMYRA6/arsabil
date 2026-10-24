@@ -157,7 +157,7 @@ export function InstallPrompt() {
                                 ArsaBil Uygulaması
                             </div>
                             <div style={{ fontSize: "0.78rem", color: "var(--muted, #999)", lineHeight: 1.4 }}>
-                                Hızlı erişim için ana ekranınıza ekleyin
+                                Hızlı erişim için ana ekranınıza ekle
                             </div>
                         </div>
 
@@ -251,7 +251,7 @@ export function InstallPrompt() {
                                 <span style={{ fontWeight: 700, color: "var(--card-title, #fff)" }}>
                                     &quot;Ana Ekrana Ekle&quot;
                                 </span>{" "}
-                                seçeneğini seçin
+                                seçeneğini seç
                             </div>
                         </div>
                     ) : (
