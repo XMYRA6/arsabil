@@ -19,17 +19,36 @@ export interface AkifChatProps {
   onSend: (text: string) => void
   /** Verilirse besteciye mikrofon düğmesi eklenir (sesli moda geçiş). */
   onVoice?: () => void
+  /** Verildiğinde (değiştikçe) besteciye bir kez yazılır ve odaklanır; gönderilmez. */
+  initialDraft?: string
 }
 
 const EXAMPLES = ['900 m² arsa, emsal 1.5, müteahhit %50', 'emsal nedir?', 'Arsa payı nasıl hesaplanır?']
 
-export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
+export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: AkifChatProps) {
   const [draft, setDraft] = useState('')
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   // Mobil sanal klavye açılınca `100dvh` küçülmez; besteci klavyenin altında
   // kalırdı. `useKeyboardInset` (BottomSheet ile aynı) pozitif inset döndürür,
   // `.wrap` yüksekliğinden düşülür → besteci klavyenin üstüne çıkar.
   const keyboardInset = useKeyboardInset()
+
+  // initialDraft değişince besteciye bir kez yazılır (render sırasında state ayarı;
+  // effect içinde setState yerine React'in önerdiği "önceki prop" kalıbı).
+  const [seenDraft, setSeenDraft] = useState<string | undefined>(undefined)
+  if (initialDraft !== seenDraft) {
+    setSeenDraft(initialDraft)
+    if (initialDraft) setDraft(initialDraft)
+  }
+  useEffect(() => {
+    if (!initialDraft) return
+    const el = inputRef.current
+    if (el) {
+      el.focus()
+      el.setSelectionRange(initialDraft.length, initialDraft.length)
+    }
+  }, [initialDraft])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' })
@@ -109,6 +128,7 @@ export function AkifChat({ entries, pending, onSend, onVoice }: AkifChatProps) {
 
       <form className={styles.composer} onSubmit={submit}>
         <textarea
+          ref={inputRef}
           className={styles.input}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
