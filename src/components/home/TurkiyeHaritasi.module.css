@@ -14,7 +14,7 @@
 }
 
 .il {
-  stroke: var(--surface);
+  stroke: var(--canvas, #F4F1EA);
   stroke-width: 1;
   stroke-linejoin: round;
   cursor: pointer;
@@ -22,12 +22,12 @@
   outline: none;
 }
 
-.k0 { fill: color-mix(in srgb, var(--ink) 8%, var(--surface)); }
-.k1 { fill: color-mix(in srgb, var(--gold) 14%, var(--surface)); }
-.k2 { fill: color-mix(in srgb, var(--gold) 32%, var(--surface)); }
-.k3 { fill: color-mix(in srgb, var(--gold) 52%, var(--surface)); }
-.k4 { fill: color-mix(in srgb, var(--gold) 74%, var(--surface)); }
-.k5 { fill: var(--gold-deep); }
+.k0 { fill: #DAD4C4; }
+.k1 { fill: #F0C75F; }
+.k2 { fill: #E4AA2E; }
+.k3 { fill: #C98A10; }
+.k4 { fill: #A56A00; }
+.k5 { fill: #7A4B00; }
 
 .aktif {
   fill: var(--ink);
@@ -67,11 +67,11 @@ a:focus-visible .il {
   height: 10px;
   border-radius: 3px;
 }
-.sw.k1 { background-color: color-mix(in srgb, var(--gold) 14%, var(--surface)); }
-.sw.k2 { background-color: color-mix(in srgb, var(--gold) 32%, var(--surface)); }
-.sw.k3 { background-color: color-mix(in srgb, var(--gold) 52%, var(--surface)); }
-.sw.k4 { background-color: color-mix(in srgb, var(--gold) 74%, var(--surface)); }
-.sw.k5 { background-color: var(--gold-deep); }
+.sw.k1 { background-color: #F0C75F; }
+.sw.k2 { background-color: #E4AA2E; }
+.sw.k3 { background-color: #C98A10; }
+.sw.k4 { background-color: #A56A00; }
+.sw.k5 { background-color: #7A4B00; }
 
 @media (max-width: 768px) {
   .wrap {
