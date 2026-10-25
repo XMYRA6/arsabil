@@ -43,12 +43,20 @@ export interface ScenarioRow {
   daireSatisFiyatiTL: number
 }
 
+// Kartın öne çıkardığı satır; `criterion` kartta "neye göre" olarak gösterilir.
+export interface Recommendation {
+  rowIndex: number
+  criterion: string
+  reason: string
+}
+
 export interface ScenarioCard {
   kind: 'contractor_offers' | 'apartment_sizes'
   rows: ScenarioRow[]
   defaultsUsed: string[]
   assumptions: string[]
   emsalNote: string
+  recommendation?: Recommendation
 }
 
 export interface ParcelCard {
@@ -59,6 +67,30 @@ export interface ParcelCard {
   candidates?: string[]
   level?: 'il' | 'ilce' | 'mahalle'
   term?: string
+}
+
+export interface ParcelCompareRow {
+  label: string
+  status: ParcelCard['status']
+  areaSqm?: number
+  basis?: 'mahalle' | 'ilce' | 'il'
+  thinData?: boolean
+  rangeLow?: number
+  rangeHigh?: number
+  estimate?: number
+  pricePerSqm?: number
+  confidence?: 'yuksek' | 'orta' | 'dusuk'
+  siteUrl?: string
+  candidates?: string[]
+}
+
+export interface ParcelCompareCard {
+  kind: 'parcel_compare'
+  tier: 'free' | 'member'
+  rows: ParcelCompareRow[]
+  recommendation?: Recommendation
+  note?: string
+  upgradeHint?: boolean
 }
 
 // Akif-5c — WhatsApp proje kartı araçlarının (findProjects, summarizeProject,
@@ -82,7 +114,7 @@ export interface ProjectCard {
   data?: Record<string, unknown>
 }
 
-export type ToolResultCard = TermCard | ScenarioCard | ParcelCard | ProjectCard
+export type ToolResultCard = TermCard | ScenarioCard | ParcelCard | ProjectCard | ParcelCompareCard
 
 export interface AkifTurn {
   intent: AkifIntent

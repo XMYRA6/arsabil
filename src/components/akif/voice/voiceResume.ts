@@ -20,6 +20,9 @@ function cardLine(card: ToolResultCard): string {
   if (card.kind === 'project') {
     return `(Proje kartı: ${card.op})`
   }
+  if (card.kind === 'parcel_compare') {
+    return `(Parsel karşılaştırıldı: ${card.rows.length} parsel)`
+  }
   const r = card.rows[0]
   if (!r) return `(Son hesap: ${card.kind})`
   const pct = Math.round(r.arsaPayiX * 100)
