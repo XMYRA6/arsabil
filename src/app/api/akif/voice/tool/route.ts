@@ -1,6 +1,6 @@
 // Akif-2 — POST /api/akif/voice/tool
 // Realtime bir function-call ürettiğinde tarayıcı buraya iletir.
-// auth → rate-limit → gövde doğrulama → validateArgs → dispatchTool → audit
+// auth → rate-limit → gövde doğrulama → validateRichArgs → dispatchRichTool → audit
 // → doğrulanmış ToolResultCard.
 // invalid_args = 200 (Realtime'a function_call_output olarak beslenir, HTTP
 // hatası değil — sözleşme hatası).
@@ -8,12 +8,13 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
+import type { DispatchDeps } from '@/lib/ai/akif/gateway/toolRegistry'
 import {
-  validateArgs,
-  dispatchTool,
-  type ToolName,
-  type DispatchDeps,
-} from '@/lib/ai/akif/gateway/toolRegistry'
+  isRichToolName,
+  validateRichArgs,
+  dispatchRichTool,
+} from '@/lib/ai/akif/gateway/richTools'
+import { createParcelLookupDeps } from '@/lib/ai/akif/gateway/parcelLookupDeps'
 import { createVoiceAuditLogger, type VoiceAuditDb } from '@/lib/ai/akif/voice/voiceAudit'
 import { checkVoiceSessionOwner, type VoiceSessionDb } from '@/lib/ai/akif/voice/voiceSession'
 import { validateActionArgs, type ActionToolName } from '@/lib/ai/akif/gateway/actionTools'
@@ -23,11 +24,6 @@ import { checkPlanLimit } from '@/lib/plan'
 
 export const runtime = 'nodejs'
 
-const TOOL_NAMES: ToolName[] = [
-  'explainTerm',
-  'compareContractorOffers',
-  'compareApartmentSizes',
-]
 // Akif-2-Aksiyon — sesle mutasyon araçları. Yalnız bu ses tool yolunda
 // expose edilir; Akif-1'in TOOL_NAMES/dispatchTool'una (metin modu) DOKUNMAZ.
 const ACTION_NAMES: ActionToolName[] = ['prepareScenarioSave', 'commitPendingAction']
@@ -94,19 +90,36 @@ export async function POST(req: Request) {
   }
 
   // Bilinmeyen araç: HTTP hatası değil — Realtime'a geri beslenir.
-  if (!TOOL_NAMES.includes(toolName as ToolName)) {
+  if (!isRichToolName(toolName)) {
     return Response.json({ error: 'invalid_args', field: 'name', reason: 'bilinmeyen araç' })
   }
-  const name = toolName as ToolName
+  const name = toolName
 
-  const v = validateArgs(name, args)
+  // compareParcels harici veri (TKGM/emsal) çeker — ek, daha sıkı limit.
+  if (name === 'compareParcels') {
+    const crl = checkRateLimit('akif-compare-parcels:user:' + userId, RATE_LIMITS.AKIF_COMPARE_PARCELS)
+    if (!crl.ok) {
+      return Response.json(
+        { error: 'rate_limited' },
+        { status: 429, headers: { 'Retry-After': String(crl.retryAfterSec ?? 60) } },
+      )
+    }
+  }
+
+  const v = validateRichArgs(name, args)
   if (!v.ok) {
     return Response.json({ error: 'invalid_args', field: v.field, reason: v.reason })
   }
 
+  // Ses yolu giriş şart koşar → üye görünümü.
+  const memberView = true
   let card
   try {
-    card = await dispatchTool(name, args, { db })
+    card = await dispatchRichTool(name, args, {
+      db,
+      parcelDeps: createParcelLookupDeps({ memberView }),
+      memberView,
+    })
   } catch (e) {
     console.error('[akif-voice] dispatch failed', e)
     return Response.json({ error: 'tool_unavailable' }, { status: 502 })

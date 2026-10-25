@@ -12,6 +12,7 @@
 import { assembleSystemPrompt } from '../prompts/assemble'
 import { AKIF_TOOL_DEFS } from '../gateway/toolRegistry'
 import { ACTION_TOOL_DEFS } from '../gateway/actionTools'
+import { RICH_EXTRA_TOOL_DEFS } from '../gateway/richTools'
 import { VOICE_RHYTHM_PROMPT } from './voiceRhythm'
 
 export interface RealtimeSessionConfig {
@@ -40,7 +41,7 @@ export function buildRealtimeSessionConfig(args: {
     type: 'realtime',
     model: args.model,
     instructions: `${base}\n\n${VOICE_RHYTHM_PROMPT}`,
-    tools: [...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS],
+    tools: [...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS, ...RICH_EXTRA_TOOL_DEFS],
     tool_choice: 'auto',
     audio: {
       input: {

@@ -1,6 +1,7 @@
 import { buildRealtimeSessionConfig } from '../realtimeSession'
 import { AKIF_TOOL_DEFS } from '../../gateway/toolRegistry'
 import { ACTION_TOOL_DEFS } from '../../gateway/actionTools'
+import { RICH_EXTRA_TOOL_DEFS } from '../../gateway/richTools'
 
 describe('buildRealtimeSessionConfig', () => {
   const cfg = buildRealtimeSessionConfig({ model: 'gpt-realtime-mini', voiceName: 'marin' })
@@ -25,8 +26,13 @@ describe('buildRealtimeSessionConfig', () => {
     expect(cfg.instructions.length).toBeGreaterThan(500)
   })
 
+  it('tools include compareParcels', () => {
+    const names = (cfg.tools as { function: { name: string } }[]).map((t) => t.function.name)
+    expect(names).toContain('compareParcels')
+  })
+
   it('AKIF_TOOL_DEFS + ACTION_TOOL_DEFS birleştirilerek aktarılır', () => {
-    expect(cfg.tools).toEqual([...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS])
+    expect(cfg.tools).toEqual([...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS, ...RICH_EXTRA_TOOL_DEFS])
     expect(cfg.tool_choice).toBe('auto')
   })
 
