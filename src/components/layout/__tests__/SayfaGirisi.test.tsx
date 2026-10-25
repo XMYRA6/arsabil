@@ -44,6 +44,9 @@ describe("SayfaGirisi.module.css", () => {
   it("disables animation for reduced motion", () => {
     expect(css).toMatch(/prefers-reduced-motion:\s*reduce/);
   });
+  it("has no min-height (must not change main layout)", () => {
+    expect(css).not.toMatch(/min-height/);
+  });
   it("uses opacity only", () => {
     expect(css).not.toMatch(/will-change/);
     expect(css).not.toMatch(/transform/);

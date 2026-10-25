@@ -15,5 +15,5 @@ export function SayfaGirisi({ children }: { children: React.ReactNode }) {
     ilkMountGecti = true;
   }, []);
 
-  return <div className={oynat ? `${styles.giris} ${styles.oynat}` : styles.giris}>{children}</div>;
+  return <div className={oynat ? styles.oynat : undefined}>{children}</div>;
 }

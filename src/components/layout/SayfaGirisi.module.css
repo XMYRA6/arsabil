@@ -1,7 +1,3 @@
-.giris {
-  min-height: inherit;
-}
-
 .oynat {
   animation: sayfaGiris var(--dur-enter) var(--ease-out) backwards;
 }
