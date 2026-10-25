@@ -4,7 +4,7 @@
 
 import { lookupParcel, type LookupParcelArgs, type LookupParcelDeps } from './lookupParcel'
 import { recommendParcels } from './recommend'
-import type { ParcelCompareCard, ParcelCompareRow } from '../contract'
+import type { ParcelCard, ParcelCompareCard,ParcelCompareRow } from '../contract'
 
 export interface CompareParcelsArgs {
   parcels: LookupParcelArgs[]
@@ -16,7 +16,19 @@ export async function compareParcels(
   opts: { memberView: boolean },
 ): Promise<ParcelCompareCard> {
   const member = opts.memberView
-  const cards = await Promise.all(args.parcels.map((p) => lookupParcel(p, deps)))
+  const cards: ParcelCard[] = await Promise.all(
+    args.parcels.map(async (p): Promise<ParcelCard> => {
+      try {
+        return await lookupParcel(p, deps)
+      } catch (err) {
+        console.error(
+          `compareParcels: lookup failed for "${p.mahalleText} ${p.ada}/${p.parsel}"`,
+          err instanceof Error ? err.name : 'error',
+        )
+        return { kind: 'parcel', status: 'parcel_unavailable' }
+      }
+    }),
+  )
 
   const rows: ParcelCompareRow[] = cards.map((c, i) => {
     const a = args.parcels[i]

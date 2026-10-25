@@ -80,6 +80,21 @@ describe('compareParcels', () => {
     expect(card.recommendation).toBeUndefined()
   })
 
+  it('a thrown lookup becomes a parcel_unavailable row and keeps other rows', async () => {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    ;(resolveLocation as jest.Mock).mockImplementation(async (a: { mahalleText: string }) => {
+      if (a.mahalleText === 'Patlayan') throw new Error('TKGM down')
+      return { kind: 'resolved', mahalleId: 1, il: 'Trabzon', ilce: 'Ortahisar', mahalle: a.mahalleText }
+    })
+    const card = await compareParcels({ parcels: [arg('A'), arg('Patlayan')] }, deps, { memberView: true })
+    spy.mockRestore()
+    expect(card.rows).toHaveLength(2)
+    expect(card.rows[0].status).toBe('resolved')
+    expect(card.rows[1].status).toBe('parcel_unavailable')
+    expect(card.rows[1].label).toBe('Patlayan 1/2')
+    expect(card.recommendation).toBeUndefined()
+  })
+
   it('resolved rows < 2 gives no recommendation', async () => {
     const card = await compareParcels({ parcels: [arg('A'), arg('Belirsiz'), arg('Belirsiz')] }, deps, { memberView: true })
     expect(card.recommendation).toBeUndefined()
