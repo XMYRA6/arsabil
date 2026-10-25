@@ -63,3 +63,24 @@ it('unresolved row shows status text', () => {
   expect(screen.getAllByText('Parsel bulunamadı')).toHaveLength(2)
   expect(screen.getByText('Veri şu an alınamadı')).toBeInTheDocument()
 })
+
+it('table has an accessible name and column-scoped headers', () => {
+  render(<AkifParcelCompareCard card={member} />)
+  expect(screen.getByRole('table', { name: 'Parsel karşılaştırma' })).toBeInTheDocument()
+  const headers = screen.getAllByRole('columnheader')
+  expect(headers.length).toBeGreaterThan(0)
+  headers.forEach((h) => expect(h).toHaveAttribute('scope', 'col'))
+})
+
+it('out-of-range recommendation rowIndex renders without crash and without recommendation box', () => {
+  render(<AkifParcelCompareCard card={{ ...member, recommendation: { rowIndex: 9, criterion: 'c', reason: 'r' } }} />)
+  expect(screen.getByRole('table')).toBeInTheDocument()
+  expect(screen.queryByText("Akif'in önerisi")).toBeNull()
+  expect(screen.queryByText('Önerilen')).toBeNull()
+})
+
+it('empty rows renders the table shell without crash', () => {
+  render(<AkifParcelCompareCard card={{ kind: 'parcel_compare', tier: 'member', rows: [], note: 'Not.' }} />)
+  expect(screen.getByRole('table', { name: 'Parsel karşılaştırma' })).toBeInTheDocument()
+  expect(screen.getByText('Not.')).toBeInTheDocument()
+})

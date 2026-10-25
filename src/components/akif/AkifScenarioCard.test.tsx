@@ -48,3 +48,21 @@ it('scenario card renders recommendation block when present and none when absent
   expect(screen.getByText(/Ölçüt: en yüksek değer/)).toBeInTheDocument()
   expect(screen.getAllByText('Müteahhit %50')[0].closest('tr')).toHaveAttribute('aria-current', 'true')
 })
+
+it('table has an accessible name and column-scoped headers', () => {
+  render(<AkifScenarioCard card={card} />)
+  expect(screen.getByRole('table', { name: 'Senaryo karşılaştırma' })).toBeInTheDocument()
+  screen.getAllByRole('columnheader').forEach((h) => expect(h).toHaveAttribute('scope', 'col'))
+})
+
+it('out-of-range recommendation rowIndex renders without crash and without recommendation box', () => {
+  render(<AkifScenarioCard card={{ ...card, recommendation: { rowIndex: 9, criterion: 'c', reason: 'r' } }} />)
+  expect(screen.getByRole('table')).toBeInTheDocument()
+  expect(screen.queryByText("Akif'in önerisi")).toBeNull()
+})
+
+it('empty rows renders without crash', () => {
+  render(<AkifScenarioCard card={{ ...card, rows: [] }} />)
+  expect(screen.getByRole('table', { name: 'Senaryo karşılaştırma' })).toBeInTheDocument()
+  expect(screen.getByText(/Emsal alanı/)).toBeInTheDocument()
+})

@@ -20,14 +20,14 @@ export function AkifScenarioCard({ card }: AkifScenarioCardProps) {
     <div className={styles.card}>
       <div className={styles.title}>{TITLE[card.kind] ?? ''}</div>
       <div className={styles.scroll}>
-        <table className={styles.table}>
+        <table className={styles.table} aria-label="Senaryo karşılaştırma">
           <thead>
             <tr>
-              <th>Senaryo</th>
-              <th>Arsa Payı</th>
-              <th>Arsa Sah. Daire</th>
-              <th>Arsa Sah. Değeri</th>
-              <th>Daire Satış</th>
+              <th scope="col">Senaryo</th>
+              <th scope="col">Arsa Payı</th>
+              <th scope="col">Arsa Sah. Daire</th>
+              <th scope="col">Arsa Sah. Değeri</th>
+              <th scope="col">Daire Satış</th>
             </tr>
           </thead>
           <tbody>

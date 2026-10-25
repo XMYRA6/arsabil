@@ -33,15 +33,15 @@ export function AkifParcelCompareCard({ card }: AkifParcelCompareCardProps) {
     <div className={styles.card}>
       <div className={styles.title}>Parsel Karşılaştırma</div>
       <div className={styles.scroll}>
-        <table className={styles.table}>
+        <table className={styles.table} aria-label="Parsel karşılaştırma">
           <thead>
             <tr>
-              <th>Parsel</th>
-              <th>Alan</th>
-              {member && <th>Tahmin</th>}
-              {member && <th>₺/m²</th>}
-              {member && <th>Güven</th>}
-              <th>Aralık</th>
+              <th scope="col">Parsel</th>
+              <th scope="col">Alan</th>
+              {member && <th scope="col">Tahmin</th>}
+              {member && <th scope="col">₺/m²</th>}
+              {member && <th scope="col">Güven</th>}
+              <th scope="col">Aralık</th>
             </tr>
           </thead>
           <tbody>
