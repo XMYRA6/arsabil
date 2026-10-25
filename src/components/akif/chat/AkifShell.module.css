@@ -279,7 +279,15 @@
     margin-bottom: calc(var(--akif-bottom) - var(--mobile-nav-pb, 0px));
   }
   /* Klavye açık: alt çubuk klavyenin altında kalır; boşluk bırakma. */
-  .shell[data-keyboard] { height: 100dvh; }
+  .shell[data-keyboard] {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--vv-top, 0px);
+    height: var(--vv-h, 100dvh);
+    margin-bottom: 0;
+    z-index: var(--z-sheet-backdrop, 1100);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

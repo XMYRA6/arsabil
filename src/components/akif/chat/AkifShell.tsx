@@ -70,8 +70,23 @@ export function AkifShell(p: AkifShellProps) {
   // Klavye açıkken alt çubuk payı kalkar; yüksekliği AkifChat'in .wrap'i klavye kadar kırpar.
   const keyboardInset = useKeyboardInset()
   const keyboardOpen = keyboardInset > 80
+  // iOS klavye açılınca yerleşim viewport'unu küçültmez, görsel viewport'u kaydırır; kabuğu
+  // tam olarak görünür alana (üst ofset + yükseklik) sabitleriz ki mesaj kutusu klavyenin üstünde kalsın.
+  const [vvBox, setVvBox] = useState<{ top: number; height: number } | null>(null)
   useEffect(() => {
-    if (keyboardOpen) window.scrollTo(0, 0)
+    const vv = window.visualViewport
+    if (!keyboardOpen || !vv) {
+      setVvBox(null)
+      return
+    }
+    const update = () => setVvBox({ top: vv.offsetTop, height: vv.height })
+    update()
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+    }
   }, [keyboardOpen])
   const drawerRef = useRef<HTMLDivElement>(null)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
@@ -206,6 +221,7 @@ export function AkifShell(p: AkifShellProps) {
       ref={shellRef}
       className={s.shell}
       data-keyboard={keyboardOpen ? '' : undefined}
+      style={vvBox ? ({ '--vv-top': `${vvBox.top}px`, '--vv-h': `${vvBox.height}px` } as React.CSSProperties) : undefined}
       data-drawer-open={drawerOpen ? '' : undefined}
       data-sheet-open={sheetOpen ? '' : undefined}
       data-panel-open={panelOpen ? '' : undefined}
