@@ -37,3 +37,14 @@ it('apartment_sizes başlığı', () => {
   render(<AkifScenarioCard card={{ ...card, kind: 'apartment_sizes' }} />)
   expect(screen.getByText(/Daire Büyüklüğü Senaryoları/)).toBeInTheDocument()
 })
+
+it('scenario card renders recommendation block when present and none when absent', () => {
+  const { rerender, container } = render(<AkifScenarioCard card={card} />)
+  expect(screen.queryByText(/Akif'in önerisi/)).toBeNull()
+  expect(container.querySelector('[aria-current="true"]')).toBeNull()
+  rerender(<AkifScenarioCard card={{ ...card, recommendation: { rowIndex: 1, criterion: 'en yüksek değer', reason: 'Daha avantajlı.' } }} />)
+  expect(screen.getByText(/Akif'in önerisi/)).toBeInTheDocument()
+  expect(screen.getByText('Daha avantajlı.')).toBeInTheDocument()
+  expect(screen.getByText(/Ölçüt: en yüksek değer/)).toBeInTheDocument()
+  expect(screen.getAllByText('Müteahhit %50')[0].closest('tr')).toHaveAttribute('aria-current', 'true')
+})

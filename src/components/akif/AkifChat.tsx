@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { AkifTurn, ScenarioCard, ParcelCard, ProjectCard } from '@/lib/ai/akif/contract'
+import type { AkifTurn, ScenarioCard, ParcelCard, ProjectCard, ParcelCompareCard } from '@/lib/ai/akif/contract'
 import { useKeyboardInset } from '@/components/mobile/useKeyboardInset'
 import { AkifMessageBubble } from './AkifMessageBubble'
 import { AkifAssumptionsBar } from './AkifAssumptionsBar'
 import { AkifScenarioCard } from './AkifScenarioCard'
 import { AkifParcelCard } from './AkifParcelCard'
+import { AkifParcelCompareCard } from './AkifParcelCompareCard'
 import { AkifProjectCard } from './AkifProjectCard'
 import styles from './AkifChat.module.css'
 
@@ -123,6 +124,7 @@ export function AkifChat({ entries, pending, onSend, onVoice, initialDraft }: Ak
                 <AkifScenarioCard card={tr as ScenarioCard} />
               )}
               {tr?.kind === 'parcel' && <AkifParcelCard card={tr as ParcelCard} />}
+              {tr?.kind === 'parcel_compare' && <AkifParcelCompareCard card={tr as ParcelCompareCard} />}
               {tr?.kind === 'project' && <AkifProjectCard card={tr as ProjectCard} />}
               {turn.needs_confirmation && (
                 <div className={styles.confirm}>

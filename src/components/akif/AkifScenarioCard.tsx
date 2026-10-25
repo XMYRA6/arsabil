@@ -1,4 +1,5 @@
 import type { ScenarioCard } from '@/lib/ai/akif/contract'
+import { AkifRecommendation } from './AkifRecommendation'
 import styles from './AkifScenarioCard.module.css'
 
 const tl = (n: number) => `${n.toLocaleString('tr-TR')} ₺`
@@ -31,8 +32,15 @@ export function AkifScenarioCard({ card }: AkifScenarioCardProps) {
           </thead>
           <tbody>
             {(card.rows ?? []).map((r, i) => (
-              <tr key={i}>
-                <td>{r.label}</td>
+              <tr
+                key={i}
+                className={card.recommendation?.rowIndex === i ? styles.recommended : undefined}
+                aria-current={card.recommendation?.rowIndex === i ? 'true' : undefined}
+              >
+                <td>
+                  {r.label}
+                  {card.recommendation?.rowIndex === i && <span className={styles.badge}>Önerilen</span>}
+                </td>
                 <td>%{Math.round(r.arsaPayiX * 100)}</td>
                 <td>{num(r.arsaSahibiDaireSayisi)}</td>
                 <td>{money(r.arsaSahibiDegeriTL)}</td>
@@ -42,6 +50,12 @@ export function AkifScenarioCard({ card }: AkifScenarioCardProps) {
           </tbody>
         </table>
       </div>
+      {card.recommendation && card.rows?.[card.recommendation.rowIndex] && (
+        <AkifRecommendation
+          recommendation={card.recommendation}
+          rowLabel={card.rows[card.recommendation.rowIndex].label}
+        />
+      )}
       <p className={styles.note}>{card.emsalNote}</p>
     </div>
   )

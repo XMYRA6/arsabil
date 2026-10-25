@@ -49,4 +49,17 @@ describe('AkifVoiceTranscript', () => {
     )
     expect(container.textContent).toBe('')
   })
+
+  it('voice transcript renders parcel_compare card', () => {
+    render(
+      <AkifVoiceTranscript
+        items={[{
+          id: '1', role: 'akif', text: '',
+          card: { kind: 'parcel_compare', tier: 'member', rows: [{ label: 'Oran 12/5', status: 'parcel_not_found' }] },
+        }]}
+      />,
+    )
+    expect(screen.getByText('Oran 12/5')).toBeInTheDocument()
+    expect(screen.getByText('Parsel bulunamadı')).toBeInTheDocument()
+  })
 })

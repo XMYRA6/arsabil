@@ -242,6 +242,12 @@ describe('tool_result türüne göre kart (çökme koruması)', () => {
     expect(screen.getByText(/25\.000/)).toBeInTheDocument()
   })
 
+  it('chat renders parcel_compare card', () => {
+    renderIt({ kind: 'parcel_compare', tier: 'member', rows: [{ label: 'Oran 12/5', status: 'parcel_unavailable' }] })
+    expect(screen.getByText('Oran 12/5')).toBeInTheDocument()
+    expect(screen.getByText('Veri şu an alınamadı')).toBeInTheDocument()
+  })
+
   it('parcel resolved ama dto yok → çökmez', () => {
     expect(() => renderIt({ kind: 'parcel', status: 'resolved' })).not.toThrow()
   })

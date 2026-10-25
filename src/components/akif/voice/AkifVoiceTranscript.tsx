@@ -1,7 +1,8 @@
 'use client'
 
-import type { ScenarioCard } from '@/lib/ai/akif/contract'
+import type { ParcelCompareCard, ScenarioCard } from '@/lib/ai/akif/contract'
 import { AkifMessageBubble } from '../AkifMessageBubble'
+import { AkifParcelCompareCard } from '../AkifParcelCompareCard'
 import { AkifScenarioCard } from '../AkifScenarioCard'
 import type { VoiceTranscriptItem } from './useRealtimeVoice'
 import styles from './AkifVoiceTranscript.module.css'
@@ -18,6 +19,9 @@ export function AkifVoiceTranscript({ items }: { items: VoiceTranscriptItem[] })
                 <div className={styles.termEx}>Örnek: {it.card.example}</div>
               </div>
             )
+          }
+          if (it.card.kind === 'parcel_compare') {
+            return <AkifParcelCompareCard key={it.id} card={it.card as ParcelCompareCard} />
           }
           return <AkifScenarioCard key={it.id} card={it.card as ScenarioCard} />
         }
