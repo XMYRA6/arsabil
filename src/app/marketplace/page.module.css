@@ -38,7 +38,7 @@
 .mapLoading { min-height: 640px; }
 
 @media (max-width: 900px) {
-  .container { padding: 12px 16px 32px; }
+  .container { padding: max(12px, calc(var(--safe-top, 0px) + 8px)) 16px 32px; }
   /* Mobilde başlık, açıklama ve "Örnek veri" rozeti yok: alt menüde sekme adı zaten var.
      Örnek veri uyarısı sayım satırında küçük metin olarak korunur (şeffaflık ilkesi). */
   .pageHead { display: none; }
