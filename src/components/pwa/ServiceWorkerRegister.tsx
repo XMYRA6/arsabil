@@ -13,6 +13,17 @@ export function ServiceWorkerRegister() {
         return installChunkErrorReload();
     }, []);
 
+    // iOS Safari viewport kısıtlarını yok sayıp iki parmakla yakınlaştırır; gesture olaylarını durdur.
+    useEffect(() => {
+        const block = (e: Event) => e.preventDefault();
+        document.addEventListener("gesturestart", block);
+        document.addEventListener("gesturechange", block);
+        return () => {
+            document.removeEventListener("gesturestart", block);
+            document.removeEventListener("gesturechange", block);
+        };
+    }, []);
+
     useEffect(() => {
         if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
             // Reload the page when the service worker changes

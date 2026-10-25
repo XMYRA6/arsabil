@@ -4,6 +4,7 @@
 // kırılımlar yalnız CSS ile değişir (öğe kopyalanmaz, durum kaybolmaz).
 'use client'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useKeyboardInset } from '@/components/mobile/useKeyboardInset'
 import s from './AkifShell.module.css'
 
 export interface AkifShellProps {
@@ -66,6 +67,12 @@ export function AkifShell(p: AkifShellProps) {
   const [draft, setDraft] = useState('')
 
   const shellRef = useRef<HTMLDivElement>(null)
+  // Klavye açıkken kabuk görünür alana sığar: mesaj kutusu klavyenin üstüne süzülür.
+  const keyboardInset = useKeyboardInset()
+  const keyboardOpen = keyboardInset > 80
+  useEffect(() => {
+    if (keyboardOpen) window.scrollTo(0, 0)
+  }, [keyboardOpen])
   const drawerRef = useRef<HTMLDivElement>(null)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   const chipRef = useRef<HTMLButtonElement>(null)
@@ -198,6 +205,8 @@ export function AkifShell(p: AkifShellProps) {
     <div
       ref={shellRef}
       className={s.shell}
+      data-keyboard={keyboardOpen ? '' : undefined}
+      style={{ '--kb': `${Math.max(0, keyboardInset)}px` } as React.CSSProperties}
       data-drawer-open={drawerOpen ? '' : undefined}
       data-sheet-open={sheetOpen ? '' : undefined}
       data-panel-open={panelOpen ? '' : undefined}

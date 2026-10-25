@@ -259,7 +259,7 @@
 html,
 body {
   max-width: 100vw;
-  touch-action: manipulation; /* çift dokunuşla yakınlaştırmayı kapatır, tek parmak kaydırma/pinch sürer */
+  touch-action: pan-x pan-y; /* çift dokunuş ve iki parmak yakınlaştırma kapalı; kaydırma sürer */
   overflow-x: clip;
   background: var(--bg-body);
   background-color: var(--bg);
@@ -480,3 +480,12 @@ a {
 
 /* Koyu harita: OSM karosu yalnızca açık sunulur; koyu mod CSS ile türetilir (CARTO karoları API anahtarı istiyor). */
 .leaflet-tile.arsabil-tile-dark { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
+
+/* iOS, 16px'ten küçük alana odaklanınca sayfayı yakınlaştırır; dokunmatik cihazlarda alt sınır 16px. */
+@media (pointer: coarse) {
+  input:not([type='range']):not([type='checkbox']):not([type='radio']),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

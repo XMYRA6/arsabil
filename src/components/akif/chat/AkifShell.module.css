@@ -269,7 +269,9 @@
 }
 
 @media (max-width: 768px) {
-  .shell { --akif-top: 0px; }
+  .shell { --akif-top: 0px; transition: height 200ms var(--ease-out); }
+  /* Klavye açık: alt çubuk klavyenin altında kalır, kabuk görünür alana (100dvh - klavye) sığar. */
+  .shell[data-keyboard] { height: calc(100dvh - var(--kb, 0px)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
