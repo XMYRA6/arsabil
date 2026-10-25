@@ -25,12 +25,30 @@
   border-radius: var(--radius-pill);
   text-decoration: none;
   color: var(--ink-secondary);
+  position: relative;
+  z-index: 1;
   transition: background-color var(--dur-ui) var(--ease-out), color var(--dur-ui) var(--ease-out);
 }
 
 .tab.active {
   background-color: var(--amber-soft);
   color: var(--amber-text);
+}
+
+.bar[data-gosterge='hazir'] .tab.active {
+  background-color: transparent;
+}
+
+.gosterge {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--amber-soft);
+  border-radius: var(--radius-pill);
+  transition: transform var(--dur-indicator) var(--ease-out), width var(--dur-indicator) var(--ease-out), opacity var(--dur-ui) var(--ease-out);
 }
 
 .icon {
@@ -88,5 +106,9 @@
   .tab {
     transition: none;
     transform: none;
+  }
+
+  .gosterge {
+    transition: none;
   }
 }
