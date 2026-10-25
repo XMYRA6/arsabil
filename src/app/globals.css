@@ -91,6 +91,11 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 
+  /* Motion duration tokens — premium gezinme hissi (yalniz opacity/transform) */
+  --dur-enter: 240ms;
+  --dur-indicator: 320ms;
+  --dur-press: 120ms;
+
   /* ===== TYPOGRAPHY TRACKING SCALE (Faz 4 — typography/cohesion audit) =====
      Tracking (letter-spacing) is size-specific — never one value for all
      sizes (Apple HIG). Large display text wants negative tracking; small
@@ -474,5 +479,19 @@ a {
   }
 }
 
+/* ===== HAREKET TEMELI — basma geri bildirimi (premium gezinme hissi) ===== */
+[data-press] {
+  transition: transform var(--dur-press) var(--ease-out);
+}
 
+[data-press]:active {
+  transform: scale(0.97);
+}
 
+@media (prefers-reduced-motion: reduce) {
+  [data-press],
+  [data-press]:active {
+    transition: none;
+    transform: none;
+  }
+}
