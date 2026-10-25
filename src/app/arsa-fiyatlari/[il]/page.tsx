@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getSeoAreas } from '@/lib/areaSeo/seoAreaDeps'
+import { safeStaticParams } from '@/lib/areaSeo/staticParams'
 import { findBySlug } from '@/lib/areaSeo/listSeoAreas'
 import { buildAreaSeoCard } from '@/lib/areaSeo/areaSeoCard'
 import { createAreaSeoCardDeps } from '@/lib/areaSeo/areaSeoCardDeps'
@@ -11,12 +12,12 @@ import styles from '../areaSeo.module.css'
 type Params = { il: string }
 
 export async function generateStaticParams(): Promise<Params[]> {
-  const entries = await getSeoAreas('il')
-  return entries.map((e) => ({ il: e.ilSlug }))
+  return safeStaticParams('il', (e) => ({ il: e.ilSlug }))
 }
 
 export const dynamicParams = true
-export const revalidate = 86400
+// Build ortamında DB yok (Docker build) — önbelleğe boş veri girmesin diye istek anında üretilir.
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { il } = await params

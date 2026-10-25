@@ -5,7 +5,8 @@ import { IllerListesi, type IlKarti } from './IllerListesi'
 import { SayfaBasligi, DegerBandi } from './areaSeoParts'
 import styles from './areaSeo.module.css'
 
-export const revalidate = 86400
+// Build ortamında DB yok (Docker build) — önbelleğe boş veri girmesin diye istek anında üretilir.
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Arsa Fiyatları | ArsaBil',
