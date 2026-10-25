@@ -26,6 +26,7 @@ RUN if [ "$INSECURE_BUILD" = "1" ]; then export NODE_TLS_REJECT_UNAUTHORIZED=0 W
     && gunzip -c /tmp/schema-engine.gz > node_modules/@prisma/engines/schema-engine-linux-musl-openssl-3.0.x \
     && chmod +x node_modules/@prisma/engines/schema-engine-linux-musl-openssl-3.0.x \
     && rm /tmp/schema-engine.gz \
+    && node scripts/stamp-sw.mjs \
     && npx next build --webpack
 
 # ---- Runner ----
