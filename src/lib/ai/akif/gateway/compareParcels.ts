@@ -52,7 +52,7 @@ export async function compareParcels(
       row.confidence = value.confidence
       if (typeof value.estimate === 'number') {
         row.estimate = value.estimate
-        if (parcel.areaSqm > 0) row.pricePerSqm = value.estimate / parcel.areaSqm
+        if (parcel.areaSqm > 0) row.pricePerSqm = Math.round(value.estimate / parcel.areaSqm)
       }
     } else {
       delete row.thinData

@@ -99,4 +99,15 @@ describe('compareParcels', () => {
     const card = await compareParcels({ parcels: [arg('A'), arg('Belirsiz'), arg('Belirsiz')] }, deps, { memberView: true })
     expect(card.recommendation).toBeUndefined()
   })
+
+  it('pricePerSqm is a rounded integer and card text has no decimals', async () => {
+    ;(deps.buildCard as jest.Mock).mockImplementationOnce(async () => ({ ok: true as const, card: mkDto('A', 810, 1_000_001) }))
+    const card = await compareParcels({ parcels: [arg('A'), arg('B')] }, deps, { memberView: true })
+    const row = card.rows[0]
+    expect(Number.isInteger(row.pricePerSqm)).toBe(true)
+    expect(row.pricePerSqm).toBe(Math.round(1_000_001 / 810))
+    expect(card.rows[1].pricePerSqm).toBe(4000)
+    expect(JSON.stringify(card)).not.toMatch(/"pricePerSqm":\d+\.\d/)
+    if (card.recommendation) expect(card.recommendation.reason).not.toMatch(/,\d/)
+  })
 })
