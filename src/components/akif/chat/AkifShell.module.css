@@ -275,8 +275,8 @@
   .shell {
     --akif-top: 0px;
     --akif-bottom: calc(var(--tabbar-top) - 2px);
-    height: calc(100dvh - var(--akif-bottom));
-    margin-bottom: calc(var(--akif-bottom) - var(--mobile-nav-pb, 0px));
+    height: calc(100dvh + var(--vv-extra, 0px) - var(--akif-bottom));
+    margin-bottom: calc(var(--akif-bottom) - var(--mobile-nav-pb, 0px) - var(--vv-extra, 0px));
   }
   /* Klavye açık: alt çubuk klavyenin altında kalır; boşluk bırakma. */
   .shell[data-keyboard] {

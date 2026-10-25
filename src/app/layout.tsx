@@ -7,6 +7,7 @@ import { SiteChrome } from "@/components/layout/SiteChrome";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { UpdateBanner } from "@/components/pwa/UpdateBanner";
+import { ViewportGap } from "@/components/pwa/ViewportGap";
 import { Toaster } from "react-hot-toast";
 
 
@@ -65,6 +66,7 @@ export default function RootLayout({
         <AuthProvider>
           <Toaster position="top-center" containerStyle={{ top: 'calc(12px + env(safe-area-inset-top, 0px))' }} />
           <ServiceWorkerRegister />
+          <ViewportGap />
           <InstallPrompt />
           <UpdateBanner />
           <SiteChrome>{children}</SiteChrome>

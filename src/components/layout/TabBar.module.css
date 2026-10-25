@@ -1,7 +1,7 @@
 .bar {
   position: fixed;
   z-index: var(--z-bottomnav, 90);
-  bottom: max(8px, calc(env(safe-area-inset-bottom) - 15px));
+  bottom: calc(max(8px, calc(env(safe-area-inset-bottom) - 15px)) - var(--vv-extra, 0px));
   left: 50%;
   width: calc(100% - 24px);
   max-width: 440px;

@@ -72,8 +72,7 @@ export function AkifShell(p: AkifShellProps) {
   const keyboardOpen = keyboardInset > 80
   // iOS klavye açılınca yerleşim viewport'unu küçültmez, görsel viewport'u kaydırır; kabuğu
   // tam olarak görünür alana (üst ofset + yükseklik) sabitleriz ki mesaj kutusu klavyenin üstünde kalsın.
-  // iOS klavye kapanınca görsel viewport'u bazen kaydırılmış bırakır (sabit alt çubuk yukarıda
-  // kalır). Açıkken sayfayı sıfırlayıp kapanınca birkaç kez 1px kaydırıp geri alarak yerleşimi eski haline döndürürüz.
+  // Klavye kapanınca sayfa en üste alınır (kalan yerleşim farkını ViewportGap telafi eder).
   const wasKeyboardOpen = useRef(false)
   useEffect(() => {
     if (keyboardOpen) {
@@ -82,18 +81,7 @@ export function AkifShell(p: AkifShellProps) {
     }
     if (!wasKeyboardOpen.current) return
     wasKeyboardOpen.current = false
-    // Sayfa kaydırılabilir olmadığı için scrollTo(0,0) tek başına etkisiz kalır (kullanıcı bulgusu:
-    // elle biraz kaydırınca düzeliyor). 2px'lik geçici yükseklik ekleyip gerçek bir kaydırma olayı üretiriz.
-    const reset = () => {
-      const el = document.documentElement
-      const prev = el.style.minHeight
-      el.style.minHeight = 'calc(100dvh + 2px)'
-      window.scrollTo(0, 1)
-      requestAnimationFrame(() => {
-        window.scrollTo(0, 0)
-        el.style.minHeight = prev
-      })
-    }
+    const reset = () => window.scrollTo(0, 0)
     reset()
     const timers = [60, 200, 500].map((ms) => window.setTimeout(reset, ms))
     return () => timers.forEach((t) => window.clearTimeout(t))
