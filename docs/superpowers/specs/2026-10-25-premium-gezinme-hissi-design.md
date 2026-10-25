@@ -60,3 +60,7 @@ ArsaBil'i iOS'ta (Safari ve ana ekrana eklenmiş PWA) kullananlar bugün donma/k
 4. **Basma efekti kapsamı:** Global seçici YOK; ortak bir yardımcı sınıf/öznitelik ile **opt-in**. Uygulanacaklar: TabBar sekmeleri, ortak `ui` bileşenleri (Button, Chip, SegmentedControl), ilan kartları (`ListingCard`, `IlanKarti`), `mobile/` altındaki tıklanabilir satır/kart bileşenleri (DataCard, SegmentedTabs). Girdiler, harita kontrolleri, BottomSheet sürükleme tutacağı ve kendi `transform`'u olan öğeler dışarıda.
 5. **Kabul çıtası:** Önce/sonra `next build` + `next start` üzerinde aynı yöntemle ölçülür (PerformanceObserver ya da Lighthouse): ana sayfa, `/marketplace`, bir `/listing/[id]`, bir `/arsa-fiyatlari/[il]`. LCP gürültü payını (±%10) aşan kötüleşme olmaz, CLS ≤ 0.02. Ölçüm DB'ye bağlı sayfalarda dev DB (127.0.0.1:5433) ile yapılır.
 6. **Skeleton ile fade ilişkisi:** `loading.tsx` iskeleti rota değişince hemen gösterilir; sayfa girişi fade'i iskelet/içerik hangisi önce gelirse onu kapsar (template yeniden mount olduğunda bir kez). Akan içerik iskeletin yerine geçerken ek animasyon yok (anlık değişim) — rekabet eden animasyon olmasın.
+
+## Doğrulama sonrası değişiklik
+
+`arsa-fiyatlari/loading.tsx` ölçüm sonrası kaldırıldı (SEO sayfalarında LCP kötüleşmesi, 2026-10-25).

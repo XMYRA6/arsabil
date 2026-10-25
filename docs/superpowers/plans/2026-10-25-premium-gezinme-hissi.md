@@ -78,13 +78,13 @@ Test komutu: `npx jest <yol>`; tip: `npx tsc --noEmit`; lint: `npx eslint <yol>`
 - Test: `src/components/ui/__tests__/SayfaIskeleti.test.tsx`
 
 **Interfaces:**
-- Produces: `export type IskeletVaryant = 'liste' | 'detay' | 'panel'`; `export function SayfaIskeleti({ varyant }: { varyant: IskeletVaryant }): JSX.Element` — kök `<div role="status" aria-busy="true" aria-label="Yükleniyor">` (görünmeyen `Yükleniyor…` metni), varyanta göre blok sayısı/düzeni (`liste`: başlık + 6 kart ızgarası; `detay`: görsel + başlık + paragraf blokları; `panel`: başlık + 3 form/panel bloğu). Parıltı: blok içinde `::after` sözde-elemanı `transform: translateX(-100%)→translateX(100%)` animasyonu; reduced-motion'da animasyon yok. Tüm `loading.tsx` dosyaları varsayılan export olarak uygun varyantla `SayfaIskeleti` döner (`arsa-fiyatlari`: `liste`, `profile`: `detay`, `compare`: `detay`, `studio/share`: `detay`).
+- Produces: `export type IskeletVaryant = 'liste' | 'detay' | 'panel'`; `export function SayfaIskeleti({ varyant }: { varyant: IskeletVaryant }): JSX.Element` — kök `<div role="status" aria-busy="true" aria-label="Yükleniyor">` (görünmeyen `Yükleniyor…` metni), varyanta göre blok sayısı/düzeni (`liste`: başlık + 6 kart ızgarası; `detay`: görsel + başlık + paragraf blokları; `panel`: başlık + 3 form/panel bloğu). Parıltı: blok içinde `::after` sözde-elemanı `transform: translateX(-100%)→translateX(100%)` animasyonu; reduced-motion'da animasyon yok. Tüm `loading.tsx` dosyaları varsayılan export olarak uygun varyantla `SayfaIskeleti` döner (`arsa-fiyatlari`: `liste`, `profile`: `detay`, `compare`: `detay`, `studio/share`: `detay`). `arsa-fiyatlari/loading.tsx` ölçüm sonrası kaldırıldı (SEO sayfalarında LCP kötüleşmesi, 2026-10-25).
 - **Ruling (kapsam):** 33 sayfa istemci bileşeni (veriyi `useEffect`'te çeker) ve suspend edemez; `loading.tsx` yalnız sunucu (async) segmentlerde işe yarar, bu yüzden liste yukarıdaki dört segmentle sınırlı. `arsa-fiyatlari/**` sayfaları `force-dynamic` olduğundan iskeletten en çok onlar yararlanır.
 
 - [ ] **Step 1: Write the failing tests** (jsdom): `renders role=status with aria-busy and an accessible label` (3 varyant için); `liste variant renders six card blocks` (`data-testid="iskelet-blok"` sayısı); `each loading.tsx default export renders SayfaIskeleti` (dört dosya import edilip render edilir); CSS dosyası okunup `prefers-reduced-motion` kuralı ve `translateX` içerdiği, `background-position` animasyonu içermediği doğrulanır.
 - [ ] **Step 2: Run** `npx jest src/components/ui/__tests__/SayfaIskeleti.test.tsx` → FAIL.
 - [ ] **Step 3: Implement** yukarıdaki imzalarla; renkler mevcut tokenlardan (`--surface-2`, `--line`).
-- [ ] **Step 4: Run** testler + `npx tsc --noEmit` + `npx eslint src/components/ui src/app/arsa-fiyatlari/loading.tsx` → PASS.
+- [ ] **Step 4: Run** testler + `npx tsc --noEmit` + `npx eslint src/components/ui` → PASS.
 - [ ] **Step 5: Commit** — `feat(ui): sunucu rotaları için yükleme iskeletleri`
 
 ---
@@ -159,3 +159,4 @@ Test komutu: `npx jest <yol>`; tip: `npx tsc --noEmit`; lint: `npx eslint <yol>`
 ## Plan notu
 
 Spec §2 "çoğu rota" iskeleti istiyordu; kodda 33 sayfa istemci bileşeni olduğu için iskelet yalnız 4 sunucu segmentine (Task 3 ruling'i) uygulanıyor. İstemci sayfaların kendi yükleme durumları ayrı bir işte ele alınabilir.
+`arsa-fiyatlari/loading.tsx` ölçüm sonrası kaldırıldı (SEO sayfalarında LCP kötüleşmesi, 2026-10-25).

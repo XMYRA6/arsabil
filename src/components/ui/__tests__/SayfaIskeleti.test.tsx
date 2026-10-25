@@ -3,7 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { SayfaIskeleti, type IskeletVaryant } from '../SayfaIskeleti';
-import ArsaFiyatlariLoading from '@/app/arsa-fiyatlari/loading';
 import ProfileLoading from '@/app/profile/[userId]/loading';
 import CompareLoading from '@/app/compare/[token]/loading';
 import StudioShareLoading from '@/app/studio/share/[token]/loading';
@@ -28,7 +27,6 @@ describe('SayfaIskeleti', () => {
   });
 
   it.each([
-    ['arsa-fiyatlari', ArsaFiyatlariLoading],
     ['profile', ProfileLoading],
     ['compare', CompareLoading],
     ['studio/share', StudioShareLoading],
