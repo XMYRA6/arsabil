@@ -51,6 +51,11 @@
   transition: transform var(--dur-indicator) var(--ease-out), width var(--dur-indicator) var(--ease-out), opacity var(--dur-ui) var(--ease-out);
 }
 
+.gosterge[data-ilk='true'] {
+  /* İlk gösterim: konuma anında yerleş, yalnız opacity geçişi. */
+  transition: opacity var(--dur-ui) var(--ease-out);
+}
+
 .icon {
   position: relative;
   display: flex;
@@ -108,7 +113,8 @@
     transform: none;
   }
 
-  .gosterge {
+  .gosterge,
+  .gosterge[data-ilk='true'] {
     transition: none;
   }
 }

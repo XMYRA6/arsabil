@@ -14,7 +14,9 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 
 export function TabBar({ tabs, activeHref }: TabBarProps) {
     const navRef = useRef<HTMLElement>(null);
-    const [olcum, setOlcum] = useState<{ x: number; width: number } | null>(null);
+    const [olcum, setOlcum] = useState<{ x: number; width: number; ilk: boolean } | null>(null);
+    // Gösterge son ölçümde gizli (aktif sekme yok / ölçülmemiş) muydu: ilk gösterimde kayma yerine anında konumlanır.
+    const gizliRef = useRef(true);
 
     const activeIndex = tabs.findIndex((tab) =>
         tab.href === '/' ? activeHref === '/' : activeHref === tab.href || activeHref.startsWith(tab.href + '/'),
@@ -28,12 +30,19 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
         const rects: TabRect[] = links.map((el) => ({ left: el.offsetLeft, width: el.offsetWidth }));
         const sonuc = hesaplaGosterge(rects, activeIndex);
         if (!sonuc || sonuc.width <= 0) {
-            // Aktif sekme yok: son konumu koru (gösterge gizli kalır, kaymaz); ölçüm geçersizse statik arka plan.
+            // Aktif sekme yok ama sekmeler ölçülebiliyor: son konumu koru, gösterge opacity 0 ile gizlenir.
+            // Sekmeler ölçülemiyorsa (ör. masaüstünde nav display:none => tüm genişlikler 0) ölçümü
+            // geçersiz say; statik .active arka planı geçerli kalır.
+            gizliRef.current = true;
             if (!sonuc && rects.some((r) => r.width > 0)) return;
             setOlcum(null);
             return;
         }
-        setOlcum((onceki) => (onceki && onceki.x === sonuc.x && onceki.width === sonuc.width ? onceki : sonuc));
+        const ilk = gizliRef.current;
+        gizliRef.current = false;
+        setOlcum((onceki) =>
+            onceki && onceki.x === sonuc.x && onceki.width === sonuc.width && onceki.ilk === ilk ? onceki : { ...sonuc, ilk },
+        );
     }, [activeIndex]);
 
     useIsomorphicLayoutEffect(() => {
@@ -65,6 +74,7 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
             <span
                 aria-hidden="true"
                 className={styles.gosterge}
+                data-ilk={olcum?.ilk ? 'true' : undefined}
                 style={{
                     transform: `translateX(${olcum?.x ?? 0}px)`,
                     width: olcum?.width ?? 0,

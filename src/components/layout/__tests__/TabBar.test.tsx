@@ -72,6 +72,22 @@ describe('TabBar gösterge', () => {
     expect(g.style.transform).toBe('translateX(88px)')
     expect(g.style.width).toBe('72px')
   })
+  it('first reveal after a hidden state does not transition transform/width (only opacity)', () => {
+    const { container, rerender } = render(<TabBar tabs={tabs} activeHref="/studio" />)
+    const g = () => container.querySelector('nav > span[aria-hidden="true"]') as HTMLElement
+    expect(g()).not.toHaveAttribute('data-ilk')
+    rerender(<TabBar tabs={tabs} activeHref="/hesapla" />)
+    expect(g()).toHaveAttribute('data-ilk', 'true')
+    expect(g().style.opacity).toBe('1')
+  })
+  it('after the first reveal the full transition is restored', () => {
+    const { container, rerender } = render(<TabBar tabs={tabs} activeHref="/studio" />)
+    rerender(<TabBar tabs={tabs} activeHref="/hesapla" />)
+    rerender(<TabBar tabs={tabs} activeHref="/" />)
+    const g = container.querySelector('nav > span[aria-hidden="true"]') as HTMLElement
+    expect(g).not.toHaveAttribute('data-ilk')
+    expect(g.style.transform).toBe('translateX(8px)')
+  })
   it('dot and unread label still render', () => {
     render(<TabBar tabs={tabs} activeHref="/" />)
     expect(screen.getByText('Okunmamış bildirim var')).toBeInTheDocument()
