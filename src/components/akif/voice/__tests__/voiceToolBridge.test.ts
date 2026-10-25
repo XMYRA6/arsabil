@@ -78,3 +78,25 @@ it('ordinary ScenarioCard still works', async () => {
   expect(r.card).not.toBeNull()
   expect(r.pendingAction).toBeUndefined()
 })
+
+describe('displayNote', () => {
+  const NOTE = 'Kart ekranda gösterildi; satırları okuma, yalnız özet ve öneriyi söyle.'
+  it.each(['contractor_offers', 'apartment_sizes', 'parcel_compare'])(
+    'comparison card output for model carries displayNote while card object does not (%s)',
+    async (kind) => {
+      const card = { kind, rows: [1, 2] }
+      const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => card })
+      const r = await runVoiceToolCall(ev, { sessionId: 's1', fetchFn: fetchFn as never })
+      expect(r.card).toEqual(card)
+      expect(r.card).not.toHaveProperty('displayNote')
+      expect(JSON.parse(r.outputForModel)).toEqual({ ...card, displayNote: NOTE })
+    },
+  )
+
+  it('term card output has no displayNote', async () => {
+    const card = { kind: 'term', term: 'emsal', shortDef: 'x', example: 'y' }
+    const fetchFn = jest.fn().mockResolvedValue({ ok: true, json: async () => card })
+    const r = await runVoiceToolCall(ev, { sessionId: 's1', fetchFn: fetchFn as never })
+    expect(JSON.parse(r.outputForModel)).not.toHaveProperty('displayNote')
+  })
+})

@@ -14,6 +14,7 @@ import { AKIF_TOOL_DEFS } from '../gateway/toolRegistry'
 import { ACTION_TOOL_DEFS } from '../gateway/actionTools'
 import { RICH_EXTRA_TOOL_DEFS } from '../gateway/richTools'
 import { VOICE_RHYTHM_PROMPT } from './voiceRhythm'
+import { COMPARISON_RULES_PROMPT } from '../prompts/comparisonRules'
 
 export interface RealtimeSessionConfig {
   type: 'realtime'
@@ -40,7 +41,9 @@ export function buildRealtimeSessionConfig(args: {
   return {
     type: 'realtime',
     model: args.model,
-    instructions: `${base}\n\n${VOICE_RHYTHM_PROMPT}`,
+    instructions: `${base}\n\n${VOICE_RHYTHM_PROMPT}
+
+${COMPARISON_RULES_PROMPT}`,
     tools: [...AKIF_TOOL_DEFS, ...ACTION_TOOL_DEFS, ...RICH_EXTRA_TOOL_DEFS],
     tool_choice: 'auto',
     audio: {

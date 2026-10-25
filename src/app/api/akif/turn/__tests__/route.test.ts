@@ -80,6 +80,7 @@ jest.mock('@/lib/rate-limit', () => ({
 }))
 
 import { POST } from '../route'
+import { COMPARISON_RULES_PROMPT } from '@/lib/ai/akif/prompts/comparisonRules'
 import { ConversationOwnershipError } from '@/lib/akif/chat/conversationStore'
 
 const TURN = {
@@ -142,6 +143,7 @@ describe('POST /api/akif/turn', () => {
       conversationId: 'c1',
       history: validBody.history,
       userMessage: validBody.userMessage,
+      extraSystemPrompt: COMPARISON_RULES_PROMPT,
     })
     expect(await res.json()).toEqual(TURN)
   })

@@ -10,6 +10,7 @@ import OpenAI from 'openai'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { runAkifTurn } from '@/lib/ai/akif/orchestrator'
+import { COMPARISON_RULES_PROMPT } from '@/lib/ai/akif/prompts/comparisonRules'
 import { createAkifModel, readAkifEnv } from '@/lib/ai/akif/openaiClient'
 import { createAuditLogger, type AuditDb } from '@/lib/ai/akif/audit'
 import { checkConversationBudget, checkMonthlyBudget } from '@/lib/ai/akif/costGuard'
@@ -167,7 +168,7 @@ export async function POST(req: Request) {
   // 7. Tur akışı.
   try {
     const turn = await runAkifTurn(
-      { conversationId, history, userMessage, projectMemory },
+      { conversationId, history, userMessage, projectMemory, extraSystemPrompt: COMPARISON_RULES_PROMPT },
       {
         model,
         modelName: env.model,

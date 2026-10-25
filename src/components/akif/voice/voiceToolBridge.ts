@@ -6,6 +6,9 @@ export type PendingActionSignal =
   | { type: 'committed'; scenarioId: string; projectId: string; projectName: string; undoToken: string; undoUntil: string }
   | { type: 'blocked' | 'error'; message: string }
 
+const COMPARISON_KINDS = new Set(['contractor_offers', 'apartment_sizes', 'parcel_compare'])
+const COMPARISON_DISPLAY_NOTE = 'Kart ekranda gösterildi; satırları okuma, yalnız özet ve öneriyi söyle.'
+
 export interface ToolBridgeResult {
   card: ToolResultCard | null
   outputForModel: string
@@ -40,7 +43,10 @@ export async function runVoiceToolCall(
       return { card: null, pendingAction: { type: 'committed', scenarioId: data.scenarioId as string, projectId: data.projectId as string, projectName: data.projectName as string, undoToken: data.undoToken as string, undoUntil: data.undoUntil as string }, outputForModel: JSON.stringify(data) }
     }
     if (data && typeof data.kind === 'string') {
-      return { card: data as unknown as ToolResultCard, outputForModel: JSON.stringify(data) }
+      const outputForModel = COMPARISON_KINDS.has(data.kind)
+        ? JSON.stringify({ ...data, displayNote: COMPARISON_DISPLAY_NOTE })
+        : JSON.stringify(data)
+      return { card: data as unknown as ToolResultCard, outputForModel }
     }
     // invalid_args veya beklenmeyen şekil — modele olduğu gibi taşı
     return { card: null, outputForModel: JSON.stringify(data) }

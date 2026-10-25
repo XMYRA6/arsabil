@@ -2,6 +2,7 @@ import { buildRealtimeSessionConfig } from '../realtimeSession'
 import { AKIF_TOOL_DEFS } from '../../gateway/toolRegistry'
 import { ACTION_TOOL_DEFS } from '../../gateway/actionTools'
 import { RICH_EXTRA_TOOL_DEFS } from '../../gateway/richTools'
+import { COMPARISON_RULES_PROMPT } from '../../prompts/comparisonRules'
 
 describe('buildRealtimeSessionConfig', () => {
   const cfg = buildRealtimeSessionConfig({ model: 'gpt-realtime-mini', voiceName: 'marin' })
@@ -24,6 +25,10 @@ describe('buildRealtimeSessionConfig', () => {
     expect(cfg.instructions).toMatch(/SES PERFORMANSI/)
     // Akif personası: sistem prompt'tan bir çapa kelime
     expect(cfg.instructions.length).toBeGreaterThan(500)
+  })
+
+  it('instructions contain comparison rules', () => {
+    expect(cfg.instructions).toContain(COMPARISON_RULES_PROMPT)
   })
 
   it('tools include compareParcels', () => {
