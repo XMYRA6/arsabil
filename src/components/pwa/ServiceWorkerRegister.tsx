@@ -17,9 +17,23 @@ export function ServiceWorkerRegister() {
         if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
             // Reload the page when the service worker changes
             let refreshing = false;
+            // Uygulama yeni açıldığında (kullanıcı henüz bir şey yapmadan) bekleyen sürüm
+            // varsa banner beklemeden uygula: aksi halde PWA eski sürümde kalıp kalıp duruyor.
+            let autoApply = false;
+            const EARLY_MS = 15_000;
+            const applyIfEarly = (worker: ServiceWorker | null) => {
+                if (worker && performance.now() < EARLY_MS) {
+                    autoApply = true;
+                    worker.postMessage({ type: "SKIP_WAITING" });
+                }
+            };
             navigator.serviceWorker.addEventListener("controllerchange", () => {
                 if (!refreshing) {
                     refreshing = true;
+                    if (autoApply) {
+                        window.location.reload();
+                        return;
+                    }
                     // Eğer sayfa gizliyse hemen yenile, değilse gizlenince yenile (kullanıcıyı bölmemek için)
                     if (document.visibilityState === "hidden") {
                         window.location.reload();
@@ -36,9 +50,11 @@ export function ServiceWorkerRegister() {
             });
 
             navigator.serviceWorker
-                .register("/sw.js")
+                .register("/sw.js", { updateViaCache: "none" })
                 .then((registration) => {
                     console.log("[ArsaBil] Service Worker kayıtlı.");
+                    if (navigator.serviceWorker.controller) applyIfEarly(registration.waiting);
+                    registration.update();
 
                     // Check for updates periodically (every 1 hour)
                     setInterval(() => {
@@ -61,6 +77,7 @@ export function ServiceWorkerRegister() {
                             newWorker.addEventListener("statechange", () => {
                                 if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
                                     console.log("[ArsaBil] Yeni sürüm indirildi, arka planda güncelleniyor...");
+                                    applyIfEarly(newWorker);
                                 }
                             });
                         }

@@ -136,6 +136,33 @@ export function BottomSheet({ open, onClose, title, className, showCloseButton =
         };
     }, [open, onClose]);
 
+    // iOS Safari/PWA'da `overflow:hidden` body'yi KILITLEMEZ: panele dokunup sürükleyince
+    // kaydırma zinciri arkadaki sayfaya geçer. Çözüm: panel açıkken touchmove'u yakala;
+    // yalnızca `.content` kendi içinde gerçekten kaydırılabiliyorsa (ve uçta değilse) izin ver.
+    useEffect(() => {
+        if (!open) return;
+        let startY = 0;
+        const onStart = (e: TouchEvent) => { startY = e.touches[0]?.clientY ?? 0; };
+        const onMove = (e: TouchEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target?.closest('input[type="range"]')) return;
+            const content = contentRef.current;
+            if (content && target && content.contains(target) && content.scrollHeight > content.clientHeight) {
+                const dy = (e.touches[0]?.clientY ?? 0) - startY;
+                const atTop = content.scrollTop <= 0;
+                const atBottom = content.scrollTop + content.clientHeight >= content.scrollHeight - 1;
+                if (!((dy > 0 && atTop) || (dy < 0 && atBottom))) return;
+            }
+            if (e.cancelable) e.preventDefault();
+        };
+        document.addEventListener('touchstart', onStart, { passive: true });
+        document.addEventListener('touchmove', onMove, { passive: false });
+        return () => {
+            document.removeEventListener('touchstart', onStart);
+            document.removeEventListener('touchmove', onMove);
+        };
+    }, [open]);
+
     // Minimal odak yönetimi: açılışta tetikleyiciyi hatırla ve odağı panele
     // taşı; kapanışta odağı tetikleyiciye geri döndür (tam bir focus trap
     // değil — sadece giriş/çıkış odağı).

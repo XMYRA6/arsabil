@@ -29,6 +29,14 @@ const nextConfig = {
                     },
                 ],
             },
+            {
+                // SW dosyası ara katmanlarda (Traefik/CDN/tarayıcı HTTP önbelleği) ASLA önbelleklenmemeli:
+                // tarayıcı güncellemeyi sw.js'in bayt farkıyla algılar.
+                source: '/sw.js',
+                headers: [
+                    { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+                ],
+            },
         ]
     },
 };

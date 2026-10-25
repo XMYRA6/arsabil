@@ -12,13 +12,14 @@ import { splitListingsByCoords } from '@/lib/listing/listingCoords';
 /* ─── Tile Sources (all free, no API key) ─── */
 const TILES = {
     light: {
-        url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-        attr: '© OpenStreetMap contributors, © CARTO',
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attr: '© OpenStreetMap contributors',
         label: '🗺️ Sokak (Light)',
     },
     dark: {
-        url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        attr: '© OpenStreetMap contributors, © CARTO',
+        url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        attr: '© OpenStreetMap contributors',
+        className: 'arsabil-tile-dark',
         label: '🌙 Sokak (Dark)',
     },
     satellite: {
@@ -143,9 +144,9 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
 
     const [tileKey, setTileKey] = useState<TileKey>(() => {
         if (typeof window !== 'undefined') {
-            return (localStorage.getItem('arsabil-map-tile') as TileKey) || 'dark';
+            return (localStorage.getItem('arsabil-map-tile-v2') as TileKey) || 'satellite';
         }
-        return 'dark';
+        return 'satellite';
     });
     const [showTileMenu, setShowTileMenu] = useState(false);
     const [pinMode, setPinMode] = useState(false);
@@ -172,9 +173,9 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
             // Tile layer
-            const savedTile = (typeof window !== 'undefined' ? localStorage.getItem('arsabil-map-tile') : null) as TileKey || 'dark';
-            const tile = TILES[savedTile] || TILES.dark;
-            tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, maxZoom: 21, maxNativeZoom: tile.url.includes('arcgisonline') ? 18 : 19 }).addTo(map);
+            const savedTile = (typeof window !== 'undefined' ? localStorage.getItem('arsabil-map-tile-v2') : null) as TileKey || 'satellite';
+            const tile = TILES[savedTile] || TILES.satellite;
+            tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, className: 'className' in tile ? tile.className : '', maxZoom: 21, maxNativeZoom: tile.url.includes('arcgisonline') ? 18 : 19 }).addTo(map);
 
             map.on('moveend', () => {
                 const c = map.getCenter();
@@ -319,8 +320,8 @@ export const MapView = forwardRef<MapViewHandle, Props>(function MapView({ listi
         const L = LRef.current;
         const tile = TILES[tileKey];
         mapRef.current.removeLayer(tileLayerRef.current);
-        tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, maxZoom: 21, maxNativeZoom: tile.url.includes('arcgisonline') ? 18 : 19 }).addTo(mapRef.current);
-        localStorage.setItem('arsabil-map-tile', tileKey);
+        tileLayerRef.current = L.tileLayer(tile.url, { attribution: tile.attr, className: 'className' in tile ? tile.className : '', maxZoom: 21, maxNativeZoom: tile.url.includes('arcgisonline') ? 18 : 19 }).addTo(mapRef.current);
+        localStorage.setItem('arsabil-map-tile-v2', tileKey);
     }, [tileKey]);
 
     /* ─── Heatmap Toggle ─── */

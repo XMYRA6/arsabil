@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { BottomNavbar } from './BottomNavbar';
-import { MobileLegalLine } from './MobileLegalLine';
 
 const KIMLIK_YOLLARI = ['/login', '/register', '/reset-password', '/verify-email'];
 
@@ -24,7 +23,6 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
             <Navbar />
             <main style={{ minHeight: "calc(100dvh - 70px)", paddingBottom: "var(--mobile-nav-pb, 0px)" }}>
                 {children}
-                <MobileLegalLine />
             </main>
             <div className="desktop-footer">
                 <Footer />

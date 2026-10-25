@@ -11,7 +11,7 @@ import type { GeoJSONPolygon } from '@/lib/tkgm/parcel'
 import styles from './EmsalMap.module.css'
 
 // Leaflet SVG/canvas render eder; CSS var() BURADA ÇÖZÜLMEZ — literal renkler.
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTR = '© OpenStreetMap, © CARTO'
 const ARSABIL_BLUE = '#0a5cff'
 const BOUNDARY_GREY = '#6e6e73'

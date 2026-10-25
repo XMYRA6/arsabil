@@ -231,7 +231,7 @@
     padding: 4px 8px;
     text-align: right;
     color: var(--ink);
-    font: 700 15px Inter, sans-serif;
+    font: 700 16px Inter, sans-serif;
 }
 
 .slider {
@@ -406,7 +406,7 @@
 .kartKompakt .alan { gap: 4px; }
 .kartKompakt .konum { min-height: 40px; padding: 0 12px; border-radius: 12px; font-size: 14px; }
 .kartKompakt .girdi { height: 40px; padding: 0 12px; border-radius: 12px; }
-.kartKompakt .girdiInput { font-size: 15px; }
+.kartKompakt .girdiInput { font-size: 16px; } /* iOS <16px odakta sayfayı yakınlaştırır */
 .kartKompakt .altNot { font-size: 11.5px; }
 .kartKompakt .standartSatir { gap: 6px; }
 .kartKompakt .standart { flex-direction: row; gap: 6px; height: 40px; border-radius: 12px; }

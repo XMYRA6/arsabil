@@ -8,7 +8,7 @@ import type { GeoJSONPolygon } from '@/lib/tkgm/parcel'
 import styles from './DegerMiniMap.module.css'
 
 // MapView TILES.light ile aynı — statik, etkileşimsiz mini-harita.
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 // Leaflet SVG/canvas render eder; CSS var() BURADA ÇÖZÜLMEZ — ArsaBil mavisi literal.
 const ARSABIL_BLUE = '#0a5cff'
 

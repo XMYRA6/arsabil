@@ -39,13 +39,14 @@ export function MiniMap({ lat, lng, label, listingId, riskLayers, parcelGeometry
         deps: [lat, lng],
         observeResize: false,
         onReady: (map, L) => {
-            // Use dark CartoDB tile to match platform
-            const savedTile = typeof window !== 'undefined' ? localStorage.getItem('arsabil-map-tile') : null;
-            const isDark = !savedTile || savedTile === 'dark';
-            const tileUrl = isDark
-                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(map);
+            // Varsayılan uydu görünümü; kullanıcı Pazar haritasında başka katman seçtiyse onu izler.
+            const savedTile = typeof window !== 'undefined' ? localStorage.getItem('arsabil-map-tile-v2') : null;
+            const tileKey = savedTile === 'light' || savedTile === 'dark' ? savedTile : 'satellite';
+            const isDark = tileKey === 'dark';
+            const tileUrl = tileKey === 'satellite'
+                ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+                : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            L.tileLayer(tileUrl, { maxZoom: tileKey === 'satellite' ? 18 : 19, className: isDark ? 'arsabil-tile-dark' : '' }).addTo(map);
 
             // Pin marker
             const pinIcon = L.divIcon({
