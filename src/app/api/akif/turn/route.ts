@@ -13,12 +13,14 @@ import { runAkifTurn } from '@/lib/ai/akif/orchestrator'
 import { createAkifModel, readAkifEnv } from '@/lib/ai/akif/openaiClient'
 import { createAuditLogger, type AuditDb } from '@/lib/ai/akif/audit'
 import { checkConversationBudget, checkMonthlyBudget } from '@/lib/ai/akif/costGuard'
+import { AKIF_TOOL_DEFS, type DispatchDeps } from '@/lib/ai/akif/gateway/toolRegistry'
 import {
-  dispatchTool,
-  validateArgs,
-  type ToolName,
-  type DispatchDeps,
-} from '@/lib/ai/akif/gateway/toolRegistry'
+  RICH_EXTRA_TOOL_DEFS,
+  validateRichArgs,
+  dispatchRichTool,
+  type RichToolName,
+} from '@/lib/ai/akif/gateway/richTools'
+import { createParcelLookupDeps } from '@/lib/ai/akif/gateway/parcelLookupDeps'
 import type { AkifMessage } from '@/lib/ai/akif/contract'
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
@@ -154,7 +156,13 @@ export async function POST(req: Request) {
 
   // 6. OpenAI client + model sarmalayıcı.
   const openai = new OpenAI({ apiKey: env.apiKey })
-  const model = createAkifModel({ client: openai, model: env.model })
+  const model = createAkifModel({
+    client: openai,
+    model: env.model,
+    toolDefs: [...AKIF_TOOL_DEFS, ...RICH_EXTRA_TOOL_DEFS],
+  })
+  // Anonim kullanıcı ücretsiz kart görür; oturumlu üye görünümü.
+  const memberView = !!sessionUserId
 
   // 7. Tur akışı.
   try {
@@ -163,8 +171,13 @@ export async function POST(req: Request) {
       {
         model,
         modelName: env.model,
-        dispatch: (n: ToolName, a: unknown) => dispatchTool(n, a, { db }),
-        validateArgs,
+        dispatch: (n: RichToolName, a: unknown) =>
+          dispatchRichTool(n, a, {
+            db,
+            parcelDeps: createParcelLookupDeps({ memberView }),
+            memberView,
+          }),
+        validateArgs: validateRichArgs,
         audit,
         checkConversationBudget: (m: { content: string }[]) =>
           checkConversationBudget(m, env.maxTurnTokens),

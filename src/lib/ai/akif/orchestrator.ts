@@ -7,7 +7,7 @@
 import type { AkifMessage, AkifTurn, ToolResultCard } from './contract'
 import { parseAkifTurn } from './contract'
 import type { ToolName } from './gateway/toolRegistry'
-import { validateArgs as realValidateArgs } from './gateway/toolRegistry'
+import type { ValidateResult } from './gateway/toolRegistry'
 import { assembleSystemPrompt } from './prompts/assemble'
 import { createAkifModel, estimateCostUsd, type ChatMsg } from './openaiClient'
 import { createAuditLogger } from './audit'
@@ -20,11 +20,12 @@ export interface RunAkifTurnInput {
   extraSystemPrompt?: string
 }
 
-export interface RunAkifTurnDeps {
+// Araç adı tipi jenerik: web RichToolName, WhatsApp WaToolName verir.
+export interface RunAkifTurnDeps<N extends string = ToolName> {
   model: ReturnType<typeof createAkifModel>
   modelName: string
-  dispatch: (name: ToolName, args: unknown) => Promise<ToolResultCard>
-  validateArgs: typeof realValidateArgs
+  dispatch: (name: N, args: unknown) => Promise<ToolResultCard>
+  validateArgs: (name: N, args: unknown) => ValidateResult
   audit: ReturnType<typeof createAuditLogger>
   checkConversationBudget: (messages: { content: string }[]) => { ok: boolean }
   now: () => Date
@@ -54,9 +55,9 @@ function parseFallbackTurn(): AkifTurn {
   }
 }
 
-export async function runAkifTurn(
+export async function runAkifTurn<N extends string = ToolName>(
   input: RunAkifTurnInput,
-  deps: RunAkifTurnDeps,
+  deps: RunAkifTurnDeps<N>,
 ): Promise<AkifTurn> {
   const { conversationId, history, userMessage, projectMemory, extraSystemPrompt } = input
   const turnNumber = Math.floor(history.length / 2) + 1
@@ -119,7 +120,7 @@ export async function runAkifTurn(
 
     // 4. Araç çağrısı → doğrula + dispatch; düz metin → asistan mesajı ekle.
     if (r1.kind === 'tool_call') {
-      const v = deps.validateArgs(r1.toolName as ToolName, r1.toolArgs)
+      const v = deps.validateArgs(r1.toolName as N, r1.toolArgs)
       // OpenAI kuralı: role:'tool' mesajı MUTLAKA bir tool_calls'lu asistan
       // mesajını takip etmeli — geçersiz argümanda bile önce onu push et.
       chatMsgs.push({
@@ -139,7 +140,7 @@ export async function runAkifTurn(
       if (v.ok) {
         // Dispatch'ten ÖNCE ata — dispatch fırlarsa bile audit doğru aracı yazsın.
         toolName = r1.toolName ?? null
-        toolResult = await deps.dispatch(r1.toolName as ToolName, r1.toolArgs)
+        toolResult = await deps.dispatch(r1.toolName as N, r1.toolArgs)
         chatMsgs.push({
           role: 'tool',
           tool_call_id: r1.toolCallId,

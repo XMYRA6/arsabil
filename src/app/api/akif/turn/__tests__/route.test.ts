@@ -48,6 +48,17 @@ jest.mock('@/lib/ai/akif/costGuard', () => ({
 jest.mock('@/lib/ai/akif/gateway/toolRegistry', () => ({
   dispatchTool: (...a: unknown[]) => dispatchToolMock(...a),
   validateArgs: (...a: unknown[]) => validateArgsMock(...a),
+  AKIF_TOOL_DEFS: [{ type: 'function', function: { name: 'explainTerm' } }],
+}))
+const dispatchRichToolMock = jest.fn()
+jest.mock('@/lib/ai/akif/gateway/richTools', () => ({
+  RICH_EXTRA_TOOL_DEFS: [{ type: 'function', function: { name: 'compareParcels' } }],
+  validateRichArgs: jest.fn(),
+  dispatchRichTool: (...a: unknown[]) => dispatchRichToolMock(...a),
+}))
+const createParcelLookupDepsMock = jest.fn()
+jest.mock('@/lib/ai/akif/gateway/parcelLookupDeps', () => ({
+  createParcelLookupDeps: (...a: unknown[]) => createParcelLookupDepsMock(...a),
 }))
 jest.mock('@/lib/prisma', () => ({
   prisma: {
@@ -112,6 +123,8 @@ describe('POST /api/akif/turn', () => {
     checkMonthlyBudgetMock.mockReset().mockResolvedValue({ ok: true, spent: 0 })
     checkConversationBudgetMock.mockReset().mockReturnValue({ ok: true })
     dispatchToolMock.mockReset()
+    dispatchRichToolMock.mockReset()
+    createParcelLookupDepsMock.mockReset().mockReturnValue({ __brand: 'parcelDeps' })
     validateArgsMock.mockReset()
     openAICtor.mockReset()
     getServerSessionMock.mockReset().mockResolvedValue(null)
@@ -131,6 +144,43 @@ describe('POST /api/akif/turn', () => {
       userMessage: validBody.userMessage,
     })
     expect(await res.json()).toEqual(TURN)
+  })
+
+  it('model gets AKIF_TOOL_DEFS + RICH_EXTRA_TOOL_DEFS', async () => {
+    await POST(req(validBody))
+    const arg = createAkifModelMock.mock.calls[0][0]
+    expect(arg.toolDefs.map((d: { function: { name: string } }) => d.function.name)).toEqual([
+      'explainTerm',
+      'compareParcels',
+    ])
+  })
+
+  it('anonymous user gets free-tier card without estimate', async () => {
+    dispatchRichToolMock.mockImplementation(async (_n, _a, d) => ({
+      kind: 'parcel_compare',
+      tier: d.memberView ? 'member' : 'free',
+      rows: [{ label: 'A 1/1', status: 'resolved', ...(d.memberView ? { estimate: 1 } : {}) }],
+    }))
+    await POST(req(validBody))
+    const rd = runAkifTurnMock.mock.calls[0][1]
+    const card = await rd.dispatch('compareParcels', { parcels: [] })
+    expect(createParcelLookupDepsMock).toHaveBeenCalledWith({ memberView: false })
+    expect(dispatchRichToolMock.mock.calls[0][2].memberView).toBe(false)
+    const json = JSON.stringify(card)
+    expect(card.tier).toBe('free')
+    for (const k of ['estimate', 'pricePerSqm', 'confidence', 'recommendation']) {
+      expect(json).not.toContain(k)
+    }
+  })
+
+  it('logged-in user gets memberView true', async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+    dispatchRichToolMock.mockResolvedValue({ kind: 'parcel_compare', tier: 'member', rows: [] })
+    await POST(req(validBody))
+    const rd = runAkifTurnMock.mock.calls[0][1]
+    await rd.dispatch('compareParcels', {})
+    expect(createParcelLookupDepsMock).toHaveBeenCalledWith({ memberView: true })
+    expect(dispatchRichToolMock.mock.calls[0][2].memberView).toBe(true)
   })
 
   it('createAuditLogger, wa: kanalini kendi web butcesinden haric tutacak sekilde cagrilir', async () => {

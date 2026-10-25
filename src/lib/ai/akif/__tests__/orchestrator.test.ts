@@ -302,6 +302,50 @@ describe('runAkifTurn', () => {
     expect(turn.tool_result).toEqual(PROJECT_CARD)
   })
 
+  it('parcel_compare tool result is passed through to turn.tool_result', async () => {
+    const { deps } = makeDeps()
+    const COMPARE_CARD = {
+      kind: 'parcel_compare' as const,
+      tier: 'free' as const,
+      rows: [{ label: 'A 1/1', status: 'resolved' as const }],
+    }
+    ;(deps.model.chatWithTools as jest.Mock).mockResolvedValueOnce({
+      kind: 'tool_call',
+      toolName: 'compareParcels',
+      toolArgs: {},
+      toolCallId: 'call_cp',
+      usage: { promptTokens: 100, completionTokens: 10 },
+    })
+    ;(deps.dispatch as unknown as jest.Mock).mockResolvedValueOnce(COMPARE_CARD)
+    const turn = await runAkifTurn(INPUT, deps as unknown as RunAkifTurnDeps<'compareParcels'>)
+    expect(turn.tool_result).toEqual(COMPARE_CARD)
+  })
+
+  it('scenario tool result keeps recommendation after row rounding', async () => {
+    const { deps } = makeDeps()
+    const card: ScenarioCard = {
+      ...JSON.parse(JSON.stringify(SCENARIO_CARD)),
+      rows: [
+        { ...SCENARIO_CARD.rows[0], label: 'A', arsaSahibiDaireSayisi: 5.55555 },
+        { ...SCENARIO_CARD.rows[0], label: 'B', arsaSahibiDaireSayisi: 6.33333 },
+      ],
+      recommendation: { rowIndex: 1, criterion: 'en çok daire', reason: 'B daha fazla daire verir' },
+    }
+    ;(deps.model.chatWithTools as jest.Mock).mockResolvedValueOnce({
+      kind: 'tool_call',
+      toolName: 'compareContractorOffers',
+      toolArgs: {},
+      toolCallId: 'call_rec',
+      usage: { promptTokens: 100, completionTokens: 10 },
+    })
+    ;(deps.dispatch as unknown as jest.Mock).mockResolvedValueOnce(card)
+    const turn = await runAkifTurn(INPUT, deps)
+    const out = turn.tool_result as ScenarioCard
+    expect(out.recommendation).toEqual(card.recommendation)
+    expect(out.rows[out.recommendation!.rowIndex].label).toBe('B')
+    expect(out.rows[1].arsaSahibiDaireSayisi).toBe(6.3)
+  })
+
   it('(l) extraSystemPrompt verilirse sistem promptuna eklenir', async () => {
     const { deps } = makeDeps()
     await runAkifTurn({ ...INPUT, extraSystemPrompt: 'EK_POLITIKA_TEST_METNI' }, deps)
