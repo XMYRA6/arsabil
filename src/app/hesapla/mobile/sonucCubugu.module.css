@@ -3,7 +3,7 @@
     position: fixed;
     left: 12px;
     right: 12px;
-    bottom: calc(var(--bottomnav-height) + var(--keyboard-inset, 0px));
+    bottom: calc(var(--tabbar-top) + 3px + var(--keyboard-inset, 0px));
     z-index: 90;
     display: flex;
     align-items: center;

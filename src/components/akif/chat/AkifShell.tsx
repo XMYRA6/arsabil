@@ -67,7 +67,7 @@ export function AkifShell(p: AkifShellProps) {
   const [draft, setDraft] = useState('')
 
   const shellRef = useRef<HTMLDivElement>(null)
-  // Klavye açıkken kabuk görünür alana sığar: mesaj kutusu klavyenin üstüne süzülür.
+  // Klavye açıkken alt çubuk payı kalkar; yüksekliği AkifChat'in .wrap'i klavye kadar kırpar.
   const keyboardInset = useKeyboardInset()
   const keyboardOpen = keyboardInset > 80
   useEffect(() => {
@@ -206,7 +206,6 @@ export function AkifShell(p: AkifShellProps) {
       ref={shellRef}
       className={s.shell}
       data-keyboard={keyboardOpen ? '' : undefined}
-      style={{ '--kb': `${Math.max(0, keyboardInset)}px` } as React.CSSProperties}
       data-drawer-open={drawerOpen ? '' : undefined}
       data-sheet-open={sheetOpen ? '' : undefined}
       data-panel-open={panelOpen ? '' : undefined}

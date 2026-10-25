@@ -269,9 +269,17 @@
 }
 
 @media (max-width: 768px) {
-  .shell { --akif-top: 0px; transition: height 200ms var(--ease-out); }
-  /* Klavye açık: alt çubuk klavyenin altında kalır, kabuk görünür alana (100dvh - klavye) sığar. */
-  .shell[data-keyboard] { height: calc(100dvh - var(--kb, 0px)); }
+  /* Mesaj kutusu alt çubuğun ~8px üstünde biter. Kabuk 128px'lik genel alt payı yerine
+     --tabbar-top - 2px bırakır; negatif alt kenar boşluğu, <main>'in --mobile-nav-pb dolgusuyla
+     toplamı 100dvh'de tutar (sayfa kaymaz). */
+  .shell {
+    --akif-top: 0px;
+    --akif-bottom: calc(var(--tabbar-top) - 2px);
+    height: calc(100dvh - var(--akif-bottom));
+    margin-bottom: calc(var(--akif-bottom) - var(--mobile-nav-pb, 0px));
+  }
+  /* Klavye açık: alt çubuk klavyenin altında kalır; boşluk bırakma. */
+  .shell[data-keyboard] { height: 100dvh; }
 }
 
 @media (prefers-reduced-motion: reduce) {
