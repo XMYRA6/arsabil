@@ -331,7 +331,7 @@ export default function ProfilePage() {
                             <label className={styles.field}>
                                 <span>Kendini tanıt</span>
                                 <textarea
-                                    placeholder="Trabzon’da arsa ve kat karşılığı projeleriyle ilgileniyorum…"
+                                    placeholder="İzmir’de arsa ve kat karşılığı projeleriyle ilgileniyorum…"
                                     value={bio}
                                     onChange={e => setBio(e.target.value)}
                                     maxLength={300}

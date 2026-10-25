@@ -21,6 +21,10 @@ export function norm(s: string): string {
     .trim()
 }
 
+/** Boşken dönen örnek konumlar (il · ilçe). */
+const ORNEK_YERLER = ['İzmir · Urla', 'İstanbul · Silivri', 'Ankara · Gölbaşı'] as const
+const ORNEK_ARALIK_MS = 2800
+
 let ilCache: Item[] | null = null
 const ilceCache = new Map<number, Item[]>()
 
@@ -56,6 +60,8 @@ export function LocationField({ value, onChange }: Props) {
   const [active, setActive] = useState(0)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
+  const [ornekIdx, setOrnekIdx] = useState(0)
+  const [hareketAzalt, setHareketAzalt] = useState(false)
 
   const secilenIl = useMemo(() => iller.find((i) => i.text === value.il) ?? null, [iller, value.il])
   const asama: 'il' | 'ilce' = value.il && !value.ilce ? 'ilce' : 'il'
@@ -67,6 +73,25 @@ export function LocationField({ value, onChange }: Props) {
     loadIlceler(secilenIl.id).then((l) => { if (!iptal) setIlceler(l) }).catch(() => { if (!iptal) setMsg('İlçe listesi alınamadı.') })
     return () => { iptal = true }
   }, [asama, secilenIl])
+
+  // Hareket azaltma tercihine saygı: örnekler dönmez, ilki sabit kalır.
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setHareketAzalt(mq.matches)
+    const on = (e: MediaQueryListEvent) => setHareketAzalt(e.matches)
+    mq.addEventListener?.('change', on)
+    return () => mq.removeEventListener?.('change', on)
+  }, [])
+
+  const ornekGorunur = !value.il && !query
+
+  // Boş alanda örnek konumlar sırayla değişir.
+  useEffect(() => {
+    if (!ornekGorunur || hareketAzalt) return
+    const id = setInterval(() => setOrnekIdx((i) => (i + 1) % ORNEK_YERLER.length), ORNEK_ARALIK_MS)
+    return () => clearInterval(id)
+  }, [ornekGorunur, hareketAzalt])
 
   // Dışarı tıklayınca kapat.
   useEffect(() => {
@@ -141,6 +166,10 @@ export function LocationField({ value, onChange }: Props) {
         <label htmlFor={inputId} className={styles.label}>İl · İlçe</label>
         <div className={styles.row}>
           {etiket && <span className={styles.chosen}>{etiket}</span>}
+          <div className={styles.inputWrap}>
+          {ornekGorunur && (
+            <span key={ornekIdx} className={styles.ghost} aria-hidden="true">{ORNEK_YERLER[ornekIdx]}</span>
+          )}
           <input
             id={inputId}
             role="combobox"
@@ -150,12 +179,13 @@ export function LocationField({ value, onChange }: Props) {
             aria-activedescendant={open && secenekler[active] ? `${listId}-${active}` : undefined}
             className={styles.input}
             value={query}
-            placeholder={value.il ? (value.ilce ? '' : 'İlçe ara') : 'Trabzon · Akçaabat'}
+            placeholder={value.il && !value.ilce ? 'İlçe ara' : ''}
             autoComplete="off"
             onFocus={ac}
             onChange={(e) => { setQuery(e.target.value); setActive(0); ac() }}
             onKeyDown={onKey}
           />
+          </div>
           {(value.il || value.ilce) && (
             <button type="button" className={styles.clear} aria-label="Konumu temizle" onClick={geri}>×</button>
           )}

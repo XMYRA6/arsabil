@@ -1,5 +1,5 @@
 /** @jest-environment jsdom */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useState } from 'react'
 import { LocationField, norm, type LocationValue } from './LocationField'
 
@@ -62,5 +62,44 @@ describe('LocationField', () => {
     render(<Kutu />)
     fireEvent.click(screen.getByRole('button', { name: 'Konumumu kullan' }))
     expect(await screen.findByText('Konum izni alınamadı.')).toBeInTheDocument()
+  })
+
+  describe('örnek yer animasyonu', () => {
+    const ornek = (txt: string) => screen.getByText(txt, { selector: '[aria-hidden="true"]' })
+
+    beforeEach(() => {
+      jest.useFakeTimers()
+      window.matchMedia = ((q: string) => ({ matches: false, media: q, addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, onchange: null, dispatchEvent: () => false })) as unknown as typeof window.matchMedia
+    })
+    afterEach(() => { jest.useRealTimers() })
+
+    it('boşken İzmir · Urla, İstanbul · Silivri, Ankara · Gölbaşı sırayla döner', () => {
+      render(<Kutu />)
+      expect(ornek('İzmir · Urla')).toBeInTheDocument()
+      act(() => { jest.advanceTimersByTime(2800) })
+      expect(ornek('İstanbul · Silivri')).toBeInTheDocument()
+      act(() => { jest.advanceTimersByTime(2800) })
+      expect(ornek('Ankara · Gölbaşı')).toBeInTheDocument()
+      act(() => { jest.advanceTimersByTime(2800) })
+      expect(ornek('İzmir · Urla')).toBeInTheDocument()
+    })
+
+    it('Trabzon · Akçaabat artık örnek olarak gösterilmez', () => {
+      render(<Kutu />)
+      expect(screen.queryByText('Trabzon · Akçaabat')).not.toBeInTheDocument()
+    })
+
+    it('yazmaya başlayınca örnek kaybolur', () => {
+      render(<Kutu />)
+      fireEvent.change(screen.getByRole('combobox'), { target: { value: 'an' } })
+      expect(screen.queryByText('İzmir · Urla', { selector: '[aria-hidden="true"]' })).not.toBeInTheDocument()
+    })
+
+    it('hareket azaltma tercihinde ilk örnek sabit kalır', () => {
+      window.matchMedia = ((q: string) => ({ matches: true, media: q, addEventListener: () => {}, removeEventListener: () => {}, addListener: () => {}, removeListener: () => {}, onchange: null, dispatchEvent: () => false })) as unknown as typeof window.matchMedia
+      render(<Kutu />)
+      act(() => { jest.advanceTimersByTime(9000) })
+      expect(ornek('İzmir · Urla')).toBeInTheDocument()
+    })
   })
 })

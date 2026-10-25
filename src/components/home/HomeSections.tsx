@@ -357,7 +357,7 @@ export function AkifSection() {
             <span>cebinde.</span>
           </h2>
           <p className={styles.lead}>
-            Yaz ya da sesli sor: “Akçaabat’ta 1.250 m² arsa ne eder?” Akif emsalleri, riski ve kat karşılığı fizibilitesini saniyeler içinde özetler.
+            Yaz ya da sesli sor: “Urla’da 1.250 m² arsa ne eder?” Akif emsalleri, riski ve kat karşılığı fizibilitesini saniyeler içinde özetler.
           </p>
           <ul className={styles.feat}>
             <li><strong>Sesli ve yazılı</strong><small>Konuşarak ya da yazarak sor</small></li>
@@ -381,8 +381,8 @@ export function AkifSection() {
             <span><b>Akif · ArsaBil</b><small>çevrimiçi</small></span>
           </div>
           <div className={styles.chat}>
-            <p className={`${styles.me} ${styles.msg}`} style={{ '--i': 0 } as React.CSSProperties}>Akçaabat’ta 1.250 m² imarlı arsa ne eder?</p>
-            <p className={`${styles.bot} ${styles.msg}`} style={{ '--i': 1 } as React.CSSProperties}>Yıldızlı Mah. emsallerine göre yaklaşık <b>₺2.450/m²</b> · toplam ≈ <b>₺3,06 M</b>. Fay riski düşük.</p>
+            <p className={`${styles.me} ${styles.msg}`} style={{ '--i': 0 } as React.CSSProperties}>Urla’da 1.250 m² imarlı arsa ne eder?</p>
+            <p className={`${styles.bot} ${styles.msg}`} style={{ '--i': 1 } as React.CSSProperties}>Urla emsallerine göre yaklaşık <b>₺4.800/m²</b> · toplam ≈ <b>₺6,0 M</b>. Fay ve taşkın riskini de kontrol ederim.</p>
             <p className={`${styles.bot} ${styles.msg}`} style={{ '--i': 2 } as React.CSSProperties}>Kat karşılığı için arsa payı önerisi <b>%46</b>. Fizibiliteyi hesaplayayım mı?</p>
             <div className={`${styles.quick} ${styles.msg}`} style={{ '--i': 3 } as React.CSSProperties}><span>Evet, hesapla</span><span>Emsalleri göster</span></div>
           </div>

@@ -36,6 +36,37 @@
   color: var(--ink);
 }
 
+.inputWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  opacity: 0.6;
+  animation: ghostGiris 480ms var(--ease-out) both;
+}
+
+@keyframes ghostGiris {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 0.6; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ghost { animation: none; }
+}
+
 .input {
   flex: 1;
   min-width: 0;

@@ -1,4 +1,4 @@
-const HELP = 'Merhaba! Bir arsanın değerini öğrenmek için konumu ve ada/parsel numarasını yaz. Örnek: `Trabzon Ortahisar Uğurlu 123/45`'
+const HELP = 'Merhaba! Bir arsanın değerini öğrenmek için konumu ve ada/parsel numarasını yaz. Örnek: `İzmir Urla İçmeler 123/45`'
 
 export const renderError = {
   help: () => HELP,
