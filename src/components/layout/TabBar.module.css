@@ -35,6 +35,11 @@
   color: var(--amber-text);
 }
 
+.bar[data-gosterge='hazir'] .tab {
+  /* Devir anında statik arka plan solmasın (gösterge ile çapraz solma yok). */
+  transition: color var(--dur-ui) var(--ease-out), transform var(--dur-press) var(--ease-out);
+}
+
 .bar[data-gosterge='hazir'] .tab.active {
   background-color: transparent;
 }
@@ -54,6 +59,11 @@
 .gosterge[data-ilk='true'] {
   /* İlk gösterim: konuma anında yerleş, yalnız opacity geçişi. */
   transition: opacity var(--dur-ui) var(--ease-out);
+}
+
+.gosterge[data-ilk='anlik'] {
+  /* Mount'taki ilk ölçüm: anında yerleş, opacity 1 hemen (statik arka plan zaten aynı yerde). */
+  transition: none;
 }
 
 .icon {
@@ -113,8 +123,10 @@
     transform: none;
   }
 
+  .bar[data-gosterge='hazir'] .tab,
   .gosterge,
-  .gosterge[data-ilk='true'] {
+  .gosterge[data-ilk='true'],
+  .gosterge[data-ilk='anlik'] {
     transition: none;
   }
 }

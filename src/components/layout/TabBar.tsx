@@ -10,13 +10,17 @@ interface TabBarProps {
     activeHref: string;
 }
 
+type Ilk = 'anlik' | 'true' | undefined;
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function TabBar({ tabs, activeHref }: TabBarProps) {
     const navRef = useRef<HTMLElement>(null);
-    const [olcum, setOlcum] = useState<{ x: number; width: number; ilk: boolean } | null>(null);
+    const [olcum, setOlcum] = useState<{ x: number; width: number; ilk: Ilk } | null>(null);
     // Gösterge son ölçümde gizli (aktif sekme yok / ölçülmemiş) muydu: ilk gösterimde kayma yerine anında konumlanır.
     const gizliRef = useRef(true);
+    // Bu mount'ta ilk ölçüm henüz yapıldı mı: ilk ölçüm anlık (statik .active -> gösterge devri çapraz solma olmadan).
+    const olculduRef = useRef(false);
 
     const activeIndex = tabs.findIndex((tab) =>
         tab.href === '/' ? activeHref === '/' : activeHref === tab.href || activeHref.startsWith(tab.href + '/'),
@@ -26,6 +30,8 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
     const olc = useCallback(() => {
         const nav = navRef.current;
         if (!nav) return;
+        const ilkOlcum = !olculduRef.current;
+        olculduRef.current = true;
         const links = Array.from(nav.querySelectorAll<HTMLElement>(':scope > a'));
         const rects: TabRect[] = links.map((el) => ({ left: el.offsetLeft, width: el.offsetWidth }));
         const sonuc = hesaplaGosterge(rects, activeIndex);
@@ -38,7 +44,7 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
             setOlcum(null);
             return;
         }
-        const ilk = gizliRef.current;
+        const ilk: Ilk = ilkOlcum ? 'anlik' : gizliRef.current ? 'true' : undefined;
         gizliRef.current = false;
         setOlcum((onceki) =>
             onceki && onceki.x === sonuc.x && onceki.width === sonuc.width && onceki.ilk === ilk ? onceki : { ...sonuc, ilk },
@@ -55,7 +61,7 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
         if (typeof ResizeObserver !== 'undefined') {
             const ro = new ResizeObserver(() => olc());
             ro.observe(nav);
-            Array.from(nav.children).forEach((c) => ro.observe(c));
+            nav.querySelectorAll(':scope > a').forEach((c) => ro.observe(c));
             return () => ro.disconnect();
         }
         window.addEventListener('resize', olc);
@@ -74,7 +80,7 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
             <span
                 aria-hidden="true"
                 className={styles.gosterge}
-                data-ilk={olcum?.ilk ? 'true' : undefined}
+                data-ilk={olcum?.ilk}
                 style={{
                     transform: `translateX(${olcum?.x ?? 0}px)`,
                     width: olcum?.width ?? 0,

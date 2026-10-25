@@ -22,6 +22,10 @@
     transform: scale(0.97);
 }
 
+.cardRoot[data-press]:has(button:active) {
+    transform: none;
+}
+
 .cardRoot:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);

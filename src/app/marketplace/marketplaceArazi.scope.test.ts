@@ -13,6 +13,12 @@ const toggleCss = read('..', '..', 'components', 'marketplace', 'ViewToggle.modu
 const cardTsx = read('..', '..', 'components', 'marketplace', 'ListingCard.tsx');
 const filterTsx = read('..', '..', 'components', 'marketplace', 'FilterSidebar.tsx');
 
+describe('ListingCard basma geri bildirimi', () => {
+  it('iç butona basılırken kartın kendisi küçülmez', () => {
+    expect(cardCss).toMatch(/\.cardRoot\[data-press\]:has\(button:active\)\s*\{[^}]*transform:\s*none/);
+  });
+});
+
 describe('pazar yeri Arazi dili', () => {
   it.each([
     ['page.module.css', pageCss],

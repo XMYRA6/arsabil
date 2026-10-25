@@ -1,4 +1,6 @@
 /** @jest-environment jsdom */
+import fs from 'fs'
+import path from 'path'
 import { render, screen } from '@testing-library/react'
 import { TabBar } from '../TabBar'
 
@@ -88,6 +90,35 @@ describe('TabBar gösterge', () => {
     expect(g).not.toHaveAttribute('data-ilk')
     expect(g.style.transform).toBe('translateX(8px)')
   })
+  it('first measurement of a fresh mount uses the instant mode (data-ilk="anlik")', () => {
+    const { container } = render(<TabBar tabs={tabs} activeHref="/hesapla" />)
+    const g = container.querySelector('nav > span[aria-hidden="true"]') as HTMLElement
+    expect(g).toHaveAttribute('data-ilk', 'anlik')
+    expect(g.style.opacity).toBe('1')
+  })
+  it('hidden→shown after mount still uses the opacity-only reveal (data-ilk="true")', () => {
+    const { container, rerender } = render(<TabBar tabs={tabs} activeHref="/studio" />)
+    rerender(<TabBar tabs={tabs} activeHref="/hesapla" />)
+    expect(container.querySelector('nav > span[aria-hidden="true"]')).toHaveAttribute('data-ilk', 'true')
+  })
+  it('tab→tab move has no data-ilk', () => {
+    const { container, rerender } = render(<TabBar tabs={tabs} activeHref="/hesapla" />)
+    rerender(<TabBar tabs={tabs} activeHref="/" />)
+    expect(container.querySelector('nav > span[aria-hidden="true"]')).not.toHaveAttribute('data-ilk')
+  })
+  it('observes only tab anchors and the nav, not the indicator', () => {
+    const observed: Element[] = []
+    ;(globalThis as { ResizeObserver?: unknown }).ResizeObserver = class {
+      observe(el: Element) { observed.push(el) }
+      disconnect() {}
+      unobserve() {}
+    }
+    const { container } = render(<TabBar tabs={tabs} activeHref="/hesapla" />)
+    const g = container.querySelector('nav > span[aria-hidden="true"]')
+    expect(observed).not.toContain(g)
+    expect(observed.filter((e) => e.tagName === 'A')).toHaveLength(3)
+    expect(observed).toContain(container.querySelector('nav'))
+  })
   it('dot and unread label still render', () => {
     render(<TabBar tabs={tabs} activeHref="/" />)
     expect(screen.getByText('Okunmamış bildirim var')).toBeInTheDocument()
@@ -116,5 +147,24 @@ describe('TabBar', () => {
   it('ikonlar aria-hidden sarmalayıcıda', () => {
     render(<TabBar tabs={tabs} activeHref="/" />)
     expect(screen.getAllByTestId('icon')[0].parentElement).toHaveAttribute('aria-hidden', 'true')
+  })
+})
+
+describe('TabBar CSS', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'TabBar.module.css'), 'utf8')
+  it("[data-ilk='anlik'] has transition: none", () => {
+    expect(css).toMatch(/\.gosterge\[data-ilk='anlik'\]\s*\{[^}]*transition:\s*none/)
+  })
+  it('static background does not fade at handoff', () => {
+    const m = css.match(/\.bar\[data-gosterge='hazir'\] \.tab\s*\{([^}]*)\}/)
+    expect(m).not.toBeNull()
+    expect(m![1]).toMatch(/transition:/)
+    expect(m![1]).not.toMatch(/background-color/)
+  })
+  it('reduced-motion block covers the instant mode and handoff', () => {
+    const rm = css.slice(css.indexOf('prefers-reduced-motion'))
+    expect(rm).toContain(".gosterge[data-ilk='anlik']")
+    expect(rm).toContain(".bar[data-gosterge='hazir'] .tab")
+    expect(rm).toMatch(/transition:\s*none/)
   })
 })

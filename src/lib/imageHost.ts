@@ -5,7 +5,8 @@
  */
 export function isOptimizableHost(url: string): boolean {
   try {
-    return new URL(url).hostname === 'res.cloudinary.com';
+    const u = new URL(url);
+    return u.protocol === 'https:' && u.hostname === 'res.cloudinary.com';
   } catch {
     return false;
   }
