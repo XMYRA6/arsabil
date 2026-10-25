@@ -75,6 +75,7 @@ export const RATE_LIMITS = {
     AKIF_TURN: { limit: 8, windowMs: 60_000 }, // kullanıcı/IP başına 8/dk — LLM turu pahalı
     AKIF_WHATSAPP_TURN: { limit: 8, windowMs: 60_000 }, // telefon başına 8/dk — LLM turu pahalı (AKIF_TURN'ün IP-bazlı eşdeğeri)
     AKIF_COMPARE_PARCELS: { limit: 6, windowMs: 60_000 }, // kullanıcı başına 6/dk — compareParcels harici parsel verisi çeker
+    AKIF_COMPARE_PARCELS_ANON: { limit: 2, windowMs: 60_000 }, // anonim IP başına 2/dk — web turn rotasında compareParcels
     AKIF_VOICE_SESSION: { limit: 5, windowMs: 3_600_000 }, // kullanıcı başına 5/saat — pahalı Realtime oturumu
     AKIF_VOICE_USAGE: { limit: 10, windowMs: 3_600_000 }, // kullanıcı başına 10/saat — /usage maliyet kaydı, forge griefing'e karşı
     STUDIO_RENDER: { limit: 5, windowMs: 60_000 }, // kullanıcı başına 5/dk — pahalı üretim, cache çoğu tekrarı zaten önler

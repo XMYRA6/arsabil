@@ -76,7 +76,11 @@ jest.mock('@/lib/auth', () => ({ authOptions: {} }))
 jest.mock('@/lib/rate-limit', () => ({
   checkRateLimit: (...a: unknown[]) => checkRateLimitMock(...a),
   getClientIp: () => '203.0.113.5',
-  RATE_LIMITS: { AKIF_TURN: { limit: 8, windowMs: 60_000 } },
+  RATE_LIMITS: {
+    AKIF_TURN: { limit: 8, windowMs: 60_000 },
+    AKIF_COMPARE_PARCELS: { limit: 6, windowMs: 60_000 },
+    AKIF_COMPARE_PARCELS_ANON: { limit: 2, windowMs: 60_000 },
+  },
 }))
 
 import { POST } from '../route'
@@ -183,6 +187,71 @@ describe('POST /api/akif/turn', () => {
     await rd.dispatch('compareParcels', {})
     expect(createParcelLookupDepsMock).toHaveBeenCalledWith({ memberView: true })
     expect(dispatchRichToolMock.mock.calls[0][2].memberView).toBe(true)
+  })
+
+  describe('compareParcels rate limit', () => {
+    const args = { parcels: [
+      { ilText: 'Trabzon', ilceText: 'Ortahisar', mahalleText: 'Oran', ada: '12', parsel: '5' },
+      { ilText: 'Trabzon', ilceText: 'Ortahisar', mahalleText: 'Oran', ada: '12', parsel: '6' },
+    ] }
+    const limitCompare = (ok: boolean) =>
+      checkRateLimitMock.mockImplementation((key: string) =>
+        key.startsWith('akif-compare-parcels') ? { ok, retryAfterSec: 30 } : { ok: true },
+      )
+
+    it('anonymous over-limit returns a note card keyed by IP, dispatch not called', async () => {
+      limitCompare(false)
+      await POST(req(validBody))
+      const rd = runAkifTurnMock.mock.calls[0][1]
+      const card = await rd.dispatch('compareParcels', args)
+      expect(checkRateLimitMock).toHaveBeenCalledWith('akif-compare-parcels:ip:203.0.113.5', { limit: 2, windowMs: 60_000 })
+      expect(dispatchRichToolMock).not.toHaveBeenCalled()
+      expect(card.kind).toBe('parcel_compare')
+      expect(card.tier).toBe('free')
+      expect(card.note).toBe('Çok sık karşılaştırma istendi; bir dakika sonra tekrar dene.')
+      expect(card.rows.map((r: { status: string }) => r.status)).toEqual(['parcel_unavailable', 'parcel_unavailable'])
+      expect(card.rows[0].label).toBe('Oran 12/5')
+      expect(JSON.stringify(card)).not.toContain('estimate')
+    })
+
+    it('anonymous within limit dispatches normally', async () => {
+      limitCompare(true)
+      dispatchRichToolMock.mockResolvedValue({ kind: 'parcel_compare', tier: 'free', rows: [] })
+      await POST(req(validBody))
+      const rd = runAkifTurnMock.mock.calls[0][1]
+      await rd.dispatch('compareParcels', args)
+      expect(dispatchRichToolMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('logged-in user uses the user key and member tier on limit', async () => {
+      getServerSessionMock.mockResolvedValue({ user: { id: 'u1' } })
+      limitCompare(false)
+      await POST(req(validBody))
+      const rd = runAkifTurnMock.mock.calls[0][1]
+      const card = await rd.dispatch('compareParcels', args)
+      expect(checkRateLimitMock).toHaveBeenCalledWith('akif-compare-parcels:user:u1', { limit: 6, windowMs: 60_000 })
+      expect(checkRateLimitMock).not.toHaveBeenCalledWith(expect.stringContaining('compare-parcels:ip'), expect.anything())
+      expect(card.tier).toBe('member')
+      expect(card.note).toContain('Çok sık')
+    })
+
+    it('over-limit with malformed args yields empty rows with note', async () => {
+      limitCompare(false)
+      await POST(req(validBody))
+      const card = await runAkifTurnMock.mock.calls[0][1].dispatch('compareParcels', {})
+      expect(card.rows).toEqual([])
+      expect(card.note).toContain('Çok sık')
+    })
+
+    it('other tools are not compare-rate-limited', async () => {
+      limitCompare(false)
+      dispatchRichToolMock.mockResolvedValue({ kind: 'term' })
+      await POST(req(validBody))
+      const rd = runAkifTurnMock.mock.calls[0][1]
+      await rd.dispatch('explainTerm', { term: 'x' })
+      expect(dispatchRichToolMock).toHaveBeenCalledTimes(1)
+      expect(checkRateLimitMock).not.toHaveBeenCalledWith(expect.stringContaining('akif-compare-parcels'), expect.anything())
+    })
   })
 
   it('createAuditLogger, wa: kanalini kendi web butcesinden haric tutacak sekilde cagrilir', async () => {

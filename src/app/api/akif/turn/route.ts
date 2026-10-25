@@ -22,7 +22,7 @@ import {
   type RichToolName,
 } from '@/lib/ai/akif/gateway/richTools'
 import { createParcelLookupDeps } from '@/lib/ai/akif/gateway/parcelLookupDeps'
-import type { AkifMessage } from '@/lib/ai/akif/contract'
+import type { AkifMessage, ParcelCompareCard, ParcelCompareRow } from '@/lib/ai/akif/contract'
 import { checkRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import {
@@ -44,6 +44,22 @@ function isValidHistory(v: unknown): v is AkifMessage[] {
     const msg = m as { role?: unknown; content?: unknown }
     return (msg.role === 'user' || msg.role === 'akif') && typeof msg.content === 'string'
   })
+}
+
+const COMPARE_RATE_NOTE = 'Çok sık karşılaştırma istendi; bir dakika sonra tekrar dene.'
+
+// compareParcels sınırı aşıldığında fırlatmak yerine temiz render olan bir kart döner.
+function compareRateLimitedCard(args: unknown, memberView: boolean): ParcelCompareCard {
+  const parcels = (args as { parcels?: unknown } | null)?.parcels
+  const rows: ParcelCompareRow[] = Array.isArray(parcels)
+    ? parcels
+        .filter((p): p is Record<string, unknown> => p != null && typeof p === 'object')
+        .map((p) => ({
+          label: [p.mahalleText, `${p.ada ?? ''}/${p.parsel ?? ''}`].filter((x) => typeof x === 'string' && x !== '/').join(' '),
+          status: 'parcel_unavailable' as const,
+        }))
+    : []
+  return { kind: 'parcel_compare', tier: memberView ? 'member' : 'free', rows, note: COMPARE_RATE_NOTE }
 }
 
 export async function POST(req: Request) {
@@ -172,12 +188,20 @@ export async function POST(req: Request) {
       {
         model,
         modelName: env.model,
-        dispatch: (n: RichToolName, a: unknown) =>
-          dispatchRichTool(n, a, {
+        dispatch: async (n: RichToolName, a: unknown) => {
+          // compareParcels harici veri çeker — ek limit (üye: kullanıcı, anonim: IP, daha sıkı).
+          if (n === 'compareParcels') {
+            const crl = sessionUserId
+              ? checkRateLimit('akif-compare-parcels:user:' + sessionUserId, RATE_LIMITS.AKIF_COMPARE_PARCELS)
+              : checkRateLimit('akif-compare-parcels:ip:' + getClientIp(req), RATE_LIMITS.AKIF_COMPARE_PARCELS_ANON)
+            if (!crl.ok) return compareRateLimitedCard(a, memberView)
+          }
+          return dispatchRichTool(n, a, {
             db,
             parcelDeps: createParcelLookupDeps({ memberView }),
             memberView,
-          }),
+          })
+        },
         validateArgs: validateRichArgs,
         audit,
         checkConversationBudget: (m: { content: string }[]) =>
