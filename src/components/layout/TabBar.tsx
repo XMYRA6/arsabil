@@ -88,6 +88,7 @@ export function TabBar({ tabs, activeHref }: TabBarProps) {
                         key={tab.href}
                         href={tab.href}
                         aria-current={isActive ? 'page' : undefined}
+                        data-press=""
                         className={`${styles.tab} ${isActive ? styles.active : ''}`}
                     >
                         <span aria-hidden="true" className={styles.icon}>

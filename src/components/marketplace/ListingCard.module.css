@@ -18,6 +18,10 @@
     transform: translateY(-3px);
 }
 
+.cardRoot[data-press]:active {
+    transform: scale(0.97);
+}
+
 .cardRoot:focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
@@ -253,6 +257,10 @@
     }
 
     .cardRoot:hover {
+        transform: none;
+    }
+
+    .cardRoot[data-press]:active {
         transform: none;
     }
 }

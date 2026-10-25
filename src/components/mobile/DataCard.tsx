@@ -62,7 +62,7 @@ export function DataCard({ title, subtitle, fields = [], actions, href, classNam
 
     return (
         <li className={`${styles.card}${className ? ` ${className}` : ""}`}>
-            {href ? <Link href={href} className={styles.link}>{body}</Link> : body}
+            {href ? <Link href={href} className={styles.link} data-press="">{body}</Link> : body}
             {actions && <div className={styles.actions}>{actions}</div>}
         </li>
     );

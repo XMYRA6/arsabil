@@ -10,7 +10,7 @@ export function IlanKarti({ id, baslik, price }: { id: string; baslik: string; p
     const zaman = useThemeZaman()
     const sahne = resolveScene({ ...sahneSec(null, null), egim: 'duz', zaman })
     return (
-        <Link href={`/listing/${id}`} className={styles.ilanKarti}>
+        <Link href={`/listing/${id}`} className={styles.ilanKarti} data-press="">
             <span className={styles.ilanFoto}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP */}
                 <img src={sahne.src800} alt="" loading="lazy" />

@@ -67,6 +67,7 @@ export function SegmentedTabs({ options, value, onChange, ariaLabel }: Segmented
                     ref={(el) => { tabRefs.current[i] = el; }}
                     type="button"
                     role="tab"
+                    data-press=""
                     aria-selected={value === o.value}
                     tabIndex={value === o.value ? 0 : -1}
                     className={`${styles.tab} ${value === o.value ? styles.active : ''}`}

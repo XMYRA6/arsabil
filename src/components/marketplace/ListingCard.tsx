@@ -110,6 +110,7 @@ export function ListingCard({ listing, highlighted, onHover, isFavorite, onFavor
         <div
             className={`${styles.cardRoot} ${highlighted ? styles.highlighted : ''}`}
             role="link"
+            data-press=""
             tabIndex={0}
             aria-label={listing.title}
             onMouseEnter={() => onHover?.(listing.id)}

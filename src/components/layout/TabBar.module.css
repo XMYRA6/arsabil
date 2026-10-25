@@ -27,7 +27,7 @@
   color: var(--ink-secondary);
   position: relative;
   z-index: 1;
-  transition: background-color var(--dur-ui) var(--ease-out), color var(--dur-ui) var(--ease-out);
+  transition: background-color var(--dur-ui) var(--ease-out), color var(--dur-ui) var(--ease-out), transform var(--dur-press) var(--ease-out);
 }
 
 .tab.active {

@@ -11,7 +11,7 @@ describe('hareket temeli (premium gezinme hissi)', () => {
     })
 
     it('defines [data-press]:active scale(0.97) rule', () => {
-        expect(css).toMatch(/\[data-press\]\s*\{[^}]*transition:\s*transform var\(--dur-press\) var\(--ease-out\)/)
+        expect(css).toMatch(/:where\(\[data-press\]\)\s*\{[^}]*transition:\s*transform var\(--dur-press\) var\(--ease-out\)/)
         expect(css).toMatch(/\[data-press\]:active\s*\{[^}]*transform:\s*scale\(0\.97\)/)
     })
 

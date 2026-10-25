@@ -480,7 +480,8 @@ a {
 }
 
 /* ===== HAREKET TEMELI — basma geri bildirimi (premium gezinme hissi) ===== */
-[data-press] {
+/* :where => specificity 0: bir bileşenin kendi transition'ı her zaman kazanır */
+:where([data-press]) {
   transition: transform var(--dur-press) var(--ease-out);
 }
 
