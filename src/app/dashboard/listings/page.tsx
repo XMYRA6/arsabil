@@ -1,8 +1,10 @@
 "use client";
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { isOptimizableHost } from '@/lib/imageHost';
 import { resolveScene } from '@/lib/dioramas/scene';
 import { useThemeZaman } from '@/components/home/useThemeZaman';
 import { sahneSec } from '../sahneSec';
@@ -119,8 +121,12 @@ export default function DashboardListingsPage() {
                         return (
                             <article key={listing.id} className={styles.listRow}>
                                 <Link href={`/listing/${listing.id}`} className={styles.rowPhoto} aria-label={listing.title || 'İlan'}>
-                                    {/* eslint-disable-next-line @next/next/no-img-element -- harici ilan fotoğrafı / yerel statik WebP */}
-                                    {photoUrl ? <img src={photoUrl} alt={listing.title || 'İlan'} /> : diorama ? <img src={diorama.src800} alt="" loading="lazy" /> : null}
+                                    {photoUrl ? (
+                                        <Image fill src={photoUrl} alt={listing.title || 'İlan'} sizes="(max-width: 900px) 110px, 170px" unoptimized={!isOptimizableHost(photoUrl)} style={{ objectFit: 'cover' }} />
+                                    ) : diorama ? (
+                                        // eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP (el yapımı srcset); next/image gerekmiyor
+                                        <img src={diorama.src800} alt="" loading="lazy" />
+                                    ) : null}
                                 </Link>
                                 <div className={styles.rowMain}>
                                     <div className={styles.rowTitleLine}>

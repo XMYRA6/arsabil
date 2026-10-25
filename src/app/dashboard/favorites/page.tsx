@@ -1,9 +1,11 @@
 "use client";
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
+import { isOptimizableHost } from '@/lib/imageHost';
 import { resolveScene } from '@/lib/dioramas/scene';
 import { sahneSec } from '../sahneSec';
 import { useThemeZaman } from '@/components/home/useThemeZaman';
@@ -90,8 +92,12 @@ export default function FavoritesPage() {
                         return (
                             <article key={favorite.id} className={styles.photoCard}>
                                 <Link href={`/listing/${favorite.listingId}`} className={styles.photoTop} aria-label={title}>
-                                    {/* eslint-disable-next-line @next/next/no-img-element -- harici ilan fotoğrafı / yerel statik WebP */}
-                                    {photoUrl ? <img src={photoUrl} alt={title} /> : diorama ? <img src={diorama.src800} alt="" loading="lazy" /> : null}
+                                    {photoUrl ? (
+                                        <Image fill src={photoUrl} alt={title} sizes="(max-width: 520px) 100vw, (max-width: 900px) 50vw, 33vw" unoptimized={!isOptimizableHost(photoUrl)} style={{ objectFit: 'cover' }} />
+                                    ) : diorama ? (
+                                        // eslint-disable-next-line @next/next/no-img-element -- yerel statik WebP (el yapımı srcset); next/image gerekmiyor
+                                        <img src={diorama.src800} alt="" loading="lazy" />
+                                    ) : null}
                                 </Link>
                                 <div className={styles.photoBody}>
                                     <Link href={`/listing/${favorite.listingId}`} className={styles.photoTitle}>
